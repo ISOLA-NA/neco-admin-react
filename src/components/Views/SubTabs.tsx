@@ -26,7 +26,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
 }) => {
   return (
     <div className='relative mt-2 mx-4'>
-      {/* Left Scroll Button */}
+      {/* دکمه اسکرول سمت چپ */}
       <ScrollButton
         direction='left'
         onClick={scrollLeft}
@@ -34,9 +34,9 @@ const SubTabs: React.FC<SubTabsProps> = ({
         ariaLabel='Scroll SubTabs Left'
       />
 
-      {/* SubTabs Container */}
+      {/* کانتینر ساب‌تب‌ها با padding مناسب */}
       <div
-        className='flex items-start space-x-4 overflow-x-auto scrollbar-hide px-4 py-2 bg-white border-b border-gray-300'
+        className='flex items-start space-x-4 overflow-x-auto scrollbar-hide px-4 py-2 bg-white border-b border-gray-300 pl-10 pr-10'
         ref={subTabsRef}
       >
         {groups ? (
@@ -88,11 +88,11 @@ const SubTabs: React.FC<SubTabsProps> = ({
             </div>
           </div>
         )}
-        {/* Vertical Line at the End */}
+        {/* خط عمودی انتهای کل ساب‌تب‌ها */}
         <div className='self-stretch w-px bg-orange-500'></div>
       </div>
 
-      {/* Right Scroll Button */}
+      {/* دکمه اسکرول سمت راست */}
       <ScrollButton
         direction='right'
         onClick={scrollRight}

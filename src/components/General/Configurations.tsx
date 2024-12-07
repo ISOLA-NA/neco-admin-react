@@ -2,7 +2,27 @@
 function Configurations() {
   return (
     <div>
-      Configurations
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
+      <h1>Configurations</h1>
 
 
     </div>

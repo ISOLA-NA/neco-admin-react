@@ -3,9 +3,8 @@ import React, { useState, useRef } from 'react';
 import MainTabs from './MainTabs';
 import SubTabs from './SubTabs';
 import TabContent from './TabContent';
-// import { TabsData, ComponentMapping } from './types'; // Define shared types
 
-// Define your TabsData and ComponentMapping interfaces
+// تعریف تایپ‌ها
 interface TabsData {
   [key: string]: {
     groups?: Array<{
@@ -22,7 +21,7 @@ interface ComponentMapping {
   };
 }
 
-// Your existing tabsData
+// داده‌های تب‌ها
 const tabsData: TabsData = {
   General: {
     groups: [
@@ -50,7 +49,7 @@ const tabsData: TabsData = {
   },
 };
 
-// Your existing componentMapping
+// نقشه‌ی کامپوننت‌ها
 const componentMapping: ComponentMapping = {
   General: {
     Configurations: React.lazy(() => import('../General/Configurations')),
@@ -98,14 +97,14 @@ const TabbedInterface: React.FC = () => {
       ? tabsData[tabName].groups![0].subtabs[0]
       : tabsData[tabName].subtabs![0];
     setActiveSubTab(firstGroup);
-    // Scroll to start when tab changes
+    // اسکرول به ابتدای تب‌ها
     mainTabsRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
     subTabsRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
   };
 
   const handleSubTabChange = (subtab: string) => {
     setActiveSubTab(subtab);
-    // Scroll to start when subtab changes
+    // اسکرول به ابتدای ساب‌تب‌ها
     subTabsRef.current?.scrollTo({ left: 0, behavior: 'smooth' });
   };
 
@@ -133,8 +132,8 @@ const TabbedInterface: React.FC = () => {
     componentMapping[activeMainTab]?.[activeSubTab] || null;
 
   return (
-    <div className='w-full h-screen flex flex-col overflow-hidden bg-gray-100'>
-      {/* Main Tabs */}
+    <div className='w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden'>
+      {/* تب‌های اصلی */}
       <MainTabs
         tabs={Object.keys(tabsData)}
         activeTab={activeMainTab}
@@ -144,7 +143,7 @@ const TabbedInterface: React.FC = () => {
         tabsRef={mainTabsRef}
       />
 
-      {/* Sub Tabs */}
+      {/* ساب‌تب‌ها */}
       <SubTabs
         groups={tabsData[activeMainTab].groups}
         subtabs={tabsData[activeMainTab].subtabs}
@@ -155,7 +154,7 @@ const TabbedInterface: React.FC = () => {
         subTabsRef={subTabsRef}
       />
 
-      {/* Tab Content */}
+      {/* محتوای تب */}
       <TabContent ActiveComponent={ActiveComponent} />
     </div>
   );

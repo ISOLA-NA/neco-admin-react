@@ -21,16 +21,16 @@ const MainTabs: React.FC<MainTabsProps> = ({
 }) => {
   return (
     <div className='relative mx-4'>
-      {/* Left Scroll Button */}
+      {/* دکمه اسکرول سمت چپ */}
       <ScrollButton
         direction='left'
         onClick={scrollLeft}
         ariaLabel='Scroll Main Tabs Left'
       />
 
-      {/* Tabs Container */}
+      {/* کانتینر تب‌ها با padding مناسب */}
       <div
-        className='flex space-x-2 overflow-x-auto scrollbar-hide px-4 py-2 bg-white border-b border-gray-300'
+        className='flex space-x-2 overflow-x-auto scrollbar-hide px-4 py-2 bg-white border-b border-gray-300 pl-10 pr-10'
         ref={tabsRef}
       >
         {tabs.map((tabName) => (
@@ -48,7 +48,7 @@ const MainTabs: React.FC<MainTabsProps> = ({
         ))}
       </div>
 
-      {/* Right Scroll Button */}
+      {/* دکمه اسکرول سمت راست */}
       <ScrollButton
         direction='right'
         onClick={scrollRight}
