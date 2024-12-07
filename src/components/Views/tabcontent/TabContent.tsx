@@ -18,33 +18,32 @@ const TabContent: React.FC<TabContentProps> = ({
   return (
     <div
       className="flex-grow bg-white overflow-hidden mt-4 border border-gray-300 rounded-lg mx-4 mb-6"
-      style={{ height: "100%" }}
+      style={{ height: "100%", minHeight: "400px" }}
     >
-      <Splitter style={{ height: "100%" }}>
-        {/* پنل محتوا */}
-        <SplitterPanel
-          className="flex align-items-center justify-content-center"
-          size={30}
-        >
-          <div style={{ margin: "10px", height: "100%", width: "100%" }}>
+      <Splitter
+        className="h-full"
+        layout="horizontal"
+        style={{ height: "100%" }}
+      >
+        {/* Data Table Panel */}
+        <SplitterPanel className="flex flex-col" size={30} minSize={20}>
+          <div className="h-full p-4">
             <DataTable
               columnDefs={columnDefs}
               rowData={rowData}
-              onRowDoubleClick={function (data: any): void {
+              onRowDoubleClick={(data) => {
                 // Implement your double-click handler here
               }}
-              setSelectedRowData={function (data: any): void {
+              setSelectedRowData={(data) => {
                 // Implement your row selection handler here
               }}
             />
           </div>
         </SplitterPanel>
-        {/* پنل جدول */}
-        <SplitterPanel
-          className="flex align-items-center justify-content-center"
-          size={70}
-        >
-          <div style={{ margin: "10px", padding: "10px", direction: "rtl" }}>
+
+        {/* Content Panel */}
+        <SplitterPanel className="flex flex-col" size={70} minSize={30}>
+          <div className="h-full overflow-auto p-4">
             {Component ? (
               <Suspense fallback={<div>در حال بارگذاری...</div>}>
                 <Component />

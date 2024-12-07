@@ -50,28 +50,19 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div className="w-full h-full flex flex-col">
       {/* نوار جستجو */}
-      <div style={{ marginBottom: "10px" }}>
+      <div className="mb-4">
         <input
           type="text"
           placeholder="جستجو..."
           value={searchText}
           onChange={onSearchChange}
-          style={{
-            padding: "8px",
-            width: "300px",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-            direction: "rtl",
-          }}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
       </div>
       {/* جدول ag-Grid */}
-      <div
-        className="ag-theme-alpine"
-        style={{ height: "calc(100% - 50px)", width: "100%" }}
-      >
+      <div className="ag-theme-alpine flex-grow">
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
@@ -87,6 +78,9 @@ const DataTable: React.FC<DataTableProps> = ({
           animateRows={true}
           onRowClicked={onRowClicked}
           onRowDoubleClicked={handleRowDoubleClicked}
+          domLayout="autoHeight"
+          suppressHorizontalScroll={false} // اجازه اسکرول افقی
+          // اطمینان از پر شدن عرض پنل
         />
       </div>
     </div>
