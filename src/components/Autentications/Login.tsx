@@ -142,7 +142,7 @@ const Login: React.FC = () => {
         </div> */}
 
         {/* Form */}
-        <form className="mt-12" onSubmit={handleFormSubmit}>
+        <form className="mt-20" onSubmit={handleFormSubmit}>
           {!isOtp ? (
             <>
               <DynamicInput
