@@ -1,18 +1,54 @@
 // src/components/General/Configurations.tsx
 
-import React from "react";
+import React, { useState } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
+import CustomTextarea from "../utilities/DynamicTextArea"; // وارد کردن کامپوننت جدید
 
 const Configurations: React.FC = () => {
+  // وضعیت مدیریت شده برای فیلد Description
+  const [description, setDescription] = useState("");
+  const [descriptionError, setDescriptionError] = useState(false);
+
+  const handleDescriptionChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setDescription(e.target.value);
+    // مثال ساده‌ای از اعتبارسنجی: اگر توضیحات کمتر از 10 کاراکتر باشند، خطا نمایش داده شود
+    if (e.target.value.length < 10) {
+      setDescriptionError(true);
+    } else {
+      setDescriptionError(false);
+    }
+  };
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Configurations</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+        Configurations
+      </h2>
       <TwoColumnLayout>
-        {/* First Input Group */}
+        {/* Configuration ID */}
+        <div className="flex flex-col">
+          <label
+            htmlFor="configId"
+            className="mb-3 text-sm font-medium text-gray-700"
+          >
+            Configuration ID
+          </label>
+          <input
+            type="number"
+            id="configId"
+            name="configId"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            placeholder="Enter configuration ID"
+          />
+        </div>
+
+        {/* Configuration Name */}
         <div className="flex flex-col">
           <label
             htmlFor="configName"
-            className="mb-2 text-sm font-medium text-gray-700"
+            className="mb-3 text-sm font-medium text-gray-700"
           >
             Configuration Name
           </label>
@@ -20,16 +56,16 @@ const Configurations: React.FC = () => {
             type="text"
             id="configName"
             name="configName"
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Enter configuration name"
           />
         </div>
 
-        {/* Second Input Group */}
+        {/* Configuration Value */}
         <div className="flex flex-col">
           <label
             htmlFor="configValue"
-            className="mb-2 text-sm font-medium text-gray-700"
+            className="mb-3 text-sm font-medium text-gray-700"
           >
             Configuration Value
           </label>
@@ -37,45 +73,53 @@ const Configurations: React.FC = () => {
             type="text"
             id="configValue"
             name="configValue"
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Enter configuration value"
           />
         </div>
 
-        {/* Third Input Group */}
+        {/* Configuration Type */}
         <div className="flex flex-col">
           <label
             htmlFor="configType"
-            className="mb-2 text-sm font-medium text-gray-700"
+            className="mb-3 text-sm font-medium text-gray-700"
           >
             Configuration Type
           </label>
           <select
             id="configType"
             name="configType"
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             <option value="">Select type</option>
             <option value="typeA">Type A</option>
             <option value="typeB">Type B</option>
+            <option value="typeC">Type C</option>
           </select>
         </div>
 
-        {/* Fourth Input Group */}
-        <div className="flex flex-col">
+        {/* Description */}
+        <div className="flex flex-col md:col-span-2">
           <label
             htmlFor="configDescription"
-            className="mb-2 text-sm font-medium text-gray-700"
+            className="mb-3 text-sm font-medium text-gray-700"
           >
             Description
           </label>
-          <textarea
+          <CustomTextarea
             id="configDescription"
             name="configDescription"
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            value={description}
+            onChange={handleDescriptionChange}
             placeholder="Enter description"
-            rows={4}
-          ></textarea>
+            rows={5}
+            className="resize"
+          />
+          {descriptionError && (
+            <span className="text-red-500 text-sm mt-1">
+              Description must be at least 10 characters.
+            </span>
+          )}
         </div>
 
         {/* Additional Input Groups as Needed */}
