@@ -10,11 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/react-split-pane": "^0.1.67",
     "daisyui": "^4.12.14",
+    "primeicons": "^7.0.0",
+    "primereact": "^10.8.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.4.0",
-    "react-router-dom": "^7.0.2"
+    "react-router-dom": "^7.0.2",
+    "react-split-pane": "^0.1.92",
+    "splitpanes": "^3.1.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
