@@ -1,4 +1,5 @@
 // src/components/views/tab/MainTabs.tsx
+
 import React from "react";
 import ScrollButton from "./ScrollButton";
 

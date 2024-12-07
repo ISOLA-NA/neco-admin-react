@@ -1,9 +1,11 @@
 // src/components/views/tab/TabbedInterface.tsx
+
 import React, { useState, useRef } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
-import { tabsData, subTabDataMapping, SubTabData } from "./tabData";
+import { tabsData, subTabDataMapping } from "./tabData";
+import { subTabComponents } from "../tab/SubTabsImports"; // Import the mapping of subtab to components
 
 const TabbedInterface: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState<string>("General");
@@ -12,9 +14,10 @@ const TabbedInterface: React.FC = () => {
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
 
-  // دریافت داده‌های زیرتب فعال
-  const currentSubTabData: SubTabData = subTabDataMapping[activeSubTab] || {
-    content: "Default content.",
+  // Get the dynamically imported component for the active sub-tab
+  const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
+
+  const currentSubTabData = subTabDataMapping[activeSubTab] || {
     columnDefs: [],
     rowData: [],
   };
@@ -25,14 +28,14 @@ const TabbedInterface: React.FC = () => {
       ? tabsData[tabName].groups![0].subtabs[0]
       : tabsData[tabName].subtabs![0];
     setActiveSubTab(firstGroup);
-    // اسکرول به ابتدای تب‌ها
+    // Scroll to the beginning of the tabs
     mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
   const handleSubTabChange = (subtab: string) => {
     setActiveSubTab(subtab);
-    // اسکرول به ابتدای ساب‌تب‌ها
+    // Scroll to the beginning of the subtabs
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
@@ -58,7 +61,7 @@ const TabbedInterface: React.FC = () => {
 
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden">
-      {/* تب‌های اصلی */}
+      {/* Main Tabs */}
       <MainTabs
         tabs={Object.keys(tabsData)}
         activeTab={activeMainTab}
@@ -68,7 +71,7 @@ const TabbedInterface: React.FC = () => {
         tabsRef={mainTabsRef}
       />
 
-      {/* ساب‌تب‌ها */}
+      {/* SubTabs */}
       <SubTabs
         groups={tabsData[activeMainTab].groups}
         subtabs={tabsData[activeMainTab].subtabs}
@@ -79,9 +82,9 @@ const TabbedInterface: React.FC = () => {
         subTabsRef={subTabsRef}
       />
 
-      {/* محتوای تب */}
+      {/* Tab Content */}
       <TabContent
-        content={currentSubTabData.content}
+        component={ActiveSubTabComponent}
         columnDefs={currentSubTabData.columnDefs}
         rowData={currentSubTabData.rowData}
       />

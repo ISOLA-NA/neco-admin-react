@@ -11,7 +11,6 @@ export interface TabsData {
 }
 
 export interface SubTabData {
-  content: string;
   columnDefs: any[];
   rowData: any[];
 }
@@ -46,7 +45,6 @@ export const tabsData: TabsData = {
 export const subTabDataMapping: { [key: string]: SubTabData } = {
   // General -> Configurations
   Configurations: {
-    content: "These are the system configurations.",
     columnDefs: [
       { headerName: "ID", field: "id", filter: "agNumberColumnFilter" },
       { headerName: "Name", field: "name", filter: "agTextColumnFilter" },
@@ -80,7 +78,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // General -> Commands
   Commands: {
-    content: "System command settings.",
     columnDefs: [
       {
         headerName: "Command ID",
@@ -122,7 +119,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // General -> Ribbons
   Ribbons: {
-    content: "Manage various ribbons of the application.",
     columnDefs: [
       { headerName: "ID", field: "id", filter: "agNumberColumnFilter" },
       {
@@ -151,7 +147,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // General -> Users
   Users: {
-    content: "Manage system users.",
     columnDefs: [
       {
         headerName: "User ID",
@@ -183,7 +178,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // General -> Roles
   Roles: {
-    content: "Define and manage user roles.",
     columnDefs: [
       {
         headerName: "Role ID",
@@ -208,7 +202,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // General -> Staffing
   Staffing: {
-    content: "Manage organizational staffing.",
     columnDefs: [
       { headerName: "ID", field: "id", filter: "agNumberColumnFilter" },
       { headerName: "Name", field: "name", filter: "agTextColumnFilter" },
@@ -240,7 +233,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // General -> RoleGroups
   RoleGroups: {
-    content: "Group roles for better management.",
     columnDefs: [
       {
         headerName: "Group ID",
@@ -273,7 +265,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // General -> Enterprises
   Enterprises: {
-    content: "Manage companies and organizational units.",
     columnDefs: [
       {
         headerName: "Enterprise ID",
@@ -298,7 +289,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Forms -> Forms
   Forms: {
-    content: "Manage system forms.",
     columnDefs: [
       {
         headerName: "Form ID",
@@ -323,7 +313,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Forms -> Categories
   Categories: {
-    content: "Categorize forms for better organization.",
     columnDefs: [
       {
         headerName: "Category ID",
@@ -356,7 +345,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // ApprovalFlows -> ApprovalFlows
   ApprovalFlows: {
-    content: "Manage approval flows in the system.",
     columnDefs: [
       {
         headerName: "Flow ID",
@@ -377,7 +365,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // ApprovalFlows -> ApprovalChecklist
   ApprovalChecklist: {
-    content: "Approval checklists for projects.",
     columnDefs: [
       {
         headerName: "Checklist ID",
@@ -410,7 +397,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Programs -> ProgramTemplate
   ProgramTemplate: {
-    content: "Manage program templates.",
     columnDefs: [
       {
         headerName: "Template ID",
@@ -443,7 +429,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Programs -> ProgramTypes
   ProgramTypes: {
-    content: "Various types of programs in the system.",
     columnDefs: [
       {
         headerName: "Type ID",
@@ -468,7 +453,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Projects -> Projects
   Projects: {
-    content: "Manage ongoing projects.",
     columnDefs: [
       {
         headerName: "Project ID",
@@ -504,7 +488,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Projects -> ProjectsAccess
   ProjectsAccess: {
-    content: "Manage access to projects.",
     columnDefs: [
       {
         headerName: "Access ID",
@@ -529,7 +512,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Projects -> Odp
   Odp: {
-    content: "Manage project ODPs.",
     columnDefs: [
       { headerName: "ODP ID", field: "odpId", filter: "agNumberColumnFilter" },
       {
@@ -550,7 +532,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Projects -> Procedures
   Procedures: {
-    content: "Manage project procedures.",
     columnDefs: [
       {
         headerName: "Procedure ID",
@@ -583,7 +564,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
   // Projects -> Calendars
   Calendars: {
-    content: "Manage project calendars.",
     columnDefs: [
       {
         headerName: "Calendar ID",

@@ -1,16 +1,17 @@
 // src/components/views/tabcontent/TabContent.tsx
-import React from "react";
+
+import React, { Suspense } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 
 interface TabContentProps {
-  content: React.ReactNode | string;
+  component: React.LazyExoticComponent<React.FC> | null;
   columnDefs: any[];
   rowData: any[];
 }
 
 const TabContent: React.FC<TabContentProps> = ({
-  content,
+  component: Component,
   columnDefs,
   rowData,
 }) => {
@@ -26,7 +27,16 @@ const TabContent: React.FC<TabContentProps> = ({
           size={30}
         >
           <div style={{ margin: "10px", height: "100%", width: "100%" }}>
-            <DataTable columnDefs={columnDefs} rowData={rowData} />
+            <DataTable
+              columnDefs={columnDefs}
+              rowData={rowData}
+              onRowDoubleClick={function (data: any): void {
+                // Implement your double-click handler here
+              }}
+              setSelectedRowData={function (data: any): void {
+                // Implement your row selection handler here
+              }}
+            />
           </div>
         </SplitterPanel>
         {/* پنل جدول */}
@@ -35,7 +45,13 @@ const TabContent: React.FC<TabContentProps> = ({
           size={70}
         >
           <div style={{ margin: "10px", padding: "10px", direction: "rtl" }}>
-            {content}
+            {Component ? (
+              <Suspense fallback={<div>در حال بارگذاری...</div>}>
+                <Component />
+              </Suspense>
+            ) : (
+              <div>محتوای پیش‌فرض.</div>
+            )}
           </div>
         </SplitterPanel>
       </Splitter>
