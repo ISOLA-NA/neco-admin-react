@@ -1,3 +1,5 @@
+// src/components/utilities/DynamicInput.tsx
+
 import React, { ReactNode } from "react";
 
 interface DynamicInputProps {

@@ -1,20 +1,21 @@
 // src/components/views/tab/TabbedInterface.tsx
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, Suspense } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
 import { tabsData, subTabDataMapping } from "./tabData";
-import { subTabComponents } from "../tab/SubTabsImports"; // Import the mapping of subtab to components
+import { subTabComponents } from "./SubTabsImports"; // Import the mapping of subtab to components
 
 const TabbedInterface: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState<string>("General");
   const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
+  const [selectedRow, setSelectedRow] = useState<any>(null); // وضعیت برای ردیف انتخاب شده
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
 
-  // Get the dynamically imported component for the active sub-tab
+  // دریافت کامپوننت مربوط به زیرتب فعال
   const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
 
   const currentSubTabData = subTabDataMapping[activeSubTab] || {
@@ -28,14 +29,16 @@ const TabbedInterface: React.FC = () => {
       ? tabsData[tabName].groups![0].subtabs[0]
       : tabsData[tabName].subtabs![0];
     setActiveSubTab(firstGroup);
-    // Scroll to the beginning of the tabs
+    setSelectedRow(null); // ریست کردن وضعیت انتخاب ردیف با تغییر تب اصلی
+    // اسکرول به ابتدا
     mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
   const handleSubTabChange = (subtab: string) => {
     setActiveSubTab(subtab);
-    // Scroll to the beginning of the subtabs
+    setSelectedRow(null); // ریست کردن وضعیت انتخاب ردیف با تغییر زیرتب
+    // اسکرول به ابتدا
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
@@ -59,9 +62,13 @@ const TabbedInterface: React.FC = () => {
     }
   };
 
+  const handleRowDoubleClick = (rowData: any) => {
+    setSelectedRow(rowData);
+  };
+
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden">
-      {/* Main Tabs */}
+      {/* تب‌های اصلی */}
       <MainTabs
         tabs={Object.keys(tabsData)}
         activeTab={activeMainTab}
@@ -71,7 +78,7 @@ const TabbedInterface: React.FC = () => {
         tabsRef={mainTabsRef}
       />
 
-      {/* SubTabs */}
+      {/* زیرتب‌ها */}
       <SubTabs
         groups={tabsData[activeMainTab].groups}
         subtabs={tabsData[activeMainTab].subtabs}
@@ -82,11 +89,13 @@ const TabbedInterface: React.FC = () => {
         subTabsRef={subTabsRef}
       />
 
-      {/* Tab Content */}
+      {/* محتوای تب‌ها */}
       <TabContent
         component={ActiveSubTabComponent}
         columnDefs={currentSubTabData.columnDefs}
         rowData={currentSubTabData.rowData}
+        onRowDoubleClick={handleRowDoubleClick} // ارسال تابع برای مدیریت دو بار کلیک ردیف
+        selectedRow={selectedRow} // ارسال داده ردیف انتخاب شده
       />
     </div>
   );

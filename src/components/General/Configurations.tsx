@@ -1,25 +1,67 @@
 // src/components/General/Configurations.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
-import CustomTextarea from "../utilities/DynamicTextArea"; // وارد کردن کامپوننت جدید
+import CustomTextarea from "../utilities/DynamicTextArea"; // اطمینان از مسیر صحیح
+import DynamicInput from "../utilities/DynamicInput";
+import DynamicSelector from "../utilities/DynamicSelector";
 
-const Configurations: React.FC = () => {
-  // وضعیت مدیریت شده برای فیلد Description
-  const [description, setDescription] = useState("");
+interface ConfigurationProps {
+  selectedRow: {
+    id: number;
+    name: string;
+    value: string;
+    description: string;
+    type: string; // اضافه کردن فیلد type
+    // در صورت نیاز می‌توانید فیلدهای دیگر را نیز اضافه کنید
+  };
+}
+
+const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
+  // وضعیت مدیریت شده برای فیلدهای ورودی
+  const [configData, setConfigData] = useState({
+    id: selectedRow.id.toString(),
+    name: selectedRow.name,
+    value: selectedRow.value,
+    description: selectedRow.description,
+    type: selectedRow.type, // مقداردهی اولیه از selectedRow.type
+  });
+
   const [descriptionError, setDescriptionError] = useState(false);
 
-  const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setDescription(e.target.value);
-    // مثال ساده‌ای از اعتبارسنجی: اگر توضیحات کمتر از 10 کاراکتر باشند، خطا نمایش داده شود
-    if (e.target.value.length < 10) {
-      setDescriptionError(true);
-    } else {
-      setDescriptionError(false);
+  // به‌روزرسانی وضعیت وقتی selectedRow تغییر می‌کند
+  useEffect(() => {
+    setConfigData({
+      id: selectedRow.id.toString(),
+      name: selectedRow.name,
+      value: selectedRow.value,
+      description: selectedRow.description,
+      type: selectedRow.type, // به‌روزرسانی از selectedRow.type
+    });
+  }, [selectedRow]);
+
+  const handleChange = (field: keyof typeof configData, value: string) => {
+    setConfigData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    // اعتبارسنجی برای فیلد Description
+    if (field === "description") {
+      if (value.length < 10) {
+        setDescriptionError(true);
+      } else {
+        setDescriptionError(false);
+      }
     }
   };
+
+  // تعریف گزینه‌ها با هماهنگی در حروف بزرگ و کوچک
+  const selectorOptions = [
+    { value: "Default", label: "Default" },
+    { value: "Advanced", label: "Advanced" },
+    { value: "Custom", label: "Custom" },
+  ];
 
   return (
     <div>
@@ -29,103 +71,71 @@ const Configurations: React.FC = () => {
       <TwoColumnLayout>
         {/* Configuration ID */}
         <div className="flex flex-col">
-          <label
-            htmlFor="configId"
-            className="mb-3 text-sm font-medium text-gray-700"
-          >
-            Configuration ID
-          </label>
-          <input
+          <DynamicInput
+            name="ID"
             type="number"
-            id="configId"
-            name="configId"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="Enter configuration ID"
+            value={configData.id}
+            onChange={(e) => handleChange("id", e.target.value)}
+            required
           />
         </div>
 
         {/* Configuration Name */}
         <div className="flex flex-col">
-          <label
-            htmlFor="configName"
-            className="mb-3 text-sm font-medium text-gray-700"
-          >
-            Configuration Name
-          </label>
-          <input
-            type="text"
-            id="configName"
-            name="configName"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="Enter configuration name"
+          <DynamicInput
+            name="Name"
+            type="string"
+            value={configData.name}
+            onChange={(e) => handleChange("name", e.target.value)}
+            required
           />
         </div>
 
         {/* Configuration Value */}
         <div className="flex flex-col">
-          <label
-            htmlFor="configValue"
-            className="mb-3 text-sm font-medium text-gray-700"
-          >
-            Configuration Value
-          </label>
-          <input
-            type="text"
-            id="configValue"
-            name="configValue"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="Enter configuration value"
+          <DynamicInput
+            name="Value"
+            type="string"
+            value={configData.value}
+            onChange={(e) => handleChange("value", e.target.value)}
           />
         </div>
 
-        {/* Configuration Type */}
+        {/* Configuration Description */}
         <div className="flex flex-col">
-          <label
-            htmlFor="configType"
-            className="mb-3 text-sm font-medium text-gray-700"
-          >
-            Configuration Type
-          </label>
-          <select
-            id="configType"
-            name="configType"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-          >
-            <option value="">Select type</option>
-            <option value="typeA">Type A</option>
-            <option value="typeB">Type B</option>
-            <option value="typeC">Type C</option>
-          </select>
-        </div>
-
-        {/* Description */}
-        <div className="flex flex-col md:col-span-2">
-          <label
-            htmlFor="configDescription"
-            className="mb-3 text-sm font-medium text-gray-700"
-          >
-            Description
-          </label>
           <CustomTextarea
-            id="configDescription"
-            name="configDescription"
-            value={description}
-            onChange={handleDescriptionChange}
-            placeholder="Enter description"
+            id="description"
+            name="Description"
+            value={configData.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            placeholder="توضیحات را وارد کنید..."
             rows={5}
-            className="resize"
+            className={`${
+              descriptionError ? "border-red-500" : "border-gray-300"
+            }`}
           />
           {descriptionError && (
-            <span className="text-red-500 text-sm mt-1">
-              Description must be at least 10 characters.
+            <span className="text-red-500 text-sm">
+              توضیحات باید حداقل 10 کاراکتر باشد.
             </span>
           )}
         </div>
 
-        {/* Additional Input Groups as Needed */}
+        {/* Configuration Type (DynamicSelector) */}
+        <div className="flex flex-col">
+          <DynamicSelector
+            options={selectorOptions}
+            selectedValue={configData.type}
+            onChange={(e) => handleChange("type", e.target.value)}
+            label="Type" // حروف بزرگ برای سازگاری
+            showButton={false}
+          />
+        </div>
+
+        {/* می‌توانید فیلدهای اضافی دیگری اضافه کنید */}
       </TwoColumnLayout>
     </div>
   );
 };
 
-export default Configurations;
+export default Configuration;

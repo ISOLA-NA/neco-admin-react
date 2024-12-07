@@ -1,10 +1,14 @@
-// src/components/views/tab/subTabImports.ts
-// This file consolidates all dynamic imports for sub-tabs.
+// src/components/views/tab/SubTabsImports.tsx
 
 import React from "react";
 
+// تعریف اینترفیس پایه برای پراپ‌ها
+interface SubTabProps {
+  selectedRow: any; // می‌توانید نوع دقیق‌تری تعریف کنید
+}
+
 export const subTabComponents: {
-  [key: string]: React.LazyExoticComponent<React.FC>;
+  [key: string]: React.LazyExoticComponent<React.FC<SubTabProps>>;
 } = {
   // General
   Configurations: React.lazy(

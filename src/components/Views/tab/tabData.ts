@@ -54,6 +54,11 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         field: "description",
         filter: "agTextColumnFilter",
       },
+      {
+        headerName: "Type",
+        field: "type",
+        filter: "agTextColumnFilter",
+      },
     ],
     rowData: [
       {
@@ -61,18 +66,21 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         name: "Configuration A",
         value: "Value A",
         description: "Description for Configuration A",
+        type: "Default",
       },
       {
         id: 2,
         name: "Configuration B",
         value: "Value B",
         description: "Description for Configuration B",
+        type: "Advanced",
       },
       {
         id: 3,
         name: "Configuration C",
         value: "Value C",
         description: "Description for Configuration C",
+        type: "Custom",
       },
     ],
   },
