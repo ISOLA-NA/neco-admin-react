@@ -20,7 +20,7 @@ const ScrollButton: React.FC<ScrollButtonProps> = ({
 
   return (
     <button
-      className={`absolute top-1/2 transform -translate-y-1/2 ${positionClass} h-8 w-8 bg-white bg-opacity-70 rounded-full shadow-md flex items-center justify-center z-10`}
+      className={`absolute top-1/2 transform -translate-y-1/2 ${positionClass} h-8 w-8 bg-white bg-opacity-70 rounded-full shadow-md flex items-center justify-center z-10 block md:hidden`}
       onClick={onClick}
       aria-label={ariaLabel}
     >
