@@ -1,6 +1,6 @@
-// MainTabs.tsx
-import React from 'react';
-import ScrollButton from './ScrollButton';
+// src/components/views/tab/MainTabs.tsx
+import React from "react";
+import ScrollButton from "./ScrollButton";
 
 interface MainTabsProps {
   tabs: string[];
@@ -20,26 +20,26 @@ const MainTabs: React.FC<MainTabsProps> = ({
   tabsRef,
 }) => {
   return (
-    <div className='relative mx-4'>
+    <div className="relative mx-4">
       {/* دکمه اسکرول سمت چپ */}
       <ScrollButton
-        direction='left'
+        direction="left"
         onClick={scrollLeft}
-        ariaLabel='Scroll Main Tabs Left'
+        ariaLabel="اسکرول به چپ برای تب‌ها"
       />
 
-      {/* کانتینر تب‌ها با padding مناسب */}
+      {/* کانتینر تب‌ها */}
       <div
-        className='flex space-x-2 overflow-x-auto scrollbar-hide px-4 py-2 bg-white border-b border-gray-300 pl-10 pr-10'
+        className="flex space-x-4 overflow-x-auto scrollbar-hide px-6 py-3 bg-white border-b border-gray-300 rounded-lg shadow-md"
         ref={tabsRef}
       >
         {tabs.map((tabName) => (
           <button
             key={tabName}
-            className={`m-1 px-4 py-1 rounded text-sm transition-all ${
+            className={`px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
               activeTab === tabName
-                ? 'bg-orange-500 text-black font-semibold'
-                : 'text-gray-700 hover:bg-orange-200'
+                ? "bg-orange-500 text-white shadow-md transform scale-105"
+                : "text-gray-600 hover:bg-orange-200 hover:text-black"
             }`}
             onClick={() => onTabChange(tabName)}
           >
@@ -50,9 +50,9 @@ const MainTabs: React.FC<MainTabsProps> = ({
 
       {/* دکمه اسکرول سمت راست */}
       <ScrollButton
-        direction='right'
+        direction="right"
         onClick={scrollRight}
-        ariaLabel='Scroll Main Tabs Right'
+        ariaLabel="اسکرول به راست برای تب‌ها"
       />
     </div>
   );

@@ -1,14 +1,14 @@
-// src/Login.tsx
-import React, { useState, ChangeEvent, KeyboardEvent, MouseEvent } from "react";
+import React, { useState } from "react";
 import {
   FaUser,
   FaLock,
+  FaPhone,
   FaEye,
   FaEyeSlash,
-  FaPhone,
   FaGlobe,
   FaChevronDown,
 } from "react-icons/fa";
+import DynamicInput from "../utilities/DynamicInput";
 
 const Login: React.FC = () => {
   const [isOtp, setIsOtp] = useState<boolean>(false);
@@ -18,17 +18,16 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
 
-  // Handlers
-  const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
-  };
-
   const handleToggleOtp = () => {
     setIsOtp(!isOtp);
   };
 
-  const handleShowPassword = () => {
+  const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLanguage(e.target.value);
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,7 +37,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-r from-red-400 via-orange-300 to-red-400">
-      {/* Optional: Add a wave SVG for a wave-like effect */}
+      {/* Wave Background */}
       <svg
         className="absolute inset-0 w-full h-full"
         xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +71,8 @@ const Login: React.FC = () => {
               size={20}
               className="absolute right-0 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none"
             />
-            <label className="absolute left-8 transform 
+            <label
+              className="absolute left-8 transform 
               transition-all duration-300 cursor-text
               top-0 text-sm text-black -translate-y-full
               peer-placeholder-shown:top-[30%] 
@@ -82,7 +82,8 @@ const Login: React.FC = () => {
               peer-focus:top-0 
               peer-focus:text-sm 
               peer-focus:text-black 
-              peer-focus:-translate-y-full">
+              peer-focus:-translate-y-full"
+            >
               Language
             </label>
           </div>
@@ -98,27 +99,28 @@ const Login: React.FC = () => {
         {/* Toggle Switcher */}
         <div className="flex justify-center items-center mt-20">
           <div className="flex items-center gap-6">
-            <span className="text-black text-sm sm:text-base">Username / Password</span>
+            <span className="text-black text-sm sm:text-base">
+              Username / Password
+            </span>
             <label className="inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                className="toggle toggle-warning hidden"
+                className="hidden"
                 checked={isOtp}
                 onChange={handleToggleOtp}
                 aria-label="Toggle OTP"
               />
-              <span className="relative">
+              <div
+                className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
+                  !isOtp ? "bg-orange-400" : "bg-gray-300"
+                }`}
+              >
                 <span
-                  className={`block w-10 h-6 rounded-full transition-transform duration-300 ${
-                    isOtp ? "bg-orange-500 translate-x-4" : "bg-gray-300"
+                  className={`absolute w-6 h-6 bg-white rounded-full shadow-md top-0 left-0 transform transition-transform duration-300 ${
+                    isOtp ? "translate-x-6" : "translate-x-0"
                   }`}
                 ></span>
-                <span
-                  className={`absolute top-0 left-0 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                    isOtp ? "translate-x-4" : "translate-x-0"
-                  }`}
-                ></span>
-              </span>
+              </div>
             </label>
             <span className="text-black text-sm sm:text-base">OTP</span>
           </div>
@@ -128,77 +130,36 @@ const Login: React.FC = () => {
         <form className="mt-12" onSubmit={handleFormSubmit}>
           {!isOtp ? (
             <>
-              {/* Username Field */}
-              <div className="mb-6 relative">
-                <FaUser
-                  size={20}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none"
-                />
-                <input
-                  type="text"
-                  placeholder=" "
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="peer w-full border-b-2 border-orange-300 pl-8 pb-2 focus:outline-none focus:border-red-500 transition-colors duration-300 text-black text-sm sm:text-base"
-                  required
-                />
-                <label className="absolute left-8 transform 
-                  transition-all duration-300 cursor-text
-                  top-0 text-sm text-black -translate-y-full
-                  peer-placeholder-shown:top-[30%] 
-                  peer-placeholder-shown:text-base 
-                  peer-placeholder-shown:text-black 
-                  peer-placeholder-shown:-translate-y-1/2
-                  peer-focus:top-0 
-                  peer-focus:text-sm 
-                  peer-focus:text-black 
-                  peer-focus:-translate-y-full">
-                  Username
-                </label>
-              </div>
-
-              {/* Password Field */}
-              <div className="mb-6 relative">
-                <FaLock
-                  size={20}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none"
-                />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder=" "
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="peer w-full border-b-2 border-orange-300 pl-8 pr-10 pb-2 focus:outline-none focus:border-red-500 transition-colors duration-300 text-black text-sm sm:text-base"
-                  required
-                />
-                <label className="absolute left-8 transform 
-                  transition-all duration-300 cursor-text
-                  top-0 text-sm text-black -translate-y-full
-                  peer-placeholder-shown:top-[30%] 
-                  peer-placeholder-shown:text-base 
-                  peer-placeholder-shown:text-black 
-                  peer-placeholder-shown:-translate-y-1/2
-                  peer-focus:top-0 
-                  peer-focus:text-sm 
-                  peer-focus:text-black 
-                  peer-focus:-translate-y-full">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={handleShowPassword}
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2 text-orange-500 hover:text-red-500 transition-colors duration-300 focus:outline-none"
-                  aria-label={showPassword ? "Hide Password" : "Show Password"}
-                >
-                  {showPassword ? (
-                    <FaEyeSlash size={20} />
-                  ) : (
-                    <FaEye size={20} />
-                  )}
-                </button>
-              </div>
-
-              {/* Login Button */}
+              <DynamicInput
+                name="Username"
+                type="string"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                leftElement={<FaUser size={20} className="text-orange-500" />}
+                required
+                className="mb-12"
+              />
+              <DynamicInput
+                name="Password"
+                type={showPassword ? "string" : "password"} // تغییر نوع ورودی بر اساس حالت نمایش
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                leftElement={<FaLock size={20} className="text-orange-500" />}
+                rightElement={
+                  <button
+                    type="button"
+                    onClick={handleTogglePasswordVisibility}
+                    className=" text-orange-500 hover:text-red-500 transition-colors duration-300 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash size={20} />
+                    ) : (
+                      <FaEye size={20} />
+                    )}
+                  </button>
+                }
+                required
+              />
               <button
                 type="submit"
                 className="w-full mt-8 bg-red-500 text-black py-2 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
@@ -208,41 +169,18 @@ const Login: React.FC = () => {
             </>
           ) : (
             <>
-              {/* Phone Number Field */}
-              <div className="mb-6 relative">
-                <FaPhone
-                  size={20}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none"
-                />
-                <input
-                  type="tel"
-                  placeholder=" "
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="peer w-full border-b-2 border-orange-300 pl-8 pb-2 focus:outline-none focus:border-red-500 transition-colors duration-300 text-black text-sm sm:text-base"
-                  required
-                />
-                <label className="absolute left-8 transform 
-                  transition-all duration-300 cursor-text
-                  top-0 text-sm text-black -translate-y-full
-                  peer-placeholder-shown:top-[30%] 
-                  peer-placeholder-shown:text-base 
-                  peer-placeholder-shown:text-black 
-                  peer-placeholder-shown:-translate-y-1/2
-                  peer-focus:top-0 
-                  peer-focus:text-sm 
-                  peer-focus:text-black 
-                  peer-focus:-translate-y-full">
-                  Phone Number
-                </label>
-              </div>
-
-              {/* Send Code Button */}
+              <DynamicInput
+                name="Phone Number"
+                type="number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                leftElement={<FaPhone size={20} className="text-orange-500" />}
+                required
+              />
               <button
                 type="submit"
                 className="w-full flex items-center justify-center gap-2 mt-8 bg-red-500 text-black py-2 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
               >
-                <FaPhone />
                 Send Code
               </button>
             </>

@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@types/react-split-pane": "^0.1.67",
+    "ag-grid-community": "^32.3.3",
+    "ag-grid-react": "^32.3.3",
     "daisyui": "^4.12.14",
     "primeicons": "^7.0.0",
     "primereact": "^10.8.5",
