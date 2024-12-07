@@ -2,19 +2,23 @@
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 
-import "ag-grid-community/styles/ag-grid.css"; // CSS اصلی ag-Grid
-import "ag-grid-community/styles/ag-theme-alpine.css"; // تم optional
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
 
 interface DataTableProps {
   columnDefs: any[];
   rowData: any[];
   defaultColDef?: any;
+  onRowDoubleClick: (data: any) => void;
+  setSelectedRowData: (data: any) => void;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
   columnDefs,
   rowData,
   defaultColDef,
+  onRowDoubleClick,
+  setSelectedRowData,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
@@ -36,6 +40,14 @@ const DataTable: React.FC<DataTableProps> = ({
       gridApi.sizeColumnsToFit();
     }
   }, [gridApi, columnDefs]);
+
+  const onRowClicked = (event: any) => {
+    setSelectedRowData(event.data);
+  };
+
+  const handleRowDoubleClicked = (event: any) => {
+    onRowDoubleClick(event.data);
+  };
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
@@ -73,6 +85,8 @@ const DataTable: React.FC<DataTableProps> = ({
           pagination={false}
           paginationPageSize={10}
           animateRows={true}
+          onRowClicked={onRowClicked}
+          onRowDoubleClicked={handleRowDoubleClicked}
         />
       </div>
     </div>

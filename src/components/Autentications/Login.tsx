@@ -1,14 +1,9 @@
+// src/pages/Login.tsx
 import React, { useState } from "react";
-import {
-  FaUser,
-  FaLock,
-  FaPhone,
-  FaEye,
-  FaEyeSlash,
-  FaGlobe,
-  FaChevronDown,
-} from "react-icons/fa";
+import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
 import DynamicInput from "../utilities/DynamicInput";
+import DynamicSelector from "../utilities/DynamicSelector";
+import DynamicModal from "../utilities/DynamicModal";
 
 const Login: React.FC = () => {
   const [isOtp, setIsOtp] = useState<boolean>(false);
@@ -17,6 +12,20 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
+
+  const [selectedName, setSelectedName] = useState<string>("");
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [selectedRowData, setSelectedRowData] = useState<any>(null);
+
+  const [nameOptions, setNameOptions] = useState([
+    { value: "", label: "Select Item" },
+    { value: "Predefined", label: "Predefined Example" },
+  ]);
+
+  const languageOptions = [
+    { value: "en", label: "English" },
+    { value: "fa", label: "فارسی" },
+  ];
 
   const handleToggleOtp = () => {
     setIsOtp(!isOtp);
@@ -32,7 +41,29 @@ const Login: React.FC = () => {
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission logic here
+    // Handle form submission logic
+  };
+
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedRowData(null);
+  };
+
+  const handleSelectFromModal = (nameValue: string) => {
+    // اگر nameValue در لیست options وجود نداشت، اضافه کن
+    const exists = nameOptions.find((opt) => opt.value === nameValue);
+    if (!exists) {
+      setNameOptions((prev) => [
+        ...prev,
+        { value: nameValue, label: nameValue },
+      ]);
+    }
+    setSelectedName(nameValue);
+    handleCloseModal();
   };
 
   return (
@@ -53,40 +84,12 @@ const Login: React.FC = () => {
       <div className="relative z-10 w-full max-w-md p-8 bg-white bg-opacity-90 rounded-lg shadow-lg mx-4 sm:mx-0">
         {/* Language Switcher */}
         <div className="absolute top-6 left-6 w-30">
-          <div className="relative">
-            <FaGlobe
-              size={20}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none"
-            />
-            <select
-              value={language}
-              onChange={handleLanguageChange}
-              className="peer w-full border-b-2 border-orange-300 pl-8 pb-2 pr-8 bg-transparent appearance-none focus:outline-none focus:border-red-500 transition-colors duration-300 relative text-black text-sm sm:text-base"
-              aria-label="Language"
-            >
-              <option value="en">English</option>
-              <option value="fa">فارسی</option>
-            </select>
-            <FaChevronDown
-              size={20}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 text-orange-500 pointer-events-none"
-            />
-            <label
-              className="absolute left-8 transform 
-              transition-all duration-300 cursor-text
-              top-0 text-sm text-black -translate-y-full
-              peer-placeholder-shown:top-[30%] 
-              peer-placeholder-shown:text-base 
-              peer-placeholder-shown:text-black 
-              peer-placeholder-shown:-translate-y-1/2
-              peer-focus:top-0 
-              peer-focus:text-sm 
-              peer-focus:text-black 
-              peer-focus:-translate-y-full"
-            >
-              Language
-            </label>
-          </div>
+          <DynamicSelector
+            options={languageOptions}
+            selectedValue={language}
+            onChange={handleLanguageChange}
+            label="Language"
+          />
         </div>
 
         {/* Profile Placeholder */}
@@ -126,6 +129,18 @@ const Login: React.FC = () => {
           </div>
         </div>
 
+        {/* سلکتور با دکمه ... داخل خودش */}
+        {/* <div className="mt-12 mb-4">
+          <DynamicSelector
+            options={nameOptions}
+            selectedValue={selectedName}
+            onChange={(e) => setSelectedName(e.target.value)}
+            label="Select Item"
+            showButton={true}
+            onButtonClick={handleOpenModal}
+          />
+        </div> */}
+
         {/* Form */}
         <form className="mt-12" onSubmit={handleFormSubmit}>
           {!isOtp ? (
@@ -141,7 +156,7 @@ const Login: React.FC = () => {
               />
               <DynamicInput
                 name="Password"
-                type={showPassword ? "string" : "password"} // تغییر نوع ورودی بر اساس حالت نمایش
+                type={showPassword ? "string" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 leftElement={<FaLock size={20} className="text-orange-500" />}
@@ -187,6 +202,16 @@ const Login: React.FC = () => {
           )}
         </form>
       </div>
+
+      {modalOpen && (
+        <DynamicModal
+          onClose={handleCloseModal}
+          onSelect={handleSelectFromModal}
+          selectedRowData={selectedRowData}
+          setSelectedRowData={setSelectedRowData}
+          modalOpen={modalOpen}
+        />
+      )}
     </div>
   );
 };
