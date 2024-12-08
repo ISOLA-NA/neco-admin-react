@@ -1,9 +1,10 @@
-// src/components/DataTable.tsx
+/* src/components/DataTable.tsx */
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 
 import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
+import "ag-grid-community/styles/ag-theme-quartz.css"; // استفاده از تم Quartz
+import "./DataTable.css";
 
 interface DataTableProps {
   columnDefs: any[];
@@ -58,11 +59,11 @@ const DataTable: React.FC<DataTableProps> = ({
           placeholder="جستجو..."
           value={searchText}
           onChange={onSearchChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="search-input"
         />
       </div>
-      {/* جدول ag-Grid */}
-      <div className="ag-theme-alpine flex-grow">
+      {/* جدول ag-Grid با تم Quartz */}
+      <div className="ag-theme-quartz flex-grow">
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
@@ -80,7 +81,6 @@ const DataTable: React.FC<DataTableProps> = ({
           onRowDoubleClicked={handleRowDoubleClicked}
           domLayout="autoHeight"
           suppressHorizontalScroll={false} // اجازه اسکرول افقی
-          // اطمینان از پر شدن عرض پنل
         />
       </div>
     </div>

@@ -43,11 +43,11 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         placeholder={placeholder}
         onChange={onChange}
         inputMode={type === "number" ? "numeric" : undefined} // فعال‌سازی کیبورد مناسب برای اعداد
-        className={`peer w-full border-b-2 border-orange-300 ${
+        className={`peer w-full border-b-2 border-[#7e3af2] bg-[#f3f4f6] ${
           leftElement ? "pl-8" : ""
         } ${
           rightElement ? "pr-8" : ""
-        } pb-2 focus:outline-none focus:border-red-500 transition-colors duration-300 text-black text-sm sm:text-base`}
+        } pb-2 focus:outline-none focus:border-[#6366f1] transition-colors duration-300 text-black text-sm sm:text-base`}
         required={required}
       />
       <label

@@ -65,9 +65,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-        Configurations
-      </h2>
       <TwoColumnLayout>
         {/* Configuration ID */}
         <div className="flex flex-col">
@@ -128,7 +125,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             selectedValue={configData.type}
             onChange={(e) => handleChange("type", e.target.value)}
             label="Type" // حروف بزرگ برای سازگاری
-            showButton={false}
+            showButton={true}
           />
         </div>
 

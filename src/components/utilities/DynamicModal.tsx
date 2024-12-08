@@ -60,7 +60,12 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
       ref={dialogRef}
     >
       <div className="modal-box" style={{ width: "500px", height: "400px" }}>
-        <h3 className="font-bold text-lg mb-4">Select an Item</h3>
+        {/* عنوان مدال */}
+        <h3 className="font-bold text-lg mb-4 text-[#7e3af2]">
+          Select an Item
+        </h3>
+
+        {/* جدول داده‌ها */}
         <div style={{ height: "250px" }}>
           <DataTable
             columnDefs={columnDefs}
@@ -69,15 +74,20 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
             setSelectedRowData={setSelectedRowData}
           />
         </div>
+
+        {/* دکمه‌های مدال */}
         <div className="modal-action mt-4">
           <button
             type="button"
-            className="btn bg-red-500 text-black hover:bg-red-600"
+            className="btn bg-[#7e3af2] text-white hover:bg-[#6366f1]"
             onClick={handleSelectClick}
           >
             Select
           </button>
-          <button className="btn" onClick={handleClose}>
+          <button
+            className="btn bg-[#f3f4f6] text-[#6366f1] hover:bg-[#e5e7eb]"
+            onClick={handleClose}
+          >
             Close
           </button>
         </div>

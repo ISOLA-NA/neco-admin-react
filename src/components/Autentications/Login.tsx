@@ -1,4 +1,3 @@
-// src/pages/Login.tsx
 import React, { useState } from "react";
 import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
 import DynamicInput from "../utilities/DynamicInput";
@@ -54,7 +53,6 @@ const Login: React.FC = () => {
   };
 
   const handleSelectFromModal = (nameValue: string) => {
-    // اگر nameValue در لیست options وجود نداشت، اضافه کن
     const exists = nameOptions.find((opt) => opt.value === nameValue);
     if (!exists) {
       setNameOptions((prev) => [
@@ -67,7 +65,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-r from-red-400 via-orange-300 to-red-400">
+    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
       {/* Wave Background */}
       <svg
         className="absolute inset-0 w-full h-full"
@@ -81,7 +79,7 @@ const Login: React.FC = () => {
         ></path>
       </svg>
 
-      <div className="relative z-10 w-full max-w-md p-8 bg-white bg-opacity-90 rounded-lg shadow-lg mx-4 sm:mx-0">
+      <div className="relative z-10 w-full max-w-md p-8 bg-white bg-opacity-90 rounded-lg shadow-xl mx-4 sm:mx-0">
         {/* Language Switcher */}
         <div className="absolute top-6 left-6 w-30">
           <DynamicSelector
@@ -94,8 +92,8 @@ const Login: React.FC = () => {
 
         {/* Profile Placeholder */}
         <div className="absolute top-6 right-6">
-          <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center">
-            <span className="text-orange-500 text-lg">+</span>
+          <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
+            <span className="text-purple-500 text-lg">+</span>
           </div>
         </div>
 
@@ -115,7 +113,7 @@ const Login: React.FC = () => {
               />
               <div
                 className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
-                  !isOtp ? "bg-orange-400" : "bg-gray-300"
+                  !isOtp ? "bg-indigo-400" : "bg-purple-400"
                 }`}
               >
                 <span
@@ -129,20 +127,8 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        {/* سلکتور با دکمه ... داخل خودش */}
-        {/* <div className="mt-12 mb-4">
-          <DynamicSelector
-            options={nameOptions}
-            selectedValue={selectedName}
-            onChange={(e) => setSelectedName(e.target.value)}
-            label="Select Item"
-            showButton={true}
-            onButtonClick={handleOpenModal}
-          />
-        </div> */}
-
         {/* Form */}
-        <form className="mt-20" onSubmit={handleFormSubmit}>
+        <form className="mt-12" onSubmit={handleFormSubmit}>
           {!isOtp ? (
             <>
               <DynamicInput
@@ -150,7 +136,7 @@ const Login: React.FC = () => {
                 type="string"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                leftElement={<FaUser size={20} className="text-orange-500" />}
+                leftElement={<FaUser size={20} className="text-indigo-500" />}
                 required
                 className="mb-12"
               />
@@ -159,12 +145,12 @@ const Login: React.FC = () => {
                 type={showPassword ? "string" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                leftElement={<FaLock size={20} className="text-orange-500" />}
+                leftElement={<FaLock size={20} className="text-indigo-500" />}
                 rightElement={
                   <button
                     type="button"
                     onClick={handleTogglePasswordVisibility}
-                    className=" text-orange-500 hover:text-red-500 transition-colors duration-300 focus:outline-none"
+                    className="text-indigo-500 hover:text-purple-500 transition-colors duration-300 focus:outline-none"
                   >
                     {showPassword ? (
                       <FaEyeSlash size={20} />
@@ -174,10 +160,11 @@ const Login: React.FC = () => {
                   </button>
                 }
                 required
+                className="mt-12"
               />
               <button
                 type="submit"
-                className="w-full mt-8 bg-red-500 text-black py-2 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
+                className="w-full mt-8 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
               >
                 Login
               </button>
@@ -189,12 +176,12 @@ const Login: React.FC = () => {
                 type="number"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                leftElement={<FaPhone size={20} className="text-orange-500" />}
+                leftElement={<FaPhone size={20} className="text-indigo-500" />}
                 required
               />
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 mt-8 bg-red-500 text-black py-2 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
+                className="w-full flex items-center justify-center gap-2 mt-8 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
               >
                 Send Code
               </button>

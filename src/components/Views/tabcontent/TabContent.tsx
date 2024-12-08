@@ -30,7 +30,7 @@ const TabContent: React.FC<TabContentProps> = ({
         style={{ height: "100%" }}
       >
         {/* پنل جدول داده‌ها */}
-        <SplitterPanel className="flex flex-col" size={30} minSize={20}>
+        <SplitterPanel className="flex flex-col" size={50} minSize={20}>
           <div className="h-full p-4">
             <DataTable
               columnDefs={columnDefs}
@@ -42,7 +42,7 @@ const TabContent: React.FC<TabContentProps> = ({
         </SplitterPanel>
 
         {/* پنل محتوای انتخاب شده */}
-        <SplitterPanel className="flex flex-col" size={70} minSize={30}>
+        <SplitterPanel className="flex flex-col" size={50} minSize={30}>
           <div className="h-full overflow-auto p-4">
             {Component && selectedRow ? (
               <Suspense fallback={<div>در حال بارگذاری...</div>}>
@@ -50,9 +50,7 @@ const TabContent: React.FC<TabContentProps> = ({
                 {/* ارسال داده ردیف به کامپوننت */}
               </Suspense>
             ) : (
-              <div className="text-gray-500">
-                لطفاً برای مشاهده جزئیات، یک ردیف را دو بار کلیک کنید.
-              </div>
+              <div className="text-gray-500"></div>
             )}
           </div>
         </SplitterPanel>

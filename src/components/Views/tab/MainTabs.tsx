@@ -1,5 +1,3 @@
-// src/components/views/tab/MainTabs.tsx
-
 import React from "react";
 import ScrollButton from "./ScrollButton";
 
@@ -31,16 +29,16 @@ const MainTabs: React.FC<MainTabsProps> = ({
 
       {/* کانتینر تب‌ها */}
       <div
-        className="flex space-x-4 overflow-x-auto scrollbar-hide px-6 py-3 bg-white border-b border-gray-300 rounded-lg shadow-md"
+        className="flex space-x-4 overflow-x-auto scrollbar-hide px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg shadow-xl"
         ref={tabsRef}
       >
         {tabs.map((tabName) => (
           <button
             key={tabName}
-            className={`px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+            className={`px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 transform ${
               activeTab === tabName
-                ? "bg-orange-500 text-white shadow-md transform scale-105"
-                : "text-gray-600 hover:bg-orange-200 hover:text-black"
+                ? "bg-white text-indigo-700 shadow-xl scale-105"
+                : "text-white hover:bg-indigo-600 hover:scale-105"
             }`}
             onClick={() => onTabChange(tabName)}
           >

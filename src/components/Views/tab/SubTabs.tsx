@@ -1,5 +1,3 @@
-// src/components/views/tab/SubTabs.tsx
-
 import React from "react";
 import ScrollButton from "./ScrollButton";
 
@@ -35,9 +33,9 @@ const SubTabs: React.FC<SubTabsProps> = ({
         ariaLabel="اسکرول به چپ برای زیرتب‌ها"
       />
 
-      {/* کانتینر ساب‌تب‌ها با padding مناسب */}
+      {/* کانتینر ساب‌تب‌ها */}
       <div
-        className="flex items-start space-x-4 overflow-x-auto scrollbar-hide px-4 py-2 bg-white border-b border-gray-300 pl-10 pr-10"
+        className="flex items-start space-x-6 overflow-x-auto scrollbar-hide px-6 py-4 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-500 rounded-lg shadow-xl"
         ref={subTabsRef}
       >
         {groups ? (
@@ -48,27 +46,22 @@ const SubTabs: React.FC<SubTabsProps> = ({
                   {group.subtabs.map((subtab) => (
                     <button
                       key={subtab}
-                      className={`flex flex-col items-center space-y-1 p-2 text-xs rounded text-center transition-all ${
+                      className={`flex flex-col items-center space-y-1 p-2 text-xs rounded-full transition-all duration-300 transform relative ${
                         activeSubTab === subtab
-                          ? "bg-orange-500 text-black shadow-md transform scale-105"
-                          : "text-gray-700 hover:bg-orange-200"
+                          ? "text-white border-b-2 border-white scale-105"
+                          : "text-white hover:bg-purple-600 hover:border-b-2 hover:border-transparent"
                       }`}
                       onClick={() => onSubTabChange(subtab)}
                     >
-                      <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
+                      <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
                       <span>{subtab}</span>
                     </button>
                   ))}
                 </div>
-                <span
-                  className="text-xs text-gray-500"
-                  style={{ marginTop: "30px" }}
-                >
-                  {group.label}
-                </span>
+                <span className="text-xs text-white mt-3">{group.label}</span>
               </div>
               {groupIndex < groups.length - 1 && (
-                <div className="self-stretch w-px bg-orange-500 mx-4"></div>
+                <div className="self-stretch w-px bg-white mx-4"></div>
               )}
             </React.Fragment>
           ))
@@ -78,14 +71,14 @@ const SubTabs: React.FC<SubTabsProps> = ({
               {subtabs!.map((subtab) => (
                 <button
                   key={subtab}
-                  className={`flex flex-col items-center space-y-1 p-2 text-xs rounded text-center transition-all ${
+                  className={`flex flex-col items-center space-y-1 p-2 text-xs rounded-full transition-all duration-300 transform relative ${
                     activeSubTab === subtab
-                      ? "bg-orange-500 text-black shadow-md transform scale-105"
-                      : "text-gray-700 hover:bg-orange-200"
+                      ? "text-white border-b-2 border-white scale-105"
+                      : "text-white hover:bg-purple-600 hover:border-b-2 hover:border-transparent"
                   }`}
                   onClick={() => onSubTabChange(subtab)}
                 >
-                  <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
+                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
                   <span>{subtab}</span>
                 </button>
               ))}
@@ -93,7 +86,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
           </div>
         )}
         {/* خط عمودی انتهای کل ساب‌تب‌ها */}
-        <div className="self-stretch w-px bg-orange-500"></div>
+        <div className="self-stretch w-px bg-white"></div>
       </div>
 
       {/* دکمه اسکرول سمت راست */}

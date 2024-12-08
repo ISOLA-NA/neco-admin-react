@@ -18,7 +18,7 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
   value,
   onChange,
   placeholder = "",
-  rows = 5,
+  rows = 2,
   className = "",
 }) => {
   return (
@@ -29,8 +29,8 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
       onChange={onChange}
       placeholder={placeholder}
       rows={rows}
-      className={`textarea textarea-error ${className}`}
-    ></textarea>
+      className={`peer w-full border-2 border-[#7e3af2] pl-3 pr-3 py-1 bg-transparent text-black focus:outline-none focus:ring-2 focus:ring-[#6366f1] transition-colors duration-300 rounded-md resize ${className}`}
+    />
   );
 };
 
