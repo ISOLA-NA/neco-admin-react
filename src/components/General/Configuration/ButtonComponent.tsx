@@ -1,9 +1,9 @@
-// src/components/ButtonComponent.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicRadioGroup from "../../utilities/DynamicRadiogroup";
-import ImageUploader from "../../utilities/ImageUploader"; // Import ImageUploader
+import ImageUploader from "../../utilities/ImageUploader";
+import TwoColumnLayout from "../../layout/TwoColumnLayout";
 
 interface ButtonComponentProps {
   onClose: () => void;
@@ -20,21 +20,17 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   columnDefs,
   rowData,
 }) => {
-  const [selectedRow, setSelectedRow] = useState<any>(null);
-  const [selectedState, setSelectedState] = useState<string>("");
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-
   const radioOptions = [
     { value: "accept", label: "Accept" },
     { value: "reject", label: "Reject" },
     { value: "close", label: "Close" },
   ];
 
-  useEffect(() => {
-    if (radioOptions.length > 0) {
-      setSelectedState(radioOptions[0].value);
-    }
-  }, [radioOptions]);
+  const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [selectedState, setSelectedState] = useState<string>(
+    radioOptions.length > 0 ? radioOptions[0].value : ""
+  );
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 
   const handleRowDoubleClick = (data: any) => {
     setSelectedRow(data);
@@ -63,8 +59,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const isSelectDisabled = !selectedRow || !selectedState;
 
   return (
-    <div className=" bg-white rounded-lg p-6">
-      <div>
+    <div className="bg-white rounded-lg p-4">
+      <div className="mb-4">
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
@@ -72,8 +68,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           setSelectedRowData={handleRowClick}
         />
       </div>
-
-      <div className="grid grid-cols-2 gap-4 mt-12">
+      <TwoColumnLayout>
         <DynamicInput name="Input 1" type="text" value="" onChange={() => {}} />
         <DynamicInput name="Input 2" type="text" value="" onChange={() => {}} />
         <DynamicInput
@@ -83,9 +78,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           onChange={() => {}}
         />
         <DynamicInput name="Input 4" type="text" value="" onChange={() => {}} />
-      </div>
-
-      <div className="mt-6 flex items-center space-x-4">
         <DynamicRadioGroup
           title="State:"
           name="stateGroup"
@@ -94,9 +86,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           onChange={(value) => setSelectedState(value)}
         />
         <ImageUploader onUpload={handleImageUpload} />
-      </div>
-
-      <div className="modal-action justify-center mt-6 space-x-4">
+      </TwoColumnLayout>
+      <div className="mt-4 flex justify-end">
         <button
           className={`btn w-48 ${
             isSelectDisabled

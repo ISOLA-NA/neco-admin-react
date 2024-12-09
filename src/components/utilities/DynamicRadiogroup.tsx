@@ -1,4 +1,3 @@
-// src/utilities/DynamicRadioGroup.tsx
 import React from "react";
 
 interface DynamicRadioGroupProps {
@@ -20,16 +19,16 @@ const DynamicRadioGroup: React.FC<DynamicRadioGroupProps> = ({
     <div className="flex items-center space-x-2">
       <span className="text-lg font-semibold whitespace-nowrap">{title}</span>
       <div className="flex items-center space-x-2">
-        {options.map((option, index) => (
+        {options.map((option) => (
           <label
-            key={index}
+            key={option.value}
             className="flex items-center cursor-pointer space-x-1 whitespace-nowrap"
           >
             <input
               type="radio"
               name={name}
               value={option.value}
-              checked={selectedValue === option.value}
+              // checked={selectedValue === option.value}
               onChange={() => onChange(option.value)}
               className="radio radio-primary"
             />
