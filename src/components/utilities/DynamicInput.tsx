@@ -1,5 +1,6 @@
 // src/utilities/DynamicInput.tsx
 
+import { classNames } from "primereact/utils";
 import React, { ReactNode } from "react";
 
 interface DynamicInputProps {
@@ -12,6 +13,8 @@ interface DynamicInputProps {
   rightElement?: ReactNode; // عنصر سمت راست
   required?: boolean; // الزامی بودن
   className?: string; // کلاس سفارشی برای سبک‌دهی
+  error?: boolean; // نمایش وضعیت خطا
+  errorMessage?: string; // پیام خطا
 }
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
@@ -23,42 +26,64 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   leftElement,
   rightElement,
   required = false,
-  className = "", // مقدار پیش‌فرض برای جلوگیری از undefined
+  className = "",
+  error = false,
+  errorMessage = "",
 }) => {
   return (
-    <div className={`mb-6 relative ${className}`}>
+    <div className={classNames("mb-6 relative", className)}>
       {/* عنصر سمت چپ */}
       {leftElement && (
-        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
           {leftElement}
         </div>
       )}
+
       <input
+        id={name}
         name={name}
-        type={type} // نوع ورودی بر اساس پراپ
+        type={type}
         value={value}
         placeholder={placeholder}
         onChange={onChange}
-        inputMode={type === "number" ? "numeric" : undefined} // فعال‌سازی کیبورد مناسب برای اعداد
-        className={`peer w-full border-b-2 border-[#7e3af2] bg-[#f3f4f6] ${
-          leftElement ? "pl-8" : ""
-        } ${
-          rightElement ? "pr-8" : ""
-        } pb-2 focus:outline-none focus:border-[#6366f1] transition-colors duration-300 text-black text-sm sm:text-base`}
+        inputMode={type === "number" ? "numeric" : undefined}
+        className={classNames(
+          "peer w-full border-b-2 bg-white",
+          error ? "border-red-500" : "border-purple-600",
+          leftElement ? "pl-10" : "pl-3",
+          rightElement ? "pr-10" : "pr-3",
+          "pb-2 focus:outline-none",
+          error ? "focus:border-red-500" : "focus:border-indigo-500",
+          "transition-colors duration-300 text-gray-800 text-sm sm:text-base"
+        )}
         required={required}
+        aria-label={name}
+        autoComplete="off" // غیرفعال‌سازی autocomplete برای جلوگیری از تغییرات ناخواسته
       />
+
       <label
-        className={`absolute ${
-          leftElement ? "left-8" : "left-0"
-        } transform transition-all duration-300 cursor-text top-0 text-sm text-black -translate-y-full peer-placeholder-shown:top-[30%] peer-placeholder-shown:text-base peer-placeholder-shown:text-black peer-placeholder-shown:-translate-y-1/2 peer-focus:top-0 peer-focus:text-sm peer-focus:text-black peer-focus:-translate-y-full`}
+        htmlFor={name}
+        className={classNames(
+          "absolute",
+          leftElement ? "left-10" : "left-3",
+          "transform transition-all duration-300 cursor-text top-0 text-sm text-gray-600 -translate-y-full",
+          "peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-600 peer-placeholder-shown:-translate-y-1/2",
+          "peer-focus:top-0 peer-focus:text-sm peer-focus:text-gray-600 peer-focus:-translate-y-full"
+        )}
       >
         {name}
       </label>
+
       {/* عنصر سمت راست */}
       {rightElement && (
-        <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
           {rightElement}
         </div>
+      )}
+
+      {/* پیام خطا */}
+      {error && errorMessage && (
+        <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>
       )}
     </div>
   );

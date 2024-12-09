@@ -175,6 +175,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           value={configData.name}
           onChange={(e) => handleChange("name", e.target.value)}
           required
+
         />
 
         {/* Input Description */}
@@ -219,6 +220,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           label="Lesson Learned Form"
           showButton={true}
           onButtonClick={() => openModal("Lesson Learned Form")}
+          className="mt-5"
         />
 
         {/* DynamicSelector - Lesson Learned */}
@@ -229,6 +231,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           label="Lesson Learned"
           showButton={true}
           onButtonClick={() => openModal("Lesson Learned")}
+          className="mt-5"
         />
 
         {/* DynamicSelector - Comment Form Template */}
@@ -241,6 +244,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           label="Comment Form Template"
           showButton={true}
           onButtonClick={() => openModal("Comment Form Template")}
+          className="mt-5"
         />
 
         {/* DynamicSelector - Procedure Form Template */}
@@ -253,11 +257,12 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           label="Procedure Form Template"
           showButton={true}
           onButtonClick={() => openModal("Procedure Form Template")}
+          className="mt-5"
         />
 
         {/* List Selectors */}
-        <ListSelector title={"Default Action Buttons"} />
-        <ListSelector title={"Letter Action Buttons"} />
+        <ListSelector title={"Default Action Buttons"} className="mt-5"/>
+        <ListSelector title={"Letter Action Buttons"} className="mt-5"/>
         <ListSelector title={"Meeting Action Buttons"} />
 
         {/* نمایش DynamicModal */}
