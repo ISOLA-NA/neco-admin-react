@@ -1,10 +1,10 @@
-// src/components/utilities/DynamicInput.tsx
+// src/utilities/DynamicInput.tsx
 
 import React, { ReactNode } from "react";
 
 interface DynamicInputProps {
   name: string; // نام ورودی
-  type: "string" | "number" | "password"; // نوع ورودی (string، number یا password)
+  type: "text" | "number" | "password"; // نوع ورودی (text، number یا password)
   value: string; // مقدار ورودی
   placeholder?: string; // جای‌نما
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; // مدیریت تغییر
@@ -25,9 +25,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   required = false,
   className = "", // مقدار پیش‌فرض برای جلوگیری از undefined
 }) => {
-  const inputType =
-    type === "password" ? "password" : type === "number" ? "number" : "text";
-
   return (
     <div className={`mb-6 relative ${className}`}>
       {/* عنصر سمت چپ */}
@@ -38,7 +35,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
       )}
       <input
         name={name}
-        type={inputType} // نوع ورودی بر اساس پراپ
+        type={type} // نوع ورودی بر اساس پراپ
         value={value}
         placeholder={placeholder}
         onChange={onChange}

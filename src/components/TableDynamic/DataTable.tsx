@@ -1,4 +1,4 @@
-/* src/components/DataTable.tsx */
+// src/components/DataTable.tsx
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 
@@ -7,17 +7,16 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // استفاده از ت
 import "./DataTable.css";
 
 interface DataTableProps {
-  columnDefs: any[];
-  rowData: any[];
-  defaultColDef?: any;
-  onRowDoubleClick: (data: any) => void;
-  setSelectedRowData: (data: any) => void;
+  columnDefs: any[]; // ستون‌ها
+  rowData: any[]; // داده‌های ردیف‌ها
+  onRowDoubleClick: (data: any) => void; // تابع دابل کلیک
+  setSelectedRowData: (data: any) => void; // ذخیره ردیف انتخابی
+  onRowClick?: (rowData: any) => void; // تابع کلیک ردیف (اختیاری)
 }
 
 const DataTable: React.FC<DataTableProps> = ({
   columnDefs,
   rowData,
-  defaultColDef,
   onRowDoubleClick,
   setSelectedRowData,
 }) => {
@@ -68,12 +67,6 @@ const DataTable: React.FC<DataTableProps> = ({
           onGridReady={onGridReady}
           columnDefs={columnDefs}
           rowData={rowData}
-          defaultColDef={{
-            sortable: true,
-            filter: true,
-            resizable: true,
-            ...defaultColDef,
-          }}
           pagination={false}
           paginationPageSize={10}
           animateRows={true}

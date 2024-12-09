@@ -1,10 +1,11 @@
 // src/components/General/Configurations.tsx
-
 import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
-import CustomTextarea from "../utilities/DynamicTextArea"; // اطمینان از مسیر صحیح
+import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicInput from "../utilities/DynamicInput";
 import DynamicSelector from "../utilities/DynamicSelector";
+import ListSelector from "../ListSelector/ListSelector";
+import DynamicModal from "../utilities/DynamicModal"; // وارد کردن DynamicModal
 
 interface ConfigurationProps {
   selectedRow: {
@@ -12,31 +13,41 @@ interface ConfigurationProps {
     name: string;
     value: string;
     description: string;
-    type: string; // اضافه کردن فیلد type
-    // در صورت نیاز می‌توانید فیلدهای دیگر را نیز اضافه کنید
+    type: string;
   };
 }
 
 const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
-  // وضعیت مدیریت شده برای فیلدهای ورودی
   const [configData, setConfigData] = useState({
     id: selectedRow.id.toString(),
     name: selectedRow.name,
     value: selectedRow.value,
     description: selectedRow.description,
-    type: selectedRow.type, // مقداردهی اولیه از selectedRow.type
+    typeProgramTemplate: selectedRow.type, // فیلد جداگانه برای Program Template
+    typeDefaultRibbon: "", // فیلد جداگانه برای Default Ribbon
+    typeLessonLearnedForm: "", // فیلد جداگانه برای Lesson Learned Form
+    typeLessonLearned: "", // فیلد جداگانه برای Lesson Learned
+    typeCommentFormTemplate: "", // فیلد جداگانه برای Comment Form Template
+    typeProcedureFormTemplate: "", // فیلد جداگانه برای Procedure Form Template
   });
 
   const [descriptionError, setDescriptionError] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false); // برای کنترل نمایش مدال
+  const [selectedRowData, setSelectedRowData] = useState<any>(null); // برای ذخیره داده‌های ردیف انتخاب شده
+  const [currentSelector, setCurrentSelector] = useState<string>(""); // برای ذخیره عنوان انتخاب‌کننده فعلی
 
-  // به‌روزرسانی وضعیت وقتی selectedRow تغییر می‌کند
   useEffect(() => {
     setConfigData({
       id: selectedRow.id.toString(),
       name: selectedRow.name,
       value: selectedRow.value,
       description: selectedRow.description,
-      type: selectedRow.type, // به‌روزرسانی از selectedRow.type
+      typeProgramTemplate: selectedRow.type,
+      typeDefaultRibbon: "",
+      typeLessonLearnedForm: "",
+      typeLessonLearned: "",
+      typeCommentFormTemplate: "",
+      typeProcedureFormTemplate: "",
     });
   }, [selectedRow]);
 
@@ -46,7 +57,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       [field]: value,
     }));
 
-    // اعتبارسنجی برای فیلد Description
     if (field === "description") {
       if (value.length < 10) {
         setDescriptionError(true);
@@ -56,80 +66,211 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     }
   };
 
-  // تعریف گزینه‌ها با هماهنگی در حروف بزرگ و کوچک
-  const selectorOptions = [
-    { value: "Default", label: "Default" },
-    { value: "Advanced", label: "Advanced" },
-    { value: "Custom", label: "Custom" },
-  ];
+  // برای باز کردن DynamicModal
+  const openModal = (selector: string) => {
+    setCurrentSelector(selector); // تنظیم انتخاب‌کننده فعلی
+    setModalOpen(true);
+  };
+
+  // محتوای مختلف برای DataTable بسته به انتخاب‌کننده فعلی
+  const getRowData = (selector: string) => {
+    switch (selector) {
+      case "Program Template":
+        return [
+          { Name: "Template1", Description: "Program Template1" },
+          { Name: "Template2", Description: "Program Template2" },
+          { Name: "Template3", Description: "Program Template3" },
+        ];
+      case "Default Ribbon":
+        return [
+          { Name: "Ribbon1", Description: "Default Ribbon1" },
+          { Name: "Ribbon2", Description: "Default Ribbon2" },
+        ];
+      case "Lesson Learned Form":
+        return [
+          { Name: "Form1", Description: "Lesson Learned Form1" },
+          { Name: "Form2", Description: "Lesson Learned Form2" },
+        ];
+      case "Lesson Learned":
+        return [
+          { Name: "Lesson1", Description: "Lesson Learned1" },
+          { Name: "Lesson2", Description: "Lesson Learned2" },
+        ];
+      case "Comment Form Template":
+        return [
+          { Name: "CommentTemplate1", Description: "Comment Form Template1" },
+          { Name: "CommentTemplate2", Description: "Comment Form Template2" },
+        ];
+      case "Procedure Form Template":
+        return [
+          { Name: "Procedure1", Description: "Procedure Form Template1" },
+          { Name: "Procedure2", Description: "Procedure Form Template2" },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  // تابع برای بروزرسانی مقدار انتخاب شده
+  const handleSelectFromModal = (selectedName: string) => {
+    switch (currentSelector) {
+      case "Program Template":
+        setConfigData((prev) => ({
+          ...prev,
+          typeProgramTemplate: selectedName,
+        }));
+        break;
+      case "Default Ribbon":
+        setConfigData((prev) => ({
+          ...prev,
+          typeDefaultRibbon: selectedName,
+        }));
+        break;
+      case "Lesson Learned Form":
+        setConfigData((prev) => ({
+          ...prev,
+          typeLessonLearnedForm: selectedName,
+        }));
+        break;
+      case "Lesson Learned":
+        setConfigData((prev) => ({
+          ...prev,
+          typeLessonLearned: selectedName,
+        }));
+        break;
+      case "Comment Form Template":
+        setConfigData((prev) => ({
+          ...prev,
+          typeCommentFormTemplate: selectedName,
+        }));
+        break;
+      case "Procedure Form Template":
+        setConfigData((prev) => ({
+          ...prev,
+          typeProcedureFormTemplate: selectedName,
+        }));
+        break;
+      default:
+        break;
+    }
+    setModalOpen(false); // بستن مدال پس از انتخاب
+  };
+
+  // گزینه‌های مختلف برای DynamicSelector بر اساس انتخاب‌کننده
+  const getSelectorOptions = (selector: string) => {
+    const rows = getRowData(selector);
+    return rows.map((row: any) => ({
+      value: row.Name,
+      label: row.Name,
+    }));
+  };
 
   return (
     <div>
       <TwoColumnLayout>
-        {/* Configuration ID */}
-        <div className="flex flex-col">
-          <DynamicInput
-            name="ID"
-            type="number"
-            value={configData.id}
-            onChange={(e) => handleChange("id", e.target.value)}
-            required
-          />
-        </div>
+        {/* Input Name */}
+        <DynamicInput
+          name="Name"
+          type="text"
+          value={configData.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          required
+        />
 
-        {/* Configuration Name */}
-        <div className="flex flex-col">
-          <DynamicInput
-            name="Name"
-            type="string"
-            value={configData.name}
-            onChange={(e) => handleChange("name", e.target.value)}
-            required
-          />
-        </div>
+        {/* Input Description */}
+        <CustomTextarea
+          id="description"
+          name="Description"
+          value={configData.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+          placeholder=""
+          className={`${
+            descriptionError ? "border-red-500" : "border-gray-300"
+          }`}
+        />
 
-        {/* Configuration Value */}
-        <div className="flex flex-col">
-          <DynamicInput
-            name="Value"
-            type="string"
-            value={configData.value}
-            onChange={(e) => handleChange("value", e.target.value)}
-          />
-        </div>
+        {/* DynamicSelector - Program Template */}
+        <DynamicSelector
+          options={getSelectorOptions("Program Template")}
+          selectedValue={configData.typeProgramTemplate}
+          onChange={(e) => handleChange("typeProgramTemplate", e.target.value)}
+          label="Program Template"
+          showButton={true}
+          onButtonClick={() => openModal("Program Template")}
+        />
 
-        {/* Configuration Description */}
-        <div className="flex flex-col">
-          <CustomTextarea
-            id="description"
-            name="Description"
-            value={configData.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            placeholder="توضیحات را وارد کنید..."
-            rows={5}
-            className={`${
-              descriptionError ? "border-red-500" : "border-gray-300"
-            }`}
-          />
-          {descriptionError && (
-            <span className="text-red-500 text-sm">
-              توضیحات باید حداقل 10 کاراکتر باشد.
-            </span>
-          )}
-        </div>
+        {/* DynamicSelector - Default Ribbon */}
+        <DynamicSelector
+          options={getSelectorOptions("Default Ribbon")}
+          selectedValue={configData.typeDefaultRibbon}
+          onChange={(e) => handleChange("typeDefaultRibbon", e.target.value)}
+          label="Default Ribbon"
+          showButton={true}
+          onButtonClick={() => openModal("Default Ribbon")}
+        />
 
-        {/* Configuration Type (DynamicSelector) */}
-        <div className="flex flex-col">
-          <DynamicSelector
-            options={selectorOptions}
-            selectedValue={configData.type}
-            onChange={(e) => handleChange("type", e.target.value)}
-            label="Type" // حروف بزرگ برای سازگاری
-            showButton={true}
-          />
-        </div>
+        {/* DynamicSelector - Lesson Learned Form */}
+        <DynamicSelector
+          options={getSelectorOptions("Lesson Learned Form")}
+          selectedValue={configData.typeLessonLearnedForm}
+          onChange={(e) =>
+            handleChange("typeLessonLearnedForm", e.target.value)
+          }
+          label="Lesson Learned Form"
+          showButton={true}
+          onButtonClick={() => openModal("Lesson Learned Form")}
+        />
 
-        {/* می‌توانید فیلدهای اضافی دیگری اضافه کنید */}
+        {/* DynamicSelector - Lesson Learned */}
+        <DynamicSelector
+          options={getSelectorOptions("Lesson Learned")}
+          selectedValue={configData.typeLessonLearned}
+          onChange={(e) => handleChange("typeLessonLearned", e.target.value)}
+          label="Lesson Learned"
+          showButton={true}
+          onButtonClick={() => openModal("Lesson Learned")}
+        />
+
+        {/* DynamicSelector - Comment Form Template */}
+        <DynamicSelector
+          options={getSelectorOptions("Comment Form Template")}
+          selectedValue={configData.typeCommentFormTemplate}
+          onChange={(e) =>
+            handleChange("typeCommentFormTemplate", e.target.value)
+          }
+          label="Comment Form Template"
+          showButton={true}
+          onButtonClick={() => openModal("Comment Form Template")}
+        />
+
+        {/* DynamicSelector - Procedure Form Template */}
+        <DynamicSelector
+          options={getSelectorOptions("Procedure Form Template")}
+          selectedValue={configData.typeProcedureFormTemplate}
+          onChange={(e) =>
+            handleChange("typeProcedureFormTemplate", e.target.value)
+          }
+          label="Procedure Form Template"
+          showButton={true}
+          onButtonClick={() => openModal("Procedure Form Template")}
+        />
+
+        {/* List Selectors */}
+        <ListSelector title={"Default Action Buttons"} />
+        <ListSelector title={"Letter Action Buttons"} />
+        <ListSelector title={"Meeting Action Buttons"} />
+
+        {/* نمایش DynamicModal */}
+        {modalOpen && (
+          <DynamicModal
+            onClose={() => setModalOpen(false)}
+            onSelect={handleSelectFromModal} // ارسال مقدار به handleSelectFromModal
+            rowData={getRowData(currentSelector)} // ارسال rowData صحیح
+            selectedRowData={selectedRowData}
+            setSelectedRowData={setSelectedRowData}
+            modalOpen={modalOpen}
+          />
+        )}
       </TwoColumnLayout>
     </div>
   );

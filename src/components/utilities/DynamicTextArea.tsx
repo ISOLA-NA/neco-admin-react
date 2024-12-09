@@ -18,7 +18,7 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
   value,
   onChange,
   placeholder = "",
-  rows = 2,
+  rows = 1,
   className = "",
 }) => {
   return (

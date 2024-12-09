@@ -1,5 +1,14 @@
+// src/components/Login.tsx
+
 import React, { useState } from "react";
-import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaUser,
+  FaLock,
+  FaPhone,
+  FaEye,
+  FaEyeSlash,
+  FaGlobe,
+} from "react-icons/fa";
 import DynamicInput from "../utilities/DynamicInput";
 import DynamicSelector from "../utilities/DynamicSelector";
 import DynamicModal from "../utilities/DynamicModal";
@@ -26,6 +35,9 @@ const Login: React.FC = () => {
     { value: "fa", label: "فارسی" },
   ];
 
+  // حالت ارور برای زبان (برای مثال)
+  const [languageError, setLanguageError] = useState<string>("");
+
   const handleToggleOtp = () => {
     setIsOtp(!isOtp);
   };
@@ -36,11 +48,22 @@ const Login: React.FC = () => {
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
+    if (e.target.value === "") {
+      setLanguageError("لطفاً زبان را انتخاب کنید.");
+    } else {
+      setLanguageError("");
+    }
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission logic
+    // اعتبارسنجی فرم
+    if (language === "") {
+      setLanguageError("لطفاً زبان را انتخاب کنید.");
+      return;
+    }
+    // ادامه منطق ارسال فرم
+    console.log("Form submitted");
   };
 
   const handleOpenModal = () => {
@@ -87,6 +110,9 @@ const Login: React.FC = () => {
             selectedValue={language}
             onChange={handleLanguageChange}
             label="Language"
+            leftIcon={<FaGlobe size={20} className="text-[#7e3af2]" />}
+            error={languageError !== ""}
+            errorMessage={languageError}
           />
         </div>
 
@@ -133,16 +159,16 @@ const Login: React.FC = () => {
             <>
               <DynamicInput
                 name="Username"
-                type="string"
+                type="text" // اصلاح شده از "string" به "text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 leftElement={<FaUser size={20} className="text-indigo-500" />}
                 required
-                className="mb-12"
+                className="mb-6"
               />
               <DynamicInput
                 name="Password"
-                type={showPassword ? "string" : "password"}
+                type={showPassword ? "text" : "password"} // اصلاح شده
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 leftElement={<FaLock size={20} className="text-indigo-500" />}
@@ -164,7 +190,7 @@ const Login: React.FC = () => {
               />
               <button
                 type="submit"
-                className="w-full mt-8 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
+                className="w-full mt-4 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
               >
                 Login
               </button>
@@ -173,15 +199,16 @@ const Login: React.FC = () => {
             <>
               <DynamicInput
                 name="Phone Number"
-                type="number"
+                type="number" // می‌توانید نوع "tel" را نیز اضافه کنید اگر نیاز دارید
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 leftElement={<FaPhone size={20} className="text-indigo-500" />}
                 required
+                className="mb-6"
               />
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 mt-8 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
+                className="w-full flex items-center justify-center gap-2 mt-4 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base"
               >
                 Send Code
               </button>
