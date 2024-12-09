@@ -1,11 +1,12 @@
 // src/components/General/Configurations.tsx
 import React, { useState, useEffect } from "react";
-import TwoColumnLayout from "../layout/TwoColumnLayout";
-import CustomTextarea from "../utilities/DynamicTextArea";
-import DynamicInput from "../utilities/DynamicInput";
-import DynamicSelector from "../utilities/DynamicSelector";
-import ListSelector from "../ListSelector/ListSelector";
-import DynamicModal from "../utilities/DynamicModal"; // وارد کردن DynamicModal
+import TwoColumnLayout from "../../layout/TwoColumnLayout";
+import CustomTextarea from "../../utilities/DynamicTextArea";
+import DynamicInput from "../../utilities/DynamicInput";
+import DynamicSelector from "../../utilities/DynamicSelector";
+import ListSelector from "../../ListSelector/ListSelector";
+import DynamicModal from "../../utilities/DynamicModal";
+import TableWithSelectButton from "../Configuration/TableSelector"; // وارد کردن صحیح
 
 interface ConfigurationProps {
   selectedRow: {
@@ -112,7 +113,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   };
 
   // تابع برای بروزرسانی مقدار انتخاب شده
-  const handleSelectFromModal = (selectedName: string) => {
+  const handleSelectFromModal = (data: any, state: string, image?: File) => {
+    const selectedName = data.Name; // بررسی کنید که داده درست انتخاب می‌شود
     switch (currentSelector) {
       case "Program Template":
         setConfigData((prev) => ({
@@ -153,7 +155,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       default:
         break;
     }
-    setModalOpen(false); // بستن مدال پس از انتخاب
+    setModalOpen(false); // بستن مدال
   };
 
   // گزینه‌های مختلف برای DynamicSelector بر اساس انتخاب‌کننده
@@ -163,6 +165,21 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       value: row.Name,
       label: row.Name,
     }));
+  };
+
+  // تعریف handler ها برای TableWithSelectButton
+  const handleRowDoubleClick = (data: any) => {
+    handleSelectFromModal(data, "someState", undefined);
+  };
+
+  const handleRowClick = (data: any) => {
+    setSelectedRowData(data);
+  };
+
+  const handleSelectButtonClick = () => {
+    if (selectedRowData && currentSelector) {
+      handleSelectFromModal(selectedRowData, "someState", undefined);
+    }
   };
 
   return (
@@ -175,7 +192,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           value={configData.name}
           onChange={(e) => handleChange("name", e.target.value)}
           required
-
         />
 
         {/* Input Description */}
@@ -261,21 +277,25 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
         />
 
         {/* List Selectors */}
-        <ListSelector title={"Default Action Buttons"} className="mt-5"/>
-        <ListSelector title={"Letter Action Buttons"} className="mt-5"/>
+        <ListSelector title={"Default Action Buttons"} className="mt-5" />
+        <ListSelector title={"Letter Action Buttons"} className="mt-5" />
         <ListSelector title={"Meeting Action Buttons"} />
 
-        {/* نمایش DynamicModal */}
-        {modalOpen && (
-          <DynamicModal
-            onClose={() => setModalOpen(false)}
-            onSelect={handleSelectFromModal} // ارسال مقدار به handleSelectFromModal
-            rowData={getRowData(currentSelector)} // ارسال rowData صحیح
-            selectedRowData={selectedRowData}
-            setSelectedRowData={setSelectedRowData}
-            modalOpen={modalOpen}
+        {/* نمایش DynamicModal با استفاده از TableWithSelectButton */}
+        <DynamicModal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+          <TableWithSelectButton
+            columnDefs={[
+              { headerName: "نام", field: "Name" },
+              { headerName: "توضیحات", field: "Description" },
+            ]}
+            rowData={getRowData(currentSelector)}
+            selectedRow={selectedRowData}
+            onRowDoubleClick={handleRowDoubleClick}
+            onRowClick={handleRowClick}
+            onSelectButtonClick={handleSelectButtonClick}
+            isSelectDisabled={!selectedRowData}
           />
-        )}
+        </DynamicModal>
       </TwoColumnLayout>
     </div>
   );

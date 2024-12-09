@@ -1,6 +1,7 @@
-// src/components/ListSelector.tsx
+// src/components/ListSelector/ListSelector.tsx
 import React, { useState } from "react";
-import DynamicDialog from "./DynamicDialog";
+import DynamicModal from "../utilities/DynamicModal"; // وارد کردن صحیح
+import ButtonComponent from "../General/Configuration/ButtonComponent"; // وارد کردن صحیح
 import { classNames } from "primereact/utils";
 
 interface ListSelectorProps {
@@ -11,6 +12,20 @@ interface ListSelectorProps {
 const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
+  const [selectedRow, setSelectedRow] = useState<any>(null);
+
+  // تعریف ستون‌ها و داده‌های جدول (می‌توانید این‌ها را از پراپ‌ها یا API دریافت کنید)
+  const columnDefs = [
+    { headerName: "نام", field: "name" },
+    { headerName: "سن", field: "age" },
+    // ستون‌های دیگر
+  ];
+
+  const rowData = [
+    { name: "جان دو", age: 30 },
+    { name: "جین اسمیت", age: 25 },
+    // داده‌های دیگر
+  ];
 
   const handleRowSelect = (data: any) => {
     const name = data.name;
@@ -18,28 +33,36 @@ const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
       setSelectedNames([...selectedNames, name]);
     }
     setIsDialogOpen(false);
+    setSelectedRow(null);
   };
 
   const handleRemoveName = (name: string) => {
     setSelectedNames(selectedNames.filter((n) => n !== name));
   };
 
-  // این تابع را برای انتخاب ردیف از دکمه سلکت اضافه کنید
-  const handleSelectFromButton = (data: any) => {
+  const handleRowClick = (data: any) => {
+    setSelectedRow(data);
+  };
+
+  const handleSelectFromButton = (data: any, state: string, image?: File) => {
     handleRowSelect(data);
+  };
+
+  const handleSelectButtonClick = () => {
+    if (selectedRow) {
+      handleRowSelect(selectedRow);
+    }
   };
 
   return (
     <div className={classNames("w-full", className)}>
       {/* هدر */}
       <div className="flex justify-between items-center p-2 rounded-t-md bg-gradient-to-r from-purple-600 to-indigo-500 h-10">
-        {/* حفظ ارتفاع هدر به h-10 و padding به p-2 */}
         <h3 className="text-sm font-semibold text-white">{title}</h3>
-        {/* کاهش اندازه دکمه و تنظیم ارتفاع و عرض */}
         <button
           className="btn btn-sm btn-primary text-white bg-purple-600 hover:bg-indigo-500 px-2 py-1 rounded-md flex-shrink-0 h-6 w-6 flex items-center justify-center text-sm transition-colors duration-300"
           onClick={() => setIsDialogOpen(true)}
-          aria-label={`Add ${title}`}
+          aria-label={`افزودن ${title}`}
         >
           +
         </button>
@@ -48,7 +71,9 @@ const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
       {/* محتوای انتخاب شده‌ها */}
       <div className="h-32 overflow-y-auto bg-gray-50 rounded-b-md p-3">
         {selectedNames.length === 0 ? (
-          <p className="text-gray-500 text-sm text-center">No items selected</p>
+          <p className="text-gray-500 text-sm text-center">
+            هیچ آیتمی انتخاب نشده است
+          </p>
         ) : (
           <div className="space-y-2">
             {selectedNames.map((name, index) => (
@@ -60,7 +85,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
                 <button
                   className="text-red-500 hover:text-red-700 focus:outline-none"
                   onClick={() => handleRemoveName(name)}
-                  aria-label={`Remove ${name}`}
+                  aria-label={`حذف ${name}`}
                 >
                   {/* استفاده از آیکون ضربدر */}
                   <svg
@@ -82,14 +107,22 @@ const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
         )}
       </div>
 
-      {/* Dialog */}
-      {isDialogOpen && (
-        <DynamicDialog
+      {/* دیالوگ با استفاده از ButtonComponent */}
+      <DynamicModal
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      >
+        <ButtonComponent
+          columnDefs={[
+            { headerName: "نام", field: "name" },
+            { headerName: "سن", field: "age" },
+          ]}
+          rowData={rowData}
           onClose={() => setIsDialogOpen(false)}
           onRowSelect={handleRowSelect}
-          onSelectFromButton={handleSelectFromButton} // پاس دادن تابع انتخاب از دکمه
+          onSelectFromButton={handleSelectFromButton}
         />
-      )}
+      </DynamicModal>
     </div>
   );
 };

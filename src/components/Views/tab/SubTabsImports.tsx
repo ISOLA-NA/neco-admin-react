@@ -12,7 +12,7 @@ export const subTabComponents: {
 } = {
   // General
   Configurations: React.lazy(
-    () => import("../../../components/General/Configurations")
+    () => import("../../General/Configuration/Configurations")
   ),
   Commands: React.lazy(
     () => import("../../../components/General/CommandSettings")

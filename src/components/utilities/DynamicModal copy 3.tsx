@@ -39,21 +39,18 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
       className="modal backdrop-blur-sm transition-all duration-300 transform"
       onClick={handleDialogClick}
     >
-      <div className="modal-box w-11/12 max-w-5xl bg-white rounded-lg p-6 relative overflow-y-auto">
+      <div className="modal-box w-11/12 max-w-5xl bg-white rounded-lg p-6 relative">
         {/* دکمه بستن */}
         <button
           className="absolute top-4 right-4 btn btn-error btn-sm"
           onClick={handleClose}
           aria-label="بستن"
-          style={{
-            zIndex: 10, // اگر نیاز به لایه‌بندی بالاتر باشد
-          }}
         >
           ✕
         </button>
 
         {/* محتوای مودال */}
-        <div className="mt-8">{children}</div>
+        {children}
       </div>
     </dialog>
   );
