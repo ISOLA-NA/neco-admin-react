@@ -158,54 +158,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
           return ribbon ? ribbon.Name : "N/A";
         },
       },
-      { 
-        headerName: "Default Action Buttons", 
-        field: "DefaultBtn", 
-        filter: "agTextColumnFilter",
-        valueGetter: (params: any) => {
-          const ids = params.data.DefaultBtn.split("|")
-            .map((id: string) => parseInt(id))
-            .filter((id: number) => !isNaN(id));
-          const buttonNames = buttons
-            .filter((btn) => ids.includes(btn.ID))
-            .map((btn) => btn.Name);
-          return buttonNames.join(", ");
-        },
-      },
-      { 
-        headerName: "Letter Action Buttons", 
-        field: "LetterBtns", 
-        filter: "agTextColumnFilter",
-        valueGetter: (params: any) => {
-          const ids = params.data.LetterBtns.split("|")
-            .map((id: string) => parseInt(id))
-            .filter((id: number) => !isNaN(id));
-          const buttonNames = buttons
-            .filter((btn) => ids.includes(btn.ID))
-            .map((btn) => btn.Name);
-          return buttonNames.join(", ");
-        },
-      },
-      { 
-        headerName: "Meeting Action Buttons", 
-        field: "MeetingBtns", 
-        filter: "agTextColumnFilter",
-        valueGetter: (params: any) => {
-          const ids = params.data.MeetingBtns.split("|")
-            .map((id: string) => parseInt(id))
-            .filter((id: number) => !isNaN(id));
-          const buttonNames = buttons
-            .filter((btn) => ids.includes(btn.ID))
-            .map((btn) => btn.Name);
-          return buttonNames.join(", ");
-        },
-      },
-      // افزودن سایر ستون‌ها در صورت نیاز
-      // افزودن سلکت‌های جدید
-      { headerName: "EntityTypeIDForLessonLearn", field: "EntityTypeIDForLessonLearn", filter: "agNumberColumnFilter" },
-      { headerName: "SelMenuIDForLessonLearnAfTemplate", field: "SelMenuIDForLessonLearnAfTemplate", filter: "agNumberColumnFilter" },
-      { headerName: "EntityTypeIDForTaskComment", field: "EntityTypeIDForTaskComment", filter: "agNumberColumnFilter" },
-      { headerName: "EntityTypeIDForProcedure", field: "EntityTypeIDForProcedure", filter: "agNumberColumnFilter" },
+
     ],
     rowData: [
       {

@@ -34,11 +34,7 @@ const TableSelector: React.FC<TableSelectorProps> = ({
         rowData={rowData}
         onRowDoubleClick={onRowDoubleClick}
         setSelectedRowData={onRowClick}
-        showAddIcon={false}
-        showEditIcon={false}
-        showDeleteIcon={false}
         showDuplicateIcon={false}
-        // اگر DataTable نیازمند این توابع است، آن‌ها را به عنوان no-op تعریف کنید
         onAdd={() => {}}
         onEdit={() => {}}
         onDelete={() => {}}

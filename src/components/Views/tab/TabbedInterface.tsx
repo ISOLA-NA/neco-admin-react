@@ -1,10 +1,8 @@
-// src/components/Views/tab/TabbedInterface.tsx
-
 import React, { useState, useRef, Suspense } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
-import { tabsData, subTabDataMapping } from "./tabData"; // استفاده از 'tabsData' به جای 'TabsData'
+import { tabsData, subTabDataMapping } from "./tabData";
 import { subTabComponents } from "./SubTabsImports";
 
 const TabbedInterface: React.FC = () => {
@@ -20,6 +18,9 @@ const TabbedInterface: React.FC = () => {
     columnDefs: [],
     rowData: [],
   };
+
+  // لیست ساب‌تب‌هایی که آیکون Duplicate نمایش داده می‌شود
+  const duplicateEnabledSubTabs = [ "Settings"];
 
   const handleMainTabChange = (tabName: string) => {
     setActiveMainTab(tabName);
@@ -71,13 +72,11 @@ const TabbedInterface: React.FC = () => {
   // CRUD Handlers
   const handleAdd = () => {
     console.log("Add clicked");
-    // اضافه کردن منطق مورد نیاز
   };
 
   const handleEdit = () => {
     if (selectedRow) {
       console.log("Edit clicked for row:", selectedRow);
-      // اضافه کردن منطق ویرایش
     } else {
       alert("Please select a row to edit.");
     }
@@ -86,7 +85,6 @@ const TabbedInterface: React.FC = () => {
   const handleDelete = () => {
     if (selectedRow) {
       console.log("Delete clicked for row:", selectedRow);
-      // اضافه کردن منطق حذف
     } else {
       alert("Please select a row to delete.");
     }
@@ -95,7 +93,6 @@ const TabbedInterface: React.FC = () => {
   const handleDuplicate = () => {
     if (selectedRow) {
       console.log("Duplicate clicked for row:", selectedRow);
-      // اضافه کردن منطق تکرار
     } else {
       alert("Please select a row to duplicate.");
     }
@@ -122,7 +119,6 @@ const TabbedInterface: React.FC = () => {
         subTabsRef={subTabsRef}
       />
 
-      {/* رندر کردن TabContent با آیکون‌های CRUD */}
       <TabContent
         component={ActiveSubTabComponent}
         columnDefs={currentSubTabData.columnDefs}
@@ -130,15 +126,12 @@ const TabbedInterface: React.FC = () => {
         onRowDoubleClick={handleRowDoubleClick}
         selectedRow={selectedRow}
         activeSubTab={activeSubTab}
-        showAddIcon={true}
-        showDeleteIcon={true}
-        showEditIcon={true}
-        showDuplicateIcon={true}
+        showDuplicateIcon={duplicateEnabledSubTabs.includes(activeSubTab)} // شرط برای نمایش Duplicate
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onDuplicate={handleDuplicate}
-        onRowClick={handleRowClick} // ارسال تابع
+        onRowClick={handleRowClick}
       />
     </div>
   );

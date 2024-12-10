@@ -61,7 +61,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           columnDefs={columnDefs}
           rowData={rowData}
           onRowDoubleClick={handleRowDoubleClick}
-          setSelectedRowData={handleRowClick} showAddIcon={false} showEditIcon={false} showDeleteIcon={false} showDuplicateIcon={false} onAdd={function (): void {
+          setSelectedRowData={handleRowClick} showDuplicateIcon={false} onAdd={function (): void {
             throw new Error('Function not implemented.')
           } } onEdit={function (): void {
             throw new Error('Function not implemented.')

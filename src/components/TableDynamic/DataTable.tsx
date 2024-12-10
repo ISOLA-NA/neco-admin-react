@@ -1,12 +1,10 @@
-// src/components/TableDynamic/DataTable.tsx
-
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
 import { FiPlus, FiTrash2, FiEdit, FiCopy } from "react-icons/fi";
 
 import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css"; // استفاده از تم Quartz
+import "ag-grid-community/styles/ag-theme-quartz.css";
 import "./DataTable.css";
 
 interface DataTableProps {
@@ -14,9 +12,6 @@ interface DataTableProps {
   rowData: any[];
   onRowDoubleClick: (data: any) => void;
   setSelectedRowData: (data: any) => void;
-  showAddIcon: boolean;
-  showEditIcon: boolean;
-  showDeleteIcon: boolean;
   showDuplicateIcon: boolean;
   onAdd: () => void;
   onEdit: () => void;
@@ -29,9 +24,6 @@ const DataTable: React.FC<DataTableProps> = ({
   rowData,
   onRowDoubleClick,
   setSelectedRowData,
-  showAddIcon,
-  showEditIcon,
-  showDeleteIcon,
   showDuplicateIcon,
   onAdd,
   onEdit,
@@ -60,77 +52,64 @@ const DataTable: React.FC<DataTableProps> = ({
   }, [gridApi, columnDefs]);
 
   const handleRowClick = (event: any) => {
-    console.log("Row clicked in DataTable:", event.data);
     setSelectedRowData(event.data);
   };
 
   const handleRowDoubleClick = (event: any) => {
-    console.log("Row double-clicked in DataTable:", event.data);
     onRowDoubleClick(event.data);
   };
 
-  console.log("DataTable Props:");
-  console.log("columnDefs:", columnDefs);
-  console.log("rowData:", rowData);
-
   return (
     <div className="w-full h-full flex flex-col">
-      {/* نوار دکمه‌های CRUD */}
-      {(showAddIcon || showEditIcon || showDeleteIcon || showDuplicateIcon) && (
-        <div className="flex items-center justify-end space-x-4 mb-4">
-          {showDuplicateIcon && (
+      {/* نوار جستجو و دکمه‌ها */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="relative max-w-sm">
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Search all table data..."
+            value={searchText}
+            onChange={onSearchChange}
+            className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+            style={{ fontFamily: "inherit" }}
+          />
+        </div>
+
+        <div className="flex items-center space-x-4">
+        {showDuplicateIcon && (
             <button
               className="text-yellow-600 hover:text-yellow-800 transition"
               title="Duplicate"
               onClick={onDuplicate}
             >
-              <FiCopy size={18} />
+              <FiCopy size={25} />
             </button>
           )}
-          {showDeleteIcon && (
             <button
               className="text-red-600 hover:text-red-800 transition"
               title="Delete"
               onClick={onDelete}
             >
-              <FiTrash2 size={18} />
+              <FiTrash2 size={25} />
             </button>
-          )}
-          {showEditIcon && (
             <button
               className="text-blue-600 hover:text-blue-800 transition"
               title="Edit"
               onClick={onEdit}
             >
-              <FiEdit size={18} />
+              <FiEdit size={25} />
             </button>
-          )}
-          {showAddIcon && (
             <button
               className="text-green-600 hover:text-green-800 transition"
               title="Add"
               onClick={onAdd}
             >
-              <FiPlus size={18} />
+              <FiPlus size={25} />
             </button>
-          )}
         </div>
-      )}
-
-      {/* نوار جستجو */}
-      <div className="mb-4 relative max-w-sm">
-        <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
-        <input
-          type="text"
-          placeholder="Search all table data..."
-          value={searchText}
-          onChange={onSearchChange}
-          className="search-input w-full pl-9 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-          style={{ fontFamily: "inherit" }}
-        />
       </div>
 
-      {/* جدول ag-Grid با تم Quartz */}
+      {/* جدول */}
       <div className="ag-theme-quartz flex-grow">
         <AgGridReact
           onGridReady={onGridReady}
@@ -143,7 +122,7 @@ const DataTable: React.FC<DataTableProps> = ({
           onRowDoubleClicked={handleRowDoubleClick}
           domLayout="autoHeight"
           suppressHorizontalScroll={false}
-          rowSelection="multiple" // برای انتخاب چندگانه
+          rowSelection="multiple"
         />
       </div>
     </div>
