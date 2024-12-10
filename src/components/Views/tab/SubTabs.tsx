@@ -1,3 +1,4 @@
+// src/components/Views/tab/SubTabs.tsx
 import React from "react";
 import ScrollButton from "./ScrollButton";
 

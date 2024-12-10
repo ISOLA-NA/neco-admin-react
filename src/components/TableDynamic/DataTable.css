@@ -48,23 +48,14 @@
   }
   
 
-  /* src/components/DataTable.css */
+/* src/components/TableDynamic/DataTable.css */
 
-/* استایل برای input جستجو */
 .search-input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 2px solid #7e3af2; /* مرز آبی روشن */
-    border-radius: 8px;
-    font-size: 14px;
-    color: #333;
-    background-color: #fff;
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* انیمیشن برای تغییرات */
-  }
-  
-  .search-input:focus {
-    border-color: #6366f1; /* رنگ آبی پررنگ در حالت فوکوس */
-    box-shadow: 0 0 5px rgba(99, 102, 241, 0.5); /* سایه اطراف input */
-  }
-  
+  /* اضافه کردن padding-left برای جلوگیری از قرار گرفتن متن زیر آیکون */
+  padding-left: 2.5rem; /* 10rem به ازای کلاس pl-10 */
+}
+
+/* استایل‌های آیکون‌های عملیات */
+.action-icons .react-icons {
+  margin-left: 0.5rem;
+}

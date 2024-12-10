@@ -1,4 +1,5 @@
 // src/components/ListSelector/ListSelector.tsx
+
 import React, { useState } from "react";
 import DynamicModal from "../utilities/DynamicModal"; // وارد کردن صحیح
 import ButtonComponent from "../General/Configuration/ButtonComponent"; // وارد کردن صحیح
@@ -7,37 +8,34 @@ import { classNames } from "primereact/utils";
 interface ListSelectorProps {
   title: string;
   className?: string; // افزودن پراپ className
+  columnDefs: any[]; // تعریف ستون‌ها از پراپ
+  rowData: any[]; // داده‌های جدول از پراپ
+  selectedIds: number[]; // شناسه‌های انتخاب شده از پراپ
+  onSelectionChange: (selectedIds: number[]) => void; // تابع تغییر انتخاب
 }
 
-const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
+const ListSelector: React.FC<ListSelectorProps> = ({
+  title,
+  className,
+  columnDefs,
+  rowData,
+  selectedIds,
+  onSelectionChange,
+}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedNames, setSelectedNames] = useState<string[]>([]);
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
-  // تعریف ستون‌ها و داده‌های جدول (می‌توانید این‌ها را از پراپ‌ها یا API دریافت کنید)
-  const columnDefs = [
-    { headerName: "نام", field: "name" },
-    { headerName: "سن", field: "age" },
-    // ستون‌های دیگر
-  ];
-
-  const rowData = [
-    { name: "جان دو", age: 30 },
-    { name: "جین اسمیت", age: 25 },
-    // داده‌های دیگر
-  ];
-
   const handleRowSelect = (data: any) => {
-    const name = data.name;
-    if (!selectedNames.includes(name)) {
-      setSelectedNames([...selectedNames, name]);
+    const id = data.ID;
+    if (!selectedIds.includes(id)) {
+      onSelectionChange([...selectedIds, id]);
     }
     setIsDialogOpen(false);
     setSelectedRow(null);
   };
 
-  const handleRemoveName = (name: string) => {
-    setSelectedNames(selectedNames.filter((n) => n !== name));
+  const handleRemoveName = (id: number) => {
+    onSelectionChange(selectedIds.filter((selectedId) => selectedId !== id));
   };
 
   const handleRowClick = (data: any) => {
@@ -53,6 +51,11 @@ const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
       handleRowSelect(selectedRow);
     }
   };
+
+  // دریافت نام‌ها بر اساس شناسه‌ها
+  const selectedNames = rowData
+    .filter((row) => selectedIds.includes(row.ID))
+    .map((row) => row.Name);
 
   return (
     <div className={classNames("w-full", className)}>
@@ -84,7 +87,10 @@ const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
                 <span className="text-gray-700">{name}</span>
                 <button
                   className="text-red-500 hover:text-red-700 focus:outline-none"
-                  onClick={() => handleRemoveName(name)}
+                  onClick={() => {
+                    const id = rowData.find((row) => row.Name === name)?.ID;
+                    if (id) handleRemoveName(id);
+                  }}
                   aria-label={`حذف ${name}`}
                 >
                   {/* استفاده از آیکون ضربدر */}
@@ -113,10 +119,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({ title, className }) => {
         onClose={() => setIsDialogOpen(false)}
       >
         <ButtonComponent
-          columnDefs={[
-            { headerName: "نام", field: "name" },
-            { headerName: "سن", field: "age" },
-          ]}
+          columnDefs={columnDefs}
           rowData={rowData}
           onClose={() => setIsDialogOpen(false)}
           onRowSelect={handleRowSelect}

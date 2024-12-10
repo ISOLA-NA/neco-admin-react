@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import DataTable from "../../TableDynamic/DataTable";
-import DynamicInput from "../../utilities/DynamicInput";
-import DynamicRadioGroup from "../../utilities/DynamicRadiogroup";
-import ImageUploader from "../../utilities/ImageUploader";
-import TwoColumnLayout from "../../layout/TwoColumnLayout";
+import React, { useState } from 'react'
+import DataTable from '../../TableDynamic/DataTable'
+import DynamicInput from '../../utilities/DynamicInput'
+import DynamicRadioGroup from '../../utilities/DynamicRadiogroup'
+import ImageUploader from '../../utilities/ImageUploader'
+import TwoColumnLayout from '../../layout/TwoColumnLayout'
 
 interface ButtonComponentProps {
-  onClose: () => void;
-  onRowSelect: (data: any) => void;
-  onSelectFromButton: (data: any, state: string, image?: File) => void;
-  columnDefs: { headerName: string; field: string }[];
-  rowData: any[];
+  onClose: () => void
+  onRowSelect: (data: any) => void
+  onSelectFromButton: (data: any, state: string, image?: File) => void
+  columnDefs: { headerName: string; field: string }[]
+  rowData: any[]
 }
 
 const ButtonComponent: React.FC<ButtonComponentProps> = ({
@@ -18,81 +18,84 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   onRowSelect,
   onSelectFromButton,
   columnDefs,
-  rowData,
+  rowData
 }) => {
   const radioOptions = [
-    { value: "accept", label: "Accept" },
-    { value: "reject", label: "Reject" },
-    { value: "close", label: "Close" },
-  ];
+    { value: 'accept', label: 'Accept' },
+    { value: 'reject', label: 'Reject' },
+    { value: 'close', label: 'Close' }
+  ]
 
-  const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [selectedRow, setSelectedRow] = useState<any>(null)
   const [selectedState, setSelectedState] = useState<string>(
-    radioOptions.length > 0 ? radioOptions[0].value : ""
-  );
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+    radioOptions.length > 0 ? radioOptions[0].value : ''
+  )
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null)
 
   const handleRowDoubleClick = (data: any) => {
-    setSelectedRow(data);
-    onRowSelect(data);
-  };
+    setSelectedRow(data)
+    onRowSelect(data)
+  }
 
   const handleRowClick = (data: any) => {
-    setSelectedRow(data);
-  };
+    setSelectedRow(data)
+  }
 
   const handleSelectButtonClick = () => {
     if (selectedRow && selectedState) {
-      onSelectFromButton(
-        selectedRow,
-        selectedState,
-        uploadedImage || undefined
-      );
-      onClose();
+      onSelectFromButton(selectedRow, selectedState, uploadedImage || undefined)
+      onClose()
     }
-  };
+  }
 
   const handleImageUpload = (file: File) => {
-    setUploadedImage(file);
-  };
+    setUploadedImage(file)
+  }
 
-  const isSelectDisabled = !selectedRow || !selectedState;
+  const isSelectDisabled = !selectedRow || !selectedState
 
   return (
-    <div className="bg-white rounded-lg p-4">
-      <div className="mb-4">
+    <div className='bg-white rounded-lg p-4'>
+      <div className='mb-4'>
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
           onRowDoubleClick={handleRowDoubleClick}
-          setSelectedRowData={handleRowClick}
-        />
+          setSelectedRowData={handleRowClick} showAddIcon={false} showEditIcon={false} showDeleteIcon={false} showDuplicateIcon={false} onAdd={function (): void {
+            throw new Error('Function not implemented.')
+          } } onEdit={function (): void {
+            throw new Error('Function not implemented.')
+          } } onDelete={function (): void {
+            throw new Error('Function not implemented.')
+          } } onDuplicate={function (): void {
+            throw new Error('Function not implemented.')
+          } }        />
       </div>
       <TwoColumnLayout>
-        <DynamicInput name="Input 1" type="text" value="" onChange={() => {}} />
-        <DynamicInput name="Input 2" type="text" value="" onChange={() => {}} />
+        <DynamicInput name='Input 1' type='text' value='' onChange={() => {}} />
+        <DynamicInput name='Input 2' type='text' value='' onChange={() => {}} />
         <DynamicInput
-          name="Input 3"
-          type="number"
-          value=""
+          name='Input 3'
+          type='number'
+          value=''
           onChange={() => {}}
         />
-        <DynamicInput name="Input 4" type="text" value="" onChange={() => {}} />
+        <DynamicInput name='Input 4' type='text' value='' onChange={() => {}} />
         <DynamicRadioGroup
-          title="State:"
-          name="stateGroup"
+          title='State:'
+          name='stateGroup'
           options={radioOptions}
           selectedValue={selectedState}
-          onChange={(value) => setSelectedState(value)}
+          onChange={value => setSelectedState(value)}
         />
         <ImageUploader onUpload={handleImageUpload} />
       </TwoColumnLayout>
-      <div className="mt-4 flex justify-end">
+      <div className='mt-4 flex justify-end'>
         <button
           className={`btn w-48 ${
             isSelectDisabled
-              ? "bg-blue-300 text-gray-500 cursor-not-allowed"
-              : "btn-primary"
+              ? 'bg-blue-300 text-gray-500 cursor-not-allowed'
+              : 'btn-primary'
           }`}
           onClick={handleSelectButtonClick}
           disabled={isSelectDisabled}
@@ -101,7 +104,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ButtonComponent;
+export default ButtonComponent

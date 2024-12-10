@@ -1,18 +1,24 @@
-// src/components/DynamicDialog/TableWithSelectButton.tsx
+// src/components/Configuration/TableSelector.tsx
+
 import React from "react";
 import DataTable from "../../TableDynamic/DataTable";
 
-interface TableWithSelectButtonProps {
-  columnDefs: { headerName: string; field: string }[];
+interface ColumnDef {
+  headerName: string;
+  field: string;
+}
+
+interface TableSelectorProps {
+  columnDefs: ColumnDef[];
   rowData: any[];
-  selectedRow: any; // اطمینان از دریافت پراپ selectedRow
+  selectedRow: any;
   onRowDoubleClick: (data: any) => void;
   onRowClick: (data: any) => void;
   onSelectButtonClick: () => void;
   isSelectDisabled: boolean;
 }
 
-const TableWithSelectButton: React.FC<TableWithSelectButtonProps> = ({
+const TableSelector: React.FC<TableSelectorProps> = ({
   columnDefs,
   rowData,
   selectedRow,
@@ -28,24 +34,29 @@ const TableWithSelectButton: React.FC<TableWithSelectButtonProps> = ({
         rowData={rowData}
         onRowDoubleClick={onRowDoubleClick}
         setSelectedRowData={onRowClick}
+        showAddIcon={false}
+        showEditIcon={false}
+        showDeleteIcon={false}
+        showDuplicateIcon={false}
+        // اگر DataTable نیازمند این توابع است، آن‌ها را به عنوان no-op تعریف کنید
+        onAdd={() => {}}
+        onEdit={() => {}}
+        onDelete={() => {}}
+        onDuplicate={() => {}}
       />
-
-      {/* Select Button */}
-      <div className="modal-action justify-center space-x-4">
-        <button
-          className={`btn w-48 ${
-            isSelectDisabled
-              ? "bg-blue-300 text-gray-500 cursor-not-allowed"
-              : "btn-primary"
-          }`}
-          onClick={onSelectButtonClick}
-          disabled={isSelectDisabled}
-        >
-          انتخاب
-        </button>
-      </div>
+      <button
+        onClick={onSelectButtonClick}
+        disabled={isSelectDisabled}
+        className={`mt-4 px-4 py-2 rounded ${
+          isSelectDisabled
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-blue-500 hover:bg-blue-700 text-white"
+        }`}
+      >
+        Select
+      </button>
     </div>
   );
 };
 
-export default TableWithSelectButton;
+export default TableSelector;

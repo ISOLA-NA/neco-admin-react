@@ -1,64 +1,54 @@
 // src/components/General/Configurations.tsx
+
 import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import ListSelector from "../../ListSelector/ListSelector";
-import DynamicModal from "../../utilities/DynamicModal";
-import TableWithSelectButton from "../Configuration/TableSelector"; // وارد کردن صحیح
+import { subTabDataMapping, buttons } from "../../Views/tab/tabData";
+import DynamicModal from "../../utilities/DynamicModal"; // وارد کردن DynamicModal
+import TableWithSelectButton from "../Configuration/TableSelector"; // وارد کردن TableWithSelectButton
 
 interface ConfigurationProps {
-  selectedRow: {
-    id: number;
-    name: string;
-    value: string;
-    description: string;
-    type: string;
-  };
+  selectedRow: any;
 }
 
 const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   const [configData, setConfigData] = useState({
-    id: selectedRow.id.toString(),
-    name: selectedRow.name,
-    value: selectedRow.value,
-    description: selectedRow.description,
-    typeProgramTemplate: selectedRow.type, // فیلد جداگانه برای Program Template
-    typeDefaultRibbon: "", // فیلد جداگانه برای Default Ribbon
-    typeLessonLearnedForm: "", // فیلد جداگانه برای Lesson Learned Form
-    typeLessonLearned: "", // فیلد جداگانه برای Lesson Learned
-    typeCommentFormTemplate: "", // فیلد جداگانه برای Comment Form Template
-    typeProcedureFormTemplate: "", // فیلد جداگانه برای Procedure Form Template
+    id: selectedRow?.ID?.toString() || "",
+    Name: selectedRow?.Name || "",
+    FirstIDProgramTemplate: selectedRow?.FirstIDProgramTemplate || "",
+    SelMenuIDForMain: selectedRow?.SelMenuIDForMain || "",
+    Description: selectedRow?.Description || "",
+    IsVisible: selectedRow?.IsVisible || true,
+    LastModified: selectedRow?.LastModified || "",
+    DefaultBtn: selectedRow?.DefaultBtn || "",
+    LetterBtns: selectedRow?.LetterBtns || "",
+    MeetingBtns: selectedRow?.MeetingBtns || "",
   });
 
   const [descriptionError, setDescriptionError] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false); // برای کنترل نمایش مدال
-  const [selectedRowData, setSelectedRowData] = useState<any>(null); // برای ذخیره داده‌های ردیف انتخاب شده
-  const [currentSelector, setCurrentSelector] = useState<string>(""); // برای ذخیره عنوان انتخاب‌کننده فعلی
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentSelector, setCurrentSelector] = useState<"DefaultBtn" | "LetterBtns" | "MeetingBtns" | "FirstIDProgramTemplate" | "SelMenuIDForMain" | null>(null);
+  const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
-  useEffect(() => {
-    setConfigData({
-      id: selectedRow.id.toString(),
-      name: selectedRow.name,
-      value: selectedRow.value,
-      description: selectedRow.description,
-      typeProgramTemplate: selectedRow.type,
-      typeDefaultRibbon: "",
-      typeLessonLearnedForm: "",
-      typeLessonLearned: "",
-      typeCommentFormTemplate: "",
-      typeProcedureFormTemplate: "",
-    });
-  }, [selectedRow]);
+  // تبدیل رشته شناسه‌ها به آرایه عددی
+  const parseIds = (ids: string): number[] => {
+    return ids
+      .split("|")
+      .map((id) => parseInt(id))
+      .filter((id) => !isNaN(id));
+  };
 
-  const handleChange = (field: keyof typeof configData, value: string) => {
+  // مدیریت تغییرات در فرم
+  const handleChange = (field: keyof typeof configData, value: string | number) => {
     setConfigData((prev) => ({
       ...prev,
       [field]: value,
     }));
 
-    if (field === "description") {
+    if (field === "Description" && typeof value === "string") {
       if (value.length < 10) {
         setDescriptionError(true);
       } else {
@@ -67,118 +57,75 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     }
   };
 
-  // برای باز کردن DynamicModal
-  const openModal = (selector: string) => {
-    setCurrentSelector(selector); // تنظیم انتخاب‌کننده فعلی
+  // به‌روزرسانی شناسه‌های انتخاب شده برای هر ListSelector
+  const handleSelectionChange = (field: "DefaultBtn" | "LetterBtns" | "MeetingBtns", selectedIds: number[]) => {
+    const idsString = selectedIds.join("|") + "|";
+    handleChange(field, idsString);
+  };
+
+  // تبدیل رشته شناسه‌ها به آرایه
+  const defaultBtnIds = parseIds(configData.DefaultBtn);
+  const letterBtnIds = parseIds(configData.LetterBtns);
+  const meetingBtnIds = parseIds(configData.MeetingBtns);
+
+  useEffect(() => {
+    console.log("Selected Row in Configuration component:", selectedRow);
+    setConfigData({
+      id: selectedRow?.ID?.toString() || "",
+      Name: selectedRow?.Name || "",
+      FirstIDProgramTemplate: selectedRow?.FirstIDProgramTemplate || "",
+      SelMenuIDForMain: selectedRow?.SelMenuIDForMain || "",
+      Description: selectedRow?.Description || "",
+      IsVisible: selectedRow?.IsVisible || true,
+      LastModified: selectedRow?.LastModified || "",
+      DefaultBtn: selectedRow?.DefaultBtn || "",
+      LetterBtns: selectedRow?.LetterBtns || "",
+      MeetingBtns: selectedRow?.MeetingBtns || "",
+    });
+  }, [selectedRow]);
+
+  // مدیریت باز و بسته شدن مودال
+  const handleOpenModal = (selector: "DefaultBtn" | "LetterBtns" | "MeetingBtns" | "FirstIDProgramTemplate" | "SelMenuIDForMain") => {
+    setCurrentSelector(selector);
     setModalOpen(true);
   };
 
-  // محتوای مختلف برای DataTable بسته به انتخاب‌کننده فعلی
-  const getRowData = (selector: string) => {
-    switch (selector) {
-      case "Program Template":
-        return [
-          { Name: "Template1", Description: "Program Template1" },
-          { Name: "Template2", Description: "Program Template2" },
-          { Name: "Template3", Description: "Program Template3" },
-        ];
-      case "Default Ribbon":
-        return [
-          { Name: "Ribbon1", Description: "Default Ribbon1" },
-          { Name: "Ribbon2", Description: "Default Ribbon2" },
-        ];
-      case "Lesson Learned Form":
-        return [
-          { Name: "Form1", Description: "Lesson Learned Form1" },
-          { Name: "Form2", Description: "Lesson Learned Form2" },
-        ];
-      case "Lesson Learned":
-        return [
-          { Name: "Lesson1", Description: "Lesson Learned1" },
-          { Name: "Lesson2", Description: "Lesson Learned2" },
-        ];
-      case "Comment Form Template":
-        return [
-          { Name: "CommentTemplate1", Description: "Comment Form Template1" },
-          { Name: "CommentTemplate2", Description: "Comment Form Template2" },
-        ];
-      case "Procedure Form Template":
-        return [
-          { Name: "Procedure1", Description: "Procedure Form Template1" },
-          { Name: "Procedure2", Description: "Procedure Form Template2" },
-        ];
-      default:
-        return [];
-    }
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedRowData(null);
+    setCurrentSelector(null);
   };
 
-  // تابع برای بروزرسانی مقدار انتخاب شده
-  const handleSelectFromModal = (data: any, state: string, image?: File) => {
-    const selectedName = data.Name; // بررسی کنید که داده درست انتخاب می‌شود
-    switch (currentSelector) {
-      case "Program Template":
-        setConfigData((prev) => ({
-          ...prev,
-          typeProgramTemplate: selectedName,
-        }));
-        break;
-      case "Default Ribbon":
-        setConfigData((prev) => ({
-          ...prev,
-          typeDefaultRibbon: selectedName,
-        }));
-        break;
-      case "Lesson Learned Form":
-        setConfigData((prev) => ({
-          ...prev,
-          typeLessonLearnedForm: selectedName,
-        }));
-        break;
-      case "Lesson Learned":
-        setConfigData((prev) => ({
-          ...prev,
-          typeLessonLearned: selectedName,
-        }));
-        break;
-      case "Comment Form Template":
-        setConfigData((prev) => ({
-          ...prev,
-          typeCommentFormTemplate: selectedName,
-        }));
-        break;
-      case "Procedure Form Template":
-        setConfigData((prev) => ({
-          ...prev,
-          typeProcedureFormTemplate: selectedName,
-        }));
-        break;
-      default:
-        break;
-    }
-    setModalOpen(false); // بستن مدال
+  // مدیریت انتخاب ردیف در جدول مودال
+  const handleRowClick = (rowData: any) => {
+    setSelectedRowData(rowData);
   };
 
-  // گزینه‌های مختلف برای DynamicSelector بر اساس انتخاب‌کننده
-  const getSelectorOptions = (selector: string) => {
-    const rows = getRowData(selector);
-    return rows.map((row: any) => ({
-      value: row.Name,
-      label: row.Name,
-    }));
-  };
-
-  // تعریف handler ها برای TableWithSelectButton
-  const handleRowDoubleClick = (data: any) => {
-    handleSelectFromModal(data, "someState", undefined);
-  };
-
-  const handleRowClick = (data: any) => {
-    setSelectedRowData(data);
-  };
-
+  // مدیریت کلیک دکمه انتخاب در مودال
   const handleSelectButtonClick = () => {
     if (selectedRowData && currentSelector) {
-      handleSelectFromModal(selectedRowData, "someState", undefined);
+      // به‌روزرسانی configData بر اساس currentSelector
+      // فرض می‌کنیم که هر ردیف دارای ID است
+      const selectedId = selectedRowData.ID;
+      handleChange(currentSelector, selectedId.toString());
+      handleCloseModal();
+    }
+  };
+
+  // گرفتن داده‌های ردیف‌ها بر اساس selector فعلی
+  const getRowData = (selector: string | null) => {
+    if (!selector) return [];
+    switch (selector) {
+      case "FirstIDProgramTemplate":
+        return subTabDataMapping["ProgramTemplate"].rowData;
+      case "SelMenuIDForMain":
+        return subTabDataMapping["DefaultRibbon"].rowData;
+      case "DefaultBtn":
+      case "LetterBtns":
+      case "MeetingBtns":
+        return buttons;
+      default:
+        return [];
     }
   };
 
@@ -189,8 +136,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
         <DynamicInput
           name="Name"
           type="text"
-          value={configData.name}
-          onChange={(e) => handleChange("name", e.target.value)}
+          value={configData.Name}
+          onChange={(e) => handleChange("Name", e.target.value)}
           required
         />
 
@@ -198,91 +145,82 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
         <CustomTextarea
           id="description"
           name="Description"
-          value={configData.description}
-          onChange={(e) => handleChange("description", e.target.value)}
-          placeholder=""
-          className={`${
-            descriptionError ? "border-red-500" : "border-gray-300"
-          }`}
+          value={configData.Description}
+          onChange={(e) => handleChange("Description", e.target.value)}
+          placeholder="Enter description (min 10 characters)"
+          className={`${descriptionError ? "border-red-500" : "border-gray-300"}`}
         />
+        {descriptionError && (
+          <span className="text-red-500 text-sm">Description must be at least 10 characters.</span>
+        )}
 
         {/* DynamicSelector - Program Template */}
         <DynamicSelector
-          options={getSelectorOptions("Program Template")}
-          selectedValue={configData.typeProgramTemplate}
-          onChange={(e) => handleChange("typeProgramTemplate", e.target.value)}
+          options={subTabDataMapping["ProgramTemplate"].rowData.map((pt) => ({
+            value: pt.ID.toString(),
+            label: pt.Name,
+          }))}
+          selectedValue={configData.FirstIDProgramTemplate}
+          onChange={(e) => handleChange("FirstIDProgramTemplate", e.target.value)}
           label="Program Template"
           showButton={true}
-          onButtonClick={() => openModal("Program Template")}
+          onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}
         />
 
         {/* DynamicSelector - Default Ribbon */}
         <DynamicSelector
-          options={getSelectorOptions("Default Ribbon")}
-          selectedValue={configData.typeDefaultRibbon}
-          onChange={(e) => handleChange("typeDefaultRibbon", e.target.value)}
+          options={subTabDataMapping["DefaultRibbon"].rowData.map((dr) => ({
+            value: dr.ID.toString(),
+            label: dr.Name,
+          }))}
+          selectedValue={configData.SelMenuIDForMain}
+          onChange={(e) => handleChange("SelMenuIDForMain", e.target.value)}
           label="Default Ribbon"
           showButton={true}
-          onButtonClick={() => openModal("Default Ribbon")}
+          onButtonClick={() => handleOpenModal("SelMenuIDForMain")}
         />
 
-        {/* DynamicSelector - Lesson Learned Form */}
-        <DynamicSelector
-          options={getSelectorOptions("Lesson Learned Form")}
-          selectedValue={configData.typeLessonLearnedForm}
-          onChange={(e) =>
-            handleChange("typeLessonLearnedForm", e.target.value)
-          }
-          label="Lesson Learned Form"
-          showButton={true}
-          onButtonClick={() => openModal("Lesson Learned Form")}
+        {/* ListSelector - Default Action Buttons */}
+        <ListSelector
+          title="Default Action Buttons"
           className="mt-5"
+          columnDefs={[
+            { headerName: "Name", field: "Name" },
+            { headerName: "Tooltip", field: "Tooltip" },
+          ]}
+          rowData={buttons}
+          selectedIds={defaultBtnIds}
+          onSelectionChange={(selectedIds) => handleSelectionChange("DefaultBtn", selectedIds)}
         />
 
-        {/* DynamicSelector - Lesson Learned */}
-        <DynamicSelector
-          options={getSelectorOptions("Lesson Learned")}
-          selectedValue={configData.typeLessonLearned}
-          onChange={(e) => handleChange("typeLessonLearned", e.target.value)}
-          label="Lesson Learned"
-          showButton={true}
-          onButtonClick={() => openModal("Lesson Learned")}
+        {/* ListSelector - Letter Action Buttons */}
+        <ListSelector
+          title="Letter Action Buttons"
           className="mt-5"
+          columnDefs={[
+            { headerName: "Name", field: "Name" },
+            { headerName: "Tooltip", field: "Tooltip" },
+          ]}
+          rowData={buttons}
+          selectedIds={letterBtnIds}
+          onSelectionChange={(selectedIds) => handleSelectionChange("LetterBtns", selectedIds)}
         />
 
-        {/* DynamicSelector - Comment Form Template */}
-        <DynamicSelector
-          options={getSelectorOptions("Comment Form Template")}
-          selectedValue={configData.typeCommentFormTemplate}
-          onChange={(e) =>
-            handleChange("typeCommentFormTemplate", e.target.value)
-          }
-          label="Comment Form Template"
-          showButton={true}
-          onButtonClick={() => openModal("Comment Form Template")}
+        {/* ListSelector - Meeting Action Buttons */}
+        <ListSelector
+          title="Meeting Action Buttons"
           className="mt-5"
+          columnDefs={[
+            { headerName: "Name", field: "Name" },
+            { headerName: "Tooltip", field: "Tooltip" },
+          ]}
+          rowData={buttons}
+          selectedIds={meetingBtnIds}
+          onSelectionChange={(selectedIds) => handleSelectionChange("MeetingBtns", selectedIds)}
         />
-
-        {/* DynamicSelector - Procedure Form Template */}
-        <DynamicSelector
-          options={getSelectorOptions("Procedure Form Template")}
-          selectedValue={configData.typeProcedureFormTemplate}
-          onChange={(e) =>
-            handleChange("typeProcedureFormTemplate", e.target.value)
-          }
-          label="Procedure Form Template"
-          showButton={true}
-          onButtonClick={() => openModal("Procedure Form Template")}
-          className="mt-5"
-        />
-
-        {/* List Selectors */}
-        <ListSelector title={"Default Action Buttons"} className="mt-5" />
-        <ListSelector title={"Letter Action Buttons"} className="mt-5" />
-        <ListSelector title={"Meeting Action Buttons"} />
 
         {/* نمایش DynamicModal با استفاده از TableWithSelectButton */}
-        <DynamicModal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+        <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
           <TableWithSelectButton
             columnDefs={[
               { headerName: "نام", field: "Name" },
@@ -290,7 +228,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             ]}
             rowData={getRowData(currentSelector)}
             selectedRow={selectedRowData}
-            onRowDoubleClick={handleRowDoubleClick}
+            onRowDoubleClick={handleSelectButtonClick}
             onRowClick={handleRowClick}
             onSelectButtonClick={handleSelectButtonClick}
             isSelectDisabled={!selectedRowData}

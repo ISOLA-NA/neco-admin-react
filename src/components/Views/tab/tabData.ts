@@ -1,4 +1,4 @@
-// src/components/views/tab/tabData.ts
+// src/components/Views/tab/tabData.ts
 
 export interface TabsData {
   [key: string]: {
@@ -15,6 +15,201 @@ export interface SubTabData {
   rowData: any[];
 }
 
+// **1. تعریف Program Templates**
+export const programTemplates = [
+  {
+    ID: 1,
+    Name: "Template Alpha",
+    Description: "Description for Template Alpha",
+    IsVisible: true,
+    LastModified: "2024-10-08T15:31:11.947",
+  },
+  {
+    ID: 2,
+    Name: "Template Beta",
+    Description: "Description for Template Beta",
+    IsVisible: true,
+    LastModified: "2024-10-09T16:32:12.123",
+  },
+  {
+    ID: 3,
+    Name: "Template Gamma",
+    Description: "Description for Template Gamma",
+    IsVisible: true,
+    LastModified: "2024-10-10T17:33:13.456",
+  },
+  // افزودن بیشتر قالب‌ها در صورت نیاز
+];
+
+// **2. تعریف Default Ribbons**
+export const defaultRibbons = [
+  {
+    ID: 1,
+    Name: "Ribbon One",
+    Description: "Description for Ribbon One",
+    IsVisible: true,
+    LastModified: "2024-05-27T16:18:54.03",
+  },
+  {
+    ID: 2,
+    Name: "Ribbon Two",
+    Description: "Description for Ribbon Two",
+    IsVisible: true,
+    LastModified: "2024-05-28T16:18:54.03",
+  },
+  {
+    ID: 3,
+    Name: "Ribbon Three",
+    Description: "Description for Ribbon Three",
+    IsVisible: true,
+    LastModified: "2024-05-29T16:18:54.03",
+  },
+  {
+    ID: 4,
+    Name: "Ribbon Four",
+    Description: "Description for Ribbon Four",
+    IsVisible: true,
+    LastModified: "2024-05-30T16:18:54.03",
+  },
+  // افزودن بیشتر Ribbon‌ها در صورت نیاز
+];
+
+// **3. تعریف Buttons**
+export const buttons = [
+  {
+    ID: 1,
+    IconImageId: "icon-1",
+    IsVisible: true,
+    LastModified: "2023-03-15T13:17:58.24",
+    ModifiedById: "user-1",
+    Name: "Approve as noted",
+    Order: 1,
+    StateText: "Approved as noted",
+    Tooltip: "Approved as noted",
+    WFCommand: 1,
+    WFStateForDeemed: 1,
+  },
+  {
+    ID: 2,
+    IconImageId: "icon-2",
+    IsVisible: true,
+    LastModified: "2023-03-16T14:18:59.24",
+    ModifiedById: "user-2",
+    Name: "Reject submission",
+    Order: 2,
+    StateText: "Rejected",
+    Tooltip: "Reject the submission",
+    WFCommand: 2,
+    WFStateForDeemed: 2,
+  },
+  {
+    ID: 3,
+    IconImageId: "icon-3",
+    IsVisible: true,
+    LastModified: "2023-03-17T15:19:00.24",
+    ModifiedById: "user-3",
+    Name: "Request changes",
+    Order: 3,
+    StateText: "Changes requested",
+    Tooltip: "Request changes from the submitter",
+    WFCommand: 3,
+    WFStateForDeemed: 3,
+  },
+  {
+    ID: 4,
+    IconImageId: "icon-4",
+    IsVisible: true,
+    LastModified: "2023-03-18T16:20:01.24",
+    ModifiedById: "user-4",
+    Name: "Approve without notes",
+    Order: 4,
+    StateText: "Approved",
+    Tooltip: "Approve the submission without notes",
+    WFCommand: 4,
+    WFStateForDeemed: 4,
+  },
+  {
+    ID: 5,
+    IconImageId: "icon-5",
+    IsVisible: true,
+    LastModified: "2023-03-19T17:21:02.24",
+    ModifiedById: "user-5",
+    Name: "Forward to manager",
+    Order: 5,
+    StateText: "Forwarded",
+    Tooltip: "Forward the submission to the manager",
+    WFCommand: 5,
+    WFStateForDeemed: 5,
+  },
+  {
+    ID: 6,
+    IconImageId: "icon-6",
+    IsVisible: true,
+    LastModified: "2023-03-20T18:22:03.24",
+    ModifiedById: "user-6",
+    Name: "Approve with comments",
+    Order: 6,
+    StateText: "Approved with comments",
+    Tooltip: "Approve the submission and add comments",
+    WFCommand: 6,
+    WFStateForDeemed: 6,
+  },
+  {
+    ID: 7,
+    IconImageId: "icon-7",
+    IsVisible: true,
+    LastModified: "2023-03-21T19:23:04.24",
+    ModifiedById: "user-7",
+    Name: "Hold for review",
+    Order: 7,
+    StateText: "On Hold",
+    Tooltip: "Hold the submission for further review",
+    WFCommand: 7,
+    WFStateForDeemed: 7,
+  },
+  {
+    ID: 8,
+    IconImageId: "icon-8",
+    IsVisible: true,
+    LastModified: "2023-03-22T20:24:05.24",
+    ModifiedById: "user-8",
+    Name: "Escalate issue",
+    Order: 8,
+    StateText: "Escalated",
+    Tooltip: "Escalate the issue to higher authority",
+    WFCommand: 8,
+    WFStateForDeemed: 8,
+  },
+  {
+    ID: 9,
+    IconImageId: "icon-9",
+    IsVisible: true,
+    LastModified: "2023-03-23T21:25:06.24",
+    ModifiedById: "user-9",
+    Name: "Archive submission",
+    Order: 9,
+    StateText: "Archived",
+    Tooltip: "Archive the submission for record",
+    WFCommand: 9,
+    WFStateForDeemed: 9,
+  },
+  {
+    ID: 10,
+    IconImageId: "icon-10",
+    IsVisible: true,
+    LastModified: "2023-03-24T22:26:07.24",
+    ModifiedById: "user-10",
+    Name: "Mark as urgent",
+    Order: 10,
+    StateText: "Urgent",
+    Tooltip: "Mark the submission as urgent",
+    WFCommand: 10,
+    WFStateForDeemed: 10,
+  },
+  // افزودن بیشتر دکمه‌ها در صورت نیاز
+];
+
+// **4. تعریف TabsData**
 export const tabsData: TabsData = {
   General: {
     groups: [
@@ -42,563 +237,601 @@ export const tabsData: TabsData = {
   },
 };
 
+// **5. افزودن سلکت‌های جدید به `subTabDataMapping`**
 export const subTabDataMapping: { [key: string]: SubTabData } = {
   // General -> Configurations
   Configurations: {
     columnDefs: [
-      { headerName: "ID", field: "id", filter: "agNumberColumnFilter" },
-      { headerName: "Name", field: "name", filter: "agTextColumnFilter" },
-      { headerName: "Value", field: "value", filter: "agTextColumnFilter" },
-      {
-        headerName: "Description",
-        field: "description",
+      { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+      { 
+        headerName: "Prg.Template", 
+        field: "FirstIDProgramTemplate", 
         filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const template = programTemplates.find((pt) => pt.ID === params.data.FirstIDProgramTemplate);
+          return template ? template.Name : "N/A";
+        },
       },
-      {
-        headerName: "Type",
-        field: "type",
+      { 
+        headerName: "Default Ribbon", 
+        field: "SelMenuIDForMain", 
         filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const ribbon = defaultRibbons.find((dr) => dr.ID === params.data.SelMenuIDForMain);
+          return ribbon ? ribbon.Name : "N/A";
+        },
       },
+      { 
+        headerName: "Default Action Buttons", 
+        field: "DefaultBtn", 
+        filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const ids = params.data.DefaultBtn.split("|")
+            .map((id: string) => parseInt(id))
+            .filter((id: number) => !isNaN(id));
+          const buttonNames = buttons
+            .filter((btn) => ids.includes(btn.ID))
+            .map((btn) => btn.Name);
+          return buttonNames.join(", ");
+        },
+      },
+      { 
+        headerName: "Letter Action Buttons", 
+        field: "LetterBtns", 
+        filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const ids = params.data.LetterBtns.split("|")
+            .map((id: string) => parseInt(id))
+            .filter((id: number) => !isNaN(id));
+          const buttonNames = buttons
+            .filter((btn) => ids.includes(btn.ID))
+            .map((btn) => btn.Name);
+          return buttonNames.join(", ");
+        },
+      },
+      { 
+        headerName: "Meeting Action Buttons", 
+        field: "MeetingBtns", 
+        filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const ids = params.data.MeetingBtns.split("|")
+            .map((id: string) => parseInt(id))
+            .filter((id: number) => !isNaN(id));
+          const buttonNames = buttons
+            .filter((btn) => ids.includes(btn.ID))
+            .map((btn) => btn.Name);
+          return buttonNames.join(", ");
+        },
+      },
+      // افزودن سایر ستون‌ها در صورت نیاز
+      // افزودن سلکت‌های جدید
+      { headerName: "EntityTypeIDForLessonLearn", field: "EntityTypeIDForLessonLearn", filter: "agNumberColumnFilter" },
+      { headerName: "EnityTypeIDForTaskCommnet", field: "EnityTypeIDForTaskCommnet", filter: "agNumberColumnFilter" },
+      { headerName: "EnityTypeIDForProcesure", field: "EnityTypeIDForProcesure", filter: "agNumberColumnFilter" },
+      { headerName: "SelMenuIDForLessonLearnAfTemplate", field: "SelMenuIDForLessonLearnAfTemplate", filter: "agNumberColumnFilter" },
     ],
     rowData: [
       {
-        id: 1,
-        name: "Configuration A",
-        value: "Value A",
-        description: "Description for Configuration A",
-        type: "Default",
+        ID: 1,
+        Name: "Configuration A",
+        FirstIDProgramTemplate: 1, // ارجاع به ProgramTemplate ID 1
+        SelMenuIDForMain: 1, // ارجاع به Default Ribbon ID 1
+        Description: "Description for Configuration A",
+        IsVisible: true,
+        LastModified: "2024-10-08T07:20:02.92",
+        DefaultBtn: "2|3|",
+        LetterBtns: "4|5|",
+        MeetingBtns: "6|7|",
+        EntityTypeIDForLessonLearn: 1,
+        EnityTypeIDForTaskCommnet: 1,
+        EnityTypeIDForProcesure: 1,
+        SelMenuIDForLessonLearnAfTemplate: 1,
       },
       {
-        id: 2,
-        name: "Configuration B",
-        value: "Value B",
-        description: "Description for Configuration B",
-        type: "Advanced",
+        ID: 2,
+        Name: "Configuration B",
+        FirstIDProgramTemplate: 2,
+        SelMenuIDForMain: 2,
+        Description: "Description for Configuration B",
+        IsVisible: true,
+        LastModified: "2024-10-09T08:15:10.45",
+        DefaultBtn: "1|4|",
+        LetterBtns: "2|3|",
+        MeetingBtns: "5|6|",
+        EntityTypeIDForLessonLearn: 2,
+        EnityTypeIDForTaskCommnet: 2,
+        EnityTypeIDForProcesure: 2,
+        SelMenuIDForLessonLearnAfTemplate: 2,
       },
       {
-        id: 3,
-        name: "Configuration C",
-        value: "Value C",
-        description: "Description for Configuration C",
-        type: "Custom",
+        ID: 3,
+        Name: "Configuration C",
+        FirstIDProgramTemplate: 3,
+        SelMenuIDForMain: 3,
+        Description: "Description for Configuration C",
+        IsVisible: true,
+        LastModified: "2024-10-10T09:25:30.12",
+        DefaultBtn: "7|8|",
+        LetterBtns: "9|10|",
+        MeetingBtns: "1|2|",
+        EntityTypeIDForLessonLearn: 3,
+        EnityTypeIDForTaskCommnet: 3,
+        EnityTypeIDForProcesure: 3,
+        SelMenuIDForLessonLearnAfTemplate: 3,
+      },
+      {
+        ID: 4,
+        Name: "Configuration D",
+        FirstIDProgramTemplate: 1,
+        SelMenuIDForMain: 4,
+        Description: "Description for Configuration D",
+        IsVisible: true,
+        LastModified: "2024-10-11T10:35:45.67",
+        DefaultBtn: "3|4|",
+        LetterBtns: "5|6|",
+        MeetingBtns: "7|8|",
+        EntityTypeIDForLessonLearn: 4,
+        EnityTypeIDForTaskCommnet: 4,
+        EnityTypeIDForProcesure: 4,
+        SelMenuIDForLessonLearnAfTemplate: 4,
+      },
+      {
+        ID: 5,
+        Name: "Configuration E",
+        FirstIDProgramTemplate: 2,
+        SelMenuIDForMain: 2,
+        Description: "Description for Configuration E",
+        IsVisible: true,
+        LastModified: "2024-10-12T11:45:55.89",
+        DefaultBtn: "2|5|",
+        LetterBtns: "3|6|",
+        MeetingBtns: "4|7|",
+        EntityTypeIDForLessonLearn: 5,
+        EnityTypeIDForTaskCommnet: 5,
+        EnityTypeIDForProcesure: 5,
+        SelMenuIDForLessonLearnAfTemplate: 5,
       },
     ],
   },
-  // General -> Commands
-  Commands: {
-    columnDefs: [
-      {
-        headerName: "Command ID",
-        field: "commandId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Command Name",
-        field: "commandName",
-        filter: "agTextColumnFilter",
-      },
-      { headerName: "Status", field: "status", filter: "agTextColumnFilter" },
-      {
-        headerName: "Created Date",
-        field: "createdDate",
-        filter: "agDateColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        commandId: 101,
-        commandName: "Start Process",
-        status: "Active",
-        createdDate: "2023-01-15",
-      },
-      {
-        commandId: 102,
-        commandName: "Stop Process",
-        status: "Inactive",
-        createdDate: "2023-02-20",
-      },
-      {
-        commandId: 103,
-        commandName: "Restart Service",
-        status: "Active",
-        createdDate: "2023-03-10",
-      },
-    ],
-  },
-  // General -> Ribbons
-  Ribbons: {
-    columnDefs: [
-      { headerName: "ID", field: "id", filter: "agNumberColumnFilter" },
-      {
-        headerName: "Ribbon Name",
-        field: "ribbonName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        id: 1,
-        ribbonName: "Main Ribbon",
-        description: "Main ribbon of the application",
-      },
-      {
-        id: 2,
-        ribbonName: "Tool Ribbon",
-        description: "Additional tool ribbons",
-      },
-    ],
-  },
-  // General -> Users
-  Users: {
-    columnDefs: [
-      {
-        headerName: "User ID",
-        field: "userId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "User Name",
-        field: "userName",
-        filter: "agTextColumnFilter",
-      },
-      { headerName: "Email", field: "email", filter: "agTextColumnFilter" },
-      { headerName: "Role", field: "role", filter: "agTextColumnFilter" },
-    ],
-    rowData: [
-      {
-        userId: 1,
-        userName: "Ali Ahmadi",
-        email: "ali@example.com",
-        role: "Admin",
-      },
-      {
-        userId: 2,
-        userName: "Zahra Mohammadi",
-        email: "zahra@example.com",
-        role: "User",
-      },
-    ],
-  },
-  // General -> Roles
-  Roles: {
-    columnDefs: [
-      {
-        headerName: "Role ID",
-        field: "roleId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Role Name",
-        field: "roleName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      { roleId: 1, roleName: "Admin", description: "Full access" },
-      { roleId: 2, roleName: "User", description: "Limited access" },
-    ],
-  },
-  // General -> Staffing
-  Staffing: {
-    columnDefs: [
-      { headerName: "ID", field: "id", filter: "agNumberColumnFilter" },
-      { headerName: "Name", field: "name", filter: "agTextColumnFilter" },
-      {
-        headerName: "Position",
-        field: "position",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Hire Date",
-        field: "hireDate",
-        filter: "agDateColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        id: 1,
-        name: "Sara Rezaei",
-        position: "Developer",
-        hireDate: "2022-05-10",
-      },
-      {
-        id: 2,
-        name: "Mohammad Hosseini",
-        position: "Project Manager",
-        hireDate: "2021-03-15",
-      },
-    ],
-  },
-  // General -> RoleGroups
-  RoleGroups: {
-    columnDefs: [
-      {
-        headerName: "Group ID",
-        field: "groupId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Group Name",
-        field: "groupName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        groupId: 1,
-        groupName: "Management Group",
-        description: "Administrative roles",
-      },
-      {
-        groupId: 2,
-        groupName: "Technical Group",
-        description: "Technical roles",
-      },
-    ],
-  },
-  // General -> Enterprises
-  Enterprises: {
-    columnDefs: [
-      {
-        headerName: "Enterprise ID",
-        field: "enterpriseId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Enterprise Name",
-        field: "enterpriseName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Location",
-        field: "location",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      { enterpriseId: 1, enterpriseName: "Company A", location: "Tehran" },
-      { enterpriseId: 2, enterpriseName: "Company B", location: "Isfahan" },
-    ],
-  },
-  // Forms -> Forms
-  Forms: {
-    columnDefs: [
-      {
-        headerName: "Form ID",
-        field: "formId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Form Name",
-        field: "formName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Created Date",
-        field: "createdDate",
-        filter: "agDateColumnFilter",
-      },
-    ],
-    rowData: [
-      { formId: 1, formName: "Registration Form", createdDate: "2023-01-01" },
-      { formId: 2, formName: "Login Form", createdDate: "2023-02-15" },
-    ],
-  },
-  // Forms -> Categories
-  Categories: {
-    columnDefs: [
-      {
-        headerName: "Category ID",
-        field: "categoryId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Category Name",
-        field: "categoryName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        categoryId: 1,
-        categoryName: "Category A",
-        description: "Description for Category A",
-      },
-      {
-        categoryId: 2,
-        categoryName: "Category B",
-        description: "Description for Category B",
-      },
-    ],
-  },
-  // ApprovalFlows -> ApprovalFlows
-  ApprovalFlows: {
-    columnDefs: [
-      {
-        headerName: "Flow ID",
-        field: "flowId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Flow Name",
-        field: "flowName",
-        filter: "agTextColumnFilter",
-      },
-      { headerName: "Status", field: "status", filter: "agTextColumnFilter" },
-    ],
-    rowData: [
-      { flowId: 1, flowName: "Approval Flow A", status: "Active" },
-      { flowId: 2, flowName: "Approval Flow B", status: "Inactive" },
-    ],
-  },
-  // ApprovalFlows -> ApprovalChecklist
-  ApprovalChecklist: {
-    columnDefs: [
-      {
-        headerName: "Checklist ID",
-        field: "checkId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Checklist Title",
-        field: "title",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        checkId: 1,
-        title: "Checklist 1",
-        description: "Description for Checklist 1",
-      },
-      {
-        checkId: 2,
-        title: "Checklist 2",
-        description: "Description for Checklist 2",
-      },
-    ],
-  },
-  // Programs -> ProgramTemplate
+
+  // **ProgramTemplate**
   ProgramTemplate: {
     columnDefs: [
-      {
-        headerName: "Template ID",
-        field: "templateId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Template Name",
-        field: "templateName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
+      { headerName: "Template Name", field: "Name", filter: "agTextColumnFilter" },
+      { headerName: "Description", field: "Description", filter: "agTextColumnFilter" },
+    ],
+    rowData: programTemplates,
+  },
+
+  // **DefaultRibbon**
+  DefaultRibbon: {
+    columnDefs: [
+      { headerName: "Ribbon Name", field: "Name", filter: "agTextColumnFilter" },
+      { headerName: "Description", field: "Description", filter: "agTextColumnFilter" },
+    ],
+    rowData: defaultRibbons,
+  },
+
+  // **Lesson Learned Form**
+  "Lesson Learned Form": {
+    columnDefs: [
+      { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
     ],
     rowData: [
       {
-        templateId: 1,
-        templateName: "Program Template A",
-        description: "Description for Template A",
+        Code: "",
+        EntityCateADescription: "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        EntityCateAName: "Start up",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 1,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-04T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Charter",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3838",
+        nEntityCateAID: 1,
+        nEntityCateBID: null,
+      },
+      // افزودن 4 ردیف دیگر به دلخواه
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateAName: "Development",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 2,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-05T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Development Plan",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3839",
+        nEntityCateAID: 2,
+        nEntityCateBID: null,
       },
       {
-        templateId: 2,
-        templateName: "Program Template B",
-        description: "Description for Template B",
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateAName: "Marketing",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 3,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-06T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Marketing Strategy",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3840",
+        nEntityCateAID: 3,
+        nEntityCateBID: null,
+      },
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateAName: "Sales",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 4,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-07T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Sales Plan",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3841",
+        nEntityCateAID: 4,
+        nEntityCateBID: null,
+      },
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateAName: "HR",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 5,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-08T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "HR Policies",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3842",
+        nEntityCateAID: 5,
+        nEntityCateBID: null,
       },
     ],
   },
-  // Programs -> ProgramTypes
-  ProgramTypes: {
+
+  // **Lesson Learned Af Template**
+  "Lesson Learned Af Template": {
     columnDefs: [
-      {
-        headerName: "Type ID",
-        field: "typeId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Type Name",
-        field: "typeName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      { typeId: 1, typeName: "Type A", description: "Description for Type A" },
-      { typeId: 2, typeName: "Type B", description: "Description for Type B" },
-    ],
-  },
-  // Projects -> Projects
-  Projects: {
-    columnDefs: [
-      {
-        headerName: "Project ID",
-        field: "projectId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Project Name",
-        field: "projectName",
-        filter: "agTextColumnFilter",
-      },
-      { headerName: "Status", field: "status", filter: "agTextColumnFilter" },
-      {
-        headerName: "Start Date",
-        field: "startDate",
-        filter: "agDateColumnFilter",
-      },
+      { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
     ],
     rowData: [
       {
-        projectId: 1,
-        projectName: "Project X",
-        status: "In Progress",
-        startDate: "2023-01-01",
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف اول سلکت Lesson Learned Af Template",
+        EntityCateAName: "Analysis",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 6,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-09T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Analysis Report",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3843",
+        nEntityCateAID: 6,
+        nEntityCateBID: null,
+      },
+      // افزودن 4 ردیف دیگر به دلخواه
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateAName: "Evaluation",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 7,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-10T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Evaluation Summary",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3844",
+        nEntityCateAID: 7,
+        nEntityCateBID: null,
       },
       {
-        projectId: 2,
-        projectName: "Project Y",
-        status: "Completed",
-        startDate: "2022-05-15",
-      },
-    ],
-  },
-  // Projects -> ProjectsAccess
-  ProjectsAccess: {
-    columnDefs: [
-      {
-        headerName: "Access ID",
-        field: "accessId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Access Name",
-        field: "accessName",
-        filter: "agTextColumnFilter",
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateAName: "Feedback",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 8,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-11T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Feedback Report",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3845",
+        nEntityCateAID: 8,
+        nEntityCateBID: null,
       },
       {
-        headerName: "Access Level",
-        field: "accessLevel",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      { accessId: 1, accessName: "Read Access", accessLevel: "Read" },
-      { accessId: 2, accessName: "Write Access", accessLevel: "Write" },
-    ],
-  },
-  // Projects -> Odp
-  Odp: {
-    columnDefs: [
-      { headerName: "ODP ID", field: "odpId", filter: "agNumberColumnFilter" },
-      {
-        headerName: "ODP Name",
-        field: "odpName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      { odpId: 1, odpName: "ODP 1", description: "Description for ODP 1" },
-      { odpId: 2, odpName: "ODP 2", description: "Description for ODP 2" },
-    ],
-  },
-  // Projects -> Procedures
-  Procedures: {
-    columnDefs: [
-      {
-        headerName: "Procedure ID",
-        field: "procedureId",
-        filter: "agNumberColumnFilter",
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateAName: "Review",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 9,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-12T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Review Document",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3850",
+        nEntityCateAID: 9,
+        nEntityCateBID: null,
       },
       {
-        headerName: "Procedure Name",
-        field: "procedureName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        procedureId: 1,
-        procedureName: "Procedure A",
-        description: "Description for Procedure A",
-      },
-      {
-        procedureId: 2,
-        procedureName: "Procedure B",
-        description: "Description for Procedure B",
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateAName: "Completion",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 10,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-13T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Completion Report",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3851",
+        nEntityCateAID: 10,
+        nEntityCateBID: null,
       },
     ],
   },
-  // Projects -> Calendars
-  Calendars: {
+
+  // **Comment Form Template**
+  "Comment Form Template": {
     columnDefs: [
-      {
-        headerName: "Calendar ID",
-        field: "calendarId",
-        filter: "agNumberColumnFilter",
-      },
-      {
-        headerName: "Calendar Name",
-        field: "calendarName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "description",
-        filter: "agTextColumnFilter",
-      },
+      { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
     ],
     rowData: [
       {
-        calendarId: 1,
-        calendarName: "Calendar 1",
-        description: "Description for Calendar 1",
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف اول سلکت Comment Form Template",
+        EntityCateAName: "Feedback Form",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 11,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-14T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Feedback Form A",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3848",
+        nEntityCateAID: 11,
+        nEntityCateBID: null,
+      },
+      // افزودن 4 ردیف دیگر به دلخواه
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateAName: "Survey Form",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 12,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-15T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Survey Form B",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3849",
+        nEntityCateAID: 12,
+        nEntityCateBID: null,
       },
       {
-        calendarId: 2,
-        calendarName: "Calendar 2",
-        description: "Description for Calendar 2",
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateAName: "Comment Form",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 13,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-16T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Comment Form C",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3850",
+        nEntityCateAID: 13,
+        nEntityCateBID: null,
+      },
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateAName: "Review Form",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 14,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-17T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Review Form D",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3851",
+        nEntityCateAID: 14,
+        nEntityCateBID: null,
+      },
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateAName: "Evaluation Form",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 15,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-18T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Evaluation Form E",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3852",
+        nEntityCateAID: 15,
+        nEntityCateBID: null,
+      },
+    ],
+  },
+
+  // **Procedure Form Template**
+  "Procedure Form Template": {
+    columnDefs: [
+      { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
+    ],
+    rowData: [
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف اول سلکت Procedure Form Template",
+        EntityCateAName: "Procedure Form A",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 16,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-19T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Procedure Form A",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3853",
+        nEntityCateAID: 16,
+        nEntityCateBID: null,
+      },
+      // افزودن 4 ردیف دیگر به دلخواه
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateAName: "Procedure Form B",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 17,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-20T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Procedure Form B",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3854",
+        nEntityCateAID: 17,
+        nEntityCateBID: null,
+      },
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateAName: "Procedure Form C",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 18,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-21T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Procedure Form C",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3855",
+        nEntityCateAID: 18,
+        nEntityCateBID: null,
+      },
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateAName: "Procedure Form D",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 19,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-22T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Procedure Form D",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3856",
+        nEntityCateAID: 19,
+        nEntityCateBID: null,
+      },
+      {
+        Code: "",
+        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateAName: "Procedure Form E",
+        EntityCateBDescription: null,
+        EntityCateBName: null,
+        ID: 20,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-23T14:58:30.647",
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Procedure Form E",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3857",
+        nEntityCateAID: 20,
+        nEntityCateBID: null,
       },
     ],
   },

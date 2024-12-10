@@ -1,23 +1,21 @@
-// src/components/views/tab/TabbedInterface.tsx
+// src/components/Views/tab/TabbedInterface.tsx
 
 import React, { useState, useRef, Suspense } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
-import { tabsData, subTabDataMapping } from "./tabData";
-import { subTabComponents } from "./SubTabsImports"; // Import the mapping of subtab to components
+import { tabsData, subTabDataMapping } from "./tabData"; // استفاده از 'tabsData' به جای 'TabsData'
+import { subTabComponents } from "./SubTabsImports";
 
 const TabbedInterface: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState<string>("General");
   const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
-  const [selectedRow, setSelectedRow] = useState<any>(null); // وضعیت برای ردیف انتخاب شده
+  const [selectedRow, setSelectedRow] = useState<any>(null);
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
 
-  // دریافت کامپوننت مربوط به زیرتب فعال
   const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
-
   const currentSubTabData = subTabDataMapping[activeSubTab] || {
     columnDefs: [],
     rowData: [],
@@ -29,16 +27,14 @@ const TabbedInterface: React.FC = () => {
       ? tabsData[tabName].groups![0].subtabs[0]
       : tabsData[tabName].subtabs![0];
     setActiveSubTab(firstGroup);
-    setSelectedRow(null); // ریست کردن وضعیت انتخاب ردیف با تغییر تب اصلی
-    // اسکرول به ابتدا
+    setSelectedRow(null);
     mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
   const handleSubTabChange = (subtab: string) => {
     setActiveSubTab(subtab);
-    setSelectedRow(null); // ریست کردن وضعیت انتخاب ردیف با تغییر زیرتب
-    // اسکرول به ابتدا
+    setSelectedRow(null);
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
@@ -63,12 +59,50 @@ const TabbedInterface: React.FC = () => {
   };
 
   const handleRowDoubleClick = (rowData: any) => {
+    console.log("Row double-clicked in TabbedInterface:", rowData);
     setSelectedRow(rowData);
+  };
+
+  const handleRowClick = (rowData: any) => {
+    console.log("Row clicked in TabbedInterface:", rowData);
+    setSelectedRow(rowData);
+  };
+
+  // CRUD Handlers
+  const handleAdd = () => {
+    console.log("Add clicked");
+    // اضافه کردن منطق مورد نیاز
+  };
+
+  const handleEdit = () => {
+    if (selectedRow) {
+      console.log("Edit clicked for row:", selectedRow);
+      // اضافه کردن منطق ویرایش
+    } else {
+      alert("Please select a row to edit.");
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedRow) {
+      console.log("Delete clicked for row:", selectedRow);
+      // اضافه کردن منطق حذف
+    } else {
+      alert("Please select a row to delete.");
+    }
+  };
+
+  const handleDuplicate = () => {
+    if (selectedRow) {
+      console.log("Duplicate clicked for row:", selectedRow);
+      // اضافه کردن منطق تکرار
+    } else {
+      alert("Please select a row to duplicate.");
+    }
   };
 
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden">
-      {/* تب‌های اصلی */}
       <MainTabs
         tabs={Object.keys(tabsData)}
         activeTab={activeMainTab}
@@ -78,7 +112,6 @@ const TabbedInterface: React.FC = () => {
         tabsRef={mainTabsRef}
       />
 
-      {/* زیرتب‌ها */}
       <SubTabs
         groups={tabsData[activeMainTab].groups}
         subtabs={tabsData[activeMainTab].subtabs}
@@ -89,13 +122,23 @@ const TabbedInterface: React.FC = () => {
         subTabsRef={subTabsRef}
       />
 
-      {/* محتوای تب‌ها */}
+      {/* رندر کردن TabContent با آیکون‌های CRUD */}
       <TabContent
         component={ActiveSubTabComponent}
         columnDefs={currentSubTabData.columnDefs}
         rowData={currentSubTabData.rowData}
-        onRowDoubleClick={handleRowDoubleClick} // ارسال تابع برای مدیریت دو بار کلیک ردیف
-        selectedRow={selectedRow} // ارسال داده ردیف انتخاب شده
+        onRowDoubleClick={handleRowDoubleClick}
+        selectedRow={selectedRow}
+        activeSubTab={activeSubTab}
+        showAddIcon={true}
+        showDeleteIcon={true}
+        showEditIcon={true}
+        showDuplicateIcon={true}
+        onAdd={handleAdd}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onDuplicate={handleDuplicate}
+        onRowClick={handleRowClick} // ارسال تابع
       />
     </div>
   );
