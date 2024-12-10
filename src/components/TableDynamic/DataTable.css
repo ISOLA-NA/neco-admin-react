@@ -59,3 +59,18 @@
 .action-icons .react-icons {
   margin-left: 0.5rem;
 }
+
+.ag-theme-quartz {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* DataTable.css */
+
+/* حالت autoHeight */
+.auto-height {
+  height: auto !important;
+}
+
+

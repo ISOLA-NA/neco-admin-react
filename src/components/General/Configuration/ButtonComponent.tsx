@@ -1,16 +1,18 @@
-import React, { useState } from 'react'
-import DataTable from '../../TableDynamic/DataTable'
-import DynamicInput from '../../utilities/DynamicInput'
-import DynamicRadioGroup from '../../utilities/DynamicRadiogroup'
-import ImageUploader from '../../utilities/ImageUploader'
-import TwoColumnLayout from '../../layout/TwoColumnLayout'
+// ButtonComponent.tsx
+
+import React, { useState } from 'react';
+import DataTable from '../../TableDynamic/DataTable';
+import DynamicInput from '../../utilities/DynamicInput';
+import DynamicRadioGroup from '../../utilities/DynamicRadiogroup';
+import ImageUploader from '../../utilities/ImageUploader';
+import TwoColumnLayout from '../../layout/TwoColumnLayout';
 
 interface ButtonComponentProps {
-  onClose: () => void
-  onRowSelect: (data: any) => void
-  onSelectFromButton: (data: any, state: string, image?: File) => void
-  columnDefs: { headerName: string; field: string }[]
-  rowData: any[]
+  onClose: () => void;
+  onRowSelect: (data: any) => void;
+  onSelectFromButton: (data: any, state: string, image?: File) => void;
+  columnDefs: { headerName: string; field: string }[];
+  rowData: any[];
 }
 
 const ButtonComponent: React.FC<ButtonComponentProps> = ({
@@ -24,53 +26,55 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     { value: 'accept', label: 'Accept' },
     { value: 'reject', label: 'Reject' },
     { value: 'close', label: 'Close' }
-  ]
+  ];
 
-  const [selectedRow, setSelectedRow] = useState<any>(null)
+  const [selectedRow, setSelectedRow] = useState<any>(null);
   const [selectedState, setSelectedState] = useState<string>(
     radioOptions.length > 0 ? radioOptions[0].value : ''
-  )
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null)
+  );
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 
   const handleRowDoubleClick = (data: any) => {
-    setSelectedRow(data)
-    onRowSelect(data)
-  }
+    setSelectedRow(data);
+    onRowSelect(data);
+  };
 
   const handleRowClick = (data: any) => {
-    setSelectedRow(data)
-  }
+    setSelectedRow(data);
+  };
 
   const handleSelectButtonClick = () => {
     if (selectedRow && selectedState) {
-      onSelectFromButton(selectedRow, selectedState, uploadedImage || undefined)
-      onClose()
+      onSelectFromButton(selectedRow, selectedState, uploadedImage || undefined);
+      onClose();
     }
-  }
+  };
 
   const handleImageUpload = (file: File) => {
-    setUploadedImage(file)
-  }
+    setUploadedImage(file);
+  };
 
-  const isSelectDisabled = !selectedRow || !selectedState
+  const isSelectDisabled = !selectedRow || !selectedState;
 
   return (
-    <div className='bg-white rounded-lg p-4'>
+    <div className='bg-white rounded-lg p-4 flex flex-col h-full'>
+      {/* بخش جدول با تنظیم ارتفاع به "autoHeight" */}
       <div className='mb-4'>
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
           onRowDoubleClick={handleRowDoubleClick}
-          setSelectedRowData={handleRowClick} showDuplicateIcon={false} onAdd={function (): void {
-            throw new Error('Function not implemented.')
-          } } onEdit={function (): void {
-            throw new Error('Function not implemented.')
-          } } onDelete={function (): void {
-            throw new Error('Function not implemented.')
-          } } onDuplicate={function (): void {
-            throw new Error('Function not implemented.')
-          } }        />
+          setSelectedRowData={handleRowClick}
+          showDuplicateIcon={false}
+          onAdd={() => {}}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onDuplicate={() => {}}
+          domLayout="autoHeight" // تنظیم domLayout به "autoHeight"
+        />
       </div>
+      
+      {/* بخش فرم‌ها و ورودی‌ها */}
       <TwoColumnLayout>
         <DynamicInput name='Input 1' type='text' value='' onChange={() => {}} />
         <DynamicInput name='Input 2' type='text' value='' onChange={() => {}} />
@@ -90,6 +94,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         />
         <ImageUploader onUpload={handleImageUpload} />
       </TwoColumnLayout>
+      
+      {/* دکمه انتخاب */}
       <div className='mt-4 flex justify-center'>
         <button
           className={`btn w-48 ${
@@ -104,7 +110,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ButtonComponent
+export default ButtonComponent;

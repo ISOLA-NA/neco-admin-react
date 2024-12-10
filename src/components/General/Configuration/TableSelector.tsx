@@ -39,6 +39,7 @@ const TableSelector: React.FC<TableSelectorProps> = ({
         onEdit={() => {}}
         onDelete={() => {}}
         onDuplicate={() => {}}
+         domLayout="autoHeight"
       />
 
       <div className='mt-4 flex justify-center'>

@@ -1,3 +1,5 @@
+// DataTable.tsx
+
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
@@ -17,6 +19,7 @@ interface DataTableProps {
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  domLayout?: "autoHeight" | "normal"; // Prop جدید برای تعیین domLayout
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -29,6 +32,7 @@ const DataTable: React.FC<DataTableProps> = ({
   onEdit,
   onDelete,
   onDuplicate,
+  domLayout = "normal", // مقدار پیش‌فرض به "normal" تنظیم شده است
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
@@ -58,6 +62,12 @@ const DataTable: React.FC<DataTableProps> = ({
   const handleRowDoubleClick = (event: any) => {
     onRowDoubleClick(event.data);
   };
+
+  // تعیین کلاس‌های CSS بر اساس domLayout
+  const gridClasses =
+    domLayout === "autoHeight"
+      ? "ag-theme-quartz auto-height"
+      : "ag-theme-quartz flex-grow h-full";
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -110,7 +120,7 @@ const DataTable: React.FC<DataTableProps> = ({
       </div>
 
       {/* جدول */}
-      <div className="ag-theme-quartz flex-grow h-full" style={{ width: "100%", height: "100%" }}>
+      <div className={gridClasses}>
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
@@ -120,7 +130,7 @@ const DataTable: React.FC<DataTableProps> = ({
           animateRows={true}
           onRowClicked={handleRowClick}
           onRowDoubleClicked={handleRowDoubleClick}
-          domLayout="normal" // تغییر domLayout به "normal"
+          domLayout={domLayout} // استفاده از prop جدید
           suppressHorizontalScroll={false}
           rowSelection="multiple"
         />
