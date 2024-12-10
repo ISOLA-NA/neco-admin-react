@@ -20,7 +20,7 @@ const TabbedInterface: React.FC = () => {
   };
 
   // لیست ساب‌تب‌هایی که آیکون Duplicate نمایش داده می‌شود
-  const duplicateEnabledSubTabs = [ "Settings"];
+  const duplicateEnabledSubTabs = ["Configurations", "Settings"];
 
   const handleMainTabChange = (tabName: string) => {
     setActiveMainTab(tabName);
@@ -61,11 +61,6 @@ const TabbedInterface: React.FC = () => {
 
   const handleRowDoubleClick = (rowData: any) => {
     console.log("Row double-clicked in TabbedInterface:", rowData);
-    setSelectedRow(rowData);
-  };
-
-  const handleRowClick = (rowData: any) => {
-    console.log("Row clicked in TabbedInterface:", rowData);
     setSelectedRow(rowData);
   };
 
@@ -123,7 +118,7 @@ const TabbedInterface: React.FC = () => {
         component={ActiveSubTabComponent}
         columnDefs={currentSubTabData.columnDefs}
         rowData={currentSubTabData.rowData}
-        onRowDoubleClick={handleRowDoubleClick}
+        onRowDoubleClick={handleRowDoubleClick} // فقط دابل کلیک
         selectedRow={selectedRow}
         activeSubTab={activeSubTab}
         showDuplicateIcon={duplicateEnabledSubTabs.includes(activeSubTab)} // شرط برای نمایش Duplicate
@@ -131,7 +126,7 @@ const TabbedInterface: React.FC = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onDuplicate={handleDuplicate}
-        onRowClick={handleRowClick}
+        onRowClick={() => {}} // غیرفعال کردن تک کلیک
       />
     </div>
   );
