@@ -34,7 +34,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
         ariaLabel="اسکرول به چپ برای زیرتب‌ها"
       />
 
-      {/* کانتینر ساب‌تب‌ها */}
+      {/* کانتینر ساب‌تب‌ها با ارتفاع ثابت */}
       <div
         className="flex items-start space-x-6 overflow-x-auto scrollbar-hide px-6 py-4 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-500 rounded-lg shadow-xl"
         ref={subTabsRef}
@@ -47,15 +47,19 @@ const SubTabs: React.FC<SubTabsProps> = ({
                   {group.subtabs.map((subtab) => (
                     <button
                       key={subtab}
-                      className={`flex flex-col items-center space-y-1 p-2 text-xs rounded-full transition-all duration-300 transform relative ${
-                        activeSubTab === subtab
-                          ? "text-white border-b-2 border-white scale-105"
-                          : "text-white hover:bg-purple-600 hover:border-b-2 hover:border-transparent"
-                      }`}
+                      className="flex flex-col items-center space-y-1 p-2 text-xs rounded-full relative focus:outline-none"
                       onClick={() => onSubTabChange(subtab)}
                     >
                       <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                      <span>{subtab}</span>
+                      <span
+                        className={`inline-block transition-colors duration-300 ${
+                          activeSubTab === subtab
+                            ? "text-white font-medium border-b-2 border-white"
+                            : "text-white border-b-2 border-transparent hover:text-indigo-200"
+                        }`}
+                      >
+                        {subtab}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -72,15 +76,19 @@ const SubTabs: React.FC<SubTabsProps> = ({
               {subtabs!.map((subtab) => (
                 <button
                   key={subtab}
-                  className={`flex flex-col items-center space-y-1 p-2 text-xs rounded-full transition-all duration-300 transform relative ${
-                    activeSubTab === subtab
-                      ? "text-white border-b-2 border-white scale-105"
-                      : "text-white hover:bg-purple-600 hover:border-b-2 hover:border-transparent"
-                  }`}
+                  className="flex flex-col items-center space-y-1 p-2 text-xs rounded-full relative focus:outline-none"
                   onClick={() => onSubTabChange(subtab)}
                 >
                   <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                  <span>{subtab}</span>
+                  <span
+                    className={`inline-block transition-colors duration-300 ${
+                      activeSubTab === subtab
+                        ? "text-white font-medium border-b-2 border-white"
+                        : "text-white border-b-2 border-transparent hover:text-indigo-200"
+                    }`}
+                  >
+                    {subtab}
+                  </span>
                 </button>
               ))}
             </div>

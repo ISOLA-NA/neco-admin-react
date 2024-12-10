@@ -76,7 +76,7 @@ const DataTable: React.FC<DataTableProps> = ({
         </div>
 
         <div className="flex items-center space-x-4">
-        {showDuplicateIcon && (
+          {showDuplicateIcon && (
             <button
               className="text-yellow-600 hover:text-yellow-800 transition"
               title="Duplicate"
@@ -85,32 +85,32 @@ const DataTable: React.FC<DataTableProps> = ({
               <FiCopy size={25} />
             </button>
           )}
-            <button
-              className="text-red-600 hover:text-red-800 transition"
-              title="Delete"
-              onClick={onDelete}
-            >
-              <FiTrash2 size={25} />
-            </button>
-            <button
-              className="text-blue-600 hover:text-blue-800 transition"
-              title="Edit"
-              onClick={onEdit}
-            >
-              <FiEdit size={25} />
-            </button>
-            <button
-              className="text-green-600 hover:text-green-800 transition"
-              title="Add"
-              onClick={onAdd}
-            >
-              <FiPlus size={25} />
-            </button>
+          <button
+            className="text-red-600 hover:text-red-800 transition"
+            title="Delete"
+            onClick={onDelete}
+          >
+            <FiTrash2 size={25} />
+          </button>
+          <button
+            className="text-blue-600 hover:text-blue-800 transition"
+            title="Edit"
+            onClick={onEdit}
+          >
+            <FiEdit size={25} />
+          </button>
+          <button
+            className="text-green-600 hover:text-green-800 transition"
+            title="Add"
+            onClick={onAdd}
+          >
+            <FiPlus size={25} />
+          </button>
         </div>
       </div>
 
       {/* جدول */}
-      <div className="ag-theme-quartz flex-grow">
+      <div className="ag-theme-quartz flex-grow h-full" style={{ width: "100%", height: "100%" }}>
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
@@ -120,7 +120,7 @@ const DataTable: React.FC<DataTableProps> = ({
           animateRows={true}
           onRowClicked={handleRowClick}
           onRowDoubleClicked={handleRowDoubleClick}
-          domLayout="autoHeight"
+          domLayout="normal" // تغییر domLayout به "normal"
           suppressHorizontalScroll={false}
           rowSelection="multiple"
         />

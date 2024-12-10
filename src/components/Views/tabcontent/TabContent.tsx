@@ -42,7 +42,7 @@ const TabContent: React.FC<TabContentProps> = ({
   };
 
   return (
-    <div className="flex-grow bg-white overflow-hidden mt-4 border border-gray-300 rounded-lg mx-4 mb-6 transition-all duration-500">
+    <div className="flex-grow bg-white overflow-hidden mt-4 border border-gray-300 rounded-lg mx-4 mb-6 transition-all duration-500 h-full">
       <Splitter className="h-full" layout="horizontal" style={{ height: "100%" }}>
         <SplitterPanel className="flex flex-col" size={leftSize} minSize={20}>
           <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100">
