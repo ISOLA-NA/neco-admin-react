@@ -2,6 +2,8 @@
 
 import React from 'react'
 import DataTable from '../../TableDynamic/DataTable'
+import ReusableButton from '../../utilities/DynamicButtons' // مسیر را به درستی تنظیم کنید
+import { FaCheck, FaArrowRight } from 'react-icons/fa' // آیکون‌های نمونه
 
 interface ColumnDef {
   headerName: string
@@ -39,21 +41,16 @@ const TableSelector: React.FC<TableSelectorProps> = ({
         onEdit={() => {}}
         onDelete={() => {}}
         onDuplicate={() => {}}
-         domLayout="autoHeight"
+        domLayout="autoHeight"
       />
 
       <div className='mt-4 flex justify-center'>
-        <button
-          className={`btn w-48 ${
-            isSelectDisabled
-              ? 'bg-blue-300 text-gray-500 cursor-not-allowed'
-              : 'btn-primary'
-          }`}
+        <ReusableButton
+          text="Select"
           onClick={onSelectButtonClick}
-          disabled={isSelectDisabled}
-        >
-          Select
-        </button>
+          isDisabled={isSelectDisabled}
+          className="w-48"
+        />
       </div>
     </div>
   )

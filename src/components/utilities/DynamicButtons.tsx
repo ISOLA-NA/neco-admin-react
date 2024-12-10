@@ -1,26 +1,35 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  children?: React.ReactNode;
+interface ReusableButtonProps {
+  text: string;
+  onClick: () => void;
+  isDisabled?: boolean;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
+  className?: string;
 }
 
-const DynamicButton: React.FC<IconButtonProps> = ({
+const DynamicButton: React.FC<ReusableButtonProps> = ({
+  text,
+  onClick,
+  isDisabled = false,
   leftIcon,
   rightIcon,
-  children,
   className = '',
-  ...props
 }) => {
   return (
     <button
-      className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-colors duration-300 ${className}`}
-      {...props}
+      className={`btn w-48 flex items-center justify-center ${
+        isDisabled
+          ? 'bg-blue-300 text-gray-500 cursor-not-allowed'
+          : 'btn-primary'
+      } ${className}`}
+      onClick={onClick}
+      disabled={isDisabled}
     >
-      {leftIcon && <span className="flex items-center">{leftIcon}</span>}
-      {children}
-      {rightIcon && <span className="flex items-center">{rightIcon}</span>}
+      {leftIcon && <span className="mr-2">{leftIcon}</span>}
+      {text}
+      {rightIcon && <span className="ml-2">{rightIcon}</span>}
     </button>
   );
 };

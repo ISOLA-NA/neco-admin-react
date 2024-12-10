@@ -6,6 +6,8 @@ import DynamicInput from '../../utilities/DynamicInput';
 import DynamicRadioGroup from '../../utilities/DynamicRadiogroup';
 import ImageUploader from '../../utilities/ImageUploader';
 import TwoColumnLayout from '../../layout/TwoColumnLayout';
+import DynamicButton from '../../utilities/DynamicButtons'; // مسیر صحیح به DynamicButton را تنظیم کنید
+import { FaCheck, FaTimes } from 'react-icons/fa'; // مثال برای آیکون‌ها
 
 interface ButtonComponentProps {
   onClose: () => void;
@@ -97,17 +99,12 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       
       {/* دکمه انتخاب */}
       <div className='mt-4 flex justify-center'>
-        <button
-          className={`btn w-48 ${
-            isSelectDisabled
-              ? 'bg-blue-300 text-gray-500 cursor-not-allowed'
-              : 'btn-primary'
-          }`}
+        <DynamicButton
+          text="Select"
           onClick={handleSelectButtonClick}
-          disabled={isSelectDisabled}
-        >
-          Select
-        </button>
+          isDisabled={isSelectDisabled}
+          className="w-48"
+        />
       </div>
     </div>
   );
