@@ -1,21 +1,21 @@
 // src/components/Configuration/TableSelector.tsx
 
-import React from "react";
-import DataTable from "../../TableDynamic/DataTable";
+import React from 'react'
+import DataTable from '../../TableDynamic/DataTable'
 
 interface ColumnDef {
-  headerName: string;
-  field: string;
+  headerName: string
+  field: string
 }
 
 interface TableSelectorProps {
-  columnDefs: ColumnDef[];
-  rowData: any[];
-  selectedRow: any;
-  onRowDoubleClick: (data: any) => void;
-  onRowClick: (data: any) => void;
-  onSelectButtonClick: () => void;
-  isSelectDisabled: boolean;
+  columnDefs: ColumnDef[]
+  rowData: any[]
+  selectedRow: any
+  onRowDoubleClick: (data: any) => void
+  onRowClick: (data: any) => void
+  onSelectButtonClick: () => void
+  isSelectDisabled: boolean
 }
 
 const TableSelector: React.FC<TableSelectorProps> = ({
@@ -25,7 +25,7 @@ const TableSelector: React.FC<TableSelectorProps> = ({
   onRowDoubleClick,
   onRowClick,
   onSelectButtonClick,
-  isSelectDisabled,
+  isSelectDisabled
 }) => {
   return (
     <div>
@@ -40,19 +40,22 @@ const TableSelector: React.FC<TableSelectorProps> = ({
         onDelete={() => {}}
         onDuplicate={() => {}}
       />
-      <button
-        onClick={onSelectButtonClick}
-        disabled={isSelectDisabled}
-        className={`mt-4 px-4 py-2 rounded ${
-          isSelectDisabled
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-500 hover:bg-blue-700 text-white"
-        }`}
-      >
-        Select
-      </button>
-    </div>
-  );
-};
 
-export default TableSelector;
+      <div className='mt-4 flex justify-center'>
+        <button
+          className={`btn w-48 ${
+            isSelectDisabled
+              ? 'bg-blue-300 text-gray-500 cursor-not-allowed'
+              : 'btn-primary'
+          }`}
+          onClick={onSelectButtonClick}
+          disabled={isSelectDisabled}
+        >
+          Select
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default TableSelector

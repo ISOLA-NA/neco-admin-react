@@ -90,7 +90,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         />
         <ImageUploader onUpload={handleImageUpload} />
       </TwoColumnLayout>
-      <div className='mt-4 flex justify-end'>
+      <div className='mt-4 flex justify-center'>
         <button
           className={`btn w-48 ${
             isSelectDisabled
