@@ -1,4 +1,4 @@
-import React, { useState, useRef, Suspense } from "react";
+import React, { useState, useRef } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
@@ -19,7 +19,6 @@ const TabbedInterface: React.FC = () => {
     rowData: [],
   };
 
-  // لیست ساب‌تب‌هایی که آیکون Duplicate نمایش داده می‌شود
   const duplicateEnabledSubTabs = ["Configurations", "Settings"];
 
   const handleMainTabChange = (tabName: string) => {
@@ -70,27 +69,23 @@ const TabbedInterface: React.FC = () => {
   };
 
   const handleEdit = () => {
-    if (selectedRow) {
-      console.log("Edit clicked for row:", selectedRow);
-    } else {
-      alert("Please select a row to edit.");
-    }
+    // در اینجا کنترل اصلی در TabContent انجام می‌شود (alert در صورت عدم انتخاب ردیف)
+    console.log("Edit action triggered");
   };
 
   const handleDelete = () => {
-    if (selectedRow) {
-      console.log("Delete clicked for row:", selectedRow);
-    } else {
-      alert("Please select a row to delete.");
-    }
+    // alert در صورت عدم انتخاب ردیف در TabContent هندل می‌شود
+    console.log("Delete action triggered");
   };
 
   const handleDuplicate = () => {
-    if (selectedRow) {
-      console.log("Duplicate clicked for row:", selectedRow);
-    } else {
-      alert("Please select a row to duplicate.");
-    }
+    // alert در صورت عدم انتخاب ردیف در TabContent هندل می‌شود
+    console.log("Duplicate action triggered");
+  };
+
+  const handleRowClick = (data: any) => {
+    // انتخاب ردیف با یک کلیک
+    setSelectedRow(data);
   };
 
   return (
@@ -118,15 +113,15 @@ const TabbedInterface: React.FC = () => {
         component={ActiveSubTabComponent}
         columnDefs={currentSubTabData.columnDefs}
         rowData={currentSubTabData.rowData}
-        onRowDoubleClick={handleRowDoubleClick} // فقط دابل کلیک
+        onRowDoubleClick={handleRowDoubleClick}
         selectedRow={selectedRow}
         activeSubTab={activeSubTab}
-        showDuplicateIcon={duplicateEnabledSubTabs.includes(activeSubTab)} // شرط برای نمایش Duplicate
+        showDuplicateIcon={duplicateEnabledSubTabs.includes(activeSubTab)}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onDuplicate={handleDuplicate}
-        onRowClick={() => {}} // غیرفعال کردن تک کلیک
+        onRowClick={handleRowClick}
       />
     </div>
   );

@@ -1,5 +1,3 @@
-// DataTable.tsx
-
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
@@ -19,7 +17,8 @@ interface DataTableProps {
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
-  domLayout?: "autoHeight" | "normal"; // Prop جدید برای تعیین domLayout
+  domLayout?: "autoHeight" | "normal";
+  isRowSelected: boolean; // اضافه شده برای کنترل فعال/غیرفعال بودن دکمه‌ها
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -32,7 +31,8 @@ const DataTable: React.FC<DataTableProps> = ({
   onEdit,
   onDelete,
   onDuplicate,
-  domLayout = "normal", // مقدار پیش‌فرض به "normal" تنظیم شده است
+  domLayout = "normal",
+  isRowSelected,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
@@ -63,7 +63,6 @@ const DataTable: React.FC<DataTableProps> = ({
     onRowDoubleClick(event.data);
   };
 
-  // تعیین کلاس‌های CSS بر اساس domLayout
   const gridClasses =
     domLayout === "autoHeight"
       ? "ag-theme-quartz auto-height"
@@ -88,24 +87,33 @@ const DataTable: React.FC<DataTableProps> = ({
         <div className="flex items-center space-x-4">
           {showDuplicateIcon && (
             <button
-              className="text-yellow-600 hover:text-yellow-800 transition"
+              className={`text-yellow-600 hover:text-yellow-800 transition ${
+                !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               title="Duplicate"
               onClick={onDuplicate}
+              disabled={!isRowSelected}
             >
               <FiCopy size={25} />
             </button>
           )}
           <button
-            className="text-red-600 hover:text-red-800 transition"
+            className={`text-red-600 hover:text-red-800 transition ${
+              !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             title="Delete"
             onClick={onDelete}
+            disabled={!isRowSelected}
           >
             <FiTrash2 size={25} />
           </button>
           <button
-            className="text-blue-600 hover:text-blue-800 transition"
+            className={`text-blue-600 hover:text-blue-800 transition ${
+              !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+            }`}
             title="Edit"
             onClick={onEdit}
+            disabled={!isRowSelected}
           >
             <FiEdit size={25} />
           </button>
@@ -130,7 +138,7 @@ const DataTable: React.FC<DataTableProps> = ({
           animateRows={true}
           onRowClicked={handleRowClick}
           onRowDoubleClicked={handleRowDoubleClick}
-          domLayout={domLayout} // استفاده از prop جدید
+          domLayout={domLayout}
           suppressHorizontalScroll={false}
           rowSelection="multiple"
         />
