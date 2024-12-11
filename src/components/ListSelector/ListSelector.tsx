@@ -11,7 +11,7 @@ interface ListSelectorProps {
   selectedIds: (string | number)[];
   onSelectionChange: (selectedIds: (string | number)[]) => void;
   showSwitcher?: boolean;
-  isGlobal: boolean;
+  isGlobal: boolean; // اجباری
   onGlobalChange?: (isGlobal: boolean) => void;
 }
 
@@ -23,7 +23,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   selectedIds,
   onSelectionChange,
   showSwitcher = false,
-  isGlobal,
+  isGlobal = false,
   onGlobalChange,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);

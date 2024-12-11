@@ -1,10 +1,12 @@
-// TabContent.tsx
+// src/components/Views/tab/TabContent.tsx
+
 import React, { useState, useEffect } from "react";
 import { Splitter, SplitterPanel } from "primereact/splitter";
-import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import DataTable from "../../TableDynamic/DataTable";
 import MyPanel from "./PanelHeader";
 import "./TabContent.css";
+import { categoriesCata, categoriesCatb } from "../tab/tabData"; // اطمینان از مسیر صحیح
+import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 
 interface TabContentProps {
   component: React.LazyExoticComponent<React.FC<any>> | null;
@@ -38,9 +40,10 @@ const TabContent: React.FC<TabContentProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [categoryType, setCategoryType] = useState<"cata" | "catb">("cata"); // وضعیت انتخاب دسته
 
-  const leftSize = isExpanded ? 100 : 50;
-  const rightSize = isExpanded ? 0 : 50;
+  const [currentColumnDefs, setCurrentColumnDefs] = useState<any[]>(columnDefs);
+  const [currentRowData, setCurrentRowData] = useState<any[]>(rowData);
 
   const toggleExpand = () => {
     setIsExpanded((prev) => !prev);
@@ -68,7 +71,7 @@ const TabContent: React.FC<TabContentProps> = ({
 
   const handleDoubleClick = (data: any) => {
     onRowDoubleClick(data);
-    setIsAdding(false); // Ensure we're not in add mode
+    setIsAdding(false); // اطمینان از عدم حالت افزودن
     setIsPanelOpen(true);
   };
 
@@ -110,6 +113,26 @@ const TabContent: React.FC<TabContentProps> = ({
     }
   };
 
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as "cata" | "catb";
+    setCategoryType(value);
+  };
+
+  useEffect(() => {
+    if (activeSubTab === "Categories") {
+      if (categoryType === "cata") {
+        setCurrentColumnDefs(categoriesCata.columnDefs);
+        setCurrentRowData(categoriesCata.rowData);
+      } else if (categoryType === "catb") {
+        setCurrentColumnDefs(categoriesCatb.columnDefs);
+        setCurrentRowData(categoriesCatb.rowData);
+      }
+    } else {
+      setCurrentColumnDefs(columnDefs);
+      setCurrentRowData(rowData);
+    }
+  }, [activeSubTab, categoryType, columnDefs, rowData]);
+
   return (
     <div className="flex-grow bg-white overflow-hidden mt-4 border border-gray-300 rounded-lg mx-4 mb-6 transition-all duration-500 h-full">
       <Splitter
@@ -117,7 +140,11 @@ const TabContent: React.FC<TabContentProps> = ({
         layout="horizontal"
         style={{ height: "100%" }}
       >
-        <SplitterPanel className="flex flex-col" size={leftSize} minSize={20}>
+        <SplitterPanel
+          className="flex flex-col"
+          size={isExpanded ? 100 : 50}
+          minSize={20}
+        >
           <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100">
             <div className="font-bold text-gray-700 text-sm">
               {activeSubTab}
@@ -134,10 +161,25 @@ const TabContent: React.FC<TabContentProps> = ({
             </button>
           </div>
 
+          {/* Select بالا */}
+          {activeSubTab === "Categories" && (
+            <div className="px-4 py-2">
+              <select
+                id="categoryType"
+                value={categoryType}
+                onChange={handleCategoryChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="cata">Cata</option>
+                <option value="catb">Cat B</option>
+              </select>
+            </div>
+          )}
+
           <div className="h-full p-4 overflow-hidden">
             <DataTable
-              columnDefs={columnDefs}
-              rowData={rowData}
+              columnDefs={currentColumnDefs}
+              rowData={currentRowData}
               onRowDoubleClick={handleDoubleClick}
               setSelectedRowData={handleRowClickLocal}
               showDuplicateIcon={showDuplicateIcon}
@@ -152,7 +194,7 @@ const TabContent: React.FC<TabContentProps> = ({
 
         <SplitterPanel
           className="flex flex-col"
-          size={rightSize}
+          size={isExpanded ? 0 : 50}
           minSize={30}
           style={{
             overflow: "hidden",
@@ -173,13 +215,15 @@ const TabContent: React.FC<TabContentProps> = ({
               />
             )}
 
-            {/* با اضافه کردن key مقادیر فرم ریست می‌شوند */}
+            {/* نمایش کامپوننت‌های اضافی در صورت باز بودن پنل */}
             {Component && isPanelOpen ? (
               <div className="mt-5">
                 <React.Suspense fallback={<div>Loading...</div>}>
                   <Component
                     key={isAdding ? "add-mode" : "edit-mode"}
                     selectedRow={isAdding ? null : selectedRow}
+                    categoryType={categoryType} // انتقال categoryType
+                    setCategoryType={setCategoryType} // انتقال setCategoryType
                   />
                 </React.Suspense>
               </div>

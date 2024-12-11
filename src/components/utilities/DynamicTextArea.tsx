@@ -59,7 +59,7 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
           rightElement ? "pr-10" : "pr-3",
           "pb-2 focus:outline-none",
           error ? "focus:border-red-500" : "focus:border-indigo-500",
-          "transition-colors duration-300 text-gray-800 text-sm sm:text-base resize-y", // اجازه ریسایز عمودی
+          "transition-colors duration-300 text-gray-800 text-sm sm:text-base resize-y" // اجازه ریسایز عمودی
         )}
         autoComplete="off" // غیرفعال‌سازی autocomplete برای جلوگیری از تغییرات ناخواسته
       />

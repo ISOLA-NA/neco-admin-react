@@ -1,6 +1,5 @@
 // src/components/Views/tab/tabData.ts
 
-
 export interface TabsData {
   [key: string]: {
     groups?: Array<{
@@ -133,6 +132,110 @@ export const tabsData: TabsData = {
   Projects: {
     subtabs: ["Projects", "ProjectsAccess", "Odp", "Procedures", "Calendars"],
   },
+};
+
+export const categoriesCata: SubTabData = {
+  columnDefs: [
+    { headerName: "ID", field: "ID", filter: "agNumberColumnFilter" },
+    { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+    {
+      headerName: "Description",
+      field: "Description",
+      filter: "agTextColumnFilter",
+    },
+
+    {
+      headerName: "Modified By",
+      field: "ModifiedById",
+      filter: "agTextColumnFilter",
+    },
+  ],
+  rowData: [
+    {
+      ID: 1,
+      Name: "Start up1",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+    {
+      ID: 2,
+      Name: "Start up2",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+    {
+      ID: 3,
+      Name: "Start up3",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+  ],
+};
+
+// **7. تعریف Categories Catb**
+export const categoriesCatb: SubTabData = {
+  columnDefs: [
+    { headerName: "ID", field: "ID", filter: "agNumberColumnFilter" },
+    { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+    {
+      headerName: "Description",
+      field: "Description",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "Is Visible",
+      field: "IsVisible",
+      filter: "agBooleanColumnFilter",
+    },
+    {
+      headerName: "Last Modified",
+      field: "LastModified",
+      filter: "agDateColumnFilter",
+    },
+    {
+      headerName: "Modified By",
+      field: "ModifiedById",
+      filter: "agTextColumnFilter",
+    },
+  ],
+  rowData: [
+    {
+      ID: 4,
+      Name: "Start up4",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+    {
+      ID: 5,
+      Name: "Start up25",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+    {
+      ID: 6,
+      Name: "Start up6",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+  ],
 };
 
 // **5. تعریف subTabDataMapping**
@@ -900,7 +1003,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
   },
 
-
   Roles: {
     columnDefs: [
       {
@@ -929,8 +1031,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         field: "Type",
         filter: "agTextColumnFilter",
       },
-
-    
     ],
     rowData: [
       {
@@ -995,8 +1095,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
     ],
   },
-  
-  RoleGroups : {
+
+  RoleGroups: {
     columnDefs: [
       {
         headerName: "Group Name",
@@ -1004,7 +1104,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         filter: "agTextColumnFilter",
         sortable: true,
       },
-
     ],
     rowData: [
       {
@@ -1012,7 +1111,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         Name: "Admin Group",
         Description: "Group for admin users",
         // اینجا دو تا پروژه داریم که در projectsData تعریف شده اند
-        ProjectsStr: "08050144-052d-45f9-ae1b-00b7c96b9847|11150144-052d-45f9-ae1b-00b7c96b9847|",
+        ProjectsStr:
+          "08050144-052d-45f9-ae1b-00b7c96b9847|11150144-052d-45f9-ae1b-00b7c96b9847|",
         PostsStr: "User1|User2|User3",
         IsGlobal: true,
         IsVisible: true,
@@ -1023,7 +1123,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         Name: "Development Team",
         Description: "Group for developers",
         // دو پروژه دیگر
-        ProjectsStr: "22250144-052d-45f9-ae1b-00b7c96b9847|33350144-052d-45f9-ae1b-00b7c96b9847|",
+        ProjectsStr:
+          "22250144-052d-45f9-ae1b-00b7c96b9847|33350144-052d-45f9-ae1b-00b7c96b9847|",
         PostsStr: "User4|User5",
         IsGlobal: false,
         IsVisible: true,
@@ -1040,11 +1141,10 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         IsVisible: false,
         LastModified: "2024-03-20",
       },
-      
     ],
   },
 
-  Enterprises : {
+  Enterprises: {
     columnDefs: [
       {
         headerName: "Name",
@@ -1064,7 +1164,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         filter: "agTextColumnFilter",
         sortable: true,
       },
-
     ],
     rowData: [
       {
@@ -1122,11 +1221,248 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         IsVisible: true,
         LastModified: "2024-05-25T16:30:15.456",
       },
-      
     ],
   },
-  
+
+  Forms: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "Transmital",
+        field: "IsDoc",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "CatA",
+        field: "EntityCateAName",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "CatB",
+        field: "EntityCateBName",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Charter 1",
+        EntityCateAName: "Start up",
+        EntityCateADescription:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        EntityCateBName: "AAAAA",
+        EntityCateBDescription: null,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-04T14:58:30.647",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        Code: "",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3838",
+        nEntityCateAID: 1,
+        nEntityCateBID: null,
+      },
+      {
+        ID: 2,
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Charter 2",
+        EntityCateAName: "Start up",
+        EntityCateADescription:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        EntityCateBName: "BBBBB",
+        EntityCateBDescription: null,
+        IsDoc: true,
+        IsGlobal: false,
+        IsVisible: true,
+        LastModified: "2024-08-10T10:00:00.000",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        Code: "CMD_START",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3838",
+        nEntityCateAID: 1,
+        nEntityCateBID: null,
+      },
+      {
+        ID: 3,
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Charter 3",
+        EntityCateAName: "Start up",
+        EntityCateADescription:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        EntityCateBName: "CCCC",
+        EntityCateBDescription: null,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: false,
+        LastModified: "2024-08-15T12:30:00.000",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        Code: "CMD_WIN_APP",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3838",
+        nEntityCateAID: 1,
+        nEntityCateBID: null,
+      },
+      {
+        ID: 4,
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Charter 4",
+        EntityCateAName: "Start up",
+        EntityCateADescription:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        EntityCateBName: null,
+        EntityCateBDescription: null,
+        IsDoc: true,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-20T09:15:45.123",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        Code: "CMD_OTHER",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3838",
+        nEntityCateAID: 1,
+        nEntityCateBID: null,
+      },
+      {
+        ID: 5,
+        ModifiedById: "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+        Name: "Charter 5",
+        EntityCateAName: "Start up",
+        EntityCateADescription:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        EntityCateBName: null,
+        EntityCateBDescription: null,
+        IsDoc: false,
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-08-25T16:45:30.789",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        Code: "",
+        TemplateDocID: null,
+        TemplateExcelID: "0527346d-51d2-4e97-bf2b-543c7c7a3838",
+        nEntityCateAID: 1,
+        nEntityCateBID: null,
+      },
+    ],
+  },
+
+  categoriesCata: {
+    columnDefs: [
+      { headerName: "ID", field: "ID", filter: "agNumberColumnFilter" },
+      { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Is Visible",
+        field: "IsVisible",
+        filter: "agBooleanColumnFilter",
+      },
+      {
+        headerName: "Last Modified",
+        field: "LastModified",
+        filter: "agDateColumnFilter",
+      },
+      {
+        headerName: "Modified By",
+        field: "ModifiedById",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Start up1",
+        Description:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        IsVisible: true,
+        LastModified: null,
+        ModifiedById: null,
+      },
+      {
+        ID: 1,
+        Name: "Start up2",
+        Description:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        IsVisible: true,
+        LastModified: null,
+        ModifiedById: null,
+      },
+      {
+        ID: 1,
+        Name: "Start up3",
+        Description:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        IsVisible: true,
+        LastModified: null,
+        ModifiedById: null,
+      },
+    ],
+  },
+  categoriesCatb: {
+    columnDefs: [
+      { headerName: "ID", field: "ID", filter: "agNumberColumnFilter" },
+      { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Is Visible",
+        field: "IsVisible",
+        filter: "agBooleanColumnFilter",
+      },
+      {
+        headerName: "Last Modified",
+        field: "LastModified",
+        filter: "agDateColumnFilter",
+      },
+      {
+        headerName: "Modified By",
+        field: "ModifiedById",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Start up4",
+        Description:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        IsVisible: true,
+        LastModified: null,
+        ModifiedById: null,
+      },
+      {
+        ID: 1,
+        Name: "Start up25",
+        Description:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        IsVisible: true,
+        LastModified: null,
+        ModifiedById: null,
+      },
+      {
+        ID: 1,
+        Name: "Start up6",
+        Description:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        IsVisible: true,
+        LastModified: null,
+        ModifiedById: null,
+      },
+    ],
+  },
 };
-
-
-

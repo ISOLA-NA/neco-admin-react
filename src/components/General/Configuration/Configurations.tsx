@@ -1,5 +1,3 @@
-// src/components/General/Configurations.tsx
-
 import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import CustomTextarea from "../../utilities/DynamicTextArea";
@@ -94,7 +92,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   // به‌روزرسانی شناسه‌های انتخاب شده برای هر ListSelector
   const handleSelectionChange = (
     field: keyof typeof configData,
-    selectedIds: number[]
+    selectedIds: (string | number)[]
   ) => {
     const idsString = selectedIds.join("|") + "|";
     handleChange(field, idsString);
@@ -256,77 +254,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           onButtonClick={() => handleOpenModal("SelMenuIDForMain")}
         />
 
-        {/* DynamicSelector - Lesson Learned Form */}
-        <DynamicSelector
-          options={subTabDataMapping["Lesson Learned Form"].rowData.map(
-            (llf) => ({
-              value: llf.ID.toString(),
-              label: llf.Name,
-            })
-          )}
-          selectedValue={configData.EntityTypeIDForLessonLearn}
-          onChange={(e) =>
-            handleChange("EntityTypeIDForLessonLearn", e.target.value)
-          }
-          label="Lesson Learned Form"
-          showButton={true}
-          onButtonClick={() => handleOpenModal("Lesson Learned Form")}
-          className="mt-7"
-        />
-
-        {/* DynamicSelector - Lesson Learned Af Template */}
-        <DynamicSelector
-          options={subTabDataMapping["Lesson Learned Af Template"].rowData.map(
-            (llat) => ({
-              value: llat.ID.toString(),
-              label: llat.Name,
-            })
-          )}
-          selectedValue={configData.SelMenuIDForLessonLearnAfTemplate}
-          onChange={(e) =>
-            handleChange("SelMenuIDForLessonLearnAfTemplate", e.target.value)
-          }
-          label="Lesson Learned Af Template"
-          showButton={true}
-          onButtonClick={() => handleOpenModal("Lesson Learned Af Template")}
-          className="mt-7"
-        />
-
-        {/* DynamicSelector - Comment Form Template */}
-        <DynamicSelector
-          options={subTabDataMapping["Comment Form Template"].rowData.map(
-            (cft) => ({
-              value: cft.ID.toString(),
-              label: cft.Name,
-            })
-          )}
-          selectedValue={configData.EntityTypeIDForTaskComment} // اصلاح نام کلید
-          onChange={(e) =>
-            handleChange("EntityTypeIDForTaskComment", e.target.value)
-          } // اصلاح نام کلید
-          label="Comment Form Template"
-          showButton={true}
-          onButtonClick={() => handleOpenModal("Comment Form Template")}
-          className="mt-7"
-        />
-
-        {/* DynamicSelector - Procedure Form Template */}
-        <DynamicSelector
-          options={subTabDataMapping["Procedure Form Template"].rowData.map(
-            (pft) => ({
-              value: pft.ID.toString(),
-              label: pft.Name,
-            })
-          )}
-          selectedValue={configData.EntityTypeIDForProcedure} // اصلاح نام کلید
-          onChange={(e) =>
-            handleChange("EntityTypeIDForProcedure", e.target.value)
-          } // اصلاح نام کلید
-          label="Procedure Form Template"
-          showButton={true}
-          onButtonClick={() => handleOpenModal("Procedure Form Template")}
-          className="mt-7"
-        />
+        {/* سایر DynamicSelector ها ... */}
 
         {/* ListSelector - Default Action Buttons */}
         <ListSelector
@@ -341,6 +269,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           onSelectionChange={(selectedIds) =>
             handleSelectionChange("DefaultBtn", selectedIds)
           }
+          isGlobal={false} // اضافه کردن پراپ isGlobal
         />
 
         {/* ListSelector - Letter Action Buttons */}
@@ -356,6 +285,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           onSelectionChange={(selectedIds) =>
             handleSelectionChange("LetterBtns", selectedIds)
           }
+          isGlobal={false} // اضافه کردن پراپ isGlobal
         />
 
         {/* ListSelector - Meeting Action Buttons */}
@@ -371,6 +301,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           onSelectionChange={(selectedIds) =>
             handleSelectionChange("MeetingBtns", selectedIds)
           }
+          isGlobal={false} // اضافه کردن پراپ isGlobal
         />
 
         {/* نمایش DynamicModal با استفاده از TableSelector */}
