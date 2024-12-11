@@ -1,3 +1,4 @@
+// TabbedInterface.tsx
 import React, { useState, useRef } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
@@ -66,25 +67,22 @@ const TabbedInterface: React.FC = () => {
   // CRUD Handlers
   const handleAdd = () => {
     console.log("Add clicked");
+    setSelectedRow(null); // خالی کردن انتخاب
   };
 
   const handleEdit = () => {
-    // در اینجا کنترل اصلی در TabContent انجام می‌شود (alert در صورت عدم انتخاب ردیف)
     console.log("Edit action triggered");
   };
 
   const handleDelete = () => {
-    // alert در صورت عدم انتخاب ردیف در TabContent هندل می‌شود
     console.log("Delete action triggered");
   };
 
   const handleDuplicate = () => {
-    // alert در صورت عدم انتخاب ردیف در TabContent هندل می‌شود
     console.log("Duplicate action triggered");
   };
 
   const handleRowClick = (data: any) => {
-    // انتخاب ردیف با یک کلیک
     setSelectedRow(data);
   };
 

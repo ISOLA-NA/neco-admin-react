@@ -28,9 +28,10 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     MeetingBtns: selectedRow?.MeetingBtns || "",
     // اضافه کردن چهار فیلد جدید با نام صحیح
     EntityTypeIDForLessonLearn: selectedRow?.EntityTypeIDForLessonLearn || "",
-    SelMenuIDForLessonLearnAfTemplate: selectedRow?.SelMenuIDForLessonLearnAfTemplate || "",
+    SelMenuIDForLessonLearnAfTemplate:
+      selectedRow?.SelMenuIDForLessonLearnAfTemplate || "",
     EntityTypeIDForTaskComment: selectedRow?.EntityTypeIDForTaskComment || "", // اصلاح نام کلید
-    EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "",   // اصلاح نام کلید
+    EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "", // اصلاح نام کلید
   });
 
   const [descriptionError, setDescriptionError] = useState(false);
@@ -58,7 +59,10 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   };
 
   // مدیریت تغییرات در فرم
-  const handleChange = (field: keyof typeof configData, value: string | number) => {
+  const handleChange = (
+    field: keyof typeof configData,
+    value: string | number
+  ) => {
     console.log(`Updating field ${field} with value ${value}`);
     setConfigData((prev) => ({
       ...prev,
@@ -76,19 +80,22 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
   // نگاشت بین سلکتورها و کلیدهای configData
   const selectorToFieldMap: { [key: string]: keyof typeof configData } = {
-    "DefaultBtn": "DefaultBtn",
-    "LetterBtns": "LetterBtns",
-    "MeetingBtns": "MeetingBtns",
-    "FirstIDProgramTemplate": "FirstIDProgramTemplate",
-    "SelMenuIDForMain": "SelMenuIDForMain",
+    DefaultBtn: "DefaultBtn",
+    LetterBtns: "LetterBtns",
+    MeetingBtns: "MeetingBtns",
+    FirstIDProgramTemplate: "FirstIDProgramTemplate",
+    SelMenuIDForMain: "SelMenuIDForMain",
     "Lesson Learned Form": "EntityTypeIDForLessonLearn",
     "Lesson Learned Af Template": "SelMenuIDForLessonLearnAfTemplate",
     "Comment Form Template": "EntityTypeIDForTaskComment", // اصلاح نام کلید
-    "Procedure Form Template": "EntityTypeIDForProcedure",  // اصلاح نام کلید
+    "Procedure Form Template": "EntityTypeIDForProcedure", // اصلاح نام کلید
   };
 
   // به‌روزرسانی شناسه‌های انتخاب شده برای هر ListSelector
-  const handleSelectionChange = (field: keyof typeof configData, selectedIds: number[]) => {
+  const handleSelectionChange = (
+    field: keyof typeof configData,
+    selectedIds: number[]
+  ) => {
     const idsString = selectedIds.join("|") + "|";
     handleChange(field, idsString);
   };
@@ -112,9 +119,10 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       LetterBtns: selectedRow?.LetterBtns || "",
       MeetingBtns: selectedRow?.MeetingBtns || "",
       EntityTypeIDForLessonLearn: selectedRow?.EntityTypeIDForLessonLearn || "",
-      SelMenuIDForLessonLearnAfTemplate: selectedRow?.SelMenuIDForLessonLearnAfTemplate || "",
+      SelMenuIDForLessonLearnAfTemplate:
+        selectedRow?.SelMenuIDForLessonLearnAfTemplate || "",
       EntityTypeIDForTaskComment: selectedRow?.EntityTypeIDForTaskComment || "", // اصلاح نام کلید
-      EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "",   // اصلاح نام کلید
+      EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "", // اصلاح نام کلید
     });
   }, [selectedRow]);
 
@@ -150,7 +158,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   const handleSelectButtonClick = () => {
     if (selectedRowData && currentSelector) {
       const field = selectorToFieldMap[currentSelector];
-      console.log(`Selected Selector: ${currentSelector}, Mapped Field: ${field}`);
+      console.log(
+        `Selected Selector: ${currentSelector}, Mapped Field: ${field}`
+      );
       console.log(`Selected ID: ${selectedRowData.ID}`);
       if (field) {
         const selectedId = selectedRowData.ID;
@@ -207,11 +217,15 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           name="Description"
           value={configData.Description}
           onChange={(e) => handleChange("Description", e.target.value)}
-          placeholder="Enter description (min 10 characters)"
-          className={`${descriptionError ? "border-red-500" : "border-gray-300"}`}
+          placeholder=""
+          className={`${
+            descriptionError ? "border-red-500" : "border-gray-300"
+          }`}
         />
         {descriptionError && (
-          <span className="text-red-500 text-sm">Description must be at least 10 characters.</span>
+          <span className="text-red-500 text-sm">
+            Description must be at least 10 characters.
+          </span>
         )}
 
         {/* DynamicSelector - Program Template */}
@@ -221,7 +235,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             label: pt.Name,
           }))}
           selectedValue={configData.FirstIDProgramTemplate}
-          onChange={(e) => handleChange("FirstIDProgramTemplate", e.target.value)}
+          onChange={(e) =>
+            handleChange("FirstIDProgramTemplate", e.target.value)
+          }
           label="Program Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}
@@ -242,12 +258,16 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Lesson Learned Form */}
         <DynamicSelector
-          options={subTabDataMapping["Lesson Learned Form"].rowData.map((llf) => ({
-            value: llf.ID.toString(),
-            label: llf.Name,
-          }))}
+          options={subTabDataMapping["Lesson Learned Form"].rowData.map(
+            (llf) => ({
+              value: llf.ID.toString(),
+              label: llf.Name,
+            })
+          )}
           selectedValue={configData.EntityTypeIDForLessonLearn}
-          onChange={(e) => handleChange("EntityTypeIDForLessonLearn", e.target.value)}
+          onChange={(e) =>
+            handleChange("EntityTypeIDForLessonLearn", e.target.value)
+          }
           label="Lesson Learned Form"
           showButton={true}
           onButtonClick={() => handleOpenModal("Lesson Learned Form")}
@@ -256,12 +276,16 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Lesson Learned Af Template */}
         <DynamicSelector
-          options={subTabDataMapping["Lesson Learned Af Template"].rowData.map((llat) => ({
-            value: llat.ID.toString(),
-            label: llat.Name,
-          }))}
+          options={subTabDataMapping["Lesson Learned Af Template"].rowData.map(
+            (llat) => ({
+              value: llat.ID.toString(),
+              label: llat.Name,
+            })
+          )}
           selectedValue={configData.SelMenuIDForLessonLearnAfTemplate}
-          onChange={(e) => handleChange("SelMenuIDForLessonLearnAfTemplate", e.target.value)}
+          onChange={(e) =>
+            handleChange("SelMenuIDForLessonLearnAfTemplate", e.target.value)
+          }
           label="Lesson Learned Af Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("Lesson Learned Af Template")}
@@ -270,12 +294,16 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Comment Form Template */}
         <DynamicSelector
-          options={subTabDataMapping["Comment Form Template"].rowData.map((cft) => ({
-            value: cft.ID.toString(),
-            label: cft.Name,
-          }))}
+          options={subTabDataMapping["Comment Form Template"].rowData.map(
+            (cft) => ({
+              value: cft.ID.toString(),
+              label: cft.Name,
+            })
+          )}
           selectedValue={configData.EntityTypeIDForTaskComment} // اصلاح نام کلید
-          onChange={(e) => handleChange("EntityTypeIDForTaskComment", e.target.value)} // اصلاح نام کلید
+          onChange={(e) =>
+            handleChange("EntityTypeIDForTaskComment", e.target.value)
+          } // اصلاح نام کلید
           label="Comment Form Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("Comment Form Template")}
@@ -284,12 +312,16 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Procedure Form Template */}
         <DynamicSelector
-          options={subTabDataMapping["Procedure Form Template"].rowData.map((pft) => ({
-            value: pft.ID.toString(),
-            label: pft.Name,
-          }))}
+          options={subTabDataMapping["Procedure Form Template"].rowData.map(
+            (pft) => ({
+              value: pft.ID.toString(),
+              label: pft.Name,
+            })
+          )}
           selectedValue={configData.EntityTypeIDForProcedure} // اصلاح نام کلید
-          onChange={(e) => handleChange("EntityTypeIDForProcedure", e.target.value)} // اصلاح نام کلید
+          onChange={(e) =>
+            handleChange("EntityTypeIDForProcedure", e.target.value)
+          } // اصلاح نام کلید
           label="Procedure Form Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("Procedure Form Template")}
@@ -306,7 +338,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           ]}
           rowData={buttons}
           selectedIds={defaultBtnIds}
-          onSelectionChange={(selectedIds) => handleSelectionChange("DefaultBtn", selectedIds)}
+          onSelectionChange={(selectedIds) =>
+            handleSelectionChange("DefaultBtn", selectedIds)
+          }
         />
 
         {/* ListSelector - Letter Action Buttons */}
@@ -319,7 +353,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           ]}
           rowData={buttons}
           selectedIds={letterBtnIds}
-          onSelectionChange={(selectedIds) => handleSelectionChange("LetterBtns", selectedIds)}
+          onSelectionChange={(selectedIds) =>
+            handleSelectionChange("LetterBtns", selectedIds)
+          }
         />
 
         {/* ListSelector - Meeting Action Buttons */}
@@ -332,7 +368,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           ]}
           rowData={buttons}
           selectedIds={meetingBtnIds}
-          onSelectionChange={(selectedIds) => handleSelectionChange("MeetingBtns", selectedIds)}
+          onSelectionChange={(selectedIds) =>
+            handleSelectionChange("MeetingBtns", selectedIds)
+          }
         />
 
         {/* نمایش DynamicModal با استفاده از TableSelector */}

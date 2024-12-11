@@ -140,25 +140,28 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   Configurations: {
     columnDefs: [
       { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
-      { 
-        headerName: "Prg.Template", 
-        field: "FirstIDProgramTemplate", 
+      {
+        headerName: "Prg.Template",
+        field: "FirstIDProgramTemplate",
         filter: "agTextColumnFilter",
         valueGetter: (params: any) => {
-          const template = programTemplates.find((pt) => pt.ID === params.data.FirstIDProgramTemplate);
+          const template = programTemplates.find(
+            (pt) => pt.ID === params.data.FirstIDProgramTemplate
+          );
           return template ? template.Name : "N/A";
         },
       },
-      { 
-        headerName: "Default Ribbon", 
-        field: "SelMenuIDForMain", 
+      {
+        headerName: "Default Ribbon",
+        field: "SelMenuIDForMain",
         filter: "agTextColumnFilter",
         valueGetter: (params: any) => {
-          const ribbon = defaultRibbons.find((dr) => dr.ID === params.data.SelMenuIDForMain);
+          const ribbon = defaultRibbons.find(
+            (dr) => dr.ID === params.data.SelMenuIDForMain
+          );
           return ribbon ? ribbon.Name : "N/A";
         },
       },
-
     ],
     rowData: [
       {
@@ -174,8 +177,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         MeetingBtns: "6|7|",
         EntityTypeIDForLessonLearn: 1,
         SelMenuIDForLessonLearnAfTemplate: 6, // اصلاح شده به ID موجود در "Lesson Learned Af Template"
-        EntityTypeIDForTaskComment: 11,        // اصلاح شده به ID موجود در "Comment Form Template"
-        EntityTypeIDForProcedure: 16,          // اصلاح شده به ID موجود در "Procedure Form Template"
+        EntityTypeIDForTaskComment: 11, // اصلاح شده به ID موجود در "Comment Form Template"
+        EntityTypeIDForProcedure: 16, // اصلاح شده به ID موجود در "Procedure Form Template"
       },
       // ... سایر ردیف‌ها تا ID 5
       {
@@ -191,8 +194,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         MeetingBtns: "5|6|",
         EntityTypeIDForLessonLearn: 2,
         SelMenuIDForLessonLearnAfTemplate: 7, // اصلاح شده
-        EntityTypeIDForTaskComment: 12,        // اصلاح شده
-        EntityTypeIDForProcedure: 17,          // اصلاح شده
+        EntityTypeIDForTaskComment: 12, // اصلاح شده
+        EntityTypeIDForProcedure: 17, // اصلاح شده
       },
       {
         ID: 3,
@@ -207,8 +210,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         MeetingBtns: "1|2|",
         EntityTypeIDForLessonLearn: 3,
         SelMenuIDForLessonLearnAfTemplate: 8, // اصلاح شده
-        EntityTypeIDForTaskComment: 13,        // اصلاح شده
-        EntityTypeIDForProcedure: 18,          // اصلاح شده
+        EntityTypeIDForTaskComment: 13, // اصلاح شده
+        EntityTypeIDForProcedure: 18, // اصلاح شده
       },
       {
         ID: 4,
@@ -223,8 +226,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         MeetingBtns: "7|8|",
         EntityTypeIDForLessonLearn: 4,
         SelMenuIDForLessonLearnAfTemplate: 9, // اصلاح شده
-        EntityTypeIDForTaskComment: 14,        // اصلاح شده
-        EntityTypeIDForProcedure: 19,          // اصلاح شده
+        EntityTypeIDForTaskComment: 14, // اصلاح شده
+        EntityTypeIDForProcedure: 19, // اصلاح شده
       },
       {
         ID: 5,
@@ -239,8 +242,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         MeetingBtns: "4|7|",
         EntityTypeIDForLessonLearn: 5,
         SelMenuIDForLessonLearnAfTemplate: 10, // اصلاح شده
-        EntityTypeIDForTaskComment: 15,        // اصلاح شده
-        EntityTypeIDForProcedure: 20,          // اصلاح شده
+        EntityTypeIDForTaskComment: 15, // اصلاح شده
+        EntityTypeIDForProcedure: 20, // اصلاح شده
       },
     ],
   },
@@ -248,8 +251,16 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   // **ProgramTemplate**
   ProgramTemplate: {
     columnDefs: [
-      { headerName: "Template Name", field: "Name", filter: "agTextColumnFilter" },
-      { headerName: "Description", field: "Description", filter: "agTextColumnFilter" },
+      {
+        headerName: "Template Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
     ],
     rowData: programTemplates,
   },
@@ -257,8 +268,16 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   // **DefaultRibbon**
   DefaultRibbon: {
     columnDefs: [
-      { headerName: "Ribbon Name", field: "Name", filter: "agTextColumnFilter" },
-      { headerName: "Description", field: "Description", filter: "agTextColumnFilter" },
+      {
+        headerName: "Ribbon Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
     ],
     rowData: defaultRibbons,
   },
@@ -267,12 +286,17 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   "Lesson Learned Form": {
     columnDefs: [
       { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
-      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
+      {
+        headerName: "Description",
+        field: "EntityCateADescription",
+        filter: "agTextColumnFilter",
+      },
     ],
     rowData: [
       {
         Code: "",
-        EntityCateADescription: "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+        EntityCateADescription:
+          "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
         EntityCateAName: "Start up",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -368,17 +392,21 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
   },
 
-
   // **Lesson Learned Af Template**
   "Lesson Learned Af Template": {
     columnDefs: [
       { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
-      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
+      {
+        headerName: "Description",
+        field: "EntityCateADescription",
+        filter: "agTextColumnFilter",
+      },
     ],
     rowData: [
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف اول سلکت Lesson Learned Af Template",
+        EntityCateADescription:
+          "توضیحات برای ردیف اول سلکت Lesson Learned Af Template",
         EntityCateAName: "Analysis",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -479,12 +507,17 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   "Comment Form Template": {
     columnDefs: [
       { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
-      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
+      {
+        headerName: "Description",
+        field: "EntityCateADescription",
+        filter: "agTextColumnFilter",
+      },
     ],
     rowData: [
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف اول سلکت Comment Form Template",
+        EntityCateADescription:
+          "توضیحات برای ردیف اول سلکت Comment Form Template",
         EntityCateAName: "Feedback Form",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -584,12 +617,17 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   "Procedure Form Template": {
     columnDefs: [
       { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
-      { headerName: "Description", field: "EntityCateADescription", filter: "agTextColumnFilter" },
+      {
+        headerName: "Description",
+        field: "EntityCateADescription",
+        filter: "agTextColumnFilter",
+      },
     ],
     rowData: [
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف اول سلکت Procedure Form Template",
+        EntityCateADescription:
+          "توضیحات برای ردیف اول سلکت Procedure Form Template",
         EntityCateAName: "Procedure Form A",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -683,6 +721,38 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         nEntityCateAID: 20,
         nEntityCateBID: null,
       },
+    ],
+  },
+
+  // **Commands**
+  Commands: {
+    columnDefs: [
+      {
+        headerName: "Command Name",
+        field: "name",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Description",
+        field: "description",
+        filter: "agTextColumnFilter",
+      },
+      // سایر ستون‌ها به دلخواه
+    ],
+    rowData: [
+      {
+        id: 1,
+        name: "Start Process",
+        description: "Start the main process",
+        // سایر داده‌ها
+      },
+      {
+        id: 2,
+        name: "Stop Process",
+        description: "Stop the main process",
+        // سایر داده‌ها
+      },
+      // افزودن ردیف‌های بیشتر در صورت نیاز
     ],
   },
 };

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import DataTable from "../../TableDynamic/DataTable";
+// TabContent.tsx
+import React, { useState, useEffect } from "react";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
-import "./TabContent.css";
+import DataTable from "../../TableDynamic/DataTable";
 import MyPanel from "./PanelHeader";
+import "./TabContent.css";
 
 interface TabContentProps {
   component: React.LazyExoticComponent<React.FC<any>> | null;
@@ -36,8 +37,8 @@ const TabContent: React.FC<TabContentProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
-  // اینجا اندازه پنل‌ها به حالت قبل برگردانده شده
   const leftSize = isExpanded ? 100 : 50;
   const rightSize = isExpanded ? 0 : 50;
 
@@ -45,27 +46,52 @@ const TabContent: React.FC<TabContentProps> = ({
     setIsExpanded((prev) => !prev);
   };
 
-  function handleSave(): void {
+  const handleSave = (): void => {
     console.log("Save clicked");
-  }
-
-  function handleClose(): void {
-    // در صورت تمایل می‌توانید با بستن پنل، محتوا را خالی کنید
+    setIsAdding(false);
     setIsPanelOpen(false);
-  }
+  };
+
+  const handleUpdate = (): void => {
+    if (selectedRow) {
+      console.log("Update clicked for row:", selectedRow);
+      setIsPanelOpen(false);
+    } else {
+      alert("Please select a row to update.");
+    }
+  };
+
+  const handleClose = (): void => {
+    setIsPanelOpen(false);
+    setIsAdding(false);
+  };
 
   const handleDoubleClick = (data: any) => {
     onRowDoubleClick(data);
+    setIsAdding(false); // Ensure we're not in add mode
     setIsPanelOpen(true);
+  };
+
+  const handleRowClickLocal = (data: any) => {
+    if (!isPanelOpen || isAdding) {
+      onRowClick(data);
+    }
   };
 
   const handleEditClick = () => {
     if (selectedRow) {
+      setIsAdding(false);
       setIsPanelOpen(true);
       onEdit();
     } else {
       alert("Please select a row to edit.");
     }
+  };
+
+  const handleAddClick = () => {
+    setIsAdding(true);
+    setIsPanelOpen(true);
+    onAdd();
   };
 
   const handleDeleteClick = () => {
@@ -113,9 +139,9 @@ const TabContent: React.FC<TabContentProps> = ({
               columnDefs={columnDefs}
               rowData={rowData}
               onRowDoubleClick={handleDoubleClick}
-              setSelectedRowData={onRowClick}
+              setSelectedRowData={handleRowClickLocal}
               showDuplicateIcon={showDuplicateIcon}
-              onAdd={onAdd}
+              onAdd={handleAddClick}
               onEdit={handleEditClick}
               onDelete={handleDeleteClick}
               onDuplicate={handleDuplicateClick}
@@ -130,23 +156,34 @@ const TabContent: React.FC<TabContentProps> = ({
           minSize={30}
           style={{
             overflow: "hidden",
-            // در حالت expand، پنل سمت راست عملا 0 است و نمایش داده نمی‌شود
           }}
         >
           <div className="h-full overflow-auto p-4">
-            <MyPanel
-              isExpanded={isExpanded}
-              toggleExpand={toggleExpand}
-              onSave={handleSave}
-              onClose={handleClose}
-            />
-            {Component && selectedRow && isPanelOpen ? (
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <Component selectedRow={selectedRow} />
-              </React.Suspense>
+            {!isPanelOpen ? (
+              <div className="text-gray-500 flex justify-center items-center h-full">
+                Select a row to view details.
+              </div>
             ) : (
-              <div className="text-gray-500">Select a row to view details.</div>
+              <MyPanel
+                isExpanded={isExpanded}
+                toggleExpand={toggleExpand}
+                onSave={isAdding ? handleSave : undefined}
+                onClose={handleClose}
+                onUpdate={!isAdding ? handleUpdate : undefined}
+              />
             )}
+
+            {/* با اضافه کردن key مقادیر فرم ریست می‌شوند */}
+            {Component && isPanelOpen ? (
+              <div style={{ marginTop: "5px" }}>
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <Component
+                    key={isAdding ? "add-mode" : "edit-mode"}
+                    selectedRow={isAdding ? null : selectedRow}
+                  />
+                </React.Suspense>
+              </div>
+            ) : null}
           </div>
         </SplitterPanel>
       </Splitter>

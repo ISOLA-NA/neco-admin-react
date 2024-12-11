@@ -1,3 +1,5 @@
+// DataTable.tsx
+
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
@@ -18,7 +20,7 @@ interface DataTableProps {
   onDelete: () => void;
   onDuplicate: () => void;
   domLayout?: "autoHeight" | "normal";
-  isRowSelected: boolean; // اضافه شده برای کنترل فعال/غیرفعال بودن دکمه‌ها
+  isRowSelected: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -70,7 +72,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* نوار جستجو و دکمه‌ها */}
+      {/* Search Bar and Action Buttons */}
       <div className="flex items-center justify-between mb-4">
         <div className="relative max-w-sm">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -127,7 +129,7 @@ const DataTable: React.FC<DataTableProps> = ({
         </div>
       </div>
 
-      {/* جدول */}
+      {/* Data Table */}
       <div className={gridClasses}>
         <AgGridReact
           onGridReady={onGridReady}

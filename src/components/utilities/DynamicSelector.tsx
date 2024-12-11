@@ -1,7 +1,8 @@
-// src/utilities/DynamicSelector.tsx
-import { classNames } from "primereact/utils";
+// DynamicSelector.tsx
+
 import React from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { classNames } from "primereact/utils";
 
 interface Option {
   value: string;
@@ -19,7 +20,7 @@ interface DynamicSelectorProps {
   rightIcon?: React.ReactNode;
   error?: boolean;
   errorMessage?: string;
-  className?: string; // افزودن پراپ className
+  className?: string;
 }
 
 const DynamicSelector: React.FC<DynamicSelectorProps> = ({
@@ -33,10 +34,10 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   rightIcon,
   error = false,
   errorMessage = "",
-  className, // دریافت className از پراپ‌ها
+  className,
 }) => {
   return (
-    <div className={classNames("relative flex items-center gap-2 ", className)}>
+    <div className={classNames("relative flex items-center gap-2", className)}>
       <div className="relative w-full">
         {leftIcon && (
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
@@ -48,15 +49,14 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
           value={selectedValue}
           onChange={onChange}
           className={classNames(
-            "peer w-full border-b-2",
-            error ? "border-red-500" : "border-purple-600",
-            "pl-10 pr-10 bg-transparent appearance-none focus:outline-none",
-            error ? "focus:border-red-500" : "focus:border-indigo-500",
-            "transition-colors duration-300 text-gray-800 text-sm sm:text-base",
-            "rounded-none"
+            "w-full border-b-2 pr-10 bg-transparent appearance-none focus:outline-none transition-colors duration-300 text-gray-800 text-sm sm:text-base rounded-none",
+            error
+              ? "border-red-500 focus:border-red-500"
+              : "border-purple-600 focus:border-indigo-500"
           )}
           aria-label={label}
         >
+          <option value="" disabled hidden></option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -68,7 +68,15 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
           {rightIcon ? rightIcon : <FaChevronDown size={16} />}
         </div>
 
-        <label className="absolute left-10 transform transition-all duration-300 cursor-text top-0 text-sm text-gray-600 -translate-y-full peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-600 peer-placeholder-shown:-translate-y-1/2 peer-focus:top-0 peer-focus:text-sm peer-focus:text-gray-600 peer-focus:-translate-y-full">
+        <label
+          className={classNames(
+            "absolute transform transition-all duration-300 cursor-text pointer-events-none",
+            "text-gray-600",
+            selectedValue
+              ? "top-0 text-sm -translate-y-full left-0"
+              : "top-1/2 text-base -translate-y-1/2 left-0"
+          )}
+        >
           {label}
         </label>
 
