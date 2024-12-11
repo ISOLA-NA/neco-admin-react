@@ -725,6 +725,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
 
   // **Commands**
+  // **Commands**
   Commands: {
     columnDefs: [
       {
@@ -737,22 +738,44 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         field: "description",
         filter: "agTextColumnFilter",
       },
-      // سایر ستون‌ها به دلخواه
+      // اگر نیاز به ستون‌های بیشتری دارید، اضافه کنید
     ],
     rowData: [
       {
         id: 1,
         name: "Start Process",
         description: "Start the main process",
-        // سایر داده‌ها
+        viewMode: "option1",
+        mainColumnId: "column1",
+        colorColumns: "red,blue",
+        groupName: "Group A",
+        query: "SELECT * FROM process",
+        hiddenColumns: "hidden1,hidden2",
+        defaultColumns: "default1,default2",
+        apiColumns: "api1,api2",
+        spParameters: "param1,param2",
+        apiMode: "apiMode1",
+        gridCommand: "gridCmd1",
+        reportCommand: "reportCmd1",
       },
       {
         id: 2,
         name: "Stop Process",
         description: "Stop the main process",
-        // سایر داده‌ها
+        viewMode: "option2",
+        mainColumnId: "column2",
+        colorColumns: "green,yellow",
+        groupName: "Group B",
+        query: "SELECT id, name FROM process",
+        hiddenColumns: "hidden3,hidden4",
+        defaultColumns: "default3,default4",
+        apiColumns: "api3,api4",
+        spParameters: "param3,param4",
+        apiMode: "apiMode2",
+        gridCommand: "gridCmd2",
+        reportCommand: "reportCmd2",
       },
-      // افزودن ردیف‌های بیشتر در صورت نیاز
+      // سایر ردیف‌ها را به همین صورت اضافه کنید
     ],
   },
 };
