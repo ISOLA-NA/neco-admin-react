@@ -1,5 +1,6 @@
 // src/components/Views/tab/tabData.ts
 
+
 export interface TabsData {
   [key: string]: {
     groups?: Array<{
@@ -898,4 +899,152 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
     ],
   },
+
+
+  Roles: {
+    columnDefs: [
+      {
+        headerName: "ID",
+        field: "ID",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Role",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+
+      {
+        headerName: "Job Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Grade",
+        field: "Grade",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Type",
+        field: "Type",
+        filter: "agTextColumnFilter",
+      },
+
+    
+    ],
+    rowData: [
+      {
+        ID: "r1234567-89ab-cdef-0123-456789abcdef",
+        Name: "Project Manager",
+        PostCode: "PM001",
+        Description: "Oversees project execution.",
+        Responsibility: "Manage team, allocate resources.",
+        Authorization: "Approve budgets, make strategic decisions.",
+        Competencies: "Leadership, communication, problem-solving.",
+        Grade: "A",
+        Type: "Full-Time",
+        isStaticPost: true,
+      },
+      {
+        ID: "r2234567-89ab-cdef-0123-456789abcdef",
+        Name: "Software Engineer",
+        PostCode: "SE002",
+        Description: "Develops software solutions.",
+        Responsibility: "Write code, fix bugs.",
+        Authorization: "Make technical decisions within project scope.",
+        Competencies: "Coding, debugging, teamwork.",
+        Grade: "B",
+        Type: "Full-Time",
+        isStaticPost: false,
+      },
+      {
+        ID: "r3234567-89ab-cdef-0123-456789abcdef",
+        Name: "QA Tester",
+        PostCode: "QA003",
+        Description: "Ensures software quality.",
+        Responsibility: "Test software, report issues.",
+        Authorization: "Decide on severity of bugs.",
+        Competencies: "Attention to detail, analytical skills.",
+        Grade: "B",
+        Type: "Contract",
+        isStaticPost: false,
+      },
+      {
+        ID: "r4234567-89ab-cdef-0123-456789abcdef",
+        Name: "Business Analyst",
+        PostCode: "BA004",
+        Description: "Analyzes business requirements.",
+        Responsibility: "Gather requirements, document processes.",
+        Authorization: "Approve requirement changes.",
+        Competencies: "Analytical thinking, communication.",
+        Grade: "A",
+        Type: "Full-Time",
+        isStaticPost: true,
+      },
+      {
+        ID: "r5234567-89ab-cdef-0123-456789abcdef",
+        Name: "UI/UX Designer",
+        PostCode: "UI005",
+        Description: "Designs user interfaces.",
+        Responsibility: "Create wireframes, prototypes.",
+        Authorization: "Decide on design elements.",
+        Competencies: "Creativity, design tools proficiency.",
+        Grade: "B",
+        Type: "Part-Time",
+        isStaticPost: false,
+      },
+    ],
+  },
+  
+  RoleGroups : {
+    columnDefs: [
+      {
+        headerName: "Group Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Admin Group",
+        Description: "Group for admin users",
+        // اینجا دو تا پروژه داریم که در projectsData تعریف شده اند
+        ProjectsStr: "08050144-052d-45f9-ae1b-00b7c96b9847|11150144-052d-45f9-ae1b-00b7c96b9847|",
+        PostsStr: "User1|User2|User3",
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-01-01",
+      },
+      {
+        ID: 2,
+        Name: "Development Team",
+        Description: "Group for developers",
+        // دو پروژه دیگر
+        ProjectsStr: "22250144-052d-45f9-ae1b-00b7c96b9847|33350144-052d-45f9-ae1b-00b7c96b9847|",
+        PostsStr: "User4|User5",
+        IsGlobal: false,
+        IsVisible: true,
+        LastModified: "2024-02-15",
+      },
+      {
+        ID: 3,
+        Name: "Support Team",
+        Description: "Group for support members",
+        // یک پروژه
+        ProjectsStr: "c5d86029-8b93-4578-824c-259a9124f18e|",
+        PostsStr: "User6|User7|User8",
+        IsGlobal: false,
+        IsVisible: false,
+        LastModified: "2024-03-20",
+      },
+      
+    ],
+  },
+  
 };
+
+
+

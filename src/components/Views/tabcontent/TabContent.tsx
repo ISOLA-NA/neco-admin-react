@@ -175,7 +175,7 @@ const TabContent: React.FC<TabContentProps> = ({
 
             {/* با اضافه کردن key مقادیر فرم ریست می‌شوند */}
             {Component && isPanelOpen ? (
-              <div style={{ marginTop: "5px" }}>
+              <div className="mt-5">
                 <React.Suspense fallback={<div>Loading...</div>}>
                   <Component
                     key={isAdding ? "add-mode" : "edit-mode"}

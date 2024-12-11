@@ -58,7 +58,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
         >
           <option value="" disabled hidden></option>
           {options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.value} className="ml-10">
               {option.label}
             </option>
           ))}

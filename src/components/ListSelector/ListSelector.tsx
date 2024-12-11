@@ -1,17 +1,18 @@
-// src/components/ListSelector/ListSelector.tsx
-
-import React, { useState } from "react";
-import DynamicModal from "../utilities/DynamicModal"; // وارد کردن صحیح
-import ButtonComponent from "../General/Configuration/ButtonComponent"; // وارد کردن صحیح
+import React from "react";
+import DynamicModal from "../utilities/DynamicModal";
+import ButtonComponent from "../General/Configuration/ButtonComponent";
 import { classNames } from "primereact/utils";
 
 interface ListSelectorProps {
   title: string;
-  className?: string; // افزودن پراپ className
-  columnDefs: any[]; // تعریف ستون‌ها از پراپ
-  rowData: any[]; // داده‌های جدول از پراپ
-  selectedIds: number[]; // شناسه‌های انتخاب شده از پراپ
-  onSelectionChange: (selectedIds: number[]) => void; // تابع تغییر انتخاب
+  className?: string;
+  columnDefs: any[];
+  rowData: { ID: string | number; Name: string }[];
+  selectedIds: (string | number)[];
+  onSelectionChange: (selectedIds: (string | number)[]) => void;
+  showSwitcher?: boolean;
+  isGlobal: boolean;
+  onGlobalChange?: (isGlobal: boolean) => void;
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
@@ -21,9 +22,12 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   rowData,
   selectedIds,
   onSelectionChange,
+  showSwitcher = false,
+  isGlobal,
+  onGlobalChange,
 }) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [selectedRow, setSelectedRow] = React.useState<any>(null);
 
   const handleRowSelect = (data: any) => {
     const id = data.ID;
@@ -34,25 +38,15 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     setSelectedRow(null);
   };
 
-  const handleRemoveName = (id: number) => {
+  const handleRemoveName = (id: string | number) => {
     onSelectionChange(selectedIds.filter((selectedId) => selectedId !== id));
   };
 
-  const handleRowClick = (data: any) => {
-    setSelectedRow(data);
-  };
-
-  const handleSelectFromButton = (data: any, state: string, image?: File) => {
+  const handleSelectFromButton = (data: any) => {
     handleRowSelect(data);
   };
 
-  const handleSelectButtonClick = () => {
-    if (selectedRow) {
-      handleRowSelect(selectedRow);
-    }
-  };
-
-  // دریافت نام‌ها بر اساس شناسه‌ها
+  // نام‌های انتخاب شده
   const selectedNames = rowData
     .filter((row) => selectedIds.includes(row.ID))
     .map((row) => row.Name);
@@ -61,17 +55,35 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     <div className={classNames("w-full", className)}>
       {/* هدر */}
       <div className="flex justify-between items-center p-2 rounded-t-md bg-gradient-to-r from-purple-600 to-indigo-500 h-10">
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
-        <button
-          className="btn btn-sm btn-primary text-white bg-purple-600 hover:bg-indigo-500 px-2 py-1 rounded-md flex-shrink-0 h-6 w-6 flex items-center justify-center text-sm transition-colors duration-300"
-          onClick={() => setIsDialogOpen(true)}
-          aria-label={`افزودن ${title}`}
-        >
-          +
-        </button>
+        <div className="flex items-center gap-2">
+          {/* نمایش چک‌باکس و متن Global در صورت نیاز */}
+          {showSwitcher && (
+            <>
+              <input
+                type="checkbox"
+                className="toggle toggle-info"
+                checked={isGlobal}
+                onChange={() => onGlobalChange && onGlobalChange(!isGlobal)}
+                aria-label="Global Switch"
+              />
+              <span className="text-white text-sm">Global</span>
+            </>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-white">{title}</h3>
+          <button
+            className="btn btn-sm btn-primary text-white bg-purple-600 hover:bg-indigo-500 px-2 py-1 rounded-md flex-shrink-0 h-6 w-6 flex items-center justify-center text-sm transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setIsDialogOpen(true)}
+            aria-label={`افزودن ${title}`}
+            disabled={isGlobal} // زمانی که global فعال است دکمه غیر فعال می‌شود
+          >
+            +
+          </button>
+        </div>
       </div>
 
-      {/* محتوای انتخاب شده‌ها */}
+      {/* محتوای انتخاب شده */}
       <div className="h-32 overflow-y-auto bg-gray-50 rounded-b-md p-3">
         {selectedNames.length === 0 ? (
           <p className="text-gray-500 text-sm text-center">
@@ -88,12 +100,11 @@ const ListSelector: React.FC<ListSelectorProps> = ({
                 <button
                   className="text-red-500 hover:text-red-700 focus:outline-none"
                   onClick={() => {
-                    const id = rowData.find((row) => row.Name === name)?.ID;
-                    if (id) handleRemoveName(id);
+                    const row = rowData.find((r) => r.Name === name);
+                    if (row) handleRemoveName(row.ID);
                   }}
                   aria-label={`حذف ${name}`}
                 >
-                  {/* استفاده از آیکون ضربدر */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -113,7 +124,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         )}
       </div>
 
-      {/* دیالوگ با استفاده از ButtonComponent */}
+      {/* دیالوگ */}
       <DynamicModal
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

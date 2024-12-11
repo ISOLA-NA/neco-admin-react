@@ -7,11 +7,10 @@ import {
   FaPhone,
   FaEye,
   FaEyeSlash,
-  FaGlobe,
 } from "react-icons/fa";
 import DynamicInput from "../utilities/DynamicInput";
 import DynamicSelector from "../utilities/DynamicSelector";
-import DynamicModal from "../utilities/DynamicModal";
+import DynamicSwitcher from "../utilities/DynamicSwitcher";
 
 const Login: React.FC = () => {
   const [isOtp, setIsOtp] = useState<boolean>(false);
@@ -20,23 +19,12 @@ const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
-
-  const [selectedName, setSelectedName] = useState<string>("");
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [selectedRowData, setSelectedRowData] = useState<any>(null);
-
-  const [nameOptions, setNameOptions] = useState([
-    { value: "", label: "Select Item" },
-    { value: "Predefined", label: "Predefined Example" },
-  ]);
+  const [languageError, setLanguageError] = useState<string>("");
 
   const languageOptions = [
     { value: "en", label: "English" },
     { value: "fa", label: "فارسی" },
   ];
-
-  // حالت ارور برای زبان (برای مثال)
-  const [languageError, setLanguageError] = useState<string>("");
 
   const handleToggleOtp = () => {
     setIsOtp(!isOtp);
@@ -57,34 +45,11 @@ const Login: React.FC = () => {
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // اعتبارسنجی فرم
     if (language === "") {
       setLanguageError("لطفاً زبان را انتخاب کنید.");
       return;
     }
-    // ادامه منطق ارسال فرم
     console.log("Form submitted");
-  };
-
-  const handleOpenModal = () => {
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedRowData(null);
-  };
-
-  const handleSelectFromModal = (nameValue: string) => {
-    const exists = nameOptions.find((opt) => opt.value === nameValue);
-    if (!exists) {
-      setNameOptions((prev) => [
-        ...prev,
-        { value: nameValue, label: nameValue },
-      ]);
-    }
-    setSelectedName(nameValue);
-    handleCloseModal();
   };
 
   return (
@@ -104,14 +69,13 @@ const Login: React.FC = () => {
 
       <div className="relative z-10 w-full max-w-md p-8 bg-white bg-opacity-90 rounded-lg shadow-xl mx-4 sm:mx-0">
         {/* Language Switcher */}
-        <div className="absolute top-6 left-6 w-30">
+        <div className="absolute top-6">
           <DynamicSelector
             options={languageOptions}
             selectedValue={language}
             onChange={handleLanguageChange}
-            label="Language"
-            leftIcon={<FaGlobe size={20} className="text-[#7e3af2]" />}
-            error={languageError !== ""}
+            label=""
+            error={!!languageError}
             errorMessage={languageError}
           />
         </div>
@@ -125,32 +89,12 @@ const Login: React.FC = () => {
 
         {/* Toggle Switcher */}
         <div className="flex justify-center items-center mt-20">
-          <div className="flex items-center gap-6">
-            <span className="text-black text-sm sm:text-base">
-              Username / Password
-            </span>
-            <label className="inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="hidden"
-                checked={isOtp}
-                onChange={handleToggleOtp}
-                aria-label="Toggle OTP"
-              />
-              <div
-                className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
-                  !isOtp ? "bg-indigo-400" : "bg-purple-400"
-                }`}
-              >
-                <span
-                  className={`absolute w-6 h-6 bg-white rounded-full shadow-md top-0 left-0 transform transition-transform duration-300 ${
-                    isOtp ? "translate-x-6" : "translate-x-0"
-                  }`}
-                ></span>
-              </div>
-            </label>
-            <span className="text-black text-sm sm:text-base">OTP</span>
-          </div>
+          <DynamicSwitcher
+            isChecked={isOtp}
+            onChange={handleToggleOtp}
+            leftLabel="Username / Password"
+            rightLabel="OTP"
+          />
         </div>
 
         {/* Form */}
@@ -159,7 +103,7 @@ const Login: React.FC = () => {
             <>
               <DynamicInput
                 name="Username"
-                type="text" // اصلاح شده از "string" به "text"
+                type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 leftElement={<FaUser size={20} className="text-indigo-500" />}
@@ -168,7 +112,7 @@ const Login: React.FC = () => {
               />
               <DynamicInput
                 name="Password"
-                type={showPassword ? "text" : "password"} // اصلاح شده
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 leftElement={<FaLock size={20} className="text-indigo-500" />}
@@ -199,7 +143,7 @@ const Login: React.FC = () => {
             <>
               <DynamicInput
                 name="Phone Number"
-                type="number" // می‌توانید نوع "tel" را نیز اضافه کنید اگر نیاز دارید
+                type="number"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 leftElement={<FaPhone size={20} className="text-indigo-500" />}
@@ -216,16 +160,6 @@ const Login: React.FC = () => {
           )}
         </form>
       </div>
-
-      {modalOpen && (
-        <DynamicModal
-          onClose={handleCloseModal}
-          onSelect={handleSelectFromModal}
-          selectedRowData={selectedRowData}
-          setSelectedRowData={setSelectedRowData}
-          modalOpen={modalOpen}
-        />
-      )}
     </div>
   );
 };

@@ -73,6 +73,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           onDelete={() => {}}
           onDuplicate={() => {}}
           domLayout="autoHeight" // تنظیم domLayout به "autoHeight"
+          isRowSelected={!!selectedRow} // بررسی اینکه آیا ردیفی انتخاب شده است
         />
       </div>
       
