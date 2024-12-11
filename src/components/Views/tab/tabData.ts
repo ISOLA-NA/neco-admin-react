@@ -1043,6 +1043,88 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       
     ],
   },
+
+  Enterprises : {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "Description",
+        field: "Describtion",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "Type",
+        field: "Type",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+
+    ],
+    rowData: [
+      {
+        ID: 1,
+        ModifiedById: null,
+        Name: "Modiriat Tose'e",
+        Describtion: "مدیریت توسعه",
+        Type: "نوع اول",
+        Information: "اطلاعات مدیریت توسعه",
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-01-04T14:29:29.413",
+      },
+      {
+        ID: 2,
+        ModifiedById: null,
+        Name: "Sanat Tose'e",
+        Describtion: "صنعت توسعه",
+        Type: "نوع دوم",
+        Information: "اطلاعات صنعت توسعه",
+        IsGlobal: false,
+        IsVisible: true,
+        LastModified: "2024-02-10T10:15:45.123",
+      },
+      {
+        ID: 3,
+        ModifiedById: null,
+        Name: "Fanni Tose'e",
+        Describtion: "فنی توسعه",
+        Type: "نوع سوم",
+        Information: "اطلاعات فنی توسعه",
+        IsGlobal: false,
+        IsVisible: false,
+        LastModified: "2024-03-15T08:45:30.789",
+      },
+      {
+        ID: 4,
+        ModifiedById: null,
+        Name: "Barname Tose'e",
+        Describtion: "برنامه توسعه",
+        Type: "نوع چهارم",
+        Information: "اطلاعات برنامه توسعه",
+        IsGlobal: true,
+        IsVisible: true,
+        LastModified: "2024-04-20T12:00:00.000",
+      },
+      {
+        ID: 5,
+        ModifiedById: null,
+        Name: "Daryafshan Tose'e",
+        Describtion: "دریافتشان توسعه",
+        Type: "نوع پنجم",
+        Information: "اطلاعات دریافشان توسعه",
+        IsGlobal: false,
+        IsVisible: true,
+        LastModified: "2024-05-25T16:30:15.456",
+      },
+      
+    ],
+  },
   
 };
 
