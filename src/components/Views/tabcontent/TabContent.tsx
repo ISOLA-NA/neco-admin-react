@@ -1,6 +1,6 @@
 // src/components/Views/tab/TabContent.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 import DataTable from "../../TableDynamic/DataTable";
 import MyPanel from "./PanelHeader";
@@ -9,7 +9,7 @@ import { categoriesCata, categoriesCatb } from "../tab/tabData"; // اطمینا
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 
 interface TabContentProps {
-  component: React.LazyExoticComponent<React.FC<any>> | null;
+  component: React.LazyExoticComponent<React.ComponentType<any>> | null;
   columnDefs: any[];
   rowData: any[];
   onRowDoubleClick: (data: any) => void;
@@ -216,18 +216,24 @@ const TabContent: React.FC<TabContentProps> = ({
             )}
 
             {/* نمایش کامپوننت‌های اضافی در صورت باز بودن پنل */}
-            {Component && isPanelOpen ? (
+            {Component && isPanelOpen && (
               <div className="mt-5">
-                <React.Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<div>Loading...</div>}>
                   <Component
                     key={isAdding ? "add-mode" : "edit-mode"}
                     selectedRow={isAdding ? null : selectedRow}
-                    categoryType={categoryType} // انتقال categoryType
-                    setCategoryType={setCategoryType} // انتقال setCategoryType
+                    categoryType={
+                      activeSubTab === "Categories" ? categoryType : undefined
+                    } // انتقال categoryType فقط برای زیرتب Categories
+                    setCategoryType={
+                      activeSubTab === "Categories"
+                        ? setCategoryType
+                        : undefined
+                    } // انتقال setCategoryType فقط برای زیرتب Categories
                   />
-                </React.Suspense>
+                </Suspense>
               </div>
-            ) : null}
+            )}
           </div>
         </SplitterPanel>
       </Splitter>

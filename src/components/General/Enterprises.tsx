@@ -1,115 +1,98 @@
-// src/components/General/EnterpriseDetails.tsx
+// src/components/General/EnterPrise.tsx
 
 import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
-import CustomTextarea from "../utilities/DynamicTextArea";
 
-interface EnterpriseDetailsProps {
+interface RoleGroupsProps {
   selectedRow: any;
-  categoryType: "cata" | "catb";
-  setCategoryType: (value: "cata" | "catb") => void;
 }
 
-const EnterpriseDetails: React.FC<EnterpriseDetailsProps> = ({
-  selectedRow,
-  categoryType,
-  setCategoryType,
-}) => {
-  const [enterpriseData, setEnterpriseData] = useState<{
+const EnterPrise: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
+  const [groupData, setGroupData] = useState<{
     ID: string | number;
-    EnterpriseName: string;
-    Description: string;
-    Title: string;
-    GroupName: string;
+    Name: string;
+    Describtion: string;
+    Type: string;
+    Information: string;
+    GroupMembers: (string | number)[];
   }>({
     ID: "",
-    EnterpriseName: "",
-    Description: "",
-    Title: "",
-    GroupName: "",
+    Name: "",
+    Describtion: "",
+    Type: "",
+    Information: "",
+    GroupMembers: [],
   });
 
   useEffect(() => {
     if (selectedRow) {
-      setEnterpriseData({
+      const selectedMembers = selectedRow.GroupMembers || [];
+
+      setGroupData({
         ID: selectedRow.ID || "",
-        EnterpriseName: selectedRow.EnterpriseName || "",
-        Description: selectedRow.Description || "",
-        Title: selectedRow.Title || "",
-        GroupName: selectedRow.GroupName || "",
+        Name: selectedRow.Name || "",
+        Describtion: selectedRow.Describtion || "",
+        Type: selectedRow.Type || "",
+        Information: selectedRow.Information || false,
+        GroupMembers: selectedMembers,
       });
     } else {
-      setEnterpriseData({
+      setGroupData({
         ID: "",
-        EnterpriseName: "",
-        Description: "",
-        Title: "",
-        GroupName: "",
+        Name: "",
+        Describtion: "",
+        Type: "",
+        Information: "",
+        GroupMembers: [],
       });
     }
   }, [selectedRow]);
 
-  // هنگام تغییر categoryType، مقدار GroupName نیز به روز شود
-  useEffect(() => {
-    setEnterpriseData((prev) => ({
-      ...prev,
-      GroupName: categoryType,
-    }));
-  }, [categoryType]);
-
-  const handleChange = (field: keyof typeof enterpriseData, value: string) => {
-    setEnterpriseData((prev) => ({
+  const handleChange = (
+    field: keyof typeof groupData,
+    value: string | string | (string | number)[]
+  ) => {
+    setGroupData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  // تعریف گزینه‌های Select بر اساس هماهنگی دو select
-  const groupOptions = ["cata", "catb"].map((type) => ({
-    value: type,
-    label: type.toUpperCase(), // نمایش با حروف بزرگ‌تر برای زیبایی
-  }));
-
   return (
     <TwoColumnLayout>
-      {/* Group Name Select */}
-      <div className="mb-4">
-        <select
-          id="groupName"
-          value={enterpriseData.GroupName}
-          onChange={(e) => {
-            handleChange("GroupName", e.target.value);
-            setCategoryType(e.target.value as "cata" | "catb"); // هماهنگ‌سازی با categoryType
-          }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-        >
-          <option value="">Select Group</option>
-          {groupOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <CustomTextarea
-        id="Description"
-        name="Description"
-        value={enterpriseData.Description}
+      <DynamicInput
+        name="EnterPrise"
+        type="text"
+        value={groupData.Name}
         placeholder=""
-        onChange={(e) => handleChange("Description", e.target.value)}
+        onChange={(e) => handleChange("Name", e.target.value)}
       />
 
       <DynamicInput
-        name="Title"
+        name="Description"
         type="text"
-        value={enterpriseData.Title}
+        value={groupData.Describtion}
         placeholder=""
-        onChange={(e) => handleChange("Title", e.target.value)}
+        onChange={(e) => handleChange("Describtion", e.target.value)}
+      />
+      <DynamicInput
+        name="Type"
+        type="text"
+        value={groupData.Type}
+        placeholder=""
+        onChange={(e) => handleChange("Type", e.target.value)}
+      />
+
+      <DynamicInput
+        name="Information"
+        type="text"
+        value={groupData.Information}
+        placeholder=""
+        onChange={(e) => handleChange("Information", e.target.value)}
       />
     </TwoColumnLayout>
   );
 };
 
-export default EnterpriseDetails;
+export default EnterPrise;

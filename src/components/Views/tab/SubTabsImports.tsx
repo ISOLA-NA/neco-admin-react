@@ -2,13 +2,8 @@
 
 import React from "react";
 
-// تعریف اینترفیس پایه برای پراپ‌ها
-interface SubTabProps {
-  selectedRow: any; // می‌توانید نوع دقیق‌تری تعریف کنید
-}
-
 export const subTabComponents: {
-  [key: string]: React.LazyExoticComponent<React.FC<SubTabProps>>;
+  [key: string]: React.LazyExoticComponent<React.ComponentType<any>>;
 } = {
   // General
   Configurations: React.lazy(
