@@ -1,5 +1,3 @@
-// src/components/Views/tab/tabData.ts
-
 export interface TabsData {
   [key: string]: {
     groups?: Array<{
@@ -1462,6 +1460,140 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         IsVisible: true,
         LastModified: null,
         ModifiedById: null,
+      },
+    ],
+  },
+
+  ApprovalFlows: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "Duration",
+        field: "MaxDuration",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "Budget",
+        field: "PCost",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Company Registration AF",
+        Description: "sss",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        IsGlobal: true,
+        MaxDuration: "3",
+        PCost: "122321",
+      },
+      {
+        ID: 2,
+        Name: "Employee Onboarding AF",
+        Description: "Process for onboarding new employees.",
+        ProjectsStr:
+          "a1b2c3d4-5678-90ab-cdef-1234567890ab|c3d4e5f6-7890-1bcd-ef12-34567890abcd|",
+        IsGlobal: false,
+        MaxDuration: "3",
+        PCost: "1233",
+      },
+      {
+        ID: 3,
+        Name: "Expense Approval AF",
+        Description: "Approval process for employee expenses.",
+        ProjectsStr: "b2c3d4e5-6789-0abc-def1-234567890abc|",
+        IsGlobal: true,
+        MaxDuration: "5",
+        PCost: "121233",
+      },
+      {
+        ID: 4,
+        Name: "Project Kickoff AF",
+        Description: "Initiating new projects.",
+        ProjectsStr:
+          "c3d4e5f6-7890-1bcd-ef12-34567890abcd|d4e5f6g7-8901-2cde-f123-4567890abcde|",
+        IsGlobal: false,
+        MaxDuration: "7",
+        PCost: "122",
+      },
+      {
+        ID: 5,
+        Name: "Leave Approval AF",
+        Description: "Process for approving employee leave requests.",
+        ProjectsStr: "d4e5f6g7-8901-2cde-f123-4567890abcde|",
+        IsGlobal: true,
+        MaxDuration: "8",
+        PCost: "12",
+      },
+    ],
+  },
+
+  ApprovalChecklist: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+        sortable: true,
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Company Registration AF",
+        Description: "sss",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        IsGlobal: true,
+      },
+      {
+        ID: 2,
+        Name: "Employee Onboarding AF",
+        Description: "Process for onboarding new employees.",
+        ProjectsStr:
+          "a1b2c3d4-5678-90ab-cdef-1234567890ab|c3d4e5f6-7890-1bcd-ef12-34567890abcd|",
+        IsGlobal: false,
+      },
+      {
+        ID: 3,
+        Name: "Expense Approval AF",
+        Description: "Approval process for employee expenses.",
+        ProjectsStr: "b2c3d4e5-6789-0abc-def1-234567890abc|",
+        IsGlobal: true,
+      },
+      {
+        ID: 4,
+        Name: "Project Kickoff AF",
+        Description: "Initiating new projects.",
+        ProjectsStr:
+          "c3d4e5f6-7890-1bcd-ef12-34567890abcd|d4e5f6g7-8901-2cde-f123-4567890abcde|",
+        IsGlobal: false,
+      },
+      {
+        ID: 5,
+        Name: "Leave Approval AF",
+        Description: "Process for approving employee leave requests.",
+        ProjectsStr: "d4e5f6g7-8901-2cde-f123-4567890abcde|",
+        IsGlobal: true,
       },
     ],
   },

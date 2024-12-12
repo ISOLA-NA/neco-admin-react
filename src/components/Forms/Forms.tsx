@@ -75,10 +75,6 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
   );
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
-  // وضعیت‌های آپلود فایل
-  const [wordFile, setWordFile] = useState<File | null>(null);
-  const [excelFile, setExcelFile] = useState<File | null>(null);
-
   useEffect(() => {
     if (selectedRow) {
       setFormData({
