@@ -40,8 +40,8 @@ interface FormsCommandProps {
 
 // داده‌های نمونه برای DynamicSelector مربوط به ACategory و BCategory
 const aCategoryOptions = [
-  { value: "Start up", label: "Start up" },
-  { value: "Development", label: "Development" },
+  { value: "1", label: "type1" },
+  { value: "2", label: "type2" },
 ];
 const bCategoryOptions = [
   { value: "", label: "None" },

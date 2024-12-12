@@ -350,40 +350,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
   },
 
-  // **ProgramTemplate**
-  ProgramTemplate: {
-    columnDefs: [
-      {
-        headerName: "Template Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "Description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: programTemplates,
-  },
-
-  // **DefaultRibbon**
-  DefaultRibbon: {
-    columnDefs: [
-      {
-        headerName: "Ribbon Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "Description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: defaultRibbons,
-  },
-
   // **Lesson Learned Form**
   "Lesson Learned Form": {
     columnDefs: [
@@ -1594,6 +1560,168 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         Description: "Process for approving employee leave requests.",
         ProjectsStr: "d4e5f6g7-8901-2cde-f123-4567890abcde|",
         IsGlobal: true,
+      },
+    ],
+  },
+
+  // **ProgramTemplate**
+  ProgramTemplate: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Open List Tender",
+        Description: "sss",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
+        IsGlobal: true,
+        Duration: 4,
+        PCost: 1000,
+        nProgramTypeID: 1,
+      },
+      {
+        ID: 2,
+        Name: "Purchase Order",
+        Description: "Process for onboarding new employees.",
+        ProjectsStr:
+          "a1b2c3d4-5678-90ab-cdef-1234567890ab|c3d4e5f6-7890-1bcd-ef12-34567890abcd|",
+        IsGlobal: false,
+        Duration: 5,
+        PCost: 4000,
+        nProgramTypeID: 2,
+      },
+    ],
+  },
+
+  // **ProgramTemplate**
+  ProgramTypes: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Open List Tender",
+        Description: "OutSourcing",
+      },
+      {
+        ID: 2,
+        Name: "Execution",
+        Description: "Process for onboarding new employees.",
+      },
+    ],
+  },
+
+  // **DefaultRibbon**
+  DefaultRibbon: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: defaultRibbons,
+  },
+
+  Projects: {
+    columnDefs: [
+      {
+        headerName: "Project Name",
+        field: "ProjectName",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Status",
+        field: "State",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Act Start",
+        field: "AcualStartTime",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Duration",
+        field: "TotalDuration",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Budget Act",
+        field: "PCostAct",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Budget Approve",
+        field: "PCostAprov",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Phase",
+        field: "IsIdea",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Is persian",
+        field: "IsPersian",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "calendar",
+        field: "calendarName",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        ProjectName: "Project 1",
+        State: "Started",
+        AcualStartTime: "2022/12/12",
+        TotalDuration: 1,
+        PCostAct: 1210000,
+        PCostAprov: 56000000,
+        IsIdea: "Idea",
+        IsPersian: true,
+        calendarName: "cal1",
+        TaskNum: 1,
+        RolesNum: 100,
+        LettersNum: 233,
+        MeetingsNum: 999,
+        IssuesNum: 111111,
+        KnowledgeNum: 5656,
+      },
+      {
+        ID: 2,
+        ProjectName: "project 2",
+        State: "Closed",
+        AcualStartTime: "2019/12/12",
+        TotalDuration: 2,
+        PCostAct: 34340000,
+        PCostAprov: 99000000,
+        IsIdea: "not Idea",
+        IsPersian: false,
+        calendarName: "cal2",
+        TaskNum: 2,
+        RolesNum: 200,
+        LettersNum: 786,
+        MeetingsNum: 998,
+        IssuesNum: 2222222222,
+        KnowledgeNum: 434334,
       },
     ],
   },
