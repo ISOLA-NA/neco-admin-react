@@ -75,12 +75,6 @@ const EnterpriseDetails: React.FC<EnterpriseDetailsProps> = ({
     <TwoColumnLayout>
       {/* Group Name Select */}
       <div className="mb-4">
-        <label
-          htmlFor="groupName"
-          className="block mb-1 text-gray-700 font-medium"
-        >
-          Group Name:
-        </label>
         <select
           id="groupName"
           value={enterpriseData.GroupName}

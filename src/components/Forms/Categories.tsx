@@ -123,7 +123,6 @@ const EnterpriseDetails: React.FC<EnterpriseDetailsProps> = ({
         placeholder=""
         onChange={(e) => handleChange("Description", e.target.value)}
         label="Description"
-        rows={4}
         required
         // می‌توانید ویژگی‌های اضافی مانند leftElement یا rightElement را اضافه کنید
       />

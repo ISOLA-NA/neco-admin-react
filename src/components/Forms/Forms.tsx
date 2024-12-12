@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+// src/components/FormsCommand.tsx
+import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import DynamicSelector from "../utilities/DynamicSelector";
 import ListSelector from "../ListSelector/ListSelector";
 import DynamicModal from "../utilities/DynamicModal";
-import TableSelector from "../General/Configuration/TableSelector"; // فرض بر این است که این کامپوننت وجود دارد
-// فرض بر این است که این کامپوننت وجود دارد
+import TableSelector from "../General/Configuration/TableSelector";
+import HandlerUplodeExcellAccess from "../utilities/HandlerUplodeExcellAccess";
 
 // یک چک‌باکس ساده
 const CheckBox = ({
@@ -77,10 +78,6 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
   // وضعیت‌های آپلود فایل
   const [wordFile, setWordFile] = useState<File | null>(null);
   const [excelFile, setExcelFile] = useState<File | null>(null);
-
-  // مراجع به input های فایل
-  const wordInputRef = useRef<HTMLInputElement | null>(null);
-  const excelInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (selectedRow) {
@@ -178,73 +175,79 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
     return [];
   };
 
-  // توابع مدیریت آپلود فایل‌ها
-  const handleWordUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setWordFile(e.target.files[0]);
-      // انجام عملیات مورد نیاز با فایل ورد (مثلاً آپلود به سرور)
-      console.log("Word file selected:", e.target.files[0]);
-    }
+  // توابع مدیریت آپلود فایل‌ها با استفاده از کامپوننت جدید
+  const handleWordUpload = (file: File) => {
+    setWordFile(file);
+    // انجام عملیات مورد نیاز با فایل ورد (مثلاً آپلود به سرور)
+    console.log("Word file selected:", file);
   };
 
-  const handleExcelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setExcelFile(e.target.files[0]);
-      // انجام عملیات مورد نیاز با فایل اکسل (مثلاً آپلود به سرور)
-      console.log("Excel file selected:", e.target.files[0]);
-    }
+  const handleExcelUpload = (file: File) => {
+    setExcelFile(file);
+    // انجام عملیات مورد نیاز با فایل اکسل (مثلاً آپلود به سرور)
+    console.log("Excel file selected:", file);
   };
 
   return (
-    <div className="relative">
+    <div>
       <TwoColumnLayout>
         {/* FormName */}
-        <DynamicInput
-          name="FormName"
-          type="text"
-          value={formData.FormName}
-          placeholder=""
-          onChange={(e) => handleChange("FormName", e.target.value)}
-        />
+        <TwoColumnLayout.Item span={1}>
+          <DynamicInput
+            name="FormName"
+            type="text"
+            value={formData.FormName}
+            placeholder=""
+            onChange={(e) => handleChange("FormName", e.target.value)}
+          />
+        </TwoColumnLayout.Item>
 
         {/* Windows App Command */}
-        <DynamicInput
-          name="Windows App Command"
-          type="text"
-          value={formData.Code}
-          placeholder=""
-          onChange={(e) => handleChange("Code", e.target.value)}
-        />
+        <TwoColumnLayout.Item span={1}>
+          <DynamicInput
+            name="Windows App Command"
+            type="text"
+            value={formData.Code}
+            placeholder=""
+            onChange={(e) => handleChange("Code", e.target.value)}
+          />
+        </TwoColumnLayout.Item>
 
         {/* ACategorization با showButton */}
-        <DynamicSelector
-          options={aCategoryOptions}
-          selectedValue={formData.EntityCateAName}
-          onChange={(e) => handleChange("EntityCateAName", e.target.value)}
-          label="ACategorization"
-          showButton={true}
-          onButtonClick={() => handleOpenModal("A")}
-        />
+        <TwoColumnLayout.Item span={1}>
+          <DynamicSelector
+            options={aCategoryOptions}
+            selectedValue={formData.EntityCateAName}
+            onChange={(e) => handleChange("EntityCateAName", e.target.value)}
+            label="ACategorization"
+            showButton={true}
+            onButtonClick={() => handleOpenModal("A")}
+          />
+        </TwoColumnLayout.Item>
 
         {/* BCategorization با showButton */}
-        <DynamicSelector
-          options={bCategoryOptions}
-          selectedValue={formData.EntityCateBName}
-          onChange={(e) => handleChange("EntityCateBName", e.target.value)}
-          label="BCategorization"
-          showButton={true}
-          onButtonClick={() => handleOpenModal("B")}
-        />
+        <TwoColumnLayout.Item span={1}>
+          <DynamicSelector
+            options={bCategoryOptions}
+            selectedValue={formData.EntityCateBName}
+            onChange={(e) => handleChange("EntityCateBName", e.target.value)}
+            label="BCategorization"
+            showButton={true}
+            onButtonClick={() => handleOpenModal("B")}
+          />
+        </TwoColumnLayout.Item>
 
-        {/* Transmital (CheckBox) */}
-        <CheckBox
-          label="Transmital"
-          checked={formData.IsDoc}
-          onChange={(val) => handleChange("IsDoc", val)}
-        />
+        {/* Transmital (CheckBox) - تک ستونی */}
+        <TwoColumnLayout.Item span={1}>
+          <CheckBox
+            label="Transmital"
+            checked={formData.IsDoc}
+            onChange={(val) => handleChange("IsDoc", val)}
+          />
+        </TwoColumnLayout.Item>
 
-        {/* Related Projects با سوییچر Global */}
-        <div>
+        {/* Related Projects با سوییچر Global - تک ستونی */}
+        <TwoColumnLayout.Item span={2}>
           <ListSelector
             title="Related Projects"
             columnDefs={[{ field: "Name", headerName: "Project Name" }]}
@@ -254,69 +257,34 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
             showSwitcher={true}
             isGlobal={formData.IsGlobal}
             onGlobalChange={handleGlobalChange}
-            className="mt-10"
+            className="-mt-5"
           />
-        </div>
+        </TwoColumnLayout.Item>
 
-        {/* ردیف جدید: Template Word File با دو دکمه گرادیانتی */}
-        <div className="flex items-center justify-between mb-6 absolute top-80">
-          {/* عنوان */}
-          <span className="text-gray-800 text-sm font-medium mr-5">
-            Template Word File
-          </span>
-
-          {/* دکمه‌ها */}
-          <div className="flex space-x-4">
-            {/* دکمه آپلود ورد */}
-            <button
-              type="button"
-              onClick={() => wordInputRef.current?.click()}
-              className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-blue-800 transition-colors duration-300"
-            >
-              آپلود ورد
-            </button>
-            <input
-              type="file"
-              accept=".doc,.docx"
-              ref={wordInputRef}
-              className="hidden"
-              onChange={handleWordUpload}
-            />
-
-            {/* دکمه آپلود اکسل */}
-            <button
-              type="button"
-              onClick={() => excelInputRef.current?.click()}
-              className="bg-gradient-to-r from-pink-500 to-pink-700 text-white px-4 py-2 rounded-lg shadow hover:from-pink-600 hover:to-pink-800 transition-colors duration-300"
-            >
-              آپلود اکسل
-            </button>
-            <input
-              type="file"
-              accept=".xls,.xlsx"
-              ref={excelInputRef}
-              className="hidden"
-              onChange={handleExcelUpload}
-            />
-          </div>
-        </div>
-
-        {/* مدال داینامیک برای انتخاب دسته‌بندی */}
-        <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
-          <TableSelector
-            columnDefs={[
-              { headerName: "نام", field: "label" }, // assuming label نشان دهنده نام است
-              // اگر توضیحاتی نیز وجود دارد، می‌توانید فیلد مربوطه را اضافه کنید
-            ]}
-            rowData={getRowData(currentSelector)}
-            selectedRow={selectedRowData}
-            onRowDoubleClick={handleSelectButtonClick}
-            onRowClick={handleRowClick}
-            onSelectButtonClick={handleSelectButtonClick}
-            isSelectDisabled={!selectedRowData}
+        {/* ردیف تک‌ستونی: Template Word File با دو دکمه گرادیانتی */}
+        <TwoColumnLayout.Item span={2}>
+          <HandlerUplodeExcellAccess
+            onWordUpload={handleWordUpload}
+            onExcelUpload={handleExcelUpload}
           />
-        </DynamicModal>
+        </TwoColumnLayout.Item>
       </TwoColumnLayout>
+
+      {/* مدال داینامیک برای انتخاب دسته‌بندی */}
+      <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
+        <TableSelector
+          columnDefs={[
+            { headerName: "نام", field: "label" },
+            // اگر توضیحاتی نیز وجود دارد، می‌توانید فیلد مربوطه را اضافه کنید
+          ]}
+          rowData={getRowData(currentSelector)}
+          selectedRow={selectedRowData}
+          onRowDoubleClick={handleSelectButtonClick}
+          onRowClick={handleRowClick}
+          onSelectButtonClick={handleSelectButtonClick}
+          isSelectDisabled={!selectedRowData}
+        />
+      </DynamicModal>
     </div>
   );
 };
