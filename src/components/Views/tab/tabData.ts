@@ -1717,11 +1717,13 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         ID: 1,
         Name: "procedure 1",
         Description: "aaaa",
+        ProjectsStr: "1|2|",
       },
       {
         ID: 2,
         Name: "procedure 2",
         Description: "xxxx",
+        ProjectsStr: "1|2|",
       },
     ],
   },
@@ -1950,5 +1952,3 @@ export const RightProjectData: { [key: string]: RightItem[] } = {
     { detail: "Assignment", checked: true },
   ],
 };
-
-// src/data/OdpData.ts
