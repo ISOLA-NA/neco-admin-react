@@ -1,6 +1,5 @@
 import React from "react";
 import DynamicModal from "../utilities/DynamicModal";
-import ButtonComponent from "../General/Configuration/ButtonComponent";
 import { classNames } from "primereact/utils";
 
 interface ListSelectorProps {
@@ -11,20 +10,24 @@ interface ListSelectorProps {
   selectedIds: (string | number)[];
   onSelectionChange: (selectedIds: (string | number)[]) => void;
   showSwitcher?: boolean;
-  isGlobal: boolean; // اجباری
+  isGlobal: boolean;
   onGlobalChange?: (isGlobal: boolean) => void;
+  ModalContentComponent: React.FC<any>;
+  modalContentProps?: any;
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
   title,
   className,
   columnDefs,
-  rowData,
+  rowData = [],
   selectedIds,
   onSelectionChange,
   showSwitcher = false,
   isGlobal = false,
   onGlobalChange,
+  ModalContentComponent,
+  modalContentProps = {},
 }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
@@ -42,21 +45,15 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     onSelectionChange(selectedIds.filter((selectedId) => selectedId !== id));
   };
 
-  const handleSelectFromButton = (data: any) => {
-    handleRowSelect(data);
-  };
-
-  // نام‌های انتخاب شده
+  // دریافت اسامی انتخاب شده
   const selectedNames = rowData
     .filter((row) => selectedIds.includes(row.ID))
     .map((row) => row.Name);
 
   return (
     <div className={classNames("w-full", className)}>
-      {/* هدر */}
       <div className="flex justify-between items-center p-2 rounded-t-md bg-gradient-to-r from-purple-600 to-indigo-500 h-10">
         <div className="flex items-center gap-2">
-          {/* نمایش چک‌باکس و متن Global در صورت نیاز */}
           {showSwitcher && (
             <>
               <input
@@ -76,14 +73,13 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             className="btn btn-sm btn-primary text-white bg-purple-600 hover:bg-indigo-500 px-2 py-1 rounded-md flex-shrink-0 h-6 w-6 flex items-center justify-center text-sm transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => setIsDialogOpen(true)}
             aria-label={`افزودن ${title}`}
-            disabled={isGlobal} // زمانی که global فعال است دکمه غیر فعال می‌شود
+            disabled={isGlobal}
           >
             +
           </button>
         </div>
       </div>
 
-      {/* محتوای انتخاب شده */}
       <div className="h-32 overflow-y-auto bg-gray-50 rounded-b-md p-3">
         {selectedNames.length === 0 ? (
           <p className="text-gray-500 text-sm text-center">
@@ -124,17 +120,25 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         )}
       </div>
 
-      {/* دیالوگ */}
       <DynamicModal
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
       >
-        <ButtonComponent
+        <ModalContentComponent
+          {...modalContentProps}
           columnDefs={columnDefs}
           rowData={rowData}
-          onClose={() => setIsDialogOpen(false)}
-          onRowSelect={handleRowSelect}
-          onSelectFromButton={handleSelectFromButton}
+          selectedRow={selectedRow}
+          onRowDoubleClick={(row: any) => {
+            handleRowSelect(row);
+          }}
+          onRowClick={(row: any) => {
+            setSelectedRow(row);
+          }}
+          onSelectButtonClick={() => {
+            if (selectedRow) handleRowSelect(selectedRow);
+          }}
+          isSelectDisabled={!selectedRow}
         />
       </DynamicModal>
     </div>

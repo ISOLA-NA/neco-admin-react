@@ -5,6 +5,7 @@ import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import ListSelector from "../ListSelector/ListSelector";
+import TableSelector from "../General/Configuration/TableSelector"; // اطمینان از مسیر صحیح
 
 interface RoleGroupsProps {
   selectedRow: any;
@@ -37,7 +38,9 @@ function getAssociatedProjects(
   const safeProjectsData = projectsData || [];
   const safeProjectsStr = projectsStr || "";
   const projectsArray = safeProjectsStr.split("|").filter(Boolean);
-  return safeProjectsData.filter((project) => projectsArray.includes(project.ID));
+  return safeProjectsData.filter((project) =>
+    projectsArray.includes(project.ID)
+  );
 }
 
 const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
@@ -61,7 +64,10 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
 
   useEffect(() => {
     if (selectedRow) {
-      const associatedProjects = getAssociatedProjects(selectedRow.ProjectsStr, projectsData);
+      const associatedProjects = getAssociatedProjects(
+        selectedRow.ProjectsStr,
+        projectsData
+      );
       const selectedMembers = selectedRow.GroupMembers || [];
 
       setGroupData({
@@ -97,11 +103,11 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
   };
 
   const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
-
   const memberColumnDefs = [{ field: "Name", headerName: "Member Name" }];
 
   const handleProjectsChange = (selectedIds: (string | number)[]) => {
-    const newProjectsStr = selectedIds.length > 0 ? selectedIds.join("|") + "|" : "";
+    const newProjectsStr =
+      selectedIds.length > 0 ? selectedIds.join("|") + "|" : "";
     handleChange("ProjectsStr", newProjectsStr);
   };
 
@@ -113,7 +119,10 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
     handleChange("IsGlobal", isGlobal);
   };
 
-  const associatedProjects = getAssociatedProjects(groupData.ProjectsStr, projectsData);
+  const associatedProjects = getAssociatedProjects(
+    groupData.ProjectsStr,
+    projectsData
+  );
   const selectedProjectIds = associatedProjects.map((p) => p.ID);
 
   return (
@@ -134,8 +143,10 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
         onChange={(e) => handleChange("Description", e.target.value)}
       />
 
+      {/* ListSelector - Projects */}
       <ListSelector
         title="Projects"
+        className="mt-4"
         columnDefs={projectColumnDefs}
         rowData={projectsData}
         selectedIds={selectedProjectIds}
@@ -143,16 +154,55 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
         showSwitcher={true}
         isGlobal={groupData.IsGlobal}
         onGlobalChange={handleGlobalChange}
+        ModalContentComponent={TableSelector}
+        modalContentProps={{
+          columnDefs: projectColumnDefs,
+          rowData: projectsData,
+          selectedRows: associatedProjects, // ردیف‌های انتخاب شده
+          onRowDoubleClick: (rows: any[]) => {
+            handleProjectsChange(rows.map((row) => row.ID));
+          },
+          onRowClick: (rows: any[]) => {
+            // برای انتخاب چندگانه، معمولاً از چک‌باکس‌ها استفاده می‌شود
+            // اینجا می‌توانید ردیف‌های انتخاب شده را ذخیره کنید
+          },
+          onSelectButtonClick: () => {
+            handleProjectsChange(selectedProjectIds);
+          },
+          isSelectDisabled: selectedProjectIds.length === 0,
+          selectionMode: "multiple",
+        }}
       />
 
+      {/* ListSelector - Group Members */}
       <ListSelector
         title="Group Members"
+        className="mt-4"
         columnDefs={memberColumnDefs}
         rowData={membersData}
         selectedIds={groupData.GroupMembers}
         onSelectionChange={handleMembersChange}
         showSwitcher={false}
         isGlobal={false} // برای Group Members سوئیچر نمایش داده نمی‌شود
+        ModalContentComponent={TableSelector}
+        modalContentProps={{
+          columnDefs: memberColumnDefs,
+          rowData: membersData,
+          selectedRows: groupData.GroupMembers.map((id) =>
+            membersData.find((m) => m.ID === id)
+          ).filter(Boolean),
+          onRowDoubleClick: (rows: any[]) => {
+            handleMembersChange(rows.map((row) => row.ID));
+          },
+          onRowClick: (rows: any[]) => {
+            // مشابه پروژه‌ها
+          },
+          onSelectButtonClick: () => {
+            handleMembersChange(groupData.GroupMembers);
+          },
+          isSelectDisabled: groupData.GroupMembers.length === 0,
+          selectionMode: "multiple",
+        }}
       />
     </TwoColumnLayout>
   );

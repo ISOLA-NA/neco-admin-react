@@ -1,3 +1,5 @@
+// src/components/General/OdpComp.tsx
+
 import React, { useState, useEffect } from "react";
 import DynamicInput from "../utilities/DynamicInput";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
@@ -103,21 +105,18 @@ const OdpComp: React.FC<OdpProps> = ({ selectedRow }) => {
     }
   }, [selectedRow]);
 
-  // state های مربوط به MODAL ODP
+  // state های مربوط به MODALها
   const [isOdpModalOpen, setIsOdpModalOpen] = useState(false);
   const [selectedOdpRow, setSelectedOdpRow] = useState<any>(null);
 
-  // state های مربوط به MODAL Form Template
   const [isFormTemplateModalOpen, setIsFormTemplateModalOpen] = useState(false);
   const [selectedFormTemplateRow, setSelectedFormTemplateRow] =
     useState<any>(null);
 
-  // state های مربوط به MODAL Approval Flow Template
   const [isApprovalFlowModalOpen, setIsApprovalFlowModalOpen] = useState(false);
   const [selectedApprovalFlowRow, setSelectedApprovalFlowRow] =
     useState<any>(null);
 
-  // state های مربوط به MODAL Relate Projects
   const [isRelateProjectsModalOpen, setIsRelateProjectsModalOpen] =
     useState(false);
   const [selectedRelateProjectsRows, setSelectedRelateProjectsRows] = useState<
@@ -234,8 +233,16 @@ const OdpComp: React.FC<OdpProps> = ({ selectedRow }) => {
   // داده‌های برای ListSelector "Relate Project"
   const relateProjectRowData = MODALRelateProjects;
 
+  // توابع مدیریت تغییر در ListSelector "Relate Project"
+  const handleRelateProjectSelectionChange = (
+    selectedIds: (string | number)[]
+  ) => {
+    setRelateProjectSelectedIds(selectedIds);
+  };
+
   return (
     <TwoColumnLayout>
+      {/* نام ODP */}
       <DynamicInput
         name="Odp Name"
         type="text"
@@ -245,6 +252,7 @@ const OdpComp: React.FC<OdpProps> = ({ selectedRow }) => {
         required={true}
       />
 
+      {/* توضیحات */}
       <CustomTextarea
         id="description"
         name="Description"
@@ -253,6 +261,7 @@ const OdpComp: React.FC<OdpProps> = ({ selectedRow }) => {
         onChange={(e) => handleChange("Description", e.target.value)}
       />
 
+      {/* آدرس */}
       <DynamicInput
         name="Address"
         type="text"
@@ -315,17 +324,31 @@ const OdpComp: React.FC<OdpProps> = ({ selectedRow }) => {
         disabled={OdpData.nWFTemplateID !== null}
       />
 
-      {/* لیست سلکتور جدید برای Relate Project */}
+      {/* لیست سلکتور جدید برای Relate Project با قابلیت داینامیک */}
       <ListSelector
         title="Relate Project"
         className="mt-4"
         columnDefs={relateProjectColumnDefs}
         rowData={relateProjectRowData}
         selectedIds={relateProjectSelectedIds}
-        onSelectionChange={setRelateProjectSelectedIds}
+        onSelectionChange={handleRelateProjectSelectionChange}
         showSwitcher={true}
         isGlobal={relateProjectIsGlobal}
         onGlobalChange={setRelateProjectIsGlobal}
+        // افزودن ModalContentComponent و modalContentProps برای داینامیک شدن
+        ModalContentComponent={TableSelector}
+        modalContentProps={{
+          columnDefs: relateProjectColumnDefs,
+          rowData: relateProjectRowData,
+          selectedRow:
+            selectedRelateProjectsRows.length > 0
+              ? selectedRelateProjectsRows[0]
+              : null,
+          onRowDoubleClick: handleRelateProjectsRowDoubleClick,
+          onRowClick: handleRelateProjectsRowClick,
+          onSelectButtonClick: handleSelectRelateProjectsFromModal,
+          isSelectDisabled: selectedRelateProjectsRows.length === 0,
+        }}
       />
 
       {/* MODAL برای ODP */}

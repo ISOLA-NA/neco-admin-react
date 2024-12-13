@@ -1,23 +1,22 @@
 // src/components/Configuration/TableSelector.tsx
 
-import React from 'react'
-import DataTable from '../../TableDynamic/DataTable'
-import ReusableButton from '../../utilities/DynamicButtons' // مسیر را به درستی تنظیم کنید
-import { FaCheck, FaArrowRight } from 'react-icons/fa' // آیکون‌های نمونه
+import React from "react";
+import DataTable from "../../TableDynamic/DataTable";
+import ReusableButton from "../../utilities/DynamicButtons";
 
 interface ColumnDef {
-  headerName: string
-  field: string
+  headerName: string;
+  field: string;
 }
 
 interface TableSelectorProps {
-  columnDefs: ColumnDef[]
-  rowData: any[]
-  selectedRow: any
-  onRowDoubleClick: (data: any) => void
-  onRowClick: (data: any) => void
-  onSelectButtonClick: () => void
-  isSelectDisabled: boolean
+  columnDefs: ColumnDef[];
+  rowData: any[];
+  selectedRow?: any;
+  onRowDoubleClick: (data: any) => void;
+  onRowClick: (data: any) => void;
+  onSelectButtonClick: () => void;
+  isSelectDisabled: boolean;
 }
 
 const TableSelector: React.FC<TableSelectorProps> = ({
@@ -27,24 +26,29 @@ const TableSelector: React.FC<TableSelectorProps> = ({
   onRowDoubleClick,
   onRowClick,
   onSelectButtonClick,
-  isSelectDisabled
+  isSelectDisabled,
 }) => {
   return (
-    <div>
-      <DataTable
-        columnDefs={columnDefs}
-        rowData={rowData}
-        onRowDoubleClick={onRowDoubleClick}
-        setSelectedRowData={onRowClick}
-        showDuplicateIcon={false}
-        onAdd={() => {}}
-        onEdit={() => {}}
-        onDelete={() => {}}
-        onDuplicate={() => {}}
-        domLayout="autoHeight"
-      />
+    <div className="bg-white rounded-lg p-4 flex flex-col h-full">
+      {/* Table Section */}
+      <div className="mb-4">
+        <DataTable
+          columnDefs={columnDefs}
+          rowData={rowData}
+          onRowDoubleClick={onRowDoubleClick}
+          setSelectedRowData={onRowClick}
+          showDuplicateIcon={false}
+          onAdd={() => {}}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onDuplicate={() => {}}
+          domLayout="autoHeight"
+          isRowSelected={false}
+        />
+      </div>
 
-      <div className='mt-4 flex justify-center'>
+      {/* Select Button */}
+      <div className="mt-4 flex justify-center">
         <ReusableButton
           text="Select"
           onClick={onSelectButtonClick}
@@ -53,7 +57,7 @@ const TableSelector: React.FC<TableSelectorProps> = ({
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TableSelector
+export default TableSelector;

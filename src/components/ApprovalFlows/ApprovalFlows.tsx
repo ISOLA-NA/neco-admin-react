@@ -5,6 +5,7 @@ import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import ListSelector from "../ListSelector/ListSelector";
+import TableSelector from "../General/Configuration/TableSelector"; // فرض بر اینکه TableSelector در این مسیر قرار دارد
 
 interface ApprovalFlowProps {
   selectedRow: any;
@@ -27,7 +28,7 @@ const relatedProjectsData = [
     IsIdea: false,
     State: "Planning",
   },
-  // Add more projects as needed...
+  // پروژه‌های بیشتر در صورت نیاز...
 ];
 
 function getAssociatedProjects(
@@ -56,6 +57,8 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
     ProjectsStr: "",
     IsGlobal: false,
   });
+
+  const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
   useEffect(() => {
     if (selectedRow) {
@@ -105,6 +108,28 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
   );
   const selectedProjectIds = associatedProjects.map((p) => p.ID);
 
+  // مدیریت انتخاب سطر در مودال ListSelector
+  const handleRowClick = (row: any) => {
+    setSelectedRowData(row);
+  };
+
+  const handleSelectButtonClick = () => {
+    if (selectedRowData) {
+      // افزودن پروژه انتخابی به لیست
+      const currentSelectedIds = selectedProjectIds.map((id) => id.toString());
+      // جلوگیری از اضافه شدن تکراری
+      if (!currentSelectedIds.includes(selectedRowData.ID)) {
+        const newSelection = [...currentSelectedIds, selectedRowData.ID];
+        handleProjectsChange(newSelection);
+      }
+      setSelectedRowData(null);
+    }
+  };
+
+  const handleRowDoubleClick = () => {
+    handleSelectButtonClick();
+  };
+
   return (
     <TwoColumnLayout>
       {/* Approval Flow Name Input */}
@@ -136,6 +161,17 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
         showSwitcher={true}
         isGlobal={approvalFlowData.IsGlobal}
         onGlobalChange={handleGlobalChange}
+        // اضافه کردن رفتار مشابه Configuration
+        ModalContentComponent={TableSelector}
+        modalContentProps={{
+          columnDefs: projectColumnDefs,
+          rowData: relatedProjectsData,
+          selectedRow: selectedRowData,
+          onRowDoubleClick: handleRowDoubleClick,
+          onRowClick: handleRowClick,
+          onSelectButtonClick: handleSelectButtonClick,
+          isSelectDisabled: !selectedRowData,
+        }}
       />
     </TwoColumnLayout>
   );

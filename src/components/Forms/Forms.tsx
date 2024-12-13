@@ -56,6 +56,32 @@ const projectData = [
   { ID: 103, Name: "Project C" },
 ];
 
+// توابع کمکی برای تبدیل شناسه‌ها
+const parseIds = (ids: string): number[] => {
+  return ids
+    .split("|")
+    .map((id) => parseInt(id))
+    .filter((id) => !isNaN(id));
+};
+
+// استخراج شناسه پروژه‌ها از رشته‌
+const extractProjectIds = (projectsStr: string): number[] => {
+  // فرض: با توجه به داده‌های نمونه می‌توانید این را سفارشی کنید
+  // در اینجا اگر ProjectsStr خالی نباشد، برای نمونه همان 101 را برمی‌گردانیم.
+  if (!projectsStr) return [];
+  // می‌توان با منطق واقعی تبدیل کرد. برای سادگی فرض می‌کنیم اگر مقداری داشت، پروژه 101
+  return [101];
+};
+
+const getProjectStr = (id: number): string => {
+  // این تابع بسته به پروژه واقعی باید بازنویسی شود.
+  // اینجا فرضی است:
+  if (id === 101) return "642bc0ce-4d93-474b-a869-6101211533d4|";
+  if (id === 102) return "642bc0ce-4d93-474b-a869-6101211533d5|";
+  if (id === 103) return "642bc0ce-4d93-474b-a869-6101211533d6|";
+  return "";
+};
+
 const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
   const [formData, setFormData] = useState({
     FormName: "",
@@ -65,7 +91,7 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
     EntityCateAName: "",
     EntityCateBName: "",
     Code: "",
-    selectedProjects: [] as number[], // برای ListSelector
+    selectedProjects: [] as number[],
   });
 
   // وضعیت‌های مدال
@@ -74,6 +100,12 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
     null
   );
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
+
+  // نگاشت میان Selector و فیلدهای formData
+  const selectorToFieldMap: { [key in "A" | "B"]?: keyof typeof formData } = {
+    A: "EntityCateAName",
+    B: "EntityCateBName",
+  };
 
   useEffect(() => {
     if (selectedRow) {
@@ -108,10 +140,14 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
     }));
   };
 
-  const handleProjectSelectionChange = (selectedIds: number[]) => {
-    handleChange("selectedProjects", selectedIds);
-    // تبدیل IDs به استرینگ با | در انتها (همانند داده‌های اصلی)
-    const str = selectedIds.map((id) => getProjectStr(id)).join("");
+  const handleProjectSelectionChange = (selectedIds: (string | number)[]) => {
+    // تبدیل به آرایه number
+    const numericIds = selectedIds
+      .map((id) => Number(id))
+      .filter((id) => !isNaN(id));
+    handleChange("selectedProjects", numericIds);
+    // تبدیل به استرینگ با توجه به ساختار
+    const str = numericIds.map((id) => getProjectStr(id)).join("");
     handleChange("ProjectsStr", str);
   };
 
@@ -119,21 +155,7 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
     handleChange("IsGlobal", val);
   };
 
-  const extractProjectIds = (projectsStr: string): number[] => {
-    if (!projectsStr) return [];
-    const parts = projectsStr.split("|").filter((p) => p.trim() !== "");
-    if (parts.length > 0) {
-      return [101]; // با توجه به داده‌های نمونه
-    }
-    return [];
-  };
-
-  const getProjectStr = (id: number): string => {
-    if (id === 101) return "642bc0ce-4d93-474b-a869-6101211533d4|";
-    else return "";
-  };
-
-  // توابع مدیریت مدال
+  // مدیریت باز کردن مدال انتخاب
   const handleOpenModal = (selector: "A" | "B") => {
     setCurrentSelector(selector);
     setSelectedRowData(null);
@@ -152,16 +174,17 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
 
   const handleSelectButtonClick = () => {
     if (selectedRowData && currentSelector) {
-      if (currentSelector === "A") {
-        handleChange("EntityCateAName", selectedRowData.value);
-      } else if (currentSelector === "B") {
-        handleChange("EntityCateBName", selectedRowData.value);
+      const field = selectorToFieldMap[currentSelector];
+      if (field) {
+        // چون در aCategoryOptions و bCategoryOptions ما value و label داریم
+        // ما value را در فیلد ذخیره می‌کنیم
+        handleChange(field, selectedRowData.value);
       }
       handleCloseModal();
     }
   };
 
-  // دریافت داده‌های ردیف بر اساس دسته‌بندی
+  // گرفتن داده‌ها بر اساس selector فعلی
   const getRowData = (selector: "A" | "B" | null) => {
     if (selector === "A") {
       return aCategoryOptions;
@@ -171,23 +194,23 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
     return [];
   };
 
-  // توابع مدیریت آپلود فایل‌ها با استفاده از کامپوننت جدید
+  // مدیریت آپلود فایل ورد و اکسل
+  const [wordFile, setWordFile] = useState<File | null>(null);
+  const [excelFile, setExcelFile] = useState<File | null>(null);
+
   const handleWordUpload = (file: File) => {
     setWordFile(file);
-    // انجام عملیات مورد نیاز با فایل ورد (مثلاً آپلود به سرور)
     console.log("Word file selected:", file);
   };
 
   const handleExcelUpload = (file: File) => {
     setExcelFile(file);
-    // انجام عملیات مورد نیاز با فایل اکسل (مثلاً آپلود به سرور)
     console.log("Excel file selected:", file);
   };
 
   return (
     <div>
       <TwoColumnLayout>
-        {/* FormName */}
         <TwoColumnLayout.Item span={1}>
           <DynamicInput
             name="FormName"
@@ -198,7 +221,6 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
           />
         </TwoColumnLayout.Item>
 
-        {/* Windows App Command */}
         <TwoColumnLayout.Item span={1}>
           <DynamicInput
             name="Windows App Command"
@@ -209,7 +231,6 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
           />
         </TwoColumnLayout.Item>
 
-        {/* ACategorization با showButton */}
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
             options={aCategoryOptions}
@@ -221,7 +242,6 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
           />
         </TwoColumnLayout.Item>
 
-        {/* BCategorization با showButton */}
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
             options={bCategoryOptions}
@@ -233,7 +253,6 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
           />
         </TwoColumnLayout.Item>
 
-        {/* Transmital (CheckBox) - تک ستونی */}
         <TwoColumnLayout.Item span={1}>
           <CheckBox
             label="Transmital"
@@ -242,7 +261,6 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
           />
         </TwoColumnLayout.Item>
 
-        {/* Related Projects با سوییچر Global - تک ستونی */}
         <TwoColumnLayout.Item span={2}>
           <ListSelector
             title="Related Projects"
@@ -254,10 +272,37 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
             isGlobal={formData.IsGlobal}
             onGlobalChange={handleGlobalChange}
             className="-mt-5"
+            // شبیه Configuration - اضافه کردن ModalContentComponent و ...
+            ModalContentComponent={TableSelector}
+            modalContentProps={{
+              columnDefs: [{ field: "Name", headerName: "Project Name" }],
+              rowData: projectData,
+              selectedRow: selectedRowData,
+              onRowDoubleClick: () => {
+                if (selectedRowData) {
+                  // افزودن پروژه انتخابی
+                  const newSelection = [
+                    ...formData.selectedProjects,
+                    selectedRowData.ID,
+                  ];
+                  handleProjectSelectionChange(newSelection);
+                }
+              },
+              onRowClick: handleRowClick,
+              onSelectButtonClick: () => {
+                if (selectedRowData) {
+                  const newSelection = [
+                    ...formData.selectedProjects,
+                    selectedRowData.ID,
+                  ];
+                  handleProjectSelectionChange(newSelection);
+                }
+              },
+              isSelectDisabled: !selectedRowData,
+            }}
           />
         </TwoColumnLayout.Item>
 
-        {/* ردیف تک‌ستونی: Template Word File با دو دکمه گرادیانتی */}
         <TwoColumnLayout.Item span={2}>
           <HandlerUplodeExcellAccess
             onWordUpload={handleWordUpload}
@@ -269,10 +314,7 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
       {/* مدال داینامیک برای انتخاب دسته‌بندی */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
-          columnDefs={[
-            { headerName: "نام", field: "label" },
-            // اگر توضیحاتی نیز وجود دارد، می‌توانید فیلد مربوطه را اضافه کنید
-          ]}
+          columnDefs={[{ headerName: "نام", field: "label" }]}
           rowData={getRowData(currentSelector)}
           selectedRow={selectedRowData}
           onRowDoubleClick={handleSelectButtonClick}

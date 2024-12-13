@@ -1,4 +1,4 @@
-// src/components/General/ApprovalFlow.tsx
+// src/components/General/ProgramTemplate.tsx
 
 import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
@@ -12,6 +12,7 @@ interface ApprovalFlowProps {
   selectedRow: any;
 }
 
+// داده‌های نمونه برای پروژه‌ها
 const relatedProjectsData = [
   {
     ID: "642bc0ce-4d93-474b-a869-6101211533d4",
@@ -29,7 +30,7 @@ const relatedProjectsData = [
     IsIdea: false,
     State: "Planning",
   },
-  // Add more projects as needed...
+  // می‌توانید پروژه‌های بیشتری اضافه کنید
 ];
 
 function getAssociatedProjects(
@@ -44,7 +45,7 @@ function getAssociatedProjects(
   );
 }
 
-// اصلاح typeOptions برای مطابقت با nProgramTypeID
+// گزینه‌های مربوط به نوع برنامه
 const typeOptions = [
   { value: "1", label: "Type 1" },
   { value: "2", label: "Type 2" },
@@ -53,8 +54,8 @@ const typeOptions = [
   { value: "5", label: "Type 5" },
 ];
 
-const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
-  const [programTemplateData, setApprovalFlowData] = useState<{
+const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
+  const [programTemplateData, setProgramTemplateData] = useState<{
     ID: string | number;
     Name: string;
     Duration: number | null;
@@ -76,7 +77,7 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
 
   useEffect(() => {
     if (selectedRow) {
-      setApprovalFlowData({
+      setProgramTemplateData({
         ID: selectedRow.ID || "",
         Name: selectedRow.Name || "",
         Duration: selectedRow.Duration || null,
@@ -89,7 +90,7 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
           : "",
       });
     } else {
-      setApprovalFlowData({
+      setProgramTemplateData({
         ID: "",
         Name: "",
         Duration: null,
@@ -104,9 +105,9 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
 
   const handleChange = (
     field: keyof typeof programTemplateData,
-    value: string | boolean | (string | number)[]
+    value: any
   ) => {
-    setApprovalFlowData((prev) => ({
+    setProgramTemplateData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -134,18 +135,19 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
   );
   const selectedProjectIds = associatedProjects.map((p) => p.ID);
 
-  // وضعیت برای مدیریت مدال
+  // مدیریت وضعیت مدال برای ProgramType
   const [modalOpen, setModalOpen] = useState(false);
   const [currentSelector, setCurrentSelector] = useState<string>("ProgramType");
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
-  // توابع مدیریت مدال
   const handleOpenModal = () => {
+    setSelectedRowData(null);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
+    setSelectedRowData(null);
   };
 
   const handleRowClick = (rowData: any) => {
@@ -159,31 +161,33 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
     }
   };
 
-  // تابع برای دریافت داده‌های ردیف‌ها بر اساس انتخاب‌کننده فعلی
   const getRowData = (selector: string) => {
-    // اینجا باید داده‌های مربوط به انتخاب‌کننده فعلی را برگردانید
-    // برای مثال، اگر selector برابر با "ProgramType" باشد:
     if (selector === "ProgramType") {
       return typeOptions.map((option) => ({
         value: option.value,
         label: option.label,
       }));
     }
-    // سایر انتخاب‌کننده‌ها را در صورت نیاز اضافه کنید
     return [];
   };
 
+  // مدیریت وضعیت مدال برای انتخاب پروژه‌ها (شبیه FormsCommand)
+  const [selectedRowDataForProjects, setSelectedRowDataForProjects] =
+    useState<any>(null);
+
   return (
     <TwoColumnLayout>
-      {/* Approval Flow Name Input */}
+      {/* Name */}
       <DynamicInput
         name="Program Name"
-        type="text" // اصلاح نوع به "text"
+        type="text"
         value={programTemplateData.Name}
         placeholder=""
-        onChange={(e) => handleChange("Name", e.target.value)} // اصلاح فیلد به "Name"
+        onChange={(e) => handleChange("Name", e.target.value)}
         required={true}
       />
+
+      {/* Duration */}
       <DynamicInput
         name="Duration"
         type="number"
@@ -193,7 +197,7 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
         required={true}
       />
 
-      {/* Cost Input */}
+      {/* Cost */}
       <DynamicInput
         name="Cost"
         type="number"
@@ -201,7 +205,8 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
         placeholder=""
         onChange={(e) => handleChange("PCost", e.target.value)}
       />
-      {/* Related Projects List Selector */}
+
+      {/* لیست پروژه‌های مرتبط با قابلیت باز کردن مدال و انتخاب شبیه FormsCommand */}
       <ListSelector
         title="Related Projects"
         columnDefs={projectColumnDefs}
@@ -211,31 +216,49 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
         showSwitcher={true}
         isGlobal={programTemplateData.IsGlobal}
         onGlobalChange={handleGlobalChange}
+        ModalContentComponent={TableSelector}
+        modalContentProps={{
+          columnDefs: projectColumnDefs,
+          rowData: relatedProjectsData,
+          selectedRow: selectedRowDataForProjects,
+          onRowDoubleClick: () => {
+            if (selectedRowDataForProjects) {
+              const newSelection = [
+                ...selectedProjectIds,
+                selectedRowDataForProjects.ID,
+              ];
+              handleProjectsChange(newSelection);
+            }
+          },
+          onRowClick: (row: any) => setSelectedRowDataForProjects(row),
+          onSelectButtonClick: () => {
+            if (selectedRowDataForProjects) {
+              const newSelection = [
+                ...selectedProjectIds,
+                selectedRowDataForProjects.ID,
+              ];
+              handleProjectsChange(newSelection);
+            }
+          },
+          isSelectDisabled: !selectedRowDataForProjects,
+        }}
       />
 
-      {/* Type Dynamic Selector */}
+      {/* انتخاب نوع برنامه با DynamicSelector و دکمه باز کردن مدال */}
       <DynamicSelector
         options={typeOptions}
         selectedValue={programTemplateData.ProgramTypeID}
         onChange={handleProgramTypeChange}
         label="Type"
         showButton={true}
-        onButtonClick={handleOpenModal} // باز کردن مدال هنگام کلیک دکمه
-        // می‌توانید آیکون‌ها را در صورت نیاز اضافه کنید
-        // leftIcon={<YourLeftIcon />}
-        // rightIcon={<YourRightIcon />}
-        // error={false}
-        // errorMessage="Error message"
-        className="-mt-24" // اضافه کردن فاصله بالا برای جدا کردن از سایر المان‌ها
+        onButtonClick={handleOpenModal}
+        className="-mt-24"
       />
 
-      {/* مدال داینامیک برای انتخاب دسته‌بندی */}
+      {/* مدال داینامیک برای انتخاب نوع برنامه شبیه FormsCommand */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
-          columnDefs={[
-            { headerName: "نام", field: "label" },
-            // اگر توضیحاتی نیز وجود دارد، می‌توانید فیلد مربوطه را اضافه کنید
-          ]}
+          columnDefs={[{ headerName: "نام", field: "label" }]}
           rowData={getRowData(currentSelector)}
           selectedRow={selectedRowData}
           onRowDoubleClick={handleSelectButtonClick}
@@ -248,4 +271,4 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
   );
 };
 
-export default ApprovalFlow;
+export default ProgramTemplate;

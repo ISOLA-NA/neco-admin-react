@@ -5,8 +5,10 @@ import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import ListSelector from "../ListSelector/ListSelector";
+import DynamicModal from "../utilities/DynamicModal";
+import TableSelector from "../General/Configuration/TableSelector"; // مسیر صحیح را تنظیم کنید
 
-interface ApprovalFlowProps {
+interface ApprovalCheCkListProps {
   selectedRow: any;
 }
 
@@ -27,7 +29,7 @@ const relatedProjectsData = [
     IsIdea: false,
     State: "Planning",
   },
-  // Add more projects as needed...
+  // پروژه‌های بیشتر در صورت نیاز...
 ];
 
 function getAssociatedProjects(
@@ -42,8 +44,10 @@ function getAssociatedProjects(
   );
 }
 
-const ApprovalCheCkList: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
-  const [approvalFlowData, setApprovalFlowData] = useState<{
+const ApprovalCheCkList: React.FC<ApprovalCheCkListProps> = ({
+  selectedRow,
+}) => {
+  const [approvalCheCkListData, setApprovalCheCkListData] = useState<{
     ID: string | number;
     Name: string;
     Description: string;
@@ -57,9 +61,16 @@ const ApprovalCheCkList: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
     IsGlobal: false,
   });
 
+  // وضعیت‌های مودال
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentSelector, setCurrentSelector] = useState<"Projects" | null>(
+    null
+  );
+  const [selectedRowData, setSelectedRowData] = useState<any>(null);
+
   useEffect(() => {
     if (selectedRow) {
-      setApprovalFlowData({
+      setApprovalCheCkListData({
         ID: selectedRow.ID || "",
         Name: selectedRow.Name || "",
         Description: selectedRow.Description || "",
@@ -67,7 +78,7 @@ const ApprovalCheCkList: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
         IsGlobal: selectedRow.IsGlobal || false,
       });
     } else {
-      setApprovalFlowData({
+      setApprovalCheCkListData({
         ID: "",
         Name: "",
         Description: "",
@@ -78,10 +89,10 @@ const ApprovalCheCkList: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
   }, [selectedRow]);
 
   const handleChange = (
-    field: keyof typeof approvalFlowData,
+    field: keyof typeof approvalCheCkListData,
     value: string | boolean | (string | number)[]
   ) => {
-    setApprovalFlowData((prev) => ({
+    setApprovalCheCkListData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -100,44 +111,111 @@ const ApprovalCheCkList: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
   };
 
   const associatedProjects = getAssociatedProjects(
-    approvalFlowData.ProjectsStr,
+    approvalCheCkListData.ProjectsStr,
     relatedProjectsData
   );
   const selectedProjectIds = associatedProjects.map((p) => p.ID);
 
+  // مدیریت انتخاب سطر در مودال ListSelector
+  const handleRowClick = (row: any) => {
+    setSelectedRowData(row);
+  };
+
+  const handleSelectButtonClick = () => {
+    if (selectedRowData) {
+      // افزودن پروژه انتخابی به لیست
+      const currentSelectedIds = selectedProjectIds.map((id) => id.toString());
+      // جلوگیری از اضافه شدن تکراری
+      if (!currentSelectedIds.includes(selectedRowData.ID)) {
+        const newSelection = [...currentSelectedIds, selectedRowData.ID];
+        handleProjectsChange(newSelection);
+      }
+      setSelectedRowData(null);
+      handleCloseModal();
+    }
+  };
+
+  const handleRowDoubleClick = () => {
+    handleSelectButtonClick();
+  };
+
+  // مدیریت باز کردن مودال
+  const handleOpenModal = () => {
+    setCurrentSelector("Projects");
+    setSelectedRowData(null);
+    setModalOpen(true);
+  };
+
+  // مدیریت بستن مودال
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setCurrentSelector(null);
+    setSelectedRowData(null);
+  };
+
   return (
-    <TwoColumnLayout>
-      {/* Approval Flow Name Input */}
-      <DynamicInput
-        name="Approval Flow Name"
-        type="text"
-        value={approvalFlowData.Name}
-        placeholder=""
-        onChange={(e) => handleChange("Name", e.target.value)}
-        required={true}
-      />
+    <div>
+      <TwoColumnLayout>
+        {/* Approval Flow Name Input */}
+        <DynamicInput
+          name="Approval Flow Name"
+          type="text"
+          value={approvalCheCkListData.Name}
+          placeholder=""
+          onChange={(e) => handleChange("Name", e.target.value)}
+          required={true}
+        />
 
-      {/* Description Textarea */}
-      <CustomTextarea
-        id="Description"
-        name="Description"
-        value={approvalFlowData.Description}
-        placeholder=""
-        onChange={(e) => handleChange("Description", e.target.value)}
-      />
+        {/* Description Textarea */}
+        <CustomTextarea
+          id="Description"
+          name="Description"
+          value={approvalCheCkListData.Description}
+          placeholder=""
+          onChange={(e) => handleChange("Description", e.target.value)}
+        />
 
-      {/* Related Projects List Selector */}
-      <ListSelector
-        title="Related Projects"
-        columnDefs={projectColumnDefs}
-        rowData={relatedProjectsData}
-        selectedIds={selectedProjectIds}
-        onSelectionChange={handleProjectsChange}
-        showSwitcher={true}
-        isGlobal={approvalFlowData.IsGlobal}
-        onGlobalChange={handleGlobalChange}
-      />
-    </TwoColumnLayout>
+        {/* Related Projects List Selector */}
+        <ListSelector
+          title="Related Projects"
+          columnDefs={projectColumnDefs}
+          rowData={relatedProjectsData}
+          selectedIds={selectedProjectIds}
+          onSelectionChange={handleProjectsChange}
+          showSwitcher={true}
+          isGlobal={approvalCheCkListData.IsGlobal}
+          onGlobalChange={handleGlobalChange}
+          // اضافه کردن رفتار مشابه Configuration
+          ModalContentComponent={TableSelector}
+          modalContentProps={{
+            columnDefs: projectColumnDefs,
+            rowData: relatedProjectsData,
+            selectedRow: selectedRowData,
+            onRowDoubleClick: handleRowDoubleClick,
+            onRowClick: handleRowClick,
+            onSelectButtonClick: handleSelectButtonClick,
+            isSelectDisabled: !selectedRowData,
+            onClose: handleCloseModal, // اضافه شده
+            onSelectFromButton: handleSelectButtonClick, // اضافه شده
+          }}
+        />
+      </TwoColumnLayout>
+
+      {/* مودال داینامیک برای انتخاب پروژه‌ها */}
+      <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
+        {currentSelector === "Projects" && (
+          <TableSelector
+            columnDefs={projectColumnDefs}
+            rowData={relatedProjectsData}
+            selectedRow={selectedRowData}
+            onRowDoubleClick={handleRowDoubleClick}
+            onRowClick={handleRowClick}
+            onSelectButtonClick={handleSelectButtonClick}
+            isSelectDisabled={!selectedRowData}
+          />
+        )}
+      </DynamicModal>
+    </div>
   );
 };
 
