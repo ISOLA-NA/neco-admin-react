@@ -1815,6 +1815,22 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
     ],
   },
+
+  Calendars: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Calendar 1",
+      },
+    ],
+  },
 };
 
 // Type Definitions
