@@ -1638,94 +1638,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     rowData: defaultRibbons,
   },
 
-  Odp: {
-    columnDefs: [
-      {
-        headerName: "Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-        sortable: true,
-      },
-      {
-        headerName: "Description",
-        field: "Description",
-        filter: "agTextColumnFilter",
-        sortable: true,
-      },
-      {
-        headerName: "Address",
-        field: "Address",
-        filter: "agTextColumnFilter",
-        sortable: true,
-      },
-    ],
-    rowData: [
-      {
-        ID: 1,
-        Name: "ODP Alpha",
-        Description: "توضیحات مربوط به ODP Alpha",
-        Address: "آدرس 1",
-        nProgramTemplateID: 1,
-        nEntityTypeID: 10,
-        nWFTemplateID: 20,
-      },
-      {
-        ID: 2,
-        Name: "ODP Beta",
-        Description: "توضیحات مربوط به ODP Beta",
-        Address: "آدرس 2",
-        nProgramTemplateID: 2,
-        nEntityTypeID: 11,
-        nWFTemplateID: 21,
-      },
-      {
-        ID: 3,
-        Name: "ODP Gamma",
-        Description: "توضیحات مربوط به ODP Gamma",
-        Address: "آدرس 3",
-        nProgramTemplateID: 3,
-        nEntityTypeID: 12,
-        nWFTemplateID: 22,
-      },
-      {
-        ID: 4,
-        Name: "ODP Delta",
-        Description: "توضیحات مربوط به ODP Delta",
-        Address: "آدرس 4",
-        nProgramTemplateID: 4,
-        nEntityTypeID: 13,
-        nWFTemplateID: 23,
-      },
-    ],
-  },
-
-  Procedures: {
-    columnDefs: [
-      {
-        headerName: "Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "Description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        ID: 1,
-        Name: "procedure 1",
-        Description: "aaaa",
-      },
-      {
-        ID: 2,
-        Name: "procedure 2",
-        Description: "xxxx",
-      },
-    ],
-  },
-
   Projects: {
     columnDefs: [
       {
@@ -1815,6 +1727,62 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
   },
 };
 
+export const ProjectsAccess: SubTabData = {
+  columnDefs: [
+    { headerName: "ID", field: "ID", filter: "agNumberColumnFilter" },
+    { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+    {
+      headerName: "Description",
+      field: "Description",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "Is Visible",
+      field: "IsVisible",
+      filter: "agBooleanColumnFilter",
+    },
+    {
+      headerName: "Last Modified",
+      field: "LastModified",
+      filter: "agDateColumnFilter",
+    },
+    {
+      headerName: "Modified By",
+      field: "ModifiedById",
+      filter: "agTextColumnFilter",
+    },
+  ],
+  rowData: [
+    {
+      ID: 4,
+      Name: "Start up4",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+    {
+      ID: 5,
+      Name: "Start up25",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+    {
+      ID: 6,
+      Name: "Start up6",
+      Description:
+        "فرم های مربوط یه زبانه استارت آپ در نوار ابزار و فرآیند ساماندهی مقدماتی در متدولوژی",
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
+    },
+  ],
+};
+
 // Type Definitions
 export interface LeftItem {
   id: string;
@@ -1825,41 +1793,6 @@ export interface RightItem {
   detail: string;
 }
 
-// در فایل داده‌ها (مثلا tabData.ts) یا هر فایل داده‌ای که استفاده می‌کنید
-
-export const ProjectsAccess = {
-  columnDefs: [
-    {
-      headerName: "Role",
-      field: "Name",
-      filter: "agTextColumnFilter",
-    },
-  ],
-  rowData: [
-    {
-      ID: 1,
-      Name: "Open List Tender",
-      Description: "OutSourcing",
-    },
-    {
-      ID: 2,
-      Name: "Execution",
-      Description: "Process for onboarding new employees.",
-    },
-  ],
-};
-
-export interface LeftItem {
-  id: string;
-  name: string;
-}
-
-export interface RightItem {
-  detail: string;
-  checked: boolean; // اضافه شده برای ذخیره وضعیت انتخاب یا عدم انتخاب
-}
-
-// داده‌های بخش چپ
 export const LeftProjectData: { [key: number]: LeftItem[] } = {
   1: [
     { id: "1-1", name: "Sub Item 1 for Project 1" },
@@ -1871,84 +1804,22 @@ export const LeftProjectData: { [key: number]: LeftItem[] } = {
   ],
 };
 
-// داده‌های بخش راست با true/false برای checked
+// Data for RightProjectAccess based on LeftProjectAccess ID
 export const RightProjectData: { [key: string]: RightItem[] } = {
   "1-1": [
-    { detail: "Create Letter", checked: true },
-    { detail: "Create Meeting", checked: false },
-    { detail: "Create Issue", checked: true },
-    { detail: "Alert Access", checked: false },
-    { detail: "See All Tasks", checked: false },
-    { detail: "Create Odp", checked: true },
-    { detail: "Edit Prj Request", checked: false },
-    { detail: "Comment", checked: false },
-    { detail: "Approval Flow", checked: true },
-    { detail: "Word Print", checked: false },
-    { detail: "Procedure", checked: false },
-    { detail: "Logs", checked: false },
-    { detail: "Check List", checked: false },
-    { detail: "Related Record", checked: false },
-    { detail: "Download Group", checked: true },
-    { detail: "Lesson Learned", checked: false },
-    { detail: "Assignment", checked: false },
+    { detail: "Detail A for Sub Item 1-1" },
+    { detail: "Detail B for Sub Item 1-1" },
   ],
   "1-2": [
-    { detail: "Create Letter", checked: false },
-    { detail: "Create Meeting", checked: false },
-    { detail: "Create Issue", checked: false },
-    { detail: "Alert Access", checked: false },
-    { detail: "See All Tasks", checked: true },
-    { detail: "Create Odp", checked: false },
-    { detail: "Edit Prj Request", checked: true },
-    { detail: "Comment", checked: false },
-    { detail: "Approval Flow", checked: false },
-    { detail: "Word Print", checked: false },
-    { detail: "Procedure", checked: false },
-    { detail: "Logs", checked: true },
-    { detail: "Check List", checked: false },
-    { detail: "Related Record", checked: false },
-    { detail: "Download Group", checked: false },
-    { detail: "Lesson Learned", checked: true },
-    { detail: "Assignment", checked: false },
+    { detail: "Detail A for Sub Item 1-2" },
+    { detail: "Detail B for Sub Item 1-2" },
   ],
   "2-1": [
-    { detail: "Create Letter", checked: true },
-    { detail: "Create Meeting", checked: true },
-    { detail: "Create Issue", checked: false },
-    { detail: "Alert Access", checked: false },
-    { detail: "See All Tasks", checked: false },
-    { detail: "Create Odp", checked: false },
-    { detail: "Edit Prj Request", checked: true },
-    { detail: "Comment", checked: false },
-    { detail: "Approval Flow", checked: true },
-    { detail: "Word Print", checked: false },
-    { detail: "Procedure", checked: true },
-    { detail: "Logs", checked: false },
-    { detail: "Check List", checked: false },
-    { detail: "Related Record", checked: true },
-    { detail: "Download Group", checked: false },
-    { detail: "Lesson Learned", checked: false },
-    { detail: "Assignment", checked: false },
+    { detail: "Detail A for Sub Item 2-1" },
+    { detail: "Detail B for Sub Item 2-1" },
   ],
   "2-2": [
-    { detail: "Create Letter", checked: false },
-    { detail: "Create Meeting", checked: false },
-    { detail: "Create Issue", checked: false },
-    { detail: "Alert Access", checked: false },
-    { detail: "See All Tasks", checked: false },
-    { detail: "Create Odp", checked: false },
-    { detail: "Edit Prj Request", checked: false },
-    { detail: "Comment", checked: true },
-    { detail: "Approval Flow", checked: false },
-    { detail: "Word Print", checked: true },
-    { detail: "Procedure", checked: false },
-    { detail: "Logs", checked: false },
-    { detail: "Check List", checked: true },
-    { detail: "Related Record", checked: false },
-    { detail: "Download Group", checked: false },
-    { detail: "Lesson Learned", checked: false },
-    { detail: "Assignment", checked: true },
+    { detail: "Detail A for Sub Item 2-2" },
+    { detail: "Detail B for Sub Item 2-2" },
   ],
 };
-
-// src/data/OdpData.ts

@@ -46,7 +46,7 @@ export const subTabComponents: {
   // Projects
   Projects: React.lazy(() => import("../../../components/Projects/Projects")),
   ProjectsAccess: React.lazy(
-    () => import("../../../components/Projects/ProjectsAccess")
+    () => import("../../Projects/ProjectAccess/ProjectsAccess")
   ),
   Odp: React.lazy(() => import("../../../components/Projects/Odp")),
   Procedures: React.lazy(

@@ -21,6 +21,7 @@ interface DynamicSelectorProps {
   error?: boolean;
   errorMessage?: string;
   className?: string;
+  disabled?: boolean; // قابلیت غیرفعال کردن کل کامپوننت
 }
 
 const DynamicSelector: React.FC<DynamicSelectorProps> = ({
@@ -35,9 +36,16 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   error = false,
   errorMessage = "",
   className,
+  disabled = false,
 }) => {
   return (
-    <div className={classNames("relative flex items-center gap-2", className)}>
+    <div
+      className={classNames(
+        "relative flex items-center gap-2",
+        className,
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      )}
+    >
       <div className="relative w-full">
         {leftIcon && (
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
@@ -48,11 +56,13 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
         <select
           value={selectedValue}
           onChange={onChange}
+          disabled={disabled}
           className={classNames(
             "w-full border-b-2 pr-10 bg-transparent appearance-none focus:outline-none transition-colors duration-300 text-gray-800 text-sm sm:text-base rounded-none",
             error
               ? "border-red-500 focus:border-red-500"
-              : "border-purple-600 focus:border-indigo-500"
+              : "border-purple-600 focus:border-indigo-500",
+            disabled ? "bg-gray-100 text-gray-500" : ""
           )}
           aria-label={label}
         >
@@ -88,8 +98,12 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
       {showButton && (
         <button
           type="button"
-          className="btn btn-sm bg-purple-600 text-white hover:bg-indigo-500 px-3 py-2 rounded-md shadow-sm transition-colors duration-300"
           onClick={onButtonClick}
+          disabled={disabled}
+          className={classNames(
+            "btn btn-sm bg-purple-600 text-white hover:bg-indigo-500 px-3 py-2 rounded-md shadow-sm transition-colors duration-300",
+            disabled ? "bg-gray-300 hover:bg-gray-300 cursor-not-allowed" : ""
+          )}
         >
           ...
         </button>

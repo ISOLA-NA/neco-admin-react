@@ -14,7 +14,10 @@ interface DataTableProps {
   rowData: any[];
   onRowDoubleClick: (data: any) => void;
   setSelectedRowData: (data: any) => void;
-  showDuplicateIcon: boolean;
+  showDuplicateIcon?: boolean;
+  showEditIcon?: boolean;
+  showAddIcon?: boolean;
+  showDeleteIcon?: boolean;
   onAdd: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -28,7 +31,10 @@ const DataTable: React.FC<DataTableProps> = ({
   rowData,
   onRowDoubleClick,
   setSelectedRowData,
-  showDuplicateIcon,
+  showDuplicateIcon = false,
+  showEditIcon = true,
+  showAddIcon = true,
+  showDeleteIcon = true,
   onAdd,
   onEdit,
   onDelete,
@@ -70,6 +76,15 @@ const DataTable: React.FC<DataTableProps> = ({
       ? "ag-theme-quartz auto-height"
       : "ag-theme-quartz flex-grow h-full";
 
+  const getRowClass = (params: any) => {
+    return params.node.selected ? "ag-row-selected" : "";
+  };
+
+  // Grid options to use for rowClass
+  const gridOptions = {
+    getRowClass: getRowClass, // This function will handle row class logic
+  };
+
   return (
     <div className="w-full h-full flex flex-col">
       {/* Search Bar and Action Buttons */}
@@ -99,33 +114,42 @@ const DataTable: React.FC<DataTableProps> = ({
               <FiCopy size={25} />
             </button>
           )}
-          <button
-            className={`text-red-600 hover:text-red-800 transition ${
-              !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            title="Delete"
-            onClick={onDelete}
-            disabled={!isRowSelected}
-          >
-            <FiTrash2 size={25} />
-          </button>
-          <button
-            className={`text-blue-600 hover:text-blue-800 transition ${
-              !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            title="Edit"
-            onClick={onEdit}
-            disabled={!isRowSelected}
-          >
-            <FiEdit size={25} />
-          </button>
-          <button
-            className="text-green-600 hover:text-green-800 transition"
-            title="Add"
-            onClick={onAdd}
-          >
-            <FiPlus size={25} />
-          </button>
+
+          {showEditIcon && (
+            <button
+              className={`text-blue-600 hover:text-blue-800 transition ${
+                !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title="Edit"
+              onClick={onEdit}
+              disabled={!isRowSelected}
+            >
+              <FiEdit size={25} />
+            </button>
+          )}
+
+          {showDeleteIcon && (
+            <button
+              className={`text-red-600 hover:text-red-800 transition ${
+                !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              title="Delete"
+              onClick={onDelete}
+              disabled={!isRowSelected}
+            >
+              <FiTrash2 size={25} />
+            </button>
+          )}
+
+          {showAddIcon && (
+            <button
+              className="text-green-600 hover:text-green-800 transition"
+              title="Add"
+              onClick={onAdd}
+            >
+              <FiPlus size={25} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -143,6 +167,7 @@ const DataTable: React.FC<DataTableProps> = ({
           domLayout={domLayout}
           suppressHorizontalScroll={false}
           rowSelection="multiple"
+          gridOptions={gridOptions} // Pass gridOptions here
         />
       </div>
     </div>

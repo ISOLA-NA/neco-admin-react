@@ -7,7 +7,7 @@ interface ListSelectorProps {
   title: string;
   className?: string;
   columnDefs: any[];
-  rowData: { ID: string | number; Name: string }[];
+  rowData?: { ID: string | number; Name: string }[];
   selectedIds: (string | number)[];
   onSelectionChange: (selectedIds: (string | number)[]) => void;
   showSwitcher?: boolean;

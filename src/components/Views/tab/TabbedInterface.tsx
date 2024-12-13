@@ -1,10 +1,15 @@
 // TabbedInterface.tsx
+
 import React, { useState, useRef } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
 import { tabsData, subTabDataMapping } from "./tabData";
 import { subTabComponents } from "./SubTabsImports";
+import {
+  subtabIconVisibility,
+  IconVisibility,
+} from "../../TableDynamic/TabIconVisibility"; // وارد کردن پیکربندی
 
 const TabbedInterface: React.FC = () => {
   const [activeMainTab, setActiveMainTab] = useState<string>("General");
@@ -20,7 +25,15 @@ const TabbedInterface: React.FC = () => {
     rowData: [],
   };
 
-  const duplicateEnabledSubTabs = ["Configurations", "Settings"];
+  // استخراج تنظیمات نمایش آیکون‌ها برای ساب‌تب فعال
+  const currentIconVisibility: IconVisibility = subtabIconVisibility[
+    activeSubTab
+  ] || {
+    showAdd: true,
+    showEdit: true,
+    showDelete: true,
+    showDuplicate: false,
+  };
 
   const handleMainTabChange = (tabName: string) => {
     setActiveMainTab(tabName);
@@ -114,7 +127,10 @@ const TabbedInterface: React.FC = () => {
         onRowDoubleClick={handleRowDoubleClick}
         selectedRow={selectedRow}
         activeSubTab={activeSubTab}
-        showDuplicateIcon={duplicateEnabledSubTabs.includes(activeSubTab)}
+        showDuplicateIcon={currentIconVisibility.showDuplicate || false}
+        showAddIcon={currentIconVisibility.showAdd || false}
+        showEditIcon={currentIconVisibility.showEdit || false}
+        showDeleteIcon={currentIconVisibility.showDelete || false}
         onAdd={handleAdd}
         onEdit={handleEdit}
         onDelete={handleDelete}

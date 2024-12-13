@@ -1638,94 +1638,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     rowData: defaultRibbons,
   },
 
-  Odp: {
-    columnDefs: [
-      {
-        headerName: "Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-        sortable: true,
-      },
-      {
-        headerName: "Description",
-        field: "Description",
-        filter: "agTextColumnFilter",
-        sortable: true,
-      },
-      {
-        headerName: "Address",
-        field: "Address",
-        filter: "agTextColumnFilter",
-        sortable: true,
-      },
-    ],
-    rowData: [
-      {
-        ID: 1,
-        Name: "ODP Alpha",
-        Description: "توضیحات مربوط به ODP Alpha",
-        Address: "آدرس 1",
-        nProgramTemplateID: 1,
-        nEntityTypeID: 10,
-        nWFTemplateID: 20,
-      },
-      {
-        ID: 2,
-        Name: "ODP Beta",
-        Description: "توضیحات مربوط به ODP Beta",
-        Address: "آدرس 2",
-        nProgramTemplateID: 2,
-        nEntityTypeID: 11,
-        nWFTemplateID: 21,
-      },
-      {
-        ID: 3,
-        Name: "ODP Gamma",
-        Description: "توضیحات مربوط به ODP Gamma",
-        Address: "آدرس 3",
-        nProgramTemplateID: 3,
-        nEntityTypeID: 12,
-        nWFTemplateID: 22,
-      },
-      {
-        ID: 4,
-        Name: "ODP Delta",
-        Description: "توضیحات مربوط به ODP Delta",
-        Address: "آدرس 4",
-        nProgramTemplateID: 4,
-        nEntityTypeID: 13,
-        nWFTemplateID: 23,
-      },
-    ],
-  },
-
-  Procedures: {
-    columnDefs: [
-      {
-        headerName: "Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: "Description",
-        field: "Description",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        ID: 1,
-        Name: "procedure 1",
-        Description: "aaaa",
-      },
-      {
-        ID: 2,
-        Name: "procedure 2",
-        Description: "xxxx",
-      },
-    ],
-  },
-
   Projects: {
     columnDefs: [
       {
@@ -1950,5 +1862,3 @@ export const RightProjectData: { [key: string]: RightItem[] } = {
     { detail: "Assignment", checked: true },
   ],
 };
-
-// src/data/OdpData.ts
