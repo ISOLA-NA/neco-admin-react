@@ -1356,6 +1356,44 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
   },
 
+  ProgramTypes: {
+    columnDefs: [
+      {
+        headerName: "Role",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+
+      {
+        headerName: "Job Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: "r1234567-89ab-cdef-0123-456789abcdef",
+        Name: "Programtype1",
+        Description: "Oversees project execution.",
+      },
+      {
+        ID: "r1234567-89ab-cdef-0123-456789abcdef",
+        Name: "Programtype2",
+        Description: "Oversees project execution.",
+      },
+      {
+        ID: "r1234567-89ab-cdef-0123-456789abcdef",
+        Name: "Programtype3",
+        Description: "Oversees project execution.",
+      },
+      {
+        ID: "r1234567-89ab-cdef-0123-456789abcdef",
+        Name: "Programtype4",
+        Description: "Oversees project execution.",
+      },
+    ],
+  },
+
   RoleGroups: {
     columnDefs: [
       {
