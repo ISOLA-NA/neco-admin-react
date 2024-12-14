@@ -1764,6 +1764,8 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
   },
 
+  // نمونه داده‌ها با ساب‌رُدی‌ها
+
   ApprovalFlows: {
     columnDefs: [
       {
@@ -1795,49 +1797,115 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         ID: 1,
         Name: "Company Registration AF",
-        Description: "sss",
+        Description: "Registering a company workflow",
         ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
         IsGlobal: true,
         MaxDuration: "3",
         PCost: "122321",
+        SubApprovalFlows: [
+          {
+            ID: "sub1",
+            Name: "SubFlow 1",
+            Description: "Description of SubFlow 1",
+            MaxDuration: "2",
+            PCost: "5000",
+          },
+          {
+            ID: "sub2",
+            Name: "SubFlow 2",
+            Description: "Description of SubFlow 2",
+            MaxDuration: "4",
+            PCost: "7000",
+          },
+        ],
       },
       {
         ID: 2,
-        Name: "Employee Onboarding AF",
-        Description: "Process for onboarding new employees.",
-        ProjectsStr:
-          "a1b2c3d4-5678-90ab-cdef-1234567890ab|c3d4e5f6-7890-1bcd-ef12-34567890abcd|",
+        Name: "Project Launch AF",
+        Description: "Approval flow for launching a project",
+        ProjectsStr: "642bc0ce-4d93-474b-a869-6101211533d4|",
         IsGlobal: false,
-        MaxDuration: "3",
-        PCost: "1233",
+        MaxDuration: "5",
+        PCost: "30000",
+        SubApprovalFlows: [
+          {
+            ID: "sub1",
+            Name: "Feasibility SubFlow",
+            Description: "Check feasibility",
+            MaxDuration: "2",
+            PCost: "10000",
+          },
+        ],
       },
       {
         ID: 3,
-        Name: "Expense Approval AF",
-        Description: "Approval process for employee expenses.",
-        ProjectsStr: "b2c3d4e5-6789-0abc-def1-234567890abc|",
+        Name: "Budget Allocation AF",
+        Description: "Flow for budget approvals",
+        ProjectsStr:
+          "642bc0ce-4d93-474b-a869-6101211533d4|a1b2c3d4-5678-90ab-cdef-1234567890ab|",
         IsGlobal: true,
-        MaxDuration: "5",
-        PCost: "121233",
+        MaxDuration: "7",
+        PCost: "50000",
+        SubApprovalFlows: [
+          {
+            ID: "sub1",
+            Name: "Initial Review SubFlow",
+            Description: "Review budget requirements",
+            MaxDuration: "3",
+            PCost: "20000",
+          },
+          {
+            ID: "sub2",
+            Name: "Final Approval SubFlow",
+            Description: "Final budget approval",
+            MaxDuration: "2",
+            PCost: "30000",
+          },
+        ],
       },
       {
         ID: 4,
-        Name: "Project Kickoff AF",
-        Description: "Initiating new projects.",
-        ProjectsStr:
-          "c3d4e5f6-7890-1bcd-ef12-34567890abcd|d4e5f6g7-8901-2cde-f123-4567890abcde|",
+        Name: "Contract Signing AF",
+        Description: "Approval flow for signing contracts",
+        ProjectsStr: "a1b2c3d4-5678-90ab-cdef-1234567890ab|",
         IsGlobal: false,
-        MaxDuration: "7",
-        PCost: "122",
+        MaxDuration: "2",
+        PCost: "15000",
+        SubApprovalFlows: [
+          {
+            ID: "sub1",
+            Name: "Legal Review SubFlow",
+            Description: "Legal team review",
+            MaxDuration: "1",
+            PCost: "5000",
+          },
+        ],
       },
       {
         ID: 5,
-        Name: "Leave Approval AF",
-        Description: "Process for approving employee leave requests.",
-        ProjectsStr: "d4e5f6g7-8901-2cde-f123-4567890abcde|",
+        Name: "Vendor Approval AF",
+        Description: "Flow to approve new vendors",
+        ProjectsStr:
+          "642bc0ce-4d93-474b-a869-6101211533d4|a1b2c3d4-5678-90ab-cdef-1234567890ab|",
         IsGlobal: true,
-        MaxDuration: "8",
-        PCost: "12",
+        MaxDuration: "4",
+        PCost: "20000",
+        SubApprovalFlows: [
+          {
+            ID: "sub1",
+            Name: "Vendor Vetting SubFlow",
+            Description: "Check vendor credentials",
+            MaxDuration: "2",
+            PCost: "10000",
+          },
+          {
+            ID: "sub2",
+            Name: "Final Vendor Approval",
+            Description: "Final vendor sign-off",
+            MaxDuration: "2",
+            PCost: "10000",
+          },
+        ],
       },
     ],
   },
