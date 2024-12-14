@@ -12,7 +12,7 @@ export const subTabComponents: {
   Commands: React.lazy(
     () => import("../../../components/General/CommandSettings")
   ),
-  Ribbons: React.lazy(() => import("../../../components/General/Ribbons")),
+  Ribbons: React.lazy(() => import("../../General/Ribbon/LeftRibbon/Ribbons")),
   Users: React.lazy(() => import("../../../components/General/Users")),
   Roles: React.lazy(() => import("../../../components/General/Roles")),
   Staffing: React.lazy(() => import("../../../components/General/Staffing")),
