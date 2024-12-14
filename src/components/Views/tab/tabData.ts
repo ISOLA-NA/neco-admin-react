@@ -236,6 +236,302 @@ export const categoriesCatb: SubTabData = {
   ],
 };
 
+const projectLists = [
+  {
+    ID: 1,
+    ProjectName: "Project 1",
+    State: "Started",
+    AcualStartTime: "2022/12/12",
+    TotalDuration: 1,
+    PCostAct: 1210000,
+    PCostAprov: 56000000,
+    IsIdea: "Idea",
+    IsPersian: true,
+    calendarName: "cal1",
+    TaskNum: 1,
+    RolesNum: 100,
+    LettersNum: 233,
+    MeetingsNum: 999,
+    IssuesNum: 111111,
+    KnowledgeNum: 5656,
+  },
+  {
+    ID: 2,
+    ProjectName: "Project 2",
+    State: "Closed",
+    AcualStartTime: "2019/12/12",
+    TotalDuration: 2,
+    PCostAct: 34340000,
+    PCostAprov: 99000000,
+    IsIdea: "not Idea",
+    IsPersian: false,
+    calendarName: "cal2",
+    TaskNum: 2,
+    RolesNum: 200,
+    LettersNum: 786,
+    MeetingsNum: 998,
+    IssuesNum: 2222222222,
+    KnowledgeNum: 434334,
+  },
+];
+
+const userLists = [
+  {
+    ID: "u1234567-89ab-cdef-0123-456789abcdef",
+    Name: "Ali",
+    LastName: "Rezaei",
+    FirstName: "Ali",
+    Email: "ali.rezaei@example.com",
+    Mobile: "09123456789",
+    Password: "password123",
+    ConfirmPassword: "password123",
+    Website: "https://ali.example.com",
+    UserType: 0,
+    UserImageId: null,
+  },
+  {
+    ID: "u2234567-89ab-cdef-0123-456789abcdef",
+    Name: "Sara",
+    LastName: "Karimi",
+    FirstName: "Sara",
+    Email: "sara.karimi@example.com",
+    Mobile: "09234567890",
+    Password: "password456",
+    ConfirmPassword: "password456",
+    Website: "https://sara.example.com",
+    UserType: 1,
+    UserImageId: null,
+  },
+  {
+    ID: "u3234567-89ab-cdef-0123-456789abcdef",
+    Name: "Reza",
+    LastName: "Ahmadi",
+    FirstName: "Reza",
+    Email: "reza.ahmadi@example.com",
+    Mobile: "09345678901",
+    Password: "password789",
+    ConfirmPassword: "password789",
+    Website: "https://reza.example.com",
+    UserType: 2,
+    UserImageId: null,
+  },
+  {
+    ID: "u4234567-89ab-cdef-0123-456789abcdef",
+    Name: "Mina",
+    LastName: "Hosseini",
+    FirstName: "Mina",
+    Email: "mina.hosseini@example.com",
+    Mobile: "09456789012",
+    Password: "password012",
+    ConfirmPassword: "password012",
+    Website: "https://mina.example.com",
+    UserType: 2,
+    UserImageId: null,
+  },
+  {
+    ID: "u5234567-89ab-cdef-0123-456789abcdef",
+    Name: "Hossein",
+    LastName: "Moghadam",
+    FirstName: "Hossein",
+    Email: "hossein.moghadam@example.com",
+    Mobile: "09567890123",
+    Password: "password345",
+    ConfirmPassword: "password345",
+    Website: "https://hossein.example.com",
+    UserType: 1,
+    UserImageId: null,
+  },
+];
+
+const roleLists = [
+  {
+    ID: "r1234567-89ab-cdef-0123-456789abcdef",
+    Name: "Project Manager",
+    PostCode: "PM001",
+    Description: "Oversees project execution.",
+    Responsibility: "Manage team, allocate resources.",
+    Authorization: "Approve budgets, make strategic decisions.",
+    Competencies: "Leadership, communication, problem-solving.",
+    Grade: "A",
+    Type: "Full-Time",
+    isStaticPost: true,
+  },
+  {
+    ID: "r2234567-89ab-cdef-0123-456789abcdef",
+    Name: "Software Engineer",
+    PostCode: "SE002",
+    Description: "Develops software solutions.",
+    Responsibility: "Write code, fix bugs.",
+    Authorization: "Make technical decisions within project scope.",
+    Competencies: "Coding, debugging, teamwork.",
+    Grade: "B",
+    Type: "Full-Time",
+    isStaticPost: false,
+  },
+  {
+    ID: "r3234567-89ab-cdef-0123-456789abcdef",
+    Name: "QA Tester",
+    PostCode: "QA003",
+    Description: "Ensures software quality.",
+    Responsibility: "Test software, report issues.",
+    Authorization: "Decide on severity of bugs.",
+    Competencies: "Attention to detail, analytical skills.",
+    Grade: "B",
+    Type: "Contract",
+    isStaticPost: false,
+  },
+  {
+    ID: "r4234567-89ab-cdef-0123-456789abcdef",
+    Name: "Business Analyst",
+    PostCode: "BA004",
+    Description: "Analyzes business requirements.",
+    Responsibility: "Gather requirements, document processes.",
+    Authorization: "Approve requirement changes.",
+    Competencies: "Analytical thinking, communication.",
+    Grade: "A",
+    Type: "Full-Time",
+    isStaticPost: true,
+  },
+  {
+    ID: "r5234567-89ab-cdef-0123-456789abcdef",
+    Name: "UI/UX Designer",
+    PostCode: "UI005",
+    Description: "Designs user interfaces.",
+    Responsibility: "Create wireframes, prototypes.",
+    Authorization: "Decide on design elements.",
+    Competencies: "Creativity, design tools proficiency.",
+    Grade: "B",
+    Type: "Part-Time",
+    isStaticPost: false,
+  },
+];
+
+const menuList = [
+  {
+    ID: 1,
+    Name: "Dashboard",
+    Description: "Main dashboard view",
+    Category: "Navigation",
+    Information: "Information about Dashboard",
+    IsActive: true,
+    IsVisible: true,
+    LastModified: "2024-06-01T10:00:00.000",
+  },
+  {
+    ID: 2,
+    Name: "Reports",
+    Description: "Access to various reports",
+    Category: "Analytics",
+    Information: "Information about Reports",
+    IsActive: true,
+    IsVisible: true,
+    LastModified: "2024-07-15T12:30:00.000",
+  },
+  {
+    ID: 3,
+    Name: "Settings",
+    Description: "Application settings",
+    Category: "Configuration",
+    Information: "Information about Settings",
+    IsActive: false,
+    IsVisible: false,
+    LastModified: "2024-08-20T09:45:00.000",
+  },
+];
+
+const EnterPriseList = [
+  {
+    ID: 1,
+    ModifiedById: null,
+    Name: "Modiriat Tose'e",
+    Describtion: "مدیریت توسعه",
+    Type: "نوع اول",
+    Information: "اطلاعات مدیریت توسعه",
+    IsGlobal: true,
+    IsVisible: true,
+    LastModified: "2024-01-04T14:29:29.413",
+  },
+  {
+    ID: 2,
+    ModifiedById: null,
+    Name: "Sanat Tose'e",
+    Describtion: "صنعت توسعه",
+    Type: "نوع دوم",
+    Information: "اطلاعات صنعت توسعه",
+    IsGlobal: false,
+    IsVisible: true,
+    LastModified: "2024-02-10T10:15:45.123",
+  },
+  {
+    ID: 3,
+    ModifiedById: null,
+    Name: "Fanni Tose'e",
+    Describtion: "فنی توسعه",
+    Type: "نوع سوم",
+    Information: "اطلاعات فنی توسعه",
+    IsGlobal: false,
+    IsVisible: false,
+    LastModified: "2024-03-15T08:45:30.789",
+  },
+  {
+    ID: 4,
+    ModifiedById: null,
+    Name: "Barname Tose'e",
+    Describtion: "برنامه توسعه",
+    Type: "نوع چهارم",
+    Information: "اطلاعات برنامه توسعه",
+    IsGlobal: true,
+    IsVisible: true,
+    LastModified: "2024-04-20T12:00:00.000",
+  },
+  {
+    ID: 5,
+    ModifiedById: null,
+    Name: "Daryafshan Tose'e",
+    Describtion: "دریافتشان توسعه",
+    Type: "نوع پنجم",
+    Information: "اطلاعات دریافشان توسعه",
+    IsGlobal: false,
+    IsVisible: true,
+    LastModified: "2024-05-25T16:30:15.456",
+  },
+];
+
+// ParentList.ts
+
+const ParentList = [
+  {
+    ID: 1,
+    Name: "Parent 1",
+    Description: "First Parent",
+    Type: "Type A",
+    Information: "Information about Parent 1",
+    IsActive: true,
+    IsVisible: true,
+    LastModified: "2024-06-01T10:00:00.000",
+  },
+  {
+    ID: 2,
+    Name: "Parent 2",
+    Description: "Second Parent",
+    Type: "Type B",
+    Information: "Information about Parent 2",
+    IsActive: true,
+    IsVisible: false,
+    LastModified: "2024-07-15T12:30:00.000",
+  },
+  {
+    ID: 3,
+    Name: "Parent 3",
+    Description: "Third Parent",
+    Type: "Type C",
+    Information: "Information about Parent 3",
+    IsActive: false,
+    IsVisible: true,
+    LastModified: "2024-08-20T09:45:00.000",
+  },
+];
+
 // **5. تعریف subTabDataMapping**
 export const subTabDataMapping: { [key: string]: SubTabData } = {
   // General -> Configurations
@@ -1598,29 +1894,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
   },
 
-  // **ProgramTemplate**
-  ProgramTypes: {
-    columnDefs: [
-      {
-        headerName: "Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        ID: 1,
-        Name: "Open List Tender",
-        Description: "OutSourcing",
-      },
-      {
-        ID: 2,
-        Name: "Execution",
-        Description: "Process for onboarding new employees.",
-      },
-    ],
-  },
-
   // **DefaultRibbon**
   DefaultRibbon: {
     columnDefs: [
@@ -1728,6 +2001,49 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
   },
 
+  Calendars: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Calendar 1",
+      },
+    ],
+  },
+
+  Ribbons: {
+    columnDefs: [
+      {
+        headerName: "Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: [
+      {
+        ID: 1,
+        Name: "Calendar 1",
+        Description: "aaa",
+      },
+      {
+        ID: 2,
+        Name: "Calendar 2",
+        Description: "bbb",
+      },
+    ],
+  },
+
   Projects: {
     columnDefs: [
       {
@@ -1776,66 +2092,107 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         filter: "agTextColumnFilter",
       },
     ],
+    rowData: projectLists,
+  },
+
+  Staffing: {
+    columnDefs: [
+      {
+        headerName: "Project Name",
+        field: "nProjectID",
+        filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const projectID = params.data.nProjectID;
+          const project = projectLists.find(
+            (p) => p.ID.toString() === projectID
+          );
+          return project ? project.ProjectName : "N/A";
+        },
+      },
+      {
+        headerName: "UserName",
+        field: "OwnerID",
+        filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const ownerID = params.data.OwnerID;
+          const user = userLists.find((u) => u.ID === ownerID);
+          return user ? user.Name : "N/A";
+        },
+      },
+      {
+        headerName: "Roles Type",
+        field: "nPostTypeID",
+        filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const roleID = params.data.nPostTypeID;
+          const role = roleLists.find((r) => r.ID === roleID);
+          return role ? role.Name : "N/A";
+        },
+      },
+      {
+        headerName: "Enterprise",
+        field: "nCompanyID",
+        filter: "agTextColumnFilter",
+        valueGetter: (params: any) => {
+          const companyID = params.data.nCompanyID;
+          const enterprise = EnterPriseList.find(
+            (e) => e.ID === Number(companyID)
+          );
+          return enterprise ? enterprise.Name : "N/A";
+        },
+      },
+      {
+        headerName: "Parent",
+        field: "ParentId",
+        filter: "agNumberColumnFilter",
+        valueGetter: (params: any) => {
+          const parentId = params.data.ParentId;
+          const parent = ParentList.find((p) => p.ID === Number(parentId));
+          return parent ? parent.Name : "N/A";
+        },
+      },
+      {
+        headerName: "Menu",
+        field: "nMenuID",
+        filter: "agNumberColumnFilter",
+        valueGetter: (params: any) => {
+          const menuId = params.data.nMenuID;
+          const menu = menuList.find((m) => m.ID === Number(menuId));
+          return menu ? menu.Name : "N/A";
+        },
+      },
+    ],
     rowData: [
       {
         ID: 1,
-        ProjectName: "Project 1",
-        State: "Started",
-        AcualStartTime: "2022/12/12",
-        TotalDuration: 1,
-        PCostAct: 1210000,
-        PCostAprov: 56000000,
-        IsIdea: "Idea",
-        IsPersian: true,
-        calendarName: "cal1",
-        TaskNum: 1,
-        RolesNum: 100,
-        LettersNum: 233,
-        MeetingsNum: 999,
-        IssuesNum: 111111,
-        KnowledgeNum: 5656,
+        nProjectID: "1",
+        OwnerID: "u1234567-89ab-cdef-0123-456789abcdef",
+        nPostTypeID: "r1234567-89ab-cdef-0123-456789abcdef",
+        nCompanyID: 1,
+        ParentId: 1,
+        nMenuID: 1,
+        isAccessCreateProject: true,
+        isHaveAddressbar: true,
       },
       {
         ID: 2,
-        ProjectName: "project 2",
-        State: "Closed",
-        AcualStartTime: "2019/12/12",
-        TotalDuration: 2,
-        PCostAct: 34340000,
-        PCostAprov: 99000000,
-        IsIdea: "not Idea",
-        IsPersian: false,
-        calendarName: "cal2",
-        TaskNum: 2,
-        RolesNum: 200,
-        LettersNum: 786,
-        MeetingsNum: 998,
-        IssuesNum: 2222222222,
-        KnowledgeNum: 434334,
+        nProjectID: "2",
+        OwnerID: "u2234567-89ab-cdef-0123-456789abcdef",
+        nPostTypeID: "r2234567-89ab-cdef-0123-456789abcdef",
+        nCompanyID: 2,
+        ParentId: 2,
+        nMenuID: 2,
+        isAccessCreateProject: false,
+        isHaveAddressbar: false,
       },
+      // می‌توانید ردیف‌های بیشتری اضافه کنید
     ],
   },
 
-  Calendars: {
+  Parents: {
     columnDefs: [
       {
-        headerName: "Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    rowData: [
-      {
-        ID: 1,
-        Name: "Calendar 1",
-      },
-    ],
-  },
-
-  Ribbons: {
-    columnDefs: [
-      {
-        headerName: "Name",
+        headerName: "Parent Name",
         field: "Name",
         filter: "agTextColumnFilter",
       },
@@ -1844,19 +2201,35 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         field: "Description",
         filter: "agTextColumnFilter",
       },
-    ],
-    rowData: [
       {
-        ID: 1,
-        Name: "Calendar 1",
-        Description: "aaa",
-      },
-      {
-        ID: 2,
-        Name: "Calendar 2",
-        Description: "bbb",
+        headerName: "Type",
+        field: "Type",
+        filter: "agTextColumnFilter",
       },
     ],
+    rowData: ParentList,
+  },
+
+  Menu: {
+    // افزودن بخش جدید Menu
+    columnDefs: [
+      {
+        headerName: "Menu Name",
+        field: "Name",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Description",
+        field: "Description",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: "Category",
+        field: "Category",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    rowData: menuList,
   },
 };
 
@@ -1870,7 +2243,96 @@ export interface RightItem {
   detail: string;
 }
 
-// در فایل داده‌ها (مثلا tabData.ts) یا هر فایل داده‌ای که استفاده می‌کنید
+export interface Staffing {
+  id: number;
+  nProjectID: number;
+}
+
+// ابتدا Projects را تعریف می‌کنیم
+export const Projects = {
+  columnDefs: [
+    {
+      headerName: "Project Name",
+      field: "ProjectName",
+      filter: "agTextColumnFilter",
+    },
+    { headerName: "Status", field: "State", filter: "agTextColumnFilter" },
+    {
+      headerName: "Act Start",
+      field: "AcualStartTime",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "Duration",
+      field: "TotalDuration",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "Budget Act",
+      field: "PCostAct",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "Budget Approve",
+      field: "PCostAprov",
+      filter: "agTextColumnFilter",
+    },
+    { headerName: "Phase", field: "IsIdea", filter: "agTextColumnFilter" },
+    {
+      headerName: "Is persian",
+      field: "IsPersian",
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "calendar",
+      field: "calendarName",
+      filter: "agTextColumnFilter",
+    },
+  ],
+  rowData: [
+    {
+      ID: 1,
+      ProjectName: "Project 1",
+      State: "Started",
+      AcualStartTime: "2022/12/12",
+      TotalDuration: 1,
+      PCostAct: 1210000,
+      PCostAprov: 56000000,
+      IsIdea: "Idea",
+      IsPersian: true,
+      calendarName: "cal1",
+    },
+    {
+      ID: 2,
+      ProjectName: "Project 2",
+      State: "Closed",
+      AcualStartTime: "2019/12/12",
+      TotalDuration: 2,
+      PCostAct: 34340000,
+      PCostAprov: 99000000,
+      IsIdea: "not Idea",
+      IsPersian: false,
+      calendarName: "cal2",
+    },
+  ],
+};
+
+// از Projects.rowData استفاده می‌کنیم
+
+export const Staffing = {
+  columnDefs: [
+    {
+      headerName: "Project Name",
+      field: "nProjectID",
+      filter: "agTextColumnFilter",
+      // از valueGetter برای برگرداندن نام پروژه استفاده می‌کنیم
+    },
+  ],
+  rowData: [
+    { ID: 1, nProjectID: "1qq" },
+    { ID: 2, nProjectID: "2" },
+  ],
+};
 
 export const ProjectsAccess = {
   columnDefs: [
