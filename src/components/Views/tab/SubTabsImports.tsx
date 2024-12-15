@@ -37,7 +37,7 @@ export const subTabComponents: {
 
   // Programs
   ProgramTemplate: React.lazy(
-    () => import("../../../components/Programs/ProgramTemplate")
+    () => import("../../Programs/ProgramTemplate/ProgramTemplate")
   ),
   ProgramTypes: React.lazy(
     () => import("../../../components/Programs/ProgramTypes")

@@ -7,7 +7,7 @@ import ListSelector from "../../ListSelector/ListSelector";
 import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
 import AddSubApprovalFlowModal from "../AddApprovalDialog/AddSubApprovalFlowModal";
-import { FiEdit, FiTrash2, FiCopy, FiPlus } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 
 interface ApprovalFlowProps {
   selectedRow: any;
@@ -30,7 +30,6 @@ const relatedProjectsData = [
     IsIdea: false,
     State: "Planning",
   },
-  // پروژه‌های بیشتر در صورت نیاز...
 ];
 
 function getAssociatedProjects(
@@ -231,7 +230,7 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
     <>
       <TwoColumnLayout>
         {/* Approval Flow Name Input */}
-        <TwoColumnLayout.Item span={2}>
+        <TwoColumnLayout.Item span={1}>
           <DynamicInput
             name="Approval Flow Name"
             type="text"
@@ -243,7 +242,7 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
         </TwoColumnLayout.Item>
 
         {/* Description Textarea */}
-        <TwoColumnLayout.Item span={2}>
+        <TwoColumnLayout.Item span={1}>
           <CustomTextarea
             id="Description"
             name="Description"
@@ -274,6 +273,7 @@ const ApprovalFlow: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
               onSelectButtonClick: handleSelectButtonClick,
               isSelectDisabled: !selectedRowData,
             }}
+            className="-mt-8"
           />
         </TwoColumnLayout.Item>
 

@@ -22,7 +22,6 @@ interface TableSelectorProps {
 const TableSelector: React.FC<TableSelectorProps> = ({
   columnDefs,
   rowData,
-  selectedRow,
   onRowDoubleClick,
   onRowClick,
   onSelectButtonClick,

@@ -9,6 +9,7 @@ export interface TabsData {
 }
 
 export interface SubTabData {
+  [x: string]: any;
   columnDefs: any[];
   rowData: any[];
 }
@@ -531,6 +532,19 @@ const ParentList = [
     LastModified: "2024-08-20T09:45:00.000",
   },
 ];
+
+export interface Role {
+  ID: string;
+  Name: string;
+  PostCode: string;
+  Description: string;
+  Responsibility: string;
+  Authorization: string;
+  Competencies: string;
+  Grade: string;
+  Type: string;
+  isStaticPost: boolean;
+}
 
 // **5. تعریف subTabDataMapping**
 export const subTabDataMapping: { [key: string]: SubTabData } = {
@@ -1275,7 +1289,6 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         field: "Name",
         filter: "agTextColumnFilter",
       },
-
       {
         headerName: "Job Description",
         field: "Description",
@@ -1294,7 +1307,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
     ],
     rowData: [
       {
-        ID: "r1234567-89ab-cdef-0123-456789abcdef",
+        ID: "1",
         Name: "Project Manager",
         PostCode: "PM001",
         Description: "Oversees project execution.",
@@ -1306,31 +1319,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         isStaticPost: true,
       },
       {
-        ID: "r2234567-89ab-cdef-0123-456789abcdef",
-        Name: "Software Engineer",
-        PostCode: "SE002",
-        Description: "Develops software solutions.",
-        Responsibility: "Write code, fix bugs.",
-        Authorization: "Make technical decisions within project scope.",
-        Competencies: "Coding, debugging, teamwork.",
-        Grade: "B",
-        Type: "Full-Time",
-        isStaticPost: false,
-      },
-      {
-        ID: "r3234567-89ab-cdef-0123-456789abcdef",
-        Name: "QA Tester",
-        PostCode: "QA003",
-        Description: "Ensures software quality.",
-        Responsibility: "Test software, report issues.",
-        Authorization: "Decide on severity of bugs.",
-        Competencies: "Attention to detail, analytical skills.",
-        Grade: "B",
-        Type: "Contract",
-        isStaticPost: false,
-      },
-      {
-        ID: "r4234567-89ab-cdef-0123-456789abcdef",
+        ID: "2",
         Name: "Business Analyst",
         PostCode: "BA004",
         Description: "Analyzes business requirements.",
@@ -1342,16 +1331,16 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         isStaticPost: true,
       },
       {
-        ID: "r5234567-89ab-cdef-0123-456789abcdef",
-        Name: "UI/UX Designer",
-        PostCode: "UI005",
-        Description: "Designs user interfaces.",
-        Responsibility: "Create wireframes, prototypes.",
-        Authorization: "Decide on design elements.",
-        Competencies: "Creativity, design tools proficiency.",
-        Grade: "B",
-        Type: "Part-Time",
-        isStaticPost: false,
+        ID: "3",
+        Name: "Business Analyst 2222",
+        PostCode: "BA004",
+        Description: "Analyzes business requirements.",
+        Responsibility: "Gather requirements, document processes.",
+        Authorization: "Approve requirement changes.",
+        Competencies: "Analytical thinking, communication.",
+        Grade: "A",
+        Type: "Full-Time",
+        isStaticPost: true,
       },
     ],
   },

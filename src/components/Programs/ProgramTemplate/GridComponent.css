@@ -1,0 +1,41 @@
+.grid {
+  display: grid;
+  grid-template-rows: repeat(auto-fill, 1fr);
+  gap: 5px;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 50px;
+  height: 30px;
+  border: 1px dashed #aaa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.cell span {
+  position: absolute;
+  font-size: 10px;
+  color: white;
+}
+
+.cell.div1 {
+  background-color: brown;
+}
+
+.cell.div2 {
+  background-color: olive;
+}
+
+.cell.div3 {
+  background-color: green;
+}
+
+.cell.div4 {
+  background-color: limegreen;
+}

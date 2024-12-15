@@ -24,6 +24,7 @@ interface DataTableProps {
   onDuplicate: () => void;
   domLayout?: "autoHeight" | "normal";
   isRowSelected: boolean;
+  showSearch?: boolean; // اضافه کردن پراپ جدید
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -41,6 +42,7 @@ const DataTable: React.FC<DataTableProps> = ({
   onDuplicate,
   domLayout = "normal",
   isRowSelected,
+  showSearch = true, // تنظیم مقدار پیش‌فرض
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
@@ -86,20 +88,22 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col bg-red-100">
       {/* Search Bar and Action Buttons */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="relative max-w-sm">
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search all table data..."
-            value={searchText}
-            onChange={onSearchChange}
-            className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-            style={{ fontFamily: "inherit" }}
-          />
-        </div>
+      <div className="flex items-center justify-between mb-4 bg-red-100">
+        {showSearch && ( // شرطی کردن نمایش نوار جستجو
+          <div className="relative max-w-sm">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search all table data..."
+              value={searchText}
+              onChange={onSearchChange}
+              className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              style={{ fontFamily: "inherit" }}
+            />
+          </div>
+        )}
 
         <div className="flex items-center space-x-4">
           {showDuplicateIcon && (

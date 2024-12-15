@@ -23,7 +23,8 @@
     "react-icons": "^5.4.0",
     "react-router-dom": "^7.0.2",
     "react-split-pane": "^0.1.92",
-    "splitpanes": "^3.1.5"
+    "splitpanes": "^3.1.5",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
