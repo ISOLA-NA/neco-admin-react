@@ -13,7 +13,7 @@ const Header: React.FC<DrawerComponentProps> = ({ username }) => {
         {/* Logo */}
         <div className="w-8 h-8 flex items-center justify-center">
           <img
-            src="./images/logoNeco.jpg"
+            src="./images/Neco/logoNeco.jpg"
             alt="Company Logo"
             className="rounded-lg shadow-sm border border-gray-200 bg-white transition-transform transform hover:scale-105 hover:shadow-md"
           />
