@@ -1,3 +1,5 @@
+// src/components/TabContent/TabContent.tsx
+
 import React, { useState, useEffect, Suspense } from "react";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 import DataTable from "../../TableDynamic/DataTable";
@@ -55,7 +57,7 @@ const TabContent: React.FC<TabContentProps> = ({
   const [categoryType, setCategoryType] = useState<"cata" | "catb">("cata");
   const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
 
-  // state جدید برای نگهداری ردیفی که در LeftProjectAccess دوبار کلیک شده
+  // State جدید برای نگهداری ردیفی که در LeftProjectAccess دوبار کلیک شده
   const [selectedSubItemForRight, setSelectedSubItemForRight] =
     useState<any>(null);
 
@@ -68,16 +70,16 @@ const TabContent: React.FC<TabContentProps> = ({
 
   const handleSave = (): void => {
     console.log("Save clicked");
-    setIsAdding(false);
-    setIsPanelOpen(false);
-    resetRightPanel();
+    // اجرای عملیات ذخیره‌سازی بدون تغییر وضعیت پنل
+    // اگر نیاز به ذخیره‌سازی دارید، اینجا اضافه کنید
+    // به عنوان مثال: API call برای ذخیره داده‌ها
   };
 
   const handleUpdate = (): void => {
     if (selectedRow) {
       console.log("Update clicked for row:", selectedRow);
-      setIsPanelOpen(false);
-      resetRightPanel();
+      // اجرای عملیات به‌روزرسانی بدون تغییر وضعیت پنل
+      // به عنوان مثال: API call برای به‌روزرسانی داده‌ها
     } else {
       alert("Please select a row to update.");
     }
