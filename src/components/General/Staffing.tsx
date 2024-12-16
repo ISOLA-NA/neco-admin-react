@@ -1,6 +1,6 @@
 // Staffing.tsx
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicSelector from "../utilities/DynamicSelector";
 import DynamicModal from "../utilities/DynamicModal";

@@ -111,10 +111,9 @@ const ResponsiveForm: React.FC = () => {
           {/* Activity Name */}
           <div className="mt-1">
             <DynamicInput
-              name="activityname"
               type="text"
               value={formData.activityname}
-              name="Activity Name"
+              name="activityname"
               onChange={handleChange}
             />
           </div>
@@ -148,7 +147,6 @@ const ResponsiveForm: React.FC = () => {
                 name="duration"
                 type="number"
                 value={formData.duration}
-                label="Duration"
                 onChange={handleChange}
               />
             </div>
@@ -157,7 +155,6 @@ const ResponsiveForm: React.FC = () => {
                 name="lag"
                 type="number"
                 value={formData.lag}
-                label="Lag"
                 onChange={handleChange}
               />
             </div>
@@ -215,18 +212,16 @@ const ResponsiveForm: React.FC = () => {
             <div className="flex-1 mt-1">
               <DynamicInput
                 name="start"
-                type="date"
+                type="text"
                 value={formData.start}
-                label="Start"
                 onChange={handleChange}
               />
             </div>
             <div className="flex-1">
               <DynamicInput
                 name="finish"
-                type="date"
+                type="text"
                 value={formData.finish}
-                label="Finish"
                 onChange={handleChange}
               />
             </div>
@@ -239,7 +234,6 @@ const ResponsiveForm: React.FC = () => {
               options={checkListOptions}
               selectedValue={formData.checkList}
               onChange={handleChange}
-              label="Check list"
             />
           </div>
 
@@ -261,7 +255,6 @@ const ResponsiveForm: React.FC = () => {
                 name="weight1"
                 type="number"
                 value={formData.weight1}
-                label="Weight"
                 onChange={handleChange}
               />
             </div>
@@ -270,7 +263,6 @@ const ResponsiveForm: React.FC = () => {
                 name="weight2"
                 type="number"
                 value={formData.weight2}
-                label="Weight2"
                 onChange={handleChange}
               />
             </div>
@@ -279,7 +271,6 @@ const ResponsiveForm: React.FC = () => {
                 name="weight3"
                 type="number"
                 value={formData.weight3}
-                label="Weight3"
                 onChange={handleChange}
               />
             </div>
@@ -292,7 +283,6 @@ const ResponsiveForm: React.FC = () => {
                 name="approvalToExecutionWeight"
                 type="number"
                 value={formData.approvalToExecutionWeight}
-                label="Approval to execution Weight (%)"
                 onChange={handleChange}
               />
             </div>
@@ -301,7 +291,6 @@ const ResponsiveForm: React.FC = () => {
                 name="wfW2"
                 type="number"
                 value={formData.wfW2}
-                label="WF % W 2"
                 onChange={handleChange}
               />
             </div>
@@ -310,7 +299,6 @@ const ResponsiveForm: React.FC = () => {
                 name="wfW3"
                 type="number"
                 value={formData.wfW3}
-                label="WF % W 3"
                 onChange={handleChange}
               />
             </div>
@@ -323,7 +311,6 @@ const ResponsiveForm: React.FC = () => {
                 name="activityBudget1"
                 type="number"
                 value={formData.activityBudget1}
-                label="Activity Budget"
                 onChange={handleChange}
               />
             </div>
@@ -332,7 +319,6 @@ const ResponsiveForm: React.FC = () => {
                 name="activityBudget2"
                 type="number"
                 value={formData.activityBudget2}
-                label="Activity Budget 2"
                 onChange={handleChange}
               />
             </div>
@@ -341,7 +327,6 @@ const ResponsiveForm: React.FC = () => {
                 name="activityBudget3"
                 type="number"
                 value={formData.activityBudget3}
-                label="Activity Budget 3"
                 onChange={handleChange}
               />
             </div>
@@ -354,7 +339,6 @@ const ResponsiveForm: React.FC = () => {
                 name="approvalBudget1"
                 type="number"
                 value={formData.approvalBudget1}
-                label="Approval Budget"
                 onChange={handleChange}
               />
             </div>
@@ -363,7 +347,6 @@ const ResponsiveForm: React.FC = () => {
                 name="approvalBudget2"
                 type="number"
                 value={formData.approvalBudget2}
-                label="Approval Budget 2"
                 onChange={handleChange}
               />
             </div>
@@ -372,7 +355,6 @@ const ResponsiveForm: React.FC = () => {
                 name="approvalBudget3"
                 type="number"
                 value={formData.approvalBudget3}
-                label="Approval Budget 3"
                 onChange={handleChange}
               />
             </div>
@@ -385,7 +367,6 @@ const ResponsiveForm: React.FC = () => {
                 name="afDuration"
                 type="number"
                 value={formData.afDuration}
-                label="Af Duration"
                 onChange={handleChange}
               />
             </div>
@@ -394,7 +375,6 @@ const ResponsiveForm: React.FC = () => {
                 name="programDuration"
                 type="number"
                 value={formData.programDuration}
-                label="Program Duration"
                 onChange={handleChange}
               />
             </div>
@@ -406,7 +386,6 @@ const ResponsiveForm: React.FC = () => {
               name="programExecutionBudget"
               type="number"
               value={formData.programExecutionBudget}
-              label="Program Execution Budget"
               onChange={handleChange}
             />
           </div>
@@ -417,7 +396,6 @@ const ResponsiveForm: React.FC = () => {
               name="programApprovalBudget"
               type="number"
               value={formData.programApprovalBudget}
-              label="Program Approval Budget"
               onChange={handleChange}
             />
           </div>
@@ -428,7 +406,6 @@ const ResponsiveForm: React.FC = () => {
               name="programToPlanWeight"
               type="number"
               value={formData.programToPlanWeight}
-              label="Program to plan weight (%)"
               onChange={handleChange}
             />
           </div>
@@ -440,7 +417,6 @@ const ResponsiveForm: React.FC = () => {
                 name="subCost2Act"
                 type="number"
                 value={formData.subCost2Act}
-                label="SubCost2 Act"
                 onChange={handleChange}
               />
             </div>
@@ -449,7 +425,6 @@ const ResponsiveForm: React.FC = () => {
                 name="subCost2Apr"
                 type="number"
                 value={formData.subCost2Apr}
-                label="SubCost2 Apr"
                 onChange={handleChange}
               />
             </div>
@@ -458,7 +433,6 @@ const ResponsiveForm: React.FC = () => {
                 name="subCost3Act"
                 type="number"
                 value={formData.subCost3Act}
-                label="SubCost3 Act"
                 onChange={handleChange}
               />
             </div>
@@ -467,7 +441,6 @@ const ResponsiveForm: React.FC = () => {
                 name="subCost3Apr"
                 type="number"
                 value={formData.subCost3Apr}
-                label="SubCost3 Apr"
                 onChange={handleChange}
               />
             </div>
@@ -476,7 +449,6 @@ const ResponsiveForm: React.FC = () => {
                 name="w2SubProg"
                 type="number"
                 value={formData.w2SubProg}
-                label="W2 SubProg"
                 onChange={handleChange}
               />
             </div>
@@ -485,7 +457,6 @@ const ResponsiveForm: React.FC = () => {
                 name="w3SubProg"
                 type="number"
                 value={formData.w3SubProg}
-                label="W3 SubProg"
                 onChange={handleChange}
               />
             </div>

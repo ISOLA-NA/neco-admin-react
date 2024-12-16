@@ -1,5 +1,3 @@
-// DynamicSelector.tsx
-
 import React from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { classNames } from "primereact/utils";
@@ -10,6 +8,7 @@ interface Option {
 }
 
 interface DynamicSelectorProps {
+  name?: string; // اضافه کردن name
   options: Option[];
   selectedValue: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -21,10 +20,11 @@ interface DynamicSelectorProps {
   error?: boolean;
   errorMessage?: string;
   className?: string;
-  disabled?: boolean; // قابلیت غیرفعال کردن کل کامپوننت
+  disabled?: boolean;
 }
 
 const DynamicSelector: React.FC<DynamicSelectorProps> = ({
+  name,
   options,
   selectedValue,
   onChange,
@@ -54,6 +54,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
         )}
 
         <select
+          name={name}
           value={selectedValue}
           onChange={onChange}
           disabled={disabled}
@@ -80,8 +81,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
 
         <label
           className={classNames(
-            "absolute transform transition-all duration-300 cursor-text pointer-events-none",
-            "text-gray-600",
+            "absolute transform transition-all duration-300 cursor-text pointer-events-none text-gray-600",
             selectedValue
               ? "top-0 text-sm -translate-y-full left-0"
               : "top-1/2 text-base -translate-y-1/2 left-0"

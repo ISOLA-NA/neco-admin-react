@@ -64,10 +64,6 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
 
   useEffect(() => {
     if (selectedRow) {
-      const associatedProjects = getAssociatedProjects(
-        selectedRow.ProjectsStr,
-        projectsData
-      );
       const selectedMembers = selectedRow.GroupMembers || [];
 
       setGroupData({
@@ -162,7 +158,7 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
           onRowDoubleClick: (rows: any[]) => {
             handleProjectsChange(rows.map((row) => row.ID));
           },
-          onRowClick: (rows: any[]) => {
+          onRowClick: () => {
             // برای انتخاب چندگانه، معمولاً از چک‌باکس‌ها استفاده می‌شود
             // اینجا می‌توانید ردیف‌های انتخاب شده را ذخیره کنید
           },
@@ -194,7 +190,7 @@ const RoleGroups: React.FC<RoleGroupsProps> = ({ selectedRow }) => {
           onRowDoubleClick: (rows: any[]) => {
             handleMembersChange(rows.map((row) => row.ID));
           },
-          onRowClick: (rows: any[]) => {
+          onRowClick: () => {
             // مشابه پروژه‌ها
           },
           onSelectButtonClick: () => {

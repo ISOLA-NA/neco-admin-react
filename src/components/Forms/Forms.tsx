@@ -57,12 +57,6 @@ const projectData = [
 ];
 
 // توابع کمکی برای تبدیل شناسه‌ها
-const parseIds = (ids: string): number[] => {
-  return ids
-    .split("|")
-    .map((id) => parseInt(id))
-    .filter((id) => !isNaN(id));
-};
 
 // استخراج شناسه پروژه‌ها از رشته‌
 const extractProjectIds = (projectsStr: string): number[] => {
@@ -195,8 +189,8 @@ const FormsCommand: React.FC<FormsCommandProps> = ({ selectedRow }) => {
   };
 
   // مدیریت آپلود فایل ورد و اکسل
-  const [wordFile, setWordFile] = useState<File | null>(null);
-  const [excelFile, setExcelFile] = useState<File | null>(null);
+  const [, setWordFile] = useState<File | null>(null);
+  const [, setExcelFile] = useState<File | null>(null);
 
   const handleWordUpload = (file: File) => {
     setWordFile(file);

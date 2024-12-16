@@ -34,11 +34,11 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     { value: "close", label: "Close" },
   ];
 
-  const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [, setSelectedRow] = useState<any>(null);
   const [selectedState, setSelectedState] = useState<string>(
     radioOptions[0].value
   );
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [, setUploadedImage] = useState<File | null>(null);
 
   const handleRowDoubleClickLocal = (data: any) => {
     setSelectedRow(data);

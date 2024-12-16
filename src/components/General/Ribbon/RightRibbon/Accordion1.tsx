@@ -68,7 +68,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
     onRowClick(row);
   };
 
-  const handleRowDoubleClickEvent = (event: any) => {
+  const handleRowDoubleClickEvent = () => {
     // دابل کلیک روی ردیف جدول
     onRowDoubleClick();
   };

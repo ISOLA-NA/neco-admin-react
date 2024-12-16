@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./components/Views/tab/TabbedInterface";
 import Login from "./components/Autentications/Login";
-import Alert, { showAlert } from "./components/utilities/Alert/DynamicAlert"; // اطمینان از مسیر صحیح
+import Alert from "./components/utilities/Alert/DynamicAlert"; // اطمینان از مسیر صحیح
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";

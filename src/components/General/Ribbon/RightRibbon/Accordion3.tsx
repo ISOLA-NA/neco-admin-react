@@ -96,7 +96,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setSelectedRow3(row);
   };
 
-  const handleRowDoubleClickEvent = (event: any) => {
+  const handleRowDoubleClickEvent = () => {
     onRowDoubleClick();
     // اکاردئون بعدی وجود ندارد، بنابراین این فراخوانی کاری انجام نمی‌دهد
   };

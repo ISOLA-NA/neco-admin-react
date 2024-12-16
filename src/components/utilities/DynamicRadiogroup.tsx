@@ -12,7 +12,6 @@ const DynamicRadioGroup: React.FC<DynamicRadioGroupProps> = ({
   options,
   title,
   name,
-  selectedValue,
   onChange,
 }) => {
   return (

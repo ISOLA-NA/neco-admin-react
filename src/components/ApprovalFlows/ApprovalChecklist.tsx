@@ -139,12 +139,6 @@ const ApprovalCheCkList: React.FC<ApprovalCheCkListProps> = ({
     handleSelectButtonClick();
   };
 
-  // مدیریت باز کردن مودال
-  const handleOpenModal = () => {
-    setCurrentSelector("Projects");
-    setSelectedRowData(null);
-    setModalOpen(true);
-  };
 
   // مدیریت بستن مودال
   const handleCloseModal = () => {

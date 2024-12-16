@@ -139,8 +139,6 @@ const OdpComp: React.FC<OdpProps> = ({ selectedRow }) => {
   const handleOpenApprovalFlowModal = () => setIsApprovalFlowModalOpen(true);
   const handleCloseApprovalFlowModal = () => setIsApprovalFlowModalOpen(false);
 
-  const handleOpenRelateProjectsModal = () =>
-    setIsRelateProjectsModalOpen(true);
   const handleCloseRelateProjectsModal = () =>
     setIsRelateProjectsModalOpen(false);
 
@@ -215,11 +213,6 @@ const OdpComp: React.FC<OdpProps> = ({ selectedRow }) => {
   }));
 
   const approvalFlowOptions = MODALApprovalFlowTemplate.map((item) => ({
-    value: item.ID.toString(),
-    label: item.Name,
-  }));
-
-  const relateProjectOptions = MODALRelateProjects.map((item) => ({
     value: item.ID.toString(),
     label: item.Name,
   }));

@@ -140,7 +140,7 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
 
   // مدیریت وضعیت مدال برای ProgramType
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentSelector, setCurrentSelector] = useState<string>("ProgramType");
+  const [currentSelector] = useState<string>("ProgramType");
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
   const handleOpenModal = () => {

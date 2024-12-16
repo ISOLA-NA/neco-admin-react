@@ -95,7 +95,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
     onRowClick(row);
   };
 
-  const handleRowDoubleClickEvent = (event: any) => {
+  const handleRowDoubleClickEvent = () => {
     onRowDoubleClick();
   };
 
