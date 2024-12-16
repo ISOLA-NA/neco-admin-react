@@ -97,22 +97,18 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const handleAdd = () => {
     console.log("Add clicked");
     setSelectedRow(null); // خالی کردن انتخاب
-    showAlert("info", null, "افزودن", "عملیات افزودن انجام شد.");
   };
 
   const handleEdit = () => {
     console.log("Edit action triggered");
-    showAlert("info", null, "ویرایش", "عملیات ویرایش انجام شد.");
   };
 
   const handleDelete = () => {
     console.log("Delete action triggered");
-    showAlert("info", null, "حذف", "عملیات حذف انجام شد.");
   };
 
   const handleDuplicate = () => {
     console.log("Duplicate action triggered");
-    showAlert("info", null, "تکثیر", "عملیات تکثیر انجام شد.");
   };
 
   const handleRowClick = (data: any) => {
