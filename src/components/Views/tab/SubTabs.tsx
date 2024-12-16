@@ -1,4 +1,5 @@
 // src/components/Views/tab/SubTabs.tsx
+
 import React from "react";
 import ScrollButton from "./ScrollButton";
 
@@ -25,7 +26,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
   subTabsRef,
 }) => {
   return (
-    <div className="relative mt-2 mx-4">
+    <div className="relative mt-1 mx-4">
       {/* دکمه اسکرول سمت چپ */}
       <ScrollButton
         direction="left"
@@ -36,21 +37,21 @@ const SubTabs: React.FC<SubTabsProps> = ({
 
       {/* کانتینر ساب‌تب‌ها با ارتفاع ثابت */}
       <div
-        className="flex items-start space-x-6 overflow-x-auto scrollbar-hide px-6 py-4 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-500 rounded-lg shadow-xl"
+        className="flex items-start space-x-5 overflow-x-auto scrollbar-hide px-4 py-2 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-500 rounded-lg shadow-md"
         ref={subTabsRef}
       >
         {groups ? (
           groups.map((group, groupIndex) => (
             <React.Fragment key={group.label}>
-              <div className="flex flex-col items-center space-y-2">
-                <div className="flex space-x-4">
+              <div className="flex flex-col items-center space-y-1">
+                <div className="flex space-x-3">
                   {group.subtabs.map((subtab) => (
                     <button
                       key={subtab}
-                      className="flex flex-col items-center space-y-1 p-2 text-xs rounded-full relative focus:outline-none"
+                      className="flex flex-col items-center space-y-0.5 p-1.5 text-xs rounded-full relative focus:outline-none"
                       onClick={() => onSubTabChange(subtab)}
                     >
-                      <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                      <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                       <span
                         className={`inline-block transition-colors duration-300 ${
                           activeSubTab === subtab
@@ -63,23 +64,23 @@ const SubTabs: React.FC<SubTabsProps> = ({
                     </button>
                   ))}
                 </div>
-                <span className="text-xs text-white mt-3">{group.label}</span>
+                <span className="text-xs text-white mt-2">{group.label}</span>
               </div>
               {groupIndex < groups.length - 1 && (
-                <div className="self-stretch w-px bg-white mx-4"></div>
+                <div className="self-stretch w-px bg-white mx-3"></div>
               )}
             </React.Fragment>
           ))
         ) : (
-          <div className="flex flex-col items-center space-y-2">
-            <div className="flex space-x-4">
+          <div className="flex flex-col items-center space-y-1">
+            <div className="flex space-x-3">
               {subtabs!.map((subtab) => (
                 <button
                   key={subtab}
-                  className="flex flex-col items-center space-y-1 p-2 text-xs rounded-full relative focus:outline-none"
+                  className="flex flex-col items-center space-y-0.5 p-1.5 text-xs rounded-full relative focus:outline-none"
                   onClick={() => onSubTabChange(subtab)}
                 >
-                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                  <div className="w-6 h-6 bg-gray-200 rounded-full"></div>
                   <span
                     className={`inline-block transition-colors duration-300 ${
                       activeSubTab === subtab

@@ -105,8 +105,13 @@ export const buttons = [
   // افزودن بیشتر دکمه‌ها در صورت نیاز
 ];
 
+
+
 // **4. تعریف TabsData**
 export const tabsData: TabsData = {
+  File: {
+    // تب File بدون گروه‌ها و زیرتب‌ها
+  },
   General: {
     groups: [
       {
