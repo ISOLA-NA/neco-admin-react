@@ -57,7 +57,9 @@ const TabContent: React.FC<TabContentProps> = ({
   const [categoryType, setCategoryType] = useState<"cata" | "catb">("cata");
   const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
 
-  // State جدید برای نگهداری ردیفی که در LeftProjectAccess دوبار کلیک شده
+  // ردیفی که با یک کلیک انتخاب شده اما هنوز در پانل اعمال نشده
+  const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
+
   const [selectedSubItemForRight, setSelectedSubItemForRight] =
     useState<any>(null);
 
@@ -70,16 +72,11 @@ const TabContent: React.FC<TabContentProps> = ({
 
   const handleSave = (): void => {
     console.log("Save clicked");
-    // اجرای عملیات ذخیره‌سازی بدون تغییر وضعیت پنل
-    // اگر نیاز به ذخیره‌سازی دارید، اینجا اضافه کنید
-    // به عنوان مثال: API call برای ذخیره داده‌ها
   };
 
   const handleUpdate = (): void => {
     if (selectedRow) {
       console.log("Update clicked for row:", selectedRow);
-      // اجرای عملیات به‌روزرسانی بدون تغییر وضعیت پنل
-      // به عنوان مثال: API call برای به‌روزرسانی داده‌ها
     } else {
       alert("Please select a row to update.");
     }
@@ -92,24 +89,26 @@ const TabContent: React.FC<TabContentProps> = ({
   };
 
   const handleDoubleClick = (data: any) => {
+    // دوبار کلیک همان رفتار قبلی: مستقیما ردیف را انتخاب و پنل را باز می‌کند.
     onRowDoubleClick(data);
     setIsAdding(false);
     setIsPanelOpen(true);
   };
 
+  // با کلیک یک بار روی ردیف، فقط pendingSelectedRow را آپدیت می‌کنیم و selectedRow را دست نمی‌زنیم
   const handleRowClickLocal = (data: any) => {
-    if (!isPanelOpen || isAdding) {
-      onRowClick(data);
-    }
+    setPendingSelectedRow(data);
   };
 
   const handleEditClick = () => {
-    if (selectedRow) {
+    // وقتی روی ادیت کلیک می‌کنیم، اگر pendingSelectedRow داریم، آن را به عنوان selectedRow ثبت می‌کنیم
+    if (pendingSelectedRow) {
+      onRowClick(pendingSelectedRow); // اینجا selectedRow در TabbedInterface آپدیت می‌شود
       setIsAdding(false);
-      setIsPanelOpen(true);
+      setIsPanelOpen(true); // پنل باز می‌شود
       onEdit();
     } else {
-      alert("Please select a row to edit.");
+      alert("Please select a row before editing.");
     }
   };
 
@@ -160,7 +159,6 @@ const TabContent: React.FC<TabContentProps> = ({
   }, [activeSubTab, categoryType, columnDefs, rowData]);
 
   const handleLeftProjectDoubleClick = (subItemRow: any) => {
-    // این تابع از LeftProjectAccess صدا زده می‌شود وقتی کاربر دوبار روی یک زیر آیتم کلیک کند.
     setSelectedSubItemForRight(subItemRow);
     setShowRightAccessPanel(true);
   };
@@ -267,9 +265,6 @@ const TabContent: React.FC<TabContentProps> = ({
                     minSize={20}
                     className="p-2 border-r border-gray-300"
                   >
-                    {/* توجه: اینجا selectedRow از بالا را برای LeftProjectAccess ارسال می‌کنیم.
-                        LeftProjectAccess هنگامی که کاربر دوبار کلیک کرد، تابع handleLeftProjectDoubleClick را صدا می‌زند
-                        و subItemRow را به ما می‌دهد. */}
                     <React.Suspense fallback={<div>Loading...</div>}>
                       <LeftProjectAccess
                         selectedRow={selectedRow}
@@ -298,7 +293,7 @@ const TabContent: React.FC<TabContentProps> = ({
               <div className="mt-5">
                 <Suspense fallback={<div>Loading...</div>}>
                   <Component
-                    key={isAdding ? "add-mode" : "edit-mode"}
+                    key={isAdding ? "add-mode" : selectedRow ? selectedRow.id : "no-selection"}
                     selectedRow={isAdding ? null : selectedRow}
                   />
                 </Suspense>
