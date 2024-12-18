@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
 import { FiPlus, FiTrash2, FiEdit, FiCopy } from "react-icons/fi";
@@ -44,28 +44,50 @@ const DataTable: React.FC<DataTableProps> = ({
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
+  const [originalRowData, setOriginalRowData] = useState<any[]>([]);
+  const [filteredRowData, setFilteredRowData] = useState<any[]>([]);
+
+  useEffect(() => {
+    setOriginalRowData(rowData);
+    setFilteredRowData(rowData);
+  }, [rowData]);
+
+  const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchText(value);
+
+    if (value.trim() === "") {
+      // اگر جستجو خالی است، همه داده‌ها نشان داده شود
+      setFilteredRowData(originalRowData);
+    } else {
+      const lowerValue = value.toLowerCase();
+      const filtered = originalRowData.filter((item) => {
+        return Object.values(item).some((val) => {
+          if (val === null || val === undefined) return false;
+          // تبدیل هر مقدار به رشته برای جستجو
+          let strVal = "";
+          if (typeof val === "object") {
+            strVal = JSON.stringify(val);
+          } else {
+            strVal = val.toString();
+          }
+          return strVal.toLowerCase().includes(lowerValue);
+        });
+      });
+      setFilteredRowData(filtered);
+    }
+  };
 
   const onGridReady = (params: any) => {
     setGridApi(params.api);
     params.api.sizeColumnsToFit();
   };
 
-  const handleSearch = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setSearchText(value);
-      if (gridApi) {
-        gridApi.setQuickFilter(value);
-      }
-    },
-    [gridApi]
-  );
-
   useEffect(() => {
     if (gridApi) {
       gridApi.sizeColumnsToFit();
     }
-  }, [gridApi, columnDefs, rowData]);
+  }, [gridApi, columnDefs, filteredRowData]);
 
   const handleRowClick = (event: any) => {
     setSelectedRowData(event.data);
@@ -86,22 +108,21 @@ const DataTable: React.FC<DataTableProps> = ({
 
   const gridOptions = {
     getRowClass: getRowClass,
-    suppressRowClickSelection: false, // اجازه انتخاب با کلیک ردیف
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col bg-red-100">
       {/* Search Bar and Action Buttons */}
-      <div className="flex items-center justify-between mb-4 bg-white p-4 rounded shadow">
+      <div className="flex items-center justify-between mb-4 bg-red-100">
         {showSearch && (
-          <div className="relative max-w-sm w-full">
+          <div className="relative max-w-sm">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
-              placeholder="ُSearch..."
+              placeholder="Search...."
               value={searchText}
-              onChange={handleSearch}
-              className="search-input w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              onChange={onSearchChange}
+              className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
               style={{ fontFamily: "inherit" }}
             />
           </div>
@@ -164,7 +185,7 @@ const DataTable: React.FC<DataTableProps> = ({
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
-          rowData={rowData}
+          rowData={filteredRowData}
           pagination={false}
           paginationPageSize={10}
           animateRows={true}
@@ -172,15 +193,8 @@ const DataTable: React.FC<DataTableProps> = ({
           onRowDoubleClicked={handleRowDoubleClick}
           domLayout={domLayout}
           suppressHorizontalScroll={false}
-          rowSelection="single" // برای انتخاب تک‌تک ردیف‌ها
+          rowSelection="multiple"
           gridOptions={gridOptions}
-          defaultColDef={{
-            flex: 1,
-            minWidth: 100,
-            filter: false,
-            sortable: true,
-            resizable: true,
-          }}
         />
       </div>
     </div>
