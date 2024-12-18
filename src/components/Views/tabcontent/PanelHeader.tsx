@@ -1,4 +1,4 @@
-// src/components/MyPanel/MyPanel.tsx
+// src/components/PanelHeader/PanelHeader.tsx
 
 import React from "react";
 import {
@@ -9,24 +9,28 @@ import {
   FiRefreshCw,
 } from "react-icons/fi";
 
-interface MyPanelProps {
+interface PanelHeaderProps {
   isExpanded: boolean;
   toggleExpand: () => void;
-  onSave?: () => void; // تغییر به حالت اختیاری
+  onSave?: () => void;
   onClose: () => void;
-  onUpdate?: () => void; // تغییر به حالت اختیاری
+  onUpdate?: () => void;
+  onTogglePanelSizeFromRight: (maximize: boolean) => void;
+  isRightMaximized: boolean; // اضافه شده
 }
 
-const MyPanel: React.FC<MyPanelProps> = ({
+const PanelHeader: React.FC<PanelHeaderProps> = ({
   isExpanded,
   toggleExpand,
   onSave,
   onClose,
   onUpdate,
+  onTogglePanelSizeFromRight,
+  isRightMaximized
 }) => {
   return (
     <div className="flex items-center justify-between p-4 bg-white shadow-md rounded-t-md">
-      {/* سمت چپ: دکمه Save و Update */}
+      {/* Left Side: Save and Update Buttons */}
       <div className="flex items-center space-x-4">
         {onSave && (
           <button
@@ -49,15 +53,26 @@ const MyPanel: React.FC<MyPanelProps> = ({
         )}
       </div>
 
-      {/* سمت راست: آیکون بزرگ‌نمایی/کوچک‌نمایی و دکمه Close */}
+      {/* Right Side: Maximize/Minimize and Close Buttons */}
       <div className="flex items-center space-x-4">
-        <button
-          onClick={toggleExpand}
-          className="text-gray-600 hover:text-gray-800 transition"
-          title={isExpanded ? "Minimize" : "Maximize"}
-        >
-          {isExpanded ? <FiMinimize2 size={20} /> : <FiMaximize2 size={20} />}
-        </button>
+        {isRightMaximized ? (
+          <button
+            onClick={() => onTogglePanelSizeFromRight(false)}
+            className="text-gray-600 hover:text-gray-800 transition"
+            title="Minimize"
+          >
+            <FiMinimize2 size={20} />
+          </button>
+        ) : (
+          <button
+            onClick={() => onTogglePanelSizeFromRight(true)}
+            className="text-gray-600 hover:text-gray-800 transition"
+            title="Maximize"
+          >
+            <FiMaximize2 size={20} />
+          </button>
+        )}
+
         <button
           onClick={onClose}
           className="text-red-600 hover:text-red-800 transition"
@@ -70,4 +85,4 @@ const MyPanel: React.FC<MyPanelProps> = ({
   );
 };
 
-export default MyPanel;
+export default PanelHeader;

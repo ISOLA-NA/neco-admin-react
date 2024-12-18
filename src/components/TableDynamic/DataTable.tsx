@@ -1,6 +1,4 @@
-// DataTable.tsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
 import { FiPlus, FiTrash2, FiEdit, FiCopy } from "react-icons/fi";
@@ -24,7 +22,7 @@ interface DataTableProps {
   onDuplicate: () => void;
   domLayout?: "autoHeight" | "normal";
   isRowSelected: boolean;
-  showSearch?: boolean; // اضافه کردن پراپ جدید
+  showSearch?: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -42,28 +40,32 @@ const DataTable: React.FC<DataTableProps> = ({
   onDuplicate,
   domLayout = "normal",
   isRowSelected,
-  showSearch = true, // تنظیم مقدار پیش‌فرض
+  showSearch = true,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
-
-  const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
-    if (gridApi) {
-      gridApi.setQuickFilter(e.target.value);
-    }
-  };
 
   const onGridReady = (params: any) => {
     setGridApi(params.api);
     params.api.sizeColumnsToFit();
   };
 
+  const handleSearch = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchText(value);
+      if (gridApi) {
+        gridApi.setQuickFilter(value);
+      }
+    },
+    [gridApi]
+  );
+
   useEffect(() => {
     if (gridApi) {
       gridApi.sizeColumnsToFit();
     }
-  }, [gridApi, columnDefs]);
+  }, [gridApi, columnDefs, rowData]);
 
   const handleRowClick = (event: any) => {
     setSelectedRowData(event.data);
@@ -82,24 +84,24 @@ const DataTable: React.FC<DataTableProps> = ({
     return params.node.selected ? "ag-row-selected" : "";
   };
 
-  // Grid options to use for rowClass
   const gridOptions = {
-    getRowClass: getRowClass, // This function will handle row class logic
+    getRowClass: getRowClass,
+    suppressRowClickSelection: false, // اجازه انتخاب با کلیک ردیف
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-red-100">
+    <div className="w-full h-full flex flex-col">
       {/* Search Bar and Action Buttons */}
-      <div className="flex items-center justify-between mb-4 bg-red-100">
-        {showSearch && ( // شرطی کردن نمایش نوار جستجو
-          <div className="relative max-w-sm">
+      <div className="flex items-center justify-between mb-4 bg-white p-4 rounded shadow">
+        {showSearch && (
+          <div className="relative max-w-sm w-full">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
-              placeholder="Search...."
+              placeholder="ُSearch..."
               value={searchText}
-              onChange={onSearchChange}
-              className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              onChange={handleSearch}
+              className="search-input w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
               style={{ fontFamily: "inherit" }}
             />
           </div>
@@ -170,8 +172,15 @@ const DataTable: React.FC<DataTableProps> = ({
           onRowDoubleClicked={handleRowDoubleClick}
           domLayout={domLayout}
           suppressHorizontalScroll={false}
-          rowSelection="multiple"
-          gridOptions={gridOptions} // Pass gridOptions here
+          rowSelection="single" // برای انتخاب تک‌تک ردیف‌ها
+          gridOptions={gridOptions}
+          defaultColDef={{
+            flex: 1,
+            minWidth: 100,
+            filter: false,
+            sortable: true,
+            resizable: true,
+          }}
         />
       </div>
     </div>
