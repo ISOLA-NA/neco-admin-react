@@ -26,7 +26,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
   onClose,
   onUpdate,
   onTogglePanelSizeFromRight,
-  isRightMaximized
+  isRightMaximized,
 }) => {
   return (
     <div className="flex items-center justify-between p-4 bg-white shadow-md rounded-t-md">
