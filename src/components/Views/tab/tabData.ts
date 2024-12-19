@@ -105,8 +105,6 @@ export const buttons = [
   // افزودن بیشتر دکمه‌ها در صورت نیاز
 ];
 
-
-
 // **4. تعریف TabsData**
 export const tabsData: TabsData = {
   File: {
@@ -549,6 +547,14 @@ export interface Role {
   Grade: string;
   Type: string;
   isStaticPost: boolean;
+}
+
+export interface SubForm {
+  SubID: number;
+  Name: string;
+  Description: string;
+  Status: string;
+  CreatedDate: string;
 }
 
 // **5. تعریف subTabDataMapping**
@@ -1645,6 +1651,193 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         nEntityCateBID: null,
       },
     ],
+    subForms: {
+      1: [
+        {
+          SubID: 101,
+          Name: "Sub Form 1-1",
+          Description: "Description for Sub Form 1-1",
+          Status: "Active",
+          CreatedDate: "2024-09-01",
+        },
+        {
+          SubID: 102,
+          Name: "Sub Form 1-2",
+          Description: "Description for Sub Form 1-2",
+          Status: "Inactive",
+          CreatedDate: "2024-09-02",
+        },
+        {
+          SubID: 103,
+          Name: "Sub Form 1-3",
+          Description: "Description for Sub Form 1-3",
+          Status: "Active",
+          CreatedDate: "2024-09-03",
+        },
+        {
+          SubID: 104,
+          Name: "Sub Form 1-4",
+          Description: "Description for Sub Form 1-4",
+          Status: "Inactive",
+          CreatedDate: "2024-09-04",
+        },
+        {
+          SubID: 105,
+          Name: "Sub Form 1-5",
+          Description: "Description for Sub Form 1-5",
+          Status: "Active",
+          CreatedDate: "2024-09-05",
+        },
+      ],
+      2: [
+        {
+          SubID: 201,
+          Name: "Sub Form 2-1",
+          Description: "Description for Sub Form 2-1",
+          Status: "Active",
+          CreatedDate: "2024-09-06",
+        },
+        {
+          SubID: 202,
+          Name: "Sub Form 2-2",
+          Description: "Description for Sub Form 2-2",
+          Status: "Inactive",
+          CreatedDate: "2024-09-07",
+        },
+        {
+          SubID: 203,
+          Name: "Sub Form 2-3",
+          Description: "Description for Sub Form 2-3",
+          Status: "Active",
+          CreatedDate: "2024-09-08",
+        },
+        {
+          SubID: 204,
+          Name: "Sub Form 2-4",
+          Description: "Description for Sub Form 2-4",
+          Status: "Inactive",
+          CreatedDate: "2024-09-09",
+        },
+        {
+          SubID: 205,
+          Name: "Sub Form 2-5",
+          Description: "Description for Sub Form 2-5",
+          Status: "Active",
+          CreatedDate: "2024-09-10",
+        },
+      ],
+      3: [
+        {
+          SubID: 301,
+          Name: "Sub Form 3-1",
+          Description: "Description for Sub Form 3-1",
+          Status: "Active",
+          CreatedDate: "2024-09-11",
+        },
+        {
+          SubID: 302,
+          Name: "Sub Form 3-2",
+          Description: "Description for Sub Form 3-2",
+          Status: "Inactive",
+          CreatedDate: "2024-09-12",
+        },
+        {
+          SubID: 303,
+          Name: "Sub Form 3-3",
+          Description: "Description for Sub Form 3-3",
+          Status: "Active",
+          CreatedDate: "2024-09-13",
+        },
+        {
+          SubID: 304,
+          Name: "Sub Form 3-4",
+          Description: "Description for Sub Form 3-4",
+          Status: "Inactive",
+          CreatedDate: "2024-09-14",
+        },
+        {
+          SubID: 305,
+          Name: "Sub Form 3-5",
+          Description: "Description for Sub Form 3-5",
+          Status: "Active",
+          CreatedDate: "2024-09-15",
+        },
+      ],
+      4: [
+        {
+          SubID: 401,
+          Name: "Sub Form 4-1",
+          Description: "Description for Sub Form 4-1",
+          Status: "Active",
+          CreatedDate: "2024-09-16",
+        },
+        {
+          SubID: 402,
+          Name: "Sub Form 4-2",
+          Description: "Description for Sub Form 4-2",
+          Status: "Inactive",
+          CreatedDate: "2024-09-17",
+        },
+        {
+          SubID: 403,
+          Name: "Sub Form 4-3",
+          Description: "Description for Sub Form 4-3",
+          Status: "Active",
+          CreatedDate: "2024-09-18",
+        },
+        {
+          SubID: 404,
+          Name: "Sub Form 4-4",
+          Description: "Description for Sub Form 4-4",
+          Status: "Inactive",
+          CreatedDate: "2024-09-19",
+        },
+        {
+          SubID: 405,
+          Name: "Sub Form 4-5",
+          Description: "Description for Sub Form 4-5",
+          Status: "Active",
+          CreatedDate: "2024-09-20",
+        },
+      ],
+      5: [
+        {
+          SubID: 501,
+          Name: "Sub Form 5-1",
+          Description: "Description for Sub Form 5-1",
+          Status: "Active",
+          CreatedDate: "2024-09-21",
+        },
+        {
+          SubID: 502,
+          Name: "Sub Form 5-2",
+          Description: "Description for Sub Form 5-2",
+          Status: "Inactive",
+          CreatedDate: "2024-09-22",
+        },
+        {
+          SubID: 503,
+          Name: "Sub Form 5-3",
+          Description: "Description for Sub Form 5-3",
+          Status: "Active",
+          CreatedDate: "2024-09-23",
+        },
+        {
+          SubID: 504,
+          Name: "Sub Form 5-4",
+          Description: "Description for Sub Form 5-4",
+          Status: "Inactive",
+          CreatedDate: "2024-09-24",
+        },
+        {
+          SubID: 505,
+          Name: "Sub Form 5-5",
+          Description: "Description for Sub Form 5-5",
+          Status: "Active",
+          CreatedDate: "2024-09-25",
+        },
+      ],
+    },
   },
 
   categoriesCata: {

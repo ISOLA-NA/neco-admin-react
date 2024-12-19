@@ -72,7 +72,7 @@ const TabContent: FC<TabContentProps> = ({
   const togglePanelSize = () => {
     // اگر از سمت چپ ماکسیمایز کنیم، isRightMaximized را false کنیم
     setIsRightMaximized(false);
-    setPanelWidth((prev) => {
+    setPanelWidth((_prev) => {
       if (isMaximized) {
         return 50;
       } else {
@@ -362,14 +362,9 @@ const TabContent: FC<TabContentProps> = ({
 
           {isPanelOpen && activeSubTab === "ProjectsAccess" && (
             <Suspense fallback={<div>Loading Projects Access...</div>}>
-              <div className="flex-grow mt-5 flex gap-2">
+              <div className="flex-grow mt-5 flex gap-2 h-full">
                 {/* Nested Panels for ProjectsAccess */}
                 <div className="flex flex-col bg-gray-200 rounded-l-lg overflow-hidden w-1/2 border-r border-gray-300 p-2">
-                  <div className="p-2 border-b border-gray-300 bg-gray-100">
-                    <span className="font-bold text-gray-700 text-sm">
-                      Projects Access Left
-                    </span>
-                  </div>
                   <div className="h-full p-2 overflow-auto">
                     <LeftProjectAccess
                       selectedRow={selectedRow}
@@ -377,12 +372,7 @@ const TabContent: FC<TabContentProps> = ({
                     />
                   </div>
                 </div>
-                <div className="flex flex-col bg-gray-200 rounded-r-lg overflow-hidden w-1/2 p-2">
-                  <div className="p-2 border-b border-gray-300 bg-gray-100">
-                    <span className="font-bold text-gray-700 text-sm">
-                      Projects Access Right
-                    </span>
-                  </div>
+                <div className="flex flex-col bg-gray-200 rounded-r-lg overflow-hidden w-1/2 p-2 h-full">
                   <div className="h-full p-2 overflow-auto">
                     {showRightAccessPanel && selectedSubItemForRight ? (
                       <RightProjectAccess
