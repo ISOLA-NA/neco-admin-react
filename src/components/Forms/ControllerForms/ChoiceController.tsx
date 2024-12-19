@@ -32,7 +32,7 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({
   };
 
   return (
-    <div className="p-4 bg-gray-50 rounded shadow-lg">
+    <div className="p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* انتخاب نوع نمایش */}
         <div>

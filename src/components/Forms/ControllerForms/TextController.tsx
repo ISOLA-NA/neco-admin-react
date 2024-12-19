@@ -9,7 +9,7 @@ const TextController: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-6 rounded-md shadow-md ">
+    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg ">
       {/* <label className="text-sm font-medium text-gray-700 mb-2 block">
         Default value:
       </label> */}

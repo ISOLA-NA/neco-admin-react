@@ -189,7 +189,7 @@ const DateTimeSelector: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
+    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
       {/* Date and Time Format Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">

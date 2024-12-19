@@ -7,7 +7,7 @@ import DynamicSelector from "../utilities/DynamicSelector";
 
 // Import the separate components
 import Component1 from "./ControllerForms/TextController";
-import Component2 from "./ControllerForms/Component3";
+import Component2 from "./ControllerForms/RichTextController";
 import Component3 from "./ControllerForms/ChoiceController";
 import Component4 from "./ControllerForms/NumberController";
 import Component5 from "./ControllerForms/DateTimeEnglishController";
@@ -139,7 +139,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-full bg-white p-4">
+    <div className="flex items-center justify-center min-h-screen  bg-white p-4 -mt-16">
       {/* Loading Layer */}
       {isLoading && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
@@ -148,7 +148,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
         </div>
       )}
 
-      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8 overflow-auto flex flex-col">
+      <div className="w-full  bg-white  rounded-lg  overflow-auto flex flex-col">
         <h2 className="text-3xl font-semibold mb-8 text-center">
           Add New Column
         </h2>
@@ -193,7 +193,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             label="Description"
             error={!!errors.description}
             errorMessage={errors.description}
-            className="md:col-span-1"
+            className="md:col-span-1 -mt-10"
           />
           <DynamicSelector
             name="command"
@@ -203,11 +203,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             label="Command"
             error={!!errors.command}
             errorMessage={errors.command}
-            className="md:col-span-1"
+            className="md:col-span-1 -mt-16"
           />
 
           {/* Required in Workflow and Print Code */}
-          <div className="flex items-center md:col-span-1">
+          <div className="flex items-center md:col-span-1 -mt-8">
             <input
               type="checkbox"
               id="isRequiredInWf"
@@ -218,7 +218,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             />
             <label
               htmlFor="isRequiredInWf"
-              className="ml-3 text-gray-700 font-medium"
+              className="ml-3 text-gray-700 font-medium "
             >
               Required in Workflow
             </label>
@@ -232,11 +232,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             required
             error={!!errors.printCode}
             errorMessage={errors.printCode}
-            className="md:col-span-1"
+            className="md:col-span-1 -mt-8"
           />
 
           {/* Editable in Workflow, Allowed Workflow Box, and Show in Alert */}
-          <div className="flex flex-col md:col-span-2 space-y-4">
+          <div className="flex flex-col md:col-span-2 space-y-4 -mt-8">
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <input
@@ -293,7 +293,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             label="Type of Information"
             error={!!errors.typeOfInformation}
             errorMessage={errors.typeOfInformation}
-            className="md:col-span-2"
+            className="md:col-span-2 -mt-2"
           />
 
           {/* Required, Main Columns, Show in List, Right to Left */}
@@ -365,7 +365,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
           </div>
 
           {/* Read Only, Meta Column, Show in Tab */}
-          <div className="flex flex-wrap md:col-span-2 space-x-4">
+          <div className="flex flex-wrap md:col-span-2 space-x-4 -mt-2">
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -407,7 +407,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
           </div>
 
           {/* Conditionally Render Selected Component */}
-          <div className="mb-8 w-full md:col-span-2">
+          <div className="mb-8 w-full md:col-span-2 -mt-8">
             {selectedComponent === "component1" && <Component1 />}
             {selectedComponent === "component2" && <Component2 />}
             {selectedComponent === "component3" && <Component3 />}
@@ -417,7 +417,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-center md:col-span-2 space-x-4 mt-4">
+          <div className="flex justify-center md:col-span-2 space-x-4 -mt-8">
             <button
               type="button"
               className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"

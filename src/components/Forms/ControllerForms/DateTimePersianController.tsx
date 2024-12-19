@@ -157,46 +157,8 @@ const PersianCalendarPicker: React.FC = () => {
     }
   };
 
-  const logSelectedDateTime = () => {
-    const dateStr = selectedDate
-      ? selectedDate.format("YYYY/MM/DD") // حذف حرف j
-      : "No Date Selected";
-    const timeStr =
-      selectedTime.hours && selectedTime.minutes && selectedTime.seconds
-        ? `${selectedTime.hours.padStart(
-            2,
-            "0"
-          )}:${selectedTime.minutes.padStart(
-            2,
-            "0"
-          )}:${selectedTime.seconds.padStart(2, "0")}`
-        : "No Time Selected";
-    console.log(`Selected Date: ${dateStr}`);
-    console.log(`Selected Time: ${timeStr}`);
-  };
-
-  // تولید بازه سال‌ها (از سال جاری -10 تا سال جاری +10)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i); // از سال جاری -10 تا سال جاری +10
-
-  // آرایه ماه‌ها
-  const months = [
-    { value: 0, label: "فروردین" },
-    { value: 1, label: "اردیبهشت" },
-    { value: 2, label: "خرداد" },
-    { value: 3, label: "تیر" },
-    { value: 4, label: "مرداد" },
-    { value: 5, label: "شهریور" },
-    { value: 6, label: "مهر" },
-    { value: 7, label: "آبان" },
-    { value: 8, label: "آذر" },
-    { value: 9, label: "دی" },
-    { value: 10, label: "بهمن" },
-    { value: 11, label: "اسفند" },
-  ];
-
   return (
-    <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
+    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
       {/* انتخاب فرمت تاریخ و زمان */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -328,16 +290,6 @@ const PersianCalendarPicker: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* دکمه لاگ کردن (اختیاری) */}
-      {/* <div className="flex justify-center">
-        <button
-          onClick={logSelectedDateTime}
-          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Log Selected Date and Time
-        </button>
-      </div> */}
 
       {/* مدال انتخاب تاریخ */}
       <DynamicModal

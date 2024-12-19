@@ -19,11 +19,8 @@ const NumberController: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-6 rounded-md shadow-md space-y-4">
+    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-4">
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          Min:
-        </label>
         <DynamicInput
           name="minValue"
           type="number"
@@ -35,9 +32,6 @@ const NumberController: React.FC = () => {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          Max:
-        </label>
         <DynamicInput
           name="maxValue"
           type="number"
@@ -49,9 +43,6 @@ const NumberController: React.FC = () => {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
-          Default value:
-        </label>
         <DynamicInput
           name="defaultValue"
           type="number"
