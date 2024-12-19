@@ -1,4 +1,5 @@
 // src/components/FormsCommand1.tsx
+
 import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
@@ -8,10 +9,10 @@ import DynamicModal from "../utilities/DynamicModal";
 import TableSelector from "../General/Configuration/TableSelector";
 import HandlerUplodeExcellAccess from "../utilities/HandlerUplodeExcellAccess";
 import DataTable from "../TableDynamic/DataTable";
-import AddForm from "./AddForm"; // فرض بر این است که این کامپوننت وجود دارد
-import { subTabDataMapping, SubForm } from "../Views/tab/tabData"; // وارد کردن داده‌ها
+import AddColumnForm from "./AddForm"; // Updated import
+import { subTabDataMapping, SubForm } from "../Views/tab/tabData"; // Importing data
 
-// یک چک‌باکس ساده
+// A simple checkbox component
 const CheckBox = ({
   label,
   checked,
@@ -38,10 +39,10 @@ const CheckBox = ({
 };
 
 interface FormsCommand1Props {
-  selectedRow: any; // اطلاعات سطر انتخاب شده
+  selectedRow: any; // Information of the selected row
 }
 
-// داده‌های نمونه برای دسته‌بندی‌ها
+// Sample data for categories
 const aCategoryOptions = [
   { value: "1", label: "Category A1" },
   { value: "2", label: "Category A2" },
@@ -54,22 +55,22 @@ const bCategoryOptions = [
   { value: "3", label: "Category B3" },
 ];
 
-// داده‌های نمونه برای پروژه‌ها
+// Sample data for projects
 const projectData = [
   { ID: "101", Name: "Project A" },
   { ID: "102", Name: "Project B" },
   { ID: "103", Name: "Project C" },
-  // می‌توانید پروژه‌های بیشتری اضافه کنید
+  // Add more projects as needed
 ];
 
-// تابع برای استخراج شناسه پروژه‌ها از رشته
+// Function to extract project IDs from a string
 const extractProjectIds = (projectsStr: string): string[] => {
   if (!projectsStr) return [];
   return projectsStr.split("|").filter(Boolean);
 };
 
 const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // Declare state for modal
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // State for the Add modal
 
   const [formData, setFormData] = useState<{
     ID: string | number;
@@ -91,7 +92,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
     Code: "",
   });
 
-  const [subForms, setSubForms] = useState<SubForm[]>([]); // حالت برای ساب‌فرم‌ها
+  const [subForms, setSubForms] = useState<SubForm[]>([]); // State for sub-forms
 
   useEffect(() => {
     if (selectedRow) {
@@ -106,7 +107,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
         Code: selectedRow.Code || "",
       });
 
-      // دریافت ساب‌فرم‌ها بر اساس ID انتخاب شده
+      // Fetch sub-forms based on the selected ID
       const selectedID = selectedRow.ID;
       const fetchedSubForms =
         subTabDataMapping.Forms.subForms?.[selectedID] || [];
@@ -122,7 +123,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
         EntityCateBName: "",
         Code: "",
       });
-      setSubForms([]); // خالی کردن ساب‌فرم‌ها
+      setSubForms([]); // Clear sub-forms
     }
   }, [selectedRow]);
 
@@ -150,7 +151,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
     handleChange("EntityCateBName", e.target.value);
   };
 
-  // مدیریت وضعیت مدال برای دسته‌بندی‌ها
+  // State for category selection modals
   const [modalOpen, setModalOpen] = useState(false);
   const [currentSelector, setCurrentSelector] = useState<"A" | "B" | null>(
     null
@@ -198,14 +199,14 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
   };
 
   const handleAddModalClose = () => {
-    setIsAddModalOpen(false); // Close the modal
+    setIsAddModalOpen(false); // Close the Add modal
   };
 
   const handleAddClick = () => {
-    setIsAddModalOpen(true); // Open the modal
+    setIsAddModalOpen(true); // Open the Add modal
   };
 
-  // داده‌های جزئیات مرتبط (اصلاح شده برای نمایش ساب‌فرم‌ها)
+  // Data for related details (updated to display sub-forms)
   const relatedDetailData = subForms.map((sub) => ({
     ID: sub.SubID,
     FormName: sub.Name,
@@ -214,7 +215,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
     CreatedDate: sub.CreatedDate,
   }));
 
-  // مدیریت آپلود فایل ورد و اکسل
+  // Manage Word and Excel file uploads
   const [, setWordFile] = useState<File | null>(null);
   const [, setExcelFile] = useState<File | null>(null);
 
@@ -231,7 +232,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
   return (
     <div>
       <TwoColumnLayout>
-        {/* فرم اصلی */}
+        {/* Main Form */}
         <TwoColumnLayout.Item span={1}>
           <DynamicInput
             name="Form Name"
@@ -318,15 +319,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
                 }
               },
               onRowClick: handleRowClick,
-              onSelectButtonClick: () => {
-                if (selectedRowData) {
-                  const newSelection = [
-                    ...extractProjectIds(formData.ProjectsStr),
-                    selectedRowData.ID,
-                  ];
-                  handleProjectSelectionChange(newSelection);
-                }
-              },
+              onSelectButtonClick: handleSelectButtonClick,
               isSelectDisabled: !selectedRowData,
             }}
           />
@@ -339,7 +332,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
           />
         </TwoColumnLayout.Item>
 
-        {/* بخش جزئیات با استفاده از DataTable */}
+        {/* Details Section using DataTable */}
         <TwoColumnLayout.Item span={2}>
           <div className="-mt-12">
             <DataTable
@@ -377,37 +370,37 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
               ]}
               rowData={relatedDetailData}
               onRowDoubleClick={() => {
-                /* اعمال دلخواه برای دوبل کلیک */
+                /* Custom action for double-click */
               }}
               setSelectedRowData={() => {
-                /* مدیریت انتخاب ردیف اگر نیاز است */
+                /* Manage row selection if needed */
               }}
               showDuplicateIcon={false}
               showEditIcon={true}
-              showAddIcon={true} // فعال کردن دکمه Add
+              showAddIcon={true} // Enable Add button
               showDeleteIcon={true}
-              onAdd={handleAddClick} // اتصال به تابع باز کردن مودال
+              onAdd={handleAddClick} // Connect to the function to open the modal
               onEdit={() => {
-                /* تابع ویرایش */
+                /* Edit function */
                 console.log("Edit clicked");
               }}
               onDelete={() => {
-                /* تابع حذف */
+                /* Delete function */
                 console.log("Delete clicked");
               }}
               onDuplicate={() => {
-                /* تابع تکرار */
+                /* Duplicate function */
                 console.log("Duplicate clicked");
               }}
               domLayout="autoHeight"
-              isRowSelected={false} // می‌توانید این را بر اساس نیاز تغییر دهید
-              showSearch={true} // فعال کردن جستجو در جزئیات
+              isRowSelected={false} // Modify based on your needs
+              showSearch={true} // Enable search in details
             />
           </div>
         </TwoColumnLayout.Item>
       </TwoColumnLayout>
 
-      {/* مدال داینامیک برای انتخاب دسته‌بندی */}
+      {/* Dynamic Modal for Category Selection */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
           columnDefs={[{ headerName: "Name", field: "label" }]}
@@ -420,9 +413,9 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
         />
       </DynamicModal>
 
-      {/* مودال داینامیک برای افزودن فرم جدید */}
+      {/* Dynamic Modal for Adding a New Column */}
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
-        <AddForm />
+        <AddColumnForm onClose={handleAddModalClose} />
       </DynamicModal>
     </div>
   );

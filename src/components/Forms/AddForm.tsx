@@ -1,5 +1,429 @@
-function AddForm() {
-  return <div>AddForm</div>;
+// src/components/AddColumnForm.tsx
+
+import React, { useState } from "react";
+import DynamicInput from "../utilities/DynamicInput";
+import CustomTextarea from "../utilities/DynamicTextArea";
+import DynamicSelector from "../utilities/DynamicSelector";
+
+interface AddColumnFormProps {
+  onClose: () => void; // Function to close the modal
 }
 
-export default AddForm;
+const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
+  // Form state
+  const [formData, setFormData] = useState({
+    formName: "",
+    order: "",
+    description: "",
+    command: "",
+    isRequiredInWf: false,
+    printCode: "",
+    isEditableInWf: false,
+    allowedWfBoxName: "",
+    showInAlert: false,
+    typeOfInformation: "richtext",
+    required: false,
+    mainColumns: false,
+    showInListView: false,
+    rightToLeft: false,
+    readOnly: false,
+    metaColumnName: "",
+    showInTab: "",
+  });
+
+  // Error state
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Options for dynamic components
+  const commandOptions = [
+    { value: "command1", label: "Command 1" },
+    { value: "command2", label: "Command 2" },
+  ];
+
+  const typeOfInformationOptions = [
+    { value: "richtext", label: "Rich Text" },
+    { value: "text", label: "Text" },
+    { value: "number", label: "Number" },
+  ];
+
+  // Handle input changes
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type } = target;
+
+    if (type === "checkbox") {
+      const { checked } = target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: checked,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  // Handle select changes
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Add your validation and submission logic here
+    // For example, simulate a network request
+    setTimeout(() => {
+      setIsLoading(false);
+      // After successful submission, reset the form and close the modal
+      setFormData({
+        formName: "",
+        order: "",
+        description: "",
+        command: "",
+        isRequiredInWf: false,
+        printCode: "",
+        isEditableInWf: false,
+        allowedWfBoxName: "",
+        showInAlert: false,
+        typeOfInformation: "richtext",
+        required: false,
+        mainColumns: false,
+        showInListView: false,
+        rightToLeft: false,
+        readOnly: false,
+        metaColumnName: "",
+        showInTab: "",
+      });
+      setErrors({});
+      onClose(); // Close the modal after successful submission
+    }, 2000);
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen w-full bg-white p-4">
+      {/* Loading Layer */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+          {/* You can design your own spinner or use existing libraries */}
+        </div>
+      )}
+
+      <div className="w-full max-w-none bg-white shadow-lg rounded-lg p-8 overflow-auto">
+        <h2 className="text-3xl font-semibold mb-8 text-center">
+          Add New Column
+        </h2>
+        <form
+          className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-12"
+          onSubmit={handleSubmit}
+        >
+          {/* Form Name and Order */}
+          <DynamicInput
+            name="formName"
+            type="text"
+            value={formData.formName}
+            placeholder=""
+            onChange={handleChange}
+            required
+            error={!!errors.formName}
+            errorMessage={errors.formName}
+            className="md:col-span-1"
+          />
+          <DynamicInput
+            name="order"
+            type="number"
+            value={formData.order}
+            placeholder=""
+            onChange={handleChange}
+            required
+            error={!!errors.order}
+            errorMessage={errors.order}
+            className="md:col-span-1"
+          />
+
+          {/* Description and Command */}
+          <CustomTextarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder=""
+            required
+            label="Description"
+            error={!!errors.description}
+            errorMessage={errors.description}
+            className="md:col-span-1"
+          />
+          <DynamicSelector
+            name="command"
+            options={commandOptions}
+            selectedValue={formData.command}
+            onChange={handleSelectChange}
+            label="Command"
+            error={!!errors.command}
+            errorMessage={errors.command}
+            className="md:col-span-1"
+          />
+
+          {/* Required in Workflow and Print Code */}
+          <div className="flex items-center md:col-span-1">
+            <input
+              type="checkbox"
+              id="isRequiredInWf"
+              name="isRequiredInWf"
+              checked={formData.isRequiredInWf}
+              onChange={handleChange}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="isRequiredInWf"
+              className="ml-3 text-gray-700 font-medium"
+            >
+              Required in Workflow
+            </label>
+          </div>
+          <DynamicInput
+            name="printCode"
+            type="text"
+            value={formData.printCode}
+            placeholder=""
+            onChange={handleChange}
+            required
+            error={!!errors.printCode}
+            errorMessage={errors.printCode}
+            className="md:col-span-1"
+          />
+
+          {/* Editable in Workflow, Allowed Workflow Box, and Show in Alert */}
+          <div className="flex flex-col md:col-span-2 space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isEditableInWf"
+                  name="isEditableInWf"
+                  checked={formData.isEditableInWf}
+                  onChange={handleChange}
+                  className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="isEditableInWf"
+                  className="ml-3 text-gray-700 font-medium"
+                >
+                  Editable in Workflow
+                </label>
+              </div>
+              <DynamicInput
+                name="allowedWfBoxName"
+                type="text"
+                value={formData.allowedWfBoxName}
+                placeholder=""
+                onChange={handleChange}
+                required
+                error={!!errors.allowedWfBoxName}
+                errorMessage={errors.allowedWfBoxName}
+                className="flex-1"
+              />
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="showInAlert"
+                  name="showInAlert"
+                  checked={formData.showInAlert}
+                  onChange={handleChange}
+                  className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="showInAlert"
+                  className="ml-3 text-gray-700 font-medium"
+                >
+                  Show in Alert
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Type of Information - Full Width */}
+          <DynamicSelector
+            name="typeOfInformation"
+            options={typeOfInformationOptions}
+            selectedValue={formData.typeOfInformation}
+            onChange={handleSelectChange}
+            label="Type of Information"
+            error={!!errors.typeOfInformation}
+            errorMessage={errors.typeOfInformation}
+            className="md:col-span-2"
+          />
+
+          {/* Required, Main Columns, Show in List, Right to Left */}
+          <div className="flex flex-wrap md:col-span-2 space-x-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="required"
+                name="required"
+                checked={formData.required}
+                onChange={handleChange}
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="required"
+                className="ml-3 text-gray-700 font-medium"
+              >
+                Required
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="mainColumns"
+                name="mainColumns"
+                checked={formData.mainColumns}
+                onChange={handleChange}
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="mainColumns"
+                className="ml-3 text-gray-700 font-medium"
+              >
+                Main Columns
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="showInListView"
+                name="showInListView"
+                checked={formData.showInListView}
+                onChange={handleChange}
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="showInListView"
+                className="ml-3 text-gray-700 font-medium"
+              >
+                Show in List
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="rightToLeft"
+                name="rightToLeft"
+                checked={formData.rightToLeft}
+                onChange={handleChange}
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="rightToLeft"
+                className="ml-3 text-gray-700 font-medium"
+              >
+                Right to Left
+              </label>
+            </div>
+          </div>
+
+          {/* Read Only, Meta Column, Show in Tab */}
+          <div className="flex flex-wrap md:col-span-2 space-x-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="readOnly"
+                name="readOnly"
+                checked={formData.readOnly}
+                onChange={handleChange}
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="readOnly"
+                className="ml-3 text-gray-700 font-medium"
+              >
+                Read Only
+              </label>
+            </div>
+            <DynamicInput
+              name="metaColumnName"
+              type="text"
+              value={formData.metaColumnName}
+              placeholder=""
+              onChange={handleChange}
+              required
+              error={!!errors.metaColumnName}
+              errorMessage={errors.metaColumnName}
+              className="flex-1"
+            />
+            <DynamicInput
+              name="showInTab"
+              type="text"
+              value={formData.showInTab}
+              placeholder=""
+              onChange={handleChange}
+              required
+              error={!!errors.showInTab}
+              errorMessage={errors.showInTab}
+              className="flex-1"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end md:col-span-2 space-x-4 mt-6">
+            <button
+              type="button"
+              className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
+              onClick={() => {
+                // Handle cancel operation: reset the form and close the modal
+                setFormData({
+                  formName: "",
+                  order: "",
+                  description: "",
+                  command: "",
+                  isRequiredInWf: false,
+                  printCode: "",
+                  isEditableInWf: false,
+                  allowedWfBoxName: "",
+                  showInAlert: false,
+                  typeOfInformation: "richtext",
+                  required: false,
+                  mainColumns: false,
+                  showInListView: false,
+                  rightToLeft: false,
+                  readOnly: false,
+                  metaColumnName: "",
+                  showInTab: "",
+                });
+                setErrors({});
+                onClose(); // Close the modal
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={isLoading}
+            >
+              {isLoading ? "Adding..." : "Add Column"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default AddColumnForm;

@@ -1,13 +1,47 @@
 @font-face {
-    font-family: 'Vazir';
-    src: url('./node_modules/vazir-font/dist/Vazir.woff2') format('woff2'),
-         url('./node_modules/vazir-font/dist/Vazir.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-  }
+  font-family: "Vazir";
+  src: url("./node_modules/vazir-font/dist/Vazir.woff2") format("woff2"),
+    url("./node_modules/vazir-font/dist/Vazir.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
 
-  body {
-    font-family: 'Vazir', sans-serif;
-  }
-  
-  
+body {
+  font-family: "Vazir", sans-serif;
+}
+
+/* استایل کلی برای تمام اسکرول‌بارها */
+::-webkit-scrollbar {
+  width: 10px; /* عرض اسکرول‌بار */
+  height: 10px; /* ارتفاع اسکرول‌بار برای اسکرول افقی */
+}
+
+/* استایل برای پس‌زمینه اسکرول‌بار */
+::-webkit-scrollbar-track {
+  background: linear-gradient(
+    to bottom,
+    #ff69b4,
+    #0073e6
+  ); /* گرادیانت صورتی تا آبی */
+  border-radius: 10px; /* گرد کردن گوشه‌ها */
+}
+
+/* استایل برای دسته اسکرول‌بار (thumb) */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    #0073e6,
+    #ff69b4
+  ); /* گرادیانت آبی تا صورتی */
+  border-radius: 10px; /* گرد کردن دسته */
+  border: 2px solid white; /* حاشیه سفید دور دسته */
+}
+
+/* استایل برای حالت هاور دسته */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    to bottom,
+    #ff1493,
+    #1e90ff
+  ); /* تغییر رنگ در هاور */
+}
