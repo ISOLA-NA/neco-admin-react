@@ -5,6 +5,14 @@ import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSelector from "../utilities/DynamicSelector";
 
+// Import the separate components
+import Component1 from "./ControllerForms/TextController";
+import Component2 from "./ControllerForms/Component3";
+import Component3 from "./ControllerForms/ChoiceController";
+import Component4 from "./ControllerForms/NumberController";
+import Component5 from "./ControllerForms/DateTimeEnglishController";
+import Component6 from "./ControllerForms/DateTimePersianController";
+
 interface AddColumnFormProps {
   onClose: () => void; // Function to close the modal
 }
@@ -21,7 +29,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
     isEditableInWf: false,
     allowedWfBoxName: "",
     showInAlert: false,
-    typeOfInformation: "richtext",
+    typeOfInformation: "component1",
     required: false,
     mainColumns: false,
     showInListView: false,
@@ -37,6 +45,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
 
+  // State to track selected component
+  const [selectedComponent, setSelectedComponent] = useState<string>(
+    "component1" // تنظیم وضعیت اولیه به "component1"
+  );
+
   // Options for dynamic components
   const commandOptions = [
     { value: "command1", label: "Command 1" },
@@ -44,9 +57,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
   ];
 
   const typeOfInformationOptions = [
-    { value: "richtext", label: "Rich Text" },
-    { value: "text", label: "Text" },
-    { value: "number", label: "Number" },
+    { value: "component1", label: "Component 1" },
+    { value: "component2", label: "Component 2" },
+    { value: "component3", label: "Component 3" },
+    { value: "component4", label: "Component 4" },
+    { value: "component5", label: "Component 5" },
+    { value: "component6", label: "Component 6" },
   ];
 
   // Handle input changes
@@ -68,6 +84,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
         [name]: value,
       }));
     }
+
+    // If the changed field is "typeOfInformation", update selectedComponent
+    if (name === "typeOfInformation") {
+      setSelectedComponent(value);
+    }
   };
 
   // Handle select changes
@@ -77,6 +98,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
       ...prev,
       [name]: value,
     }));
+
+    if (name === "typeOfInformation") {
+      setSelectedComponent(value);
+    }
   };
 
   // Handle form submission
@@ -98,7 +123,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
         isEditableInWf: false,
         allowedWfBoxName: "",
         showInAlert: false,
-        typeOfInformation: "richtext",
+        typeOfInformation: "component1",
         required: false,
         mainColumns: false,
         showInListView: false,
@@ -108,6 +133,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
         showInTab: "",
       });
       setErrors({});
+      setSelectedComponent("component1"); // بازنشانی به "component1"
       onClose(); // Close the modal after successful submission
     }, 2000);
   };
@@ -122,12 +148,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
         </div>
       )}
 
-      <div className="w-full max-w-none bg-white shadow-lg rounded-lg p-8 overflow-auto">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8 overflow-auto flex flex-col">
         <h2 className="text-3xl font-semibold mb-8 text-center">
           Add New Column
         </h2>
+
+        {/* Form */}
         <form
-          className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-12"
+          className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-12 flex-grow"
           onSubmit={handleSubmit}
         >
           {/* Form Name and Order */}
@@ -378,8 +406,18 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             />
           </div>
 
+          {/* Conditionally Render Selected Component */}
+          <div className="mb-8 w-full md:col-span-2">
+            {selectedComponent === "component1" && <Component1 />}
+            {selectedComponent === "component2" && <Component2 />}
+            {selectedComponent === "component3" && <Component3 />}
+            {selectedComponent === "component4" && <Component4 />}
+            {selectedComponent === "component5" && <Component5 />}
+            {selectedComponent === "component6" && <Component6 />}
+          </div>
+
           {/* Buttons */}
-          <div className="flex justify-end md:col-span-2 space-x-4 mt-6">
+          <div className="flex justify-center md:col-span-2 space-x-4 mt-4">
             <button
               type="button"
               className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
@@ -395,7 +433,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
                   isEditableInWf: false,
                   allowedWfBoxName: "",
                   showInAlert: false,
-                  typeOfInformation: "richtext",
+                  typeOfInformation: "component1",
                   required: false,
                   mainColumns: false,
                   showInListView: false,
@@ -405,6 +443,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
                   showInTab: "",
                 });
                 setErrors({});
+                setSelectedComponent("component1"); // بازنشانی به "component1"
                 onClose(); // Close the modal
               }}
             >
