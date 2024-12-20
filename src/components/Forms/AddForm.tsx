@@ -12,6 +12,8 @@ import Component3 from "./ControllerForms/ChoiceController";
 import Component4 from "./ControllerForms/NumberController";
 import Component5 from "./ControllerForms/DateTimeEnglishController";
 import Component6 from "./ControllerForms/DateTimePersianController";
+import Component7 from "./ControllerForms/LookupController";
+import Component8 from "./ControllerForms/PostPickerList";
 
 interface AddColumnFormProps {
   onClose: () => void; // Function to close the modal
@@ -47,8 +49,21 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
 
   // State to track selected component
   const [selectedComponent, setSelectedComponent] = useState<string>(
-    "component1" // تنظیم وضعیت اولیه به "component1"
+    "component1" // Initial state set to "component1"
   );
+
+  // State and data for Component8 (PostPickerList)
+  const [defaultValues, setDefaultValues] = useState<string[][]>([]);
+  const columnDefs = [
+    { headerName: "Position", field: "position" },
+    // Add other column definitions as needed
+  ];
+  const rowData = [
+    { position: "Manager" },
+    { position: "Developer" },
+    { position: "Designer" },
+    // Add more row data as needed
+  ];
 
   // Options for dynamic components
   const commandOptions = [
@@ -63,6 +78,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
     { value: "component4", label: "Component 4" },
     { value: "component5", label: "Component 5" },
     { value: "component6", label: "Component 6" },
+    { value: "component7", label: "Component 7" },
+    { value: "component8", label: "Component 8" },
   ];
 
   // Handle input changes
@@ -133,13 +150,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
         showInTab: "",
       });
       setErrors({});
-      setSelectedComponent("component1"); // بازنشانی به "component1"
+      setSelectedComponent("component1"); // Reset to "component1"
       onClose(); // Close the modal after successful submission
     }, 2000);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen  bg-white p-4 -mt-16">
+    <div className="flex items-center justify-center min-h-screen bg-white p-4 -mt-16">
       {/* Loading Layer */}
       {isLoading && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
@@ -148,7 +165,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
         </div>
       )}
 
-      <div className="w-full  bg-white  rounded-lg  overflow-auto flex flex-col">
+      <div className="w-full bg-white rounded-lg overflow-auto flex flex-col">
         <h2 className="text-3xl font-semibold mb-8 text-center">
           Add New Column
         </h2>
@@ -218,7 +235,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             />
             <label
               htmlFor="isRequiredInWf"
-              className="ml-3 text-gray-700 font-medium "
+              className="ml-3 text-gray-700 font-medium"
             >
               Required in Workflow
             </label>
@@ -414,6 +431,15 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             {selectedComponent === "component4" && <Component4 />}
             {selectedComponent === "component5" && <Component5 />}
             {selectedComponent === "component6" && <Component6 />}
+            {selectedComponent === "component7" && <Component7 />}
+            {selectedComponent === "component8" && (
+              <Component8
+                defaultValues={defaultValues}
+                setDefaultValues={setDefaultValues}
+                columnDefs={columnDefs}
+                rowData={rowData}
+              />
+            )}
           </div>
 
           {/* Buttons */}
@@ -443,7 +469,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
                   showInTab: "",
                 });
                 setErrors({});
-                setSelectedComponent("component1"); // بازنشانی به "component1"
+                setSelectedComponent("component1"); // Reset to "component1"
+                // Reset Component8 state if needed
+                setDefaultValues([]);
                 onClose(); // Close the modal
               }}
             >

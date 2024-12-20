@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode } from "react";
 
 interface ReusableButtonProps {
   text: string;
@@ -15,14 +15,14 @@ const DynamicButton: React.FC<ReusableButtonProps> = ({
   isDisabled = false,
   leftIcon,
   rightIcon,
-  className = '',
+  className = "",
 }) => {
   return (
     <button
       className={`btn w-48 flex items-center justify-center ${
         isDisabled
-          ? 'bg-blue-300 text-gray-500 cursor-not-allowed'
-          : 'btn-primary'
+          ? "bg-blue-300 text-gray-500 cursor-not-allowed"
+          : "btn-primary"
       } ${className}`}
       onClick={onClick}
       disabled={isDisabled}
