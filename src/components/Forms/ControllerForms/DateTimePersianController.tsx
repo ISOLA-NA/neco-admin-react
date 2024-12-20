@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaCalendarAlt, FaClock } from "react-icons/fa";
 import DynamicModal from "../../utilities/DynamicModal";
-import PersianDatePicker from "./DatePicker"; // اطمینان از مسیر صحیح وارد کردن
+import PersianDatePicker from "./PersianDatePicker"; // اطمینان از مسیر صحیح وارد کردن
 import { DateObject } from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
 
 const PersianCalendarPicker: React.FC = () => {
   // مدیریت وضعیت فرمت
@@ -14,10 +15,12 @@ const PersianCalendarPicker: React.FC = () => {
     "none" | "today" | "option1"
   >("none");
   const [isDynamic, setIsDynamic] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null);
   const [tempSelectedDate, setTempSelectedDate] = useState<DateObject | null>(
     null
-  ); // وضعیت موقتی برای مدال تاریخ
+  );
+
   const [selectedTime, setSelectedTime] = useState<{
     hours: string;
     minutes: string;
@@ -27,6 +30,7 @@ const PersianCalendarPicker: React.FC = () => {
     minutes: "",
     seconds: "",
   });
+
   const [tempSelectedTime, setTempSelectedTime] = useState<{
     hours: string;
     minutes: string;
@@ -35,19 +39,16 @@ const PersianCalendarPicker: React.FC = () => {
     hours: "",
     minutes: "",
     seconds: "",
-  }); // وضعیت موقتی برای مدال زمان
+  });
+
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
 
-  // انتخاب ماه و سال برای تقویم فارسی
-  const [selectedMonth, setSelectedMonth] = useState<number>(
-    selectedDate ? selectedDate.month.number - 1 : new Date().getMonth()
-  );
-  const [selectedYear, setSelectedYear] = useState<number>(
-    selectedDate ? selectedDate.year : new Date().getFullYear()
-  );
+  // Persian month and year as strings
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
 
-  // رفرنس‌ها برای ورودی‌های زمان
+  // Refs for time inputs
   const hourRef = useRef<HTMLInputElement>(null);
   const minuteRef = useRef<HTMLInputElement>(null);
   const secondRef = useRef<HTMLInputElement>(null);
@@ -66,18 +67,26 @@ const PersianCalendarPicker: React.FC = () => {
     if (defaultValue === "none") {
       setIsDynamic(false);
       setSelectedDate(null);
+      setTempSelectedDate(null);
+      setSelectedYear("");
+      setSelectedMonth("");
       setSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
     } else if (defaultValue === "today") {
       setIsDynamic(true);
-      const today = new DateObject();
+      const today = new DateObject({ calendar: persian });
       setSelectedDate(today);
       setTempSelectedDate(today);
+      setSelectedYear(today.year.toString());
+      setSelectedMonth((today.month.number - 1).toString());
       setSelectedTime({ hours: "", minutes: "", seconds: "" });
       setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
     } else if (defaultValue === "option1") {
       setIsDynamic(true);
       setSelectedDate(null); // پیاده‌سازی منطق خاص برای Option1 در صورت نیاز
       setTempSelectedDate(null);
+      setSelectedYear("");
+      setSelectedMonth("");
       setSelectedTime({ hours: "", minutes: "", seconds: "" });
       setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
     }
@@ -86,9 +95,20 @@ const PersianCalendarPicker: React.FC = () => {
   // مقداردهی اولیه برای تاریخ موقتی هنگام باز شدن مدال
   useEffect(() => {
     if (isDateModalOpen) {
-      setTempSelectedDate(selectedDate || new DateObject());
-      setSelectedMonth((selectedDate || new DateObject()).month.number - 1);
-      setSelectedYear((selectedDate || new DateObject()).year);
+      if (
+        selectedDate &&
+        selectedDate.month &&
+        selectedDate.month.number !== undefined
+      ) {
+        setTempSelectedDate(selectedDate);
+        setSelectedMonth((selectedDate.month.number - 1).toString());
+        setSelectedYear(selectedDate.year.toString());
+      } else {
+        const today = new DateObject({ calendar: persian });
+        setTempSelectedDate(today);
+        setSelectedMonth((today.month.number - 1).toString());
+        setSelectedYear(today.year.toString());
+      }
     }
   }, [isDateModalOpen, selectedDate]);
 
@@ -104,41 +124,62 @@ const PersianCalendarPicker: React.FC = () => {
     setDefaultValue(value);
     if (value === "today") {
       setIsDynamic(true);
-      const today = new DateObject();
+      const today = new DateObject({ calendar: persian });
       setSelectedDate(today);
       setTempSelectedDate(today);
+      setSelectedYear(today.year.toString());
+      setSelectedMonth((today.month.number - 1).toString());
+      setSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
     } else if (value === "none") {
       setSelectedDate(null);
       setTempSelectedDate(null);
+      setSelectedYear("");
+      setSelectedMonth("");
       setSelectedTime({ hours: "", minutes: "", seconds: "" });
       setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
       setIsDynamic(false);
     } else if (value === "option1") {
       setSelectedDate(null); // پیاده‌سازی منطق خاص برای Option1 در صورت نیاز
       setTempSelectedDate(null);
+      setSelectedYear("");
+      setSelectedMonth("");
+      setSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
       setIsDynamic(true);
     }
   };
 
+  // هندلر انتخاب تاریخ
   const handleSelectDate = () => {
-    setSelectedDate(tempSelectedDate);
+    if (
+      tempSelectedDate &&
+      tempSelectedDate.month &&
+      tempSelectedDate.month.number !== undefined
+    ) {
+      setSelectedDate(tempSelectedDate);
+      setSelectedMonth((tempSelectedDate.month.number - 1).toString());
+      setSelectedYear(tempSelectedDate.year.toString());
+    }
     setIsDateModalOpen(false);
   };
 
+  // هندلر ذخیره زمان
   const handleTimeChange = () => {
     setSelectedTime(tempSelectedTime);
     setIsTimeModalOpen(false);
   };
 
+  // هندلر تغییر ورودی‌های زمان
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // اجازه دادن فقط به اعداد و محدود کردن طول
+    // اجازه دادن فقط به اعداد و محدود کردن طول به ۲
     if (/^\d*$/.test(value)) {
       let val = value;
       if (name === "hours") {
-        if (parseInt(val) > 23) val = "23";
+        if (parseInt(val, 10) > 23) val = "23";
       } else {
-        if (parseInt(val) > 59) val = "59";
+        if (parseInt(val, 10) > 59) val = "59";
       }
       setTempSelectedTime((prev) => ({
         ...prev,
@@ -147,6 +188,7 @@ const PersianCalendarPicker: React.FC = () => {
     }
   };
 
+  // هندلر کلیدهای فشار داده شده برای انتقال فوکوس
   const handleTimeKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
     nextRef: React.RefObject<HTMLInputElement> | null
@@ -250,7 +292,7 @@ const PersianCalendarPicker: React.FC = () => {
           {/* ورودی تاریخ */}
           <div className="relative w-64">
             <input
-              type="text"
+              type="button"
               value={selectedDate ? selectedDate.format("YYYY/MM/DD") : ""}
               onClick={() => setIsDateModalOpen(true)}
               placeholder="انتخاب تاریخ"
@@ -315,7 +357,7 @@ const PersianCalendarPicker: React.FC = () => {
         </div>
       </DynamicModal>
 
-      {/* مدال انتخاب زمان */}
+      {/* مدال انتخاب زمان (همیشه نمایش داده می‌شود) */}
       <DynamicModal
         isOpen={isTimeModalOpen}
         onClose={() => setIsTimeModalOpen(false)}

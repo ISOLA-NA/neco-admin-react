@@ -6,11 +6,11 @@ import persian_fa from "react-date-object/locales/persian_fa";
 
 interface PersianDatePickerProps {
   selectedDate: DateObject | null;
-  onDateChange: React.Dispatch<React.SetStateAction<DateObject | null>>;
-  selectedMonth: number;
-  setSelectedMonth: React.Dispatch<React.SetStateAction<number>>;
-  selectedYear: number;
-  setSelectedYear: React.Dispatch<React.SetStateAction<number>>;
+  onDateChange: (date: DateObject | null) => void;
+  selectedMonth: string;
+  setSelectedMonth: React.Dispatch<React.SetStateAction<string>>;
+  selectedYear: string;
+  setSelectedYear: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
@@ -22,22 +22,22 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
   setSelectedYear,
 }) => {
   const months = [
-    { label: "فروردین", value: 0 },
-    { label: "اردیبهشت", value: 1 },
-    { label: "خرداد", value: 2 },
-    { label: "تیر", value: 3 },
-    { label: "مرداد", value: 4 },
-    { label: "شهریور", value: 5 },
-    { label: "مهر", value: 6 },
-    { label: "آبان", value: 7 },
-    { label: "آذر", value: 8 },
-    { label: "دی", value: 9 },
-    { label: "بهمن", value: 10 },
-    { label: "اسفند", value: 11 },
+    { label: "فروردین", value: "0" },
+    { label: "اردیبهشت", value: "1" },
+    { label: "خرداد", value: "2" },
+    { label: "تیر", value: "3" },
+    { label: "مرداد", value: "4" },
+    { label: "شهریور", value: "5" },
+    { label: "مهر", value: "6" },
+    { label: "آبان", value: "7" },
+    { label: "آذر", value: "8" },
+    { label: "دی", value: "9" },
+    { label: "بهمن", value: "10" },
+    { label: "اسفند", value: "11" },
   ];
 
   const years = Array.from({ length: 1430 - 1300 + 1 }, (_, i) => {
-    const persianYear = 1300 + i;
+    const persianYear = (1300 + i).toString();
     return { label: persianYear, value: persianYear };
   });
 
@@ -47,7 +47,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
         انتخاب تاریخ
       </h2>
 
-      {/* Display selected date */}
+      {/* نمایش تاریخ انتخاب شده */}
       {selectedDate && (
         <div className="mb-4 text-center">
           <span className="text-lg font-medium text-pink-600">
@@ -67,7 +67,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
           <select
             id="month"
             value={selectedMonth}
-            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            onChange={(e) => setSelectedMonth(e.target.value)}
             className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             {months.map((month) => (
@@ -88,7 +88,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
           <select
             id="year"
             value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            onChange={(e) => setSelectedYear(e.target.value)}
             className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             {years.map((year) => (
@@ -103,17 +103,19 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
       <div className="flex justify-center">
         <Calendar
           value={selectedDate}
-          onChange={(date: DateObject) => onDateChange(date)}
+          onChange={(date: DateObject | null) => onDateChange(date)}
           calendar={persian}
           locale={persian_fa}
           className="w-full custom-calendar"
           currentDate={
-            new DateObject({
-              calendar: persian,
-              year: selectedYear,
-              month: selectedMonth + 1,
-              day: 1,
-            })
+            selectedYear && selectedMonth !== ""
+              ? new DateObject({
+                  calendar: persian,
+                  year: Number(selectedYear),
+                  month: Number(selectedMonth) + 1,
+                  day: selectedDate?.day || 1,
+                })
+              : undefined
           }
         />
       </div>

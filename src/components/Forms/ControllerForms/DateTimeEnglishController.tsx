@@ -424,6 +424,7 @@ const DateTimeSelector: React.FC = () => {
           {/* Select Date Button */}
           <div className="flex justify-center mt-6">
             <button
+              type="button"
               onClick={handleSelectDate}
               className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
@@ -526,6 +527,7 @@ const DateTimeSelector: React.FC = () => {
           {/* Save Time Button */}
           <div className="flex justify-center mt-6">
             <button
+              type="button"
               onClick={handleTimeChange}
               className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
