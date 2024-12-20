@@ -14,6 +14,10 @@ import Component5 from "./ControllerForms/DateTimeEnglishController";
 import Component6 from "./ControllerForms/DateTimePersianController";
 import Component7 from "./ControllerForms/LookupController";
 import Component8 from "./ControllerForms/PostPickerList";
+import Component9 from "./ControllerForms/LookupRealValueController";
+import Component10 from "./ControllerForms/LookUpAdvanceTable";
+import Component11 from "./ControllerForms/AdvanceLookupAdvanceTable";
+import Component12 from "./ControllerForms/LookupImage";
 
 interface AddColumnFormProps {
   onClose: () => void; // Function to close the modal
@@ -80,6 +84,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
     { value: "component6", label: "Component 6" },
     { value: "component7", label: "Component 7" },
     { value: "component8", label: "Component 8" },
+    { value: "component9", label: "Component 9" },
+    { value: "component10", label: "Component 10" },
+    { value: "component11", label: "Component 11" },
+    { value: "component12", label: "Component 12" },
   ];
 
   // Handle input changes
@@ -440,6 +448,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
                 rowData={rowData}
               />
             )}
+            {selectedComponent === "component9" && <Component9 />}
+            {selectedComponent === "component10" && <Component10 />}
+            {selectedComponent === "component11" && <Component11 />}
+            {selectedComponent === "component12" && <Component12 />}
           </div>
 
           {/* Buttons */}
