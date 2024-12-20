@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// src/components/General/Configuration/PostPickerList.tsx
+
+import React, { useState } from "react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import DynamicModal from "../../utilities/DynamicModal"; // داینامیک مودال
 import TableSelector from "../../General/Configuration/TableSelector"; // تیبل سلکتور
@@ -8,6 +10,7 @@ interface DefaultValueProps {
   setDefaultValues: React.Dispatch<React.SetStateAction<string[][]>>;
   columnDefs: { headerName: string; field: string }[];
   rowData: { position: string }[];
+  fullWidth?: boolean; // پراپ جدید
 }
 
 const PostPickerList: React.FC<DefaultValueProps> = ({
@@ -15,16 +18,10 @@ const PostPickerList: React.FC<DefaultValueProps> = ({
   setDefaultValues,
   columnDefs,
   rowData,
+  fullWidth = false, // مقدار پیش‌فرض
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any | null>(null);
-
-  // افزودن یک خط خالی در صورت خالی بودن defaultValues
-  useEffect(() => {
-    if (defaultValues.length === 0) {
-      setDefaultValues([[]]);
-    }
-  }, [defaultValues, setDefaultValues]);
 
   const handleSelect = () => {
     if (selectedRow) {
@@ -55,14 +52,17 @@ const PostPickerList: React.FC<DefaultValueProps> = ({
   };
 
   return (
-    <div className="relative mt-4">
+    <div className={`relative mt-4 ${fullWidth ? "w-1/2 mx-auto" : "w-full"}`}>
       <label className="text-gray-500 text-sm">Default Value</label>
-      <div className="flex flex-col space-y-2 mt-2">
+      <div
+        className={`flex flex-col space-y-2 mt-2 ${
+          fullWidth
+            ? "border-b-2 border-gray-300 pb-2 w-1/2 mx-auto"
+            : "border-b-2 border-gray-300 pb-2"
+        }`}
+      >
         {defaultValues.map((line, lineIndex) => (
-          <div
-            key={lineIndex}
-            className="flex items-center flex-wrap gap-2 border-b-2 border-gray-300 pb-2"
-          >
+          <div key={lineIndex} className="flex items-center flex-wrap gap-2">
             {line.map((value, valueIndex) => (
               <div
                 key={valueIndex}
@@ -86,7 +86,9 @@ const PostPickerList: React.FC<DefaultValueProps> = ({
       <button
         type="button"
         onClick={() => setIsModalOpen(true)}
-        className="absolute right-0 top-0 flex items-center justify-center text-indigo-500 hover:text-indigo-700"
+        className={`absolute right-0 top-0 flex items-center justify-center text-indigo-500 hover:text-indigo-700 ${
+          fullWidth ? "right-auto left-1/2 transform -translate-x-1/2 mt-2" : ""
+        }`}
       >
         <FaPlus size={18} />
       </button>

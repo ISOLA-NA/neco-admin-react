@@ -1,3 +1,5 @@
+// DataTable.tsx
+
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
@@ -23,6 +25,7 @@ interface DataTableProps {
   domLayout?: "autoHeight" | "normal";
   isRowSelected: boolean;
   showSearch?: boolean;
+  showAddNew?: boolean; // پروپ جدید
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -41,6 +44,7 @@ const DataTable: React.FC<DataTableProps> = ({
   domLayout = "normal",
   isRowSelected,
   showSearch = true,
+  showAddNew = false, // پیش‌فرض false
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
@@ -93,7 +97,7 @@ const DataTable: React.FC<DataTableProps> = ({
     setSelectedRowData(event.data);
   };
 
-  const handleRowDoubleClick = (event: any) => {
+  const handleRowDoubleClickInternal = (event: any) => {
     onRowDoubleClick(event.data);
   };
 
@@ -112,7 +116,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col bg-red-100">
-      {/* Search Bar and Action Buttons */}
+      {/* نوار جستجو و دکمه‌های اکشن */}
       <div className="flex items-center justify-between mb-4 bg-red-100">
         {showSearch && (
           <div className="relative max-w-sm">
@@ -170,6 +174,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
           {showAddIcon && (
             <button
+              type="button" // افزودن نوع button برای جلوگیری از ارسال فرم
               className="text-green-600 hover:text-green-800 transition"
               title="Add"
               onClick={onAdd}
@@ -180,7 +185,7 @@ const DataTable: React.FC<DataTableProps> = ({
         </div>
       </div>
 
-      {/* Data Table */}
+      {/* جدول داده‌ها */}
       <div className={gridClasses}>
         <AgGridReact
           onGridReady={onGridReady}
@@ -190,13 +195,26 @@ const DataTable: React.FC<DataTableProps> = ({
           paginationPageSize={10}
           animateRows={true}
           onRowClicked={handleRowClick}
-          onRowDoubleClicked={handleRowDoubleClick}
+          onRowDoubleClicked={handleRowDoubleClickInternal}
           domLayout={domLayout}
           suppressHorizontalScroll={false}
-          rowSelection="multiple"
+          rowSelection="single" // تغییر به 'single' برای انتخاب تنها یک سطر
           gridOptions={gridOptions}
+          singleClickEdit={true} // فعال‌سازی ویرایش با یک کلیک
+          stopEditingWhenCellsLoseFocus={true} // توقف ویرایش هنگام از دست دادن فوکوس سلول
         />
       </div>
+
+      {/* دکمه Add New */}
+      {showAddNew && (
+        <button
+          type="button" // افزودن نوع button برای جلوگیری از ارسال فرم
+          className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+          onClick={onAdd}
+        >
+          Add New
+        </button>
+      )}
     </div>
   );
 };
