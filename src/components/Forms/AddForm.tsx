@@ -18,6 +18,9 @@ import Component9 from "./ControllerForms/LookupRealValueController";
 import Component10 from "./ControllerForms/LookUpAdvanceTable";
 import Component11 from "./ControllerForms/AdvanceLookupAdvanceTable";
 import Component12 from "./ControllerForms/LookupImage";
+import Component13 from "./ControllerForms/YesNoController";
+import Component14 from "./ControllerForms/AttachFileController";
+import Component15 from "./ControllerForms/PictureBoxController";
 
 interface AddColumnFormProps {
   onClose: () => void; // Function to close the modal
@@ -88,6 +91,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
     { value: "component10", label: "Component 10" },
     { value: "component11", label: "Component 11" },
     { value: "component12", label: "Component 12" },
+    { value: "component13", label: "Component 13" },
+    { value: "component14", label: "Component 14" },
+    { value: "component15", label: "Component 15" },
   ];
 
   // Handle input changes
@@ -452,6 +458,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             {selectedComponent === "component10" && <Component10 />}
             {selectedComponent === "component11" && <Component11 />}
             {selectedComponent === "component12" && <Component12 />}
+            {selectedComponent === "component13" && <Component13 />}
+            {selectedComponent === "component14" && <Component14 />}
+            {selectedComponent === "component15" && <Component15 />}
           </div>
 
           {/* Buttons */}
