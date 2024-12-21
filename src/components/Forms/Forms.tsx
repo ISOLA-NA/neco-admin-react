@@ -238,7 +238,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
             name="Form Name"
             type="text"
             value={formData.FormName}
-            placeholder="Enter form name"
+            placeholder=""
             onChange={(e) => handleChange("FormName", e.target.value)}
             required={true}
           />
@@ -249,7 +249,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
             name="Code"
             type="text"
             value={formData.Code}
-            placeholder="Enter code"
+            placeholder=""
             onChange={(e) => handleChange("Code", e.target.value)}
             required={true}
           />
@@ -334,7 +334,7 @@ const FormsCommand1: React.FC<FormsCommand1Props> = ({ selectedRow }) => {
 
         {/* Details Section using DataTable */}
         <TwoColumnLayout.Item span={2}>
-          <div className="-mt-12">
+          <div className="-mt-4">
             <DataTable
               columnDefs={[
                 {

@@ -21,6 +21,16 @@ import Component12 from "./ControllerForms/LookupImage";
 import Component13 from "./ControllerForms/YesNoController";
 import Component14 from "./ControllerForms/AttachFileController";
 import Component15 from "./ControllerForms/PictureBoxController";
+import Component16 from "./ControllerForms/TableController";
+import Component17 from "./ControllerForms/PfiLookUpController";
+import Component18 from "./ControllerForms/SeqnialNumber";
+import Component19 from "./ControllerForms/AdvanceTableController";
+import Component20 from "./ControllerForms/WordPanelController";
+import Component21 from "./ControllerForms/ExceclPanelController";
+import Component22 from "./ControllerForms/CalculatedField";
+import Component23 from "./ControllerForms/ExcelCalculator";
+import Component24 from "./ControllerForms/TabController";
+import Component25 from "./ControllerForms/MapController";
 
 interface AddColumnFormProps {
   onClose: () => void; // Function to close the modal
@@ -94,6 +104,16 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
     { value: "component13", label: "Component 13" },
     { value: "component14", label: "Component 14" },
     { value: "component15", label: "Component 15" },
+    { value: "component16", label: "Component 16" },
+    { value: "component17", label: "Component 17" },
+    { value: "component18", label: "Component 18" },
+    { value: "component19", label: "Component 19" },
+    { value: "component20", label: "Component 20" },
+    { value: "component21", label: "Component 21" },
+    { value: "component22", label: "Component 22" },
+    { value: "component23", label: "Component 23" },
+    { value: "component24", label: "Component 24" },
+    { value: "component25", label: "Component 25" },
   ];
 
   // Handle input changes
@@ -461,6 +481,16 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({ onClose }) => {
             {selectedComponent === "component13" && <Component13 />}
             {selectedComponent === "component14" && <Component14 />}
             {selectedComponent === "component15" && <Component15 />}
+            {selectedComponent === "component16" && <Component16 />}
+            {selectedComponent === "component17" && <Component17 />}
+            {selectedComponent === "component18" && <Component18 />}
+            {selectedComponent === "component19" && <Component19 />}
+            {selectedComponent === "component20" && <Component20 />}
+            {selectedComponent === "component21" && <Component21 />}
+            {selectedComponent === "component22" && <Component22 />}
+            {selectedComponent === "component23" && <Component23 />}
+            {selectedComponent === "component24" && <Component24 />}
+            {selectedComponent === "component25" && <Component25 />}
           </div>
 
           {/* Buttons */}

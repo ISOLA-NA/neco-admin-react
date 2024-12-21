@@ -1,5 +1,3 @@
-// DataTable.tsx
-
 import React, { useState, useEffect } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
@@ -22,10 +20,11 @@ interface DataTableProps {
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onCellValueChanged?: (event: any) => void; // اضافه شد
   domLayout?: "autoHeight" | "normal";
   isRowSelected: boolean;
   showSearch?: boolean;
-  showAddNew?: boolean; // پروپ جدید
+  showAddNew?: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -41,10 +40,11 @@ const DataTable: React.FC<DataTableProps> = ({
   onEdit,
   onDelete,
   onDuplicate,
+  onCellValueChanged, // اضافه شد
   domLayout = "normal",
   isRowSelected,
   showSearch = true,
-  showAddNew = false, // پیش‌فرض false
+  showAddNew = false,
 }) => {
   const [searchText, setSearchText] = useState("");
   const [gridApi, setGridApi] = useState<any>(null);
@@ -202,6 +202,7 @@ const DataTable: React.FC<DataTableProps> = ({
           gridOptions={gridOptions}
           singleClickEdit={true} // فعال‌سازی ویرایش با یک کلیک
           stopEditingWhenCellsLoseFocus={true} // توقف ویرایش هنگام از دست دادن فوکوس سلول
+          onCellValueChanged={onCellValueChanged} // اضافه شد
         />
       </div>
 

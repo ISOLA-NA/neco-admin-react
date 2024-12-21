@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import HomePage from "./components/Views/tab/TabbedInterface";
 import Login from "./components/Autentications/Login";
 import Alert from "./components/utilities/Alert/DynamicAlert"; // اطمینان از مسیر صحیح
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import "./App.css"
+import "leaflet/dist/leaflet.css";
+
+import "./App.css";
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -33,8 +40,8 @@ const App: React.FC = () => {
     <Router>
       <Alert /> {/* ToastContainer در بالاترین سطح اپلیکیشن */}
       <Routes>
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             isAuthenticated ? (
               // <HomePage />
@@ -42,17 +49,17 @@ const App: React.FC = () => {
             ) : (
               <Navigate to="/login" replace />
             )
-          } 
+          }
         />
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             isAuthenticated ? (
               <Navigate to="/" replace />
             ) : (
               <Login onLogin={handleLogin} />
             )
-          } 
+          }
         />
         {/* مسیرهای دیگر را در صورت نیاز اضافه کنید */}
       </Routes>
