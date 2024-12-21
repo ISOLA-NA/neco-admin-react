@@ -52,70 +52,81 @@ const PostPickerList: React.FC<DefaultValueProps> = ({
   };
 
   return (
-    <div className={`relative mt-4 ${fullWidth ? "w-1/2 mx-auto" : "w-full"}`}>
-      <label className="text-gray-500 text-sm">Default Value</label>
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
       <div
-        className={`flex flex-col space-y-2 mt-2 ${
-          fullWidth
-            ? "border-b-2 border-gray-300 pb-2 w-1/2 mx-auto"
-            : "border-b-2 border-gray-300 pb-2"
-        }`}
+        className={`relative mt-4 ${fullWidth ? "w-1/2 mx-auto" : "w-full"}`}
       >
-        {defaultValues.map((line, lineIndex) => (
-          <div key={lineIndex} className="flex items-center flex-wrap gap-2">
-            {line.map((value, valueIndex) => (
-              <div
-                key={valueIndex}
-                className="relative px-2 py-1 bg-gray-100 rounded-lg flex items-center"
-              >
-                <span className="text-gray-800">{value}</span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleRemoveDefaultValue(lineIndex, valueIndex)
-                  }
-                  className="absolute -top-2 -right-2 text-red-500 hover:text-red-700"
+        <label className="text-gray-500 text-sm">Default Value</label>
+        <div
+          className={`flex flex-col space-y-2 mt-2 ${
+            fullWidth
+              ? "border-b-2 border-gray-300 pb-2 w-1/2 mx-auto"
+              : "border-b-2 border-gray-300 pb-2"
+          }`}
+        >
+          {defaultValues.map((line, lineIndex) => (
+            <div key={lineIndex} className="flex items-center flex-wrap gap-2">
+              {line.map((value, valueIndex) => (
+                <div
+                  key={valueIndex}
+                  className="relative px-2 py-1 bg-gray-100 rounded-lg flex items-center"
                 >
-                  <FaTimes size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={() => setIsModalOpen(true)}
-        className={`absolute right-0 top-0 flex items-center justify-center text-indigo-500 hover:text-indigo-700 ${
-          fullWidth ? "right-auto left-1/2 transform -translate-x-1/2 mt-2" : ""
-        }`}
-      >
-        <FaPlus size={18} />
-      </button>
+                  <span className="text-gray-800">{value}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleRemoveDefaultValue(lineIndex, valueIndex)
+                    }
+                    className="absolute -top-2 -right-2 text-red-500 hover:text-red-700"
+                  >
+                    <FaTimes size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          className={`absolute right-0 top-0 flex items-center justify-center text-indigo-500 hover:text-indigo-700 ${
+            fullWidth
+              ? "right-auto left-1/2 transform -translate-x-1/2 mt-2"
+              : ""
+          }`}
+        >
+          <FaPlus size={18} />
+        </button>
 
-      {/* مودال انتخاب */}
-      <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <TableSelector
-          columnDefs={columnDefs}
-          rowData={rowData}
-          onRowDoubleClick={(row) => {
-            const newDefaultValues = [...defaultValues];
-            if (
-              newDefaultValues.length === 0 ||
-              newDefaultValues[newDefaultValues.length - 1].length >= 3
-            ) {
-              newDefaultValues.push([row.position]);
-            } else {
-              newDefaultValues[newDefaultValues.length - 1].push(row.position);
-            }
-            setDefaultValues(newDefaultValues);
-            setIsModalOpen(false);
-          }}
-          onRowClick={(row) => setSelectedRow(row)}
-          onSelectButtonClick={handleSelect}
-          isSelectDisabled={!selectedRow}
-        />
-      </DynamicModal>
+        {/* مودال انتخاب */}
+        <DynamicModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        >
+          <TableSelector
+            columnDefs={columnDefs}
+            rowData={rowData}
+            onRowDoubleClick={(row) => {
+              const newDefaultValues = [...defaultValues];
+              if (
+                newDefaultValues.length === 0 ||
+                newDefaultValues[newDefaultValues.length - 1].length >= 3
+              ) {
+                newDefaultValues.push([row.position]);
+              } else {
+                newDefaultValues[newDefaultValues.length - 1].push(
+                  row.position
+                );
+              }
+              setDefaultValues(newDefaultValues);
+              setIsModalOpen(false);
+            }}
+            onRowClick={(row) => setSelectedRow(row)}
+            onSelectButtonClick={handleSelect}
+            isSelectDisabled={!selectedRow}
+          />
+        </DynamicModal>
+      </div>
     </div>
   );
 };

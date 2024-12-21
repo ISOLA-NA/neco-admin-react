@@ -41,7 +41,7 @@ const PictureBoxFile: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-start space-y-6 p-8 border border-gray-300 rounded-lg shadow-md bg-white">
+    <div className="flex flex-col items-start space-y-6 p-8 border border-gray-300 rounded-lg shadow-md bg-gradient-to-r from-pink-100 to-blue-100">
       <div className="flex items-center w-full space-x-4">
         {/* Reset Button (Trash Icon) - Moved to the Left */}
         {fileName && (

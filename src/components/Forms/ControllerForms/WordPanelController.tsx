@@ -43,7 +43,7 @@ const WordPanel: React.FC = () => {
   };
 
   return (
-    <div className="p-2 bg-gray-50 flex items-center justify-center ">
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
       <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8">
         {/* Header Controls */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">

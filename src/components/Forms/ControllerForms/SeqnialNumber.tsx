@@ -17,69 +17,71 @@ const SeqenialNumber: React.FC = () => {
   ];
 
   return (
-    <div className="p-4 w-full max-w-lg space-y-6">
-      {/* Command Input */}
-      <DynamicInput
-        name="Command"
-        type="text"
-        value={command}
-        onChange={(e) => setCommand(e.target.value)}
-        placeholder=""
-      />
-
-      <div className="flex items-center space-x-4">
-        {/* Number Of Digit */}
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
+      <div className="p-4 w-full max-w-lg space-y-6">
+        {/* Command Input */}
         <DynamicInput
-          name="Number Of Digit"
-          type="number"
-          value={numberOfDigit}
-          onChange={(e) => setNumberOfDigit(e.target.value)}
-          placeholder=""
-        />
-
-        {/* Separator Character */}
-        <DynamicInput
-          name="Separator Character"
+          name="Command"
           type="text"
-          value={separatorCharacter}
-          onChange={(e) => setSeparatorCharacter(e.target.value)}
-          placeholder=""
-        />
-      </div>
-
-      <div className="flex items-center space-x-4">
-        {/* Count of Const */}
-        <DynamicInput
-          name="Count of Const"
-          type="number"
-          value={countOfConst}
-          onChange={(e) => setCountOfConst(e.target.value)}
+          value={command}
+          onChange={(e) => setCommand(e.target.value)}
           placeholder=""
         />
 
-        {/* Count In Reject */}
-        <div className="flex items-center space-x-2">
-          <input
-            id="countInReject"
-            type="checkbox"
-            checked={countInReject}
-            onChange={(e) => setCountInReject(e.target.checked)}
-            className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+        <div className="flex items-center space-x-4">
+          {/* Number Of Digit */}
+          <DynamicInput
+            name="Number Of Digit"
+            type="number"
+            value={numberOfDigit}
+            onChange={(e) => setNumberOfDigit(e.target.value)}
+            placeholder=""
           />
-          <label htmlFor="countInReject" className="text-gray-700">
-            Count In Reject
-          </label>
-        </div>
-      </div>
 
-      {/* Modes Selector */}
-      <DynamicSelector
-        name="Modes"
-        options={modeOptions}
-        selectedValue={mode}
-        onChange={(e) => setMode(e.target.value)}
-        label="Modes"
-      />
+          {/* Separator Character */}
+          <DynamicInput
+            name="Separator Character"
+            type="text"
+            value={separatorCharacter}
+            onChange={(e) => setSeparatorCharacter(e.target.value)}
+            placeholder=""
+          />
+        </div>
+
+        <div className="flex items-center space-x-4">
+          {/* Count of Const */}
+          <DynamicInput
+            name="Count of Const"
+            type="number"
+            value={countOfConst}
+            onChange={(e) => setCountOfConst(e.target.value)}
+            placeholder=""
+          />
+
+          {/* Count In Reject */}
+          <div className="flex items-center space-x-2">
+            <input
+              id="countInReject"
+              type="checkbox"
+              checked={countInReject}
+              onChange={(e) => setCountInReject(e.target.checked)}
+              className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+            />
+            <label htmlFor="countInReject" className="text-gray-700">
+              Count In Reject
+            </label>
+          </div>
+        </div>
+
+        {/* Modes Selector */}
+        <DynamicSelector
+          name="Modes"
+          options={modeOptions}
+          selectedValue={mode}
+          onChange={(e) => setMode(e.target.value)}
+          label="Modes"
+        />
+      </div>
     </div>
   );
 };

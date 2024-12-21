@@ -119,7 +119,7 @@ const Lookuprealvalue: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-4 bg-gray-50 rounded shadow-lg">
+    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
       {/* بخش بالایی: Selectors و تنظیمات */}
       <div className="flex gap-8">
         {/* بخش سمت چپ: Selectors */}

@@ -46,30 +46,36 @@ const MapModalButtonPigeon: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <button className="btn btn-primary" onClick={handleOpenModal}>
-        نمایش نقشه (Pigeon Maps)
-      </button>
-      <DynamicModal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1">
-            <Map
-              defaultCenter={[35.6892, 51.389]}
-              defaultZoom={13}
-              height={500}
-              onBoundsChanged={handleBoundsChanged}
-              onClick={handleMapClick}
-            >
-              <Marker width={50} anchor={markerLocation} />
-            </Map>
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <button className="btn btn-primary" onClick={handleOpenModal}>
+          نمایش نقشه (Pigeon Maps)
+        </button>
+        <DynamicModal isOpen={isModalOpen} onClose={handleCloseModal}>
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1">
+              <Map
+                defaultCenter={[35.6892, 51.389]}
+                defaultZoom={13}
+                height={500}
+                onBoundsChanged={handleBoundsChanged}
+                onClick={handleMapClick}
+              >
+                <Marker width={50} anchor={markerLocation} />
+              </Map>
+            </div>
+            <div className="mt-4 flex justify-center items-center">
+              <button
+                className="btn btn-success"
+                onClick={handleSelect}
+                type="button"
+              >
+                Select
+              </button>
+            </div>
           </div>
-          <div className="mt-4 flex justify-center items-center">
-            <button className="btn btn-success" onClick={handleSelect}>
-              Select
-            </button>
-          </div>
-        </div>
-      </DynamicModal>
+        </DynamicModal>
+      </div>
     </div>
   );
 };

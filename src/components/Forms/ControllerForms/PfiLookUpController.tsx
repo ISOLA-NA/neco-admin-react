@@ -18,24 +18,26 @@ const PfiLookup: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-4 w-64">
-      <DynamicSelector
-        name="entityType"
-        options={entityTypeOptions}
-        selectedValue={entityType}
-        onChange={(e) => setEntityType(e.target.value)}
-        label="Select Entity Types"
-        rightIcon={null} // بدون آیکون اضافه
-      />
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
+      <div className="flex flex-col gap-4 w-64">
+        <DynamicSelector
+          name="entityType"
+          options={entityTypeOptions}
+          selectedValue={entityType}
+          onChange={(e) => setEntityType(e.target.value)}
+          label="Select Entity Types"
+          rightIcon={null} // بدون آیکون اضافه
+        />
 
-      <DynamicSelector
-        name="mode"
-        options={modeOptions}
-        selectedValue={mode}
-        onChange={(e) => setMode(e.target.value)}
-        label="Modes"
-        rightIcon={null} // بدون آیکون اضافه
-      />
+        <DynamicSelector
+          name="mode"
+          options={modeOptions}
+          selectedValue={mode}
+          onChange={(e) => setMode(e.target.value)}
+          label="Modes"
+          rightIcon={null} // بدون آیکون اضافه
+        />
+      </div>
     </div>
   );
 };

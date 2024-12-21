@@ -12,28 +12,30 @@ const AdvanceTable: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-4 w-64">
-      {/* منوی انتخاب فرم */}
-      <DynamicSelector
-        name="Show Form"
-        options={formOptions}
-        selectedValue={selectedForm}
-        onChange={(e) => setSelectedForm(e.target.value)}
-        label="Show Form"
-      />
-
-      {/* چک‌باکس حالت گالری */}
-      <div className="flex items-center space-x-2">
-        <input
-          id="galleryMode"
-          type="checkbox"
-          checked={isGalleryMode}
-          onChange={(e) => setIsGalleryMode(e.target.checked)}
-          className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
+      <div className="flex flex-col gap-4 w-64">
+        {/* منوی انتخاب فرم */}
+        <DynamicSelector
+          name="Show Form"
+          options={formOptions}
+          selectedValue={selectedForm}
+          onChange={(e) => setSelectedForm(e.target.value)}
+          label="Show Form"
         />
-        <label htmlFor="galleryMode" className="text-gray-700">
-          Gallery mode
-        </label>
+
+        {/* چک‌باکس حالت گالری */}
+        <div className="flex items-center space-x-2">
+          <input
+            id="galleryMode"
+            type="checkbox"
+            checked={isGalleryMode}
+            onChange={(e) => setIsGalleryMode(e.target.checked)}
+            className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+          />
+          <label htmlFor="galleryMode" className="text-gray-700">
+            Gallery mode
+          </label>
+        </div>
       </div>
     </div>
   );
