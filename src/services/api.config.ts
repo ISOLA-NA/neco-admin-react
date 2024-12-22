@@ -1,37 +1,49 @@
-import axios, { InternalAxiosRequestConfig } from "axios";
-import { authHeader } from "./authHeader"
-const baseUrl = process.env.REACT_APP_URL;
+// src/services/api.config.ts
+import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import Cookies from 'js-cookie';
 
-console.log("urlllllllll", baseUrl)
+// استفاده از import.meta.env برای دسترسی به متغیر محیطی در Vite
+const baseUrl = import.meta.env.VITE_URL;
 
-const Api_Path = `${baseUrl}/`;
+if (!baseUrl) {
+  throw new Error('VITE_URL is not defined in the environment variables.');
+}
 
 const httpClient = axios.create({
-    baseURL: Api_Path,
-    headers: {
-        "Content-Type": "application/json",
-    },
-
-    withCredentials: true
+  baseURL: `${baseUrl}/`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
 });
 
-httpClient.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
-httpClient.defaults.headers.post["Access-Control-Allow-Methods"] = "*";
-httpClient.defaults.headers.post["Access-Control-Allow-Headers"] = "*";
-
-const authInterceptor = (config: InternalAxiosRequestConfig) => {
-    config.headers["Authorization"] = authHeader()
-    return config;
-};
-
-httpClient.interceptors.response.use(
-    function (response) {
-        return response;
-    },
-    function (error) {
-        return Promise.reject(error);
+// اضافه کردن interceptor برای افزودن هدر Authorization
+httpClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = Cookies.get('token');
+    if (token) {
+      // اطمینان از اینکه headers تعریف شده است
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`; // معمولاً توکن به صورت Bearer ارسال می‌شود
     }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
-httpClient.interceptors.request.use(authInterceptor);
+
+// اضافه کردن interceptor برای مدیریت خطاهای پاسخ
+httpClient.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // در صورت دریافت خطای 401، توکن را حذف کرده و به صفحه لاگین هدایت کنید
+      Cookies.remove('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default httpClient;
