@@ -20,8 +20,6 @@ interface PanelHeaderProps {
 }
 
 const PanelHeader: React.FC<PanelHeaderProps> = ({
-  isExpanded,
-  toggleExpand,
   onSave,
   onClose,
   onUpdate,

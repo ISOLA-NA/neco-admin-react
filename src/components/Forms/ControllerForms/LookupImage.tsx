@@ -16,15 +16,7 @@ const LookupUmage: React.FC = () => {
     null
   );
 
-  // داده‌های تیبل سلکتور (برای مثال، اگر نیاز به انتخاب‌های خاصی دارید)
-  const columnDefs = [{ headerName: "Position", field: "position" }];
 
-  const rowData = [
-    { position: "POS1" },
-    { position: "POS2" },
-    { position: "POS3" },
-    { position: "POS4" },
-  ];
 
   // تعریف ستون‌ها برای Lookup Table با srcField و desField به عنوان ویرایشگرهای انتخاب
   const lookupColumnDefs = [
@@ -163,7 +155,7 @@ const LookupUmage: React.FC = () => {
         <DataTable
           columnDefs={lookupColumnDefs}
           rowData={lookupData}
-          onRowDoubleClick={(data) => {
+          onRowDoubleClick={() => {
             // امکان ویرایش سطر با دوبار کلیک
             // اینجا می‌توانید یک مودال باز کنید یا ویرایش درون خطی را فعال کنید
           }}

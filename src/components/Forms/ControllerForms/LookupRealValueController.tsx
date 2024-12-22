@@ -193,7 +193,7 @@ const Lookuprealvalue: React.FC = () => {
         <DataTable
           columnDefs={lookupColumnDefs}
           rowData={lookupData}
-          onRowDoubleClick={(data) => {
+          onRowDoubleClick={() => {
             // امکان ویرایش سطر با دوبار کلیک
             // اینجا می‌توانید یک مودال باز کنید یا ویرایش درون خطی را فعال کنید
           }}

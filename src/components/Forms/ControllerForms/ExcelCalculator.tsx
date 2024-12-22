@@ -3,13 +3,13 @@ import DynamicInput from "../../utilities/DynamicInput";
 
 const ExcelCalculator: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
-  const [outputValue, setOutputValue] = useState("");
+  const [outputValue] = useState("");
 
-  const handleCalculate = () => {
-    // Perform some calculation based on the inputValue
-    // Here we simply reverse the string as a placeholder calculation
-    setOutputValue(inputValue.split("").reverse().join(""));
-  };
+  // const handleCalculate = () => {
+  //   // Perform some calculation based on the inputValue
+  //   // Here we simply reverse the string as a placeholder calculation
+  //   setOutputValue(inputValue.split("").reverse().join(""));
+  // };
 
   return (
     <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">

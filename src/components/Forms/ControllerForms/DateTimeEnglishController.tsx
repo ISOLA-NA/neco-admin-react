@@ -150,23 +150,23 @@ const DateTimeSelector: React.FC = () => {
     }
   };
 
-  const logSelectedDateTime = () => {
-    const dateStr = selectedDate
-      ? selectedDate.toLocaleDateString("en-CA")
-      : "No Date Selected";
-    const timeStr =
-      selectedTime.hours && selectedTime.minutes && selectedTime.seconds
-        ? `${selectedTime.hours.padStart(
-            2,
-            "0"
-          )}:${selectedTime.minutes.padStart(
-            2,
-            "0"
-          )}:${selectedTime.seconds.padStart(2, "0")}`
-        : "No Time Selected";
-    console.log(`Selected Date: ${dateStr}`);
-    console.log(`Selected Time: ${timeStr}`);
-  };
+  // const logSelectedDateTime = () => {
+  //   const dateStr = selectedDate
+  //     ? selectedDate.toLocaleDateString("en-CA")
+  //     : "No Date Selected";
+  //   const timeStr =
+  //     selectedTime.hours && selectedTime.minutes && selectedTime.seconds
+  //       ? `${selectedTime.hours.padStart(
+  //           2,
+  //           "0"
+  //         )}:${selectedTime.minutes.padStart(
+  //           2,
+  //           "0"
+  //         )}:${selectedTime.seconds.padStart(2, "0")}`
+  //       : "No Time Selected";
+  //   console.log(`Selected Date: ${dateStr}`);
+  //   console.log(`Selected Time: ${timeStr}`);
+  // };
 
   // Generate Years Range
   const currentYear = new Date().getFullYear();
