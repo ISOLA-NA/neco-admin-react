@@ -9,11 +9,11 @@ import { subTabComponents } from "./SubTabsImports";
 import {
   subtabIconVisibility,
   IconVisibility,
-} from "../../TableDynamic/TabIconVisibility"; // وارد کردن پیکربندی
-import { showAlert } from "../../utilities/Alert/DynamicAlert"; // برای نمایش توست
+} from "../../TableDynamic/TabIconVisibility";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { useNavigate } from "react-router-dom";
-import DrawerComponent from "../tab/Header"; // وارد کردن کامپوننت هدر
-import SidebarDrawer from "../tab/SidebarDrawer"; // وارد کردن کامپوننت دراور
+import DrawerComponent from "../tab/Header";
+import SidebarDrawer from "../tab/SidebarDrawer";
 
 interface TabbedInterfaceProps {
   onLogout: () => void;
@@ -23,34 +23,60 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const [activeMainTab, setActiveMainTab] = useState<string>("General");
   const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
   const [selectedRow, setSelectedRow] = useState<any>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false); // وضعیت دراور
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  // داده‌هایی که در حال حاضر برای ساب‌تب فعال از سرور یا از فایل tabData گرفته می‌شوند:
+  const [currentRowData, setCurrentRowData] = useState<any[]>([]);
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
 
+  // کامپوننت Lazy مربوط به ساب‌تب فعال
   const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
+  // اطلاعات مربوط به ستون‌ها
   const currentSubTabData = subTabDataMapping[activeSubTab] || {
     columnDefs: [],
     rowData: [],
   };
 
   // استخراج تنظیمات نمایش آیکون‌ها برای ساب‌تب فعال
-  const currentIconVisibility: IconVisibility = subtabIconVisibility[
-    activeSubTab
-  ] || {
-    showAdd: true,
-    showEdit: true,
-    showDelete: true,
-    showDuplicate: false,
-  };
+  const currentIconVisibility: IconVisibility =
+    subtabIconVisibility[activeSubTab] || {
+      showAdd: true,
+      showEdit: true,
+      showDelete: true,
+      showDuplicate: false,
+    };
+
+  // هنگامی که زیرتب فعال تغییر می‌کند، داده را از سرور (یا از آبجکت) می‌خوانیم
+  useEffect(() => {
+    const fetchDataForSubTab = async () => {
+      setSelectedRow(null); // هر بار تغییر ساب‌تب، انتخاب را خالی می‌کنیم
+      if (subTabDataMapping[activeSubTab]?.fetchData) {
+        // اگر برای ساب‌تب فانکشن fetchData تعریف شده:
+        try {
+          const data = await subTabDataMapping[activeSubTab].fetchData!();
+          setCurrentRowData(data);
+        } catch (error) {
+          console.error("Error fetching data for sub-tab:", error);
+          setCurrentRowData([]);
+        }
+      } else {
+        // اگر فانکشن fetchData تعریف نشده، از داده‌های استاتیک استفاده می‌کنیم
+        setCurrentRowData(subTabDataMapping[activeSubTab]?.rowData || []);
+      }
+    };
+
+    fetchDataForSubTab();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSubTab]);
 
   const handleMainTabChange = (tabName: string) => {
     if (tabName === "File") {
-      // باز کردن دراور
       setIsDrawerOpen(true);
-      return; // جلوگیری از تغییر تب فعال
+      return;
     }
     setActiveMainTab(tabName);
     const firstGroup = tabsData[tabName].groups
@@ -96,7 +122,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   // CRUD Handlers
   const handleAdd = () => {
     console.log("Add clicked");
-    setSelectedRow(null); // خالی کردن انتخاب
+    setSelectedRow(null);
   };
 
   const handleEdit = () => {
@@ -119,14 +145,13 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     onLogout();
     showAlert("success", null, "خروج", "شما با موفقیت خارج شدید.");
     navigate("/login");
-    setIsDrawerOpen(false); // بستن دراور پس از خروج
+    setIsDrawerOpen(false);
   };
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
   };
 
-  // جلوگیری از اسکرول صفحه زمانی که دراور باز است
   useEffect(() => {
     if (isDrawerOpen) {
       document.body.style.overflow = "hidden";
@@ -137,23 +162,19 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   return (
     <>
-      {/* کامپوننت دراور جدا شده */}
       <SidebarDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         onLogout={handleLogoutClick}
       />
 
-      {/* محتوای اصلی با افکت بلور زمانی که دراور باز است */}
       <div
         className={`w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden transition-filter duration-300 ${
           isDrawerOpen ? "filter blur-sm" : ""
         }`}
       >
-        {/* کامپوننت هدر جدا شده */}
         <DrawerComponent username="Hasanzade" />
 
-        {/* Main Tabs */}
         <MainTabs
           tabs={Object.keys(tabsData)}
           activeTab={activeMainTab}
@@ -163,7 +184,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           tabsRef={mainTabsRef}
         />
 
-        {/* Sub Tabs */}
         <SubTabs
           groups={tabsData[activeMainTab].groups}
           subtabs={tabsData[activeMainTab].subtabs}
@@ -174,11 +194,12 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           subTabsRef={subTabsRef}
         />
 
-        {/* Tab Content */}
         <TabContent
           component={ActiveSubTabComponent}
+          // ستونی که از subTabDataMapping می‌خوانیم
           columnDefs={currentSubTabData.columnDefs}
-          rowData={currentSubTabData.rowData}
+          // داده‌های fetched شده یا استاتیک
+          rowData={currentRowData}
           onRowDoubleClick={handleRowDoubleClick}
           selectedRow={selectedRow}
           activeSubTab={activeSubTab}
