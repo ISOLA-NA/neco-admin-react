@@ -6,7 +6,7 @@ import {
   Route,
   Navigate
 } from 'react-router-dom';
-import HomePage from './components/Views/tab/TabbedInterface';
+import HomePage from './components/Views/tab/TabbedInterface_temp';
 import Login from './components/Autentications/Login';
 import Alert from './components/utilities/Alert/DynamicAlert';
 import { SubTabProvider } from './context/SubTabContext';

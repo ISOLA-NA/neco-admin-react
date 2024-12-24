@@ -4,8 +4,8 @@ import SubTabs from "../../Views/tab/SubTabs";
 import { useSubTabContext } from "../../../context/SubTabContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { useNavigate } from "react-router-dom";
-import DrawerComponent from "../tab/Header";
-import SidebarDrawer from "../tab/SidebarDrawer";
+import DrawerComponent from "./Header";
+import SidebarDrawer from "./SidebarDrawer";
 import { Configuration, ProgramType } from "../../../services/api.services";
 
 interface TabbedInterfaceProps {
