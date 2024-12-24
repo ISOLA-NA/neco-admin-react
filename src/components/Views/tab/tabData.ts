@@ -1,3 +1,5 @@
+import AppServices from "../../../services/api.services";
+
 export interface TabsData {
   [key: string]: {
     groups?: Array<{
@@ -669,6 +671,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         EntityTypeIDForProcedure: 20, // اصلاح شده
       },
     ],
+   
   },
 
   // **Lesson Learned Form**
@@ -779,6 +782,9 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         nEntityCateBID: null,
       },
     ],
+    async fetchData() {
+      return await AppServices.getAllConfiguration()
+    }
   },
 
   // **Lesson Learned Af Template**

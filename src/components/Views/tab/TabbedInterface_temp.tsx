@@ -1,6 +1,6 @@
 // src/components/Views/tab/TabbedInterface.tsx
 import React, { useRef, useEffect } from "react";
-import SubTabs from "../../Views/tab/SubTabs";
+import SubTabs from "../tab/SubTabs_temp";
 import { useSubTabContext } from "../../../context/SubTabContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { useNavigate } from "react-router-dom";
