@@ -57,7 +57,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
         ariaLabel="اسکرول به چپ برای زیرتب‌ها"
       />
 
-      {/* کانتینر ساب‌تب‌ها با ارتفاع ثابت */}
+      {/* کانتینر ساب‌تب‌ها */}
       <div
         className="flex items-start space-x-5 overflow-x-auto scrollbar-hide px-4 py-2 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-500 rounded-lg shadow-md"
         ref={subTabsRef}
@@ -102,7 +102,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
         ) : (
           <div className="flex flex-col items-center space-y-1">
             <div className="flex space-x-3">
-              {subtabs!.map((subtab) => (
+              {subtabs?.map((subtab) => (
                 <button
                   key={subtab}
                   className="flex flex-col items-center space-y-0.5 p-1.5 text-xs rounded-full relative focus:outline-none"

@@ -1,4 +1,4 @@
-// src/components/TabContent/TabContent.tsx
+// src/components/Views/tabcontent/TabContent.tsx
 
 import React, {
   useState,
@@ -11,10 +11,9 @@ import React, {
 } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import MyPanel from "./PanelHeader";
-import { categoriesCata, categoriesCatb, ProjectsAccess } from "../tab/tabData";
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 
-// Lazy load the additional components
+// Lazy load for ProjectsAccess panels, if needed
 const LeftProjectAccess = React.lazy(
   () => import("../../Projects/ProjectAccess/Panel/LeftProjectAccess")
 );
@@ -57,55 +56,43 @@ const TabContent: FC<TabContentProps> = ({
   showAddIcon,
   showDeleteIcon,
 }) => {
-  // State for panel width and dragging
-  const [panelWidth, setPanelWidth] = useState(50); // percentage width for left panel
+  // state مربوط به پنل‌ها و درگ
+  const [panelWidth, setPanelWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Track if right panel is maximized
   const [isRightMaximized, setIsRightMaximized] = useState(false);
 
-  // Determine if the panel is maximized (from left side control)
-  const isMaximized = panelWidth >= 98; // Changed from 99 to 98
+  const isMaximized = panelWidth >= 98;
 
-  // Function to toggle panel size from the left panel's own button
   const togglePanelSize = () => {
-    // اگر از سمت چپ ماکسیمایز کنیم، isRightMaximized را false کنیم
     setIsRightMaximized(false);
-    setPanelWidth((_prev) => {
-      if (isMaximized) {
-        return 50;
-      } else {
-        return 98; // Changed from 99 to 98
-      }
+    setPanelWidth((prev) => {
+      if (isMaximized) return 50;
+      return 98;
     });
   };
 
-  // Function to toggle panel size from the right panel control
   const togglePanelSizeFromRight = (maximize: boolean) => {
     if (maximize) {
-      // ماکسیمایز از سمت راست => راست کامل بیاد روی چپ
       setIsRightMaximized(true);
-      setPanelWidth(1); // Changed to 2% to leave space for the splitter
+      setPanelWidth(2);
     } else {
-      // برگرداندن به حالت 50-50
       setIsRightMaximized(false);
       setPanelWidth(50);
     }
   };
 
-  // Start dragging
   const startDragging = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
 
-  // Stop dragging
   const stopDragging = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  // Handle mouse movement during dragging
   const handleMouseMove = useCallback(
     (e: MouseEvent | globalThis.MouseEvent) => {
       if (!isDragging || !containerRef.current) return;
@@ -113,9 +100,8 @@ const TabContent: FC<TabContentProps> = ({
       let newWidth =
         ((e.clientX - containerRect.left) / containerRect.width) * 100;
 
-      // Constraints
       if (newWidth < 10) newWidth = 1;
-      if (newWidth > 98) newWidth = 99; // Changed from 99 to 98
+      if (newWidth > 98) newWidth = 99;
 
       // وقتی کاربر دستی اندازه را تغییر می‌دهد، ماکسیمایز از راست را غیرفعال کنیم
       setIsRightMaximized(false);
@@ -138,41 +124,24 @@ const TabContent: FC<TabContentProps> = ({
     };
   }, [isDragging, handleMouseMove, stopDragging]);
 
-  // Internal component states
-  const [isExpanded, setIsExpanded] = useState(false);
+  // مدیریت حالت باز و بسته بودن فرم و ... 
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [categoryType, setCategoryType] = useState<"cata" | "catb">("cata");
-  const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
-
   const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
-  const [selectedSubItemForRight, setSelectedSubItemForRight] =
-    useState<any>(null);
-
-  const [currentColumnDefs, setCurrentColumnDefs] = useState<any[]>(columnDefs);
-  const [currentRowData, setCurrentRowData] = useState<any[]>(rowData);
-
-  // Action handlers
-  const toggleExpandFunc = () => {
-    setIsExpanded((prev) => !prev);
-  };
-
-  const handleSave = (): void => {
-    console.log("Save clicked");
-  };
-
-  const handleUpdate = (): void => {
-    if (selectedRow) {
-      console.log("Update clicked for row:", selectedRow);
-    } else {
-      alert("Please select a row to update.");
-    }
-  };
+  const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
+  const [selectedSubItemForRight, setSelectedSubItemForRight] = useState<any>(
+    null
+  );
 
   const handleClose = (): void => {
     setIsPanelOpen(false);
     setIsAdding(false);
     resetRightPanel();
+  };
+
+  const resetRightPanel = () => {
+    setShowRightAccessPanel(false);
+    setSelectedSubItemForRight(null);
   };
 
   const handleDoubleClick = (data: any) => {
@@ -219,38 +188,9 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as "cata" | "catb";
-    setCategoryType(value);
-  };
-
-  // Adjust columns and data based on active subtab and category type
-  useEffect(() => {
-    if (activeSubTab === "Categories") {
-      if (categoryType === "cata") {
-        setCurrentColumnDefs(categoriesCata.columnDefs);
-        setCurrentRowData(categoriesCata.rowData);
-      } else if (categoryType === "catb") {
-        setCurrentColumnDefs(categoriesCatb.columnDefs);
-        setCurrentRowData(categoriesCatb.rowData);
-      }
-    } else if (activeSubTab === "ProjectsAccess") {
-      setCurrentColumnDefs(ProjectsAccess.columnDefs);
-      setCurrentRowData(ProjectsAccess.rowData);
-    } else {
-      setCurrentColumnDefs(columnDefs);
-      setCurrentRowData(rowData);
-    }
-  }, [activeSubTab, categoryType, columnDefs, rowData]);
-
   const handleLeftProjectDoubleClick = (subItemRow: any) => {
     setSelectedSubItemForRight(subItemRow);
     setShowRightAccessPanel(true);
-  };
-
-  const resetRightPanel = () => {
-    setShowRightAccessPanel(false);
-    setSelectedSubItemForRight(null);
   };
 
   return (
@@ -261,13 +201,11 @@ const TabContent: FC<TabContentProps> = ({
     >
       {/* پنل چپ */}
       <div
-        className={`flex flex-col overflow-auto bg-gray-100 box-border`}
+        className="flex flex-col overflow-auto bg-gray-100 box-border"
         style={{
           flex: `0 0 ${panelWidth}%`,
-          // اگر panelWidth=0 باشد، minWidth را هم 0 کنیم تا کاملاً مخفی شود
           transition: isDragging ? "none" : "flex-basis 0.1s ease-out",
           backgroundColor: "#f3f4f6",
-          boxSizing: "border-box",
         }}
       >
         {/* هدر پنل چپ */}
@@ -285,26 +223,11 @@ const TabContent: FC<TabContentProps> = ({
           </button>
         </div>
 
-        {/* Dropdown دسته‌بندی (فقط در تب Categories و حالت غیر ماکسیمایز) */}
-        {activeSubTab === "Categories" && !isMaximized && panelWidth !== 0 && (
-          <div className="px-4 py-2">
-            <select
-              id="categoryType"
-              value={categoryType}
-              onChange={handleCategoryChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="cata">Cata</option>
-              <option value="catb">Cat B</option>
-            </select>
-          </div>
-        )}
-
-        {/* DataTable - always rendered */}
+        {/* دیتاتیبل */}
         <div className="h-full p-4 overflow-auto">
           <DataTable
-            columnDefs={currentColumnDefs}
-            rowData={currentRowData}
+            columnDefs={columnDefs}
+            rowData={rowData}
             onRowDoubleClick={handleDoubleClick}
             setSelectedRowData={handleRowClickLocal}
             showDuplicateIcon={showDuplicateIcon}
@@ -321,7 +244,6 @@ const TabContent: FC<TabContentProps> = ({
       </div>
 
       {/* اسپلیتر */}
-      {/* Ensure the splitter is always rendered */}
       <div
         onMouseDown={startDragging}
         className="flex items-center justify-center lg:divider lg:divider-horizontal cursor-ew-resize w-2"
@@ -333,14 +255,11 @@ const TabContent: FC<TabContentProps> = ({
       {/* پنل راست */}
       <div
         className={`flex-1 overflow-auto transition-opacity duration-100 bg-gray-100 ${
-          isMaximized
-            ? "opacity-50 pointer-events-none"
-            : "opacity-100 pointer-events-auto"
+          isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
         }`}
         style={{
           transition: "opacity 0.1s ease-out",
           backgroundColor: "#f3f4f6",
-          boxSizing: "border-box",
         }}
       >
         <div className="h-full overflow-auto p-4">
@@ -350,20 +269,21 @@ const TabContent: FC<TabContentProps> = ({
             </div>
           ) : (
             <MyPanel
-              isExpanded={isExpanded}
-              toggleExpand={toggleExpandFunc}
-              onSave={isAdding ? handleSave : undefined}
+              isExpanded={false}
+              toggleExpand={() => {}}
+              onSave={isAdding ? () => console.log("save") : undefined}
               onClose={handleClose}
-              onUpdate={!isAdding ? handleUpdate : undefined}
+              onUpdate={!isAdding ? () => console.log("update") : undefined}
               onTogglePanelSizeFromRight={togglePanelSizeFromRight}
               isRightMaximized={isRightMaximized}
             />
           )}
 
+          {/* اگر ساب‌تب ProjectsAccess باشد نمونه کد دو پنله */}
           {isPanelOpen && activeSubTab === "ProjectsAccess" && (
             <Suspense fallback={<div>Loading Projects Access...</div>}>
               <div className="flex-grow mt-5 flex gap-2 h-full">
-                {/* Nested Panels for ProjectsAccess */}
+                {/* پنل چپ پروژه‌ها */}
                 <div className="flex flex-col bg-gray-200 rounded-l-lg overflow-hidden w-1/2 border-r border-gray-300 p-2">
                   <div className="h-full p-2 overflow-auto">
                     <LeftProjectAccess
@@ -372,12 +292,11 @@ const TabContent: FC<TabContentProps> = ({
                     />
                   </div>
                 </div>
+                {/* پنل راست */}
                 <div className="flex flex-col bg-gray-200 rounded-r-lg overflow-hidden w-1/2 p-2 h-full">
                   <div className="h-full p-2 overflow-auto">
                     {showRightAccessPanel && selectedSubItemForRight ? (
-                      <RightProjectAccess
-                        selectedRow={selectedSubItemForRight}
-                      />
+                      <RightProjectAccess selectedRow={selectedSubItemForRight} />
                     ) : (
                       <div className="text-center text-gray-400 mt-10">
                         Double click on a left table row to show details here.
@@ -389,6 +308,7 @@ const TabContent: FC<TabContentProps> = ({
             </Suspense>
           )}
 
+          {/* در غیر این صورت اگر کامپوننت دینامیک داریم */}
           {isPanelOpen && activeSubTab !== "ProjectsAccess" && Component && (
             <div className="mt-5">
               <Suspense fallback={<div>Loading...</div>}>
@@ -397,7 +317,7 @@ const TabContent: FC<TabContentProps> = ({
                     isAdding
                       ? "add-mode"
                       : selectedRow
-                      ? selectedRow.id
+                      ? selectedRow.ID
                       : "no-selection"
                   }
                   selectedRow={isAdding ? null : selectedRow}

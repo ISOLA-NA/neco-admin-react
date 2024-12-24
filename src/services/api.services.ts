@@ -1,33 +1,29 @@
 // src/services/api.services.ts
-import httpClient from './api.config';
-import { apiConst } from './api.constant';
+import httpClient from "./api.config";
+import { apiConst } from "./api.constant";
 
-// رابط (interface) مربوط به پاسخ لاگین
+// رابط‌های نمونه
 export interface AppSetting {
   ID: number;
   Name: string;
   LetterBtns: string;
-  // ... هر فیلد دیگر که در شیء AppSetting دیدید
 }
 
 export interface MyUser {
-  ID: string;           // یا number اگر مطمئن هستید
+  ID: string;
   TTKK: string;
   Username: string;
   Name: string;
   Email: string;
-  // ... سایر فیلدها (Mobile, Password, Website, etc.)
-  userType?: number;    // اگر واقعاً در پاسخ وجود دارد (در تصویر userType ندیدیم)
+  userType?: number;
 }
 
 export interface WebLoginResponse {
-  data: { MyUser: any; tokenLife: any; };
+  data: { MyUser: any; tokenLife: any };
   AppSetting: AppSetting;
   MyUser: MyUser;
-  // ... اگر فیلدهای دیگری مثل Status, Message یا UserPosts در ریشه دارید، اضافه کنید
 }
 
-// اگر OTP و سایر APIها ساختار متفاوت دارند، مشابه همین تعریف کنید
 export interface SendOtpResponse {
   success: boolean;
   message: string;
@@ -60,26 +56,71 @@ export interface TokenSetupResponse {
   data: number;
 }
 
+// داده Configuration
+export interface ConfigurationItem {
+  ID: number;
+  Name: string;
+  Description: string;
+  DefaultBtn?: string;
+  LetterBtns?: string;
+  MeetingBtns?: string;
+  // بقیه فیلدها بسته به نیاز شما
+}
+
+// داده Commands
+export interface CommandItem {
+  ID: number;
+  Name: string;
+  // سایر فیلدها ...
+}
+
+// ... همینطور برای سایر ساب‌تب‌ها
+
 class ApiService {
+  // ------------------------------
+  // مثال‌های مربوط به لاگین/OTP
+  // ------------------------------
   async webLogin(userData: WebLoginRequest): Promise<WebLoginResponse> {
-    const response = await httpClient.post<WebLoginResponse>(apiConst.webLogin, userData);
+    const response = await httpClient.post<WebLoginResponse>(
+      apiConst.webLogin,
+      userData
+    );
     return response.data;
   }
 
   async sendOtp(data: SendOtpRequest): Promise<SendOtpResponse> {
-    const response = await httpClient.post<SendOtpResponse>(apiConst.sendOtp, data);
+    const response = await httpClient.post<SendOtpResponse>(
+      apiConst.sendOtp,
+      data
+    );
     return response.data;
   }
 
   async loginWithOtp(data: LoginWithOtpRequest): Promise<LoginWithOtpResponse> {
-    const response = await httpClient.post<LoginWithOtpResponse>(apiConst.loginWithOtp, data);
+    const response = await httpClient.post<LoginWithOtpResponse>(
+      apiConst.loginWithOtp,
+      data
+    );
     return response.data;
   }
 
   async tokenSetup(): Promise<TokenSetupResponse> {
-    const response = await httpClient.post<TokenSetupResponse>(apiConst.tokenSetup);
+    const response = await httpClient.post<TokenSetupResponse>(
+      apiConst.tokenSetup
+    );
     return response.data;
   }
+
+  // ------------------------------
+  // مثال‌های مربوط به هر ساب‌تب
+  // ------------------------------
+  async getAllConfigurations(): Promise<ConfigurationItem[]> {
+    const response = await httpClient.post<ConfigurationItem[]>(
+      apiConst.getAllConfiguration
+    );
+    return response.data;
+  }
+
 }
 
 const AppServices = new ApiService();

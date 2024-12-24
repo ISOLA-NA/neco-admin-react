@@ -4,96 +4,230 @@ import React, { useState, useRef, useEffect } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
-import { tabsData, subTabDataMapping } from "./tabData";
 import { subTabComponents } from "./SubTabsImports";
-import {
-  subtabIconVisibility,
-  IconVisibility,
-} from "../../TableDynamic/TabIconVisibility";
-import { showAlert } from "../../utilities/Alert/DynamicAlert";
+import { showAlert } from "../../utilities/Alert/DynamicAlert"; 
 import { useNavigate } from "react-router-dom";
-import DrawerComponent from "../tab/Header";
-import SidebarDrawer from "../tab/SidebarDrawer";
+import DrawerComponent from "../tab/Header"; 
+import SidebarDrawer from "../tab/SidebarDrawer"; 
 
+// سرویس‌ها
+import AppServices from "../../../services/api.services";
+
+// برای مدیریت آیکون‌های CRUD
+interface IconVisibility {
+  showAdd: boolean;
+  showEdit: boolean;
+  showDelete: boolean;
+  showDuplicate: boolean;
+}
+
+// برای ذخیره‌سازی ستون‌ها و endpoint هر ساب‌تب
+interface SubTabDefinition {
+  endpoint?: () => Promise<any[]>;   // تابعی که داده را از API برمی‌گرداند
+  columnDefs: any[];                // ستون‌های جدول
+  iconVisibility: IconVisibility;
+}
+
+// تعریف اینترفیس Props برای TabbedInterface
 interface TabbedInterfaceProps {
   onLogout: () => void;
 }
 
+// تعریف اینترفیس برای گروه‌های هر تب
+interface TabGroup {
+  label: string;
+  subtabs: string[];
+}
+
+// تعریف اینترفیس برای هر تب اصلی
+interface MainTabDefinition {
+  groups: TabGroup[];
+}
+
+// 1. تعریف MainTabKey به عنوان یک Union از رشته‌ها
+type MainTabKey = 
+  | "General"
+  | "Forms"
+  | "ApprovalFlows"
+  | "Programs"
+  | "Projects"
+  | "File"; // اضافه کردن "File" اگر نیاز است
+
+// 2. تعریف mainTabsData با استفاده از MainTabKey
+const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
+  General: {
+    groups: [
+      {
+        label: "Setup",
+        subtabs: ["Configurations", "Commands", "Ribbons"],
+      },
+      {
+        label: "User",
+        subtabs: ["Users", "Roles", "Staffing", "RoleGroups"],
+      },
+      {
+        label: "Org",
+        subtabs: ["Enterprises"],
+      },
+    ],
+  },
+  Forms: {
+    groups: [
+      {
+        label: "Manage",
+        subtabs: ["Forms", "Categories"],
+      },
+    ],
+  },
+  ApprovalFlows: {
+    groups: [
+      {
+        label: "Flows",
+        subtabs: ["ApprovalFlows", "ApprovalChecklist"],
+      },
+    ],
+  },
+  Programs: {
+    groups: [
+      {
+        label: "Setup",
+        subtabs: ["ProgramTemplate", "ProgramTypes"],
+      },
+    ],
+  },
+  Projects: {
+    groups: [
+      {
+        label: "Project",
+        subtabs: [
+          "Projects",
+          "ProjectsAccess",
+          "Odp",
+          "Procedures",
+          "Calendars",
+        ],
+      },
+    ],
+  },
+  File: {
+    groups: [], // تعریف مناسب یا مدیریت جداگانه
+  },
+};
+
+// ستون‌ها و endpoint مربوط به هر ساب‌تب
+const subTabDefinitions: Record<string, SubTabDefinition> = {
+  Configurations: {
+    endpoint: () => AppServices.getAllConfigurations(),
+    columnDefs: [
+      { headerName: "ID", field: "ID" },
+      { headerName: "Name", field: "Name" },
+      { headerName: "Description", field: "Description" },
+    ],
+    iconVisibility: {
+      showAdd: true,
+      showEdit: true,
+      showDelete: true,
+      showDuplicate: false,
+    },
+  },
+  // ... سایر ساب‌تب‌ها باید اینطور تعریف شوند
+};
+
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
-  const [activeMainTab, setActiveMainTab] = useState<string>("General");
+  // تعریف نوع state به عنوان MainTabKey
+  const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
   const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  // داده‌هایی که در حال حاضر برای ساب‌تب فعال از سرور یا از فایل tabData گرفته می‌شوند:
+  // داده‌های مربوط به جدول جاری
+  const [currentColumnDefs, setCurrentColumnDefs] = useState<any[]>([]);
   const [currentRowData, setCurrentRowData] = useState<any[]>([]);
+  const [currentIconVisibility, setCurrentIconVisibility] = useState<IconVisibility>({
+    showAdd: true,
+    showEdit: true,
+    showDelete: true,
+    showDuplicate: false,
+  });
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
 
-  // کامپوننت Lazy مربوط به ساب‌تب فعال
+  // تعیین کامپوننت ساب‌تب از فایل SubTabsImports
   const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
-  // اطلاعات مربوط به ستون‌ها
-  const currentSubTabData = subTabDataMapping[activeSubTab] || {
-    columnDefs: [],
-    rowData: [],
+
+  // وقتی ساب‌تب عوض شود، داده‌ها را از API می‌خوانیم
+  const fetchSubTabData = async (subTabName: string) => {
+    try {
+      const def = subTabDefinitions[subTabName];
+      if (!def) {
+        setCurrentRowData([]);
+        setCurrentColumnDefs([]);
+        setCurrentIconVisibility({
+          showAdd: false,
+          showEdit: false,
+          showDelete: false,
+          showDuplicate: false,
+        });
+        return;
+      }
+      // فراخوانی API
+      let data: any[] = [];
+      if (def.endpoint) {
+        data = await def.endpoint();
+      }
+
+      setCurrentRowData(data);
+      setCurrentColumnDefs(def.columnDefs);
+      setCurrentIconVisibility(def.iconVisibility);
+    } catch (error) {
+      console.error("Error fetching data for subTab:", subTabName, error);
+    }
   };
 
-  // استخراج تنظیمات نمایش آیکون‌ها برای ساب‌تب فعال
-  const currentIconVisibility: IconVisibility =
-    subtabIconVisibility[activeSubTab] || {
-      showAdd: true,
-      showEdit: true,
-      showDelete: true,
-      showDuplicate: false,
-    };
-
-  // هنگامی که زیرتب فعال تغییر می‌کند، داده را از سرور (یا از آبجکت) می‌خوانیم
   useEffect(() => {
-    const fetchDataForSubTab = async () => {
-      setSelectedRow(null); // هر بار تغییر ساب‌تب، انتخاب را خالی می‌کنیم
-      if (subTabDataMapping[activeSubTab]?.fetchData) {
-        // اگر برای ساب‌تب فانکشن fetchData تعریف شده:
-        try {
-          const data = await subTabDataMapping[activeSubTab].fetchData!();
-          setCurrentRowData(data);
-        } catch (error) {
-          console.error("Error fetching data for sub-tab:", error);
-          setCurrentRowData([]);
-        }
-      } else {
-        // اگر فانکشن fetchData تعریف نشده، از داده‌های استاتیک استفاده می‌کنیم
-        setCurrentRowData(subTabDataMapping[activeSubTab]?.rowData || []);
-      }
-    };
-
-    fetchDataForSubTab();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // بار اول یا تغییر ساب‌تب
+    fetchSubTabData(activeSubTab);
   }, [activeSubTab]);
 
+  // هندل انتخاب تب اصلی
   const handleMainTabChange = (tabName: string) => {
     if (tabName === "File") {
+      // باز کردن دراور
       setIsDrawerOpen(true);
       return;
     }
-    setActiveMainTab(tabName);
-    const firstGroup = tabsData[tabName].groups
-      ? tabsData[tabName].groups![0].subtabs[0]
-      : tabsData[tabName].subtabs![0];
-    setActiveSubTab(firstGroup);
-    setSelectedRow(null);
-    mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-    subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+
+    // اطمینان از اینکه tabName یکی از کلیدهای mainTabsData است
+    if (tabName in mainTabsData) {
+      setActiveMainTab(tabName as MainTabKey);
+
+      const mainTabConfig = mainTabsData[tabName as MainTabKey];
+      if (mainTabConfig && mainTabConfig.groups) {
+        const firstGroup = mainTabConfig.groups[0];
+        if (firstGroup && firstGroup.subtabs.length > 0) {
+          setActiveSubTab(firstGroup.subtabs[0]);
+        }
+      }
+      setSelectedRow(null);
+
+      mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+      subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      console.warn(`Unknown tabName: ${tabName}`);
+    }
   };
 
+  // هندل انتخاب ساب‌تب
   const handleSubTabChange = (subtab: string) => {
     setActiveSubTab(subtab);
     setSelectedRow(null);
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
+  // اسکرول تب‌ها
   const scrollMainTabs = (direction: "left" | "right") => {
     if (mainTabsRef.current) {
       const scrollAmount = 150;
@@ -114,12 +248,13 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
   };
 
+  // وقتی روی سطر دوبار کلیک شود
   const handleRowDoubleClick = (rowData: any) => {
-    console.log("Row double-clicked in TabbedInterface:", rowData);
+    console.log("Row double-clicked:", rowData);
     setSelectedRow(rowData);
   };
 
-  // CRUD Handlers
+  // عملیات CRUD
   const handleAdd = () => {
     console.log("Add clicked");
     setSelectedRow(null);
@@ -145,13 +280,14 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     onLogout();
     showAlert("success", null, "خروج", "شما با موفقیت خارج شدید.");
     navigate("/login");
-    setIsDrawerOpen(false);
+    setIsDrawerOpen(false); 
   };
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
   };
 
+  // جلوگیری از اسکرول صفحه زمانی که دراور باز است
   useEffect(() => {
     if (isDrawerOpen) {
       document.body.style.overflow = "hidden";
@@ -160,14 +296,20 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
   }, [isDrawerOpen]);
 
+  // لیست نام تب‌های اصلی جهت پاس دادن به <MainTabs />
+  const mainTabs: string[] = [...Object.keys(mainTabsData), "File"]; 
+  // چون "File" در اینجا به صورت جداگانه هم مدیریت شده
+
   return (
     <>
+      {/* دراور منو (File) */}
       <SidebarDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         onLogout={handleLogoutClick}
       />
 
+      {/* محتوای اصلی */}
       <div
         className={`w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden transition-filter duration-300 ${
           isDrawerOpen ? "filter blur-sm" : ""
@@ -175,8 +317,9 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       >
         <DrawerComponent username="Hasanzade" />
 
+        {/* تب‌های اصلی */}
         <MainTabs
-          tabs={Object.keys(tabsData)}
+          tabs={mainTabs}
           activeTab={activeMainTab}
           onTabChange={handleMainTabChange}
           scrollLeft={() => scrollMainTabs("left")}
@@ -184,9 +327,12 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           tabsRef={mainTabsRef}
         />
 
+        {/* ساب‌تب‌ها */}
         <SubTabs
-          groups={tabsData[activeMainTab].groups}
-          subtabs={tabsData[activeMainTab].subtabs}
+          groups={mainTabsData[activeMainTab]?.groups}
+          // ممکن است برخی تب‌ها groups نداشته باشند
+          // که در این صورت در شیء mainTabsData تعریف نشده‌اند
+          subtabs={undefined} 
           activeSubTab={activeSubTab}
           onSubTabChange={handleSubTabChange}
           scrollLeft={() => scrollSubTabs("left")}
@@ -194,19 +340,18 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           subTabsRef={subTabsRef}
         />
 
+        {/* محتوا */}
         <TabContent
           component={ActiveSubTabComponent}
-          // ستونی که از subTabDataMapping می‌خوانیم
-          columnDefs={currentSubTabData.columnDefs}
-          // داده‌های fetched شده یا استاتیک
+          columnDefs={currentColumnDefs}
           rowData={currentRowData}
           onRowDoubleClick={handleRowDoubleClick}
           selectedRow={selectedRow}
           activeSubTab={activeSubTab}
-          showDuplicateIcon={currentIconVisibility.showDuplicate || false}
-          showAddIcon={currentIconVisibility.showAdd || false}
-          showEditIcon={currentIconVisibility.showEdit || false}
-          showDeleteIcon={currentIconVisibility.showDelete || false}
+          showDuplicateIcon={currentIconVisibility.showDuplicate}
+          showAddIcon={currentIconVisibility.showAdd}
+          showEditIcon={currentIconVisibility.showEdit}
+          showDeleteIcon={currentIconVisibility.showDelete}
           onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
