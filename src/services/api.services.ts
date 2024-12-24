@@ -104,7 +104,6 @@ class ApiService {
     return response.data;
   }
 
-<<<<<<< HEAD
   // متد دریافت تنظیمات
   async getAllConfiguration(): Promise<Configuration[]> {
     const response = await httpClient.post<Configuration[]>(apiConst.getAllConfiguration);
@@ -118,12 +117,6 @@ class ApiService {
   }
 
   // سایر متدهای API
-=======
-  async getAllConfiguration(): Promise<TokenSetupResponse> {
-    const response = await httpClient.post<TokenSetupResponse>(apiConst.getAllConfiguration);
-    return response.data;
-  }
->>>>>>> 9be494a261592598e0161d0e72bfdb3146c2ec31
 }
 
 const AppServices = new ApiService();
