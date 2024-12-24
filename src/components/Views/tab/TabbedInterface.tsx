@@ -26,7 +26,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   // داده‌هایی که در حال حاضر برای ساب‌تب فعال از سرور یا از فایل tabData گرفته می‌شوند:
-  const [currentRowData, setCurrentRowData] = useState<any[]>([]);
+  const [currentRowData, setCurrentRowData] = useState<any[]>();
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
@@ -57,7 +57,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       if (subTabDataMapping[activeSubTab]?.fetchData) {
         // اگر برای ساب‌تب فانکشن fetchData تعریف شده:
         try {
-          const data = await subTabDataMapping[activeSubTab].fetchData!();
+          const data = await subTabDataMapping[activeSubTab].fetchData();
+          console.log(data)
           setCurrentRowData(data);
         } catch (error) {
           console.error("Error fetching data for sub-tab:", error);

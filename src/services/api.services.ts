@@ -80,6 +80,11 @@ class ApiService {
     const response = await httpClient.post<TokenSetupResponse>(apiConst.tokenSetup);
     return response.data;
   }
+
+  async getAllConfiguration(): Promise<TokenSetupResponse> {
+    const response = await httpClient.post<TokenSetupResponse>(apiConst.getAllConfiguration);
+    return response.data;
+  }
 }
 
 const AppServices = new ApiService();
