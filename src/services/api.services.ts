@@ -2,32 +2,55 @@
 import httpClient from './api.config';
 import { apiConst } from './api.constant';
 
-// رابط (interface) مربوط به پاسخ لاگین
+// تعریف اینترفیس‌ها
 export interface AppSetting {
   ID: number;
   Name: string;
   LetterBtns: string;
-  // ... هر فیلد دیگر که در شیء AppSetting دیدید
+  // ... سایر فیلدها
+}
+
+export interface Configuration {
+  ID: number;
+  Name: string;
+  FirstIDProgramTemplate: number;
+  SelMenuIDForMain: number;
+  Description: string;
+  IsVisible: boolean;
+  LastModified: string;
+  DefaultBtn: string;
+  LetterBtns: string;
+  MeetingBtns: string;
+  EntityTypeIDForLessonLearn: number;
+  SelMenuIDForLessonLearnAfTemplate: number;
+  EntityTypeIDForTaskComment: number;
+  EntityTypeIDForProcedure: number;
+  // ... سایر فیلدها
+}
+
+export interface ProgramType {
+  ID: number;
+  Name: string;
+  // ... سایر فیلدها خاص به ProgramType
 }
 
 export interface MyUser {
-  ID: string;           // یا number اگر مطمئن هستید
+  ID: string; // یا number اگر مطمئن هستید
   TTKK: string;
   Username: string;
   Name: string;
   Email: string;
-  // ... سایر فیلدها (Mobile, Password, Website, etc.)
-  userType?: number;    // اگر واقعاً در پاسخ وجود دارد (در تصویر userType ندیدیم)
+  // ... سایر فیلدها
+  userType?: number;
 }
 
 export interface WebLoginResponse {
   data: { MyUser: any; tokenLife: any; };
   AppSetting: AppSetting;
   MyUser: MyUser;
-  // ... اگر فیلدهای دیگری مثل Status, Message یا UserPosts در ریشه دارید، اضافه کنید
+  // ... سایر فیلدها
 }
 
-// اگر OTP و سایر APIها ساختار متفاوت دارند، مشابه همین تعریف کنید
 export interface SendOtpResponse {
   success: boolean;
   message: string;
@@ -80,6 +103,20 @@ class ApiService {
     const response = await httpClient.post<TokenSetupResponse>(apiConst.tokenSetup);
     return response.data;
   }
+
+  // متد دریافت تنظیمات
+  async getAllConfiguration(): Promise<Configuration[]> {
+    const response = await httpClient.post<Configuration[]>(apiConst.getAllConfiguration);
+    return response.data;
+  }
+
+  // متد دریافت انواع برنامه‌ها
+  async getAllProgramType(): Promise<ProgramType[]> {
+    const response = await httpClient.post<ProgramType[]>(apiConst.getAllProgramType);
+    return response.data;
+  }
+
+  // سایر متدهای API
 }
 
 const AppServices = new ApiService();

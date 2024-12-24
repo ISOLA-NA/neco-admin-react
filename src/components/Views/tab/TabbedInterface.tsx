@@ -1,145 +1,22 @@
 // src/components/Views/tab/TabbedInterface.tsx
-
-import React, { useState, useRef, useEffect } from "react";
-import MainTabs from "./MainTabs";
-import SubTabs from "./SubTabs";
-import TabContent from "../tabcontent/TabContent";
-import { tabsData, subTabDataMapping } from "./tabData";
-import { subTabComponents } from "./SubTabsImports";
-import {
-  subtabIconVisibility,
-  IconVisibility,
-} from "../../TableDynamic/TabIconVisibility";
+import React, { useRef, useEffect } from "react";
+import SubTabs from "../../Views/tab/SubTabs";
+import { useSubTabContext } from "../../../context/SubTabContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { useNavigate } from "react-router-dom";
 import DrawerComponent from "../tab/Header";
 import SidebarDrawer from "../tab/SidebarDrawer";
+import { Configuration, ProgramType } from "../../../services/api.services";
 
 interface TabbedInterfaceProps {
   onLogout: () => void;
 }
 
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
-  const [activeMainTab, setActiveMainTab] = useState<string>("General");
-  const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
-  const [selectedRow, setSelectedRow] = useState<any>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
-
-  // داده‌هایی که در حال حاضر برای ساب‌تب فعال از سرور یا از فایل tabData گرفته می‌شوند:
-  const [currentRowData, setCurrentRowData] = useState<any[]>([]);
-
-  const mainTabsRef = useRef<HTMLDivElement>(null);
-  const subTabsRef = useRef<HTMLDivElement>(null);
-
+  const { activeSubTab, data, loading, error } = useSubTabContext();
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState<boolean>(false);
   const navigate = useNavigate();
-
-  // کامپوننت Lazy مربوط به ساب‌تب فعال
-  const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
-  // اطلاعات مربوط به ستون‌ها
-  const currentSubTabData = subTabDataMapping[activeSubTab] || {
-    columnDefs: [],
-    rowData: [],
-  };
-
-  // استخراج تنظیمات نمایش آیکون‌ها برای ساب‌تب فعال
-  const currentIconVisibility: IconVisibility =
-    subtabIconVisibility[activeSubTab] || {
-      showAdd: true,
-      showEdit: true,
-      showDelete: true,
-      showDuplicate: false,
-    };
-
-  // هنگامی که زیرتب فعال تغییر می‌کند، داده را از سرور (یا از آبجکت) می‌خوانیم
-  useEffect(() => {
-    const fetchDataForSubTab = async () => {
-      setSelectedRow(null); // هر بار تغییر ساب‌تب، انتخاب را خالی می‌کنیم
-      if (subTabDataMapping[activeSubTab]?.fetchData) {
-        // اگر برای ساب‌تب فانکشن fetchData تعریف شده:
-        try {
-          const data = await subTabDataMapping[activeSubTab].fetchData!();
-          setCurrentRowData(data);
-        } catch (error) {
-          console.error("Error fetching data for sub-tab:", error);
-          setCurrentRowData([]);
-        }
-      } else {
-        // اگر فانکشن fetchData تعریف نشده، از داده‌های استاتیک استفاده می‌کنیم
-        setCurrentRowData(subTabDataMapping[activeSubTab]?.rowData || []);
-      }
-    };
-
-    fetchDataForSubTab();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeSubTab]);
-
-  const handleMainTabChange = (tabName: string) => {
-    if (tabName === "File") {
-      setIsDrawerOpen(true);
-      return;
-    }
-    setActiveMainTab(tabName);
-    const firstGroup = tabsData[tabName].groups
-      ? tabsData[tabName].groups![0].subtabs[0]
-      : tabsData[tabName].subtabs![0];
-    setActiveSubTab(firstGroup);
-    setSelectedRow(null);
-    mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-    subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-  };
-
-  const handleSubTabChange = (subtab: string) => {
-    setActiveSubTab(subtab);
-    setSelectedRow(null);
-    subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-  };
-
-  const scrollMainTabs = (direction: "left" | "right") => {
-    if (mainTabsRef.current) {
-      const scrollAmount = 150;
-      mainTabsRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const scrollSubTabs = (direction: "left" | "right") => {
-    if (subTabsRef.current) {
-      const scrollAmount = 150;
-      subTabsRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const handleRowDoubleClick = (rowData: any) => {
-    console.log("Row double-clicked in TabbedInterface:", rowData);
-    setSelectedRow(rowData);
-  };
-
-  // CRUD Handlers
-  const handleAdd = () => {
-    console.log("Add clicked");
-    setSelectedRow(null);
-  };
-
-  const handleEdit = () => {
-    console.log("Edit action triggered");
-  };
-
-  const handleDelete = () => {
-    console.log("Delete action triggered");
-  };
-
-  const handleDuplicate = () => {
-    console.log("Duplicate action triggered");
-  };
-
-  const handleRowClick = (data: any) => {
-    setSelectedRow(data);
-  };
+  const subTabsRef = useRef<HTMLDivElement>(null);
 
   const handleLogoutClick = () => {
     onLogout();
@@ -175,44 +52,74 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       >
         <DrawerComponent username="Hasanzade" />
 
-        <MainTabs
-          tabs={Object.keys(tabsData)}
-          activeTab={activeMainTab}
-          onTabChange={handleMainTabChange}
-          scrollLeft={() => scrollMainTabs("left")}
-          scrollRight={() => scrollMainTabs("right")}
-          tabsRef={mainTabsRef}
-        />
+        <SubTabs />
 
-        <SubTabs
-          groups={tabsData[activeMainTab].groups}
-          subtabs={tabsData[activeMainTab].subtabs}
-          activeSubTab={activeSubTab}
-          onSubTabChange={handleSubTabChange}
-          scrollLeft={() => scrollSubTabs("left")}
-          scrollRight={() => scrollSubTabs("right")}
-          subTabsRef={subTabsRef}
-        />
+        <div className="container mx-auto p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold">{activeSubTab}</h1>
+            <button
+              onClick={handleLogoutClick}
+              className="px-4 py-2 bg-red-500 text-white rounded"
+            >
+              خروج
+            </button>
+          </div>
 
-        <TabContent
-          component={ActiveSubTabComponent}
-          // ستونی که از subTabDataMapping می‌خوانیم
-          columnDefs={currentSubTabData.columnDefs}
-          // داده‌های fetched شده یا استاتیک
-          rowData={currentRowData}
-          onRowDoubleClick={handleRowDoubleClick}
-          selectedRow={selectedRow}
-          activeSubTab={activeSubTab}
-          showDuplicateIcon={currentIconVisibility.showDuplicate || false}
-          showAddIcon={currentIconVisibility.showAdd || false}
-          showEditIcon={currentIconVisibility.showEdit || false}
-          showDeleteIcon={currentIconVisibility.showDelete || false}
-          onAdd={handleAdd}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onDuplicate={handleDuplicate}
-          onRowClick={handleRowClick}
-        />
+          <div className="mt-4">
+            {loading && <p>در حال بارگذاری...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {!loading && !error && data && (
+              <div>
+                {activeSubTab === 'Configurations' && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-2">تنظیمات</h2>
+                    <table className="min-w-full bg-white">
+                      <thead>
+                        <tr>
+                          <th className="py-2">شناسه</th>
+                          <th className="py-2">نام</th>
+                          <th className="py-2">اولین قالب برنامه</th>
+                          <th className="py-2">توضیحات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(data as Configuration[]).map((config) => (
+                          <tr key={config.ID} className="text-center">
+                            <td className="py-2">{config.ID}</td>
+                            <td className="py-2">{config.Name}</td>
+                            <td className="py-2">{config.FirstIDProgramTemplate}</td>
+                            <td className="py-2">{config.Description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {activeSubTab === 'ProgramTypes' && (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-2">انواع برنامه</h2>
+                    <table className="min-w-full bg-white">
+                      <thead>
+                        <tr>
+                          <th className="py-2">شناسه</th>
+                          <th className="py-2">نام</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(data as ProgramType[]).map((programType) => (
+                          <tr key={programType.ID} className="text-center">
+                            <td className="py-2">{programType.ID}</td>
+                            <td className="py-2">{programType.Name}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );

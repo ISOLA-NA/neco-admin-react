@@ -4,6 +4,7 @@ export const apiConst = Object.freeze({
     sendOtp: 'api/SendOtp',
     loginWithOtp: 'api/loginWithOtp',
     tokenSetup: 'api/tokenSetup',
-    getAllConfiguration : 'api/Setting/GetAll'
+    getAllConfiguration : 'api/Setting/GetAll',
+    getAllProgramType:'api/ProgramType/GetAll'
   });
   
