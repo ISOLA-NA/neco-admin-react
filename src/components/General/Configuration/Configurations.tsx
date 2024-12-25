@@ -1,13 +1,22 @@
-import React, { useState, useEffect } from "react";
+// src/components/Views/tab/Configuration.tsx
+
+import React, { useState, useEffect, useMemo } from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import ListSelector from "../../ListSelector/ListSelector";
-import { subTabDataMapping, buttons } from "../../Views/tab/tabData";
-import DynamicModal from "../../utilities/DynamicModal"; // وارد کردن DynamicModal
-import TableSelector from "../Configuration/TableSelector"; // اصلاح مسیر واردات
-import ButtonComponent from "../Configuration/ButtonComponent"; // وارد کردن ButtonComponent
+import DynamicModal from "../../utilities/DynamicModal";
+import TableSelector from "../Configuration/TableSelector";
+import ButtonComponent from "../Configuration/ButtonComponent";
+
+import AppServices, {
+  EntityTypeItem,
+  WfTemplateItem,
+  ProgramTemplateItem,
+  MenuItem,
+  AFBtnItem,
+} from "../../../services/api.services";
 
 interface ConfigurationProps {
   selectedRow: any;
@@ -28,8 +37,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     EntityTypeIDForLessonLearn: selectedRow?.EntityTypeIDForLessonLearn || "",
     SelMenuIDForLessonLearnAfTemplate:
       selectedRow?.SelMenuIDForLessonLearnAfTemplate || "",
-    EntityTypeIDForTaskComment: selectedRow?.EntityTypeIDForTaskComment || "", // اصلاح نام کلید
-    EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "", // اصلاح نام کلید
+    EntityTypeIDForTaskComment: selectedRow?.EntityTypeIDForTaskComment || "",
+    EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "",
   });
 
   const [descriptionError, setDescriptionError] = useState(false);
@@ -48,7 +57,16 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   >(null);
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
-  // تبدیل رشته شناسه‌ها به آرایه عددی
+  // State for API data
+  const [programTemplates, setProgramTemplates] = useState<
+    ProgramTemplateItem[]
+  >([]);
+  const [defaultRibbons, setDefaultRibbons] = useState<MenuItem[]>([]);
+  const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
+  const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
+  const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
+
+  // Parsing function (could be moved to utils)
   const parseIds = (ids: string): number[] => {
     return ids
       .split("|")
@@ -56,7 +74,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       .filter((id) => !isNaN(id));
   };
 
-  // مدیریت تغییرات در فرم
+  // Handle form changes
   const handleChange = (
     field: keyof typeof configData,
     value: string | number
@@ -76,7 +94,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     }
   };
 
-  // نگاشت بین سلکتورها و کلیدهای configData
+  // Map selectors to configData fields
   const selectorToFieldMap: { [key: string]: keyof typeof configData } = {
     DefaultBtn: "DefaultBtn",
     LetterBtns: "LetterBtns",
@@ -85,24 +103,69 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     SelMenuIDForMain: "SelMenuIDForMain",
     "Lesson Learned Form": "EntityTypeIDForLessonLearn",
     "Lesson Learned Af Template": "SelMenuIDForLessonLearnAfTemplate",
-    "Comment Form Template": "EntityTypeIDForTaskComment", // اصلاح نام کلید
-    "Procedure Form Template": "EntityTypeIDForProcedure", // اصلاح نام کلید
+    "Comment Form Template": "EntityTypeIDForTaskComment",
+    "Procedure Form Template": "EntityTypeIDForProcedure",
   };
 
-  // به‌روزرسانی شناسه‌های انتخاب شده برای هر ListSelector
+  // Handle selection changes and update configData
   const handleSelectionChange = (
     field: keyof typeof configData,
-    selectedIds: (string | number)[]
+    selectedIds: (number | string)[]
   ) => {
     const idsString = selectedIds.join("|") + "|";
     handleChange(field, idsString);
   };
 
-  // تبدیل رشته شناسه‌ها به آرایه
-  const defaultBtnIds = parseIds(configData.DefaultBtn);
-  const letterBtnIds = parseIds(configData.LetterBtns);
-  const meetingBtnIds = parseIds(configData.MeetingBtns);
+  // Handle row double click in ListSelector
+  const handleSelectButtonClick = () => {
+    if (selectedRowData && currentSelector) {
+      const field = selectorToFieldMap[currentSelector];
+      console.log(
+        `Selected Selector: ${currentSelector}, Mapped Field: ${field}`
+      );
+      console.log(`Selected ID: ${selectedRowData.ID}`);
+      if (field) {
+        const selectedId = selectedRowData.ID;
+        handleChange(field, selectedId.toString());
+        handleCloseModal();
+      }
+    } else {
+      console.warn("No row selected or selector is null");
+    }
+  };
 
+  // Fetch initial data
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
+          await Promise.all([
+            AppServices.getAllProgramTemplates(),
+            AppServices.getAllDefaultRibbons(),
+            AppServices.getTableTransmittal(),
+            AppServices.getAllWfTemplate(),
+            AppServices.getAllAfbtn(), // Fetch AFBtn data
+          ]);
+        console.log("Program Templates:", templates);
+        console.log("Default Ribbons:", ribbons);
+        console.log("Entity Types:", entities);
+        console.log("WF Templates:", wfTemplatesData);
+        console.log("AF Buttons:", afButtonsData); // Log AF Buttons
+
+        setProgramTemplates(templates);
+        setDefaultRibbons(ribbons);
+        setEntityTypes(entities);
+        setWfTemplates(wfTemplatesData);
+        setAfButtons(afButtonsData); // Correctly set AF Buttons
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  // بروزرسانی configData زمانی که selectedRow تغییر می‌کند
   useEffect(() => {
     console.log("Selected Row in Configuration component:", selectedRow);
     setConfigData({
@@ -116,15 +179,15 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       DefaultBtn: selectedRow?.DefaultBtn || "",
       LetterBtns: selectedRow?.LetterBtns || "",
       MeetingBtns: selectedRow?.MeetingBtns || "",
-      EntityTypeIDForLessonLearn: selectedRow?.EntityTypeIDForLessonLearn || "",
+      EntityTypeIDForLessonLearn: selectedRow?.EnityTypeIDForLessonLearn || "",
       SelMenuIDForLessonLearnAfTemplate:
-        selectedRow?.SelMenuIDForLessonLearnAfTemplate || "",
-      EntityTypeIDForTaskComment: selectedRow?.EntityTypeIDForTaskComment || "", // اصلاح نام کلید
-      EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "", // اصلاح نام کلید
+        selectedRow?.WFTemplateIDForLessonLearn || "",
+      EntityTypeIDForTaskComment: selectedRow?.EnityTypeIDForTaskCommnet || "",
+      EntityTypeIDForProcedure: selectedRow?.EnityTypeIDForProcesure || "",
     });
   }, [selectedRow]);
 
-  // مدیریت باز و بسته شدن مودال
+  // Open and close modal
   const handleOpenModal = (
     selector:
       | "DefaultBtn"
@@ -137,69 +200,64 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       | "Comment Form Template"
       | "Procedure Form Template"
   ) => {
+    console.log(`Opening modal for selector: ${selector}`);
     setCurrentSelector(selector);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    console.log("Closing modal");
     setModalOpen(false);
     setSelectedRowData(null);
     setCurrentSelector(null);
   };
 
-  // مدیریت انتخاب ردیف در جدول مودال
+  // Handle row click in modal
   const handleRowClick = (rowData: any) => {
+    console.log("Row clicked in modal:", rowData);
     setSelectedRowData(rowData);
   };
 
-  // مدیریت کلیک دکمه انتخاب در مودال
-  const handleSelectButtonClick = () => {
-    if (selectedRowData && currentSelector) {
-      const field = selectorToFieldMap[currentSelector];
-      console.log(
-        `Selected Selector: ${currentSelector}, Mapped Field: ${field}`
-      );
-      console.log(`Selected ID: ${selectedRowData.ID}`);
-      if (field) {
-        const selectedId = selectedRowData.ID;
-        handleChange(field, selectedId.toString());
-        handleCloseModal();
-      }
-    }
-  };
-
-  // گرفتن داده‌های ردیف‌ها بر اساس selector فعلی
+  // Get row data based on current selector
   const getRowData = (selector: string | null) => {
     if (!selector) return [];
     switch (selector) {
       case "FirstIDProgramTemplate":
-        return subTabDataMapping["ProgramTemplate"].rowData;
+        return programTemplates;
       case "SelMenuIDForMain":
-        return subTabDataMapping["DefaultRibbon"].rowData;
+        return defaultRibbons;
+      case "Lesson Learned Form":
+      case "Comment Form Template":
+      case "Procedure Form Template":
+        return entityTypes;
+      case "Lesson Learned Af Template":
+        return wfTemplates;
       case "DefaultBtn":
       case "LetterBtns":
       case "MeetingBtns":
-        return buttons;
-      case "Lesson Learned Form":
-        return subTabDataMapping["Lesson Learned Form"].rowData;
-      case "Lesson Learned Af Template":
-        return subTabDataMapping["Lesson Learned Af Template"].rowData;
-      case "Comment Form Template":
-        return subTabDataMapping["Comment Form Template"].rowData;
-      case "Procedure Form Template":
-        return subTabDataMapping["Procedure Form Template"].rowData;
+        return afButtons;
       default:
         return [];
     }
   };
 
-  useEffect(() => {
-    console.log("Configuration Data Updated:", configData);
-  }, [configData]);
+  // Helper to get names from IDs
+  const getNamesFromIds = (ids: number[], data: any[]) => {
+    return data
+      .filter((item) => ids.includes(item.ID))
+      .map((item) => item.Name)
+      .join(", ");
+  };
+
+  // Parse the IDs
+  const defaultBtnIds = parseIds(configData.DefaultBtn);
+  const letterBtnIds = parseIds(configData.LetterBtns);
+  const meetingBtnIds = parseIds(configData.MeetingBtns);
 
   return (
     <div>
       <TwoColumnLayout>
+        {/* DynamicInput - Name */}
         <DynamicInput
           name="Name"
           type="text"
@@ -208,6 +266,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           required
         />
 
+        {/* CustomTextarea - Description */}
         <CustomTextarea
           id="description"
           name="Description"
@@ -221,7 +280,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Program Template */}
         <DynamicSelector
-          options={subTabDataMapping["ProgramTemplate"].rowData.map((pt) => ({
+          options={programTemplates.map((pt) => ({
             value: pt.ID.toString(),
             label: pt.Name,
           }))}
@@ -236,7 +295,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Default Ribbon */}
         <DynamicSelector
-          options={subTabDataMapping["DefaultRibbon"].rowData.map((dr) => ({
+          options={defaultRibbons.map((dr) => ({
             value: dr.ID.toString(),
             label: dr.Name,
           }))}
@@ -249,12 +308,10 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Lesson Learned Form */}
         <DynamicSelector
-          options={subTabDataMapping["Lesson Learned Form"].rowData.map(
-            (llf) => ({
-              value: llf.ID.toString(),
-              label: llf.Name,
-            })
-          )}
+          options={entityTypes.map((llf) => ({
+            value: llf.ID.toString(),
+            label: llf.Name,
+          }))}
           selectedValue={configData.EntityTypeIDForLessonLearn}
           onChange={(e) =>
             handleChange("EntityTypeIDForLessonLearn", e.target.value)
@@ -267,12 +324,10 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Lesson Learned Af Template */}
         <DynamicSelector
-          options={subTabDataMapping["Lesson Learned Af Template"].rowData.map(
-            (llat) => ({
-              value: llat.ID.toString(),
-              label: llat.Name,
-            })
-          )}
+          options={wfTemplates.map((wf) => ({
+            value: wf.ID.toString(),
+            label: wf.Name,
+          }))}
           selectedValue={configData.SelMenuIDForLessonLearnAfTemplate}
           onChange={(e) =>
             handleChange("SelMenuIDForLessonLearnAfTemplate", e.target.value)
@@ -285,16 +340,14 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Comment Form Template */}
         <DynamicSelector
-          options={subTabDataMapping["Comment Form Template"].rowData.map(
-            (cft) => ({
-              value: cft.ID.toString(),
-              label: cft.Name,
-            })
-          )}
-          selectedValue={configData.EntityTypeIDForTaskComment} // اصلاح نام کلید
+          options={entityTypes.map((cft) => ({
+            value: cft.ID.toString(),
+            label: cft.Name,
+          }))}
+          selectedValue={configData.EntityTypeIDForTaskComment}
           onChange={(e) =>
             handleChange("EntityTypeIDForTaskComment", e.target.value)
-          } // اصلاح نام کلید
+          }
           label="Comment Form Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("Comment Form Template")}
@@ -303,16 +356,14 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Procedure Form Template */}
         <DynamicSelector
-          options={subTabDataMapping["Procedure Form Template"].rowData.map(
-            (pft) => ({
-              value: pft.ID.toString(),
-              label: pft.Name,
-            })
-          )}
-          selectedValue={configData.EntityTypeIDForProcedure} // اصلاح نام کلید
+          options={entityTypes.map((pft) => ({
+            value: pft.ID.toString(),
+            label: pft.Name,
+          }))}
+          selectedValue={configData.EntityTypeIDForProcedure}
           onChange={(e) =>
             handleChange("EntityTypeIDForProcedure", e.target.value)
-          } // اصلاح نام کلید
+          }
           label="Procedure Form Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("Procedure Form Template")}
@@ -327,8 +378,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             { headerName: "Name", field: "Name" },
             { headerName: "Tooltip", field: "Tooltip" },
           ]}
-          rowData={buttons}
-          selectedIds={defaultBtnIds}
+          rowData={afButtons} // Use afButtons instead of buttons
+          selectedIds={defaultBtnIds} // Pass parsed IDs
           onSelectionChange={(selectedIds) =>
             handleSelectionChange("DefaultBtn", selectedIds)
           }
@@ -339,7 +390,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
               { headerName: "Name", field: "Name" },
               { headerName: "Tooltip", field: "Tooltip" },
             ],
-            rowData: buttons,
+            rowData: afButtons, // Ensure modal uses afButtons
             onClose: handleCloseModal,
             onRowSelect: handleSelectButtonClick,
             onSelectFromButton: handleSelectButtonClick,
@@ -354,8 +405,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             { headerName: "Name", field: "Name" },
             { headerName: "Tooltip", field: "Tooltip" },
           ]}
-          rowData={buttons}
-          selectedIds={letterBtnIds}
+          rowData={afButtons} // Use afButtons
+          selectedIds={letterBtnIds} // Parsed IDs
           onSelectionChange={(selectedIds) =>
             handleSelectionChange("LetterBtns", selectedIds)
           }
@@ -366,7 +417,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
               { headerName: "Name", field: "Name" },
               { headerName: "Tooltip", field: "Tooltip" },
             ],
-            rowData: buttons,
+            rowData: afButtons, // Ensure modal uses afButtons
             selectedRow: selectedRowData,
             onClose: handleCloseModal,
             onRowSelect: handleSelectButtonClick,
@@ -374,7 +425,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             isSelectDisabled: !selectedRowData,
           }}
         />
-
         {/* ListSelector - Meeting Action Buttons */}
         <ListSelector
           title="Meeting Action Buttons"
@@ -383,8 +433,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             { headerName: "Name", field: "Name" },
             { headerName: "Tooltip", field: "Tooltip" },
           ]}
-          rowData={buttons}
-          selectedIds={meetingBtnIds}
+          rowData={afButtons} // Use afButtons
+          selectedIds={meetingBtnIds} // Parsed IDs
           onSelectionChange={(selectedIds) =>
             handleSelectionChange("MeetingBtns", selectedIds)
           }
@@ -395,7 +445,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
               { headerName: "نام", field: "Name" },
               { headerName: "توضیحات", field: "EntityCateADescription" },
             ],
-            rowData: buttons,
+            rowData: afButtons, // Ensure modal uses afButtons
             selectedRow: selectedRowData,
             onRowDoubleClick: handleSelectButtonClick,
             onRowClick: handleRowClick,
@@ -405,7 +455,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
         />
       </TwoColumnLayout>
 
-      {/* مودال عمومی برای سلکتورها */}
+      {/* General Modal */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
           columnDefs={[

@@ -67,16 +67,56 @@ export interface ConfigurationItem {
   // بقیه فیلدها بسته به نیاز شما
 }
 
-// داده Commands
-export interface CommandItem {
+// داده Menu
+export interface MenuItem {
   ID: number;
   Name: string;
   // سایر فیلدها ...
 }
 
-// ... همینطور برای سایر ساب‌تب‌ها
+// داده ProgramTemplate
+export interface ProgramTemplateItem {
+  ID: number;
+  Name: string;
+  // سایر فیلدها ...
+}
+
+// داده DefaultRibbon
+export interface MenuItem {
+  ID: number;
+  Name: string;
+  // سایر فیلدها ...
+}
+
+export interface EntityTypeItem {
+  ID: number;
+  Name: string;
+  Category: string; // فرض بر این است که دسته‌بندی وجود دارد
+  // سایر فیلدها ...
+}
+
+export interface WfTemplateItem {
+  ID: number;
+  Name: string;
+  // سایر فیلدها ...
+}
+
+export interface AFBtnItem {
+  ID: number;
+  Name: string;
+  // سایر فیلدها ...
+}
 
 class ApiService {
+  getProcedureFormTemplates(): any {
+    throw new Error("Method not implemented.");
+  }
+  getCommentFormTemplates(): any {
+    throw new Error("Method not implemented.");
+  }
+  getLessonLearnedForms(): any {
+    throw new Error("Method not implemented.");
+  }
   // ------------------------------
   // مثال‌های مربوط به لاگین/OTP
   // ------------------------------
@@ -121,6 +161,40 @@ class ApiService {
     return response.data;
   }
 
+  async getAllProgramTemplates(): Promise<ProgramTemplateItem[]> {
+    const response = await httpClient.post<ProgramTemplateItem[]>(
+      apiConst.getAllProgramTemplate
+    );
+    return response.data;
+  }
+
+  // فرضیه: برای Default Ribbon یک endpoint مشابه اضافه شده است
+  async getAllDefaultRibbons(): Promise<MenuItem[]> {
+    const response = await httpClient.post<MenuItem[]>(
+      apiConst.getAllDefaultRibbons
+    );
+    return response.data;
+  }
+
+  async getTableTransmittal(): Promise<EntityTypeItem[]> {
+    const response = await httpClient.post<EntityTypeItem[]>(
+      apiConst.getTableTransmittal
+    );
+    return response.data;
+  }
+
+  // دریافت تمام WF Templates (برای LessonLearnedAfTemplate)
+  async getAllWfTemplate(): Promise<WfTemplateItem[]> {
+    const response = await httpClient.post<WfTemplateItem[]>(
+      apiConst.getAllWfTemplate
+    );
+    return response.data;
+  }
+
+  async getAllAfbtn(): Promise<AFBtnItem[]> {
+    const response = await httpClient.post<AFBtnItem[]>(apiConst.getAllAfbtn);
+    return response.data;
+  }
 }
 
 const AppServices = new ApiService();

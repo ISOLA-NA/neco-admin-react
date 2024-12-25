@@ -186,7 +186,7 @@ const DataTable: React.FC<DataTableProps> = ({
       </div>
 
       {/* جدول داده‌ها */}
-      <div className={gridClasses}>
+      <div className="ag-theme-quartz h-96 overflow-y-auto">
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}

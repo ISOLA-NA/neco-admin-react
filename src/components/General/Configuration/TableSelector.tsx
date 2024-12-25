@@ -1,5 +1,3 @@
-// src/components/Configuration/TableSelector.tsx
-
 import React from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import ReusableButton from "../../utilities/DynamicButtons";
@@ -29,8 +27,8 @@ const TableSelector: React.FC<TableSelectorProps> = ({
 }) => {
   return (
     <div className="bg-white rounded-lg p-4 flex flex-col h-full">
-      {/* Table Section */}
-      <div className="mb-4">
+      {/* Table Section with fixed height and vertical scroll */}
+      <div className="flex-grow overflow-y-auto mb-4">
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
@@ -46,7 +44,7 @@ const TableSelector: React.FC<TableSelectorProps> = ({
         />
       </div>
 
-      {/* Select Button */}
+      {/* Select Button with a fixed position at the bottom */}
       <div className="mt-4 flex justify-center">
         <ReusableButton
           text="Select"

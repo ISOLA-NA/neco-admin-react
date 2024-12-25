@@ -124,14 +124,13 @@ const TabContent: FC<TabContentProps> = ({
     };
   }, [isDragging, handleMouseMove, stopDragging]);
 
-  // مدیریت حالت باز و بسته بودن فرم و ... 
+  // مدیریت حالت باز و بسته بودن فرم و ...
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
   const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
-  const [selectedSubItemForRight, setSelectedSubItemForRight] = useState<any>(
-    null
-  );
+  const [selectedSubItemForRight, setSelectedSubItemForRight] =
+    useState<any>(null);
 
   const handleClose = (): void => {
     setIsPanelOpen(false);
@@ -296,7 +295,9 @@ const TabContent: FC<TabContentProps> = ({
                 <div className="flex flex-col bg-gray-200 rounded-r-lg overflow-hidden w-1/2 p-2 h-full">
                   <div className="h-full p-2 overflow-auto">
                     {showRightAccessPanel && selectedSubItemForRight ? (
-                      <RightProjectAccess selectedRow={selectedSubItemForRight} />
+                      <RightProjectAccess
+                        selectedRow={selectedSubItemForRight}
+                      />
                     ) : (
                       <div className="text-center text-gray-400 mt-10">
                         Double click on a left table row to show details here.
