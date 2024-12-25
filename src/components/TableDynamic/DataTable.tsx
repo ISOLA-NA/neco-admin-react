@@ -20,7 +20,7 @@ interface DataTableProps {
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
-  onCellValueChanged?: (event: any) => void; // اضافه شد
+  onCellValueChanged?: (event: any) => void;
   domLayout?: "autoHeight" | "normal";
   isRowSelected: boolean;
   showSearch?: boolean;
@@ -40,7 +40,7 @@ const DataTable: React.FC<DataTableProps> = ({
   onEdit,
   onDelete,
   onDuplicate,
-  onCellValueChanged, // اضافه شد
+  onCellValueChanged,
   domLayout = "normal",
   isRowSelected,
   showSearch = true,
@@ -61,14 +61,12 @@ const DataTable: React.FC<DataTableProps> = ({
     setSearchText(value);
 
     if (value.trim() === "") {
-      // اگر جستجو خالی است، همه داده‌ها نشان داده شود
       setFilteredRowData(originalRowData);
     } else {
       const lowerValue = value.toLowerCase();
       const filtered = originalRowData.filter((item) => {
         return Object.values(item).some((val) => {
           if (val === null || val === undefined) return false;
-          // تبدیل هر مقدار به رشته برای جستجو
           let strVal = "";
           if (typeof val === "object") {
             strVal = JSON.stringify(val);
@@ -102,8 +100,8 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   const gridClasses =
-    domLayout === "autoHeight"
-      ? "ag-theme-quartz auto-height"
+    filteredRowData.length > 10
+      ? "ag-theme-quartz h-96 overflow-y-auto"
       : "ag-theme-quartz flex-grow h-full";
 
   const getRowClass = (params: any) => {
@@ -115,9 +113,8 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-red-100">
-      {/* نوار جستجو و دکمه‌های اکشن */}
-      <div className="flex items-center justify-between mb-4 bg-red-100">
+    <div className="w-full h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 bg-red-100 p-2 ">
         {showSearch && (
           <div className="relative max-w-sm">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -174,7 +171,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
           {showAddIcon && (
             <button
-              type="button" // افزودن نوع button برای جلوگیری از ارسال فرم
+              type="button"
               className="text-green-600 hover:text-green-800 transition"
               title="Add"
               onClick={onAdd}
@@ -185,8 +182,7 @@ const DataTable: React.FC<DataTableProps> = ({
         </div>
       </div>
 
-      {/* جدول داده‌ها */}
-      <div className="ag-theme-quartz h-96 overflow-y-auto">
+      <div className={gridClasses} style={{marginTop:"-15px"}}>
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
@@ -198,18 +194,17 @@ const DataTable: React.FC<DataTableProps> = ({
           onRowDoubleClicked={handleRowDoubleClickInternal}
           domLayout={domLayout}
           suppressHorizontalScroll={false}
-          rowSelection="single" // تغییر به 'single' برای انتخاب تنها یک سطر
+          rowSelection="single"
           gridOptions={gridOptions}
-          singleClickEdit={true} // فعال‌سازی ویرایش با یک کلیک
-          stopEditingWhenCellsLoseFocus={true} // توقف ویرایش هنگام از دست دادن فوکوس سلول
-          onCellValueChanged={onCellValueChanged} // اضافه شد
+          singleClickEdit={true}
+          stopEditingWhenCellsLoseFocus={true}
+          onCellValueChanged={onCellValueChanged}
         />
       </div>
 
-      {/* دکمه Add New */}
       {showAddNew && (
         <button
-          type="button" // افزودن نوع button برای جلوگیری از ارسال فرم
+          type="button"
           className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
           onClick={onAdd}
         >

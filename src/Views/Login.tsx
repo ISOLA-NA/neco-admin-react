@@ -3,19 +3,18 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
 
-import DynamicInput from '../utilities/DynamicInput';
-import DynamicSelector from '../utilities/DynamicSelector';
-import DynamicSwitcher from '../utilities/DynamicSwitcher';
-import { showAlert } from '../utilities/Alert/DynamicAlert';
+import DynamicInput from '../components/utilities/DynamicInput';
+import DynamicSelector from '../components/utilities/DynamicSelector';
+import DynamicSwitcher from '../components/utilities/DynamicSwitcher';
+import { showAlert } from '../components/utilities/Alert/DynamicAlert';
 
 import AppServices, {
   WebLoginRequest,
   WebLoginResponse,
   SendOtpRequest,
   SendOtpResponse,
-  LoginWithOtpRequest,
-  LoginWithOtpResponse,
-} from '../../services/api.services';
+
+} from '../services/api.services';
 
 import Cookies from 'js-cookie';
 import CryptoJS from 'crypto-js';
@@ -247,7 +246,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                leftElement={<FaUser size={20} className="text-indigo-500" />}
+                leftIcon={<FaUser size={20} className="text-indigo-500" />}
                 required
                 className="mb-6"
               />
@@ -256,8 +255,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                leftElement={<FaLock size={20} className="text-indigo-500" />}
-                rightElement={
+                leftIcon={<FaLock size={20} className="text-indigo-500" />}
+                rightIcon={
                   <button
                     type="button"
                     onClick={handleTogglePasswordVisibility}
@@ -315,7 +314,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 type="number"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                leftElement={<FaPhone size={20} className="text-indigo-500" />}
+                leftIcon={<FaPhone size={20} className="text-indigo-500" />}
                 required
                 className="mb-6"
               />

@@ -1,6 +1,6 @@
 // src/components/Views/tab/Configuration.tsx
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 import DynamicInput from "../../utilities/DynamicInput";
@@ -241,13 +241,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     }
   };
 
-  // Helper to get names from IDs
-  const getNamesFromIds = (ids: number[], data: any[]) => {
-    return data
-      .filter((item) => ids.includes(item.ID))
-      .map((item) => item.Name)
-      .join(", ");
-  };
 
   // Parse the IDs
   const defaultBtnIds = parseIds(configData.DefaultBtn);
@@ -268,7 +261,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* CustomTextarea - Description */}
         <CustomTextarea
-          id="description"
           name="Description"
           value={configData.Description}
           onChange={(e) => handleChange("Description", e.target.value)}

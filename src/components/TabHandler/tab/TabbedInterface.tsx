@@ -143,8 +143,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     ProgramTemplateItem[]
   >([]);
   const [defaultRibbons, setDefaultRibbons] = useState<MenuItem[]>([]);
-  const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
-  const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
+  const [, setEntityTypes] = useState<EntityTypeItem[]>([]);
+  const [, setWfTemplates] = useState<WfTemplateItem[]>([]);
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);

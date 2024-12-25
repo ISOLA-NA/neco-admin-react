@@ -5,8 +5,8 @@ import {
   Route,
   Navigate
 } from 'react-router-dom'
-import HomePage from './components/Views/tab/TabbedInterface'
-import Login from './components/Autentications/Login'
+import HomePage from '../src/components/TabHandler/tab/TabbedInterface'
+import Login from '../src/Views/Login'
 // import Test from './components/Test/test'
 import Alert from './components/utilities/Alert/DynamicAlert'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'

@@ -80,7 +80,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         </div>
       </div>
 
-      <div className="h-32 overflow-y-auto bg-gray-300 rounded-b-md p-3">
+      <div className="h-32 overflow-y-auto bg-gray-200 rounded-b-md p-3">
         {selectedNames.length === 0 ? (
           <p className="text-gray-500 text-sm text-center">
             هیچ آیتمی انتخاب نشده است

@@ -1,7 +1,5 @@
-// src/utilities/DynamicInput.tsx
-
-import { classNames } from "primereact/utils";
 import React, { ReactNode } from "react";
+import { classNames } from "primereact/utils";
 
 interface DynamicInputProps {
   name: string; // نام ورودی
@@ -9,8 +7,8 @@ interface DynamicInputProps {
   value?: string | number | null; // مقدار ورودی
   placeholder?: string; // جای‌نما
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; // مدیریت تغییر
-  leftElement?: ReactNode; // عنصر سمت چپ
-  rightElement?: ReactNode; // عنصر سمت راست
+  leftIcon?: ReactNode; // عنصر سمت چپ
+  rightIcon?: ReactNode; // عنصر سمت راست
   required?: boolean; // الزامی بودن
   className?: string; // کلاس سفارشی برای سبک‌دهی
   error?: boolean; // نمایش وضعیت خطا
@@ -24,76 +22,69 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   value,
   placeholder = " ",
   onChange,
-  leftElement,
-  rightElement,
+  leftIcon,
+  rightIcon,
   required = false,
   className = "",
   error = false,
   errorMessage = "",
-  disabled = false, // پیش‌فرض: فعال
+  disabled = false,
 }) => {
   return (
     <div
       className={classNames(
-        "mb-6 relative",
+        "relative flex items-center gap-2",
         className,
-        disabled ? "opacity-50 cursor-not-allowed" : "" // استایل غیرفعال
+        disabled ? "opacity-50 cursor-not-allowed" : ""
       )}
     >
-      {/* عنصر سمت چپ */}
-      {leftElement && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
-          {leftElement}
+      {/* آیکون سمت چپ */}
+      {leftIcon && (
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
+          {leftIcon}
         </div>
       )}
 
+      {/* ورودی */}
       <input
         id={name}
         name={name}
         type={type}
-        value={value ?? ""} // تبدیل null به ""
-        placeholder={placeholder}
+        value={value ?? ""}
         onChange={onChange}
-        inputMode={type === "number" ? "numeric" : undefined}
-        className={classNames(
-          "peer w-full border-b-2 bg-white",
-          error ? "border-red-500" : "border-purple-600",
-          leftElement ? "pl-10" : "pl-3",
-          rightElement ? "pr-10" : "pr-3",
-          "pb-2 focus:outline-none",
-          error ? "focus:border-red-500" : "focus:border-indigo-500",
-          "transition-colors duration-300 text-gray-800 text-sm sm:text-base",
-          disabled ? "cursor-not-allowed bg-gray-200" : "" // استایل ورودی غیرفعال
-        )}
+        placeholder={placeholder}
         required={required}
+        disabled={disabled}
         aria-label={name}
-        autoComplete="off"
-        disabled={disabled} // غیرفعال کردن ورودی
+        className={classNames(
+          "peer w-full border border-purple-600 rounded-md px-4 py-2 pl-2 pr-10  bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-300 text-gray-800 text-sm sm:text-base truncate",
+          error
+            ? "border-red-500 focus:border-red-500"
+            : "border-purple-600 focus:border-indigo-500",
+          leftIcon ? "pl-10" : "",
+          rightIcon ? "pr-10" : "", 
+          disabled ? "bg-gray-100 text-gray-500" : ""
+        )}
       />
 
+      {/* برچسب بالای ورودی */}
       <label
         htmlFor={name}
-        className={classNames(
-          "absolute",
-          leftElement ? "left-10" : "left-3",
-          "transform transition-all duration-300 cursor-text top-0 text-sm text-gray-600 -translate-y-full",
-          "peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-600 peer-placeholder-shown:-translate-y-1/2",
-          "peer-focus:top-0 peer-focus:text-sm peer-focus:text-gray-600 peer-focus:-translate-y-full"
-        )}
+        className="absolute -top-3 left-3 bg-pink-100 px-2 text-sm text-gray-800"
       >
         {name}
       </label>
 
-      {/* عنصر سمت راست */}
-      {rightElement && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-          {rightElement}
+      {/* آیکون سمت راست */}
+      {rightIcon && (
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-600">
+          {rightIcon}
         </div>
       )}
 
       {/* پیام خطا */}
       {error && errorMessage && (
-        <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>
+        <p className="absolute mt-1 text-red-500 text-xs">{errorMessage}</p>
       )}
     </div>
   );
