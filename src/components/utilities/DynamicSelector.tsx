@@ -8,7 +8,7 @@ interface Option {
 }
 
 interface DynamicSelectorProps {
-  name?: string; // اضافه کردن name
+  name?: string;
   options: Option[];
   selectedValue: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -46,67 +46,72 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
         disabled ? "opacity-50 cursor-not-allowed" : ""
       )}
     >
-      <div className="relative w-full">
-        {leftIcon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
-            {leftIcon}
-          </div>
-        )}
-
-        <select
-          name={name}
-          value={selectedValue}
-          onChange={onChange}
-          disabled={disabled}
-          className={classNames(
-            "w-full border-b-2 pr-10 bg-transparent appearance-none focus:outline-none transition-colors duration-300 text-gray-800 text-sm sm:text-base rounded-none",
-            error
-              ? "border-red-500 focus:border-red-500"
-              : "border-purple-600 focus:border-indigo-500",
-            disabled ? "bg-gray-100 text-gray-500" : ""
-          )}
-          aria-label={label}
-        >
-          <option value="" disabled hidden></option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value} className="ml-10">
-              {option.label}
-            </option>
-          ))}
-        </select>
-
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
-          {rightIcon ? rightIcon : <FaChevronDown size={16} />}
-        </div>
-
+      {/* لیبل شناور */}
+      {label && (
         <label
-          className={classNames(
-            "absolute transform transition-all duration-300 cursor-text pointer-events-none text-gray-600",
-            selectedValue
-              ? "top-0 text-sm -translate-y-full left-0"
-              : "top-1/2 text-base -translate-y-1/2 left-0"
-          )}
+          htmlFor={name}
+          className="absolute -top-2 left-4 bg-white px-1 text-gray-600 text-xs sm:text-sm truncate w-24 sm:w-auto"
+          title={label} // نمایش کامل متن در هنگام هاور
         >
           {label}
         </label>
+      )}
 
-        {error && errorMessage && (
-          <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>
+      {/* آیکون سمت چپ */}
+      {leftIcon && (
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
+          {leftIcon}
+        </div>
+      )}
+
+      {/* عنصر select */}
+      <select
+        id={name}
+        name={name}
+        value={selectedValue}
+        onChange={onChange}
+        disabled={disabled}
+        className={classNames(
+          "w-full border border-purple-600 rounded-md px-4 py-2 pl-10 pr-10 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-300 text-gray-800 text-sm sm:text-base truncate",
+          error
+            ? "border-red-500 focus:border-red-500"
+            : "border-purple-600 focus:border-indigo-500",
+          disabled ? "bg-gray-100 text-gray-500" : ""
         )}
+        aria-label={label}
+      >
+        <option value="" disabled hidden></option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value} className="truncate">
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {/* آیکون سمت راست */}
+      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
+        {rightIcon ? rightIcon : <FaChevronDown size={16} />}
       </div>
 
+      {/* دکمه اختیاری */}
       {showButton && (
         <button
           type="button"
           onClick={onButtonClick}
           disabled={disabled}
           className={classNames(
-            "btn btn-sm bg-purple-600 text-white hover:bg-indigo-500 px-3 py-2 rounded-md shadow-sm transition-colors duration-300",
+            "bg-purple-600 text-white hover:bg-pink-500 px-4 py-2 rounded-md shadow-sm transition-colors duration-300 truncate flex items-center justify-center",
             disabled ? "bg-gray-300 hover:bg-gray-300 cursor-not-allowed" : ""
           )}
+          title="اضافه کردن" // نمایش کامل متن در هنگام هاور
         >
           ...
         </button>
+      )}
+
+      {/* پیام خطا */}
+      {error && errorMessage && (
+        <p className="absolute mt-1 text-red-500 text-xs">{errorMessage}</p>
       )}
     </div>
   );
