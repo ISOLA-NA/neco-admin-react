@@ -10,19 +10,22 @@ import DynamicModal from "../../utilities/DynamicModal";
 import TableSelector from "../Configuration/TableSelector";
 import ButtonComponent from "../Configuration/ButtonComponent";
 
-import AppServices, {
+import {
+  useApi,
   EntityTypeItem,
   WfTemplateItem,
   ProgramTemplateItem,
-  MenuItem,
+  DefaultRibbonItem,
   AFBtnItem,
-} from "../../../services/api.services";
+} from "../../../context/ApiContext"; // وارد کردن نوع‌ها و context
 
 interface ConfigurationProps {
   selectedRow: any;
 }
 
 const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
+  const api = useApi(); // دسترسی به متدهای API از context
+
   const [configData, setConfigData] = useState({
     id: selectedRow?.ID?.toString() || "",
     Name: selectedRow?.Name || "",
@@ -34,12 +37,13 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     DefaultBtn: selectedRow?.DefaultBtn || "",
     LetterBtns: selectedRow?.LetterBtns || "",
     MeetingBtns: selectedRow?.MeetingBtns || "",
-    EntityTypeIDForLessonLearn: selectedRow?.EntityTypeIDForLessonLearn || "",
-    SelMenuIDForLessonLearnAfTemplate:
-      selectedRow?.SelMenuIDForLessonLearnAfTemplate || "",
-    EntityTypeIDForTaskComment: selectedRow?.EntityTypeIDForTaskComment || "",
-    EntityTypeIDForProcedure: selectedRow?.EntityTypeIDForProcedure || "",
+    EnityTypeIDForLessonLearn: selectedRow?.EnityTypeIDForLessonLearn || "",
+    EnityTypeIDForTaskCommnet: selectedRow?.EnityTypeIDForTaskCommnet || "",
+    EnityTypeIDForProcesure: selectedRow?.EnityTypeIDForProcesure || "",
   });
+
+  // EnityTypeIDForTaskCommnet;
+  // EntityTypeIDForTaskComment;
 
   const [descriptionError, setDescriptionError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -61,7 +65,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   const [programTemplates, setProgramTemplates] = useState<
     ProgramTemplateItem[]
   >([]);
-  const [defaultRibbons, setDefaultRibbons] = useState<MenuItem[]>([]);
+  const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
   const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
   const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
   const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
@@ -101,10 +105,10 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     MeetingBtns: "MeetingBtns",
     FirstIDProgramTemplate: "FirstIDProgramTemplate",
     SelMenuIDForMain: "SelMenuIDForMain",
-    "Lesson Learned Form": "EntityTypeIDForLessonLearn",
-    "Lesson Learned Af Template": "SelMenuIDForLessonLearnAfTemplate",
-    "Comment Form Template": "EntityTypeIDForTaskComment",
-    "Procedure Form Template": "EntityTypeIDForProcedure",
+    "Lesson Learned Form": "EnityTypeIDForLessonLearn",
+    "Lesson Learned Af Template": "SelMenuIDForMain",
+    "Comment Form Template": "EnityTypeIDForTaskCommnet",
+    "Procedure Form Template": "EnityTypeIDForProcesure",
   };
 
   // Handle selection changes and update configData
@@ -140,11 +144,11 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       try {
         const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
           await Promise.all([
-            AppServices.getAllProgramTemplates(),
-            AppServices.getAllDefaultRibbons(),
-            AppServices.getTableTransmittal(),
-            AppServices.getAllWfTemplate(),
-            AppServices.getAllAfbtn(), // Fetch AFBtn data
+            api.getAllProgramTemplates(),
+            api.getAllDefaultRibbons(),
+            api.getTableTransmittal(),
+            api.getAllWfTemplate(),
+            api.getAllAfbtn(), // Fetch AFBtn data
           ]);
         console.log("Program Templates:", templates);
         console.log("Default Ribbons:", ribbons);
@@ -163,7 +167,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     };
 
     fetchInitialData();
-  }, []);
+  }, [api]);
 
   // بروزرسانی configData زمانی که selectedRow تغییر می‌کند
   useEffect(() => {
@@ -179,11 +183,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       DefaultBtn: selectedRow?.DefaultBtn || "",
       LetterBtns: selectedRow?.LetterBtns || "",
       MeetingBtns: selectedRow?.MeetingBtns || "",
-      EntityTypeIDForLessonLearn: selectedRow?.EnityTypeIDForLessonLearn || "",
-      SelMenuIDForLessonLearnAfTemplate:
-        selectedRow?.WFTemplateIDForLessonLearn || "",
-      EntityTypeIDForTaskComment: selectedRow?.EnityTypeIDForTaskCommnet || "",
-      EntityTypeIDForProcedure: selectedRow?.EnityTypeIDForProcesure || "",
+      EnityTypeIDForLessonLearn: selectedRow?.EnityTypeIDForLessonLearn || "",
+      EnityTypeIDForTaskCommnet: selectedRow?.EnityTypeIDForTaskCommnet || "",
+      EnityTypeIDForProcesure: selectedRow?.EnityTypeIDForProcesure || "",
     });
   }, [selectedRow]);
 
@@ -240,7 +242,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
         return [];
     }
   };
-
 
   // Parse the IDs
   const defaultBtnIds = parseIds(configData.DefaultBtn);
@@ -304,9 +305,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             value: llf.ID.toString(),
             label: llf.Name,
           }))}
-          selectedValue={configData.EntityTypeIDForLessonLearn}
+          selectedValue={configData.EnityTypeIDForLessonLearn}
           onChange={(e) =>
-            handleChange("EntityTypeIDForLessonLearn", e.target.value)
+            handleChange("EnityTypeIDForLessonLearn", e.target.value)
           }
           label="Lesson Learned Form"
           showButton={true}
@@ -320,10 +321,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             value: wf.ID.toString(),
             label: wf.Name,
           }))}
-          selectedValue={configData.SelMenuIDForLessonLearnAfTemplate}
-          onChange={(e) =>
-            handleChange("SelMenuIDForLessonLearnAfTemplate", e.target.value)
-          }
+          selectedValue={configData.SelMenuIDForMain}
+          onChange={(e) => handleChange("SelMenuIDForMain", e.target.value)}
           label="Lesson Learned Af Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("Lesson Learned Af Template")}
@@ -336,9 +335,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             value: cft.ID.toString(),
             label: cft.Name,
           }))}
-          selectedValue={configData.EntityTypeIDForTaskComment}
+          selectedValue={configData.EnityTypeIDForTaskCommnet}
           onChange={(e) =>
-            handleChange("EntityTypeIDForTaskComment", e.target.value)
+            handleChange("EnityTypeIDForTaskCommnet", e.target.value)
           }
           label="Comment Form Template"
           showButton={true}
@@ -352,9 +351,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             value: pft.ID.toString(),
             label: pft.Name,
           }))}
-          selectedValue={configData.EntityTypeIDForProcedure}
+          selectedValue={configData.EnityTypeIDForProcesure}
           onChange={(e) =>
-            handleChange("EntityTypeIDForProcedure", e.target.value)
+            handleChange("EnityTypeIDForProcesure", e.target.value)
           }
           label="Procedure Form Template"
           showButton={true}

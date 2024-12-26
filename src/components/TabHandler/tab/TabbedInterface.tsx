@@ -10,13 +10,14 @@ import { useNavigate } from "react-router-dom";
 import DrawerComponent from "../tab/Header";
 import SidebarDrawer from "../tab/SidebarDrawer";
 
-// سرویس‌ها
-import AppServices, {
+import {
+  useApi,
   ProgramTemplateItem,
-  MenuItem,
+  DefaultRibbonItem,
   EntityTypeItem,
   WfTemplateItem,
-} from "../../../services/api.services";
+  AFBtnItem,
+} from "../../../context/ApiContext"; // وارد کردن نوع‌ها و context
 
 // برای مدیریت آیکون‌های CRUD
 interface IconVisibility {
@@ -28,8 +29,8 @@ interface IconVisibility {
 
 // برای ذخیره‌سازی ستون‌ها و endpoint هر ساب‌تب
 interface SubTabDefinition {
-  endpoint?: () => Promise<any[]>; // تابعی که داده را از API برمی‌گرداند
-  columnDefs: any[]; // ستون‌های جدول
+  endpoint?: () => Promise<any[]>;
+  columnDefs: any[];
   iconVisibility: IconVisibility;
 }
 
@@ -56,7 +57,7 @@ type MainTabKey =
   | "ApprovalFlows"
   | "Programs"
   | "Projects"
-  | "File"; // اضافه کردن "File" اگر نیاز است
+  | "File";
 
 // تعریف mainTabsData با استفاده از MainTabKey
 const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
@@ -115,13 +116,15 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
     ],
   },
   File: {
-    groups: [], // تعریف مناسب یا مدیریت جداگانه
+    groups: [],
   },
 };
 
-// تعریف subTabDefinitions به داخل کامپوننت تا از state ها استفاده کنیم
+// تعریف TabbedInterface
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
-  // تعریف نوع state به عنوان MainTabKey
+  const api = useApi(); // دسترسی به متدهای API از context
+
+  // حالت‌ها
   const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
   const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
   const [selectedRow, setSelectedRow] = useState<any>(null);
@@ -142,9 +145,10 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const [programTemplates, setProgramTemplates] = useState<
     ProgramTemplateItem[]
   >([]);
-  const [defaultRibbons, setDefaultRibbons] = useState<MenuItem[]>([]);
-  const [, setEntityTypes] = useState<EntityTypeItem[]>([]);
-  const [, setWfTemplates] = useState<WfTemplateItem[]>([]);
+  const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
+  const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
+  const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
+  const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]); // اضافه شد
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
@@ -158,30 +162,32 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [templates, ribbons, entities, wfTemplatesData] =
+        const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
           await Promise.all([
-            AppServices.getAllProgramTemplates(),
-            AppServices.getAllDefaultRibbons(),
-            AppServices.getTableTransmittal(),
-            AppServices.getAllWfTemplate(),
+            api.getAllProgramTemplates(),
+            api.getAllDefaultRibbons(),
+            api.getTableTransmittal(),
+            api.getAllWfTemplate(),
+            api.getAllAfbtn(), // اضافه شد
           ]);
         setProgramTemplates(templates);
         setDefaultRibbons(ribbons);
         setEntityTypes(entities);
         setWfTemplates(wfTemplatesData);
+        setAfButtons(afButtonsData); // اضافه شد
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
     };
 
     fetchInitialData();
-  }, []);
+  }, [api]);
 
   // تعریف subTabDefinitions به داخل کامپوننت با استفاده از useMemo
   const subTabDefinitions: Record<string, SubTabDefinition> = useMemo(
     () => ({
       Configurations: {
-        endpoint: () => AppServices.getAllConfigurations(), // فرض بر این است که getAllConfiguration موجود است
+        endpoint: api.getAllConfigurations,
         columnDefs: [
           { headerName: "Name", field: "Name" },
           {
@@ -215,9 +221,9 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
         },
       },
 
-      // ... سایر ساب‌تب‌ها
+      // ... سایر ساب‌تب‌ها را به همین صورت اضافه کنید
     }),
-    [programTemplates, defaultRibbons]
+    [api, programTemplates, defaultRibbons]
   );
 
   // وقتی ساب‌تب عوض شود، داده‌ها را از API می‌خوانیم
@@ -360,7 +366,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   // لیست نام تب‌های اصلی جهت پاس دادن به <MainTabs />
   const mainTabs: string[] = [...Object.keys(mainTabsData), "File"];
-  // چون "File" در اینجا به صورت جداگانه هم مدیریت شده
 
   return (
     <>
@@ -392,7 +397,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
         {/* ساب‌تب‌ها */}
         <SubTabs
           groups={mainTabsData[activeMainTab]?.groups}
-          subtabs={undefined}
           activeSubTab={activeSubTab}
           onSubTabChange={handleSubTabChange}
           scrollLeft={() => scrollSubTabs("left")}

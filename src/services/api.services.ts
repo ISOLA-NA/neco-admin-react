@@ -67,8 +67,8 @@ export interface ConfigurationItem {
   // بقیه فیلدها بسته به نیاز شما
 }
 
-// داده Menu
-export interface MenuItem {
+// داده Menu (برای Default Ribbon)
+export interface DefaultRibbonItem {
   ID: number;
   Name: string;
   // سایر فیلدها ...
@@ -81,13 +81,7 @@ export interface ProgramTemplateItem {
   // سایر فیلدها ...
 }
 
-// داده DefaultRibbon
-export interface MenuItem {
-  ID: number;
-  Name: string;
-  // سایر فیلدها ...
-}
-
+// داده EntityType
 export interface EntityTypeItem {
   ID: number;
   Name: string;
@@ -108,18 +102,7 @@ export interface AFBtnItem {
 }
 
 class ApiService {
-  getProcedureFormTemplates(): any {
-    throw new Error("Method not implemented.");
-  }
-  getCommentFormTemplates(): any {
-    throw new Error("Method not implemented.");
-  }
-  getLessonLearnedForms(): any {
-    throw new Error("Method not implemented.");
-  }
-  // ------------------------------
   // مثال‌های مربوط به لاگین/OTP
-  // ------------------------------
   async webLogin(userData: WebLoginRequest): Promise<WebLoginResponse> {
     const response = await httpClient.post<WebLoginResponse>(
       apiConst.webLogin,
@@ -151,9 +134,7 @@ class ApiService {
     return response.data;
   }
 
-  // ------------------------------
   // مثال‌های مربوط به هر ساب‌تب
-  // ------------------------------
   async getAllConfigurations(): Promise<ConfigurationItem[]> {
     const response = await httpClient.post<ConfigurationItem[]>(
       apiConst.getAllConfiguration
@@ -169,8 +150,8 @@ class ApiService {
   }
 
   // فرضیه: برای Default Ribbon یک endpoint مشابه اضافه شده است
-  async getAllDefaultRibbons(): Promise<MenuItem[]> {
-    const response = await httpClient.post<MenuItem[]>(
+  async getAllDefaultRibbons(): Promise<DefaultRibbonItem[]> {
+    const response = await httpClient.post<DefaultRibbonItem[]>(
       apiConst.getAllDefaultRibbons
     );
     return response.data;
@@ -195,6 +176,8 @@ class ApiService {
     const response = await httpClient.post<AFBtnItem[]>(apiConst.getAllAfbtn);
     return response.data;
   }
+
+  // متدهای دیگری که نیاز دارید ...
 }
 
 const AppServices = new ApiService();
