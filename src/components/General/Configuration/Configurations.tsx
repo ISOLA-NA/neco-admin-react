@@ -42,9 +42,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     EnityTypeIDForProcesure: selectedRow?.EnityTypeIDForProcesure || "",
   });
 
-  // EnityTypeIDForTaskCommnet;
-  // EntityTypeIDForTaskComment;
-
   const [descriptionError, setDescriptionError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentSelector, setCurrentSelector] = useState<
@@ -69,6 +66,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
   const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
   const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
+
+  // Loading state
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Parsing function (could be moved to utils)
   const parseIds = (ids: string): number[] => {
@@ -142,6 +142,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        setLoading(true);
         const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
           await Promise.all([
             api.getAllProgramTemplates(),
@@ -163,6 +164,8 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
         setAfButtons(afButtonsData); // Correctly set AF Buttons
       } catch (error) {
         console.error("Error fetching initial data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -258,6 +261,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           value={configData.Name}
           onChange={(e) => handleChange("Name", e.target.value)}
           required
+          loading={loading}
         />
 
         {/* CustomTextarea - Description */}
@@ -273,6 +277,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
 
         {/* DynamicSelector - Program Template */}
         <DynamicSelector
+          name="FirstIDProgramTemplate"
           options={programTemplates.map((pt) => ({
             value: pt.ID.toString(),
             label: pt.Name,
@@ -284,10 +289,12 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           label="Program Template"
           showButton={true}
           onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}
+          loading={loading}
         />
 
         {/* DynamicSelector - Default Ribbon */}
         <DynamicSelector
+          name="SelMenuIDForMain"
           options={defaultRibbons.map((dr) => ({
             value: dr.ID.toString(),
             label: dr.Name,
@@ -297,10 +304,12 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           label="Default Ribbon"
           showButton={true}
           onButtonClick={() => handleOpenModal("SelMenuIDForMain")}
+          loading={loading}
         />
 
         {/* DynamicSelector - Lesson Learned Form */}
         <DynamicSelector
+          name="EnityTypeIDForLessonLearn"
           options={entityTypes.map((llf) => ({
             value: llf.ID.toString(),
             label: llf.Name,
@@ -313,10 +322,12 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           showButton={true}
           onButtonClick={() => handleOpenModal("Lesson Learned Form")}
           className="mt-7"
+          loading={loading}
         />
 
         {/* DynamicSelector - Lesson Learned Af Template */}
         <DynamicSelector
+          name="Lesson Learned Af Template"
           options={wfTemplates.map((wf) => ({
             value: wf.ID.toString(),
             label: wf.Name,
@@ -327,10 +338,12 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           showButton={true}
           onButtonClick={() => handleOpenModal("Lesson Learned Af Template")}
           className="mt-7"
+          loading={loading}
         />
 
         {/* DynamicSelector - Comment Form Template */}
         <DynamicSelector
+          name="EnityTypeIDForTaskCommnet"
           options={entityTypes.map((cft) => ({
             value: cft.ID.toString(),
             label: cft.Name,
@@ -343,10 +356,12 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           showButton={true}
           onButtonClick={() => handleOpenModal("Comment Form Template")}
           className="mt-7"
+          loading={loading}
         />
 
         {/* DynamicSelector - Procedure Form Template */}
         <DynamicSelector
+          name="EnityTypeIDForProcesure"
           options={entityTypes.map((pft) => ({
             value: pft.ID.toString(),
             label: pft.Name,
@@ -359,6 +374,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
           showButton={true}
           onButtonClick={() => handleOpenModal("Procedure Form Template")}
           className="mt-7"
+          loading={loading}
         />
 
         {/* ListSelector - Default Action Buttons */}
@@ -386,6 +402,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             onRowSelect: handleSelectButtonClick,
             onSelectFromButton: handleSelectButtonClick,
           }}
+          loading={loading} // اضافه کردن پروپ بارگذاری
         />
 
         {/* ListSelector - Letter Action Buttons */}
@@ -415,7 +432,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             onSelectFromButton: handleSelectButtonClick,
             isSelectDisabled: !selectedRowData,
           }}
+          loading={loading} // اضافه کردن پروپ بارگذاری
         />
+
         {/* ListSelector - Meeting Action Buttons */}
         <ListSelector
           title="Meeting Action Buttons"
@@ -443,6 +462,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
             onSelectButtonClick: handleSelectButtonClick,
             isSelectDisabled: !selectedRowData,
           }}
+          loading={loading} // اضافه کردن پروپ بارگذاری
         />
       </TwoColumnLayout>
 

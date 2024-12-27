@@ -61,19 +61,18 @@ type MainTabKey =
 
 // تعریف mainTabsData با استفاده از MainTabKey
 const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
+  File: {
+    groups: [],
+  },
   General: {
     groups: [
       {
         label: "Setup",
-        subtabs: ["Configurations", "Commands", "Ribbons"],
+        subtabs: ["Configurations", "Commands", "Ribbons", "Enterprises"],
       },
       {
         label: "User",
         subtabs: ["Users", "Roles", "Staffing", "RoleGroups"],
-      },
-      {
-        label: "Org",
-        subtabs: ["Enterprises"],
       },
     ],
   },
@@ -115,9 +114,6 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
       },
     ],
   },
-  File: {
-    groups: [],
-  },
 };
 
 // تعریف TabbedInterface
@@ -146,9 +142,9 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     ProgramTemplateItem[]
   >([]);
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
-  const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
-  const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
-  const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]); // اضافه شد
+  const [, setEntityTypes] = useState<EntityTypeItem[]>([]);
+  const [, setWfTemplates] = useState<WfTemplateItem[]>([]);
+  const [, setAfButtons] = useState<AFBtnItem[]>([]); // اضافه شد
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
@@ -189,7 +185,11 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       Configurations: {
         endpoint: api.getAllConfigurations,
         columnDefs: [
-          { headerName: "Name", field: "Name" },
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "FirstIDProgramTemplate",
+          },
           {
             headerName: "Prg.Template",
             field: "FirstIDProgramTemplate",
@@ -365,7 +365,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   }, [isDrawerOpen]);
 
   // لیست نام تب‌های اصلی جهت پاس دادن به <MainTabs />
-  const mainTabs: string[] = [...Object.keys(mainTabsData), "File"];
+  const mainTabs: string[] = [...Object.keys(mainTabsData)];
 
   return (
     <>

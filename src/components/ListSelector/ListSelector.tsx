@@ -1,3 +1,5 @@
+// src/ListSelector/ListSelector.tsx
+
 import React from "react";
 import DynamicModal from "../utilities/DynamicModal";
 import { classNames } from "primereact/utils";
@@ -14,6 +16,7 @@ interface ListSelectorProps {
   onGlobalChange?: (isGlobal: boolean) => void;
   ModalContentComponent: React.FC<any>;
   modalContentProps?: any;
+  loading?: boolean; // پروپ بارگذاری اضافه شده
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
@@ -28,6 +31,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   onGlobalChange,
   ModalContentComponent,
   modalContentProps = {},
+  loading = false, // پیش‌فرض بارگذاری false
 }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
@@ -80,8 +84,32 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         </div>
       </div>
 
-      <div className="h-32 overflow-y-auto bg-gray-200 rounded-b-md p-3">
-        {selectedNames.length === 0 ? (
+      <div className="relative h-32 overflow-y-auto bg-gray-200 rounded-b-md p-3">
+        {loading ? (
+          // نمایش اسپینر بارگذاری در صورت بارگذاری
+          <div className="flex justify-center items-center h-full">
+            <svg
+              className="animate-spin h-5 w-5 text-purple-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
+            </svg>
+          </div>
+        ) : selectedNames.length === 0 ? (
           <p className="text-gray-500 text-sm text-center">
             هیچ آیتمی انتخاب نشده است
           </p>

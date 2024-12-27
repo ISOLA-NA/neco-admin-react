@@ -1,14 +1,18 @@
-
 .ag-theme-quartz,
 .ag-theme-quartz-dark {
   --ag-foreground-color: rgb(255, 255, 255);
   --ag-background-color: rgb(0, 0, 0);
   --ag-header-foreground-color: rgb(0, 0, 0);
   --ag-header-background-color: rgb(235, 72, 155);
-  --ag-odd-row-background-color: rgba(255, 0, 0, 0.03); /* استفاده از rgba برای شفافیت */
+  --ag-odd-row-background-color: rgba(
+    255,
+    0,
+    0,
+    0.03
+  ); /* استفاده از rgba برای شفافیت */
   --ag-header-column-resize-handle-color: rgb(255, 255, 255);
-  --ag-background-color: to right,#7e3af2, #6366f1;
-  background: linear-gradient(to right, #ec4899, #7e3af2, #6366f1)
+  --ag-background-color: to right, #7e3af2, #6366f1;
+  background: linear-gradient(to right, #ec4899, #7e3af2, #6366f1);
 }
 
 /* استایل برای ردیف‌های انتخاب شده */
@@ -16,32 +20,30 @@
   background-color: #7e3af2 !important; /* رنگ پس‌زمینه انتخابی */
   color: rgb(255, 255, 255) !important; /* رنگ متن سفید */
 }
-  /* استایل برای اینپوت جستجو */
-  .search-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 16px;
-    background-color: #f3f4f6; /* پس‌زمینه روشن برای اینپوت */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .search-input:focus {
-    outline: none;
-    border-color: #7e3af2; /* رنگ مرز زمانی که در فوکوس است */
-    box-shadow: 0 0 5px rgba(126, 58, 242, 0.5); /* سایه اطراف اینپوت در فوکوس */
-  }
-  
-  .search-input::placeholder {
-    color: #999;
-  }
-  
 
-/* src/components/TableDynamic/DataTable.css */
-
+/* استایل برای اینپوت جستجو */
 .search-input {
-  /* اضافه کردن padding-left برای جلوگیری از قرار گرفتن متن زیر آیکون */
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #f3f4f6; /* پس‌زمینه روشن برای اینپوت */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #7e3af2; /* رنگ مرز زمانی که در فوکوس است */
+  box-shadow: 0 0 5px rgba(126, 58, 242, 0.5); /* سایه اطراف اینپوت در فوکوس */
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+/* اضافه کردن padding-left برای جلوگیری از قرار گرفتن متن زیر آیکون */
+.search-input {
   padding-left: 2.5rem; /* 10rem به ازای کلاس pl-10 */
 }
 
@@ -50,15 +52,28 @@
   margin-left: 0.5rem;
 }
 
-/* DataTable.css */
-
 /* حالت autoHeight */
 .auto-height {
   height: auto !important;
 }
 
 .ag-filter-body-wrapper.ag-simple-filter-body-wrapper {
-  background-color: black ;
+  background-color: black;
 }
 
+/* سفارشی‌سازی Overlay Loading */
+.ag-theme-quartz .ag-overlay-loading-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2rem;
+  color: #7e3af2; /* رنگ متن لودینگ */
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.8
+  ); /* پس‌زمینه نیمه شفاف برای خوانایی بیشتر */
+}
 

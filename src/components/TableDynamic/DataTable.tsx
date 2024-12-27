@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
 import { FiPlus, FiTrash2, FiEdit, FiCopy } from "react-icons/fi";
+import { TailSpin } from "react-loader-spinner";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -22,9 +23,9 @@ interface DataTableProps {
   onDuplicate: () => void;
   onCellValueChanged?: (event: any) => void;
   domLayout?: "autoHeight" | "normal";
-  isRowSelected: boolean;
   showSearch?: boolean;
   showAddNew?: boolean;
+  isLoading?: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -42,14 +43,15 @@ const DataTable: React.FC<DataTableProps> = ({
   onDuplicate,
   onCellValueChanged,
   domLayout = "normal",
-  isRowSelected,
   showSearch = true,
   showAddNew = false,
+  isLoading = false,
 }) => {
   const [searchText, setSearchText] = useState("");
-  const [gridApi, setGridApi] = useState<any>(null);
+  const gridApiRef = useRef<any>(null);
   const [originalRowData, setOriginalRowData] = useState<any[]>([]);
   const [filteredRowData, setFilteredRowData] = useState<any[]>([]);
+  const [isRowSelected, setIsRowSelected] = useState<boolean>(false); // وضعیت داخلی
 
   useEffect(() => {
     setOriginalRowData(rowData);
@@ -81,18 +83,33 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   const onGridReady = (params: any) => {
-    setGridApi(params.api);
+    gridApiRef.current = params.api;
     params.api.sizeColumnsToFit();
+
+    if (isLoading) {
+      params.api.showLoadingOverlay();
+    }
   };
 
   useEffect(() => {
-    if (gridApi) {
-      gridApi.sizeColumnsToFit();
+    if (gridApiRef.current) {
+      gridApiRef.current.sizeColumnsToFit();
     }
-  }, [gridApi, columnDefs, filteredRowData]);
+  }, [columnDefs, filteredRowData]);
+
+  useEffect(() => {
+    if (gridApiRef.current) {
+      if (isLoading) {
+        gridApiRef.current.showLoadingOverlay();
+      } else {
+        gridApiRef.current.hideOverlay();
+      }
+    }
+  }, [isLoading]);
 
   const handleRowClick = (event: any) => {
     setSelectedRowData(event.data);
+    setIsRowSelected(true); // تنظیم وضعیت انتخاب شده
   };
 
   const handleRowDoubleClickInternal = (event: any) => {
@@ -110,17 +127,19 @@ const DataTable: React.FC<DataTableProps> = ({
 
   const gridOptions = {
     getRowClass: getRowClass,
+    overlayLoadingTemplate:
+      '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height={80} width={80} /></div>',
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col relative">
       <div className="flex items-center justify-between mb-4 bg-red-100 p-2 ">
         {showSearch && (
           <div className="relative max-w-sm">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
-              placeholder="Search...."
+              placeholder="جستجو..."
               value={searchText}
               onChange={onSearchChange}
               className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
@@ -182,7 +201,7 @@ const DataTable: React.FC<DataTableProps> = ({
         </div>
       </div>
 
-      <div className={gridClasses} style={{marginTop:"-15px"}}>
+      <div className={gridClasses} style={{ marginTop: "-15px" }}>
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
@@ -199,6 +218,9 @@ const DataTable: React.FC<DataTableProps> = ({
           singleClickEdit={true}
           stopEditingWhenCellsLoseFocus={true}
           onCellValueChanged={onCellValueChanged}
+          overlayLoadingTemplate={
+            '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height={80} width={80} /></div>'
+          }
         />
       </div>
 
@@ -210,6 +232,13 @@ const DataTable: React.FC<DataTableProps> = ({
         >
           Add New
         </button>
+      )}
+
+      {/* Overlay Spinner */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-10">
+          <TailSpin color="#7e3af2" height={80} width={80} />
+        </div>
       )}
     </div>
   );
