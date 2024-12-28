@@ -58,53 +58,48 @@ export interface TokenSetupResponse {
 
 // داده Configuration
 export interface ConfigurationItem {
-  ID: number;
+  ID?: number;
   Name: string;
   Description: string;
   DefaultBtn?: string;
   LetterBtns?: string;
   MeetingBtns?: string;
-  FirstIDProgramTemplate:number;
-  SelMenuIDForMain:number;
-  IsVisible:boolean;
-  LastModified:string;
-  EnityTypeIDForLessonLearn:number;
-  EnityTypeIDForTaskCommnet:number;
-  EnityTypeIDForProcesure:number
+  FirstIDProgramTemplate: number;
+  SelMenuIDForMain: number;
+  IsVisible: boolean;
+  LastModified: string;
+  EnityTypeIDForLessonLearn: number;
+  EnityTypeIDForTaskCommnet: number;
+  EnityTypeIDForProcesure: number;
 }
 
 // داده Menu (برای Default Ribbon)
 export interface DefaultRibbonItem {
   ID: number;
   Name: string;
-  // سایر فیلدها ...
 }
 
 // داده ProgramTemplate
 export interface ProgramTemplateItem {
   ID: number;
   Name: string;
-  // سایر فیلدها ...
 }
 
 // داده EntityType
 export interface EntityTypeItem {
   ID: number;
   Name: string;
-  Category: string; // فرض بر این است که دسته‌بندی وجود دارد
-  // سایر فیلدها ...
+  Category: string;
 }
 
 export interface WfTemplateItem {
   ID: number;
   Name: string;
-  // سایر فیلدها ...
 }
 
 export interface AFBtnItem {
   ID: number;
   Name: string;
-  // سایر فیلدها ...
 }
 
 class ApiService {
@@ -140,7 +135,7 @@ class ApiService {
     return response.data;
   }
 
-  // مثال‌های مربوط به هر ساب‌تب
+  // مثال‌های مربوط به پیکربندی (Configurations)
   async getAllConfigurations(): Promise<ConfigurationItem[]> {
     const response = await httpClient.post<ConfigurationItem[]>(
       apiConst.getAllConfiguration
@@ -148,7 +143,9 @@ class ApiService {
     return response.data;
   }
 
-  async insertConfiguration(data: ConfigurationItem): Promise<ConfigurationItem> {
+  async insertConfiguration(
+    data: ConfigurationItem
+  ): Promise<ConfigurationItem> {
     const response = await httpClient.post<ConfigurationItem>(
       apiConst.insertConfiguration,
       data
@@ -156,7 +153,9 @@ class ApiService {
     return response.data;
   }
 
-  async updateConfiguration(data: ConfigurationItem): Promise<ConfigurationItem> {
+  async updateConfiguration(
+    data: ConfigurationItem
+  ): Promise<ConfigurationItem> {
     const response = await httpClient.post<ConfigurationItem>(
       apiConst.updateConfiguration,
       data
@@ -164,6 +163,14 @@ class ApiService {
     return response.data;
   }
 
+  // متد حذف Configuration
+  async deleteConfiguration(id: number): Promise<void> {
+    // بسته به اینکه API شما ID را در body می‌گیرد یا QueryString، 
+    // شاید نیاز باشد ساختار ارسال داده را تغییر دهید.
+    await httpClient.post(apiConst.deleteConfiguration, { ID: id });
+  }
+
+  // مثال‌های دیگر
   async getAllProgramTemplates(): Promise<ProgramTemplateItem[]> {
     const response = await httpClient.post<ProgramTemplateItem[]>(
       apiConst.getAllProgramTemplate
@@ -171,7 +178,6 @@ class ApiService {
     return response.data;
   }
 
-  // فرضیه: برای Default Ribbon یک endpoint مشابه اضافه شده است
   async getAllDefaultRibbons(): Promise<DefaultRibbonItem[]> {
     const response = await httpClient.post<DefaultRibbonItem[]>(
       apiConst.getAllDefaultRibbons
@@ -186,7 +192,6 @@ class ApiService {
     return response.data;
   }
 
-  // دریافت تمام WF Templates (برای LessonLearnedAfTemplate)
   async getAllWfTemplate(): Promise<WfTemplateItem[]> {
     const response = await httpClient.post<WfTemplateItem[]>(
       apiConst.getAllWfTemplate
@@ -198,8 +203,6 @@ class ApiService {
     const response = await httpClient.post<AFBtnItem[]>(apiConst.getAllAfbtn);
     return response.data;
   }
-
-  // متدهای دیگری که نیاز دارید ...
 }
 
 const AppServices = new ApiService();

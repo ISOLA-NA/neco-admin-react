@@ -7,21 +7,23 @@ import React, {
   useRef,
   MouseEvent,
   useCallback,
-  FC
-} from 'react';
-import DataTable from '../../TableDynamic/DataTable';
-import PanelHeader from '../tabcontent/PanelHeader'; // اطمینان از مسیر صحیح
-import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
-import { showAlert } from '../../utilities/Alert/DynamicAlert'; // اطمینان از مسیر صحیح
-import { ConfigurationHandle } from '../../General/Configuration/Configurations'; // اطمینان از مسیر صحیح
-import { useApi } from '../../../context/ApiContext'; // اطمینان از مسیر صحیح
+  FC,
+} from "react";
+import DataTable from "../../TableDynamic/DataTable";
+import PanelHeader from "../tabcontent/PanelHeader";
+import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
+import { ConfigurationHandle } from "../../General/Configuration/Configurations";
+import { useApi } from "../../../context/ApiContext";
 
-// Lazy load for ProjectsAccess panels, if needed
+// کامپوننت کانفیرم جدید
+import DynamicConfirm from "../../utilities/DynamicConfirm";
+
 const LeftProjectAccess = React.lazy(
-  () => import('../../Projects/ProjectAccess/Panel/LeftProjectAccess')
+  () => import("../../Projects/ProjectAccess/Panel/LeftProjectAccess")
 );
 const RightProjectAccess = React.lazy(
-  () => import('../../Projects/ProjectAccess/Panel/RightProjectAccess')
+  () => import("../../Projects/ProjectAccess/Panel/RightProjectAccess")
 );
 
 interface TabContentProps {
@@ -59,31 +61,57 @@ const TabContent: FC<TabContentProps> = ({
   showAddIcon,
   showDeleteIcon,
 }) => {
-  // دسترسی به API
   const api = useApi();
-
-  // State related to panels and dragging
-  const [panelWidth, setPanelWidth] = useState(50); // Initial width in percentage
+  const [panelWidth, setPanelWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Track if the right panel is maximized
   const [isRightMaximized, setIsRightMaximized] = useState(false);
+  const isMaximized = panelWidth >= 97;
 
-  const isMaximized = panelWidth >= 97; // Adjusted to 97% to account for splitter
+  // برای تأیید عملیات با DynamicConfirm
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">(
+    "delete"
+  );
+  const [confirmTitle, setConfirmTitle] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
+
+  // تابع‌های help برای بازکردن مودال
+  const openDeleteConfirm = (action: () => void) => {
+    setConfirmVariant("delete");
+    setConfirmTitle("Delete Confirmation");
+    setConfirmMessage("Are you sure you want to delete this item?");
+    setConfirmAction(() => action);
+    setConfirmOpen(true);
+  };
+
+  const openEditConfirm = (action: () => void) => {
+    setConfirmVariant("edit");
+    setConfirmTitle("Edit Confirmation");
+    setConfirmMessage("Are you sure you want to edit this item?");
+    setConfirmAction(() => action);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    // زمانی که کاربر روی Confirm کلیک کند
+    setConfirmOpen(false);
+    confirmAction();
+  };
 
   const togglePanelSize = () => {
     setIsRightMaximized(false);
-    setPanelWidth(prevWidth => (isMaximized ? 50 : 97)); // Toggle between 50% and 97%
+    setPanelWidth((prevWidth) => (isMaximized ? 50 : 97));
   };
 
   const togglePanelSizeFromRight = (maximize: boolean) => {
     if (maximize) {
       setIsRightMaximized(true);
-      setPanelWidth(2); // Shrink left panel to 2% when right is maximized
+      setPanelWidth(2);
     } else {
       setIsRightMaximized(false);
-      setPanelWidth(50); // Restore left panel to 50%
+      setPanelWidth(50);
     }
   };
 
@@ -103,11 +131,8 @@ const TabContent: FC<TabContentProps> = ({
       let newWidth =
         ((e.clientX - containerRect.left) / containerRef.current.clientWidth) *
         100;
-
-      if (newWidth < 2) newWidth = 2; // Minimum width to prevent collapse
-      if (newWidth > 97) newWidth = 97; // Maximum width to prevent overflow
-
-      // Disable right maximization when manually resizing
+      if (newWidth < 2) newWidth = 2;
+      if (newWidth > 97) newWidth = 97;
       setIsRightMaximized(false);
       setPanelWidth(newWidth);
     },
@@ -116,19 +141,18 @@ const TabContent: FC<TabContentProps> = ({
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', stopDragging);
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", stopDragging);
     } else {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', stopDragging);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", stopDragging);
     }
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', stopDragging);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", stopDragging);
     };
   }, [isDragging, handleMouseMove, stopDragging]);
 
-  // State for panel visibility and actions
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
@@ -136,84 +160,82 @@ const TabContent: FC<TabContentProps> = ({
   const [selectedSubItemForRight, setSelectedSubItemForRight] =
     useState<any>(null);
 
-  // State for loading
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchedRowData, setFetchedRowData] = useState<any[]>([]);
 
-  // Ref to the Configuration component
   const configurationRef = useRef<ConfigurationHandle>(null);
 
-  // تابع واکشی داده‌ها
-  const fetchData = useCallback(async () => {
+  // واکشی داده مرتبط با ساب‌تب کنونی
+  const fetchData = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await api.getAllConfigurations();
-      setFetchedRowData(data);
+      if (activeSubTab === "Configurations") {
+        const data = await api.getAllConfigurations();
+        setFetchedRowData(data);
+      } else {
+        setFetchedRowData(rowData);
+      }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [api]);
+  }, [api, activeSubTab, rowData]);
 
-  // واکشی داده‌ها هنگام بارگذاری کامپوننت
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // تابع handleSave که از PanelHeader فراخوانی می‌شود
+  // ذخیره در حالت Adding
   const handleSave = async () => {
     if (configurationRef.current) {
       try {
         await configurationRef.current.save();
-        // بعد از ذخیره، داده‌ها را دوباره واکشی کنید
         await fetchData();
-        showAlert('success', null, 'ذخیره', 'پیکربندی با موفقیت ذخیره شد.');
+        showAlert(
+          "success",
+          null,
+          "Saved",
+          "Configuration saved successfully."
+        );
         setIsPanelOpen(false);
         setIsAdding(false);
       } catch (error) {
-        console.error('Error saving configuration:', error);
-        showAlert('error', null, 'خطا', 'ذخیره پیکربندی با خطا مواجه شد.');
+        console.error("Error saving configuration:", error);
+        showAlert("error", null, "Error", "Failed to save configuration.");
       }
-    } else {
-      console.warn("Configuration ref is not set");
     }
   };
 
+  // به‌روزرسانی در حالت Edit
   const handleUpdate = async () => {
-    if (activeSubTab === 'Configurations') {
-      try {
-        // فراخوانی متد save از Configuration
-        const updatedConfig = await configurationRef.current?.save();
-        if (updatedConfig) {
-          await fetchData();
-          // به‌روزرسانی currentRowData
-          setCurrentRowData(prevData => {
-            const index = prevData.findIndex((row: { ID: any; }) => row.ID === updatedConfig);
-            if (index !== -1) {
-              const newData = [...prevData];
-              newData[index] = updatedConfig;
-              
-              return newData;
-              
-            }
-            
-            return prevData;
-          });
-          // نمایش پیام موفقیت
-          showAlert('success', null, 'آپدیت شد', 'با موفقیت آپدیت شد.');
-        }
-      } catch (error) {
-        // نمایش پیام خطا
-        showAlert('error', null, 'خطا', 'آپدیت با خطا مواجه شد.');
-        console.error("Error updating configuration:", error);
-      }
+    if (!pendingSelectedRow) {
+      alert("Please select a row for editing first.");
+      return;
     }
-    // بستن پنل
-    setIsPanelOpen(false);
+    // ابتدا مودال تأیید را نمایش می‌دهیم
+    openEditConfirm(async () => {
+      // در صورت تأیید
+      if (activeSubTab === "Configurations") {
+        try {
+          await configurationRef.current?.save();
+          await fetchData();
+          showAlert(
+            "success",
+            null,
+            "Updated",
+            "Configuration updated successfully."
+          );
+        } catch (error) {
+          showAlert("error", null, "Error", "Failed to update configuration.");
+          console.error("Error updating configuration:", error);
+        }
+      }
+      setIsPanelOpen(false);
+    });
   };
 
-  const handleClose = (): void => {
+  const handleClose = () => {
     setIsPanelOpen(false);
     setIsAdding(false);
     resetRightPanel();
@@ -241,7 +263,7 @@ const TabContent: FC<TabContentProps> = ({
       setIsAdding(false);
       setIsPanelOpen(true);
     } else {
-      alert('لطفاً یک ردیف را قبل از ویرایش انتخاب کنید.');
+      alert("Please select a row to edit.");
     }
   };
 
@@ -252,19 +274,40 @@ const TabContent: FC<TabContentProps> = ({
     resetRightPanel();
   };
 
-  const handleDeleteClick = () => {
-    if (selectedRow) {
-      onDelete();
-    } else {
-      alert('لطفاً یک ردیف را برای حذف انتخاب کنید.');
+  // حذف
+  const handleDeleteClick = async () => {
+    if (!pendingSelectedRow) {
+      alert("Please select a row to delete.");
+      return;
     }
+    // ابتدا یک مودال تأیید برای حذف نمایش می‌دهیم
+    openDeleteConfirm(async () => {
+      // اگر تأیید شد
+      if (activeSubTab === "Configurations") {
+        try {
+          await api.deleteConfiguration(pendingSelectedRow.ID);
+          showAlert(
+            "success",
+            null,
+            "Deleted",
+            "Configuration deleted successfully."
+          );
+          await fetchData();
+        } catch (error) {
+          showAlert("error", null, "Error", "Failed to delete configuration.");
+          console.error("Error deleting configuration:", error);
+        }
+      } else {
+        onDelete();
+      }
+    });
   };
 
   const handleDuplicateClick = () => {
     if (selectedRow) {
       onDuplicate();
     } else {
-      alert('لطفاً یک ردیف را برای تکرار انتخاب کنید.');
+      alert("Please select a row to duplicate.");
     }
   };
 
@@ -276,24 +319,37 @@ const TabContent: FC<TabContentProps> = ({
   return (
     <div
       ref={containerRef}
-      className='flex-1 overflow-hidden mt-2 border border-gray-300 rounded-lg mb-6 flex relative'
-      style={{ height: '100%' }}
+      className="flex-1 overflow-hidden mt-2 border border-gray-300 rounded-lg mb-6 flex relative"
+      style={{ height: "100%" }}
     >
+      {/* 
+        استفاده از DynamicConfirm با حالت و رنگ متفاوت
+        بسته به variant = delete/edit
+      */}
+      <DynamicConfirm
+        isOpen={confirmOpen}
+        variant={confirmVariant}
+        title={confirmTitle}
+        message={confirmMessage}
+        onConfirm={handleConfirm}
+        onClose={() => setConfirmOpen(false)}
+      />
+
       {/* Left Panel */}
       <div
-        className='flex flex-col overflow-auto bg-gray-100 box-border'
+        className="flex flex-col overflow-auto bg-gray-100 box-border"
         style={{
-          flex: `0 0 calc(${panelWidth}% - 1px)`, // Subtract half of splitter width (1px)
-          transition: isDragging ? 'none' : 'flex-basis 0.1s ease-out',
-          backgroundColor: '#f3f4f6'
+          flex: `0 0 calc(${panelWidth}% - 1px)`,
+          transition: isDragging ? "none" : "flex-basis 0.1s ease-out",
+          backgroundColor: "#f3f4f6",
         }}
       >
         {/* Left Panel Header */}
-        <div className='flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100 w-full'>
-          <div className='font-bold text-gray-700 text-sm'>{activeSubTab}</div>
+        <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100 w-full">
+          <div className="font-bold text-gray-700 text-sm">{activeSubTab}</div>
           <button
             onClick={togglePanelSize}
-            className='text-gray-700 hover:text-gray-900 transition'
+            className="text-gray-700 hover:text-gray-900 transition"
           >
             {isMaximized ? (
               <FiMinimize2 size={18} />
@@ -304,7 +360,7 @@ const TabContent: FC<TabContentProps> = ({
         </div>
 
         {/* DataTable */}
-        <div className='h-full p-4 overflow-auto'>
+        <div className="h-full p-4 overflow-auto">
           <DataTable
             columnDefs={columnDefs}
             rowData={fetchedRowData}
@@ -318,7 +374,7 @@ const TabContent: FC<TabContentProps> = ({
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
             onDuplicate={handleDuplicateClick}
-            isLoading={isLoading} // ارسال وضعیت لودینگ
+            isLoading={isLoading}
           />
         </div>
       </div>
@@ -326,67 +382,70 @@ const TabContent: FC<TabContentProps> = ({
       {/* Splitter */}
       <div
         onMouseDown={startDragging}
-        className='flex items-center justify-center cursor-ew-resize w-2'
-        style={{ userSelect: 'none', cursor: 'col-resize', zIndex: 30 }}
+        className="flex items-center justify-center cursor-ew-resize w-2"
+        style={{ userSelect: "none", cursor: "col-resize", zIndex: 30 }}
       >
-        <div className='h-full w-1 bg-[#dd4bae] rounded'></div>
+        <div className="h-full w-1 bg-[#dd4bae] rounded"></div>
       </div>
 
-      {/* Right Panel: نمایش فقط زمانی که isPanelOpen برابر با true است */}
+      {/* Right Panel */}
       {isPanelOpen && (
         <div
           className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
-            isMaximized ? 'opacity-50 pointer-events-none' : 'opacity-100'
+            isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
           }`}
           style={{
-            transition: 'opacity 0.1s ease-out',
-            backgroundColor: '#f3f4f6',
-            display: 'flex',
-            flexDirection: 'column',
-            overflowX: panelWidth <= 30 ? 'auto' : 'hidden',
-            maxWidth: panelWidth <= 30 ? '100%' : '100%'
+            transition: "opacity 0.1s ease-out",
+            backgroundColor: "#f3f4f6",
+            display: "flex",
+            flexDirection: "column",
+            overflowX: panelWidth <= 30 ? "auto" : "hidden",
+            maxWidth: panelWidth <= 30 ? "100%" : "100%",
           }}
         >
           <div
-            className='h-full p-4 flex flex-col'
+            className="h-full p-4 flex flex-col"
             style={{
-              minWidth: panelWidth <= 30 ? '300px' : 'auto' // Minimum width to prevent content overflow
+              minWidth: panelWidth <= 30 ? "300px" : "auto",
             }}
           >
-            {/* PanelHeader */}
             <PanelHeader
               isExpanded={false}
               toggleExpand={() => {}}
-              onSave={isAdding &&activeSubTab === 'Configurations' ? handleSave : undefined} // ارسال handleSave تنها برای Configurations
-              onUpdate={!isAdding && activeSubTab === 'Configurations' ? handleUpdate : undefined} // ارسال handleUpdate تنها برای Configurations و زمانی که در حالت افزودن نیست
+              onSave={
+                isAdding && activeSubTab === "Configurations"
+                  ? handleSave
+                  : undefined
+              }
+              onUpdate={
+                !isAdding && activeSubTab === "Configurations"
+                  ? handleUpdate
+                  : undefined
+              }
               onClose={handleClose}
               onTogglePanelSizeFromRight={togglePanelSizeFromRight}
               isRightMaximized={isRightMaximized}
             />
 
-            {/* ProjectsAccess SubTab */}
-            {activeSubTab === 'ProjectsAccess' && (
+            {activeSubTab === "ProjectsAccess" && (
               <Suspense fallback={<div>Loading Projects Access...</div>}>
-                {/* تغییرات در این بخش برای پاسخگویی به عرض پنل */}
-                <div className='flex-grow mt-5 flex flex-wrap gap-2 h-full overflow-y-auto'>
-                  {/* Left Access Panel */}
-                  <div className='flex flex-col bg-gray-200 rounded-l-lg overflow-hidden min-w-[300px] w-1/2 border-r border-gray-300 p-2'>
-                    <div className='h-full p-2 overflow-auto'>
+                <div className="flex-grow mt-5 flex flex-wrap gap-2 h-full overflow-y-auto">
+                  <div className="flex flex-col bg-gray-200 rounded-l-lg overflow-hidden min-w-[300px] w-1/2 border-r border-gray-300 p-2">
+                    <div className="h-full p-2 overflow-auto">
                       <LeftProjectAccess
                         selectedRow={selectedRow}
                         onDoubleClickSubItem={handleLeftProjectDoubleClick}
                       />
                     </div>
                   </div>
-                  {/* Right Access Panel */}
-                  <div className='flex flex-col bg-gray-200 rounded-r-lg overflow-hidden min-w-[300px] w-1/2 p-2 h-full'>
-                    <div className='h-full p-2 overflow-auto'>
+                  <div className="flex flex-col bg-gray-200 rounded-r-lg overflow-hidden min-w-[300px] w-1/2 p-2 h-full">
+                    <div className="h-full p-2 overflow-auto">
                       {showRightAccessPanel && selectedSubItemForRight ? (
                         <RightProjectAccess
                           selectedRow={selectedSubItemForRight}
                         />
                       ) : (
-                        <div className='text-center text-gray-400 mt-10'>
+                        <div className="text-center text-gray-400 mt-10">
                           Double click on a left table row to show details here.
                         </div>
                       )}
@@ -396,22 +455,24 @@ const TabContent: FC<TabContentProps> = ({
               </Suspense>
             )}
 
-            {/* Dynamic Component for Other SubTabs */}
-            {activeSubTab !== 'ProjectsAccess' && Component && (
-              <div className='mt-5 flex-grow overflow-y-auto'>
-                <div style={{ minWidth: '600px' }}>
-                  {/* Ensure minimum width to prevent content overflow */}
+            {activeSubTab !== "ProjectsAccess" && Component && (
+              <div className="mt-5 flex-grow overflow-y-auto">
+                <div style={{ minWidth: "600px" }}>
                   <Suspense fallback={<div>Loading...</div>}>
                     <Component
                       key={
                         isAdding
-                          ? 'add-mode'
+                          ? "add-mode"
                           : selectedRow
                           ? selectedRow.ID
-                          : 'no-selection'
+                          : "no-selection"
                       }
                       selectedRow={isAdding ? null : selectedRow}
-                      ref={activeSubTab === "Configurations" ? configurationRef : null} // اتصال ref تنها برای Configurations
+                      ref={
+                        activeSubTab === "Configurations"
+                          ? configurationRef
+                          : null
+                      }
                     />
                   </Suspense>
                 </div>
@@ -425,7 +486,3 @@ const TabContent: FC<TabContentProps> = ({
 };
 
 export default TabContent;
-function setCurrentRowData(arg0: (prevData: any) => any) {
-  throw new Error('Function not implemented.');
-}
-

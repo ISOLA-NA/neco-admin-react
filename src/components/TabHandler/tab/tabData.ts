@@ -571,7 +571,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
           const template = programTemplates.find(
             (pt) => pt.ID === params.data.FirstIDProgramTemplate
           );
-          return template ? template.Name : "N/A";
+          return template ? template.Name : "";
         },
       },
       {
@@ -582,7 +582,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
           const ribbon = defaultRibbons.find(
             (dr) => dr.ID === params.data.SelMenuIDForMain
           );
-          return ribbon ? ribbon.Name : "N/A";
+          return ribbon ? ribbon.Name : "";
         },
       },
     ],
@@ -2399,7 +2399,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
           const project = projectLists.find(
             (p) => p.ID.toString() === projectID
           );
-          return project ? project.ProjectName : "N/A";
+          return project ? project.ProjectName : "";
         },
       },
       {
@@ -2409,7 +2409,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         valueGetter: (params: any) => {
           const ownerID = params.data.OwnerID;
           const user = userLists.find((u) => u.ID === ownerID);
-          return user ? user.Name : "N/A";
+          return user ? user.Name : "";
         },
       },
       {
@@ -2419,7 +2419,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         valueGetter: (params: any) => {
           const roleID = params.data.nPostTypeID;
           const role = roleLists.find((r) => r.ID === roleID);
-          return role ? role.Name : "N/A";
+          return role ? role.Name : "";
         },
       },
       {
@@ -2431,7 +2431,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
           const enterprise = EnterPriseList.find(
             (e) => e.ID === Number(companyID)
           );
-          return enterprise ? enterprise.Name : "N/A";
+          return enterprise ? enterprise.Name : "";
         },
       },
       {
@@ -2441,7 +2441,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         valueGetter: (params: any) => {
           const parentId = params.data.ParentId;
           const parent = ParentList.find((p) => p.ID === Number(parentId));
-          return parent ? parent.Name : "N/A";
+          return parent ? parent.Name : "";
         },
       },
       {
@@ -2451,7 +2451,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         valueGetter: (params: any) => {
           const menuId = params.data.nMenuID;
           const menu = menuList.find((m) => m.ID === Number(menuId));
-          return menu ? menu.Name : "N/A";
+          return menu ? menu.Name : "";
         },
       },
     ],

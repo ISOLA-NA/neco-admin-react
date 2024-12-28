@@ -225,7 +225,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
           const project = projectLists.find(
             (p) => p.ID.toString() === projectID
           );
-          return project ? project.ProjectName : "N/A";
+          return project ? project.ProjectName : "";
         },
       },
       {
@@ -235,7 +235,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
         valueGetter: (params: any) => {
           const ownerID = params.data.OwnerID; // "u1234567-89ab-cdef-0123-456789abcdef" و غیره
           const user = userList.find((u) => u.ID === ownerID);
-          return user ? user.Name : "N/A";
+          return user ? user.Name : "";
         },
       },
     ],

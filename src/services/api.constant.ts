@@ -6,7 +6,8 @@ export const apiConst = Object.freeze({
   tokenSetup: "api/tokenSetup",
   getAllConfiguration: "api/Setting/GetAll",
   insertConfiguration: "api/Setting/Insert",
-  updateConfiguration: 'api/Setting/Update', // Adjust the path as needed
+  updateConfiguration: "api/Setting/Update",
+  deleteConfiguration: "api/Setting/Delete",
   getAllProgramTemplate: "api/ProgramTemplate/GetAll",
   getAllDefaultRibbons: "api/Menu/GetAll",
   // EntityType جداول مختلف (LessonLearnedFormTemplate, CommentFormTemplate, ProcedureFormTemplate)
@@ -14,5 +15,5 @@ export const apiConst = Object.freeze({
   // LessonLearnedAfTemplate
   getAllWfTemplate: "api/WFTemplate/GetAll",
   getAllAfbtn: "api/AFBtn/GetAll",
-  inserConfiguration:"api/Setting/Insert",
+  inserConfiguration: "api/Setting/Insert",
 });

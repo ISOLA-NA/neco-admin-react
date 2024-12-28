@@ -1,5 +1,4 @@
 // src/context/ApiContext.tsx
-
 import React, { createContext, useContext } from "react";
 import AppServices, {
   WebLoginRequest,
@@ -17,7 +16,6 @@ import AppServices, {
   AFBtnItem,
 } from "../services/api.services";
 
-// تعریف نوع برای context
 interface ApiContextType {
   webLogin: (data: WebLoginRequest) => Promise<WebLoginResponse>;
   sendOtp: (data: SendOtpRequest) => Promise<SendOtpResponse>;
@@ -31,13 +29,13 @@ interface ApiContextType {
   getAllAfbtn: () => Promise<AFBtnItem[]>;
   insertConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>;
   updateConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>;
-  // اضافه کردن متدهای دیگر در صورت نیاز
+
+  // افزودن متد حذف
+  deleteConfiguration: (id: number) => Promise<void>;
 }
 
-// ایجاد context
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
-// ایجاد Provider
 export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -54,16 +52,15 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     getAllWfTemplate: AppServices.getAllWfTemplate.bind(AppServices),
     getAllAfbtn: AppServices.getAllAfbtn.bind(AppServices),
     insertConfiguration: AppServices.insertConfiguration.bind(AppServices),
-    updateConfiguration: AppServices.updateConfiguration.bind(AppServices), // Added method
+    updateConfiguration: AppServices.updateConfiguration.bind(AppServices),
 
-
-    // اضافه کردن متدهای دیگر در صورت نیاز
+    // اینجا هم متد جدید را bind می‌کنیم
+    deleteConfiguration: AppServices.deleteConfiguration.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
 };
 
-// ایجاد هوک برای استفاده از context
 export const useApi = (): ApiContextType => {
   const context = useContext(ApiContext);
   if (!context) {
@@ -72,7 +69,6 @@ export const useApi = (): ApiContextType => {
   return context;
 };
 
-// صادر کردن نوع‌ها برای استفاده در کامپوننت‌ها
 export type {
   ConfigurationItem,
   WebLoginResponse,

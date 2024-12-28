@@ -1,5 +1,4 @@
 // src/components/Views/tab/TabbedInterface.tsx
-
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
@@ -18,6 +17,7 @@ import {
   WfTemplateItem,
   AFBtnItem,
 } from "../../../context/ApiContext";
+
 // برای مدیریت آیکون‌های CRUD
 interface IconVisibility {
   showAdd: boolean;
@@ -115,7 +115,6 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
   },
 };
 
-// تعریف TabbedInterface
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const api = useApi(); // دسترسی به متدهای API از context
 
@@ -143,7 +142,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
   const [, setEntityTypes] = useState<EntityTypeItem[]>([]);
   const [, setWfTemplates] = useState<WfTemplateItem[]>([]);
-  const [, setAfButtons] = useState<AFBtnItem[]>([]); // اضافه شد
+  const [, setAfButtons] = useState<AFBtnItem[]>([]);
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
@@ -163,13 +162,13 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
             api.getAllDefaultRibbons(),
             api.getTableTransmittal(),
             api.getAllWfTemplate(),
-            api.getAllAfbtn(), // اضافه شد
+            api.getAllAfbtn(),
           ]);
         setProgramTemplates(templates);
         setDefaultRibbons(ribbons);
         setEntityTypes(entities);
         setWfTemplates(wfTemplatesData);
-        setAfButtons(afButtonsData); // اضافه شد
+        setAfButtons(afButtonsData);
       } catch (error) {
         console.error("Error fetching initial data:", error);
       }
@@ -197,7 +196,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
               const template = programTemplates.find(
                 (pt) => pt.ID === params.data.FirstIDProgramTemplate
               );
-              return template ? template.Name : "N/A";
+              return template ? template.Name : "";
             },
           },
           {
@@ -208,7 +207,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
               const ribbon = defaultRibbons.find(
                 (dr) => dr.ID === params.data.SelMenuIDForMain
               );
-              return ribbon ? ribbon.Name : "N/A";
+              return ribbon ? ribbon.Name : "";
             },
           },
         ],
@@ -219,7 +218,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           showDuplicate: false,
         },
       },
-
       // ... سایر ساب‌تب‌ها را به همین صورت اضافه کنید
     }),
     [api, programTemplates, defaultRibbons]
@@ -365,7 +363,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   // لیست نام تب‌های اصلی جهت پاس دادن به <MainTabs />
   const mainTabs: string[] = [...Object.keys(mainTabsData)];
-
 
   return (
     <>
