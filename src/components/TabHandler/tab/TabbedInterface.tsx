@@ -1,4 +1,3 @@
-// src/components/Views/tab/TabbedInterface.tsx
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
@@ -9,14 +8,9 @@ import { useNavigate } from "react-router-dom";
 import DrawerComponent from "../tab/Header";
 import SidebarDrawer from "../tab/SidebarDrawer";
 
-import {
-  useApi,
-  ProgramTemplateItem,
-  DefaultRibbonItem,
-  EntityTypeItem,
-  WfTemplateItem,
-  AFBtnItem,
-} from "../../../context/ApiContext";
+// کانتکست‌های جدید
+import { useSubTabDefinitions } from "../../../context/SubTabDefinitionsContext";
+import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
 
 // برای مدیریت آیکون‌های CRUD
 interface IconVisibility {
@@ -24,13 +18,6 @@ interface IconVisibility {
   showEdit: boolean;
   showDelete: boolean;
   showDuplicate: boolean;
-}
-
-// برای ذخیره‌سازی ستون‌ها و endpoint هر ساب‌تب
-interface SubTabDefinition {
-  endpoint?: () => Promise<any[]>;
-  columnDefs: any[];
-  iconVisibility: IconVisibility;
 }
 
 // تعریف اینترفیس Props برای TabbedInterface
@@ -116,7 +103,10 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
 };
 
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
-  const api = useApi(); // دسترسی به متدهای API از context
+  // کانتکست‌هایی که ساخته‌ایم
+  const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
+  const { handleAdd, handleEdit, handleDelete, handleDuplicate } =
+    useAddEditDelete();
 
   // حالت‌ها
   const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
@@ -135,15 +125,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       showDuplicate: false,
     });
 
-  // حالت برای نگهداری داده‌های API
-  const [programTemplates, setProgramTemplates] = useState<
-    ProgramTemplateItem[]
-  >([]);
-  const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
-  const [, setEntityTypes] = useState<EntityTypeItem[]>([]);
-  const [, setWfTemplates] = useState<WfTemplateItem[]>([]);
-  const [, setAfButtons] = useState<AFBtnItem[]>([]);
-
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
 
@@ -152,78 +133,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   // تعیین کامپوننت ساب‌تب از فایل SubTabsImports
   const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
 
-  // دریافت داده‌ها از API‌ها هنگام بارگذاری کامپوننت
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
-          await Promise.all([
-            api.getAllProgramTemplates(),
-            api.getAllDefaultRibbons(),
-            api.getTableTransmittal(),
-            api.getAllWfTemplate(),
-            api.getAllAfbtn(),
-          ]);
-        setProgramTemplates(templates);
-        setDefaultRibbons(ribbons);
-        setEntityTypes(entities);
-        setWfTemplates(wfTemplatesData);
-        setAfButtons(afButtonsData);
-      } catch (error) {
-        console.error("Error fetching initial data:", error);
-      }
-    };
-
-    fetchInitialData();
-  }, [api]);
-
-  // تعریف subTabDefinitions به داخل کامپوننت با استفاده از useMemo
-  const subTabDefinitions: Record<string, SubTabDefinition> = useMemo(
-    () => ({
-      Configurations: {
-        endpoint: api.getAllConfigurations,
-        columnDefs: [
-          {
-            headerName: "Name",
-            field: "Name",
-            filter: "FirstIDProgramTemplate",
-          },
-          {
-            headerName: "Prg.Template",
-            field: "FirstIDProgramTemplate",
-            filter: "agTextColumnFilter",
-            valueGetter: (params: any) => {
-              const template = programTemplates.find(
-                (pt) => pt.ID === params.data.FirstIDProgramTemplate
-              );
-              return template ? template.Name : "";
-            },
-          },
-          {
-            headerName: "Default Ribbon",
-            field: "SelMenuIDForMain",
-            filter: "agTextColumnFilter",
-            valueGetter: (params: any) => {
-              const ribbon = defaultRibbons.find(
-                (dr) => dr.ID === params.data.SelMenuIDForMain
-              );
-              return ribbon ? ribbon.Name : "";
-            },
-          },
-        ],
-        iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: false,
-        },
-      },
-      // ... سایر ساب‌تب‌ها را به همین صورت اضافه کنید
-    }),
-    [api, programTemplates, defaultRibbons]
-  );
-
-  // وقتی ساب‌تب عوض شود، داده‌ها را از API می‌خوانیم
+  // وقتی ساب‌تب عوض شود، داده‌ها را از کانتکست می‌خوانیم
   const fetchSubTabData = async (subTabName: string) => {
     try {
       const def = subTabDefinitions[subTabName];
@@ -238,11 +148,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
         });
         return;
       }
-      // فراخوانی API
-      let data: any[] = [];
-      if (def.endpoint) {
-        data = await def.endpoint();
-      }
+      // فراخوانی متد مخصوص واکشی داده در کانتکست
+      const data = await fetchDataForSubTab(subTabName);
 
       setCurrentRowData(data);
       setCurrentColumnDefs(def.columnDefs);
@@ -292,7 +199,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
-  // اسکرول تب‌ها
+  // اسکرول تب‌های اصلی
   const scrollMainTabs = (direction: "left" | "right") => {
     if (mainTabsRef.current) {
       const scrollAmount = 150;
@@ -303,6 +210,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
   };
 
+  // اسکرول ساب‌تب‌ها
   const scrollSubTabs = (direction: "left" | "right") => {
     if (subTabsRef.current) {
       const scrollAmount = 150;
@@ -319,21 +227,35 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     setSelectedRow(rowData);
   };
 
-  // عملیات CRUD
-  const handleAdd = () => {
+  // عملیات CRUD -- حالا از کانتکست گرفته می‌شود
+  const handleAddClick = () => {
+    handleAdd(); // از کانتکست
     console.log("Add clicked");
     setSelectedRow(null);
   };
 
-  const handleEdit = () => {
+  const handleEditClick = () => {
+    handleEdit(); // از کانتکست
     console.log("Edit action triggered");
   };
 
-  const handleDelete = () => {
-    console.log("Delete action triggered");
+  const handleDeleteClick = async () => {
+    if (!selectedRow || !selectedRow.ID) {
+      alert("No row is selected for deletion");
+      return;
+    }
+    try {
+      await handleDelete(activeSubTab, selectedRow.ID); // از کانتکست
+      showAlert("success", null, "Deleted", "Record deleted successfully.");
+      await fetchSubTabData(activeSubTab); // جدول را رفرش می‌کنیم
+    } catch (err) {
+      console.error(err);
+      showAlert("error", null, "Error", "Failed to delete record.");
+    }
   };
 
-  const handleDuplicate = () => {
+  const handleDuplicateClick = () => {
+    handleDuplicate(); // از کانتکست
     console.log("Duplicate action triggered");
   };
 
@@ -413,10 +335,10 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           showAddIcon={currentIconVisibility.showAdd}
           showEditIcon={currentIconVisibility.showEdit}
           showDeleteIcon={currentIconVisibility.showDelete}
-          onAdd={handleAdd}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onDuplicate={handleDuplicate}
+          onAdd={handleAddClick}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+          onDuplicate={handleDuplicateClick}
           onRowClick={handleRowClick}
         />
       </div>

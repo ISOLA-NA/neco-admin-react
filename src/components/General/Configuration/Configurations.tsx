@@ -1,4 +1,3 @@
-// src/components/Views/tab/Configuration.tsx
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import CustomTextarea from "../../utilities/DynamicTextArea";
@@ -19,6 +18,8 @@ import {
   ConfigurationItem,
 } from "../../../context/ApiContext";
 
+import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
+
 interface ConfigurationProps {
   selectedRow: any;
   onSave?: (data: ConfigurationItem) => void;
@@ -31,6 +32,8 @@ export interface ConfigurationHandle {
 const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
   ({ selectedRow }, ref) => {
     const api = useApi();
+    // از کانتکست CRUD استفاده می‌کنیم
+    const { handleSaveConfiguration } = useAddEditDelete();
 
     const [configData, setConfigData] = useState({
       id: selectedRow?.ID?.toString() || "",
@@ -62,6 +65,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       | "Procedure Form Template"
       | null
     >(null);
+
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
     // State for API data
@@ -77,54 +81,6 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
 
     // Loading state
     const [loading, setLoading] = useState<boolean>(true);
-
-    // تابع ذخیره‌سازی
-    const handleSave = async (): Promise<ConfigurationItem | null> => {
-      try {
-        setLoading(true);
-
-        const newConfig: ConfigurationItem = {
-          ...(selectedRow?.ID && { ID: parseInt(configData.id) }),
-          Name: configData.Name,
-          Description: configData.Description,
-          DefaultBtn: configData.DefaultBtn,
-          LetterBtns: configData.LetterBtns,
-          MeetingBtns: configData.MeetingBtns,
-          FirstIDProgramTemplate:
-            Number(configData.FirstIDProgramTemplate) || 0,
-          SelMenuIDForMain: Number(configData.SelMenuIDForMain) || 0,
-          IsVisible: configData.IsVisible,
-          LastModified: new Date().toISOString(),
-          EnityTypeIDForLessonLearn:
-            Number(configData.EnityTypeIDForLessonLearn) || 0,
-          EnityTypeIDForTaskCommnet:
-            Number(configData.EnityTypeIDForTaskCommnet) || 0,
-          EnityTypeIDForProcesure:
-            Number(configData.EnityTypeIDForProcesure) || 0,
-        };
-
-        let updatedConfig: ConfigurationItem;
-        if (newConfig.ID) {
-          // اگر ID وجود دارد، رکورد موجود را به‌روزرسانی کن
-          updatedConfig = await api.updateConfiguration(newConfig);
-        } else {
-          // در غیر این صورت، یک رکورد جدید ایجاد کن
-          updatedConfig = await api.insertConfiguration(newConfig);
-        }
-
-        return updatedConfig;
-      } catch (error) {
-        console.error("Error saving configuration:", error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // استفاده از useImperativeHandle برای افشای متد save
-    useImperativeHandle(ref, () => ({
-      save: handleSave,
-    }));
 
     // متدهای هندل تغییر مقدار فرم
     const handleChange = (
@@ -145,7 +101,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       }
     };
 
-    // Map selectors to configData fields
+    // map کردن نام ساب‌فرم (Dialog) به فیلد configData
     const selectorToFieldMap: { [key: string]: keyof typeof configData } = {
       DefaultBtn: "DefaultBtn",
       LetterBtns: "LetterBtns",
@@ -158,6 +114,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       "Procedure Form Template": "EnityTypeIDForProcesure",
     };
 
+    // تابع کمکی برای ست کردن مقداری که از سطر انتخاب شده در مودال می‌آید
     const handleSelectionChange = (
       field: keyof typeof configData,
       selectedIds: (number | string)[]
@@ -180,7 +137,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       }
     };
 
-    // Fetch initial data
+    // hook جهت واکشی داده‌های لازم (Templates, Ribbons, EntityTypes و ...)
     useEffect(() => {
       const fetchInitialData = async () => {
         try {
@@ -228,7 +185,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       });
     }, [selectedRow]);
 
-    // Open and close modal
+    // باز/بسته کردن مودال
     const handleOpenModal = (
       selector:
         | "DefaultBtn"
@@ -255,6 +212,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       setSelectedRowData(rowData);
     };
 
+    // تبدیل رشته pipe (مثلاً "2|5|") به آرایه اعداد
     const parseIds = (ids: string): number[] => {
       return ids
         .split("|")
@@ -262,6 +220,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
         .filter((id) => !isNaN(id));
     };
 
+    // با توجه به selector کنونی، مشخص می‌کنیم چه داده‌ای را به TableSelector یا ListSelector پاس دهیم
     const getRowData = (selector: string | null) => {
       if (!selector) return [];
       switch (selector) {
@@ -284,9 +243,26 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       }
     };
 
+    // برای نمایش ListSelector
     const defaultBtnIds = parseIds(configData.DefaultBtn);
     const letterBtnIds = parseIds(configData.LetterBtns);
     const meetingBtnIds = parseIds(configData.MeetingBtns);
+
+    /**
+     * تابعی که فراخوانی می‌شود تا از بیرون (TabContent) عمل Save انجام گردد.
+     * از useImperativeHandle استفاده می‌کنیم تا والد بتواند با ref فراخوانی کند.
+     */
+    const handleSave = async (): Promise<ConfigurationItem | null> => {
+      // اینجا فقط توابع کانتکست را صدا می‌زنیم
+      // دادهٔ configData را پاس می‌دهیم
+      const result = await handleSaveConfiguration(configData);
+      return result;
+    };
+
+    // useImperativeHandle => والد می‌تواند با ref بگوید: configurationRef.current?.save()
+    useImperativeHandle(ref, () => ({
+      save: handleSave,
+    }));
 
     return (
       <div>
@@ -503,7 +479,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           />
         </TwoColumnLayout>
 
-        {/* General Modal */}
+        {/* Modal کلی - برای انتخاب از جدول TableSelector */}
         <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
           <TableSelector
             columnDefs={[

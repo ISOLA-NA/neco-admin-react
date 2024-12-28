@@ -103,6 +103,9 @@ export interface AFBtnItem {
 }
 
 class ApiService {
+  post(_insert: string, _model: any) {
+    throw new Error("Method not implemented.");
+  }
   // مثال‌های مربوط به لاگین/OTP
   async webLogin(userData: WebLoginRequest): Promise<WebLoginResponse> {
     const response = await httpClient.post<WebLoginResponse>(
@@ -165,7 +168,7 @@ class ApiService {
 
   // متد حذف Configuration
   async deleteConfiguration(id: number): Promise<void> {
-    // بسته به اینکه API شما ID را در body می‌گیرد یا QueryString، 
+    // بسته به اینکه API شما ID را در body می‌گیرد یا QueryString،
     // شاید نیاز باشد ساختار ارسال داده را تغییر دهید.
     await httpClient.post(apiConst.deleteConfiguration, { ID: id });
   }

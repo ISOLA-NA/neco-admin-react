@@ -77,7 +77,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           onDelete={() => {}}
           onDuplicate={() => {}}
           domLayout="autoHeight"
-          isRowSelected={false}
         />
       </div>
 

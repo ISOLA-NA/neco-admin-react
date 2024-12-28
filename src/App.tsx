@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -6,10 +5,14 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import HomePage from "./components/TabHandler/tab/TabbedInterface"; // مسیر خود را اصلاح کنید
-import Login from "./Views/Login"; // مسیر خود را اصلاح کنید
+import HomePage from "./components/TabHandler/tab/TabbedInterface"; // مسیر اصلاح شود
+import Login from "./Views/Login"; // مسیر اصلاح شود
 import Alert from "./components/utilities/Alert/DynamicAlert";
 import { APIProvider } from "./context/ApiContext";
+
+// کانتکست‌های جدید
+import { SubTabDefinitionsProvider } from "./context/SubTabDefinitionsContext";
+import { AddEditDeleteProvider } from "./context/AddEditDeleteContext";
 
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -38,31 +41,35 @@ const App: React.FC = () => {
 
   return (
     <APIProvider>
-      <Router>
-        <Alert />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              isAuthenticated ? (
-                <HomePage onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/" replace />
-              ) : (
-                <Login onLogin={handleLogin} />
-              )
-            }
-          />
-        </Routes>
-      </Router>
+      <SubTabDefinitionsProvider>
+        <AddEditDeleteProvider>
+          <Router>
+            <Alert />
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <HomePage onLogout={handleLogout} />
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <Login onLogin={handleLogin} />
+                  )
+                }
+              />
+            </Routes>
+          </Router>
+        </AddEditDeleteProvider>
+      </SubTabDefinitionsProvider>
     </APIProvider>
   );
 };

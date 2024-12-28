@@ -16,4 +16,6 @@ export const apiConst = Object.freeze({
   getAllWfTemplate: "api/WFTemplate/GetAll",
   getAllAfbtn: "api/AFBtn/GetAll",
   inserConfiguration: "api/Setting/Insert",
+  upload: "api/File/Upload",
+  insert: "api/File/Insert",
 });
