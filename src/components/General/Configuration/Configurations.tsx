@@ -1,6 +1,6 @@
 // src/components/Views/tab/Configuration.tsx
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 import DynamicInput from "../../utilities/DynamicInput";
@@ -17,14 +17,20 @@ import {
   ProgramTemplateItem,
   DefaultRibbonItem,
   AFBtnItem,
+  ConfigurationItem,
 } from "../../../context/ApiContext"; // وارد کردن نوع‌ها و context
 
 interface ConfigurationProps {
   selectedRow: any;
+  onSave?: (data: ConfigurationItem) => void; // افزودن onSave
 }
 
-const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
-  const api = useApi(); // دسترسی به متدهای API از context
+export interface ConfigurationHandle {
+  save: () => Promise<void>;
+}
+
+const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
+  ({ selectedRow }, ref) => {  const api = useApi(); // دسترسی به متدهای API از context
 
   const [configData, setConfigData] = useState({
     id: selectedRow?.ID?.toString() || "",
@@ -41,6 +47,41 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
     EnityTypeIDForTaskCommnet: selectedRow?.EnityTypeIDForTaskCommnet || "",
     EnityTypeIDForProcesure: selectedRow?.EnityTypeIDForProcesure || "",
   });
+
+ // تابع ذخیره‌سازی
+    const handleSave = async (): Promise<ConfigurationItem | null> => {
+      try {
+        setLoading(true);
+
+        const newConfig: ConfigurationItem = {
+          ...(selectedRow?.ID && { ID: parseInt(configData.id) }),
+          Name: configData.Name,
+          // ... سایر فیلدها
+          LastModified: new Date().toISOString(),
+        };
+
+        let updatedConfig: ConfigurationItem;
+        if (newConfig.ID) {
+          // اگر ID وجود دارد، رکورد موجود را به‌روزرسانی کن
+          updatedConfig = await api.updateConfiguration(newConfig);
+        } else {
+          // در غیر این صورت، یک رکورد جدید ایجاد کن
+          updatedConfig = await api.insertConfiguration(newConfig);
+        }
+
+        return updatedConfig; // بازگرداندن داده‌های به‌روز شده
+      } catch (error) {
+        console.error("Error saving configuration:", error);
+        throw error; // پرتاب خطا برای مدیریت آن در `TabContent`
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // استفاده از useImperativeHandle برای افشای متد save
+    useImperativeHandle(ref, () => ({
+      save: handleSave,
+    }));
 
   const [descriptionError, setDescriptionError] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -250,6 +291,9 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
   const defaultBtnIds = parseIds(configData.DefaultBtn);
   const letterBtnIds = parseIds(configData.LetterBtns);
   const meetingBtnIds = parseIds(configData.MeetingBtns);
+
+
+  
 
   return (
     <div>
@@ -466,6 +510,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
         />
       </TwoColumnLayout>
 
+
       {/* General Modal */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
@@ -483,6 +528,6 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedRow }) => {
       </DynamicModal>
     </div>
   );
-};
+});
 
 export default Configuration;

@@ -17,8 +17,7 @@ import {
   EntityTypeItem,
   WfTemplateItem,
   AFBtnItem,
-} from "../../../context/ApiContext"; // وارد کردن نوع‌ها و context
-
+} from "../../../context/ApiContext";
 // برای مدیریت آیکون‌های CRUD
 interface IconVisibility {
   showAdd: boolean;
@@ -366,6 +365,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   // لیست نام تب‌های اصلی جهت پاس دادن به <MainTabs />
   const mainTabs: string[] = [...Object.keys(mainTabsData)];
+
 
   return (
     <>

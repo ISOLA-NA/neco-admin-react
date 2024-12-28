@@ -29,6 +29,8 @@ interface ApiContextType {
   getTableTransmittal: () => Promise<EntityTypeItem[]>;
   getAllWfTemplate: () => Promise<WfTemplateItem[]>;
   getAllAfbtn: () => Promise<AFBtnItem[]>;
+  insertConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>;
+  updateConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>;
   // اضافه کردن متدهای دیگر در صورت نیاز
 }
 
@@ -51,6 +53,10 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     getTableTransmittal: AppServices.getTableTransmittal.bind(AppServices),
     getAllWfTemplate: AppServices.getAllWfTemplate.bind(AppServices),
     getAllAfbtn: AppServices.getAllAfbtn.bind(AppServices),
+    insertConfiguration: AppServices.insertConfiguration.bind(AppServices),
+    updateConfiguration: AppServices.updateConfiguration.bind(AppServices), // Added method
+
+
     // اضافه کردن متدهای دیگر در صورت نیاز
   };
 
@@ -69,6 +75,10 @@ export const useApi = (): ApiContextType => {
 // صادر کردن نوع‌ها برای استفاده در کامپوننت‌ها
 export type {
   ConfigurationItem,
+  WebLoginResponse,
+  SendOtpResponse,
+  LoginWithOtpResponse,
+  TokenSetupResponse,
   DefaultRibbonItem,
   ProgramTemplateItem,
   EntityTypeItem,

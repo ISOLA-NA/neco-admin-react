@@ -64,7 +64,13 @@ export interface ConfigurationItem {
   DefaultBtn?: string;
   LetterBtns?: string;
   MeetingBtns?: string;
-  // بقیه فیلدها بسته به نیاز شما
+  FirstIDProgramTemplate:number;
+  SelMenuIDForMain:number;
+  IsVisible:boolean;
+  LastModified:string;
+  EnityTypeIDForLessonLearn:number;
+  EnityTypeIDForTaskCommnet:number;
+  EnityTypeIDForProcesure:number
 }
 
 // داده Menu (برای Default Ribbon)
@@ -138,6 +144,22 @@ class ApiService {
   async getAllConfigurations(): Promise<ConfigurationItem[]> {
     const response = await httpClient.post<ConfigurationItem[]>(
       apiConst.getAllConfiguration
+    );
+    return response.data;
+  }
+
+  async insertConfiguration(data: ConfigurationItem): Promise<ConfigurationItem> {
+    const response = await httpClient.post<ConfigurationItem>(
+      apiConst.insertConfiguration,
+      data
+    );
+    return response.data;
+  }
+
+  async updateConfiguration(data: ConfigurationItem): Promise<ConfigurationItem> {
+    const response = await httpClient.post<ConfigurationItem>(
+      apiConst.updateConfiguration,
+      data
     );
     return response.data;
   }
