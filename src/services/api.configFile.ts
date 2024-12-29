@@ -9,7 +9,7 @@ if (!baseUrl) {
   throw new Error("VITE_URL is not defined in the environment variables.");
 }
 
-const httpClient = axios.create({
+const httpClientFile = axios.create({
   baseURL: `${baseUrl}/`,
   headers: {
     "Content-Type": "application/json",
@@ -18,7 +18,7 @@ const httpClient = axios.create({
 });
 
 // اضافه کردن interceptor برای افزودن هدر Authorization
-httpClient.interceptors.request.use(
+httpClientFile.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = Cookies.get("token");
     if (token) {
@@ -34,7 +34,7 @@ httpClient.interceptors.request.use(
 );
 
 // اضافه کردن interceptor برای مدیریت خطاهای پاسخ
-httpClient.interceptors.response.use(
+httpClientFile.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
@@ -46,4 +46,4 @@ httpClient.interceptors.response.use(
   }
 );
 
-export default httpClient;
+export default httpClientFile;

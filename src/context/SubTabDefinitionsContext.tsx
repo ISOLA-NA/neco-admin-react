@@ -1,26 +1,17 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-} from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { useApi } from "./ApiContext";
+import Cookies from "js-cookie";
 import { ProgramTemplateItem, DefaultRibbonItem } from "./ApiContext";
 
-// برای مدیریت آیکون‌های CRUD
-interface IconVisibility {
-  showAdd: boolean;
-  showEdit: boolean;
-  showDelete: boolean;
-  showDuplicate: boolean;
-}
-
-// برای ذخیره‌سازی ستون‌ها و endpoint هر ساب‌تب
 interface SubTabDefinition {
   endpoint?: () => Promise<any[]>;
   columnDefs: any[];
-  iconVisibility: IconVisibility;
+  iconVisibility: {
+    showAdd: boolean;
+    showEdit: boolean;
+    showDelete: boolean;
+    showDuplicate: boolean;
+  };
 }
 
 interface SubTabDefinitionsContextType {
@@ -37,14 +28,14 @@ export const SubTabDefinitionsProvider: React.FC<{
 }> = ({ children }) => {
   const api = useApi();
 
-  const [programTemplates, setProgramTemplates] = useState<
-    ProgramTemplateItem[]
-  >([]);
+  const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>([]);
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
 
-  // شما می‌توانید در صورت نیاز داده‌های دیگر (مثل entityTypes و ...) را نیز در اینجا واکشی کنید
-
   useEffect(() => {
+    const token = Cookies.get("token");
+    // فقط اگر توکن داریم، داده‌های محافظت‌شده را بگیریم
+    if (!token) return;
+
     const fetchInitialData = async () => {
       try {
         const [templates, ribbons] = await Promise.all([
@@ -57,10 +48,10 @@ export const SubTabDefinitionsProvider: React.FC<{
         console.error("Error in SubTabDefinitionsProvider:", error);
       }
     };
+
     fetchInitialData();
   }, [api]);
 
-  // این بخش ساختار ساب‌تب‌ها را مشخص می‌کند
   const subTabDefinitions = useMemo(() => {
     return {
       Configurations: {
@@ -101,13 +92,15 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
-
-      // ... در صورت نیاز، ساب‌تب‌های دیگر را نیز اضافه کنید
+      // بقیه ساب‌تب‌ها...
     } as Record<string, SubTabDefinition>;
   }, [api, programTemplates, defaultRibbons]);
 
-  // متد کمکی برای واکشی داده مربوط به هر ساب‌تب
   const fetchDataForSubTab = async (subTabName: string) => {
+    // اگر توکن نداریم یا اندپوینت تعریف نشده، خالی برگردان
+    const token = Cookies.get("token");
+    if (!token) return [];
+
     const definition = subTabDefinitions[subTabName];
     if (!definition || !definition.endpoint) return [];
     return await definition.endpoint();

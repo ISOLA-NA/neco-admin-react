@@ -1,7 +1,9 @@
+// Alert.tsx
 import React from 'react';
 import { toast, ToastContainer, ToastOptions } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Alert.css'; // استایل سفارشی خود را اضافه کنید
+import CloseButton from '../CloseButton'; // اطمینان حاصل کنید مسیر درست است
 
 type AlertType = 'success' | 'error' | 'warning' | 'info';
 
@@ -26,11 +28,7 @@ export const showAlert = (
         pauseOnHover: true,
         draggable: true,
         rtl: true,
-        closeButton: (
-            <button className="absolute top-1 left-1 text-white opacity-80 hover:opacity-100">
-                ✕
-            </button>
-        ),
+        closeButton: <CloseButton />, // استفاده از کامپوننت CloseButton
     };
 
     toast(

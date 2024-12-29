@@ -4,6 +4,7 @@ export const apiConst = Object.freeze({
   sendOtp: "api/SendOtp",
   loginWithOtp: "api/loginWithOtp",
   tokenSetup: "api/tokenSetup",
+  getIdByUserToken: "api/user/GetByToken",
   getAllConfiguration: "api/Setting/GetAll",
   insertConfiguration: "api/Setting/Insert",
   updateConfiguration: "api/Setting/Update",
@@ -16,6 +17,8 @@ export const apiConst = Object.freeze({
   getAllWfTemplate: "api/WFTemplate/GetAll",
   getAllAfbtn: "api/AFBtn/GetAll",
   inserConfiguration: "api/Setting/Insert",
-  upload: "api/File/Upload",
+  uploadFile: "api/File/Upload",
   insert: "api/File/Insert",
+  download: "api/File/Download",
+  getFile: "api/File/GetById",
 });

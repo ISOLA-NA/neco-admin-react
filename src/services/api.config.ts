@@ -1,46 +1,39 @@
-// src/services/api.config.ts
-import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import Cookies from 'js-cookie';
+import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import Cookies from "js-cookie";
 
-// استفاده از import.meta.env برای دسترسی به متغیر محیطی در Vite
 const baseUrl = import.meta.env.VITE_URL;
-
 if (!baseUrl) {
-  throw new Error('VITE_URL is not defined in the environment variables.');
+  throw new Error("VITE_URL is not defined in the environment variables.");
 }
 
 const httpClient = axios.create({
   baseURL: `${baseUrl}/`,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
-// اضافه کردن interceptor برای افزودن هدر Authorization
+// درخواست: ست‌کردن هدر Authorization با توکن
 httpClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (token) {
-      // اطمینان از اینکه headers تعریف شده است
       config.headers = config.headers || {};
-      config.headers['Authorization'] = `Bearer ${token}`; // معمولاً توکن به صورت Bearer ارسال می‌شود
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// اضافه کردن interceptor برای مدیریت خطاهای پاسخ
+// پاسخ: اگر 401 شد، توکن را حذف و ریدایرکت
 httpClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // در صورت دریافت خطای 401، توکن را حذف کرده و به صفحه لاگین هدایت کنید
-      Cookies.remove('token');
-      window.location.href = '/login';
+      Cookies.remove("token");
+      window.location.href = "/login"; 
     }
     return Promise.reject(error);
   }

@@ -102,6 +102,11 @@ export interface AFBtnItem {
   Name: string;
 }
 
+export interface UserToken {
+  ID: number;
+  Name: string;
+}
+
 class ApiService {
   post(_insert: string, _model: any) {
     throw new Error("Method not implemented.");
@@ -204,6 +209,11 @@ class ApiService {
 
   async getAllAfbtn(): Promise<AFBtnItem[]> {
     const response = await httpClient.post<AFBtnItem[]>(apiConst.getAllAfbtn);
+    return response.data;
+  }
+
+  async getIdByUserToken(): Promise<UserToken[]> {
+    const response = await httpClient.post<UserToken[]>(apiConst.getIdByUserToken);
     return response.data;
   }
 }
