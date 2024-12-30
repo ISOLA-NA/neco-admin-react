@@ -1,11 +1,11 @@
 // src/components/Configuration/ButtonComponent.tsx
 
 import React, { useState, useRef } from "react";
-import DataTable from "../../TableDynamic/DataTable";
-import DynamicInput from "../../utilities/DynamicInput";
-import DynamicRadioGroup from "../../utilities/DynamicRadiogroup";
-import TwoColumnLayout from "../../layout/TwoColumnLayout";
-import DynamicButton from "../../utilities/DynamicButtons";
+import DataTable from "../../TableDynamic/DataTable"; // فرض بر این است که این کامپوننت وجود دارد
+import DynamicInput from "../../utilities/DynamicInput"; // فرض بر این است که این کامپوننت وجود دارد
+import DynamicRadioGroup from "../../utilities/DynamicRadiogroup"; // فرض بر این است که این کامپوننت وجود دارد
+import TwoColumnLayout from "../../layout/TwoColumnLayout"; // فرض بر این است که این کامپوننت وجود دارد
+import DynamicButton from "../../utilities/DynamicButtons"; // فرض بر این است که این کامپوننت وجود دارد
 
 // Import FileUploadHandler and its ref type
 import FileUploadHandler, {
@@ -106,37 +106,61 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
   // هندل کردن کلیک روی ردیف
   const handleRowClickLocal = async (data: any) => {
-    setSelectedRow(data);
-    onRowClick(data);
-    setIsRowClicked(true);
+    try {
+      // تنظیم ردیف انتخاب شده
+      setSelectedRow(data);
+      onRowClick(data);
+      setIsRowClicked(true);
 
-    setNameValue(data.Name || "");
-    setStateTextValue(data.StateText || "");
-    setTooltipValue(data.Tooltip || "");
-    setOrderValue(data.Order || "");
+      // تنظیم مقادیر ورودی‌ها
+      setNameValue(data.Name || "");
+      setStateTextValue(data.StateText || "");
+      setTooltipValue(data.Tooltip || "");
+      setOrderValue(data.Order || "");
 
-    if (data.WFStateForDeemed !== undefined) {
-      setSelectedState(mapWFStateForDeemedToRadio(data.WFStateForDeemed));
-    } else {
-      setSelectedState(RadioOptionsState[0].value);
-    }
-
-    if (data.WFCommand !== undefined) {
-      setSelectedCommand(mapWFCommandToRadio(data.WFCommand));
-    } else {
-      setSelectedCommand(RadioOptionsCommand[0].value);
-    }
-
-    // اگر ردیف دارای IconImageId باشد، تصویر را دانلود کن
-    if (data.IconImageId) {
-      try {
-        await fileUploadHandlerRef.current?.handleFileDownload(data.IconImageId);
-      } catch (err) {
-        console.error("خطا در دانلود فایل", err);
+      if (data.WFStateForDeemed !== undefined) {
+        setSelectedState(mapWFStateForDeemedToRadio(data.WFStateForDeemed));
+      } else {
+        setSelectedState(RadioOptionsState[0].value);
       }
-    } else {
-      // اگر IconImageId خالی بود، پیش‌نمایش تصویر را پاک کن
-      fileUploadHandlerRef.current?.clearDownloadedImage();
+
+      if (data.WFCommand !== undefined) {
+        setSelectedCommand(mapWFCommandToRadio(data.WFCommand));
+      } else {
+        setSelectedCommand(RadioOptionsCommand[0].value);
+      }
+
+      // گام 1: پاکسازی تصویر آپلود شده
+      if (fileUploadHandlerRef.current) {
+        console.log("پاکسازی تصویر آپلود شده...");
+        fileUploadHandlerRef.current.clearUploadedImage();
+        console.log("تصویر آپلود شده پاکسازی شد.");
+      } else {
+        console.warn("fileUploadHandlerRef.current is null while trying to clear uploaded image.");
+      }
+
+      // افزودن یک تأخیر کوچک برای اطمینان از پاکسازی
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // گام 2: پاکسازی تصویر دانلود شده
+      if (fileUploadHandlerRef.current) {
+        console.log("پاکسازی تصویر دانلود شده...");
+        fileUploadHandlerRef.current.clearDownloadedImage();
+        console.log("تصویر دانلود شده پاکسازی شد.");
+      } else {
+        console.warn("fileUploadHandlerRef.current is null while trying to clear downloaded image.");
+      }
+
+      // گام 3: دانلود تصویر جدید
+      if (data.IconImageId) {
+        console.log("در حال دانلود تصویر جدید برای IconImageId:", data.IconImageId);
+        await fileUploadHandlerRef.current?.handleFileDownload(data.IconImageId);
+        console.log("تصویر جدید با موفقیت دانلود شد.");
+      } else {
+        console.log("IconImageId موجود نیست؛ دانلود تصویر جدید انجام نشد.");
+      }
+    } catch (error) {
+      console.error("خطا در handleRowClickLocal:", error);
     }
   };
 
@@ -146,6 +170,14 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     onSelectFromButton();
     onClose();
     setIsRowClicked(false);
+  };
+
+  // تابع هندل کردن موفقیت‌آمیز بودن آپلود
+  const handleUploadSuccess = (insertModel: any) => {
+    if (selectedRow && selectedRow.IconImageId) {
+      // فراخوانی متد دانلود فایل برای ردیف انتخاب شده
+      fileUploadHandlerRef.current?.handleFileDownload(selectedRow.IconImageId);
+    }
   };
 
   return (
@@ -198,40 +230,46 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
             setOrderValue(e.target.value)
           }
         />
-
-        {/* گروه رادیو برای وضعیت */}
-        <DynamicRadioGroup
-          key={`state-${isRowClicked ? "controlled" : "uncontrolled"}`}
-          title="State:"
-          name="stateGroup"
-          options={RadioOptionsState}
-          selectedValue={selectedState}
-          onChange={(value) => setSelectedState(value)}
-          isRowClicked={isRowClicked}
-        />
-
-        {/* اتصال ref به FileUploadHandler */}
-        <FileUploadHandler ref={fileUploadHandlerRef} />
-
-        {/* گروه رادیو برای فرمان */}
-        <DynamicRadioGroup
-          key={`command-${isRowClicked ? "controlled" : "uncontrolled"}`}
-          title="Command:"
-          name="commandGroup"
-          options={RadioOptionsCommand}
-          selectedValue={selectedCommand}
-          onChange={(value) => setSelectedCommand(value)}
-          className="-mt-20"
-          isRowClicked={isRowClicked}
-        />
       </TwoColumnLayout>
+
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "20px" }}>
+        {/* سمت چپ: رادیو باتن‌ها */}
+        <div style={{ flex: "1" }} className="px-5">
+          <DynamicRadioGroup
+            key={`state-${isRowClicked ? "controlled" : "uncontrolled"}`}
+            title="State:"
+            name="stateGroup"
+            options={RadioOptionsState}
+            selectedValue={selectedState}
+            onChange={(value) => setSelectedState(value)}
+            isRowClicked={isRowClicked}
+            className="mt-10"
+          />
+
+          <DynamicRadioGroup
+            key={`command-${isRowClicked ? "controlled" : "uncontrolled"}`}
+            title="Command:"
+            name="commandGroup"
+            options={RadioOptionsCommand}
+            selectedValue={selectedCommand}
+            onChange={(value) => setSelectedCommand(value)}
+            isRowClicked={isRowClicked}
+            className="mt-10"
+          />
+        </div>
+
+        {/* سمت راست: آپلودر */}
+        <FileUploadHandler
+          ref={fileUploadHandlerRef}
+          onUploadSuccess={handleUploadSuccess} // ارسال callback
+        />
+      </div>
 
       <div className="mt-4 flex justify-center">
         <DynamicButton
           text="Select"
           onClick={handleSelectButtonClickLocal}
           isDisabled={isSelectDisabled}
-          className="w-48"
         />
       </div>
     </div>

@@ -27,17 +27,21 @@ export interface FileUploadHandlerRef {
   handleFileUpload: (file: File) => Promise<void>;
   handleFileDownload: (userImg: string) => Promise<void>;
   clearDownloadedImage: () => void;
+  clearUploadedImage: () => void;
 }
 
-interface FileUploadHandlerProps {}
+interface FileUploadHandlerProps {
+  onUploadSuccess?: (insertModel: InsertModel) => void; // افزودن onUploadSuccess
+}
 
 const FileUploadHandler = forwardRef<FileUploadHandlerRef, FileUploadHandlerProps>(
-  (props, ref) => {
+  ({ onUploadSuccess }, ref) => {
     const [uploadedFileInfo, setUploadedFileInfo] = useState<InsertModel | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [userId, setUserId] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+    const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
+    const [downloadedPreviewUrl, setDownloadedPreviewUrl] = useState<string | null>(null);
 
     // قالب‌بندی تاریخ
     const dateFormat = (inputDate: Date, format: string): string => {
@@ -100,6 +104,7 @@ const FileUploadHandler = forwardRef<FileUploadHandlerRef, FileUploadHandlerProp
     const handleFileUpload = async (file: File) => {
       setIsLoading(true);
       setErrorMessage(null);
+      setDownloadedPreviewUrl(null); // پاک کردن تصویر دانلود شده هنگام آپلود فایل جدید
 
       try {
         // اعتبارسنجی پسوند فایل
@@ -149,8 +154,20 @@ const FileUploadHandler = forwardRef<FileUploadHandlerRef, FileUploadHandlerProp
 
           // به‌روزرسانی وضعیت‌ها
           setUploadedFileInfo(insertModel);
-          setPreviewImageUrl(URL.createObjectURL(file)); // نمایش پیش‌نمایش آپلود شده
+
+          // استفاده از FileReader برای تبدیل فایل آپلود شده به Data URL
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setUploadedPreviewUrl(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+
           alert("فایل با موفقیت آپلود و درج شد.");
+
+          // فراخوانی callback پس از موفقیت‌آمیز بودن آپلود
+          if (onUploadSuccess) {
+            onUploadSuccess(insertModel);
+          }
         }
       } catch (error: any) {
         console.error("خطا در آپلود یا درج فایل:", error);
@@ -166,12 +183,13 @@ const FileUploadHandler = forwardRef<FileUploadHandlerRef, FileUploadHandlerProp
      */
     const handleFileDownload = async (userImg: string) => {
       if (!userImg) {
-        setPreviewImageUrl(null); // پاک کردن تصویر اگر userImg خالی باشد
+        setDownloadedPreviewUrl(null); // پاک کردن تصویر اگر userImg خالی باشد
         return;
       }
 
       setIsLoading(true);
       setErrorMessage(null);
+      setUploadedPreviewUrl(null); // پاک کردن تصویر آپلود شده هنگام دانلود فایل جدید
 
       try {
         // دریافت جزئیات فایل با استفاده از userImg
@@ -196,11 +214,12 @@ const FileUploadHandler = forwardRef<FileUploadHandlerRef, FileUploadHandlerProp
         // تبدیل آرایه بایت به Blob
         const blob = new Blob([downloadResponse.data], { type: "application/octet-stream" });
 
-        // ایجاد URL موقت برای Blob
-        const blobUrl = URL.createObjectURL(blob);
-
-        // تنظیم URL برای پیش‌نمایش تصویر دانلود شده
-        setPreviewImageUrl(blobUrl);
+        // استفاده از FileReader برای تبدیل Blob به Data URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setDownloadedPreviewUrl(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
       } catch (err: any) {
         console.error("خطا در دانلود فایل:", err);
         setErrorMessage("خطا در دانلود فایل.");
@@ -213,7 +232,16 @@ const FileUploadHandler = forwardRef<FileUploadHandlerRef, FileUploadHandlerProp
      * متد پاک کردن پیش‌نمایش تصویر دانلود شده
      */
     const clearDownloadedImage = () => {
-      setPreviewImageUrl(null);
+      console.log("پاکسازی تصویر دانلود شده:", downloadedPreviewUrl);
+      setDownloadedPreviewUrl(null);
+    };
+
+    /**
+     * متد پاک کردن پیش‌نمایش تصویر آپلود شده
+     */
+    const clearUploadedImage = () => {
+      console.log("پاکسازی تصویر آپلود شده:", uploadedPreviewUrl);
+      setUploadedPreviewUrl(null);
     };
 
     // نمایش متدها به والد از طریق ref
@@ -221,16 +249,18 @@ const FileUploadHandler = forwardRef<FileUploadHandlerRef, FileUploadHandlerProp
       handleFileUpload,
       handleFileDownload,
       clearDownloadedImage,
+      clearUploadedImage,
     }));
 
     return (
-      <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold mb-4">آپلود یا دانلود فایل</h2>
-
+      <div className="flex flex-col items-center rounded-lg w-1/2">
         {/* آپلود و پیش‌نمایش در یک بخش مجتمع */}
         <div className="w-full max-w-md flex flex-col items-center space-y-4">
           {/* کامپوننت آپلود تصویر با پیش‌نمایش مشترک */}
-          <ImageUploader onUpload={handleFileUpload} externalPreviewUrl={previewImageUrl} />
+          <ImageUploader
+            onUpload={handleFileUpload}
+            externalPreviewUrl={downloadedPreviewUrl}
+          />
 
           {/* نمایش اطلاعات فایل آپلود شده (اختیاری) */}
           {uploadedFileInfo && (

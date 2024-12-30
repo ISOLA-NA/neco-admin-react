@@ -1,69 +1,81 @@
 // src/components/utilities/ImageUploader.tsx
 
-import React, { useCallback, useState, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
+import React, { useState, useEffect } from "react";
 import { FiImage } from "react-icons/fi";
 
 interface ImageUploaderProps {
   onUpload: (file: File) => void;
-  externalPreviewUrl?: string | null; // URL تصویر دانلود شده
+  externalPreviewUrl?: string | null; // URL of the downloaded image (Data URL)
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreviewUrl }) => {
   const [internalPreview, setInternalPreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (file) {
-        onUpload(file);
-        setInternalPreview(URL.createObjectURL(file));
-      }
-    },
-    [onUpload]
-  );
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      onUpload(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setInternalPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "image/*": [],
-    },
-    multiple: false,
-  });
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
 
-  // زمانی که externalPreviewUrl تغییر کند، internalPreview را پاک می‌کنیم
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      onUpload(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setInternalPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   useEffect(() => {
     if (externalPreviewUrl) {
-      setInternalPreview(null);
+      console.log("External preview URL updated:", externalPreviewUrl);
+      setInternalPreview(null); // Clear internal preview if externalPreviewUrl changes
     }
   }, [externalPreviewUrl]);
-
-  // پاکسازی URL های ایجاد شده برای جلوگیری از نشت حافظه
-  useEffect(() => {
-    return () => {
-      if (externalPreviewUrl) {
-        URL.revokeObjectURL(externalPreviewUrl);
-      }
-      if (internalPreview) {
-        URL.revokeObjectURL(internalPreview);
-      }
-    };
-  }, [externalPreviewUrl, internalPreview]);
 
   return (
     <div className="flex justify-between items-center space-x-6 p-4 bg-gray-100 rounded-lg shadow-md w-full">
       <span className="text-lg font-semibold text-gray-700">Image :</span>
       <div
-        {...getRootProps()}
         className={`border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer transition-colors duration-200 
         ${
-          isDragActive
+          isDragging
             ? "border-blue-500 bg-blue-50"
             : "border-gray-300 bg-white"
         }`}
         style={{ width: "150px", height: "150px" }}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
-        <input {...getInputProps()} />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="absolute opacity-0 w-full h-full cursor-pointer"
+        />
         {externalPreviewUrl ? (
           <img
             src={externalPreviewUrl}
