@@ -5,7 +5,7 @@ import { FiImage } from "react-icons/fi";
 
 interface ImageUploaderProps {
   onUpload: (file: File) => void;
-  externalPreviewUrl?: string | null; // URL of the downloaded image (Data URL)
+  externalPreviewUrl?: string | null; // URL پیش‌نمایش تصویر دانلود شده یا آپلود شده
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreviewUrl }) => {
@@ -51,7 +51,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreview
   useEffect(() => {
     if (externalPreviewUrl) {
       console.log("External preview URL updated:", externalPreviewUrl);
-      setInternalPreview(null); // Clear internal preview if externalPreviewUrl changes
+      setInternalPreview(null); // پاکسازی پیش‌نمایش داخلی اگر externalPreviewUrl تغییر کند
     }
   }, [externalPreviewUrl]);
 
@@ -79,13 +79,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreview
         {externalPreviewUrl ? (
           <img
             src={externalPreviewUrl}
-            alt="Downloaded Preview"
+            alt="Preview"
             className="w-full h-full object-cover rounded-md"
           />
         ) : internalPreview ? (
           <img
             src={internalPreview}
-            alt="Uploaded Preview"
+            alt="Preview"
             className="w-full h-full object-cover rounded-md"
           />
         ) : (
