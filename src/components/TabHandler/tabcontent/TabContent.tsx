@@ -1,3 +1,5 @@
+// src/components/views/tabcontent/TabContent.tsx
+
 import React, {
   useState,
   useEffect,
@@ -14,8 +16,9 @@ import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { ConfigurationHandle } from "../../General/Configuration/Configurations";
 import { useApi } from "../../../context/ApiContext";
 
-// کامپوننت کانفیرم جدید
+// کامپوننت کانفیرم
 import DynamicConfirm from "../../utilities/DynamicConfirm";
+import { CommandHandle } from "../../General/CommandSettings";
 
 const LeftProjectAccess = React.lazy(
   () => import("../../Projects/ProjectAccess/Panel/LeftProjectAccess")
@@ -66,7 +69,11 @@ const TabContent: FC<TabContentProps> = ({
   const [isRightMaximized, setIsRightMaximized] = useState(false);
   const isMaximized = panelWidth >= 97;
 
-  // برای تأیید عملیات با DynamicConfirm
+  // دو رفرنس برای Configurations و Commands
+  const configurationRef = useRef<ConfigurationHandle>(null);
+  const commandRef = useRef<CommandHandle>(null);
+
+  // برای DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">(
     "delete"
@@ -138,17 +145,24 @@ const TabContent: FC<TabContentProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchedRowData, setFetchedRowData] = useState<any[]>([]);
 
-  const configurationRef = useRef<ConfigurationHandle>(null);
-
-  // مثال از رویکردی برای بارگذاری داده
+  // ----------------------------------------------------------------
+  // متد fetchData: برای هر ساب‌تب، داده‌ی جدید را از API یا props بگیرید
+  // ----------------------------------------------------------------
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      // اگر ساب‌تب فعلی Configurations باشد، داده‌ها را از API می‌گیریم
       if (activeSubTab === "Configurations") {
+        // برای Configuration
         const data = await api.getAllConfigurations();
         setFetchedRowData(data);
-      } else {
+      }
+      // *** اضافه کردن Commands ***
+      else if (activeSubTab === "Commands") {
+        const data = await api.getAllCommands();
+        setFetchedRowData(data);
+      }
+      // به دلخواه: اگر زیرتب دیگری هم دارید، می‌توانید اینجا اضافه کنید
+      else {
         setFetchedRowData(rowData);
       }
     } catch (error) {
@@ -163,39 +177,34 @@ const TabContent: FC<TabContentProps> = ({
   }, [fetchData]);
 
   const handleSave = async () => {
-    if (configurationRef.current) {
-      try {
+    try {
+      if (activeSubTab === "Configurations" && configurationRef.current) {
         await configurationRef.current.save();
-        await fetchData();
-        showAlert(
-          "success",
-          null,
-          "Saved",
-          "Configuration saved successfully."
-        );
-        setIsPanelOpen(false);
-        setIsAdding(false);
-      } catch (error) {
-        console.error("Error saving configuration:", error);
-        showAlert("error", null, "Error", "Failed to save configuration.");
+      } else if (activeSubTab === "Commands" && commandRef.current) {
+        await commandRef.current.save();
       }
+      await fetchData(); // پس از ذخیره، مجدداً لیست را بگیرید
+      showAlert("success", null, "Saved", "Data saved successfully.");
+      setIsPanelOpen(false);
+      setIsAdding(false);
+    } catch (error) {
+      console.error("Error saving:", error);
+      showAlert("error", null, "Error", "Failed to save data.");
     }
   };
 
   const handleUpdate = async () => {
     try {
-      // فراخوانی متد save در رفرنسی که به Configuration داریم
-      await configurationRef.current?.save();
-      await fetchData();
-      showAlert(
-        "success",
-        null,
-        "Updated",
-        "Configuration updated successfully."
-      );
+      if (activeSubTab === "Configurations" && configurationRef.current) {
+        await configurationRef.current.save();
+      } else if (activeSubTab === "Commands" && commandRef.current) {
+        await commandRef.current.save();
+      }
+      await fetchData(); // پس از آپدیت، مجدداً لیست را بگیرید
+      showAlert("success", null, "Updated", "Data updated successfully.");
     } catch (error) {
-      showAlert("error", null, "Error", "Failed to update configuration.");
-      console.error("Error updating configuration:", error);
+      console.error("Error updating:", error);
+      showAlert("error", null, "Error", "Failed to update data.");
     }
     setIsPanelOpen(false);
   };
@@ -222,7 +231,6 @@ const TabContent: FC<TabContentProps> = ({
     onRowClick(data);
   };
 
-  // چون در TabbedInterface کلیک Add داریم، این تابع می‌تواند صرفاً پنل را باز کند
   const handleAddClick = () => {
     setIsAdding(true);
     setIsPanelOpen(true);
@@ -230,24 +238,20 @@ const TabContent: FC<TabContentProps> = ({
     resetRightPanel();
   };
 
-  // مثال: اگر بخواهید در همین فایل هم عمل حذف Configuration را انجام دهید
-  // ولی اکنون منطق اصلی در AddEditDeleteContext است. اینجا می‌توانید صرفاً فراخوانی کنید.
   const handleDeleteClick = () => {
     if (!pendingSelectedRow) {
       alert("Please select a row to delete.");
       return;
     }
-    // باز کردن مودال تأیید حذف
     setConfirmVariant("delete");
     setConfirmTitle("Delete Confirmation");
     setConfirmMessage("Are you sure you want to delete this item?");
     setConfirmAction(() => async () => {
       try {
-        // از تابع onDelete که از والد می‌آید و در حقیقت به کانتکست متصل است استفاده می‌کنیم
         onDelete();
-        await fetchData();
+        await fetchData(); // بعد از Delete هم لیست را رفرش می‌کنیم
       } catch (error) {
-        console.error("Error deleting configuration:", error);
+        console.error("Error deleting:", error);
       }
     });
     setConfirmOpen(true);
@@ -266,7 +270,6 @@ const TabContent: FC<TabContentProps> = ({
     setShowRightAccessPanel(true);
   };
 
-  // زمانی که کاربر روی دکمه تأیید در دیالوگ تأیید کلیک می‌کند
   const handleConfirm = async () => {
     setConfirmOpen(false);
     await confirmAction();
@@ -287,7 +290,7 @@ const TabContent: FC<TabContentProps> = ({
         onClose={() => setConfirmOpen(false)}
       />
 
-      {/* پنل سمت چپ (جدول اصلی) */}
+      {/* پنل سمت چپ */}
       <div
         className="flex flex-col overflow-auto bg-gray-100 box-border"
         style={{
@@ -296,7 +299,6 @@ const TabContent: FC<TabContentProps> = ({
           backgroundColor: "#f3f4f6",
         }}
       >
-        {/* هدر پنل سمت چپ */}
         <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100 w-full">
           <div className="font-bold text-gray-700 text-sm">{activeSubTab}</div>
           <button
@@ -311,7 +313,6 @@ const TabContent: FC<TabContentProps> = ({
           </button>
         </div>
 
-        {/* DataTable */}
         <div className="h-full p-4 overflow-auto">
           <DataTable
             columnDefs={columnDefs}
@@ -331,7 +332,7 @@ const TabContent: FC<TabContentProps> = ({
         </div>
       </div>
 
-      {/* جداکننده برای درگ کردن */}
+      {/* جداکننده */}
       <div
         onMouseDown={startDragging}
         className="flex items-center justify-center cursor-ew-resize w-2"
@@ -365,12 +366,16 @@ const TabContent: FC<TabContentProps> = ({
               isExpanded={false}
               toggleExpand={() => {}}
               onSave={
-                isAdding && activeSubTab === "Configurations"
+                isAdding &&
+                (activeSubTab === "Configurations" ||
+                  activeSubTab === "Commands")
                   ? handleSave
                   : undefined
               }
               onUpdate={
-                !isAdding && activeSubTab === "Configurations"
+                !isAdding &&
+                (activeSubTab === "Configurations" ||
+                  activeSubTab === "Commands")
                   ? handleUpdate
                   : undefined
               }
@@ -379,7 +384,6 @@ const TabContent: FC<TabContentProps> = ({
               isRightMaximized={isRightMaximized}
             />
 
-            {/* نمونه نمایش ProjectsAccess به صورت دو پنلی */}
             {activeSubTab === "ProjectsAccess" && (
               <Suspense fallback={<div>Loading Projects Access...</div>}>
                 <div className="flex-grow mt-5 flex flex-wrap gap-2 h-full overflow-y-auto">
@@ -408,7 +412,6 @@ const TabContent: FC<TabContentProps> = ({
               </Suspense>
             )}
 
-            {/* در غیر این صورت نمایش کامپوننت ساب‌تب مورد نظر (مثلاً Configurations) */}
             {activeSubTab !== "ProjectsAccess" && Component && (
               <div className="mt-5 flex-grow overflow-y-auto">
                 <div style={{ minWidth: "600px" }}>
@@ -422,9 +425,12 @@ const TabContent: FC<TabContentProps> = ({
                           : "no-selection"
                       }
                       selectedRow={isAdding ? null : selectedRow}
+                      // ارجاع به رفرنس درست
                       ref={
                         activeSubTab === "Configurations"
                           ? configurationRef
+                          : activeSubTab === "Commands"
+                          ? commandRef
                           : null
                       }
                     />

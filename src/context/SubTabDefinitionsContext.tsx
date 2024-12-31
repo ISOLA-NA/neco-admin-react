@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+// src/context/SubTabDefinitionsContext.tsx
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import { useApi } from "./ApiContext";
 import Cookies from "js-cookie";
 import { ProgramTemplateItem, DefaultRibbonItem } from "./ApiContext";
@@ -28,7 +35,9 @@ export const SubTabDefinitionsProvider: React.FC<{
 }> = ({ children }) => {
   const api = useApi();
 
-  const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>([]);
+  const [programTemplates, setProgramTemplates] = useState<
+    ProgramTemplateItem[]
+  >([]);
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
 
   useEffect(() => {
@@ -54,13 +63,15 @@ export const SubTabDefinitionsProvider: React.FC<{
 
   const subTabDefinitions = useMemo(() => {
     return {
+      // -------------------
+      // Configurations
+      // -------------------
       Configurations: {
         endpoint: api.getAllConfigurations,
         columnDefs: [
           {
             headerName: "Name",
             field: "Name",
-            filter: "FirstIDProgramTemplate",
           },
           {
             headerName: "Prg.Template",
@@ -92,7 +103,33 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
-      // بقیه ساب‌تب‌ها...
+
+      // -------------------
+      // Commands
+      // -------------------
+      Commands: {
+        endpoint: api.getAllCommands,
+        columnDefs: [
+          { headerName: "ID", field: "ID", hide: true },
+          { headerName: "Name", field: "Name" },
+          { headerName: "GroupName", field: "GroupName" },
+          { headerName: "CmdType", field: "CmdType" },
+          {
+            headerName: "projectIntensive",
+            field: "projectIntensive",
+            valueGetter: (params: any) =>
+              params.data.projectIntensive ? "Yes" : "No",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
+      // اگر ساب‌تب‌های دیگری دارید، اینجا تعریف کنید ...
     } as Record<string, SubTabDefinition>;
   }, [api, programTemplates, defaultRibbons]);
 

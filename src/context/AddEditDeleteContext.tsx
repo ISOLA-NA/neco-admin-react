@@ -1,34 +1,38 @@
+// src/context/AddEditDeleteContext.tsx
 import React, { createContext, useContext, useState } from "react";
-import { useApi, ConfigurationItem } from "./ApiContext";
+import { useApi } from "./ApiContext";
+import { ConfigurationItem, CommandItem } from "./ApiContext";
 
+// ساختار داده فرم Configuration
 interface ConfigurationData {
-  // در اینجا همان فیلدهایی را قرار می‌دهید که در کامپوننت Configuration داشتید.
-  // یا می‌توانید همین ConfigurationItem را استفاده کنید.
   id?: string;
   Name: string;
-  Description: string;
-  DefaultBtn: string;
-  LetterBtns: string;
-  MeetingBtns: string;
-  FirstIDProgramTemplate: string;
-  SelMenuIDForMain: string;
-  IsVisible: boolean;
-  LastModified?: string;
-  EnityTypeIDForLessonLearn: string;
-  EnityTypeIDForTaskCommnet: string;
-  EnityTypeIDForProcesure: string;
+  Description?: string;
+  // ... سایر فیلدها
+}
+
+// ساختار داده فرم Command
+interface CommandData {
+  id?: string;
+  Name: string;
+  Describtion?: string;
+  // ... سایر فیلدهای مورد نیاز
 }
 
 interface AddEditDeleteContextType {
+  // عملیات عمومی
   handleAdd: () => void;
   handleEdit: () => void;
   handleDelete: (subTabName: string, id: number) => Promise<void>;
   handleDuplicate: () => void;
 
-  // متدی که عملیات ذخیره را انجام می‌دهد (Add یا Edit) بسته به اینکه ID وجود دارد یا نه
+  // ذخیره (Add یا Edit) Configuration
   handleSaveConfiguration: (
     data: ConfigurationData
   ) => Promise<ConfigurationItem | null>;
+
+  // ذخیره (Add یا Edit) Command
+  handleSaveCommand: (data: CommandData) => Promise<CommandItem | null>;
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -41,77 +45,121 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
   const api = useApi();
   const [isLoading, setIsLoading] = useState(false);
 
-  // افزودن کانفیگ جدید
+  /**
+   * عملیات Add
+   * (برای بازکردن فرم در حالت افزودن)
+   */
   const handleAdd = () => {
-    // اینجا فقط یک مثال است. شما می‌توانید صرفاً panel را باز کنید یا state خاصی ست کنید.
     console.log("Add clicked from context");
+    // اگر لاجیک خاصی برای بازکردن پنل یا... دارید، اینجا بنویسید
   };
 
-  // ویرایش کانفیگ موجود
+  /**
+   * عملیات Edit
+   * (برای بازکردن فرم در حالت ویرایش)
+   */
   const handleEdit = () => {
-    // اینجا هم یک مثال:
     console.log("Edit action triggered from context");
   };
 
-  // حذف رکورد (مثلاً Configuration)
+  /**
+   * حذف رکورد. با توجه به ساب‌تب، متد Delete مناسب را فرامی‌خواند
+   */
   const handleDelete = async (subTabName: string, id: number) => {
-    console.log("Delete action triggered from context for subTab:", subTabName);
+    setIsLoading(true);
     try {
       if (subTabName === "Configurations") {
         await api.deleteConfiguration(id);
         console.log("Configuration deleted successfully!");
+      } else if (subTabName === "Commands") {
+        await api.deleteCommand(id);
+        console.log("Command deleted successfully!");
       }
-      // اگر ساب‌تب دیگری وجود داشت، اینجا شرط بگذارید
+      // اگر تب‌های دیگری هم دارید، اینجا اضافه کنید
     } catch (error) {
-      console.error(error);
+      console.error("Error deleting record:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Duplicate
+  /**
+   * Duplicate (در صورت نیاز)
+   */
   const handleDuplicate = () => {
     console.log("Duplicate action triggered from context");
+    // کپی رکورد
   };
 
   /**
-   * عمل ذخیرهConfiguration
-   * - اگر ID وجود داشته باشد، Update
-   * - اگر نداشته باشد، Insert
+   * ذخیره (Add یا Edit) برای Configuration
    */
   const handleSaveConfiguration = async (
     data: ConfigurationData
   ): Promise<ConfigurationItem | null> => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       const newConfig: ConfigurationItem = {
         ...(data.id && { ID: parseInt(data.id) }),
         Name: data.Name,
-        Description: data.Description,
-        DefaultBtn: data.DefaultBtn,
-        LetterBtns: data.LetterBtns,
-        MeetingBtns: data.MeetingBtns,
-        FirstIDProgramTemplate: Number(data.FirstIDProgramTemplate) || 0,
-        SelMenuIDForMain: Number(data.SelMenuIDForMain) || 0,
-        IsVisible: data.IsVisible,
+        Description: data.Description || "",
+        // بقیه فیلدها
         LastModified: new Date().toISOString(),
-        EnityTypeIDForLessonLearn: Number(data.EnityTypeIDForLessonLearn) || 0,
-        EnityTypeIDForTaskCommnet: Number(data.EnityTypeIDForTaskCommnet) || 0,
-        EnityTypeIDForProcesure: Number(data.EnityTypeIDForProcesure) || 0,
+        IsVisible: true,
+        FirstIDProgramTemplate: 0,
+        SelMenuIDForMain: 0,
+        EnityTypeIDForLessonLearn: 0,
+        EnityTypeIDForTaskCommnet: 0,
+        EnityTypeIDForProcesure: 0,
       };
 
-      let updatedConfig: ConfigurationItem;
+      let result: ConfigurationItem;
       if (newConfig.ID) {
-        // اگر ID وجود دارد، رکورد موجود را به‌روزرسانی کن
-        updatedConfig = await api.updateConfiguration(newConfig);
+        // Update
+        result = await api.updateConfiguration(newConfig);
+        console.log("Configuration updated:", result);
       } else {
-        // در غیر این صورت، یک رکورد جدید ایجاد کن
-        updatedConfig = await api.insertConfiguration(newConfig);
+        // Insert
+        result = await api.insertConfiguration(newConfig);
+        console.log("Configuration inserted:", result);
       }
-
-      return updatedConfig;
+      return result;
     } catch (error) {
       console.error("Error saving configuration:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * ذخیره (Add یا Edit) برای Command
+   */
+  const handleSaveCommand = async (
+    data: CommandData
+  ): Promise<CommandItem | null> => {
+    setIsLoading(true);
+    try {
+      const newCmd: CommandItem = {
+        ...(data.id && { ID: parseInt(data.id) }),
+        Name: data.Name,
+        Describtion: data.Describtion,
+        // بقیه فیلدها
+      };
+
+      let updatedCmd: CommandItem;
+      if (newCmd.ID) {
+        updatedCmd = await api.updateCommand(newCmd);
+        console.log("Command updated:", updatedCmd);
+      } else {
+        updatedCmd = await api.insertCommand(newCmd);
+        console.log("Command inserted:", updatedCmd);
+      }
+
+      return updatedCmd;
+    } catch (error) {
+      console.error("Error saving command:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -126,6 +174,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleDelete,
         handleDuplicate,
         handleSaveConfiguration,
+        handleSaveCommand,
       }}
     >
       {children}

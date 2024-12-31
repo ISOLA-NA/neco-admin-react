@@ -8,10 +8,14 @@ interface ImageUploaderProps {
   externalPreviewUrl?: string | null; // URL پیش‌نمایش تصویر دانلود شده یا آپلود شده
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreviewUrl }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({
+  onUpload,
+  externalPreviewUrl,
+}) => {
   const [internalPreview, setInternalPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
+  // آپلود فایل با اینپوت
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -24,16 +28,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreview
     }
   };
 
+  // درگ‌اور
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
   };
 
+  // درگ‌لیو
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
   };
 
+  // دراپ فایل
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
@@ -48,24 +55,26 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreview
     }
   };
 
+  // اگر از بیرون یک externalPreviewUrl داریم، برای نمایش در اولویت قرار دهیم
   useEffect(() => {
     if (externalPreviewUrl) {
-      console.log("External preview URL updated:", externalPreviewUrl);
-      setInternalPreview(null); // پاکسازی پیش‌نمایش داخلی اگر externalPreviewUrl تغییر کند
+      setInternalPreview(null); // اگر فایل بیرونی آمد، پیش‌نمایش داخلی را خالی می‌کنیم
     }
   }, [externalPreviewUrl]);
 
+  const previewSrc = externalPreviewUrl || internalPreview;
+
   return (
-    <div className="flex justify-between items-center space-x-6 p-4 bg-gray-100 rounded-lg shadow-md w-full">
-      <span className="text-lg font-semibold text-gray-700">Image :</span>
+    <div className="w-full flex flex-col space-y-2">
       <div
-        className={`border-2 border-dashed rounded-md flex items-center justify-center cursor-pointer transition-colors duration-200 
-        ${
-          isDragging
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 bg-white"
-        }`}
-        style={{ width: "150px", height: "150px" }}
+        className={`relative border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center transition-all duration-200 
+          ${
+            isDragging
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-300 bg-gray-50 hover:bg-gray-100"
+          }
+        `}
+        style={{ minHeight: "200px" }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -74,22 +83,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, externalPreview
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="absolute opacity-0 w-full h-full cursor-pointer"
+          className="absolute inset-0 opacity-0 cursor-pointer"
         />
-        {externalPreviewUrl ? (
+        {previewSrc ? (
           <img
-            src={externalPreviewUrl}
+            src={previewSrc}
             alt="Preview"
-            className="w-full h-full object-cover rounded-md"
-          />
-        ) : internalPreview ? (
-          <img
-            src={internalPreview}
-            alt="Preview"
-            className="w-full h-full object-cover rounded-md"
+            className="max-h-48 object-contain rounded-md"
           />
         ) : (
-          <FiImage className="text-gray-400" size={48} />
+          <div className="flex flex-col items-center justify-center text-gray-400">
+            <FiImage size={48} />
+            <p className="mt-2 text-sm">Drag & Drop or Click to Upload Image</p>
+          </div>
         )}
       </div>
     </div>

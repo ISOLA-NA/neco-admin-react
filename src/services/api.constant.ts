@@ -16,9 +16,16 @@ export const apiConst = Object.freeze({
   // LessonLearnedAfTemplate
   getAllWfTemplate: "api/WFTemplate/GetAll",
   getAllAfbtn: "api/AFBtn/GetAll",
+  insertAFBtn: "api/AFBtn/Insert",
+  updateAFBtn: "api/AFBtn/Update",
+  deleteAFBtn: "api/AFBtn/Delete",
   inserConfiguration: "api/Setting/Insert",
   uploadFile: "api/File/Upload",
   insert: "api/File/Insert",
   download: "api/File/Download",
   getFile: "api/File/GetById",
+  getCommand: "api/Command/GetAll",
+  insertCommand: "api/Command/Insert",
+  deleteCommand: "api/Command/Delete",
+  updateCommand: "api/Command/Update",
 });

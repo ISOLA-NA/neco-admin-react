@@ -1,14 +1,18 @@
 // src/services/api.services.ts
+
 import httpClient from "./api.config";
 import { apiConst } from "./api.constant";
 
-// رابط‌های نمونه
+// ================== اینترفیس‌ها ==================
+
+// نمونه از AppSetting
 export interface AppSetting {
   ID: number;
   Name: string;
   LetterBtns: string;
 }
 
+// نمونه از کاربر
 export interface MyUser {
   ID: string;
   TTKK: string;
@@ -18,45 +22,40 @@ export interface MyUser {
   userType?: number;
 }
 
+// برای لاگین (OTP و ...)
 export interface WebLoginResponse {
   data: { MyUser: any; tokenLife: any };
   AppSetting: AppSetting;
   MyUser: MyUser;
 }
-
 export interface SendOtpResponse {
   success: boolean;
   message: string;
 }
-
 export interface LoginWithOtpResponse {
   AppSetting: AppSetting;
   MyUser: MyUser;
 }
-
 export interface WebLoginRequest {
   UserName: string;
   Password: string;
   SeqKey: string;
 }
-
 export interface SendOtpRequest {
   UserName: string;
   Password: string;
   SeqKey: string;
 }
-
 export interface LoginWithOtpRequest {
   UserName: string;
   Password: string;
   SeqKey: string;
 }
-
 export interface TokenSetupResponse {
   data: number;
 }
 
-// داده Configuration
+// ================== اینترفیس‌های Config ==================
 export interface ConfigurationItem {
   ID?: number;
   Name: string;
@@ -73,19 +72,19 @@ export interface ConfigurationItem {
   EnityTypeIDForProcesure: number;
 }
 
-// داده Menu (برای Default Ribbon)
+// ================== اینترفیس‌های Menu/Ribbon ==================
 export interface DefaultRibbonItem {
   ID: number;
   Name: string;
 }
 
-// داده ProgramTemplate
+// ================== اینترفیس‌های ProgramTemplate ==================
 export interface ProgramTemplateItem {
   ID: number;
   Name: string;
 }
 
-// داده EntityType
+// ================== EntityType ==================
 export interface EntityTypeItem {
   ID: number;
   Name: string;
@@ -98,20 +97,51 @@ export interface WfTemplateItem {
 }
 
 export interface AFBtnItem {
-  ID: number;
+  ID?: number; // در Insert ممکن است خالی باشد
   Name: string;
+  Tooltip?: string;
+  StateText?: string;
+  Order?: number;
+  WFStateForDeemed?: number;
+  WFCommand?: number;
+  IconImageId?: string | null;
+  IsVisible: boolean;
+  LastModified: string | null;
+  ModifiedById?: number | null;
 }
 
+// نمونه‌ی کاربر با توکن
 export interface UserToken {
   ID: number;
   Name: string;
 }
 
+// ================== CommandItem ==================
+export interface CommandItem {
+  ID?: number;
+  Name: string;
+  Describtion?: string;
+  MainColumnIDName?: string;
+  GroupName?: string;
+  gridCmd?: string;
+  tabCmd?: string;
+  QR?: string;
+  ViewMode?: any; // می‌تواند string یا number باشد
+  DefaultColumns?: string | null;
+  ReportParam?: string | null;
+  projectIntensive?: boolean;
+  ColorColumn?: string;
+  InvisibleColumns?: string;
+  ApiColumns?: string;
+  SpParam?: string;
+  CmdType?: number;
+}
+
+// ساخت یک کلاس برای متدهای API
 class ApiService {
-  post(_insert: string, _model: any) {
-    throw new Error("Method not implemented.");
-  }
-  // مثال‌های مربوط به لاگین/OTP
+  // ------------------------------------
+  // متدهای عمومی (لاگین، OTP و ...)
+  // ------------------------------------
   async webLogin(userData: WebLoginRequest): Promise<WebLoginResponse> {
     const response = await httpClient.post<WebLoginResponse>(
       apiConst.webLogin,
@@ -143,7 +173,9 @@ class ApiService {
     return response.data;
   }
 
-  // مثال‌های مربوط به پیکربندی (Configurations)
+  // ------------------------------------
+  // Configurations
+  // ------------------------------------
   async getAllConfigurations(): Promise<ConfigurationItem[]> {
     const response = await httpClient.post<ConfigurationItem[]>(
       apiConst.getAllConfiguration
@@ -171,14 +203,13 @@ class ApiService {
     return response.data;
   }
 
-  // متد حذف Configuration
   async deleteConfiguration(id: number): Promise<void> {
-    // بسته به اینکه API شما ID را در body می‌گیرد یا QueryString،
-    // شاید نیاز باشد ساختار ارسال داده را تغییر دهید.
     await httpClient.post(apiConst.deleteConfiguration, { ID: id });
   }
 
-  // مثال‌های دیگر
+  // ------------------------------------
+  // Ribbon/ProgramTemplate/WFTemplate/AFBtn
+  // ------------------------------------
   async getAllProgramTemplates(): Promise<ProgramTemplateItem[]> {
     const response = await httpClient.post<ProgramTemplateItem[]>(
       apiConst.getAllProgramTemplate
@@ -207,16 +238,70 @@ class ApiService {
     return response.data;
   }
 
+  // ---- AFBtn ----
   async getAllAfbtn(): Promise<AFBtnItem[]> {
     const response = await httpClient.post<AFBtnItem[]>(apiConst.getAllAfbtn);
     return response.data;
   }
 
-  async getIdByUserToken(): Promise<UserToken[]> {
-    const response = await httpClient.post<UserToken[]>(apiConst.getIdByUserToken);
+  // سه متد جدید: Insert - Update - Delete
+  async insertAFBtn(data: AFBtnItem): Promise<AFBtnItem> {
+    const response = await httpClient.post<AFBtnItem>(
+      apiConst.insertAFBtn,
+      data
+    );
     return response.data;
+  }
+
+  async updateAFBtn(data: AFBtnItem): Promise<AFBtnItem> {
+    const response = await httpClient.post<AFBtnItem>(
+      apiConst.updateAFBtn,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteAFBtn(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteAFBtn, { ID: id });
+  }
+
+  // دریافت ID کاربر
+  async getIdByUserToken(): Promise<UserToken[]> {
+    const response = await httpClient.post<UserToken[]>(
+      apiConst.getIdByUserToken
+    );
+    return response.data;
+  }
+
+  // ------------------------------------
+  // Command
+  // ------------------------------------
+  async getAllCommands(): Promise<CommandItem[]> {
+    const response = await httpClient.post<CommandItem[]>(apiConst.getCommand);
+    return response.data;
+  }
+
+  async insertCommand(data: CommandItem): Promise<CommandItem> {
+    const response = await httpClient.post<CommandItem>(
+      apiConst.insertCommand,
+      data
+    );
+    return response.data;
+  }
+
+  async updateCommand(data: CommandItem): Promise<CommandItem> {
+    const response = await httpClient.post<CommandItem>(
+      apiConst.updateCommand,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteCommand(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteCommand, { ID: id });
   }
 }
 
+// یک خروجی برای استفاده در Context
 const AppServices = new ApiService();
 export default AppServices;
