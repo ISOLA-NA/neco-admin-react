@@ -186,7 +186,6 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
 
       // ایجاد FormData
       const formData = new FormData();
-      formData.append("gid", UUID); // افزودن gid به payload
       formData.append("FileName", `${UUID}.${fileExtension}`);
       formData.append("FolderName", folderName);
       formData.append("file", file); // کلید "file" مطابق نیاز سرویس
@@ -194,7 +193,10 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
       // آپلود فایل
       const uploadResponse = await fileService.uploadFile(formData);
 
-      if (uploadResponse && uploadResponse.data) {
+      console.log("formData",formData)
+
+      if (uploadResponse && uploadResponse.status) {
+        console.log("formData",formData)
         const { FileIQ, FileName, FileSize } = uploadResponse.data;
 
         // ایجاد مدل برای درج در دیتابیس
