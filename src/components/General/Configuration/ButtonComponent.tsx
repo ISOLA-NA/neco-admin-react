@@ -5,7 +5,7 @@ import DataTable from '../../TableDynamic/DataTable';
 import DynamicInput from '../../utilities/DynamicInput';
 import DynamicRadioGroup from '../../utilities/DynamicRadiogroup';
 import DynamicButton from '../../utilities/DynamicButtons';
-import FileUploadHandler from '../../../services/FileUploadHandler';
+import FileUploadHandler, { InsertModel } from '../../../services/FileUploadHandler';
 import { useApi } from '../../../context/ApiContext';
 import { AFBtnItem } from '../../../services/api.services';
 
@@ -20,19 +20,6 @@ interface ButtonComponentProps {
   onSelectFromButton: () => void;
 }
 
-interface InsertModel {
-  ID: string;
-  gid: string;
-  FileIQ: string;
-  FileName: string;
-  FileSize: number;
-  FolderName: string;
-  IsVisible: boolean;
-  LastModified: Date | null;
-  SenderID: string | null;
-  FileType: string | null;
-}
-
 const ButtonComponent: React.FC<ButtonComponentProps> = ({
   columnDefs,
   rowData,
@@ -41,10 +28,9 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 }) => {
   const api = useApi(); // برای متدهای API
 
-  // وضعیت‌ها
+  // مقادیر فرم
   const [selectedState, setSelectedState] = useState<string>('accept');
   const [selectedCommand, setSelectedCommand] = useState<string>('accept');
-
   const [nameValue, setNameValue] = useState('');
   const [stateTextValue, setStateTextValue] = useState('');
   const [tooltipValue, setTooltipValue] = useState('');
@@ -53,18 +39,18 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [isRowClicked, setIsRowClicked] = useState<boolean>(false);
 
+  // مقدار فایل آپلودی
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
 
-  // وضعیت ریست کردن preview با استفاده از شمارنده
+  // شمارنده ریست
   const [resetCounter, setResetCounter] = useState<number>(0);
 
-  // رادیوآپشن‌ها
+  // آپشن رادیو
   const RadioOptionsState = [
     { value: 'accept', label: 'Accept' },
     { value: 'reject', label: 'Reject' },
     { value: 'close', label: 'Close' },
   ];
-
   const RadioOptionsCommand = [
     { value: 'accept', label: 'Accept' },
     { value: 'reject', label: 'Reject' },
@@ -73,20 +59,19 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     { value: 'admin', label: 'Previous State Admin' },
   ];
 
-  // دوبار کلیک
+  // دوبار کلیک روی ردیف جدول
   const handleRowDoubleClickLocal = (data: any) => {
     setSelectedRow(data);
     onRowDoubleClick(data);
   };
 
   // کلیک روی ردیف جدول
-  const handleRowClickLocal = async (data: any) => {
+  const handleRowClickLocal = (data: any) => {
     try {
       setSelectedRow(data);
       onRowClick(data);
       setIsRowClicked(true);
 
-      // پرکردن فیلدهای فرم با مقدار سطر انتخاب شده
       setNameValue(data.Name || '');
       setStateTextValue(data.StateText || '');
       setTooltipValue(data.Tooltip || '');
@@ -104,19 +89,19 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         setSelectedCommand(RadioOptionsCommand[0].value);
       }
 
-      // اگر این سطر آیکن (تصویر) نداشت، fileId را خالی بگذاریم و preview را ریست کنیم
+      // تنظیم selectedFileId به ID رکورد
       if (data.IconImageId) {
         setSelectedFileId(data.IconImageId);
       } else {
         setSelectedFileId(null);
-        handleReset(); // ریست کردن ImageUploader
+        handleReset();
       }
     } catch (error) {
       console.error('خطا در handleRowClickLocal:', error);
     }
   };
 
-  // تبدیل مقدار StateForDeemed به مقدار رادیو
+  // مپ کردن مقدار StateForDeemed به رادیو
   const mapWFStateForDeemedToRadio = (val: number) => {
     switch (val) {
       case 1:
@@ -130,7 +115,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     }
   };
 
-  // تبدیل مقدار WFCommand به مقدار رادیو
+  // مپ کردن مقدار WFCommand به رادیو
   const mapWFCommandToRadio = (val: number) => {
     switch (val) {
       case 1:
@@ -148,7 +133,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     }
   };
 
-  // مبدل رادیو => WFStateForDeemed
+  // رادیو => عدد
   const radioToWFStateForDeemed = (radioVal: string): number => {
     switch (radioVal) {
       case 'accept':
@@ -161,8 +146,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         return 1;
     }
   };
-
-  // مبدل رادیو => WFCommand
   const radioToWFCommand = (radioVal: string): number => {
     switch (radioVal) {
       case 'accept':
@@ -180,24 +163,23 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     }
   };
 
-  // تعریف تابع برای ریست کردن با استفاده از useCallback
+  // تابع ریست کامپوننت آپلود
   const handleReset = useCallback(() => {
     setResetCounter((prev) => prev + 1);
   }, []);
 
-  // کلیک دکمه Add
+  // دکمه Add
   const handleAddClick = async () => {
     try {
-      // ساخت آبجکت AFBtn جدید
       const newAFBtn: AFBtnItem = {
-        ID: 0, // درج جدید
+        ID: 0, // فرض بر این است که سرور این مقدار را مدیریت می‌کند
         Name: nameValue,
         Tooltip: tooltipValue,
         StateText: stateTextValue,
         Order: parseInt(orderValue || '0'),
         WFStateForDeemed: radioToWFStateForDeemed(selectedState),
         WFCommand: radioToWFCommand(selectedCommand),
-        IconImageId: selectedFileId,
+        IconImageId: selectedFileId, // مقدار ID جدید است
         IsVisible: true,
         LastModified: null,
         ModifiedById: null,
@@ -206,7 +188,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       await api.insertAFBtn(newAFBtn);
       alert('آیتم جدید با موفقیت درج شد.');
 
-      // ریست کردن preview بعد از افزودن
       handleReset();
     } catch (error) {
       console.error('خطا در درج آیتم AFBtn:', error);
@@ -214,7 +195,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     }
   };
 
-  // کلیک دکمه Edit
+  // دکمه Edit
   const handleEditClick = async () => {
     if (!selectedRow || !selectedRow.ID) {
       alert('لطفاً یک ردیف را از جدول انتخاب کنید.');
@@ -238,7 +219,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       await api.updateAFBtn(updatedAFBtn);
       alert('آیتم با موفقیت ویرایش شد.');
 
-      // ریست کردن preview بعد از ویرایش
       handleReset();
     } catch (error) {
       console.error('خطا در ویرایش آیتم AFBtn:', error);
@@ -246,22 +226,22 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     }
   };
 
-  // هندل آپلود موفقیت‌آمیز در FileUploadHandler
+  // آپلود موفق
   const handleUploadSuccess = (insertModel: InsertModel) => {
+    // استفاده از ID جدید برای selectedFileId
+    const newFileId = insertModel.ID || null;
+
+    // به‌روز رسانی سطر انتخابی (در صورت نیاز)
     if (selectedRow) {
-      const updatedRow = { ...selectedRow, IconImageId: insertModel.ID };
+      const updatedRow = { ...selectedRow, IconImageId: newFileId };
       setSelectedRow(updatedRow);
-
-      // برای یکسان‌سازی با دیتای جدول و جلوگیری از ناسازگاری
-      // می‌توانید اینجا onRowClick(updatedRow) را دوباره صدا بزنید یا
-      // در صورت نیاز در دیتاست rowData نیز آپدیت کنید
-
-      // مهم‌تر از همه، selectedFileId را برابر insertModel.ID بگذاریم
-      setSelectedFileId(insertModel.ID);
-
-      // ریست کردن preview بعد از آپلود موفقیت‌آمیز
-      handleReset();
     }
+
+    // تنظیم selectedFileId برای Add/Edit
+    setSelectedFileId(newFileId);
+
+    // ریست کردن preview
+    handleReset();
   };
 
   return (
@@ -282,12 +262,10 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         />
       </div>
 
-      {/* بخش فرم */}
+      {/* فرم */}
       <div className='w-full grid grid-cols-1 lg:grid-cols-3 gap-4'>
-        {/* ستون اینپوت‌ها */}
         <div className='lg:col-span-2'>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
-            {/* ردیف اول: Name و StateText */}
             <DynamicInput
               name='Name'
               type='text'
@@ -307,7 +285,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
               className='sm:ml-2'
             />
 
-            {/* ردیف دوم: Tooltip و Order */}
             <DynamicInput
               name='Tooltip'
               type='text'
@@ -353,18 +330,18 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           </div>
         </div>
 
-        {/* آپلودر سمت راست */}
+        {/* آپلود فایل */}
         <div className='lg:col-span-1 flex flex-col items-start mt-4 lg:mt-0'>
           <FileUploadHandler
             selectedFileId={selectedFileId}
             onUploadSuccess={handleUploadSuccess}
-            resetCounter={resetCounter} // ارسال شمارنده به فرزند
-            onReset={handleReset} // ارسال تابع ریست
+            resetCounter={resetCounter}
+            onReset={handleReset}
           />
         </div>
       </div>
 
-      {/* دکمه های پایین */}
+      {/* دکمه‌های پایین */}
       <div className='mt-6 flex justify-start space-x-4'>
         <DynamicButton text='Add' onClick={handleAddClick} isDisabled={false} />
         <DynamicButton text='Edit' onClick={handleEditClick} isDisabled={false} />

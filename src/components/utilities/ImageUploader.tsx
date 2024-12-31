@@ -5,7 +5,7 @@ import { FiImage } from "react-icons/fi";
 
 interface ImageUploaderProps {
   onUpload: (file: File) => void;
-  externalPreviewUrl?: string | null; // URL پیش‌نمایش تصویر دانلود شده یا آپلود شده
+  externalPreviewUrl?: string | null; 
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
@@ -15,7 +15,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [internalPreview, setInternalPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  // آپلود فایل با اینپوت
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -28,19 +27,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // درگ‌اور
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
   };
 
-  // درگ‌لیو
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
   };
 
-  // دراپ فایل
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
@@ -55,8 +51,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // هر تغییری در externalPreviewUrl اتفاق بیفتد (حتی null)،
-  // پیش‌نمایش داخلی را پاک می‌کنیم تا فقط externalPreviewUrl نمایش داده شود.
+  // اگر externalPreviewUrl تغییر کند، پیش‌نمایش داخلی را پاک می‌کنیم
   useEffect(() => {
     setInternalPreview(null);
   }, [externalPreviewUrl]);
@@ -93,7 +88,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         ) : (
           <div className="flex flex-col items-center justify-center text-gray-400">
             <FiImage size={48} />
-            <p className="mt-2 text-sm">Drag & Drop or Click to Upload Image</p>
+            <p className="mt-2 text-sm">Drag &amp; Drop or Click to Upload Image</p>
           </div>
         )}
       </div>
