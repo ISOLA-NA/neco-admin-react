@@ -21,11 +21,15 @@ interface InsertModel {
 interface FileUploadHandlerProps {
   selectedFileId: string | null; // شناسه فایل برای دانلود
   onUploadSuccess?: (insertModel: InsertModel) => void; // callback پس از آپلود موفقیت‌آمیز
+  resetCounter: number; // prop جدید برای ریست کردن پیش‌نمایش
+  onReset: () => void; // prop جدید برای ریست کردن از خارج
 }
 
 const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
   selectedFileId,
   onUploadSuccess,
+  resetCounter,
+  onReset,
 }) => {
   const [uploadedFileInfo, setUploadedFileInfo] = useState<InsertModel | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -50,7 +54,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     fetchUserId();
   }, []);
 
-  // واکنش به تغییرات selectedFileId برای دانلود فایل
+  // نظارت بر تغییرات selectedFileId برای دانلود فایل
   useEffect(() => {
     const downloadFile = async () => {
       if (!selectedFileId) {
@@ -68,7 +72,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
 
         if (!res.data) {
           setErrorMessage("فایل مورد نظر یافت نشد.");
-          setIsLoading(false);
+          setDownloadedPreviewUrl(null); // پاک کردن پیش‌نمایش دانلود شده
           return;
         }
 
@@ -83,7 +87,9 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
         const downloadResponse = await fileService.download(obj);
 
         // تبدیل آرایه بایت به Blob
-        const blob = new Blob([downloadResponse.data], { type: "application/octet-stream" });
+        const blob = new Blob([downloadResponse.data], {
+          type: "application/octet-stream",
+        });
 
         // استفاده از FileReader برای تبدیل Blob به Data URL
         const reader = new FileReader();
@@ -95,13 +101,28 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
       } catch (err: any) {
         console.error("خطا در دانلود فایل:", err);
         setErrorMessage("خطا در دانلود فایل.");
+
+        // تنظیم هر دو پیش‌نمایش به null برای پاک کردن تصاویر
+        setUploadedPreviewUrl(null);
+        setDownloadedPreviewUrl(null);
+
+        // ریست کردن ImageUploader با فراخوانی onReset
+        onReset();
       } finally {
         setIsLoading(false);
       }
     };
 
     downloadFile();
-  }, [selectedFileId]);
+  }, [selectedFileId, onReset]);
+
+  // نظارت بر تغییرات resetCounter برای ریست کردن preview
+  useEffect(() => {
+    if (resetCounter > 0) {
+      setDownloadedPreviewUrl(null);
+      setUploadedPreviewUrl(null);
+    }
+  }, [resetCounter]);
 
   // توابع کمکی
   const uuid = (): string => {
@@ -213,20 +234,29 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     } catch (error: any) {
       console.error("خطا در آپلود یا درج فایل:", error);
       setErrorMessage("خطا در آپلود یا درج فایل.");
+
+      // تنظیم هر دو پیش‌نمایش به null برای پاک کردن تصاویر
+      setUploadedPreviewUrl(null);
+      setDownloadedPreviewUrl(null);
+
+      // ریست کردن ImageUploader با فراخوانی onReset
+      onReset();
     } finally {
       setIsLoading(false);
     }
   };
 
+  const previewSrc = downloadedPreviewUrl || uploadedPreviewUrl;
 
   return (
-    <div className="flex flex-col items-center rounded-lg w-1/2">
+    <div className="flex flex-col items-center rounded-lg w-full">
       {/* آپلود و پیش‌نمایش در یک بخش مجتمع */}
-      <div className="w-full max-w-md flex flex-col items-center space-y-4">
+      <div className="w-full flex flex-col items-center space-y-4">
         {/* کامپوننت آپلود تصویر با پیش‌نمایش مشترک */}
         <ImageUploader
+          key={`image-uploader-${resetCounter}`} // افزودن key برای ریست کردن
           onUpload={handleFileUpload}
-          externalPreviewUrl={downloadedPreviewUrl || uploadedPreviewUrl}
+          externalPreviewUrl={previewSrc}
         />
 
         {/* نمایش اطلاعات فایل آپلود شده (اختیاری) */}
@@ -263,7 +293,6 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
         {/* نمایش پیام خطا */}
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       </div>
-
     </div>
   );
 };

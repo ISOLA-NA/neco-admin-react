@@ -105,8 +105,8 @@ export interface AFBtnItem {
   WFStateForDeemed?: number;
   WFCommand?: number;
   IconImageId?: string | null;
-  IsVisible: boolean;
-  LastModified: string | null;
+  IsVisible?: boolean;
+  LastModified?: string | null;
   ModifiedById?: number | null;
 }
 

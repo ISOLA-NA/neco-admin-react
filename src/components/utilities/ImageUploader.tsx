@@ -55,11 +55,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  // اگر از بیرون یک externalPreviewUrl داریم، برای نمایش در اولویت قرار دهیم
+  // هر تغییری در externalPreviewUrl اتفاق بیفتد (حتی null)،
+  // پیش‌نمایش داخلی را پاک می‌کنیم تا فقط externalPreviewUrl نمایش داده شود.
   useEffect(() => {
-    if (externalPreviewUrl) {
-      setInternalPreview(null); // اگر فایل بیرونی آمد، پیش‌نمایش داخلی را خالی می‌کنیم
-    }
+    setInternalPreview(null);
   }, [externalPreviewUrl]);
 
   const previewSrc = externalPreviewUrl || internalPreview;

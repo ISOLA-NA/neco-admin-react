@@ -112,14 +112,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         columnDefs: [
           { headerName: "ID", field: "ID", hide: true },
           { headerName: "Name", field: "Name" },
-          { headerName: "GroupName", field: "GroupName" },
-          { headerName: "CmdType", field: "CmdType" },
-          {
-            headerName: "projectIntensive",
-            field: "projectIntensive",
-            valueGetter: (params: any) =>
-              params.data.projectIntensive ? "Yes" : "No",
-          },
+          { headerName: "Describtion", field: "Describtion" },
         ],
         iconVisibility: {
           showAdd: true,
