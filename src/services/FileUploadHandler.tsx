@@ -62,11 +62,11 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     fetchUserId();
   }, []);
 
-  // تغییر selectedFileId
+  // اگر selectedFileId تغییر کند، تلاش برای دانلود فایل (مگر اینکه خالی باشد)
   useEffect(() => {
     const downloadFile = async () => {
-      if (!selectedFileId) {
-        // اگر شناسه خالی باشد، چیزی برای دانلود نداریم
+      // اگر شناسه خالی باشد، چیزی برای دانلود نداریم
+     if (!selectedFileId || selectedFileId.trim() === "") {
         setDownloadedPreviewUrl(null);
         return;
       }
@@ -117,7 +117,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
         setErrorMessage("خطا در دانلود فایل.");
         setUploadedPreviewUrl(null);
         setDownloadedPreviewUrl(null);
-        onReset();
+        // onReset();
       } finally {
         setIsLoading(false);
       }
@@ -261,34 +261,6 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
           onUpload={handleFileUpload}
           externalPreviewUrl={previewSrc}
         />
-
-        {/* اطلاعات فایل آپلود شده (اختیاری) */}
-        {uploadedFileInfo && (
-          <div className="w-full bg-green-100 p-4 rounded-lg">
-            <h3 className="text-md font-semibold">فایل آپلودشده:</h3>
-            <p>
-              <strong>ID:</strong> {uploadedFileInfo.ID}
-            </p>
-            <p>
-              <strong>FileIQ:</strong> {uploadedFileInfo.FileIQ}
-            </p>
-            <p>
-              <strong>File Name:</strong> {uploadedFileInfo.FileName}
-            </p>
-            <p>
-              <strong>File Size:</strong> {uploadedFileInfo.FileSize} bytes
-            </p>
-            <p>
-              <strong>Folder Name:</strong> {uploadedFileInfo.FolderName}
-            </p>
-            <p>
-              <strong>Sender ID:</strong> {uploadedFileInfo.SenderID}
-            </p>
-            <p>
-              <strong>File Type:</strong> {uploadedFileInfo.FileType}
-            </p>
-          </div>
-        )}
 
         {isLoading && <p className="text-blue-500">در حال آپلود...</p>}
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}

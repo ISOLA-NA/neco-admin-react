@@ -5,7 +5,7 @@ import { FiImage } from "react-icons/fi";
 
 interface ImageUploaderProps {
   onUpload: (file: File) => void;
-  externalPreviewUrl?: string | null; 
+  externalPreviewUrl?: string | null;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
