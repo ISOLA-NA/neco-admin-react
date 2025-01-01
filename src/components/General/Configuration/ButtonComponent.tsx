@@ -23,10 +23,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   columnDefs,
   onRowDoubleClick,
   onRowClick,
-  onSelectButtonClick,
-  isSelectDisabled,
-  onClose,
-  onSelectFromButton,
 }) => {
   const api = useApi(); // برای دسترسی به متدهای API
 

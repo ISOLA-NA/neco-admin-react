@@ -61,7 +61,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const api = useApi();
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   const handleAdd = () => {
     console.log("Add clicked from context");

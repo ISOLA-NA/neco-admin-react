@@ -32,10 +32,10 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
   resetCounter,
   onReset,
 }) => {
-  const [uploadedFileInfo, setUploadedFileInfo] = useState<InsertModel | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [, setUploadedFileInfo] = useState<InsertModel | null>(null);
+  const [, setIsLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [, setErrorMessage] = useState<string | null>(null);
 
   // پیش‌نمایش مربوط به فایلی که به‌تازگی آپلود شده
   const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
@@ -193,7 +193,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
       console.log("پاسخ آپلود:", uploadResponse);
 
       if (uploadResponse && uploadResponse.status) {
-        const { FileSize, FileType } = uploadResponse.data;
+        const { FileSize } = uploadResponse.data;
 
         // ایجاد InsertModel با دو UUID مجزا
         const insertModel: InsertModel = {
@@ -261,8 +261,6 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
           onUpload={handleFileUpload}
           externalPreviewUrl={previewSrc}
         />
-
-       
       </div>
     </div>
   );

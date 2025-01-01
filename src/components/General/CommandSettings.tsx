@@ -1,6 +1,6 @@
 // src/components/CommandSettings.tsx
 
-import React, {
+import  {
   useState,
   useEffect,
   forwardRef,
@@ -11,7 +11,7 @@ import DynamicInput from '../utilities/DynamicInput'
 import CustomTextarea from '../utilities/DynamicTextArea'
 import DynamicSelector from '../utilities/DynamicSelector'
 import { useAddEditDelete } from '../../context/AddEditDeleteContext'
-import { CommandItem, GetEnumRequest, GetEnumResponse } from '../../services/api.services'
+import { CommandItem, GetEnumResponse } from '../../services/api.services'
 import AppServices from '../../services/api.services'
 
 export interface CommandHandle {
@@ -56,8 +56,8 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
     const [loadingViewModes, setLoadingViewModes] = useState<boolean>(false)
     const [loadingApiModes, setLoadingApiModes] = useState<boolean>(false)
 
-    const [errorViewModes, setErrorViewModes] = useState<string | null>(null)
-    const [errorApiModes, setErrorApiModes] = useState<string | null>(null)
+    const [, setErrorViewModes] = useState<string | null>(null)
+    const [, setErrorApiModes] = useState<string | null>(null)
 
     // به‌روزرسانی داده‌های فرم هنگام تغییر selectedRow
     useEffect(() => {
