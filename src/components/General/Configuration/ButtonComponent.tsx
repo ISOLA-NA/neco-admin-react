@@ -449,7 +449,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
             )}
           </>
         ) : (
-          <p>No image selected.</p>
+          <p></p>
         )}
       </div>
 

@@ -114,7 +114,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
         reader.readAsDataURL(blob);
       } catch (err: any) {
         console.error("خطا در دانلود فایل:", err);
-        setErrorMessage("خطا در دانلود فایل.");
+        // setErrorMessage("خطا در دانلود فایل.");
         setUploadedPreviewUrl(null);
         setDownloadedPreviewUrl(null);
         // onReset();
@@ -262,8 +262,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
           externalPreviewUrl={previewSrc}
         />
 
-        {isLoading && <p className="text-blue-500">در حال آپلود...</p>}
-        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+       
       </div>
     </div>
   );

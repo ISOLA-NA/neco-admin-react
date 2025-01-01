@@ -1,37 +1,55 @@
 // src/context/AddEditDeleteContext.tsx
 import React, { createContext, useContext, useState } from "react";
-import { useApi } from "./ApiContext";
-import { ConfigurationItem, CommandItem } from "./ApiContext";
+import { useApi, CommandItem } from "./ApiContext";
+import { ConfigurationItem } from "./ApiContext";
 
-// ساختار داده فرم Configuration
-interface ConfigurationData {
-  id?: string;
-  Name: string;
-  Description?: string;
-  // ... سایر فیلدها
-}
-
-// ساختار داده فرم Command
+// Define CommandData if it's different from CommandItem
 interface CommandData {
   id?: string;
   Name: string;
-  Describtion?: string;
-  // ... سایر فیلدهای مورد نیاز
+  Describtion: string;
+  MainColumnIDName: string;
+  GroupName: string;
+  gridCmd: string;
+  tabCmd: string;
+  QR: string;
+  ViewMode: string | null;
+  DefaultColumns: string | null;
+  ReportParam: string | null;
+  ProjectIntensive: boolean;
+  ColorColumn: string;
+  InvisibleColumns: string;
+  ApiColumns: string;
+  SpParam: string;
+  CmdType: number;
+  ApiMode?: string;
+}
+
+interface ConfigurationData {
+  id?: string;
+  Name: string;
+  FirstIDProgramTemplate: string;
+  SelMenuIDForMain: string;
+  Description?: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  DefaultBtn: string;
+  LetterBtns: string;
+  MeetingBtns: string;
+  EnityTypeIDForLessonLearn: string;
+  EnityTypeIDForTaskCommnet: string;
+  EnityTypeIDForProcesure: string;
+  // ... سایر فیلدها در صورت نیاز
 }
 
 interface AddEditDeleteContextType {
-  // عملیات عمومی
   handleAdd: () => void;
   handleEdit: () => void;
   handleDelete: (subTabName: string, id: number) => Promise<void>;
   handleDuplicate: () => void;
-
-  // ذخیره (Add یا Edit) Configuration
   handleSaveConfiguration: (
     data: ConfigurationData
   ) => Promise<ConfigurationItem | null>;
-
-  // ذخیره (Add یا Edit) Command
   handleSaveCommand: (data: CommandData) => Promise<CommandItem | null>;
 }
 
@@ -45,26 +63,16 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
   const api = useApi();
   const [isLoading, setIsLoading] = useState(false);
 
-  /**
-   * عملیات Add
-   * (برای بازکردن فرم در حالت افزودن)
-   */
   const handleAdd = () => {
     console.log("Add clicked from context");
-    // اگر لاجیک خاصی برای بازکردن پنل یا... دارید، اینجا بنویسید
+    // Logic to open add form
   };
 
-  /**
-   * عملیات Edit
-   * (برای بازکردن فرم در حالت ویرایش)
-   */
   const handleEdit = () => {
     console.log("Edit action triggered from context");
+    // Logic to open edit form
   };
 
-  /**
-   * حذف رکورد. با توجه به ساب‌تب، متد Delete مناسب را فرامی‌خواند
-   */
   const handleDelete = async (subTabName: string, id: number) => {
     setIsLoading(true);
     try {
@@ -75,7 +83,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         await api.deleteCommand(id);
         console.log("Command deleted successfully!");
       }
-      // اگر تب‌های دیگری هم دارید، اینجا اضافه کنید
+      // Add more conditions if there are other sub-tabs
     } catch (error) {
       console.error("Error deleting record:", error);
       throw error;
@@ -84,17 +92,11 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  /**
-   * Duplicate (در صورت نیاز)
-   */
   const handleDuplicate = () => {
     console.log("Duplicate action triggered from context");
-    // کپی رکورد
+    // Logic to duplicate a record
   };
 
-  /**
-   * ذخیره (Add یا Edit) برای Configuration
-   */
   const handleSaveConfiguration = async (
     data: ConfigurationData
   ): Promise<ConfigurationItem | null> => {
@@ -103,24 +105,25 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       const newConfig: ConfigurationItem = {
         ...(data.id && { ID: parseInt(data.id) }),
         Name: data.Name,
+        FirstIDProgramTemplate: parseInt(data.FirstIDProgramTemplate) || 0,
+        SelMenuIDForMain: parseInt(data.SelMenuIDForMain) || 0,
         Description: data.Description || "",
-        // بقیه فیلدها
-        LastModified: new Date().toISOString(),
-        IsVisible: true,
-        FirstIDProgramTemplate: 0,
-        SelMenuIDForMain: 0,
-        EnityTypeIDForLessonLearn: 0,
-        EnityTypeIDForTaskCommnet: 0,
-        EnityTypeIDForProcesure: 0,
+        IsVisible: data.IsVisible,
+        LastModified: data.LastModified || new Date().toISOString(),
+        DefaultBtn: data.DefaultBtn || "",
+        LetterBtns: data.LetterBtns || "",
+        MeetingBtns: data.MeetingBtns || "",
+        EnityTypeIDForLessonLearn: parseInt(data.EnityTypeIDForLessonLearn) || 0,
+        EnityTypeIDForTaskCommnet: parseInt(data.EnityTypeIDForTaskCommnet) || 0,
+        EnityTypeIDForProcesure: parseInt(data.EnityTypeIDForProcesure) || 0,
+        // Add other fields as necessary
       };
 
       let result: ConfigurationItem;
       if (newConfig.ID) {
-        // Update
         result = await api.updateConfiguration(newConfig);
         console.log("Configuration updated:", result);
       } else {
-        // Insert
         result = await api.insertConfiguration(newConfig);
         console.log("Configuration inserted:", result);
       }
@@ -133,27 +136,39 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  /**
-   * ذخیره (Add یا Edit) برای Command
-   */
   const handleSaveCommand = async (
     data: CommandData
   ): Promise<CommandItem | null> => {
     setIsLoading(true);
     try {
-      const newCmd: CommandItem = {
+      const newCmd: Partial<CommandItem> = {
         ...(data.id && { ID: parseInt(data.id) }),
         Name: data.Name,
-        Describtion: data.Describtion,
-        // بقیه فیلدها
+        Describtion: data.Describtion || "",
+        MainColumnIDName: data.MainColumnIDName || "",
+        GroupName: data.GroupName || "",
+        gridCmd: data.gridCmd || "",
+        tabCmd: data.tabCmd || "",
+        QR: data.QR || "",
+        ViewMode: data.ViewMode || -1,
+        DefaultColumns: data.DefaultColumns || null,
+        ReportParam: data.ReportParam || null,
+        ProjectIntensive:
+          data.ProjectIntensive !== undefined ? data.ProjectIntensive : true,
+        ColorColumn: data.ColorColumn || "",
+        InvisibleColumns: data.InvisibleColumns || "",
+        ApiColumns: data.ApiColumns || "",
+        SpParam: data.SpParam || "",
+        CmdType: data.CmdType || 0,
+        ApiMode: data.ApiMode || "",
       };
 
       let updatedCmd: CommandItem;
       if (newCmd.ID) {
-        updatedCmd = await api.updateCommand(newCmd);
+        updatedCmd = await api.updateCommand(newCmd as CommandItem);
         console.log("Command updated:", updatedCmd);
       } else {
-        updatedCmd = await api.insertCommand(newCmd);
+        updatedCmd = await api.insertCommand(newCmd as CommandItem);
         console.log("Command inserted:", updatedCmd);
       }
 

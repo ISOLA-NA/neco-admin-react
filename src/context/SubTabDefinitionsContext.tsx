@@ -110,9 +110,8 @@ export const SubTabDefinitionsProvider: React.FC<{
       Commands: {
         endpoint: api.getAllCommands,
         columnDefs: [
-          { headerName: "ID", field: "ID", hide: true },
-          { headerName: "Name", field: "Name" },
-          { headerName: "Describtion", field: "Describtion" },
+          { headerName: "Name", field: "Name" , filter: "agTextColumnFilter",},
+          { headerName: "Describtion", field: "Describtion",    filter: "agTextColumnFilter", },
         ],
         iconVisibility: {
           showAdd: true,

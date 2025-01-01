@@ -129,14 +129,23 @@ export interface CommandItem {
   ViewMode?: any; // می‌تواند string یا number باشد
   DefaultColumns?: string | null;
   ReportParam?: string | null;
-  projectIntensive?: boolean;
+  ProjectIntensive?: boolean;
   ColorColumn?: string;
   InvisibleColumns?: string;
   ApiColumns?: string;
   SpParam?: string;
   CmdType?: number;
+  ApiMode?: string
 }
 
+export interface GetEnumRequest {
+  str: string;
+}
+
+// تعریف اینترفیس برای پاسخ getEnum
+export interface GetEnumResponse {
+  [key: string]: string;
+}
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -300,7 +309,16 @@ class ApiService {
   async deleteCommand(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteCommand, { ID: id });
   }
+
+  async getEnum(data: GetEnumRequest): Promise<GetEnumResponse> {
+    const response = await httpClient.post<GetEnumResponse>(
+      apiConst.getEnum,
+      data
+    );
+    return response.data;
+  }
 }
+
 
 // یک خروجی برای استفاده در Context
 const AppServices = new ApiService();

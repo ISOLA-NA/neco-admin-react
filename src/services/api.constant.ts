@@ -28,4 +28,6 @@ export const apiConst = Object.freeze({
   insertCommand: "api/Command/Insert",
   deleteCommand: "api/Command/Delete",
   updateCommand: "api/Command/Update",
+  getEnum: "api/GetEnumByName",
+
 });
