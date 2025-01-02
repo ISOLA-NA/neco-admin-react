@@ -382,9 +382,7 @@ class ApiService {
     const response = await httpClient.post<Menu[]>(apiConst.getAllMenu);
     return response.data;
   }
-  // -------------------
-  // Menu APIs
-  // -------------------
+
   /**
    * Fetch all menu tabs for a given menu ID.
    * @param menuId - The ID of the menu.
@@ -418,10 +416,6 @@ class ApiService {
     return response.data;
   }
 
-  /**
-   * Insert a new MenuTab.
-   * @param data - The MenuTab data to insert.
-   */
   async insertMenuTab(data: MenuTab): Promise<MenuTab> {
     const response = await httpClient.post<MenuTab>(
       apiConst.insertMenuTab,
@@ -448,70 +442,6 @@ class ApiService {
    */
   async deleteMenuTab(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteMenuTab, { ID: id });
-  }
-
-  /**
-   * Insert a new MenuGroup.
-   * @param data - The MenuGroup data to insert.
-   */
-  async insertMenuGroup(data: MenuGroup): Promise<MenuGroup> {
-    const response = await httpClient.post<MenuGroup>(
-      apiConst.insertMenuGroup,
-      data
-    );
-    return response.data;
-  }
-
-  /**
-   * Update an existing MenuGroup.
-   * @param data - The MenuGroup data to update.
-   */
-  async updateMenuGroup(data: MenuGroup): Promise<MenuGroup> {
-    const response = await httpClient.post<MenuGroup>(
-      apiConst.updateMenuGroup,
-      data
-    );
-    return response.data;
-  }
-
-  /**
-   * Delete a MenuGroup by ID.
-   * @param id - The ID of the MenuGroup to delete.
-   */
-  async deleteMenuGroup(id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteMenuGroup, { ID: id });
-  }
-
-  /**
-   * Insert a new MenuItem.
-   * @param data - The MenuItem data to insert.
-   */
-  async insertMenuItem(data: MenuItem): Promise<MenuItem> {
-    const response = await httpClient.post<MenuItem>(
-      apiConst.insertMenuItem,
-      data
-    );
-    return response.data;
-  }
-
-  /**
-   * Update an existing MenuItem.
-   * @param data - The MenuItem data to update.
-   */
-  async updateMenuItem(data: MenuItem): Promise<MenuItem> {
-    const response = await httpClient.post<MenuItem>(
-      apiConst.updateMenuItem,
-      data
-    );
-    return response.data;
-  }
-
-  /**
-   * Delete a MenuItem by ID.
-   * @param id - The ID of the MenuItem to delete.
-   */
-  async deleteMenuItem(id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteMenuItem, { ID: id });
   }
 }
 
