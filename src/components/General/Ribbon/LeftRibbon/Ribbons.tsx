@@ -23,13 +23,13 @@ interface RowData2 {
   Order: number;
 }
 
-const MainAccardeon: React.FC<{ selectedRibbon?: RibbonRow }> = ({
-  selectedRibbon,
+const MainAccardeon: React.FC<{ selectedRow?: RibbonRow }> = ({
+  selectedRow,
 }) => {
   const [selectedRow1, setSelectedRow1] = useState<RowData1 | null>(null);
   const [selectedRow2, setSelectedRow2] = useState<RowData2 | null>(null);
   const [selectedMenuId, setSelectedMenuId] = useState<number | null>(
-    selectedRibbon?.ID || null
+    selectedRow?.ID || null
   );
 
   const [accordionsOpen, setAccordionsOpen] = useState<{
@@ -49,13 +49,14 @@ const MainAccardeon: React.FC<{ selectedRibbon?: RibbonRow }> = ({
 
   // هر زمان که انتخاب Ribbon تغییر کند، Accordion1 را دوباره بارگذاری می‌کنیم
   useEffect(() => {
-    if (selectedRibbon) {
-      setSelectedMenuId(selectedRibbon.ID); // ID Ribbon انتخاب‌شده
+    if (selectedRow) {
+      setSelectedMenuId(selectedRow.ID); // ID Ribbon انتخاب‌شده
       setSelectedRow1(null); // پاک کردن داده‌های Accordion1
       setSelectedRow2(null); // پاک کردن داده‌های Accordion2
       setAccordionsOpen({ 1: true, 2: false, 3: false }); // باز کردن Accordion1
+      console.log("iddddddddddd", selectedRow);
     }
-  }, [selectedRibbon]);
+  }, [selectedRow]);
 
   useEffect(() => {
     if (selectedRow1) {

@@ -19,7 +19,6 @@ export const apiConst = Object.freeze({
   insertAFBtn: "api/AFBtn/Insert",
   updateAFBtn: "api/AFBtn/Update",
   deleteAFBtn: "api/AFBtn/Delete",
-  inserConfiguration: "api/Setting/Insert",
   uploadFile: "api/File/Upload",
   insert: "api/File/Insert",
   download: "api/File/Download",

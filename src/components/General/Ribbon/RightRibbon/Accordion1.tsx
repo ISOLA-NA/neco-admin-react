@@ -37,7 +37,9 @@ const Accordion1: React.FC<Accordion1Props> = ({
   onRowDoubleClick,
   isOpen,
   toggleAccordion,
+  selectedMenuId,
 }) => {
+  console.log("selectedMenuId", selectedMenuId);
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [selectedRow, setSelectedRow] = useState<RowData1 | null>(null);
   const [searchText, setSearchText] = useState<string>("");
@@ -55,7 +57,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
       setIsLoading(true);
       // فرض بر این است که nMenuId از یک منبع خاص گرفته می‌شود؛ در اینجا برای مثال، از 1 استفاده شده است
       // شما باید این مقدار را از انتخاب قبلی دریافت کنید
-      const nMenuId = 1; // جایگزین کنید با مقدار واقعی اگر نیاز بود
+      const nMenuId = selectedMenuId; // جایگزین کنید با مقدار واقعی اگر نیاز بود
       fetchDataForSubTab("MenuTab", { ID: nMenuId }) // ارسال id به درستی
         // تغییر در پارامترها
         .then((data: RowData1[]) => {
