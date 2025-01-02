@@ -50,25 +50,28 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [formData, setFormData] = useState<Partial<RowData1>>({});
 
   const columnDefs: ColDef<RowData1>[] =
-    subTabDefinitions["MenuTab"].columnDefs;
+    subTabDefinitions["MenuTab"]?.columnDefs || [];
 
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
-      // فرض بر این است که nMenuId از یک منبع خاص گرفته می‌شود؛ در اینجا برای مثال، از 1 استفاده شده است
-      // شما باید این مقدار را از انتخاب قبلی دریافت کنید
-      const nMenuId = selectedMenuId; // جایگزین کنید با مقدار واقعی اگر نیاز بود
-      fetchDataForSubTab("MenuTab", { ID: nMenuId }) // ارسال id به درستی
-        // تغییر در پارامترها
-        .then((data: RowData1[]) => {
-          setRowData(data);
-        })
-        .catch((error: any) => {
-          console.error("Error fetching MenuTabs:", error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      const nMenuId = selectedMenuId;
+      if (nMenuId !== null) {
+        fetchDataForSubTab("MenuTab", { ID: nMenuId })
+          .then((data: RowData1[]) => {
+            setRowData(data);
+          })
+          .catch((error: any) => {
+            console.error("Error fetching MenuTabs:", error);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      } else {
+        console.warn("selectedMenuId is null");
+        setRowData([]);
+        setIsLoading(false);
+      }
     } else {
       setRowData([]);
       setSelectedRow(null);
@@ -77,7 +80,13 @@ const Accordion1: React.FC<Accordion1Props> = ({
       setIsAdding(false);
       setFormData({});
     }
-  }, [isOpen, fetchDataForSubTab, subTabDefinitions, onRowClick]);
+  }, [
+    isOpen,
+    fetchDataForSubTab,
+    subTabDefinitions,
+    onRowClick,
+    selectedMenuId,
+  ]);
 
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
@@ -98,7 +107,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
     }
   };
 
-  const onEdit = async () => {
+  const onEdit = () => {
     if (!selectedRow) return;
     setIsEditing(true);
     setFormData({ ...selectedRow });
@@ -146,6 +155,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
   };
 
   const handleFormSubmit = async () => {
+    console.log("handleFormSubmit called with formData:", formData);
     if (isEditing) {
       // ویرایش MenuTab
       if (!formData.ID || !formData.Name) {
@@ -158,11 +168,12 @@ const Accordion1: React.FC<Accordion1Props> = ({
           Name: formData.Name,
           Description: formData.Description || "",
           Order: formData.Order || 0,
-          nMenuId: 1, // باید مقدار واقعی را جایگزین کنید
+          nMenuId: selectedMenuId!, // اطمینان از اینکه selectedMenuId وجود دارد
           IsVisible: true, // یا مقدار مناسب
           ModifiedById: null, // جایگزین با مقدار واقعی
           LastModified: null,
         };
+        console.log("Updating MenuTab:", updatedMenuTab);
         const result = await AppServices.updateMenuTab(updatedMenuTab);
         setRowData((prev) =>
           prev.map((row) => (row.ID === result.ID ? result : row))
@@ -186,11 +197,12 @@ const Accordion1: React.FC<Accordion1Props> = ({
           Name: formData.Name,
           Description: formData.Description || "",
           Order: formData.Order || 0,
-          nMenuId: 1, // باید مقدار واقعی را جایگزین کنید
+          nMenuId: selectedMenuId!, // اطمینان از اینکه selectedMenuId وجود دارد
           IsVisible: true, // یا مقدار مناسب
           ModifiedById: null, // جایگزین با مقدار واقعی
           LastModified: null,
         };
+        console.log("Inserting MenuTab:", newMenuTab);
         const result = await AppServices.insertMenuTab(newMenuTab);
         setRowData((prev) => [...prev, result]);
         setIsAdding(false);

@@ -171,14 +171,13 @@ export interface MenuTab {
 // Interface for MenuGroup
 export interface MenuGroup {
   ID: number;
-  ModifiedById: string;
-  IconImageId: string | null;
+  ModifiedById: string | null;
   Name: string;
   Order: number;
   Description: string;
   nMenuTabId: number;
   IsVisible: boolean;
-  LastModified: string;
+  LastModified: string | null;
 }
 
 // Interface for MenuItem
@@ -201,12 +200,6 @@ export interface MenuItem {
 }
 // ساخت یک کلاس برای متدهای API
 class ApiService {
-  insertMenuGroup(newMenuGroup: MenuGroup) {
-    throw new Error("Method not implemented.");
-  }
-  updateMenuGroup(updatedMenuGroup: MenuGroup) {
-    throw new Error("Method not implemented.");
-  }
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
@@ -443,6 +436,78 @@ class ApiService {
    */
   async deleteMenuTab(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteMenuTab, { ID: id });
+  }
+
+  // -------------------
+  // متدهای MenuGroup
+  // -------------------
+
+  /**
+   * درج یک MenuGroup جدید.
+   * @param data - داده‌های MenuGroup برای درج.
+   */
+  async insertMenuGroup(data: MenuGroup): Promise<MenuGroup> {
+    const response = await httpClient.post<MenuGroup>(
+      apiConst.insertMenuGroup,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * به‌روزرسانی یک MenuGroup موجود.
+   * @param data - داده‌های MenuGroup برای به‌روزرسانی.
+   */
+  async updateMenuGroup(data: MenuGroup): Promise<MenuGroup> {
+    const response = await httpClient.post<MenuGroup>(
+      apiConst.updateMenuGroup,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * حذف یک MenuGroup بر اساس ID.
+   * @param id - شناسه MenuGroup برای حذف.
+   */
+  async deleteMenuGroup(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuGroup, { ID: id });
+  }
+
+  // -------------------
+  // متدهای MenuItem
+  // -------------------
+
+  /**
+   * درج یک MenuItem جدید.
+   * @param data - داده‌های MenuItem برای درج.
+   */
+  async insertMenuItem(data: MenuItem): Promise<MenuItem> {
+    const response = await httpClient.post<MenuItem>(
+      apiConst.insertMenuItem,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * به‌روزرسانی یک MenuItem موجود.
+   * @param data - داده‌های MenuItem برای به‌روزرسانی.
+   */
+  async updateMenuItem(data: MenuItem): Promise<MenuItem> {
+    const response = await httpClient.post<MenuItem>(
+      apiConst.updateMenuItem,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * حذف یک MenuItem بر اساس ID.
+   * @param id - شناسه MenuItem برای حذف.
+   */
+  async deleteMenuItem(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuItem, { ID: id });
   }
 }
 
