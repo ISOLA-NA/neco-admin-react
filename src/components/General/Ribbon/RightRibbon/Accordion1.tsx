@@ -22,6 +22,7 @@ interface Accordion1Props {
   onRowDoubleClick: (menuTabId: number) => void;
   isOpen: boolean;
   toggleAccordion: () => void;
+  selectedMenuId: number | null; // اضافه کردن این prop
 }
 
 interface RowData1 {
@@ -55,7 +56,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
       // فرض بر این است که nMenuId از یک منبع خاص گرفته می‌شود؛ در اینجا برای مثال، از 1 استفاده شده است
       // شما باید این مقدار را از انتخاب قبلی دریافت کنید
       const nMenuId = 1; // جایگزین کنید با مقدار واقعی اگر نیاز بود
-      fetchDataForSubTab("MenuTab", { nMenuId })
+      fetchDataForSubTab("MenuTab", { ID: nMenuId }) // ارسال id به درستی
+        // تغییر در پارامترها
         .then((data: RowData1[]) => {
           setRowData(data);
         })

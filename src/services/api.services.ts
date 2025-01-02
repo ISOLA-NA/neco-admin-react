@@ -201,6 +201,12 @@ export interface MenuItem {
 }
 // ساخت یک کلاس برای متدهای API
 class ApiService {
+  insertMenuGroup(newMenuGroup: MenuGroup) {
+    throw new Error("Method not implemented.");
+  }
+  updateMenuGroup(updatedMenuGroup: MenuGroup) {
+    throw new Error("Method not implemented.");
+  }
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
@@ -383,39 +389,34 @@ class ApiService {
     return response.data;
   }
 
-  /**
-   * Fetch all menu tabs for a given menu ID.
-   * @param menuId - The ID of the menu.
-   */
   async getAllMenuTab(menuId: number): Promise<MenuTab[]> {
-    const response = await httpClient.post<MenuTab[]>(
-      `${apiConst.getAllMenuTab}?nMenuId=${menuId}`
-    );
+    const response = await httpClient.post<MenuTab[]>(apiConst.getAllMenuTab, {
+      ID: menuId, // مطمئن شوید که پارامتر ID در body ارسال می‌شود
+    });
     return response.data;
   }
 
-  /**
-   * Fetch all menu groups for a given menu tab ID.
-   * @param menuTabId - The ID of the menu tab.
-   */
+  // دریافت MenuGroups با ID
   async getAllMenuGroup(menuTabId: number): Promise<MenuGroup[]> {
     const response = await httpClient.post<MenuGroup[]>(
-      `${apiConst.getAllMenuGroup}?nMenuTabId=${menuTabId}`
+      apiConst.getAllMenuGroup,
+      {
+        ID: menuTabId, // مطمئن شوید که پارامتر ID در body ارسال می‌شود
+      }
     );
     return response.data;
   }
 
-  /**
-   * Fetch all menu items for a given menu group ID.
-   * @param menuGroupId - The ID of the menu group.
-   */
+  // دریافت MenuItems با ID
   async getAllMenuItem(menuGroupId: number): Promise<MenuItem[]> {
     const response = await httpClient.post<MenuItem[]>(
-      `${apiConst.getAllMenuItem}?nMenuGroupId=${menuGroupId}`
+      apiConst.getAllMenuItem,
+      {
+        ID: menuGroupId, // مطمئن شوید که پارامتر id در body ارسال می‌شود
+      }
     );
     return response.data;
   }
-
   async insertMenuTab(data: MenuTab): Promise<MenuTab> {
     const response = await httpClient.post<MenuTab>(
       apiConst.insertMenuTab,

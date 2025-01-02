@@ -50,7 +50,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
   useEffect(() => {
     if (isOpen && selectedMenuGroupId !== null) {
       setIsLoading(true);
-      fetchDataForSubTab("MenuItem", { nMenuGroupId: selectedMenuGroupId })
+      fetchDataForSubTab("MenuItem", { ID: selectedMenuGroupId }) // ارسال id
         .then((data: RowData3[]) => {
           setRowData(data);
         })

@@ -47,6 +47,7 @@ export const SubTabDefinitionsProvider: React.FC<{
     ProgramTemplateItem[]
   >([]);
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
+  const [menus, setMenus] = useState<Menu[]>([]);
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -55,12 +56,14 @@ export const SubTabDefinitionsProvider: React.FC<{
 
     const fetchInitialData = async () => {
       try {
-        const [templates, ribbons] = await Promise.all([
+        const [templates, ribbons, menusData] = await Promise.all([
           api.getAllProgramTemplates(),
           api.getAllDefaultRibbons(),
+          api.getAllMenu(),
         ]);
         setProgramTemplates(templates);
         setDefaultRibbons(ribbons);
+        setMenus(menusData);
       } catch (error) {
         console.error("Error in SubTabDefinitionsProvider:", error);
       }
@@ -157,15 +160,9 @@ export const SubTabDefinitionsProvider: React.FC<{
       // MenuTab
       // -------------------
       MenuTab: {
-        // Endpoint: دریافت MenuTab با استفاده از nMenuId
-        endpoint: (params: { nMenuId: number }) =>
-          api.getAllMenuTab(params.nMenuId),
+        endpoint: (params: { ID: number }) => api.getAllMenuTab(params.ID),
         columnDefs: [
-          {
-            headerName: "Name",
-            field: "Name",
-            filter: "agTextColumnFilter",
-          },
+          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
           {
             headerName: "Description",
             field: "Description",
@@ -185,19 +182,10 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
 
-      // -------------------
-      // MenuGroup
-      // -------------------
       MenuGroup: {
-        // Endpoint: دریافت MenuGroup با استفاده از nMenuTabId
-        endpoint: (params: { nMenuTabId: number }) =>
-          api.getAllMenuGroup(params.nMenuTabId),
+        endpoint: (params: { ID: number }) => api.getAllMenuGroup(params.ID),
         columnDefs: [
-          {
-            headerName: "Name",
-            field: "Name",
-            filter: "agTextColumnFilter",
-          },
+          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
           {
             headerName: "Description",
             field: "Description",
@@ -217,19 +205,10 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
 
-      // -------------------
-      // MenuItem
-      // -------------------
       MenuItem: {
-        // Endpoint: دریافت MenuItem با استفاده از nMenuGroupId
-        endpoint: (params: { nMenuGroupId: number }) =>
-          api.getAllMenuItem(params.nMenuGroupId),
+        endpoint: (params: { ID: number }) => api.getAllMenuItem(params.ID),
         columnDefs: [
-          {
-            headerName: "Name",
-            field: "Name",
-            filter: "agTextColumnFilter",
-          },
+          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
           {
             headerName: "Command",
             field: "Command",
@@ -256,7 +235,7 @@ export const SubTabDefinitionsProvider: React.FC<{
 
       // Add other sub-tabs here
     } as Record<string, SubTabDefinition>;
-  }, [api, programTemplates, defaultRibbons]);
+  }, [api, programTemplates, defaultRibbons, menus]);
 
   const fetchDataForSubTab = async (subTabName: string, params?: any) => {
     // If no token or endpoint not defined, return empty

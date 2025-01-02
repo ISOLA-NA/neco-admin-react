@@ -51,7 +51,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
   useEffect(() => {
     if (isOpen && selectedMenuTabId !== null) {
       setIsLoading(true);
-      fetchDataForSubTab("MenuGroup", { nMenuTabId: selectedMenuTabId })
+      fetchDataForSubTab("MenuGroup", { ID: selectedMenuTabId }) // ارسال id
         .then((data: RowData2[]) => {
           setRowData(data);
         })
