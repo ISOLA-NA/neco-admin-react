@@ -362,27 +362,29 @@ const TabContent: FC<TabContentProps> = ({
               minWidth: panelWidth <= 30 ? "300px" : "auto",
             }}
           >
-            <PanelHeader
-              isExpanded={false}
-              toggleExpand={() => {}}
-              onSave={
-                isAdding &&
-                (activeSubTab === "Configurations" ||
-                  activeSubTab === "Commands")
-                  ? handleSave
-                  : undefined
-              }
-              onUpdate={
-                !isAdding &&
-                (activeSubTab === "Configurations" ||
-                  activeSubTab === "Commands")
-                  ? handleUpdate
-                  : undefined
-              }
-              onClose={handleClose}
-              onTogglePanelSizeFromRight={togglePanelSizeFromRight}
-              isRightMaximized={isRightMaximized}
-            />
+            {activeSubTab !== "Ribbons" && (
+              <PanelHeader
+                isExpanded={false}
+                toggleExpand={() => {}}
+                onSave={
+                  isAdding &&
+                  (activeSubTab === "Configurations" ||
+                    activeSubTab === "Commands")
+                    ? handleSave
+                    : undefined
+                }
+                onUpdate={
+                  !isAdding &&
+                  (activeSubTab === "Configurations" ||
+                    activeSubTab === "Commands")
+                    ? handleUpdate
+                    : undefined
+                }
+                onClose={handleClose}
+                onTogglePanelSizeFromRight={togglePanelSizeFromRight}
+                isRightMaximized={isRightMaximized}
+              />
+            )}
 
             {activeSubTab === "ProjectsAccess" && (
               <Suspense fallback={<div>Loading Projects Access...</div>}>

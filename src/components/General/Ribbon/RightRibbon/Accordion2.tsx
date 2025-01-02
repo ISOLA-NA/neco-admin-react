@@ -15,131 +15,127 @@ import {
   FiChevronDown,
   FiChevronUp,
 } from "react-icons/fi";
+import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 
 interface Accordion2Props {
-  selectedRow: {
-    ID: number;
-    Name: string;
-    Description: string;
-    Order: number;
-  } | null;
+  selectedMenuTabId: number | null;
   onRowClick: (row: any) => void;
-  onRowDoubleClick: () => void;
+  onRowDoubleClick: (menuGroupId: number) => void;
   isOpen: boolean;
   toggleAccordion: () => void;
 }
 
 interface RowData2 {
   ID: number;
-  SubName: string;
-  SubDescription: string;
+  Name: string;
+  Description: string;
   Order: number;
 }
 
 const Accordion2: React.FC<Accordion2Props> = ({
-  selectedRow,
+  selectedMenuTabId,
   onRowClick,
   onRowDoubleClick,
   isOpen,
   toggleAccordion,
 }) => {
-  const [selectedRow2, setSelectedRow2] = useState<RowData2 | null>(null);
+  const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
+  const [selectedRow, setSelectedRow] = useState<RowData2 | null>(null);
   const [searchText, setSearchText] = useState<string>("");
   const [rowData, setRowData] = useState<RowData2[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const columnDefs: ColDef<RowData2>[] =
+    subTabDefinitions["MenuGroup"].columnDefs;
 
   useEffect(() => {
-    if (selectedRow) {
-      setRowData([
-        {
-          ID: 1,
-          SubName: `Sub-Row 1 of ${selectedRow.Name}`,
-          SubDescription: "Details 1",
-          Order: 1,
-        },
-        {
-          ID: 2,
-          SubName: `Sub-Row 2 of ${selectedRow.Name}`,
-          SubDescription: "Details 2",
-          Order: 2,
-        },
-      ]);
-      setSelectedRow2(null);
+    if (isOpen && selectedMenuTabId !== null) {
+      setIsLoading(true);
+      fetchDataForSubTab("MenuGroup", { nMenuTabId: selectedMenuTabId })
+        .then((data: RowData2[]) => {
+          setRowData(data);
+        })
+        .catch((error: any) => {
+          console.error("Error fetching MenuGroups:", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     } else {
       setRowData([]);
-      setSelectedRow2(null);
+      setSelectedRow(null);
+      onRowClick(null);
     }
-  }, [selectedRow]);
-
-  const columnDefs: ColDef<RowData2>[] = [
-    { headerName: "Sub-Name", field: "SubName", filter: "agTextColumnFilter" },
-    {
-      headerName: "Sub-Description",
-      field: "SubDescription",
-      filter: "agTextColumnFilter",
-    },
-    { headerName: "Order", field: "Order", filter: "agNumberColumnFilter" },
-  ];
+  }, [
+    isOpen,
+    selectedMenuTabId,
+    fetchDataForSubTab,
+    subTabDefinitions,
+    onRowClick,
+  ]);
 
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
     return rowData.filter((row) =>
-      Object.values(row).some((value) =>
-        value.toString().toLowerCase().includes(searchText.toLowerCase())
-      )
+      row.Name.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [searchText, rowData]);
 
   const handleRowClick = (event: any) => {
     const row = event.data as RowData2;
-    setSelectedRow2(row);
+    setSelectedRow(row);
     onRowClick(row);
   };
 
   const handleRowDoubleClickEvent = () => {
-    onRowDoubleClick();
+    if (selectedRow) {
+      onRowDoubleClick(selectedRow.ID);
+    }
   };
 
-  // Actions
+  // عملیات
   const onDuplicate = () => {
-    if (selectedRow2) {
+    if (selectedRow) {
       const newId =
         rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
-      const duplicatedRow = { ...selectedRow2, ID: newId };
+      const duplicatedRow = { ...selectedRow, ID: newId };
       setRowData((prev) => [...prev, duplicatedRow]);
-      setSelectedRow2(duplicatedRow);
+      setSelectedRow(duplicatedRow);
+      onRowClick(duplicatedRow);
     }
   };
 
   const onEdit = () => {
-    console.log("Edit clicked for Row:", selectedRow2);
+    console.log("Edit clicked for Row:", selectedRow);
+    // پیاده‌سازی منطق ویرایش در صورت نیاز
   };
 
   const onDelete = () => {
-    if (selectedRow2) {
-      setRowData((prev) => prev.filter((row) => row.ID !== selectedRow2.ID));
-      setSelectedRow2(null);
+    if (selectedRow) {
+      setRowData((prev) => prev.filter((row) => row.ID !== selectedRow.ID));
+      setSelectedRow(null);
       onRowClick(null);
     }
   };
 
   const onAdd = () => {
-    if (selectedRow) {
+    if (selectedMenuTabId !== null) {
       const newId =
         rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
       const newRow: RowData2 = {
         ID: newId,
-        SubName: "",
-        SubDescription: "",
+        Name: "",
+        Description: "",
         Order: 0,
       };
       setRowData((prev) => [...prev, newRow]);
-      setSelectedRow2(newRow);
-      onRowClick(null);
+      setSelectedRow(newRow);
+      onRowClick(newRow);
     }
   };
 
   const handleInputChange = (name: string, value: string | number) => {
-    setSelectedRow2((prev) => {
+    setSelectedRow((prev) => {
       if (prev) {
         const updatedRow = { ...prev, [name]: value };
         setRowData((prevData) =>
@@ -157,13 +153,13 @@ const Accordion2: React.FC<Accordion2Props> = ({
     >
       <div
         className="collapse-title text-xl font-medium cursor-pointer flex justify-between items-center"
-        onClick={toggleAccordion} // اکاردئون با یک کلیک باز/بسته شود
+        onClick={toggleAccordion}
       >
-        <span>Accordion 2 - Sub Table</span>
+        <span>Menu Groups</span>
         {isOpen ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
       </div>
       <div className="collapse-content">
-        {isOpen && selectedRow ? (
+        {isOpen && selectedMenuTabId !== null ? (
           <>
             {/* نوار جستجو و دکمه‌های عملیات */}
             <div className="flex items-center justify-between mb-4">
@@ -184,26 +180,26 @@ const Accordion2: React.FC<Accordion2Props> = ({
                   className="text-yellow-600 hover:text-yellow-800 transition"
                   title="Duplicate"
                   onClick={onDuplicate}
+                  disabled={!selectedRow}
                 >
                   <FiCopy size={25} />
                 </button>
-
                 <button
                   className="text-blue-600 hover:text-blue-800 transition"
                   title="Edit"
                   onClick={onEdit}
+                  disabled={!selectedRow}
                 >
                   <FiEdit size={25} />
                 </button>
-
                 <button
                   className="text-red-600 hover:text-red-800 transition"
                   title="Delete"
                   onClick={onDelete}
+                  disabled={!selectedRow}
                 >
                   <FiTrash2 size={25} />
                 </button>
-
                 <button
                   className="text-green-600 hover:text-green-800 transition"
                   title="Add"
@@ -228,45 +224,52 @@ const Accordion2: React.FC<Accordion2Props> = ({
                 onRowDoubleClicked={handleRowDoubleClickEvent}
                 rowSelection="single"
                 animateRows={true}
+                overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
+                loadingOverlayComponentParams={{ loadingMessage: "Loading..." }}
               />
             </div>
 
             {/* فیلدهای ورودی */}
-            <div className="mt-4">
-              <DynamicInput
-                name="SubName"
-                type="text"
-                value={selectedRow2?.SubName || ""}
-                placeholder=""
-                onChange={(e) => handleInputChange("SubName", e.target.value)}
-                className="mt-10"
-              />
-              <DynamicInput
-                name="SubDescription"
-                type="text"
-                value={selectedRow2?.SubDescription || ""}
-                placeholder=""
-                onChange={(e) =>
-                  handleInputChange("SubDescription", e.target.value)
-                }
-                className="mt-10"
-              />
-              <DynamicInput
-                name="Order"
-                type="number"
-                value={selectedRow2?.Order || 0}
-                placeholder=""
-                onChange={(e) =>
-                  handleInputChange("Order", parseInt(e.target.value, 10) || 0)
-                }
-                className="mt-10"
-              />
-            </div>
+            {selectedRow && (
+              <div className="mt-4">
+                <DynamicInput
+                  name="Name"
+                  type="text"
+                  value={selectedRow?.Name || ""}
+                  placeholder="Name"
+                  onChange={(e) => handleInputChange("Name", e.target.value)}
+                  className="mt-2"
+                />
+                <DynamicInput
+                  name="Description"
+                  type="text"
+                  value={selectedRow?.Description || ""}
+                  placeholder="Description"
+                  onChange={(e) =>
+                    handleInputChange("Description", e.target.value)
+                  }
+                  className="mt-2"
+                />
+                <DynamicInput
+                  name="Order"
+                  type="number"
+                  value={selectedRow?.Order || 0}
+                  placeholder="Order"
+                  onChange={(e) =>
+                    handleInputChange(
+                      "Order",
+                      parseInt(e.target.value, 10) || 0
+                    )
+                  }
+                  className="mt-2"
+                />
+              </div>
+            )}
           </>
         ) : (
           isOpen && (
             <p className="text-gray-500">
-              Select a row in Accordion 1 to see more details.
+              Select a Menu Tab in Accordion 1 to see Menu Groups.
             </p>
           )
         )}

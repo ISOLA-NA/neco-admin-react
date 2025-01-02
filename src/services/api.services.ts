@@ -135,7 +135,7 @@ export interface CommandItem {
   ApiColumns?: string;
   SpParam?: string;
   CmdType?: number;
-  ApiMode?: string
+  ApiMode?: string;
 }
 
 export interface GetEnumRequest {
@@ -145,6 +145,59 @@ export interface GetEnumRequest {
 // تعریف اینترفیس برای پاسخ getEnum
 export interface GetEnumResponse {
   [key: string]: string;
+}
+
+export interface Menu {
+  ID: number;
+  ModifiedById: string;
+  Name: string;
+  Description: string;
+  IsVisible: boolean;
+  LastModified: string;
+}
+
+// Interface for MenuTab
+export interface MenuTab {
+  ID: number;
+  ModifiedById?: string | null;
+  Name: string;
+  Order: number;
+  Description: string;
+  nMenuId: number;
+  IsVisible: boolean;
+  LastModified: string | null;
+}
+
+// Interface for MenuGroup
+export interface MenuGroup {
+  ID: number;
+  ModifiedById: string;
+  IconImageId: string | null;
+  Name: string;
+  Order: number;
+  Description: string;
+  nMenuTabId: number;
+  IsVisible: boolean;
+  LastModified: string;
+}
+
+// Interface for MenuItem
+export interface MenuItem {
+  ID: number;
+  ModifiedById: string;
+  Name: string;
+  Description: string;
+  Order: number;
+  IconImageId: string | null;
+  Command: string;
+  CommandWeb: string;
+  CommandMobile: string;
+  HelpText: string;
+  KeyTip: string;
+  Size: number;
+  nMenuGroupId: number;
+  IsVisible: boolean;
+  LastModified: string;
 }
 // ساخت یک کلاس برای متدهای API
 class ApiService {
@@ -317,8 +370,150 @@ class ApiService {
     );
     return response.data;
   }
-}
 
+  // -------------------
+  // Menu APIs
+  // -------------------
+
+  /**
+   * Fetch all menus.
+   */
+  async getAllMenu(): Promise<Menu[]> {
+    const response = await httpClient.post<Menu[]>(apiConst.getAllMenu);
+    return response.data;
+  }
+  // -------------------
+  // Menu APIs
+  // -------------------
+  /**
+   * Fetch all menu tabs for a given menu ID.
+   * @param menuId - The ID of the menu.
+   */
+  async getAllMenuTab(menuId: number): Promise<MenuTab[]> {
+    const response = await httpClient.post<MenuTab[]>(
+      `${apiConst.getAllMenuTab}?nMenuId=${menuId}`
+    );
+    return response.data;
+  }
+
+  /**
+   * Fetch all menu groups for a given menu tab ID.
+   * @param menuTabId - The ID of the menu tab.
+   */
+  async getAllMenuGroup(menuTabId: number): Promise<MenuGroup[]> {
+    const response = await httpClient.post<MenuGroup[]>(
+      `${apiConst.getAllMenuGroup}?nMenuTabId=${menuTabId}`
+    );
+    return response.data;
+  }
+
+  /**
+   * Fetch all menu items for a given menu group ID.
+   * @param menuGroupId - The ID of the menu group.
+   */
+  async getAllMenuItem(menuGroupId: number): Promise<MenuItem[]> {
+    const response = await httpClient.post<MenuItem[]>(
+      `${apiConst.getAllMenuItem}?nMenuGroupId=${menuGroupId}`
+    );
+    return response.data;
+  }
+
+  /**
+   * Insert a new MenuTab.
+   * @param data - The MenuTab data to insert.
+   */
+  async insertMenuTab(data: MenuTab): Promise<MenuTab> {
+    const response = await httpClient.post<MenuTab>(
+      apiConst.insertMenuTab,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Update an existing MenuTab.
+   * @param data - The MenuTab data to update.
+   */
+  async updateMenuTab(data: MenuTab): Promise<MenuTab> {
+    const response = await httpClient.post<MenuTab>(
+      apiConst.updateMenuTab,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Delete a MenuTab by ID.
+   * @param id - The ID of the MenuTab to delete.
+   */
+  async deleteMenuTab(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuTab, { ID: id });
+  }
+
+  /**
+   * Insert a new MenuGroup.
+   * @param data - The MenuGroup data to insert.
+   */
+  async insertMenuGroup(data: MenuGroup): Promise<MenuGroup> {
+    const response = await httpClient.post<MenuGroup>(
+      apiConst.insertMenuGroup,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Update an existing MenuGroup.
+   * @param data - The MenuGroup data to update.
+   */
+  async updateMenuGroup(data: MenuGroup): Promise<MenuGroup> {
+    const response = await httpClient.post<MenuGroup>(
+      apiConst.updateMenuGroup,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Delete a MenuGroup by ID.
+   * @param id - The ID of the MenuGroup to delete.
+   */
+  async deleteMenuGroup(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuGroup, { ID: id });
+  }
+
+  /**
+   * Insert a new MenuItem.
+   * @param data - The MenuItem data to insert.
+   */
+  async insertMenuItem(data: MenuItem): Promise<MenuItem> {
+    const response = await httpClient.post<MenuItem>(
+      apiConst.insertMenuItem,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Update an existing MenuItem.
+   * @param data - The MenuItem data to update.
+   */
+  async updateMenuItem(data: MenuItem): Promise<MenuItem> {
+    const response = await httpClient.post<MenuItem>(
+      apiConst.updateMenuItem,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * Delete a MenuItem by ID.
+   * @param id - The ID of the MenuItem to delete.
+   */
+  async deleteMenuItem(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuItem, { ID: id });
+  }
+}
 
 // یک خروجی برای استفاده در Context
 const AppServices = new ApiService();

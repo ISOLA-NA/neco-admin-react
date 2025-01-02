@@ -15,14 +15,10 @@ import {
   FiChevronDown,
   FiChevronUp,
 } from "react-icons/fi";
+import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 
 interface Accordion3Props {
-  selectedRow: {
-    ID: number;
-    SubName: string;
-    SubDescription: string;
-    Order: number;
-  } | null;
+  selectedMenuGroupId: number | null;
   onRowDoubleClick: () => void;
   isOpen: boolean;
   toggleAccordion: () => void;
@@ -30,116 +26,106 @@ interface Accordion3Props {
 
 interface RowData3 {
   ID: number;
-  DetailName: string;
-  DetailDescription: string;
+  Name: string;
+  Command: string;
+  Description: string;
   Order: number;
 }
 
 const Accordion3: React.FC<Accordion3Props> = ({
-  selectedRow,
+  selectedMenuGroupId,
   onRowDoubleClick,
   isOpen,
   toggleAccordion,
 }) => {
-  const [selectedRow3, setSelectedRow3] = useState<RowData3 | null>(null);
+  const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
+  const [selectedRow, setSelectedRow] = useState<RowData3 | null>(null);
   const [searchText, setSearchText] = useState<string>("");
   const [rowData, setRowData] = useState<RowData3[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const columnDefs: ColDef<RowData3>[] =
+    subTabDefinitions["MenuItem"].columnDefs;
 
   useEffect(() => {
-    if (selectedRow) {
-      setRowData([
-        {
-          ID: 1,
-          DetailName: `Detail-1 of ${selectedRow.SubName}`,
-          DetailDescription: "Extra Info 1",
-          Order: 1,
-        },
-        {
-          ID: 2,
-          DetailName: `Detail-2 of ${selectedRow.SubName}`,
-          DetailDescription: "Extra Info 2",
-          Order: 2,
-        },
-      ]);
-      setSelectedRow3(null);
+    if (isOpen && selectedMenuGroupId !== null) {
+      setIsLoading(true);
+      fetchDataForSubTab("MenuItem", { nMenuGroupId: selectedMenuGroupId })
+        .then((data: RowData3[]) => {
+          setRowData(data);
+        })
+        .catch((error: any) => {
+          console.error("Error fetching MenuItems:", error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     } else {
       setRowData([]);
-      setSelectedRow3(null);
+      setSelectedRow(null);
     }
-  }, [selectedRow]);
-
-  const columnDefs: ColDef<RowData3>[] = [
-    {
-      headerName: "Detail-Name",
-      field: "DetailName",
-      filter: "agTextColumnFilter",
-    },
-    {
-      headerName: "Detail-Description",
-      field: "DetailDescription",
-      filter: "agTextColumnFilter",
-    },
-    { headerName: "Order", field: "Order", filter: "agNumberColumnFilter" },
-  ];
+  }, [isOpen, selectedMenuGroupId, fetchDataForSubTab, subTabDefinitions]);
 
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
-    return rowData.filter((row) =>
-      Object.values(row).some((value) =>
-        value.toString().toLowerCase().includes(searchText.toLowerCase())
-      )
+    return rowData.filter(
+      (row) =>
+        row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.Command.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.Description.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [searchText, rowData]);
 
   const handleRowClick = (event: any) => {
     const row = event.data as RowData3;
-    setSelectedRow3(row);
+    setSelectedRow(row);
   };
 
   const handleRowDoubleClickEvent = () => {
     onRowDoubleClick();
-    // اکاردئون بعدی وجود ندارد، بنابراین این فراخوانی کاری انجام نمی‌دهد
   };
 
-  // Actions
+  // عملیات
   const onDuplicate = () => {
-    if (selectedRow3) {
+    if (selectedRow) {
       const newId =
         rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
-      const duplicatedRow = { ...selectedRow3, ID: newId };
+      const duplicatedRow = { ...selectedRow, ID: newId };
       setRowData((prev) => [...prev, duplicatedRow]);
-      setSelectedRow3(duplicatedRow);
+      setSelectedRow(duplicatedRow);
     }
   };
 
   const onEdit = () => {
-    console.log("Edit clicked for Row:", selectedRow3);
+    console.log("Edit clicked for Row:", selectedRow);
+    // پیاده‌سازی منطق ویرایش در صورت نیاز
   };
 
   const onDelete = () => {
-    if (selectedRow3) {
-      setRowData((prev) => prev.filter((row) => row.ID !== selectedRow3.ID));
-      setSelectedRow3(null);
+    if (selectedRow) {
+      setRowData((prev) => prev.filter((row) => row.ID !== selectedRow.ID));
+      setSelectedRow(null);
     }
   };
 
   const onAdd = () => {
-    if (selectedRow) {
+    if (selectedMenuGroupId !== null) {
       const newId =
         rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
       const newRow: RowData3 = {
         ID: newId,
-        DetailName: "",
-        DetailDescription: "",
+        Name: "",
+        Command: "",
+        Description: "",
         Order: 0,
       };
       setRowData((prev) => [...prev, newRow]);
-      setSelectedRow3(newRow);
+      setSelectedRow(newRow);
     }
   };
 
   const handleInputChange = (name: string, value: string | number) => {
-    setSelectedRow3((prev) => {
+    setSelectedRow((prev) => {
       if (prev) {
         const updatedRow = { ...prev, [name]: value };
         setRowData((prevData) =>
@@ -157,13 +143,13 @@ const Accordion3: React.FC<Accordion3Props> = ({
     >
       <div
         className="collapse-title text-xl font-medium cursor-pointer flex justify-between items-center"
-        onClick={toggleAccordion} // با یک کلیک باز/بسته شود
+        onClick={toggleAccordion}
       >
-        <span>Accordion 3 - Details Table</span>
+        <span>Menu Items</span>
         {isOpen ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
       </div>
       <div className="collapse-content">
-        {isOpen && selectedRow ? (
+        {isOpen && selectedMenuGroupId !== null ? (
           <>
             {/* نوار جستجو و دکمه‌های عملیات */}
             <div className="flex items-center justify-between mb-4">
@@ -184,6 +170,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   className="text-yellow-600 hover:text-yellow-800 transition"
                   title="Duplicate"
                   onClick={onDuplicate}
+                  disabled={!selectedRow}
                 >
                   <FiCopy size={25} />
                 </button>
@@ -191,6 +178,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   className="text-blue-600 hover:text-blue-800 transition"
                   title="Edit"
                   onClick={onEdit}
+                  disabled={!selectedRow}
                 >
                   <FiEdit size={25} />
                 </button>
@@ -198,6 +186,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   className="text-red-600 hover:text-red-800 transition"
                   title="Delete"
                   onClick={onDelete}
+                  disabled={!selectedRow}
                 >
                   <FiTrash2 size={25} />
                 </button>
@@ -225,47 +214,60 @@ const Accordion3: React.FC<Accordion3Props> = ({
                 onRowDoubleClicked={handleRowDoubleClickEvent}
                 rowSelection="single"
                 animateRows={true}
+                overlayLoadingTemplate='<span class="ag-overlay-loading-center">Loading...</span>'
+                loadingOverlayComponentParams={{ loadingMessage: "Loading..." }}
               />
             </div>
 
             {/* فیلدهای ورودی */}
-            <div className="mt-4">
-              <DynamicInput
-                name="DetailName"
-                type="text"
-                value={selectedRow3?.DetailName || ""}
-                placeholder=""
-                onChange={(e) =>
-                  handleInputChange("DetailName", e.target.value)
-                }
-                className="mt-10"
-              />
-              <DynamicInput
-                name="DetailDescription"
-                type="text"
-                value={selectedRow3?.DetailDescription || ""}
-                placeholder=""
-                onChange={(e) =>
-                  handleInputChange("DetailDescription", e.target.value)
-                }
-                className="mt-10"
-              />
-              <DynamicInput
-                name="Order"
-                type="number"
-                value={selectedRow3?.Order || 0}
-                placeholder=""
-                onChange={(e) =>
-                  handleInputChange("Order", parseInt(e.target.value, 10) || 0)
-                }
-                className="mt-10"
-              />
-            </div>
+            {selectedRow && (
+              <div className="mt-4">
+                <DynamicInput
+                  name="Name"
+                  type="text"
+                  value={selectedRow?.Name || ""}
+                  placeholder="Name"
+                  onChange={(e) => handleInputChange("Name", e.target.value)}
+                  className="mt-2"
+                />
+                <DynamicInput
+                  name="Command"
+                  type="text"
+                  value={selectedRow?.Command || ""}
+                  placeholder="Command"
+                  onChange={(e) => handleInputChange("Command", e.target.value)}
+                  className="mt-2"
+                />
+                <DynamicInput
+                  name="Description"
+                  type="text"
+                  value={selectedRow?.Description || ""}
+                  placeholder="Description"
+                  onChange={(e) =>
+                    handleInputChange("Description", e.target.value)
+                  }
+                  className="mt-2"
+                />
+                <DynamicInput
+                  name="Order"
+                  type="number"
+                  value={selectedRow?.Order || 0}
+                  placeholder="Order"
+                  onChange={(e) =>
+                    handleInputChange(
+                      "Order",
+                      parseInt(e.target.value, 10) || 0
+                    )
+                  }
+                  className="mt-2"
+                />
+              </div>
+            )}
           </>
         ) : (
           isOpen && (
             <p className="text-gray-500">
-              Select a row in Accordion 2 to see more details.
+              Select a Menu Group in Accordion 2 to see Menu Items.
             </p>
           )
         )}

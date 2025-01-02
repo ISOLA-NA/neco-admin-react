@@ -16,6 +16,10 @@ import AppServices, {
   WfTemplateItem,
   AFBtnItem,
   CommandItem,
+  Menu,
+  MenuTab,
+  MenuGroup,
+  MenuItem,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -50,6 +54,30 @@ interface ApiContextType {
   insertCommand: (data: CommandItem) => Promise<CommandItem>;
   updateCommand: (data: CommandItem) => Promise<CommandItem>;
   deleteCommand: (id: number) => Promise<void>;
+
+  // ------------------- Menu APIs -------------------
+  /**
+   * Fetch all menus.
+   */
+  getAllMenu: () => Promise<Menu[]>;
+
+  /**
+   * Fetch all menu tabs for a given menu ID.
+   * @param menuId - The ID of the menu.
+   */
+  getAllMenuTab: (menuId: number) => Promise<MenuTab[]>;
+
+  /**
+   * Fetch all menu groups for a given menu tab ID.
+   * @param menuTabId - The ID of the menu tab.
+   */
+  getAllMenuGroup: (menuTabId: number) => Promise<MenuGroup[]>;
+
+  /**
+   * Fetch all menu items for a given menu group ID.
+   * @param menuGroupId - The ID of the menu group.
+   */
+  getAllMenuItem: (menuGroupId: number) => Promise<MenuItem[]>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -70,7 +98,7 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     updateConfiguration: AppServices.updateConfiguration.bind(AppServices),
     deleteConfiguration: AppServices.deleteConfiguration.bind(AppServices),
 
-    // سایر
+    // سایر سرویس‌ها
     getAllProgramTemplates:
       AppServices.getAllProgramTemplates.bind(AppServices),
     getAllDefaultRibbons: AppServices.getAllDefaultRibbons.bind(AppServices),
@@ -89,6 +117,12 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertCommand: AppServices.insertCommand.bind(AppServices),
     updateCommand: AppServices.updateCommand.bind(AppServices),
     deleteCommand: AppServices.deleteCommand.bind(AppServices),
+
+    // ------------------- Menu APIs -------------------
+    getAllMenu: AppServices.getAllMenu.bind(AppServices),
+    getAllMenuTab: AppServices.getAllMenuTab.bind(AppServices),
+    getAllMenuGroup: AppServices.getAllMenuGroup.bind(AppServices),
+    getAllMenuItem: AppServices.getAllMenuItem.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -115,4 +149,8 @@ export type {
   WfTemplateItem,
   AFBtnItem,
   CommandItem,
+  Menu,
+  MenuTab,
+  MenuGroup,
+  MenuItem,
 };

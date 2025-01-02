@@ -1,4 +1,5 @@
 // src/context/SubTabDefinitionsContext.tsx
+
 import React, {
   createContext,
   useContext,
@@ -8,10 +9,17 @@ import React, {
 } from "react";
 import { useApi } from "./ApiContext";
 import Cookies from "js-cookie";
-import { ProgramTemplateItem, DefaultRibbonItem } from "./ApiContext";
+import {
+  ProgramTemplateItem,
+  DefaultRibbonItem,
+  Menu,
+  MenuTab,
+  MenuGroup,
+  MenuItem,
+} from "./ApiContext";
 
 interface SubTabDefinition {
-  endpoint?: () => Promise<any[]>;
+  endpoint?: (params?: any) => Promise<any[]>;
   columnDefs: any[];
   iconVisibility: {
     showAdd: boolean;
@@ -23,7 +31,7 @@ interface SubTabDefinition {
 
 interface SubTabDefinitionsContextType {
   subTabDefinitions: Record<string, SubTabDefinition>;
-  fetchDataForSubTab: (subTabName: string) => Promise<any[]>;
+  fetchDataForSubTab: (subTabName: string, params?: any) => Promise<any[]>;
 }
 
 const SubTabDefinitionsContext = createContext<SubTabDefinitionsContextType>(
@@ -42,7 +50,7 @@ export const SubTabDefinitionsProvider: React.FC<{
 
   useEffect(() => {
     const token = Cookies.get("token");
-    // فقط اگر توکن داریم، داده‌های محافظت‌شده را بگیریم
+    // Only fetch protected data if token exists
     if (!token) return;
 
     const fetchInitialData = async () => {
@@ -110,8 +118,12 @@ export const SubTabDefinitionsProvider: React.FC<{
       Commands: {
         endpoint: api.getAllCommands,
         columnDefs: [
-          { headerName: "Name", field: "Name" , filter: "agTextColumnFilter",},
-          { headerName: "Describtion", field: "Describtion",    filter: "agTextColumnFilter", },
+          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
+          {
+            headerName: "Description",
+            field: "Description",
+            filter: "agTextColumnFilter",
+          },
         ],
         iconVisibility: {
           showAdd: true,
@@ -121,18 +133,139 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
 
-      // اگر ساب‌تب‌های دیگری دارید، اینجا تعریف کنید ...
+      // -------------------
+      // Ribbons
+      // -------------------
+      Ribbons: {
+        endpoint: api.getAllMenu,
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true, // Adjust based on needs
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
+      // -------------------
+      // MenuTab
+      // -------------------
+      MenuTab: {
+        // Endpoint: دریافت MenuTab با استفاده از nMenuId
+        endpoint: (params: { nMenuId: number }) =>
+          api.getAllMenuTab(params.nMenuId),
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Description",
+            field: "Description",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Order",
+            field: "Order",
+            filter: "agNumberColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
+      // -------------------
+      // MenuGroup
+      // -------------------
+      MenuGroup: {
+        // Endpoint: دریافت MenuGroup با استفاده از nMenuTabId
+        endpoint: (params: { nMenuTabId: number }) =>
+          api.getAllMenuGroup(params.nMenuTabId),
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Description",
+            field: "Description",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Order",
+            field: "Order",
+            filter: "agNumberColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
+      // -------------------
+      // MenuItem
+      // -------------------
+      MenuItem: {
+        // Endpoint: دریافت MenuItem با استفاده از nMenuGroupId
+        endpoint: (params: { nMenuGroupId: number }) =>
+          api.getAllMenuItem(params.nMenuGroupId),
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Command",
+            field: "Command",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Description",
+            field: "Description",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Order",
+            field: "Order",
+            filter: "agNumberColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
+      // Add other sub-tabs here
     } as Record<string, SubTabDefinition>;
   }, [api, programTemplates, defaultRibbons]);
 
-  const fetchDataForSubTab = async (subTabName: string) => {
-    // اگر توکن نداریم یا اندپوینت تعریف نشده، خالی برگردان
+  const fetchDataForSubTab = async (subTabName: string, params?: any) => {
+    // If no token or endpoint not defined, return empty
     const token = Cookies.get("token");
     if (!token) return [];
 
     const definition = subTabDefinitions[subTabName];
     if (!definition || !definition.endpoint) return [];
-    return await definition.endpoint();
+    return await definition.endpoint(params);
   };
 
   return (

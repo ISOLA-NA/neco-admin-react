@@ -29,5 +29,15 @@ export const apiConst = Object.freeze({
   deleteCommand: "api/Command/Delete",
   updateCommand: "api/Command/Update",
   getEnum: "api/GetEnumByName",
-
+  getAllMenu: "api/Menu/GetAll",
+  getAllMenuTab: "api/MenuTab/GetAll",
+  insertMenuTab: "api/MenuTab/Insert",
+  updateMenuTab: "api/MenuTab/Update",
+  deleteMenuTab: "api/MenuTab/Delete",
+  getAllMenuGroup: "api/MenuGroup/GetAll",
+  getAllMenuItem: "api/MenuItem/GetAll",
 });
+
+// getAllMenuTab: "api/MenuTab/GetByMenuId",
+// getAllMenuGroup: "api/MenuGroup/GetAllByMenuGroupId",
+// getAllMenuItem: "api/MenuItem/GetAllByMenuTabID",
