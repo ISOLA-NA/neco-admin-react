@@ -31,6 +31,10 @@ interface RowData3 {
   Command: string;
   Description: string;
   Order: number;
+  IsVisible?: boolean;
+  LastModified?: string | null;
+  ModifiedById?: string | null;
+  // می‌توانید سایر فیلدهای مورد نیاز را اضافه کنید
 }
 
 const Accordion3: React.FC<Accordion3Props> = ({
@@ -62,7 +66,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
           <button
             className="text-yellow-600 hover:text-yellow-800 transition"
             onClick={() => handleDuplicate(params.data)}
-            title="Duplicate"
+            title="کپی"
           >
             <FiCopy size={20} />
           </button>
@@ -90,10 +94,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
       setIsLoading(true);
       fetchDataForSubTab("MenuItem", { ID: selectedMenuGroupId }) // ارسال id
         .then((data: RowData3[]) => {
-          setRowData(data);
+          // اطمینان حاصل کنید که ModifiedById به جای رشته خالی، null باشد
+          const sanitizedData = data.map((item) => ({
+            ...item,
+            ModifiedById: item.ModifiedById === "" ? null : item.ModifiedById,
+          }));
+          setRowData(sanitizedData);
         })
         .catch((error: any) => {
-          console.error("Error fetching MenuItems:", error);
+          console.error("خطا در دریافت MenuItems:", error);
         })
         .finally(() => {
           setIsLoading(false);
@@ -105,7 +114,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
       setIsAdding(false);
       setFormData({});
     }
-  }, [isOpen, selectedMenuGroupId, fetchDataForSubTab, subTabDefinitions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, selectedMenuGroupId]);
 
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
@@ -119,8 +129,13 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   const handleRowClick = (event: any) => {
     const row = event.data as RowData3;
-    setSelectedRow(row);
-    setFormData(row);
+    // اطمینان از اینکه ModifiedById خالی نیست
+    const sanitizedRow = {
+      ...row,
+      ModifiedById: row.ModifiedById === "" ? null : row.ModifiedById,
+    };
+    setSelectedRow(sanitizedRow);
+    setFormData(sanitizedRow);
     setIsEditing(false);
     setIsAdding(false);
   };
@@ -132,14 +147,16 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   // عملیات
   const handleDuplicate = (row: RowData3) => {
-    const newId =
-      rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
-    const duplicatedRow = { ...row, ID: newId };
-    setRowData((prev) => [...prev, duplicatedRow]);
-    setSelectedRow(duplicatedRow);
+    const duplicatedRow: RowData3 = {
+      ...row,
+      ID: 0, // فرض بر این است که ID=0 نشان‌دهنده یک ردیف جدید است و Backend ID جدید اختصاص می‌دهد
+      Name: `${row.Name} (کپی)`,
+      ModifiedById: null, // اطمینان از اینکه مقدار null است
+    };
     setFormData(duplicatedRow);
-    setIsEditing(false);
     setIsAdding(true);
+    setIsEditing(false);
+    setSelectedRow(null);
   };
 
   const handleEdit = (row: RowData3) => {
@@ -160,9 +177,9 @@ const Accordion3: React.FC<Accordion3Props> = ({
       setRowData((prev) => prev.filter((r) => r.ID !== row.ID));
       setSelectedRow(null);
       setFormData({});
-      alert("حذف موفقیت‌آمیز بود.");
+      alert("حذف با موفقیت انجام شد.");
     } catch (error: any) {
-      console.error("Error deleting MenuItem:", error);
+      console.error("خطا در حذف MenuItem:", error);
       alert("حذف با خطا مواجه شد.");
     }
   };
@@ -172,17 +189,17 @@ const Accordion3: React.FC<Accordion3Props> = ({
       alert("لطفاً یک Menu Group را انتخاب کنید.");
       return;
     }
-    const newId =
-      rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
     const newRow: RowData3 = {
-      ID: newId,
+      ID: 0, // Backend باید ID واقعی را اختصاص دهد
       Name: "",
       Command: "",
       Description: "",
       Order: 0,
+      IsVisible: true,
+      LastModified: null,
+      ModifiedById: null,
     };
-    setRowData((prev) => [...prev, newRow]);
-    setSelectedRow(newRow);
+    setSelectedRow(null);
     setFormData(newRow);
     setIsAdding(true);
     setIsEditing(false);
@@ -200,68 +217,78 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("handleFormSubmit called with formData:", formData);
-
+    console.log("handleFormSubmit با formData:", formData);
     if (!formData.Name || !formData.Command) {
       alert("لطفاً نام و دستور را وارد کنید.");
       return;
     }
 
+    // اطمینان از اینکه ModifiedById خالی نیست
+    const sanitizedFormData = {
+      ...formData,
+      ModifiedById:
+        formData.ModifiedById && formData.ModifiedById.trim() !== ""
+          ? formData.ModifiedById
+          : null,
+    };
+
     if (isAdding) {
       // افزودن MenuItem جدید
       try {
         const newMenuItem: MenuItem = {
-          ID: formData.ID!,
-          Name: formData.Name,
-          Command: formData.Command,
-          Description: formData.Description || "",
-          Order: formData.Order || 0,
+          ID: 0, // Backend باید ID واقعی را اختصاص دهد
+          Name: sanitizedFormData.Name!,
+          Command: sanitizedFormData.Command!,
+          Description: sanitizedFormData.Description || "",
+          Order: sanitizedFormData.Order || 0,
           nMenuGroupId: selectedMenuGroupId!,
-          ModifiedById: "",
+          IsVisible: sanitizedFormData.IsVisible ?? true,
+          LastModified: null,
+          ModifiedById: sanitizedFormData.ModifiedById,
           IconImageId: null,
           CommandWeb: "",
           CommandMobile: "",
           HelpText: "",
           KeyTip: "",
           Size: 0,
-          IsVisible: false,
-          LastModified: "",
+          // سایر فیلدهای مورد نیاز را اضافه کنید
         };
-        console.log("Inserting MenuItem:", newMenuItem);
+        console.log("درج MenuItem جدید:", newMenuItem);
         const result = await AppServices.insertMenuItem(newMenuItem);
-        setRowData((prev) => [...prev, result]);
+        setRowData((prev) => [result, ...prev]);
         setIsAdding(false);
         setFormData({});
-        alert("اضافه کردن با موفقیت انجام شد.");
+        alert("افزودن با موفقیت انجام شد.");
       } catch (error: any) {
-        console.error("Error inserting MenuItem:", error);
-        alert("اضافه کردن با خطا مواجه شد.");
+        console.error("خطا در افزودن MenuItem:", error);
+        alert("افزودن با خطا مواجه شد.");
       }
     } else if (isEditing) {
       // ویرایش MenuItem موجود
-      if (!formData.ID) {
+      if (sanitizedFormData.ID === undefined || sanitizedFormData.ID === null) {
         alert("شناسه MenuItem وجود ندارد.");
         return;
       }
       try {
         const updatedMenuItem: MenuItem = {
-          ID: formData.ID,
-          Name: formData.Name,
-          Command: formData.Command,
-          Description: formData.Description || "",
-          Order: formData.Order || 0,
+          ID: sanitizedFormData.ID,
+          Name: sanitizedFormData.Name!,
+          Command: sanitizedFormData.Command!,
+          Description: sanitizedFormData.Description || "",
+          Order: sanitizedFormData.Order || 0,
           nMenuGroupId: selectedMenuGroupId!,
-          ModifiedById: "",
+          IsVisible: sanitizedFormData.IsVisible ?? true,
+          LastModified: sanitizedFormData.LastModified || null,
+          ModifiedById: sanitizedFormData.ModifiedById,
           IconImageId: null,
           CommandWeb: "",
           CommandMobile: "",
           HelpText: "",
           KeyTip: "",
           Size: 0,
-          IsVisible: false,
-          LastModified: "",
+          // سایر فیلدهای مورد نیاز را اضافه کنید
         };
-        console.log("Updating MenuItem:", updatedMenuItem);
+        console.log("به‌روزرسانی MenuItem:", updatedMenuItem);
         const result = await AppServices.updateMenuItem(updatedMenuItem);
         setRowData((prev) =>
           prev.map((row) => (row.ID === result.ID ? result : row))
@@ -270,7 +297,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         setFormData({});
         alert("ویرایش با موفقیت انجام شد.");
       } catch (error: any) {
-        console.error("Error updating MenuItem:", error);
+        console.error("خطا در ویرایش MenuItem:", error);
         alert("ویرایش با خطا مواجه شد.");
       }
     }
@@ -322,7 +349,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                 </button>
                 <button
                   className="text-yellow-600 hover:text-yellow-800 transition"
-                  title="Duplicate"
+                  title="کپی"
                   onClick={() => {
                     if (selectedRow) {
                       handleDuplicate(selectedRow);
@@ -441,6 +468,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     }
                     className="mt-2"
                   />
+                  {/* اگر فیلدهای دیگری نیاز دارید می‌توانید آنها را اضافه کنید */}
                 </div>
                 <div className="flex justify-end space-x-4 mt-4">
                   <button

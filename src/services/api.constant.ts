@@ -38,9 +38,9 @@ export const apiConst = Object.freeze({
   updateMenuGroup: "api/MenuGroup/Update",
   deleteMenuGroup: "api/MenuGroup/Delete",
   getAllMenuItem: "api/MenuItem/GetAllByMenuGroupId",
-  insertMenuItem: "api/MenuItem/GetAllByMenuGroupId",
-  updateMenuItem: "api/MenuItem/GetAllByMenuGroupId",
-  deleteMenuItem: "api/MenuItem/GetAllByMenuGroupId",
+  insertMenuItem: "api/MenuItem/Insert",
+  updateMenuItem: "api/MenuItem/Update",
+  deleteMenuItem: "api/MenuItem/Delete",
 });
 
 // getAllMenuTab: "api/MenuTab/GetByMenuId",

@@ -183,7 +183,7 @@ export interface MenuGroup {
 // Interface for MenuItem
 export interface MenuItem {
   ID: number;
-  ModifiedById: string;
+  ModifiedById: string | null;
   Name: string;
   Description: string;
   Order: number;
@@ -196,7 +196,7 @@ export interface MenuItem {
   Size: number;
   nMenuGroupId: number;
   IsVisible: boolean;
-  LastModified: string;
+  LastModified: string | null;
 }
 // ساخت یک کلاس برای متدهای API
 class ApiService {
