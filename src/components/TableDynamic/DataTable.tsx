@@ -116,10 +116,8 @@ const DataTable: React.FC<DataTableProps> = ({
     onRowDoubleClick(event.data);
   };
 
-  const gridClasses =
-    filteredRowData.length > 10
-      ? "ag-theme-quartz h-96 overflow-y-auto"
-      : "ag-theme-quartz flex-grow h-full";
+  // تنظیم کلاس‌های ثابت برای حفظ اسکرول عمودی
+  const gridClasses = "ag-theme-quartz h-96 overflow-y-auto";
 
   const getRowClass = (params: any) => {
     return params.node.selected ? "ag-row-selected" : "";

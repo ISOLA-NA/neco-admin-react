@@ -52,21 +52,20 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const columnDefs: ColDef<RowData1>[] =
     subTabDefinitions["MenuTab"]?.columnDefs || [];
 
-  useEffect(() => {
+  // تابع برای بارگذاری داده‌ها
+  const loadRowData = async () => {
     if (isOpen) {
       setIsLoading(true);
       const nMenuId = selectedMenuId;
       if (nMenuId !== null) {
-        fetchDataForSubTab("MenuTab", { ID: nMenuId })
-          .then((data: RowData1[]) => {
-            setRowData(data);
-          })
-          .catch((error: any) => {
-            console.error("Error fetching MenuTabs:", error);
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
+        try {
+          const data: RowData1[] = await fetchDataForSubTab("MenuTab", { ID: nMenuId });
+          setRowData(data);
+        } catch (error) {
+          console.error("Error fetching MenuTabs:", error);
+        } finally {
+          setIsLoading(false);
+        }
       } else {
         console.warn("selectedMenuId is null");
         setRowData([]);
@@ -80,13 +79,12 @@ const Accordion1: React.FC<Accordion1Props> = ({
       setIsAdding(false);
       setFormData({});
     }
-  }, [
-    isOpen,
-    fetchDataForSubTab,
-    subTabDefinitions,
-    onRowClick,
-    selectedMenuId,
-  ]);
+  };
+
+  useEffect(() => {
+    loadRowData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, fetchDataForSubTab, subTabDefinitions, onRowClick, selectedMenuId]);
 
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
@@ -122,10 +120,10 @@ const Accordion1: React.FC<Accordion1Props> = ({
 
     try {
       await AppServices.deleteMenuTab(selectedRow.ID);
-      setRowData((prev) => prev.filter((row) => row.ID !== selectedRow.ID));
+      alert("حذف موفقیت‌آمیز بود.");
+      await loadRowData(); // بارگذاری مجدد داده‌ها بعد از حذف
       setSelectedRow(null);
       onRowClick(null);
-      alert("حذف موفقیت‌آمیز بود.");
     } catch (error) {
       console.error("Error deleting MenuTab:", error);
       alert("حذف با خطا مواجه شد.");
@@ -174,13 +172,11 @@ const Accordion1: React.FC<Accordion1Props> = ({
           LastModified: null,
         };
         console.log("Updating MenuTab:", updatedMenuTab);
-        const result = await AppServices.updateMenuTab(updatedMenuTab);
-        setRowData((prev) =>
-          prev.map((row) => (row.ID === result.ID ? result : row))
-        );
+        await AppServices.updateMenuTab(updatedMenuTab);
+        alert("ویرایش با موفقیت انجام شد.");
         setIsEditing(false);
         setFormData({});
-        alert("ویرایش با موفقیت انجام شد.");
+        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از ویرایش
       } catch (error) {
         console.error("Error updating MenuTab:", error);
         alert("ویرایش با خطا مواجه شد.");
@@ -203,11 +199,11 @@ const Accordion1: React.FC<Accordion1Props> = ({
           LastModified: null,
         };
         console.log("Inserting MenuTab:", newMenuTab);
-        const result = await AppServices.insertMenuTab(newMenuTab);
-        setRowData((prev) => [...prev, result]);
+        await AppServices.insertMenuTab(newMenuTab);
+        alert("اضافه کردن با موفقیت انجام شد.");
         setIsAdding(false);
         setFormData({});
-        alert("اضافه کردن با موفقیت انجام شد.");
+        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از افزودن
       } catch (error) {
         console.error("Error inserting MenuTab:", error);
         alert("اضافه کردن با خطا مواجه شد.");
@@ -308,7 +304,6 @@ const Accordion1: React.FC<Accordion1Props> = ({
           {/* فرم ویرایش یا افزودن */}
           {(isEditing || isAdding) && formData && (
             <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
-
               <div className="grid grid-cols-1 gap-4">
                 <DynamicInput
                   name="Name"

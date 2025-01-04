@@ -209,7 +209,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     setSelectedFileId(newFileId);
 
     // ریست کردن preview
-    handleReset();
+    // handleReset();
 
     // به‌روز رسانی داده‌های جدول
     fetchAllAFBtn();

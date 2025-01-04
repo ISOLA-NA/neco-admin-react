@@ -1,3 +1,5 @@
+// src/components/MainAccordion.tsx
+
 import React, { useState, useEffect } from "react";
 import Accordion1 from "../RightRibbon/Accordion1";
 import Accordion2 from "../RightRibbon/Accordion2";
@@ -23,7 +25,7 @@ interface RowData2 {
   Order: number;
 }
 
-const MainAccardeon: React.FC<{ selectedRow?: RibbonRow }> = ({
+const MainAccordion: React.FC<{ selectedRow?: RibbonRow }> = ({
   selectedRow,
 }) => {
   const [selectedRow1, setSelectedRow1] = useState<RowData1 | null>(null);
@@ -54,7 +56,7 @@ const MainAccardeon: React.FC<{ selectedRow?: RibbonRow }> = ({
       setSelectedRow1(null); // پاک کردن داده‌های Accordion1
       setSelectedRow2(null); // پاک کردن داده‌های Accordion2
       setAccordionsOpen({ 1: true, 2: false, 3: false }); // باز کردن Accordion1
-      console.log("iddddddddddd", selectedRow);
+      console.log("Selected Ribbon:", selectedRow);
     }
   }, [selectedRow]);
 
@@ -76,6 +78,7 @@ const MainAccardeon: React.FC<{ selectedRow?: RibbonRow }> = ({
 
   return (
     <div className="-mt-5">
+      <h1>aaaaaaaaa</h1>
       <Accordion1
         onRowClick={(row: RowData1 | null) => {
           setSelectedRow1(row);
@@ -111,4 +114,4 @@ const MainAccardeon: React.FC<{ selectedRow?: RibbonRow }> = ({
   );
 };
 
-export default MainAccardeon;
+export default MainAccordion;

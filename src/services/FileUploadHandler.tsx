@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import fileService from "./api.servicesFile"; // لطفاً مسیر را بررسی کنید
-import apiService from "./api.services";      // لطفاً مسیر را بررسی کنید
+import fileService from "./api.servicesFile"; // Ensure correct path
+import apiService from "./api.services";      // Ensure correct path
 import ImageUploader from "../components/utilities/ImageUploader";
 
-// تعریف و صادرات InsertModel
 export interface InsertModel {
-  ID?: string;       // UUID مجزا برای رکورد
-  FileIQ?: string;   // UUID مجزا برای فایل
+  ID?: string;
+  FileIQ?: string;
   FileName: string;
   FileSize: number;
   FolderName: string;
@@ -20,10 +19,10 @@ export interface InsertModel {
 }
 
 interface FileUploadHandlerProps {
-  selectedFileId: string | null; // شناسه فایل برای دانلود (ID رکورد)
-  onUploadSuccess?: (insertModel: InsertModel) => void; // کال‌بک پس از آپلود موفقیت‌آمیز
-  resetCounter: number; // برای ریست کردن پیش‌نمایش
-  onReset: () => void;  // تابع ریست که از خارج ارسال می‌شود
+  selectedFileId: string | null;
+  onUploadSuccess?: (insertModel: InsertModel) => void;
+  resetCounter: number;
+  onReset: () => void;
 }
 
 const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
@@ -32,112 +31,102 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
   resetCounter,
   onReset,
 }) => {
-  const [, setUploadedFileInfo] = useState<InsertModel | null>(null);
-  const [, setIsLoading] = useState<boolean>(false);
+  const [uploadedFileInfo, setUploadedFileInfo] = useState<InsertModel | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // پیش‌نمایش مربوط به فایلی که به‌تازگی آپلود شده
   const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
-  // پیش‌نمایش مربوط به فایلی که از سرور دانلود می‌کنیم
   const [downloadedPreviewUrl, setDownloadedPreviewUrl] = useState<string | null>(null);
 
-  // این state نشان می‌دهد که فایل جدیداً آپلود شده یا خیر
-  const [justUploaded, setJustUploaded] = useState<boolean>(false);
-
-  // دریافت شناسه کاربر
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         const res = await apiService.getIdByUserToken();
         if (res && res.length > 0) {
           setUserId(res[0].ID.toString());
-          console.log("شناسه کاربر دریافت شد:", res[0].ID.toString());
+          console.log("User ID fetched:", res[0].ID.toString());
         }
       } catch (err: any) {
-        console.error("خطا در دریافت شناسه کاربر:", err);
-        setErrorMessage("خطا در دریافت اطلاعات کاربر.");
+        console.error("Error fetching user ID:", err);
+        setErrorMessage("Error fetching user information.");
       }
     };
     fetchUserId();
   }, []);
 
-  // اگر selectedFileId تغییر کند، تلاش برای دانلود فایل (مگر اینکه خالی باشد)
   useEffect(() => {
     const downloadFile = async () => {
-      // اگر شناسه خالی باشد، چیزی برای دانلود نداریم
-     if (!selectedFileId || selectedFileId.trim() === "") {
+      if (!selectedFileId || selectedFileId.trim() === "") {
         setDownloadedPreviewUrl(null);
         return;
       }
 
-      // اگر فایل جدیداً آپلود شده باشد، لازم نیست دوباره دانلود کنیم.
-      // چون preview لوکال را داریم.
-      if (justUploaded) {
+      if (uploadedPreviewUrl) {
+        // If there's an uploaded preview, don't download from server
         return;
       }
 
       setIsLoading(true);
       setErrorMessage(null);
-      setUploadedPreviewUrl(null); // پاک کردن پیش‌نمایش آپلودی قبلی
+      setUploadedPreviewUrl(null);
 
       try {
-        // با selectedFileId فایل را از سرور می‌گیریم
         const res = await fileService.getFile(selectedFileId);
 
         if (!res.data) {
-          setErrorMessage("فایل مورد نظر یافت نشد.");
+          setErrorMessage("File not found.");
           setDownloadedPreviewUrl(null);
           return;
         }
 
-        // در پاسخ سرور، فرض بر این است که FileIQ، FileType و FolderName موجود است
         const { FileIQ, FileType, FolderName } = res.data;
         const obj = {
           FileName: `${FileIQ}${FileType}`,
           FolderName: FolderName,
+          cacheBust: Date.now(), // Add cache busting parameter
         };
 
         const downloadResponse = await fileService.download(obj);
 
-        // تبدیل آرایه بایت به Blob
         const blob = new Blob([downloadResponse.data], {
           type: "application/octet-stream",
         });
 
-        // ساخت DataURL از Blob
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          setDownloadedPreviewUrl(result);
-        };
-        reader.readAsDataURL(blob);
+        const objectUrl = URL.createObjectURL(blob);
+        setDownloadedPreviewUrl(objectUrl);
+        console.log("Downloaded preview URL set:", objectUrl);
       } catch (err: any) {
-        console.error("خطا در دانلود فایل:", err);
-        // setErrorMessage("خطا در دانلود فایل.");
+        console.error("Error downloading file:", err);
         setUploadedPreviewUrl(null);
         setDownloadedPreviewUrl(null);
-        // onReset();
       } finally {
         setIsLoading(false);
       }
     };
 
     downloadFile();
-  }, [selectedFileId, onReset, justUploaded]);
+  }, [selectedFileId, uploadedPreviewUrl]);
 
-  // ریست کردن پیش‌نمایش با افزایش resetCounter
   useEffect(() => {
     if (resetCounter > 0) {
       setDownloadedPreviewUrl(null);
       setUploadedPreviewUrl(null);
-      // همچنین اگر reset فراخوانی شود، یعنی دیگر فایل جدید آپلودشده نداریم
-      setJustUploaded(false);
-      console.log("پیش‌نمایش ریست شد به دلیل تغییر در resetCounter:", resetCounter);
+      console.log("Preview reset due to resetCounter:", resetCounter);
     }
   }, [resetCounter]);
 
-  // تابع فرمت تاریخ (استفاده می‌شود برای ساخت نام فولدر بر اساس تاریخ روز)
+  useEffect(() => {
+    return () => {
+      if (downloadedPreviewUrl) {
+        URL.revokeObjectURL(downloadedPreviewUrl);
+      }
+      if (uploadedPreviewUrl) {
+        URL.revokeObjectURL(uploadedPreviewUrl);
+      }
+    };
+  }, [downloadedPreviewUrl, uploadedPreviewUrl]);
+
   const dateFormat = (inputDate: Date, format: string): string => {
     const date = new Date(inputDate);
     const day = date.getDate();
@@ -156,49 +145,42 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     return formatted;
   };
 
-  // آپلود فایل
   const handleFileUpload = async (file: File) => {
-    console.log("در حال آپلود فایل:", file.name);
+    console.log("Uploading file:", file.name);
     setIsLoading(true);
     setErrorMessage(null);
     setUploadedPreviewUrl(null);
+    setDownloadedPreviewUrl(null); // Clear previous download preview
 
     try {
-      // اعتبارسنجی پسوند
       const allowedExtensions = ["jpg", "jpeg", "png"];
       const fileExtension = file.name.split(".").pop()?.toLowerCase();
       if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-        setErrorMessage("لطفاً فقط فایل‌های با پسوند jpg، jpeg یا png را انتخاب کنید.");
+        setErrorMessage("Please select only jpg, jpeg, or png files.");
         setIsLoading(false);
         return;
       }
 
-      // تولید دو UUID مجزا برای ID و FileIQ
       const ID = uuidv4();
       const FileIQ = uuidv4();
 
-      // نام پوشه بر اساس تاریخ
       const folderName = dateFormat(new Date(), "yy-MM-dd");
-      // نام کامل فایل (مثلاً 0364bfee-1eb2-48d7-bd68-1281d81a33a7.jpg)
       const generatedFileName = `${FileIQ}.${fileExtension}`;
 
-      // آماده‌سازی FormData
       const formData = new FormData();
       formData.append("FileName", generatedFileName);
       formData.append("FolderName", folderName);
       formData.append("file", file);
 
-      // آپلود فایل به سرور
       const uploadResponse = await fileService.uploadFile(formData);
-      console.log("پاسخ آپلود:", uploadResponse);
+      console.log("Upload response:", uploadResponse);
 
       if (uploadResponse && uploadResponse.status) {
         const { FileSize } = uploadResponse.data;
 
-        // ایجاد InsertModel با دو UUID مجزا
         const insertModel: InsertModel = {
-          ID: ID,                   // UUID جدید برای ID
-          FileIQ: FileIQ,           // UUID جدید برای FileIQ
+          ID: ID,
+          FileIQ: FileIQ,
           FileName: generatedFileName,
           FileSize: FileSize || file.size,
           FolderName: folderName,
@@ -208,60 +190,52 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
           FileType: `.${fileExtension}`,
         };
 
-        // درج اطلاعات فایل در دیتابیس
         const insertResponse = await fileService.insert(insertModel);
 
         if (insertResponse && insertResponse.status) {
           const insertedModel: InsertModel = insertResponse.data;
           setUploadedFileInfo(insertedModel);
 
-          // ساخت پیش‌نمایش آپلودشده (لوکال)
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setUploadedPreviewUrl(reader.result as string);
-            console.log("URL پیش‌نمایش فایل آپلود شده تنظیم شد.");
-          };
-          reader.readAsDataURL(file);
+          const previewUrl = URL.createObjectURL(file);
+          setUploadedPreviewUrl(previewUrl);
+          console.log("Uploaded preview URL set:", previewUrl);
 
-          alert("فایل با موفقیت آپلود و درج شد.");
+          alert("File uploaded and inserted successfully.");
 
-          // اعلام کنیم که فایل آپلود شده
-          setJustUploaded(true);
-
-          // فراخوانی callback
           if (onUploadSuccess) {
             onUploadSuccess(insertedModel);
           }
         } else {
-          setErrorMessage("درج اطلاعات فایل در دیتابیس ناموفق بود.");
+          setErrorMessage("Failed to insert file info to database.");
         }
       } else {
-        setErrorMessage("آپلود فایل ناموفق بود.");
+        setErrorMessage("File upload failed.");
       }
     } catch (error: any) {
-      console.error("خطا در آپلود یا درج فایل:", error);
-      setErrorMessage("خطا در آپلود یا درج فایل.");
+      console.error("Error uploading or inserting file:", error);
+      setErrorMessage("Error uploading or inserting file.");
       setUploadedFileInfo(null);
       setUploadedPreviewUrl(null);
+      setDownloadedPreviewUrl(null);
       onReset();
     } finally {
       setIsLoading(false);
     }
   };
 
-  // تعیین پیش‌نمایش نهایی (دانلودی یا آپلودی)
-  const previewSrc = downloadedPreviewUrl || uploadedPreviewUrl;
+  const previewSrc = uploadedPreviewUrl || downloadedPreviewUrl;
 
   return (
     <div className="flex flex-col items-center rounded-lg w-full">
       <div className="w-full flex flex-col items-center space-y-4">
-        {/* کامپوننت آپلود تصویر */}
         <ImageUploader
-          key={`image-uploader-${resetCounter}`}
+          key={`image-uploader-${resetCounter}-${selectedFileId}-${uploadedPreviewUrl}-${downloadedPreviewUrl}`}
           onUpload={handleFileUpload}
           externalPreviewUrl={previewSrc}
         />
       </div>
+      {isLoading && <p className="text-blue-500 mt-2">Uploading...</p>}
+      {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
     </div>
   );
 };

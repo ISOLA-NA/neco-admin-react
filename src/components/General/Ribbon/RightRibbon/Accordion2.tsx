@@ -82,20 +82,18 @@ const Accordion2: React.FC<Accordion2Props> = ({
     },
   ];
 
-  useEffect(() => {
+  // تابع برای بارگذاری داده‌ها
+  const loadRowData = async () => {
     if (isOpen && selectedMenuTabId !== null) {
       setIsLoading(true);
-      // ارسال پارامتر صحیح با نام ID
-      fetchDataForSubTab("MenuGroup", { ID: selectedMenuTabId })
-        .then((data: RowData2[]) => {
-          setRowData(data);
-        })
-        .catch((error: any) => {
-          console.error("Error fetching MenuGroups:", error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      try {
+        const data: RowData2[] = await fetchDataForSubTab("MenuGroup", { ID: selectedMenuTabId });
+        setRowData(data);
+      } catch (error) {
+        console.error("Error fetching MenuGroups:", error);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setRowData([]);
       setSelectedRow(null);
@@ -104,13 +102,12 @@ const Accordion2: React.FC<Accordion2Props> = ({
       setIsAdding(false);
       setFormData({});
     }
-  }, [
-    isOpen,
-    selectedMenuTabId,
-    fetchDataForSubTab,
-    subTabDefinitions,
-    onRowClick,
-  ]);
+  };
+
+  useEffect(() => {
+    loadRowData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, selectedMenuTabId]);
 
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
@@ -148,10 +145,10 @@ const Accordion2: React.FC<Accordion2Props> = ({
 
     try {
       await AppServices.deleteMenuGroup(row.ID);
-      setRowData((prev) => prev.filter((r) => r.ID !== row.ID));
+      alert("حذف موفقیت‌آمیز بود.");
+      await loadRowData(); // بارگذاری مجدد داده‌ها بعد از حذف
       setSelectedRow(null);
       onRowClick(null);
-      alert("حذف موفقیت‌آمیز بود.");
     } catch (error: any) {
       console.error("Error deleting MenuGroup:", error);
       alert("حذف با خطا مواجه شد.");
@@ -209,11 +206,11 @@ const Accordion2: React.FC<Accordion2Props> = ({
           LastModified: null,
         };
         console.log("Inserting MenuGroup:", newMenuGroup);
-        const result = await AppServices.insertMenuGroup(newMenuGroup);
-        setRowData((prev) => [...prev, result]);
+        await AppServices.insertMenuGroup(newMenuGroup);
+        alert("اضافه کردن با موفقیت انجام شد.");
         setIsAdding(false);
         setFormData({});
-        alert("اضافه کردن با موفقیت انجام شد.");
+        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از افزودن
       } catch (error: any) {
         console.error("Error inserting MenuGroup:", error);
         alert("اضافه کردن با خطا مواجه شد.");
@@ -236,13 +233,11 @@ const Accordion2: React.FC<Accordion2Props> = ({
           LastModified: null,
         };
         console.log("Updating MenuGroup:", updatedMenuGroup);
-        const result = await AppServices.updateMenuGroup(updatedMenuGroup);
-        setRowData((prev) =>
-          prev.map((row) => (row.ID === result.ID ? result : row))
-        );
+        await AppServices.updateMenuGroup(updatedMenuGroup);
+        alert("ویرایش با موفقیت انجام شد.");
         setIsEditing(false);
         setFormData({});
-        alert("ویرایش با موفقیت انجام شد.");
+        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از ویرایش
       } catch (error: any) {
         console.error("Error updating MenuGroup:", error);
         alert("ویرایش با خطا مواجه شد.");
@@ -364,7 +359,9 @@ const Accordion2: React.FC<Accordion2Props> = ({
                       type="text"
                       value={formData.Name || ""}
                       placeholder="نام"
-                      onChange={(e) => handleInputChange("Name", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("Name", e.target.value)
+                      }
                       className="mt-2"
                     />
                     <DynamicInput

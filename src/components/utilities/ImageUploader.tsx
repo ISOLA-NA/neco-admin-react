@@ -19,11 +19,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const file = event.target.files?.[0];
     if (file) {
       onUpload(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setInternalPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const previewUrl = URL.createObjectURL(file);
+      setInternalPreview(previewUrl);
     }
   };
 
@@ -43,20 +40,27 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const file = event.dataTransfer.files[0];
     if (file) {
       onUpload(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setInternalPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const previewUrl = URL.createObjectURL(file);
+      setInternalPreview(previewUrl);
     }
   };
 
-  // اگر externalPreviewUrl تغییر کند، پیش‌نمایش داخلی را پاک می‌کنیم
   useEffect(() => {
-    setInternalPreview(null);
+    if (externalPreviewUrl) {
+      setInternalPreview(null);
+    }
   }, [externalPreviewUrl]);
 
   const previewSrc = externalPreviewUrl || internalPreview;
+
+  // Clean up the object URL when the component unmounts or when a new file is uploaded
+  useEffect(() => {
+    return () => {
+      if (internalPreview) {
+        URL.revokeObjectURL(internalPreview);
+      }
+    };
+  }, [internalPreview]);
 
   return (
     <div className="w-full flex flex-col space-y-2">

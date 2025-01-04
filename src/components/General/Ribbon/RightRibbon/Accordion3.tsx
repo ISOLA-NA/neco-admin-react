@@ -6,6 +6,8 @@ import { ColDef } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import DynamicInput from "../../../utilities/DynamicInput";
+import DynamicRadioGroup from "../../../utilities/DynamicRadiogroup"; // ایمپورت DynamicRadioGroup
+import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler"; // ایمپورت FileUploadHandler
 import { FaSearch } from "react-icons/fa";
 import {
   FiCopy,
@@ -34,6 +36,7 @@ interface RowData3 {
   IsVisible?: boolean;
   LastModified?: string | null;
   ModifiedById?: string | null;
+  IconImageId?: string | null; // اضافه کردن IconImageId
   // می‌توانید سایر فیلدهای مورد نیاز را اضافه کنید
 }
 
@@ -51,6 +54,11 @@ const Accordion3: React.FC<Accordion3Props> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [formData, setFormData] = useState<Partial<RowData3>>({});
+
+  // وضعیت برای سایز و آیدی تصویر
+  const [selectedSize, setSelectedSize] = useState<string>("0"); // پیش‌فرض "Large"
+  const [iconImageId, setIconImageId] = useState<string | null>(null);
+  const [resetCounter, setResetCounter] = useState<number>(0);
 
   // تعریف ستون‌ها و اضافه کردن ستون عملیات
   const columnDefs: ColDef<RowData3>[] = [
@@ -89,31 +97,38 @@ const Accordion3: React.FC<Accordion3Props> = ({
     },
   ];
 
-  useEffect(() => {
+  // تابع برای بارگذاری داده‌ها
+  const loadRowData = async () => {
     if (isOpen && selectedMenuGroupId !== null) {
       setIsLoading(true);
-      fetchDataForSubTab("MenuItem", { ID: selectedMenuGroupId }) // ارسال id
-        .then((data: RowData3[]) => {
-          // اطمینان حاصل کنید که ModifiedById به جای رشته خالی، null باشد
-          const sanitizedData = data.map((item) => ({
-            ...item,
-            ModifiedById: item.ModifiedById === "" ? null : item.ModifiedById,
-          }));
-          setRowData(sanitizedData);
-        })
-        .catch((error: any) => {
-          console.error("خطا در دریافت MenuItems:", error);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      try {
+        const data: RowData3[] = await fetchDataForSubTab("MenuItem", { ID: selectedMenuGroupId });
+        // اطمینان حاصل کنید که ModifiedById و IconImageId به جای رشته خالی، null باشند
+        const sanitizedData = data.map((item) => ({
+          ...item,
+          ModifiedById: item.ModifiedById === "" ? null : item.ModifiedById,
+          IconImageId: item.IconImageId === "" ? null : item.IconImageId,
+        }));
+        setRowData(sanitizedData);
+      } catch (error) {
+        console.error("خطا در دریافت MenuItems:", error);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setRowData([]);
       setSelectedRow(null);
       setIsEditing(false);
       setIsAdding(false);
       setFormData({});
+      setSelectedSize("0");
+      setIconImageId(null);
+      setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
     }
+  };
+
+  useEffect(() => {
+    loadRowData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedMenuGroupId]);
 
@@ -129,13 +144,16 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   const handleRowClick = (event: any) => {
     const row = event.data as RowData3;
-    // اطمینان از اینکه ModifiedById خالی نیست
+    // اطمینان از اینکه ModifiedById و IconImageId خالی نیستند
     const sanitizedRow = {
       ...row,
       ModifiedById: row.ModifiedById === "" ? null : row.ModifiedById,
+      IconImageId: row.IconImageId === "" ? null : row.IconImageId,
     };
     setSelectedRow(sanitizedRow);
     setFormData(sanitizedRow);
+    setSelectedSize(sanitizedRow.Order?.toString() || "0"); // فرض بر اینکه Order نماینده Size است
+    setIconImageId(sanitizedRow.IconImageId || null);
     setIsEditing(false);
     setIsAdding(false);
   };
@@ -152,16 +170,22 @@ const Accordion3: React.FC<Accordion3Props> = ({
       ID: 0, // فرض بر این است که ID=0 نشان‌دهنده یک ردیف جدید است و Backend ID جدید اختصاص می‌دهد
       Name: `${row.Name} (کپی)`,
       ModifiedById: null, // اطمینان از اینکه مقدار null است
+      IconImageId: null, // پاک کردن IconImageId برای کپی
     };
     setFormData(duplicatedRow);
+    setSelectedSize("0");
+    setIconImageId(null);
     setIsAdding(true);
     setIsEditing(false);
     setSelectedRow(null);
+    setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
   };
 
   const handleEdit = (row: RowData3) => {
     setSelectedRow(row);
     setFormData(row);
+    setSelectedSize(row.Order?.toString() || "0"); // فرض بر اینکه Order نماینده Size است
+    setIconImageId(row.IconImageId || null);
     setIsEditing(true);
     setIsAdding(false);
   };
@@ -174,10 +198,10 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
     try {
       await AppServices.deleteMenuItem(row.ID);
-      setRowData((prev) => prev.filter((r) => r.ID !== row.ID));
+      alert("حذف با موفقیت انجام شد.");
+      await loadRowData(); // بارگذاری مجدد داده‌ها بعد از حذف
       setSelectedRow(null);
       setFormData({});
-      alert("حذف با موفقیت انجام شد.");
     } catch (error: any) {
       console.error("خطا در حذف MenuItem:", error);
       alert("حذف با خطا مواجه شد.");
@@ -198,11 +222,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
       IsVisible: true,
       LastModified: null,
       ModifiedById: null,
+      IconImageId: null,
     };
     setSelectedRow(null);
     setFormData(newRow);
+    setSelectedSize("0");
+    setIconImageId(null);
     setIsAdding(true);
     setIsEditing(false);
+    setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
   };
 
   const handleInputChange = (
@@ -215,6 +243,23 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }));
   };
 
+  const handleRadioChange = (value: string) => {
+    setSelectedSize(value);
+    setFormData((prev) => ({
+      ...prev,
+      Order: parseInt(value, 10),
+    }));
+  };
+
+  const handleUploadSuccess = (insertModel: InsertModel) => {
+    setIconImageId(insertModel.ID || null);
+    setFormData((prev) => ({
+      ...prev,
+      IconImageId: insertModel.ID || null,
+    }));
+    // حذف setJustUploaded(false); زیرا setJustUploaded در اینجا تعریف نشده است
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("handleFormSubmit با formData:", formData);
@@ -223,13 +268,13 @@ const Accordion3: React.FC<Accordion3Props> = ({
       return;
     }
 
-    // اطمینان از اینکه ModifiedById خالی نیست
     const sanitizedFormData = {
       ...formData,
       ModifiedById:
         formData.ModifiedById && formData.ModifiedById.trim() !== ""
           ? formData.ModifiedById
           : null,
+      IconImageId: iconImageId,
     };
 
     if (isAdding) {
@@ -245,20 +290,23 @@ const Accordion3: React.FC<Accordion3Props> = ({
           IsVisible: sanitizedFormData.IsVisible ?? true,
           LastModified: null,
           ModifiedById: sanitizedFormData.ModifiedById,
-          IconImageId: null,
-          CommandWeb: "",
-          CommandMobile: "",
-          HelpText: "",
-          KeyTip: "",
-          Size: 0,
+          IconImageId: sanitizedFormData.IconImageId || null,
+          CommandWeb: "", // در صورت نیاز مقداردهی کنید
+          CommandMobile: "", // در صورت نیاز مقداردهی کنید
+          HelpText: "", // در صورت نیاز مقداردهی کنید
+          KeyTip: "", // در صورت نیاز مقداردهی کنید
+          Size: sanitizedFormData.Order || 0,
           // سایر فیلدهای مورد نیاز را اضافه کنید
         };
         console.log("درج MenuItem جدید:", newMenuItem);
         const result = await AppServices.insertMenuItem(newMenuItem);
-        setRowData((prev) => [result, ...prev]);
+        alert("افزودن با موفقیت انجام شد.");
         setIsAdding(false);
         setFormData({});
-        alert("افزودن با موفقیت انجام شد.");
+        setSelectedSize("0");
+        setIconImageId(null);
+        setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
+        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از افزودن
       } catch (error: any) {
         console.error("خطا در افزودن MenuItem:", error);
         alert("افزودن با خطا مواجه شد.");
@@ -280,22 +328,23 @@ const Accordion3: React.FC<Accordion3Props> = ({
           IsVisible: sanitizedFormData.IsVisible ?? true,
           LastModified: sanitizedFormData.LastModified || null,
           ModifiedById: sanitizedFormData.ModifiedById,
-          IconImageId: null,
-          CommandWeb: "",
-          CommandMobile: "",
-          HelpText: "",
-          KeyTip: "",
-          Size: 0,
+          IconImageId: sanitizedFormData.IconImageId || null,
+          CommandWeb: "", // در صورت نیاز مقداردهی کنید
+          CommandMobile: "", // در صورت نیاز مقداردهی کنید
+          HelpText: "", // در صورت نیاز مقداردهی کنید
+          KeyTip: "", // در صورت نیاز مقداردهی کنید
+          Size: sanitizedFormData.Order || 0,
           // سایر فیلدهای مورد نیاز را اضافه کنید
         };
         console.log("به‌روزرسانی MenuItem:", updatedMenuItem);
         const result = await AppServices.updateMenuItem(updatedMenuItem);
-        setRowData((prev) =>
-          prev.map((row) => (row.ID === result.ID ? result : row))
-        );
+        alert("ویرایش با موفقیت انجام شد.");
         setIsEditing(false);
         setFormData({});
-        alert("ویرایش با موفقیت انجام شد.");
+        setSelectedSize("0");
+        setIconImageId(null);
+        setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
+        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از ویرایش
       } catch (error: any) {
         console.error("خطا در ویرایش MenuItem:", error);
         alert("ویرایش با خطا مواجه شد.");
@@ -308,6 +357,9 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setIsAdding(false);
     setFormData({});
     setSelectedRow(null);
+    setSelectedSize("0");
+    setIconImageId(null);
+    setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
   };
 
   return (
@@ -354,7 +406,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   >
                     <FiPlus size={25} />
                   </button>
-
                   <button
                     className="text-blue-600 hover:text-blue-800 transition"
                     title="ویرایش"
@@ -411,6 +462,13 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   onSubmit={handleFormSubmit}
                   className="mt-4 p-4 border rounded bg-gray-50 shadow-inner"
                 >
+                  <h3 className="text-lg font-semibold mb-4">
+                    {isAdding
+                      ? "افزودن MenuItem جدید"
+                      : isEditing
+                      ? "ویرایش MenuItem"
+                      : ""}
+                  </h3>
                   <div className="grid grid-cols-1 gap-6">
                     <DynamicInput
                       name="Name"
@@ -453,7 +511,32 @@ const Accordion3: React.FC<Accordion3Props> = ({
                       }
                       className="mt-2"
                     />
-                    {/* اگر فیلدهای دیگری نیاز دارید می‌توانید آنها را اضافه کنید */}
+
+                    {/* ردیف جدید شامل رادیو گروپ و آپلودر */}
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                      {/* رادیو گروپ سایز */}
+                      <DynamicRadioGroup
+                        options={[
+                          { value: "0", label: "Large" },
+                          { value: "1", label: "Medium" },
+                          { value: "2", label: "Small" },
+                        ]}
+                        title="Size"
+                        name="size"
+                        selectedValue={selectedSize}
+                        onChange={handleRadioChange}
+                        className="w-full md:w-1/2"
+                        isRowClicked={true}
+                      />
+
+                      {/* آپلودر تصویر */}
+                      <FileUploadHandler
+                        selectedFileId={iconImageId}
+                        onUploadSuccess={handleUploadSuccess}
+                        resetCounter={resetCounter}
+                        onReset={() => setResetCounter((prev) => prev + 1)}
+                      />
+                    </div>
                   </div>
                   <div className="flex justify-center space-x-4 mt-12">
                     <button
@@ -476,7 +559,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
           ) : (
             isOpen && (
               <p className="text-gray-500">
-                لطفاً یک Menu Group در Accordion2 انتخاب کنید تا Menu Items نمایش
+                لطفاً یک Menu Group را در Accordion2 انتخاب کنید تا Menu Items نمایش
                 داده شوند.
               </p>
             )

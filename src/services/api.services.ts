@@ -148,12 +148,12 @@ export interface GetEnumResponse {
 }
 
 export interface Menu {
-  ID: number;
-  ModifiedById: string;
+  ID?: number; // Optional for creation
+  ModifiedById?: string; // Optional, set by backend or current user
   Name: string;
   Description: string;
-  IsVisible: boolean;
-  LastModified: string;
+  IsVisible?: boolean; // Optional, default to true or as per your logic
+  LastModified?: string; // Optional, set by backend
 }
 
 // Interface for MenuTab
@@ -200,6 +200,7 @@ export interface MenuItem {
 }
 // ساخت یک کلاس برای متدهای API
 class ApiService {
+
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
@@ -381,6 +382,38 @@ class ApiService {
     const response = await httpClient.post<Menu[]>(apiConst.getAllMenu);
     return response.data;
   }
+
+    /**
+   * Insert a new Menu.
+   * @param data - The Menu data to insert.
+   */
+    async insertMenu(data: Menu): Promise<Menu> {
+      const response = await httpClient.post<Menu>(
+        apiConst.insertMenu,
+        data
+      );
+      return response.data;
+    }
+  
+    /**
+     * Update an existing Menu.
+     * @param data - The Menu data to update.
+     */
+    async updateMenu(data: Menu): Promise<Menu> {
+      const response = await httpClient.post<Menu>(
+        apiConst.updateMenu,
+        data
+      );
+      return response.data;
+    }
+  
+    /**
+     * Delete a Menu by ID.
+     * @param id - The ID of the Menu to delete.
+     */
+    async deleteMenu(id: number): Promise<void> {
+      await httpClient.post(apiConst.deleteMenu, { ID: id });
+    }
 
   async getAllMenuTab(menuId: number): Promise<MenuTab[]> {
     const response = await httpClient.post<MenuTab[]>(apiConst.getAllMenuTab, {
