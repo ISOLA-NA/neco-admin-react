@@ -20,6 +20,7 @@ import AppServices, {
   MenuItem,
   UserToken,
   User,
+  Role,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -70,6 +71,11 @@ interface ApiContextType {
   insertUser: (data: User) => Promise<User>;
   updateUser: (data: User) => Promise<User>;
   deleteUser: (id: string) => Promise<void>;
+
+  getAllRoles: () => Promise<Role[]>;
+  insertRole: (data: Role) => Promise<Role>;
+  updateRole: (data: Role) => Promise<Role>;
+  deleteRole: (id: string) => Promise<void>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -125,6 +131,12 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertUser: AppServices.insertUser.bind(AppServices),
     updateUser: AppServices.updateUser.bind(AppServices),
     deleteUser: AppServices.deleteUser.bind(AppServices),
+
+    // Role methods
+    getAllRoles: AppServices.getAllRoles.bind(AppServices),
+    insertRole: AppServices.insertRole.bind(AppServices),
+    updateRole: AppServices.updateRole.bind(AppServices),
+    deleteRole: AppServices.deleteRole.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -156,4 +168,5 @@ export type {
   MenuGroup,
   MenuItem,
   User,
+  Role,
 };

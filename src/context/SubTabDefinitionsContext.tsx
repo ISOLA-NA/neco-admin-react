@@ -207,6 +207,37 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+      Roles: {
+        endpoint: api.getAllRoles,
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Description",
+            field: "Description",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Post Code",
+            field: "PostCode",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Grade",
+            field: "Grade",
+            filter: "agTextColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
 
       // -------------------
       // MenuTab

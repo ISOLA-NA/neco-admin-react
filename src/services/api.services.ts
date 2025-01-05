@@ -1,4 +1,3 @@
-
 // src/services/api.services.ts
 
 import httpClient from "./api.config";
@@ -229,17 +228,32 @@ export interface MenuItem {
   LastModified: string | null;
 }
 
+export interface Role {
+  ID?: string;
+  LastModified?: string;
+  ModifiedById?: string;
+  Name: string;
+  Description: string;
+  IsVisible?: boolean;
+  Type?: string;
+  Grade: string;
+  Competencies?: string;
+  Authorization?: string;
+  Responsibility?: string;
+  PostCode: string;
+  isStaticPost?: boolean;
+}
+
 // src/services/api.services.ts
 
 // اینترفیس درخواست ChangePasswordByAdmin
 export interface ChangePasswordByAdminRequest {
-  UserId: string;    // شناسه کاربری
-  Password: string;   // رمز عبور جدید
+  UserId: string; // شناسه کاربری
+  Password: string; // رمز عبور جدید
 }
 
 // ساخت یک کلاس برای متدهای API
 class ApiService {
-
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
@@ -596,10 +610,30 @@ class ApiService {
     await httpClient.post(apiConst.deleteUser, { gid: id });
   }
 
-  async changePasswordByAdmin(data: ChangePasswordByAdminRequest): Promise<void> {
+  async changePasswordByAdmin(
+    data: ChangePasswordByAdminRequest
+  ): Promise<void> {
     await httpClient.post(apiConst.changePassword, data);
   }
 
+  async getAllRoles(): Promise<Role[]> {
+    const response = await httpClient.post<Role[]>(apiConst.getAllRoles);
+    return response.data;
+  }
+
+  async insertRole(data: Role): Promise<Role> {
+    const response = await httpClient.post<Role>(apiConst.insertRole, data);
+    return response.data;
+  }
+
+  async updateRole(data: Role): Promise<Role> {
+    const response = await httpClient.post<Role>(apiConst.updateRole, data);
+    return response.data;
+  }
+
+  async deleteRole(id: string): Promise<void> {
+    await httpClient.post(apiConst.deleteRole, { gid: id });
+  }
 }
 
 // یک خروجی برای استفاده در Context

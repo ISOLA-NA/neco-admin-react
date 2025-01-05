@@ -17,6 +17,7 @@ import { ConfigurationHandle } from "../../General/Configuration/Configurations"
 import { useApi } from "../../../context/ApiContext";
 import { CommandHandle } from "../../General/CommandSettings";
 import { UserHandle } from "../../General/Users";
+import { RoleHandle } from "../../General/Roles";
 
 // Components
 import DynamicConfirm from "../../utilities/DynamicConfirm";
@@ -76,10 +77,13 @@ const TabContent: FC<TabContentProps> = ({
   const configurationRef = useRef<ConfigurationHandle>(null);
   const commandRef = useRef<CommandHandle>(null);
   const userRef = useRef<UserHandle>(null);
+  const roleRef = useRef<RoleHandle>(null);
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">("delete");
+  const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">(
+    "delete"
+  );
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
@@ -89,7 +93,8 @@ const TabContent: FC<TabContentProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
   const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
-  const [selectedSubItemForRight, setSelectedSubItemForRight] = useState<any>(null);
+  const [selectedSubItemForRight, setSelectedSubItemForRight] =
+    useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchedRowData, setFetchedRowData] = useState<any[]>([]);
 
@@ -169,6 +174,9 @@ const TabContent: FC<TabContentProps> = ({
         case "Users":
           data = await api.getAllUsers();
           break;
+        case "Roles": // اضافه شده
+          data = await api.getAllRoles();
+          break;
         default:
           data = rowData;
       }
@@ -194,7 +202,12 @@ const TabContent: FC<TabContentProps> = ({
         case "Configurations":
           if (configurationRef.current) {
             await configurationRef.current.save();
-            showAlert("success", null, "Saved", "Configuration added successfully.");
+            showAlert(
+              "success",
+              null,
+              "Saved",
+              "Configuration added successfully."
+            );
             await fetchData(); // فقط بعد از ذخیره موفقیت‌آمیز، دیتا را دوباره بگیریم
           }
           break;
@@ -208,7 +221,8 @@ const TabContent: FC<TabContentProps> = ({
         case "Users":
           if (userRef.current) {
             const result = await userRef.current.save();
-            if (result) { // فقط اگر ذخیره موفقیت‌آمیز بود
+            if (result) {
+              // فقط اگر ذخیره موفقیت‌آمیز بود
               showAlert("success", null, "Saved", "User added successfully.");
               await fetchData();
             }
@@ -222,6 +236,13 @@ const TabContent: FC<TabContentProps> = ({
           });
           showAlert("success", null, "Saved", "Ribbon added successfully.");
           await fetchData();
+          break;
+        case "Roles": // اضافه شده
+          if (roleRef.current) {
+            await roleRef.current.save();
+            showAlert("success", null, "Saved", "Role added successfully.");
+            await fetchData();
+          }
           break;
       }
       setIsPanelOpen(false);
@@ -239,21 +260,32 @@ const TabContent: FC<TabContentProps> = ({
         case "Configurations":
           if (configurationRef.current) {
             await configurationRef.current.save();
-            showAlert("success", null, "Updated", "Configuration updated successfully.");
+            showAlert(
+              "success",
+              null,
+              "Updated",
+              "Configuration updated successfully."
+            );
             await fetchData();
           }
           break;
         case "Commands":
           if (commandRef.current) {
             await commandRef.current.save();
-            showAlert("success", null, "Updated", "Command updated successfully.");
+            showAlert(
+              "success",
+              null,
+              "Updated",
+              "Command updated successfully."
+            );
             await fetchData();
           }
           break;
         case "Users":
           if (userRef.current) {
             const result = await userRef.current.save();
-            if (result) { // فقط اگر آپدیت موفقیت‌آمیز بود
+            if (result) {
+              // فقط اگر آپدیت موفقیت‌آمیز بود
               await fetchData();
             }
           }
@@ -266,7 +298,19 @@ const TabContent: FC<TabContentProps> = ({
               Description: descriptionInput,
               IsVisible: selectedRow.IsVisible,
             });
-            showAlert("success", null, "Updated", "Ribbon updated successfully.");
+            showAlert(
+              "success",
+              null,
+              "Updated",
+              "Ribbon updated successfully."
+            );
+            await fetchData();
+          }
+          break;
+        case "Roles": // اضافه شده
+          if (selectedRow && roleRef.current) {
+            await roleRef.current.save();
+            showAlert("success", null, "Updated", "Role updated successfully.");
             await fetchData();
           }
           break;
@@ -332,7 +376,9 @@ const TabContent: FC<TabContentProps> = ({
     }
     setConfirmVariant("delete");
     setConfirmTitle("Delete Confirmation");
-    setConfirmMessage(`Are you sure you want to delete this ${activeSubTab.toLowerCase()}?`);
+    setConfirmMessage(
+      `Are you sure you want to delete this ${activeSubTab.toLowerCase()}?`
+    );
     setConfirmAction(() => async () => {
       try {
         switch (activeSubTab) {
@@ -348,8 +394,16 @@ const TabContent: FC<TabContentProps> = ({
           case "Configurations":
             await api.deleteConfiguration(pendingSelectedRow.ID);
             break;
+          case "Roles":
+            await api.deleteRole(pendingSelectedRow.ID);
+            break;
         }
-        showAlert("success", null, "Deleted", `${activeSubTab} deleted successfully.`);
+        showAlert(
+          "success",
+          null,
+          "Deleted",
+          `${activeSubTab} deleted successfully.`
+        );
         await fetchData();
       } catch (error) {
         console.error("Error deleting:", error);
@@ -369,7 +423,12 @@ const TabContent: FC<TabContentProps> = ({
         setIsPanelOpen(true);
       }
     } else {
-      showAlert("warning", null, "Warning", "Please select a row to duplicate.");
+      showAlert(
+        "warning",
+        null,
+        "Warning",
+        "Please select a row to duplicate."
+      );
     }
   };
 
@@ -400,6 +459,8 @@ const TabContent: FC<TabContentProps> = ({
         return commandRef;
       case "Users":
         return userRef;
+      case "Roles":
+        return roleRef;
       default:
         return null;
     }
@@ -435,7 +496,11 @@ const TabContent: FC<TabContentProps> = ({
             onClick={togglePanelSize}
             className="text-gray-700 hover:text-gray-900 transition"
           >
-            {isMaximized ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+            {isMaximized ? (
+              <FiMinimize2 size={18} />
+            ) : (
+              <FiMaximize2 size={18} />
+            )}
           </button>
         </div>
 
@@ -456,8 +521,8 @@ const TabContent: FC<TabContentProps> = ({
             isLoading={isLoading}
           />
 
-        {/* Ribbons Form */}
-        {activeSubTab === "Ribbons" && isPanelOpen && (
+          {/* Ribbons Form */}
+          {activeSubTab === "Ribbons" && isPanelOpen && (
             <div className="-mt-32 w-full p-4 bg-white rounded-md shadow-md absolute">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                 <DynamicInput
@@ -550,7 +615,8 @@ const TabContent: FC<TabContentProps> = ({
                   (activeSubTab === "Configurations" ||
                     activeSubTab === "Commands" ||
                     activeSubTab === "Users" ||
-                    activeSubTab === "Ribbons")
+                    activeSubTab === "Ribbons" ||
+                    activeSubTab === "Roles")
                     ? handleInsert
                     : undefined
                 }
@@ -559,7 +625,8 @@ const TabContent: FC<TabContentProps> = ({
                   (activeSubTab === "Configurations" ||
                     activeSubTab === "Commands" ||
                     activeSubTab === "Users" ||
-                    activeSubTab === "Ribbons")
+                    activeSubTab === "Ribbons" ||
+                    activeSubTab === "Roles")
                     ? handleUpdate
                     : undefined
                 }
@@ -597,7 +664,7 @@ const TabContent: FC<TabContentProps> = ({
               </Suspense>
             )}
 
-            {activeSubTab !== "ProjectsAccess" && activeSubTab !== "Ribbons" && Component && (
+            {activeSubTab !== "ProjectsAccess" && Component && (
               <div className="mt-5 flex-grow overflow-y-auto">
                 <div style={{ minWidth: "600px" }}>
                   <Suspense fallback={<div>Loading...</div>}>

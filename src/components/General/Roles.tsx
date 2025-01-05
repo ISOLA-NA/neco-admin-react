@@ -1,27 +1,41 @@
 // src/components/General/Role.tsx
 
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSwitcher from "../utilities/DynamicSwitcher";
+import { useAddEditDelete } from "../../context/AddEditDeleteContext";
+import { showAlert } from "../utilities/Alert/DynamicAlert";
+
+// تعریف اینترفیس RoleHandle
+export interface RoleHandle {
+  save: () => Promise<void>;
+}
 
 interface RoleProps {
   selectedRow: any;
 }
 
-const Role: React.FC<RoleProps> = ({ selectedRow }) => {
+const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
+  const { handleSaveRole } = useAddEditDelete(); // دسترسی به متد context
   const [roleData, setRoleData] = useState({
-    ID: "",
-    Role: "",
-    RoleCode: "",
-    JobDescription: "",
-    Responsibilities: "",
-    Authorities: "",
-    Competencies: "",
-    Grade: "",
+    ID: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    Name: "",
+    Description: "",
+    IsVisible: false,
     Type: "",
-    StaticPost: false,
+    Grade: "",
+    Competencies: "",
+    Authorization: "",
+    Responsibility: "",
+    PostCode: "",
+    isStaticPost: false,
   });
 
   useEffect(() => {
@@ -29,38 +43,61 @@ const Role: React.FC<RoleProps> = ({ selectedRow }) => {
     if (selectedRow) {
       setRoleData({
         ID: selectedRow.ID || "",
-        Role: selectedRow.Name || "",
-        RoleCode: selectedRow.PostCode || "",
-        JobDescription: selectedRow.Description || "",
-        Responsibilities: selectedRow.Responsibility || "",
-        Authorities: selectedRow.Authorization || "",
-        Competencies: selectedRow.Competencies || "",
-        Grade: selectedRow.Grade || "",
+        Name: selectedRow.Name || "",
+        Description: selectedRow.Description || "",
+        IsVisible: selectedRow.IsVisible || false,
         Type: selectedRow.Type || "",
-        StaticPost: selectedRow.isStaticPost || false,
+        Grade: selectedRow.Grade || "",
+        Competencies: selectedRow.Competencies || "",
+        Authorization: selectedRow.Authorization || "",
+        Responsibility: selectedRow.Responsibility || "",
+        PostCode: selectedRow.PostCode || "",
+        isStaticPost: selectedRow.isStaticPost || false,
       });
     } else {
       setRoleData({
         ID: "",
-        Role: "",
-        RoleCode: "",
-        JobDescription: "",
-        Responsibilities: "",
-        Authorities: "",
-        Competencies: "",
-        Grade: "",
+        Name: "",
+        Description: "",
+        IsVisible: false,
         Type: "",
-        StaticPost: false,
+        Grade: "",
+        Competencies: "",
+        Authorization: "",
+        Responsibility: "",
+        PostCode: "",
+        isStaticPost: false,
       });
     }
   }, [selectedRow]);
 
-  const handleChange = (field: keyof typeof roleData, value: string | boolean) => {
+  const handleChange = (
+    field: keyof typeof roleData,
+    value: string | boolean
+  ) => {
     setRoleData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
+
+  // متد save که توسط context فراخوانی می‌شود
+  const save = async () => {
+    try {
+      await handleSaveRole(roleData);
+      // در صورت نیاز می‌توانید عملیات دیگری نیز انجام دهید
+      showAlert("success", null, "Saved", "Role saved successfully.");
+    } catch (error) {
+      // مدیریت خطا
+      console.error("Error saving role:", error);
+      showAlert("error", null, "Error", "Failed to save role.");
+    }
+  };
+
+  // expose the save method to parent via ref
+  useImperativeHandle(ref, () => ({
+    save,
+  }));
 
   return (
     <TwoColumnLayout>
@@ -68,50 +105,46 @@ const Role: React.FC<RoleProps> = ({ selectedRow }) => {
       <DynamicInput
         name="Role"
         type="text"
-        value={roleData.Role}
+        value={roleData.Name}
         placeholder=""
-        onChange={(e) => handleChange("Role", e.target.value)}
+        onChange={(e) => handleChange("Name", e.target.value)}
       />
 
       {/* Role Code */}
       <DynamicInput
         name="Role Code"
         type="text"
-        value={roleData.RoleCode}
+        value={roleData.PostCode}
         placeholder=""
-        onChange={(e) => handleChange("RoleCode", e.target.value)}
+        onChange={(e) => handleChange("PostCode", e.target.value)}
       />
 
       {/* Job Description */}
       <CustomTextarea
-        id="JobDescription"
         name="Job Description"
-        value={roleData.JobDescription}
+        value={roleData.Description}
         placeholder=""
-        onChange={(e) => handleChange("JobDescription", e.target.value)}
+        onChange={(e) => handleChange("Description", e.target.value)}
       />
 
       {/* Responsibilities */}
       <CustomTextarea
-        id="Responsibilities"
         name="Responsibilities"
-        value={roleData.Responsibilities}
+        value={roleData.Responsibility}
         placeholder=""
-        onChange={(e) => handleChange("Responsibilities", e.target.value)}
+        onChange={(e) => handleChange("Responsibility", e.target.value)}
       />
 
       {/* Authorities */}
       <CustomTextarea
-        id="Authorities"
         name="Authorities"
-        value={roleData.Authorities}
+        value={roleData.Authorization}
         placeholder=""
-        onChange={(e) => handleChange("Authorities", e.target.value)}
+        onChange={(e) => handleChange("Authorization", e.target.value)}
       />
 
       {/* Competencies */}
       <CustomTextarea
-        id="Competencies"
         name="Competencies"
         value={roleData.Competencies}
         placeholder=""
@@ -139,14 +172,14 @@ const Role: React.FC<RoleProps> = ({ selectedRow }) => {
       {/* Static Post */}
       <div className="mb-4">
         <DynamicSwitcher
-          isChecked={roleData.StaticPost}
-          onChange={() => handleChange("StaticPost", !roleData.StaticPost)}
+          isChecked={roleData.isStaticPost}
+          onChange={() => handleChange("isStaticPost", !roleData.isStaticPost)}
           leftLabel=""
           rightLabel="Static Post"
         />
       </div>
     </TwoColumnLayout>
   );
-};
+});
 
 export default Role;
