@@ -185,11 +185,13 @@ export interface MenuGroup {
 // src/services/api.services.ts
 
 // Interface for User
+// src/context/ApiContext.tsx
+
 export interface User {
-  ID?: string;  // اصلاح شد به number
-  ModifiedById?: string;
+  ID: number | undefined;
   Username: string;
-  Password?: string;
+  Password?: string; // این فیلد اجباری است
+  ConfirmPassword?: string; // این فیلد نیز اجباری است
   Status: number;
   MaxWrongPass: number;
   Name: string;
@@ -197,15 +199,18 @@ export interface User {
   Email: string;
   Website: string;
   Mobile: string;
-  CreateDate: string | null;
-  LastLoginTime: string | null;
-  UserImageId: string | null;
   TTKK: string;
   userType: number;
   Code: string;
   IsVisible: boolean;
   LastModified: string;
+  ModifiedById?: string;
+  CreateDate?: string | null;
+  LastLoginTime?: string | null;
+  UserImageId?: string | null;
 }
+
+
 
 
 // Interface for MenuItem

@@ -1,3 +1,5 @@
+// src/components/User.tsx
+
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import TwoColumnLayout from '../layout/TwoColumnLayout'
 import DynamicInput from '../utilities/DynamicInput'
@@ -14,8 +16,6 @@ interface UserProps {
   selectedRow: any
 }
 
-// ... (imports remain the same)
-
 const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   const { handleSaveUser } = useAddEditDelete()
 
@@ -26,8 +26,8 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     Family: selectedRow?.Family || '',
     Email: selectedRow?.Email || '',
     Mobile: selectedRow?.Mobile || '',
-    Password: selectedRow?.Password || '', // Pre-fill Password (not recommended)
-    ConfirmPassword: '', // Not needed when editing
+    Password: '', // همیشه خالی است
+    ConfirmPassword: '', // همیشه خالی است
     Status: selectedRow?.Status || 0,
     MaxWrongPass: selectedRow?.MaxWrongPass || 5,
     Website: selectedRow?.Website || '',
@@ -49,8 +49,8 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         Family: selectedRow.Family || '',
         Email: selectedRow.Email || '',
         Mobile: selectedRow.Mobile || '',
-        Password: selectedRow.Password || '', // Pre-fill Password
-        ConfirmPassword: '', // Not needed when editing
+        Password: '', // همیشه خالی است
+        ConfirmPassword: '', // همیشه خالی است
         Status: selectedRow.Status || 0,
         MaxWrongPass: selectedRow.MaxWrongPass || 5,
         Website: selectedRow.Website || '',
@@ -114,14 +114,21 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       return false
     }
 
-    if (selectedRow && userData.Password && userData.Password !== selectedRow.Password) {
-      showAlert(
-        'error',
-        null,
-        'Validation Error',
-        'Passwords do not match'
-      )
+    if (!selectedRow && userData.Password !== userData.ConfirmPassword) {
+      showAlert('error', null, 'Validation Error', 'Passwords do not match')
       return false
+    }
+
+    if (selectedRow && userData.Password) {
+      if (userData.Password !== userData.ConfirmPassword) {
+        showAlert(
+          'error',
+          null,
+          'Validation Error',
+          'New passwords do not match'
+        )
+        return false
+      }
     }
 
     if (userData.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.Email)) {
@@ -138,7 +145,7 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     }
 
     try {
-      // Prepare data for saving
+      // آماده‌سازی داده‌ها برای ذخیره‌سازی
       const dataToSave: UserType = {
         ...userData,
         LastModified: new Date().toISOString(),
@@ -148,19 +155,26 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       }
 
       if (selectedRow) {
-        // Editing existing user
-        // Do not send ConfirmPassword
+        // ویرایش کاربر موجود
+        if (userData.Password) {
+          // اگر رمز عبور جدید وارد شده باشد
+          dataToSave.Password = userData.Password
+          dataToSave.ConfirmPassword = userData.ConfirmPassword
+        } else {
+          // حذف فیلدهای رمز عبور اگر رمز عبور جدید وارد نشده باشد
+          delete dataToSave.Password
+          delete dataToSave.ConfirmPassword
+        }
       } else {
-        // Creating new user
+        // ایجاد کاربر جدید
+        dataToSave.Password = userData.Password
         dataToSave.ConfirmPassword = userData.ConfirmPassword
       }
 
-      // If creating a new user, ensure ID is undefined
+      // اگر کاربر جدید است، مطمئن شویم که ID تعریف نشده است
       if (!selectedRow) {
         delete dataToSave.ID
       }
-
-      console.log('Data to Save:', dataToSave) // For debugging
 
       const result = await handleSaveUser(dataToSave)
 
@@ -239,7 +253,7 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
 
       {!selectedRow && (
         <>
-          {/* For adding a new user */}
+          {/* برای ایجاد کاربر جدید */}
           <DynamicInput
             name='Password'
             type='password'
@@ -260,13 +274,22 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
 
       {selectedRow && (
         <>
-          {/* For editing an existing user */}
+          {/* برای ویرایش کاربر موجود */}
           <DynamicInput
             name='Password'
             type='password'
             value={userData.Password}
             onChange={e => handleChange('Password', e.target.value)}
             placeholder='Enter new password (optional)'
+          />
+
+          <DynamicInput
+            name='Confirm Password'
+            type='password'
+            value={userData.ConfirmPassword}
+            onChange={e => handleChange('ConfirmPassword', e.target.value)}
+            placeholder='Confirm new password'
+            disabled={!userData.Password}
           />
         </>
       )}

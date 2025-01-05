@@ -1,3 +1,5 @@
+// src/context/AddEditDeleteContext.tsx
+
 import React, { createContext, useContext, useState } from 'react'
 import { useApi, CommandItem, User, ConfigurationItem } from './ApiContext'
 
@@ -39,11 +41,12 @@ interface ConfigurationData {
   EnityTypeIDForProcesure: string
 }
 
+// رابط داده‌های یوزر
 export interface UserData {
   ID?: number;
   Username: string;
-  Password?: string; // Optional in edit mode
-  ConfirmPassword?: string; // Optional in edit mode
+  Password?: string; // Made optional
+  ConfirmPassword?: string; // Made optional
   Status: number;
   MaxWrongPass: number;
   Name: string;
@@ -51,15 +54,15 @@ export interface UserData {
   Email: string;
   Website: string;
   Mobile: string;
+  CreateDate?: string | null;
+  LastLoginTime?: string | null;
+  UserImageId?: string | null;
   TTKK: string;
   userType: number;
   Code: string;
   IsVisible: boolean;
-  LastModified: string;
+  LastModified?: string;
   ModifiedById?: string;
-  CreateDate?: string | null;
-  LastLoginTime?: string | null;
-  UserImageId?: string | null;
 }
 
 interface AddEditDeleteContextType {
@@ -204,58 +207,52 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }
 
-  // ... (imports remain the same)
+  const handleSaveUser = async (data: UserData): Promise<User | null> => {
+    setIsLoading(true)
+    try {
+      const userRequest: User = {
+        ID: data.ID,
+        Username: data.Username,
+        Status: data.Status,
+        MaxWrongPass: data.MaxWrongPass,
+        Name: data.Name,
+        Family: data.Family,
+        Email: data.Email,
+        Website: data.Website,
+        Mobile: data.Mobile,
+        TTKK: data.TTKK,
+        userType: data.userType,
+        Code: data.Code,
+        IsVisible: data.IsVisible,
+        LastModified: new Date().toISOString(),
+        ModifiedById: data.ModifiedById,
+        CreateDate: data.CreateDate ?? null,
+        LastLoginTime: data.LastLoginTime ?? null,
+        UserImageId: data.UserImageId ?? null,
+        Password: data.Password,  // از Password استفاده می‌شود
+        ConfirmPassword: data.ConfirmPassword, // ConfirmPassword ضروری است
+      }
 
-const handleSaveUser = async (data: UserData): Promise<User | null> => {
-  setIsLoading(true)
-  try {
-    const userRequest: User = {
-      ID: data.ID,
-      Username: data.Username,
-      Status: data.Status,
-      MaxWrongPass: data.MaxWrongPass,
-      Name: data.Name,
-      Family: data.Family,
-      Email: data.Email,
-      Website: data.Website,
-      Mobile: data.Mobile,
-      TTKK: data.TTKK,
-      userType: data.userType,
-      Code: data.Code,
-      IsVisible: data.IsVisible,
-      LastModified: data.LastModified || new Date().toISOString(),
-      ModifiedById: data.ModifiedById,
-      CreateDate: data.CreateDate ?? null,
-      LastLoginTime: data.LastLoginTime ?? null,
-      UserImageId: data.UserImageId ?? null,
-      // Conditionally include Password fields
-      ...(data.Password && { Password: data.Password }),
-      // Exclude ConfirmPassword when editing
-      ...(!data.ID && data.ConfirmPassword && { ConfirmPassword: data.ConfirmPassword })
+      let result: User
+      if (userRequest.ID !== undefined) {
+        // Updating existing user
+        result = await api.updateUser(userRequest)
+        console.log('User updated:', result)
+      } else {
+        // Creating new user
+        result = await api.insertUser(userRequest)
+        console.log('User inserted:', result)
+      }
+
+      return result
+    } catch (error) {
+      console.error('Error saving user:', error)
+      throw error
+    } finally {
+      setIsLoading(false)
     }
-
-    console.log('User Request Data:', userRequest) // For debugging
-
-    let result: User
-    if (userRequest.ID !== undefined && userRequest.ID !== null) {
-      // Updating existing user
-      result = await api.updateUser(userRequest)
-      console.log('User updated:', result)
-    } else {
-      // Creating new user
-      result = await api.insertUser(userRequest)
-      console.log('User inserted:', result)
-    }
-
-    return result
-  } catch (error) {
-    console.error('Error saving user:', error)
-    throw error
-  } finally {
-    setIsLoading(false)
   }
-}
- 
+
   return (
     <AddEditDeleteContext.Provider
       value={{
