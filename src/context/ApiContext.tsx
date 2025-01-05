@@ -1,5 +1,3 @@
-// src/context/ApiContext.tsx
-
 import React, { createContext, useContext } from "react";
 import AppServices, {
   WebLoginRequest,
@@ -21,6 +19,7 @@ import AppServices, {
   MenuGroup,
   MenuItem,
   UserToken,
+  User,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -66,58 +65,67 @@ interface ApiContextType {
   getAllMenuTab: (menuId: number) => Promise<MenuTab[]>;
   getAllMenuGroup: (menuTabId: number) => Promise<MenuGroup[]>;
   getAllMenuItem: (menuGroupId: number) => Promise<MenuItem[]>;
-}
 
+  getAllUsers: () => Promise<User[]>;
+  insertUser: (data: User) => Promise<User>;
+  updateUser: (data: User) => Promise<User>;
+  deleteUser: (id: string) => Promise<void>;
+}
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
 export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
- // در src/context/ApiContext.tsx
-const api: ApiContextType = {
-  // متدهای OTP/Login
-  webLogin: AppServices.webLogin.bind(AppServices),
-  sendOtp: AppServices.sendOtp.bind(AppServices),
-  loginWithOtp: AppServices.loginWithOtp.bind(AppServices),
-  tokenSetup: AppServices.tokenSetup.bind(AppServices),
+  // در src/context/ApiContext.tsx
+  const api: ApiContextType = {
+    // متدهای OTP/Login
+    webLogin: AppServices.webLogin.bind(AppServices),
+    sendOtp: AppServices.sendOtp.bind(AppServices),
+    loginWithOtp: AppServices.loginWithOtp.bind(AppServices),
+    tokenSetup: AppServices.tokenSetup.bind(AppServices),
 
-  // متدهای Configuration
-  getAllConfigurations: AppServices.getAllConfigurations.bind(AppServices),
-  insertConfiguration: AppServices.insertConfiguration.bind(AppServices),
-  updateConfiguration: AppServices.updateConfiguration.bind(AppServices),
-  deleteConfiguration: AppServices.deleteConfiguration.bind(AppServices),
+    // متدهای Configuration
+    getAllConfigurations: AppServices.getAllConfigurations.bind(AppServices),
+    insertConfiguration: AppServices.insertConfiguration.bind(AppServices),
+    updateConfiguration: AppServices.updateConfiguration.bind(AppServices),
+    deleteConfiguration: AppServices.deleteConfiguration.bind(AppServices),
 
-  // سایر سرویس‌ها
-  getAllProgramTemplates: AppServices.getAllProgramTemplates.bind(AppServices),
-  getAllDefaultRibbons: AppServices.getAllDefaultRibbons.bind(AppServices),
-  getTableTransmittal: AppServices.getTableTransmittal.bind(AppServices),
-  getAllWfTemplate: AppServices.getAllWfTemplate.bind(AppServices),
-  getAllAfbtn: AppServices.getAllAfbtn.bind(AppServices),
-  getIdByUserToken: AppServices.getIdByUserToken.bind(AppServices),
+    // سایر سرویس‌ها
+    getAllProgramTemplates:
+      AppServices.getAllProgramTemplates.bind(AppServices),
+    getAllDefaultRibbons: AppServices.getAllDefaultRibbons.bind(AppServices),
+    getTableTransmittal: AppServices.getTableTransmittal.bind(AppServices),
+    getAllWfTemplate: AppServices.getAllWfTemplate.bind(AppServices),
+    getAllAfbtn: AppServices.getAllAfbtn.bind(AppServices),
+    getIdByUserToken: AppServices.getIdByUserToken.bind(AppServices),
 
-  // متدهای AFBtn
-  insertAFBtn: AppServices.insertAFBtn.bind(AppServices),
-  updateAFBtn: AppServices.updateAFBtn.bind(AppServices),
-  deleteAFBtn: AppServices.deleteAFBtn.bind(AppServices),
+    // متدهای AFBtn
+    insertAFBtn: AppServices.insertAFBtn.bind(AppServices),
+    updateAFBtn: AppServices.updateAFBtn.bind(AppServices),
+    deleteAFBtn: AppServices.deleteAFBtn.bind(AppServices),
 
-  // متدهای Command
-  getAllCommands: AppServices.getAllCommands.bind(AppServices),
-  insertCommand: AppServices.insertCommand.bind(AppServices),
-  updateCommand: AppServices.updateCommand.bind(AppServices),
-  deleteCommand: AppServices.deleteCommand.bind(AppServices),
+    // متدهای Command
+    getAllCommands: AppServices.getAllCommands.bind(AppServices),
+    insertCommand: AppServices.insertCommand.bind(AppServices),
+    updateCommand: AppServices.updateCommand.bind(AppServices),
+    deleteCommand: AppServices.deleteCommand.bind(AppServices),
 
-  // متدهای Menu APIs
-  getAllMenu: AppServices.getAllMenu.bind(AppServices),
-  insertMenu: AppServices.insertMenu.bind(AppServices),
-  updateMenu: AppServices.updateMenu.bind(AppServices),
-  deleteMenu: AppServices.deleteMenu.bind(AppServices),
+    // متدهای Menu APIs
+    getAllMenu: AppServices.getAllMenu.bind(AppServices),
+    insertMenu: AppServices.insertMenu.bind(AppServices),
+    updateMenu: AppServices.updateMenu.bind(AppServices),
+    deleteMenu: AppServices.deleteMenu.bind(AppServices),
 
-  getAllMenuTab: AppServices.getAllMenuTab.bind(AppServices),
-  getAllMenuGroup: AppServices.getAllMenuGroup.bind(AppServices),
-  getAllMenuItem: AppServices.getAllMenuItem.bind(AppServices),
-};
+    getAllMenuTab: AppServices.getAllMenuTab.bind(AppServices),
+    getAllMenuGroup: AppServices.getAllMenuGroup.bind(AppServices),
+    getAllMenuItem: AppServices.getAllMenuItem.bind(AppServices),
 
+    getAllUsers: AppServices.getAllUsers.bind(AppServices),
+    insertUser: AppServices.insertUser.bind(AppServices),
+    updateUser: AppServices.updateUser.bind(AppServices),
+    deleteUser: AppServices.deleteUser.bind(AppServices),
+  };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
 };
@@ -147,4 +155,5 @@ export type {
   MenuTab,
   MenuGroup,
   MenuItem,
+  User,
 };

@@ -1,6 +1,6 @@
 // src/context/AddEditDeleteContext.tsx
 import React, { createContext, useContext, useState } from "react";
-import { useApi, CommandItem } from "./ApiContext";
+import { useApi, CommandItem, User } from "./ApiContext";
 import { ConfigurationItem } from "./ApiContext";
 
 // Define CommandData if it's different from CommandItem
@@ -39,7 +39,31 @@ interface ConfigurationData {
   EnityTypeIDForLessonLearn: string;
   EnityTypeIDForTaskCommnet: string;
   EnityTypeIDForProcesure: string;
-  // ... سایر فیلدها در صورت نیاز
+}
+
+// رابط داده‌های یوزر
+interface UserData {
+  ID?: string;
+  Username: string;
+  Password?: string;
+  NewPassword?: string;
+  ConfirmPassword?: string;
+  Status: number;
+  MaxWrongPass: number;
+  Name: string;
+  Family: string;
+  Email: string;
+  Website: string;
+  Mobile: string;
+  CreateDate?: string | null;
+  LastLoginTime?: string | null;
+  UserImageId?: string | null;
+  TTKK: string;
+  userType: number;
+  Code: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string;
 }
 
 interface AddEditDeleteContextType {
@@ -51,6 +75,7 @@ interface AddEditDeleteContextType {
     data: ConfigurationData
   ) => Promise<ConfigurationItem | null>;
   handleSaveCommand: (data: CommandData) => Promise<CommandItem | null>;
+  handleSaveUser: (data: UserData) => Promise<User | null>;
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -82,6 +107,10 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       } else if (subTabName === "Commands") {
         await api.deleteCommand(id);
         console.log("Command deleted successfully!");
+      } else if (subTabName === "Users") {
+        // حذف یوزر
+        await api.deleteUser(String(id));
+        console.log("User deleted successfully!");
       }
       // Add more conditions if there are other sub-tabs
     } catch (error) {
@@ -116,7 +145,6 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         EnityTypeIDForLessonLearn: parseInt(data.EnityTypeIDForLessonLearn) || 0,
         EnityTypeIDForTaskCommnet: parseInt(data.EnityTypeIDForTaskCommnet) || 0,
         EnityTypeIDForProcesure: parseInt(data.EnityTypeIDForProcesure) || 0,
-        // Add other fields as necessary
       };
 
       let result: ConfigurationItem;
@@ -181,6 +209,50 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleSaveUser = async (data: UserData): Promise<User | null> => {
+    setIsLoading(true);
+    try {
+      const newUser: User = {
+        ID: data.ID,
+        Username: data.Username,
+        Password: data.Password,
+        Status: data.Status || 0,
+        MaxWrongPass: data.MaxWrongPass || 5,
+        Name: data.Name,
+        Family: data.Family,
+        Email: data.Email || "",
+        Website: data.Website || "",
+        Mobile: data.Mobile || "",
+        CreateDate: data.CreateDate || null,
+        LastLoginTime: data.LastLoginTime || null,
+        UserImageId: data.UserImageId || null,
+        TTKK: data.TTKK || "",
+        userType: data.userType || 0,
+        Code: data.Code || "",
+        IsVisible: data.IsVisible ?? true,
+        LastModified: data.LastModified || new Date().toISOString(),
+        ModifiedById: data.ModifiedById || undefined
+      };
+  
+      let result: User;
+      if (newUser.ID) {
+        result = await api.updateUser(newUser);
+        console.log("User updated:", result);
+      } else {
+        result = await api.insertUser(newUser);
+        console.log("User inserted:", result);
+      }
+  
+      return result;
+    } catch (error) {
+      console.error("Error saving user:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -190,6 +262,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleDuplicate,
         handleSaveConfiguration,
         handleSaveCommand,
+        handleSaveUser,
       }}
     >
       {children}

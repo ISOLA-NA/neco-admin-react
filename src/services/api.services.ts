@@ -1,3 +1,4 @@
+
 // src/services/api.services.ts
 
 import httpClient from "./api.config";
@@ -180,6 +181,33 @@ export interface MenuGroup {
   LastModified: string | null;
 }
 
+// Add this interface with the other interfaces in api.services.ts
+// src/services/api.services.ts
+
+// Interface for User
+export interface User {
+  ID?: string;  // اصلاح شد به number
+  ModifiedById?: string;
+  Username: string;
+  Password?: string;
+  Status: number;
+  MaxWrongPass: number;
+  Name: string;
+  Family: string;
+  Email: string;
+  Website: string;
+  Mobile: string;
+  CreateDate: string | null;
+  LastLoginTime: string | null;
+  UserImageId: string | null;
+  TTKK: string;
+  userType: number;
+  Code: string;
+  IsVisible: boolean;
+  LastModified: string;
+}
+
+
 // Interface for MenuItem
 export interface MenuItem {
   ID: number;
@@ -200,7 +228,6 @@ export interface MenuItem {
 }
 // ساخت یک کلاس برای متدهای API
 class ApiService {
-
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
@@ -383,37 +410,31 @@ class ApiService {
     return response.data;
   }
 
-    /**
+  /**
    * Insert a new Menu.
    * @param data - The Menu data to insert.
    */
-    async insertMenu(data: Menu): Promise<Menu> {
-      const response = await httpClient.post<Menu>(
-        apiConst.insertMenu,
-        data
-      );
-      return response.data;
-    }
-  
-    /**
-     * Update an existing Menu.
-     * @param data - The Menu data to update.
-     */
-    async updateMenu(data: Menu): Promise<Menu> {
-      const response = await httpClient.post<Menu>(
-        apiConst.updateMenu,
-        data
-      );
-      return response.data;
-    }
-  
-    /**
-     * Delete a Menu by ID.
-     * @param id - The ID of the Menu to delete.
-     */
-    async deleteMenu(id: number): Promise<void> {
-      await httpClient.post(apiConst.deleteMenu, { ID: id });
-    }
+  async insertMenu(data: Menu): Promise<Menu> {
+    const response = await httpClient.post<Menu>(apiConst.insertMenu, data);
+    return response.data;
+  }
+
+  /**
+   * Update an existing Menu.
+   * @param data - The Menu data to update.
+   */
+  async updateMenu(data: Menu): Promise<Menu> {
+    const response = await httpClient.post<Menu>(apiConst.updateMenu, data);
+    return response.data;
+  }
+
+  /**
+   * Delete a Menu by ID.
+   * @param id - The ID of the Menu to delete.
+   */
+  async deleteMenu(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenu, { ID: id });
+  }
 
   async getAllMenuTab(menuId: number): Promise<MenuTab[]> {
     const response = await httpClient.post<MenuTab[]>(apiConst.getAllMenuTab, {
@@ -541,6 +562,26 @@ class ApiService {
    */
   async deleteMenuItem(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteMenuItem, { ID: id });
+  }
+
+  // Add these methods to the ApiService class
+  async getAllUsers(): Promise<User[]> {
+    const response = await httpClient.post<User[]>(apiConst.getAllUser);
+    return response.data;
+  }
+
+  async insertUser(data: User): Promise<User> {
+    const response = await httpClient.post<User>(apiConst.insertUser, data);
+    return response.data;
+  }
+
+  async updateUser(data: User): Promise<User> {
+    const response = await httpClient.post<User>(apiConst.updateUser, data);
+    return response.data;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await httpClient.post(apiConst.deleteUser, { ID: id });
   }
 }
 

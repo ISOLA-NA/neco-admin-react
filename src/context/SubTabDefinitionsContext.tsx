@@ -156,6 +156,58 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
 
+      Users: {
+        endpoint: api.getAllUsers,
+        columnDefs: [
+          {
+            headerName: "Username",
+            field: "Username",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "ID",
+            field: "ID",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Last Name",
+            field: "Family",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "User Type",
+            field: "userType",
+            filter: "agNumberColumnFilter",
+          },
+          {
+            headerName: "Website",
+            field: "Website",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Mobile",
+            field: "Mobile",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Email",
+            field: "Email",
+            filter: "agTextColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
       // -------------------
       // MenuTab
       // -------------------

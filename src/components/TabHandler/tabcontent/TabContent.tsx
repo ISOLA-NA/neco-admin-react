@@ -15,12 +15,11 @@ import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { ConfigurationHandle } from "../../General/Configuration/Configurations";
 import { useApi } from "../../../context/ApiContext";
-
-// کامپوننت کانفیرم
-import DynamicConfirm from "../../utilities/DynamicConfirm";
 import { CommandHandle } from "../../General/CommandSettings";
+import { UserHandle } from "../../General/Users";
 
-// اضافه کردن DynamicInput
+// Components
+import DynamicConfirm from "../../utilities/DynamicConfirm";
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
 
@@ -73,19 +72,32 @@ const TabContent: FC<TabContentProps> = ({
   const [isRightMaximized, setIsRightMaximized] = useState(false);
   const isMaximized = panelWidth >= 97;
 
-  // دو رفرنس برای Configurations و Commands
+  // Refs for different components
   const configurationRef = useRef<ConfigurationHandle>(null);
   const commandRef = useRef<CommandHandle>(null);
+  const userRef = useRef<UserHandle>(null);
 
-  // برای DynamicConfirm
+  // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">(
-    "delete"
-  );
+  const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">("delete");
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
 
+  // Panel State Management
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
+  const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
+  const [selectedSubItemForRight, setSelectedSubItemForRight] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [fetchedRowData, setFetchedRowData] = useState<any[]>([]);
+
+  // Form inputs state for Ribbons
+  const [nameInput, setNameInput] = useState<string>("");
+  const [descriptionInput, setDescriptionInput] = useState<string>("");
+
+  // Panel size management
   const togglePanelSize = () => {
     setIsRightMaximized(false);
     setPanelWidth((prevWidth) => (isMaximized ? 50 : 97));
@@ -101,6 +113,7 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
+  // Dragging functionality
   const startDragging = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
@@ -117,8 +130,7 @@ const TabContent: FC<TabContentProps> = ({
       let newWidth =
         ((e.clientX - containerRect.left) / containerRef.current.clientWidth) *
         100;
-      if (newWidth < 2) newWidth = 2;
-      if (newWidth > 97) newWidth = 97;
+      newWidth = Math.max(2, Math.min(97, newWidth));
       setIsRightMaximized(false);
       setPanelWidth(newWidth);
     },
@@ -139,112 +151,129 @@ const TabContent: FC<TabContentProps> = ({
     };
   }, [isDragging, handleMouseMove, stopDragging]);
 
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-  const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
-  const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
-  const [selectedSubItemForRight, setSelectedSubItemForRight] =
-    useState<any>(null);
-
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [fetchedRowData, setFetchedRowData] = useState<any[]>([]);
-
-  // ----------------------------------------------------------------
-  // متد fetchData: برای هر ساب‌تب، داده‌ی جدید را از API یا props بگیرید
-  // ----------------------------------------------------------------
-  const fetchData = React.useCallback(async () => {
+  // Data fetching
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      if (activeSubTab === "Configurations") {
-        // برای Configuration
-        const data = await api.getAllConfigurations();
-        setFetchedRowData(data);
+      let data;
+      switch (activeSubTab) {
+        case "Configurations":
+          data = await api.getAllConfigurations();
+          break;
+        case "Commands":
+          data = await api.getAllCommands();
+          break;
+        case "Ribbons":
+          data = await api.getAllMenu();
+          break;
+        case "Users":
+          data = await api.getAllUsers();
+          break;
+        default:
+          data = rowData;
       }
-      // *** اضافه کردن Commands ***
-      else if (activeSubTab === "Commands") {
-        const data = await api.getAllCommands();
-        setFetchedRowData(data);
-      }
-      // *** اضافه کردن Ribbons ***
-      else if (activeSubTab === "Ribbons") {
-        const data = await api.getAllMenu();
-        setFetchedRowData(data);
-      }
-      // به دلخواه: اگر زیرتب دیگری هم دارید، می‌توانید اینجا اضافه کنید
-      else {
-        setFetchedRowData(rowData);
-      }
+      setFetchedRowData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
+      showAlert("error", null, "Error", "Failed to fetch data");
     } finally {
       setIsLoading(false);
     }
   }, [api, activeSubTab, rowData]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (activeSubTab) {
+      fetchData();
+    }
+  }, [activeSubTab]); // فقط وابسته به activeSubTab باشد
 
-  // ----------------------------------------------------------------
-  // Handle Insert (Save)
-  // ----------------------------------------------------------------
+  // Save/Update handlers
   const handleInsert = async () => {
     try {
-      if (activeSubTab === "Configurations" && configurationRef.current) {
-        await configurationRef.current.save();
-      } else if (activeSubTab === "Commands" && commandRef.current) {
-        await commandRef.current.save();
-      } else if (activeSubTab === "Ribbons") {
-        await api.insertMenu({
-          Name: nameInput,
-          Description: descriptionInput,
-          // می‌توانید مقادیر پیش‌فرض را تنظیم کنید یا داده‌های اضافی را جمع‌آوری کنید
-          IsVisible: true, // مقدار پیش‌فرض نمونه
-          // ModifiedById می‌تواند بر اساس کانتکست کاربر فعلی تنظیم شود
-        });
-        showAlert("success", null, "Saved", "Ribbon added successfully.");
-        await fetchData(); // پس از ذخیره، مجدداً لیست را بگیرید
-        setIsPanelOpen(false);
-        setIsAdding(false);
-        // ریست کردن ورودی‌ها
-        setNameInput("");
-        setDescriptionInput("");
+      switch (activeSubTab) {
+        case "Configurations":
+          if (configurationRef.current) {
+            await configurationRef.current.save();
+            showAlert("success", null, "Saved", "Configuration added successfully.");
+            await fetchData(); // فقط بعد از ذخیره موفقیت‌آمیز، دیتا را دوباره بگیریم
+          }
+          break;
+        case "Commands":
+          if (commandRef.current) {
+            await commandRef.current.save();
+            showAlert("success", null, "Saved", "Command added successfully.");
+            await fetchData();
+          }
+          break;
+        case "Users":
+          if (userRef.current) {
+            const result = await userRef.current.save();
+            if (result) { // فقط اگر ذخیره موفقیت‌آمیز بود
+              showAlert("success", null, "Saved", "User added successfully.");
+              await fetchData();
+            }
+          }
+          break;
+        case "Ribbons":
+          await api.insertMenu({
+            Name: nameInput,
+            Description: descriptionInput,
+            IsVisible: true,
+          });
+          showAlert("success", null, "Saved", "Ribbon added successfully.");
+          await fetchData();
+          break;
       }
-      // سایر عملیات...
+      setIsPanelOpen(false);
+      setIsAdding(false);
+      resetInputs();
     } catch (error) {
       console.error("Error saving:", error);
       showAlert("error", null, "Error", "Failed to save data.");
     }
   };
 
-  // ----------------------------------------------------------------
-  // Handle Update
-  // ----------------------------------------------------------------
   const handleUpdate = async () => {
     try {
-      if (activeSubTab === "Configurations" && configurationRef.current) {
-        await configurationRef.current.save();
-      } else if (activeSubTab === "Commands" && commandRef.current) {
-        await commandRef.current.save();
-      } else if (activeSubTab === "Ribbons") {
-        if (selectedRow) {
-          await api.updateMenu({
-            ID: selectedRow.ID,
-            Name: nameInput,
-            Description: descriptionInput,
-            // Include other required fields if necessary
-            IsVisible: selectedRow.IsVisible, // Preserving existing value
-            // ModifiedById می‌تواند بر اساس کانتکست کاربر فعلی تنظیم شود
-          });
-          showAlert("success", null, "Updated", "Ribbon updated successfully.");
-          await fetchData();
-          setIsPanelOpen(false);
-          // ریست کردن ورودی‌ها
-          setNameInput("");
-          setDescriptionInput("");
-        }
+      switch (activeSubTab) {
+        case "Configurations":
+          if (configurationRef.current) {
+            await configurationRef.current.save();
+            showAlert("success", null, "Updated", "Configuration updated successfully.");
+            await fetchData();
+          }
+          break;
+        case "Commands":
+          if (commandRef.current) {
+            await commandRef.current.save();
+            showAlert("success", null, "Updated", "Command updated successfully.");
+            await fetchData();
+          }
+          break;
+        case "Users":
+          if (userRef.current) {
+            const result = await userRef.current.save();
+            if (result) { // فقط اگر آپدیت موفقیت‌آمیز بود
+              showAlert("success", null, "Updated", "User updated successfully.");
+              await fetchData();
+            }
+          }
+          break;
+        case "Ribbons":
+          if (selectedRow) {
+            await api.updateMenu({
+              ID: selectedRow.ID,
+              Name: nameInput,
+              Description: descriptionInput,
+              IsVisible: selectedRow.IsVisible,
+            });
+            showAlert("success", null, "Updated", "Ribbon updated successfully.");
+            await fetchData();
+          }
+          break;
       }
-      // سایر عملیات...
+      setIsPanelOpen(false);
+      resetInputs();
     } catch (error) {
       console.error("Error updating:", error);
       showAlert("error", null, "Error", "Failed to update data.");
@@ -255,9 +284,7 @@ const TabContent: FC<TabContentProps> = ({
     setIsPanelOpen(false);
     setIsAdding(false);
     resetRightPanel();
-    // ریست کردن ورودی‌ها
-    setNameInput("");
-    setDescriptionInput("");
+    resetInputs();
   };
 
   const resetRightPanel = () => {
@@ -265,13 +292,19 @@ const TabContent: FC<TabContentProps> = ({
     setSelectedSubItemForRight(null);
   };
 
+  const resetInputs = () => {
+    setNameInput("");
+    setDescriptionInput("");
+  };
+
+  // Row interaction handlers
   const handleDoubleClick = (data: any) => {
     onRowDoubleClick(data);
     setIsAdding(false);
     setIsPanelOpen(true);
     if (activeSubTab === "Ribbons") {
-      setNameInput(data.Name); // نام ویژگی اصلاح شده
-      setDescriptionInput(data.Description); // نام ویژگی اصلاح شده
+      setNameInput(data.Name);
+      setDescriptionInput(data.Description);
     }
   };
 
@@ -279,41 +312,46 @@ const TabContent: FC<TabContentProps> = ({
     setPendingSelectedRow(data);
     onRowClick(data);
     if (activeSubTab === "Ribbons") {
-      setNameInput(data.Name); // نام ویژگی اصلاح شده
-      setDescriptionInput(data.Description); // نام ویژگی اصلاح شده
+      setNameInput(data.Name);
+      setDescriptionInput(data.Description);
     }
   };
 
-  // ----------------------------------------------------------------
-  // Handle Add Click
-  // ----------------------------------------------------------------
+  // CRUD operation handlers
   const handleAddClick = () => {
     setIsAdding(true);
     setIsPanelOpen(true);
     onAdd();
     resetRightPanel();
-    if (activeSubTab === "Ribbons") {
-      setNameInput("");
-      setDescriptionInput("");
-    }
+    resetInputs();
   };
 
-  // ----------------------------------------------------------------
-  // Handle Delete Click
-  // ----------------------------------------------------------------
   const handleDeleteClick = () => {
     if (!pendingSelectedRow) {
-      alert("Please select a row to delete.");
+      showAlert("warning", null, "Warning", "Please select a row to delete.");
       return;
     }
     setConfirmVariant("delete");
     setConfirmTitle("Delete Confirmation");
-    setConfirmMessage("Are you sure you want to delete this ribbon?");
+    setConfirmMessage(`Are you sure you want to delete this ${activeSubTab.toLowerCase()}?`);
     setConfirmAction(() => async () => {
       try {
-        await api.deleteMenu(pendingSelectedRow.ID);
-        showAlert("success", null, "Deleted", "Ribbon deleted successfully.");
-        await fetchData(); // بعد از Delete هم لیست را رفرش می‌کنیم
+        switch (activeSubTab) {
+          case "Users":
+            await api.deleteUser(pendingSelectedRow.ID);
+            break;
+          case "Ribbons":
+            await api.deleteMenu(pendingSelectedRow.ID);
+            break;
+          case "Commands":
+            await api.deleteCommand(pendingSelectedRow.ID);
+            break;
+          case "Configurations":
+            await api.deleteConfiguration(pendingSelectedRow.ID);
+            break;
+        }
+        showAlert("success", null, "Deleted", `${activeSubTab} deleted successfully.`);
+        await fetchData();
       } catch (error) {
         console.error("Error deleting:", error);
         showAlert("error", null, "Error", "Failed to delete data.");
@@ -322,20 +360,17 @@ const TabContent: FC<TabContentProps> = ({
     setConfirmOpen(true);
   };
 
-  // ----------------------------------------------------------------
-  // Handle Duplicate Click
-  // ----------------------------------------------------------------
   const handleDuplicateClick = () => {
     if (selectedRow) {
       onDuplicate();
       if (activeSubTab === "Ribbons") {
-        setNameInput(selectedRow.Name); // نام ویژگی اصلاح شده
-        setDescriptionInput(selectedRow.Description); // نام ویژگی اصلاح شده
+        setNameInput(selectedRow.Name);
+        setDescriptionInput(selectedRow.Description);
         setIsAdding(true);
         setIsPanelOpen(true);
       }
     } else {
-      alert("Please select a row to duplicate.");
+      showAlert("warning", null, "Warning", "Please select a row to duplicate.");
     }
   };
 
@@ -349,16 +384,26 @@ const TabContent: FC<TabContentProps> = ({
     await confirmAction();
   };
 
-  // Stateهای جدید برای Ribbons
-  const [nameInput, setNameInput] = useState<string>("");
-  const [descriptionInput, setDescriptionInput] = useState<string>("");
-
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNameInput(e.target.value);
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDescriptionInput(e.target.value);
+  };
+
+  // Determine which ref to use based on activeSubTab
+  const getActiveRef = () => {
+    switch (activeSubTab) {
+      case "Configurations":
+        return configurationRef;
+      case "Commands":
+        return commandRef;
+      case "Users":
+        return userRef;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -376,7 +421,7 @@ const TabContent: FC<TabContentProps> = ({
         onClose={() => setConfirmOpen(false)}
       />
 
-      {/* پنل سمت چپ */}
+      {/* Left Panel */}
       <div
         className="flex flex-col overflow-auto bg-gray-100 box-border"
         style={{
@@ -391,11 +436,7 @@ const TabContent: FC<TabContentProps> = ({
             onClick={togglePanelSize}
             className="text-gray-700 hover:text-gray-900 transition"
           >
-            {isMaximized ? (
-              <FiMinimize2 size={18} />
-            ) : (
-              <FiMaximize2 size={18} />
-            )}
+            {isMaximized ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
           </button>
         </div>
 
@@ -416,9 +457,9 @@ const TabContent: FC<TabContentProps> = ({
             isLoading={isLoading}
           />
 
-          {/* اضافه کردن فرم برای Ribbons */}
-          {activeSubTab === "Ribbons" && (
-            <div className="-mt-32 w-full p-4 bg-white rounded-md shadow-md absolute ">
+        {/* Ribbons Form */}
+        {activeSubTab === "Ribbons" && isPanelOpen && (
+            <div className="-mt-32 w-full p-4 bg-white rounded-md shadow-md absolute">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                 <DynamicInput
                   name="Name"
@@ -471,7 +512,7 @@ const TabContent: FC<TabContentProps> = ({
         </div>
       </div>
 
-      {/* جداکننده */}
+      {/* Divider */}
       <div
         onMouseDown={startDragging}
         className="flex items-center justify-center cursor-ew-resize w-2"
@@ -480,7 +521,7 @@ const TabContent: FC<TabContentProps> = ({
         <div className="h-full w-1 bg-[#dd4bae] rounded"></div>
       </div>
 
-      {/* پنل سمت راست */}
+      {/* Right Panel */}
       {isPanelOpen && (
         <div
           className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
@@ -496,7 +537,7 @@ const TabContent: FC<TabContentProps> = ({
           }}
         >
           <div
-            className="h-full p-4 flex flex-col "
+            className="h-full p-4 flex flex-col"
             style={{
               minWidth: panelWidth <= 30 ? "300px" : "auto",
             }}
@@ -509,6 +550,7 @@ const TabContent: FC<TabContentProps> = ({
                   isAdding &&
                   (activeSubTab === "Configurations" ||
                     activeSubTab === "Commands" ||
+                    activeSubTab === "Users" ||
                     activeSubTab === "Ribbons")
                     ? handleInsert
                     : undefined
@@ -517,6 +559,7 @@ const TabContent: FC<TabContentProps> = ({
                   !isAdding &&
                   (activeSubTab === "Configurations" ||
                     activeSubTab === "Commands" ||
+                    activeSubTab === "Users" ||
                     activeSubTab === "Ribbons")
                     ? handleUpdate
                     : undefined
@@ -568,42 +611,7 @@ const TabContent: FC<TabContentProps> = ({
                           : "no-selection"
                       }
                       selectedRow={isAdding ? null : selectedRow}
-                      // ارجاع به رفرنس درست
-                      ref={
-                        activeSubTab === "Configurations"
-                          ? configurationRef
-                          : activeSubTab === "Commands"
-                          ? commandRef
-                          : null
-                      }
-                    />
-                  </Suspense>
-                </div>
-              </div>
-            )}
-
-            {/* اگر پنل برای Ribbons باز باشد */}
-            {activeSubTab === "Ribbons" && Component && (
-              <div className="mt-5 flex-grow overflow-y-auto">
-                <div style={{ minWidth: "600px" }}>
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <Component
-                      key={
-                        isAdding
-                          ? "add-mode"
-                          : selectedRow
-                          ? selectedRow.ID
-                          : "no-selection"
-                      }
-                      selectedRow={isAdding ? null : selectedRow}
-                      // ارجاع به رفرنس درست
-                      ref={
-                        activeSubTab === "Ribbons"
-                          ? null
-                          : activeSubTab === "Commands"
-                          ? commandRef
-                          : null
-                      }
+                      ref={getActiveRef()}
                     />
                   </Suspense>
                 </div>
