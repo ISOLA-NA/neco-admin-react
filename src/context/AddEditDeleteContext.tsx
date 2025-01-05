@@ -40,10 +40,10 @@ interface ConfigurationData {
 }
 
 export interface UserData {
-  ID?: number;
+  ID?: string; // Changed from number to string to match User interface
   Username: string;
-  Password?: string; // Optional in edit mode
-  ConfirmPassword?: string; // Optional in edit mode
+  Password?: string;
+  ConfirmPassword?: string;
   Status: number;
   MaxWrongPass: number;
   Name: string;
@@ -61,7 +61,6 @@ export interface UserData {
   LastLoginTime?: string | null;
   UserImageId?: string | null;
 }
-
 interface AddEditDeleteContextType {
   handleAdd: () => void
   handleEdit: () => void

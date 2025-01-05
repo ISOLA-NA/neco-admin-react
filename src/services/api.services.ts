@@ -188,7 +188,7 @@ export interface MenuGroup {
 // src/context/ApiContext.tsx
 
 export interface User {
-  ID: number | undefined;
+  ID?: string | undefined;
   Username: string;
   Password?: string; // این فیلد اجباری است
   ConfirmPassword?: string; // این فیلد نیز اجباری است
@@ -593,7 +593,7 @@ class ApiService {
   }
 
   async deleteUser(id: string): Promise<void> {
-    await httpClient.post(apiConst.deleteUser, { ID: id });
+    await httpClient.post(apiConst.deleteUser, { gid: id });
   }
 
   async changePasswordByAdmin(data: ChangePasswordByAdminRequest): Promise<void> {

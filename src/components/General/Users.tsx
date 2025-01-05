@@ -25,6 +25,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   const { handleSaveUser } = useAddEditDelete();
   const [userTypeOptions, setUserTypeOptions] = useState<{ value: string; label: string }[]>([]);
   const [resetCounter, setResetCounter] = useState<number>(0);
+  const [newPassword, setNewPassword] = useState(''); // Added state for new password
 
   const [userData, setUserData] = useState({
     ID: selectedRow?.ID || null,
@@ -88,6 +89,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         CreateDate: selectedRow.CreateDate || null,
         LastLoginTime: selectedRow.LastLoginTime || null,
       });
+      setNewPassword(''); // Reset new password when selected row changes
     } else {
       setUserData({
         ID: null,
@@ -110,8 +112,42 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         LastLoginTime: null,
       });
       setResetCounter(prev => prev + 1);
+      setNewPassword('');
     }
   }, [selectedRow]);
+
+  // Added changePassword function
+  const changePassword = async () => {
+    if (!newPassword) {
+      showAlert(
+        'error',
+        null,
+        'Validation Error',
+        'New password cannot be empty'
+      );
+      return;
+    }
+
+    try {
+      const payload = {
+        UserId: selectedRow.ID,
+        Password: newPassword,
+      };
+
+      await AppServices.changePasswordByAdmin(payload);
+
+      showAlert('success', null, 'Success', 'Password changed successfully');
+      setNewPassword('');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      showAlert(
+        'error',
+        null,
+        'Error',
+        'Failed to change password'
+      );
+    }
+  };
 
   const handleChange = (field: keyof typeof userData, value: any) => {
     setUserData(prev => ({
@@ -263,13 +299,21 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       )}
 
       {selectedRow && (
-        <DynamicInput
-          name="Password"
-          type="password"
-          value=""
-          onChange={e => handleChange('Password', e.target.value)}
-          placeholder="Enter new password (optional)"
-        />
+        <>
+          <DynamicInput
+            name="Password"
+            type="password"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            placeholder="Enter new password (optional)"
+          />
+          <button
+            onClick={changePassword}
+            className="mt-2 px-5 py-2.5 border-none rounded bg-gradient-to-r from-[#e14aa7] via-[#6761f0] to-[#b23ace] text-white cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-[#b23ace] hover:via-[#6761f0] hover:to-[#e14aa7]"
+          >
+            Change Password
+          </button>
+        </>
       )}
 
       <DynamicInput
