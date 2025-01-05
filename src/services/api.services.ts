@@ -536,9 +536,14 @@ class ApiService {
     await httpClient.post(apiConst.deleteMenuItem, { ID: id });
   }
 
+  ///////////////////////////////////////////////////
   async GetAllMenuClient() {
     return await httpClient.post(apiConstClient.GetAllMenuClient);
   }
+  async GetZipFullMenuClient(id: number) {
+    return await httpClient.post(apiConstClient.GetZipFullMenuClient, { id });
+  }
+  ////////////////////////////////////////////////////
 }
 
 // یک خروجی برای استفاده در Context

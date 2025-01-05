@@ -52,4 +52,5 @@ export const apiConst = Object.freeze({
 
 export const apiConstClient = Object.freeze({
   GetAllMenuClient: "Menu/GetAllForClient",
+  GetZipFullMenuClient: "Menu/GetZipFullMenuClient",
 });
