@@ -264,7 +264,7 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           <DynamicInput
             name='Password'
             type='password'
-            value={userData.Password}
+            value=""
             onChange={e => handleChange('Password', e.target.value)}
             placeholder='Enter new password (optional)'
           />
@@ -308,25 +308,7 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         label='Status'
       />
 
-      <DynamicInput
-        name='TTKK'
-        type='text'
-        value={userData.TTKK}
-        onChange={e => handleChange('TTKK', e.target.value)}
-      />
 
-      <div className='flex items-center gap-2 mt-2'>
-        <label htmlFor='isVisible' className='text-sm font-medium'>
-          Is Visible:
-        </label>
-        <input
-          id='isVisible'
-          type='checkbox'
-          checked={userData.IsVisible}
-          onChange={e => handleChange('IsVisible', e.target.checked)}
-          className='form-checkbox h-4 w-4'
-        />
-      </div>
     </TwoColumnLayout>
   )
 })

@@ -254,7 +254,6 @@ const TabContent: FC<TabContentProps> = ({
           if (userRef.current) {
             const result = await userRef.current.save();
             if (result) { // فقط اگر آپدیت موفقیت‌آمیز بود
-              showAlert("success", null, "Updated", "User updated successfully.");
               await fetchData();
             }
           }
