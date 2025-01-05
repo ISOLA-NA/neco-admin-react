@@ -18,6 +18,7 @@ import { useApi } from "../../../context/ApiContext";
 import { CommandHandle } from "../../General/CommandSettings";
 import { UserHandle } from "../../General/Users";
 import { RoleHandle } from "../../General/Roles";
+import { CompanyHandle } from "../../General/Enterprises"; // Add this import
 
 // Components
 import DynamicConfirm from "../../utilities/DynamicConfirm";
@@ -78,6 +79,7 @@ const TabContent: FC<TabContentProps> = ({
   const commandRef = useRef<CommandHandle>(null);
   const userRef = useRef<UserHandle>(null);
   const roleRef = useRef<RoleHandle>(null);
+  const companyRef = useRef<CompanyHandle>(null); // Add this with other refs
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -177,6 +179,9 @@ const TabContent: FC<TabContentProps> = ({
         case "Roles": // اضافه شده
           data = await api.getAllRoles();
           break;
+        case "Enterprises": // Add this case
+          data = await api.getAllCompanies();
+          break;
         default:
           data = rowData;
       }
@@ -241,6 +246,18 @@ const TabContent: FC<TabContentProps> = ({
           if (roleRef.current) {
             await roleRef.current.save();
             showAlert("success", null, "Saved", "Role added successfully.");
+            await fetchData();
+          }
+          break;
+        case "Enterprises": // Add this case
+          if (companyRef.current) {
+            await companyRef.current.save();
+            showAlert(
+              "success",
+              null,
+              "Saved",
+              "Enterprise added successfully."
+            );
             await fetchData();
           }
           break;
@@ -311,6 +328,18 @@ const TabContent: FC<TabContentProps> = ({
           if (selectedRow && roleRef.current) {
             await roleRef.current.save();
             showAlert("success", null, "Updated", "Role updated successfully.");
+            await fetchData();
+          }
+          break;
+        case "Enterprises": // Add this case
+          if (selectedRow && companyRef.current) {
+            await companyRef.current.save();
+            showAlert(
+              "success",
+              null,
+              "Updated",
+              "Enterprise updated successfully."
+            );
             await fetchData();
           }
           break;
@@ -397,6 +426,9 @@ const TabContent: FC<TabContentProps> = ({
           case "Roles":
             await api.deleteRole(pendingSelectedRow.ID);
             break;
+          case "Enterprises":
+            await api.deleteCompany(pendingSelectedRow.ID);
+            break;
         }
         showAlert(
           "success",
@@ -461,6 +493,8 @@ const TabContent: FC<TabContentProps> = ({
         return userRef;
       case "Roles":
         return roleRef;
+      case "Enterprises": // Add this case
+        return companyRef;
       default:
         return null;
     }
@@ -616,7 +650,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Commands" ||
                     activeSubTab === "Users" ||
                     activeSubTab === "Ribbons" ||
-                    activeSubTab === "Roles")
+                    activeSubTab === "Roles" ||
+                    activeSubTab === "Enterprises")
                     ? handleInsert
                     : undefined
                 }
@@ -626,7 +661,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Commands" ||
                     activeSubTab === "Users" ||
                     activeSubTab === "Ribbons" ||
-                    activeSubTab === "Roles")
+                    activeSubTab === "Roles" ||
+                    activeSubTab === "Enterprises")
                     ? handleUpdate
                     : undefined
                 }

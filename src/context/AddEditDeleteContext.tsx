@@ -5,6 +5,7 @@ import {
   User,
   ConfigurationItem,
   Role,
+  Company,
 } from "./ApiContext";
 
 // Define CommandData if it's different from CommandItem
@@ -82,6 +83,17 @@ interface RoleData {
   isStaticPost?: boolean;
 }
 
+interface CompanyData {
+  ID?: number;
+  Name: string;
+  Description?: string;
+  Type?: string | null;
+  Information?: string | null;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string | null;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
@@ -92,7 +104,8 @@ interface AddEditDeleteContextType {
   ) => Promise<ConfigurationItem | null>;
   handleSaveCommand: (data: CommandData) => Promise<CommandItem | null>;
   handleSaveUser: (data: UserData) => Promise<User | null>;
-  handleSaveRole: (data: RoleData) => Promise<Role | null>; // اضافه شده
+  handleSaveRole: (data: RoleData) => Promise<Role | null>;
+  handleSaveCompany: (data: CompanyData) => Promise<Company | null>;
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -132,6 +145,10 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         // حذف یوزر
         await api.deleteRole(String(id));
         console.log("User deleted successfully!");
+      } else if (subTabName === "Enterprises") {
+        // Add this case
+        await api.deleteCompany(id);
+        console.log("Company deleted successfully!");
       }
     } catch (error) {
       console.error("Error deleting record:", error);
@@ -327,6 +344,47 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleSaveCompany = async (
+    data: CompanyData
+  ): Promise<Company | null> => {
+    setIsLoading(true);
+    try {
+      const companyRequest: Partial<Company> = {
+        Name: data.Name,
+        Description: data.Description,
+        Type: data.Type,
+        Information: data.Information,
+        IsVisible: data.IsVisible,
+        LastModified: data.LastModified || new Date().toISOString(),
+        ModifiedById: data.ModifiedById,
+      };
+
+      // Add ID if it exists (for updates)
+      if (data.ID) {
+        companyRequest.ID = data.ID;
+      }
+
+      let result: Company;
+
+      if (companyRequest.ID) {
+        // Update existing company
+        result = await api.updateCompany(companyRequest as Company);
+        console.log("Company updated:", result);
+      } else {
+        // Add new company
+        result = await api.insertCompany(companyRequest as Company);
+        console.log("Company inserted:", result);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error saving company:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -338,6 +396,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveCommand,
         handleSaveUser,
         handleSaveRole,
+        handleSaveCompany,
       }}
     >
       {children}

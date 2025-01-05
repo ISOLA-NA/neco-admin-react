@@ -53,4 +53,8 @@ export const apiConst = Object.freeze({
   insertRole: "api/Post/Insert",
   updateRole: "api/Post/Update",
   deleteRole: "api/Post/Delete",
+  getAllCompany: "api/Company/GetAll",
+  insertCompany: "api/Company/Insert",
+  deleteCompany: "api/Company/Delete",
+  updateCompany: "api/Company/Update",
 });

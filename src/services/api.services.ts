@@ -244,6 +244,17 @@ export interface Role {
   isStaticPost?: boolean;
 }
 
+export interface Company {
+  ID: number;
+  Name: string;
+  Description?: string; // افزودن Description به صورت اختیاری
+  Information?: string | null; // اطلاعات ممکن است خالی باشد
+  IsVisible: boolean;
+  LastModified: string;
+  ModifiedById?: string | null;
+  Type?: string | null; // نوع می‌تواند مقدار نال یا یک رشته باشد
+}
+
 // src/services/api.services.ts
 
 // اینترفیس درخواست ChangePasswordByAdmin
@@ -633,6 +644,43 @@ class ApiService {
 
   async deleteRole(id: string): Promise<void> {
     await httpClient.post(apiConst.deleteRole, { gid: id });
+  }
+
+  async getAllCompanies(): Promise<Company[]> {
+    const response = await httpClient.post<Company[]>(apiConst.getAllCompany);
+    return response.data;
+  }
+
+  /**
+   * درج یک شرکت جدید.
+   * @param data - داده‌های شرکت برای درج.
+   */
+  async insertCompany(data: Company): Promise<Company> {
+    const response = await httpClient.post<Company>(
+      apiConst.insertCompany,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * به‌روزرسانی یک شرکت موجود.
+   * @param data - داده‌های شرکت برای به‌روزرسانی.
+   */
+  async updateCompany(data: Company): Promise<Company> {
+    const response = await httpClient.post<Company>(
+      apiConst.updateCompany,
+      data
+    );
+    return response.data;
+  }
+
+  /**
+   * حذف یک شرکت بر اساس ID.
+   * @param id - شناسه شرکت برای حذف.
+   */
+  async deleteCompany(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteCompany, { ID: id });
   }
 }
 

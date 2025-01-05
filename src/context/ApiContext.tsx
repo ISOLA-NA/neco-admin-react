@@ -21,6 +21,7 @@ import AppServices, {
   UserToken,
   User,
   Role,
+  Company,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -76,6 +77,11 @@ interface ApiContextType {
   insertRole: (data: Role) => Promise<Role>;
   updateRole: (data: Role) => Promise<Role>;
   deleteRole: (id: string) => Promise<void>;
+
+  getAllCompanies: () => Promise<Company[]>;
+  insertCompany: (data: Company) => Promise<Company>;
+  updateCompany: (data: Company) => Promise<Company>;
+  deleteCompany: (id: number) => Promise<void>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -137,6 +143,11 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertRole: AppServices.insertRole.bind(AppServices),
     updateRole: AppServices.updateRole.bind(AppServices),
     deleteRole: AppServices.deleteRole.bind(AppServices),
+
+    getAllCompanies: AppServices.getAllCompanies.bind(AppServices),
+    insertCompany: AppServices.insertCompany.bind(AppServices),
+    updateCompany: AppServices.updateCompany.bind(AppServices),
+    deleteCompany: AppServices.deleteCompany.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -169,4 +180,5 @@ export type {
   MenuItem,
   User,
   Role,
+  Company,
 };
