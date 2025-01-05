@@ -19,43 +19,48 @@ export default function SideBar() {
     getAllMenuClient();
   }, []);
   return (
-    <div className="flex flex-col  h-full">
-      <div className={"menu "}>
-        <MdApps size={30} />
+    <aside className="flex flex-col  h-full pt-12 px-2">
+      <div
+        className={
+          " cursor-pointer self-start rounded-md hover:bg-slate-400 duration-300 mb-2"
+        }
+      >
+        <MdApps size={25} />
       </div>
-      <div className="max-h-[80vh] overflow-auto ">
-        <ul className="menu bg-base-200">
-          {ribbon &&
-            ribbon.length > 0 &&
-            ribbon.map(
-              (item) =>
-                item.Groups.length > 0 && (
-                  <li key={item.MenuTab.ID}>
-                    <details>
-                      <summary>{item.MenuTab.Name}</summary>
-                      <ul>
-                        {item.Groups.map((group) => (
-                          <li key={group.ID}>
-                            <details>
-                              <summary>{group.Name}</summary>
-                              <ul>
-                                {group.MenuItems.map((groupItem) => (
-                                  <li key={groupItem.ID}>
-                                    <a>{groupItem.Name}</a>
-                                  </li>
-                                ))}
-                              </ul>
-                            </details>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                    {/* <a></a> */}
-                  </li>
-                ),
-            )}
-        </ul>
+      <div className="max-h-[80vh] overflow-auto border p-1">
+        {ribbon && (
+          <ul className="menu bg-base-200">
+            {ribbon.length > 0 &&
+              ribbon.map(
+                (item) =>
+                  item.Groups.length > 0 && (
+                    <li key={item.MenuTab.ID}>
+                      <details>
+                        <summary>{item.MenuTab.Name}</summary>
+                        <ul>
+                          {item.Groups.map((group) => (
+                            <li key={group.ID}>
+                              <details>
+                                <summary>{group.Name}</summary>
+                                <ul>
+                                  {group.MenuItems.map((groupItem) => (
+                                    <li key={groupItem.ID}>
+                                      <a>{groupItem.Name}</a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                      {/* <a></a> */}
+                    </li>
+                  ),
+              )}
+          </ul>
+        )}
       </div>
-    </div>
+    </aside>
   );
 }
