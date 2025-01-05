@@ -48,4 +48,5 @@ export const apiConst = Object.freeze({
   insertUser: "api/User/Insert",
   updateUser: "api/User/Update",
   deleteUser: "api/User/Delete",
+  changePassword: "api/User/ChangePasswordByAdmin",
 });

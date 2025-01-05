@@ -1,51 +1,49 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import TwoColumnLayout from '../layout/TwoColumnLayout'
-import DynamicInput from '../utilities/DynamicInput'
-import DynamicSelector from '../utilities/DynamicSelector'
-import { useAddEditDelete } from '../../context/AddEditDeleteContext'
-import type { GetEnumResponse, User as UserType } from '../../services/api.services'
-import { showAlert } from '../utilities/Alert/DynamicAlert'
-import AppServices from '../../services/api.services'
+// src/components/User/User.tsx
 
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import TwoColumnLayout from '../layout/TwoColumnLayout';
+import DynamicInput from '../utilities/DynamicInput';
+import DynamicSelector from '../utilities/DynamicSelector';
+import { useAddEditDelete } from '../../context/AddEditDeleteContext';
+import type { GetEnumResponse, User as UserType } from '../../services/api.services';
+import { showAlert } from '../utilities/Alert/DynamicAlert';
+import AppServices from '../../services/api.services';
 
+// Import necessary styles or use inline styles as shown below
 
- 
 export interface UserHandle {
-  save: () => Promise<UserType | null>
+  save: () => Promise<UserType | null>;
 }
 
 interface UserProps {
-  selectedRow: any
+  selectedRow: any;
 }
 
-// ... (imports remain the same)
-
 const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
-  const { handleSaveUser } = useAddEditDelete()
+  const { handleSaveUser } = useAddEditDelete();
 
-  const [userTypeOptions, setUserTypeOptions] = useState<{ value: string, label: string }[]>([])
+  const [userTypeOptions, setUserTypeOptions] = useState<{ value: string; label: string }[]>([]);
+  const [newPassword, setNewPassword] = useState<string>(''); // State for new password
 
-useEffect(() => {
-  // Fetch UserType options from API
-  const fetchUserTypes = async () => {
-    // setIsLoadingUserTypes(true)
-    try {
-      const response: GetEnumResponse = await AppServices.getEnum({ str: "UserType" })
+  useEffect(() => {
+    // Fetch UserType options from API
+    const fetchUserTypes = async () => {
+      try {
+        const response: GetEnumResponse = await AppServices.getEnum({ str: 'UserType' });
 
-      console.log("rrrr",response.data)
-      const options = Object.entries(response).map(([key, val]) => ({
-        value: val.toString(),
-        label: key
-      }))
-      setUserTypeOptions(options)
-    } catch (error) {
-      console.error('Error fetching UserType enums:', error)
-    } 
-  }
+        console.log('UserType Response:', response);
+        const options = Object.entries(response).map(([key, val]) => ({
+          value: val.toString(),
+          label: key,
+        }));
+        setUserTypeOptions(options);
+      } catch (error) {
+        console.error('Error fetching UserType enums:', error);
+      }
+    };
 
-  fetchUserTypes()
-}, [])
-
+    fetchUserTypes();
+  }, []);
 
   const [userData, setUserData] = useState({
     ID: selectedRow?.ID || null,
@@ -66,7 +64,7 @@ useEffect(() => {
     UserImageId: selectedRow?.UserImageId || null,
     CreateDate: selectedRow?.CreateDate || null,
     LastLoginTime: selectedRow?.LastLoginTime || null,
-  })
+  });
 
   useEffect(() => {
     if (selectedRow) {
@@ -77,7 +75,7 @@ useEffect(() => {
         Family: selectedRow.Family || '',
         Email: selectedRow.Email || '',
         Mobile: selectedRow.Mobile || '',
-        Password: selectedRow.Password || '', // Pre-fill Password
+        Password: '', // Do not pre-fill password in edit mode
         ConfirmPassword: '', // Not needed when editing
         Status: selectedRow.Status || 0,
         MaxWrongPass: selectedRow.MaxWrongPass || 5,
@@ -89,7 +87,8 @@ useEffect(() => {
         UserImageId: selectedRow.UserImageId || null,
         CreateDate: selectedRow.CreateDate || null,
         LastLoginTime: selectedRow.LastLoginTime || null,
-      })
+      });
+      setNewPassword(''); // Reset new password when selectedRow changes
     } else {
       setUserData({
         ID: null,
@@ -110,59 +109,50 @@ useEffect(() => {
         UserImageId: null,
         CreateDate: null,
         LastLoginTime: null,
-      })
+      });
+      setNewPassword('');
     }
-  }, [selectedRow])
+  }, [selectedRow]);
 
   const handleChange = (field: keyof typeof userData, value: any) => {
-    setUserData(prev => ({
+    setUserData((prev) => ({
       ...prev,
       [field]: value,
-    }))
-  }
+    }));
+  };
 
   const validateForm = () => {
     if (!userData.Username) {
-      showAlert('error', null, 'Validation Error', 'Username is required')
-      return false
+      showAlert('error', null, 'Validation Error', 'Username is required');
+      return false;
     }
 
     if (!selectedRow && !userData.Password) {
-      showAlert(
-        'error',
-        null,
-        'Validation Error',
-        'Password is required for new users'
-      )
-      return false
+      showAlert('error', null, 'Validation Error', 'Password is required for new users');
+      return false;
     }
 
     if (!userData.Name) {
-      showAlert('error', null, 'Validation Error', 'Name is required')
-      return false
+      showAlert('error', null, 'Validation Error', 'Name is required');
+      return false;
     }
 
-    if (selectedRow && userData.Password && userData.Password !== selectedRow.Password) {
-      showAlert(
-        'error',
-        null,
-        'Validation Error',
-        'Passwords do not match'
-      )
-      return false
+    if (selectedRow && userData.Password && userData.Password !== userData.ConfirmPassword) {
+      showAlert('error', null, 'Validation Error', 'Passwords do not match');
+      return false;
     }
 
     if (userData.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.Email)) {
-      showAlert('error', null, 'Validation Error', 'Invalid email format')
-      return false
+      showAlert('error', null, 'Validation Error', 'Invalid email format');
+      return false;
     }
 
-    return true
-  }
+    return true;
+  };
 
   const save = async (): Promise<UserType | null> => {
     if (!validateForm()) {
-      return null
+      return null;
     }
 
     try {
@@ -173,24 +163,24 @@ useEffect(() => {
         CreateDate: userData.CreateDate ?? null,
         LastLoginTime: userData.LastLoginTime ?? null,
         UserImageId: userData.UserImageId ?? null,
-      }
+      };
 
       if (selectedRow) {
         // Editing existing user
         // Do not send ConfirmPassword
       } else {
         // Creating new user
-        dataToSave.ConfirmPassword = userData.ConfirmPassword
+        dataToSave.ConfirmPassword = userData.ConfirmPassword;
       }
 
       // If creating a new user, ensure ID is undefined
       if (!selectedRow) {
-        delete dataToSave.ID
+        delete dataToSave.ID;
       }
 
-      console.log('Data to Save:', dataToSave) // For debugging
+      console.log('Data to Save:', dataToSave); // For debugging
 
-      const result = await handleSaveUser(dataToSave)
+      const result = await handleSaveUser(dataToSave);
 
       if (result) {
         showAlert(
@@ -198,89 +188,103 @@ useEffect(() => {
           null,
           'Success',
           `User ${selectedRow ? 'updated' : 'created'} successfully`
-        )
+        );
       }
 
-      return result
+      return result;
     } catch (error) {
-      console.error('Error saving user:', error)
+      console.error('Error saving user:', error);
       showAlert(
         'error',
         null,
         'Error',
         `Failed to ${selectedRow ? 'update' : 'create'} user`
-      )
-      return null
+      );
+      return null;
     }
-  }
+  };
+
+  const changePassword = async () => {
+    if (!newPassword) {
+      showAlert('error', null, 'Validation Error', 'New password cannot be empty');
+      return;
+    }
+
+    // Optionally, add more password validations here (e.g., strength, length)
+
+    try {
+      const payload = {
+        UserId: selectedRow.ID,
+        Password: newPassword,
+      };
+
+      await AppServices.changePasswordByAdmin(payload);
+
+      showAlert('success', null, 'Success', 'Password changed successfully');
+
+      // Optionally, reset the newPassword state
+      setNewPassword('');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      showAlert('error', null, 'Error', 'Failed to change password');
+    }
+  };
 
   useImperativeHandle(ref, () => ({
     save,
-  }))
-
-  const userTypes = [
-    { value: '0', label: 'Admin' },
-    { value: '1', label: 'Sysadmin' },
-    { value: '2', label: 'Employee' },
-  ]
-
-  const statusOptions = [
-    { value: '0', label: 'Active' },
-    { value: '1', label: 'Inactive' },
-    { value: '2', label: 'Suspended' },
-  ]
+  }));
 
   return (
     <TwoColumnLayout>
       {/* Code Field - Always visible but disabled in edit mode */}
       <DynamicInput
-        name='Code'
-        type='number'
+        name="Code"
+        type="number"
         value={userData.Code}
-        onChange={e => handleChange('Code', e.target.value)}
+        onChange={(e) => handleChange('Code', e.target.value)}
         disabled={!!selectedRow}
       />
 
       <DynamicInput
-        name='Username'
-        type='text'
+        name="Username"
+        type="text"
         value={userData.Username}
-        onChange={e => handleChange('Username', e.target.value)}
+        onChange={(e) => handleChange('Username', e.target.value)}
         required
         disabled={!!selectedRow}
       />
 
       <DynamicInput
-        name='Name'
-        type='text'
+        name="Name"
+        type="text"
         value={userData.Name}
-        onChange={e => handleChange('Name', e.target.value)}
+        onChange={(e) => handleChange('Name', e.target.value)}
         required
       />
 
       <DynamicInput
-        name='Family'
-        type='text'
+        name="Family"
+        type="text"
         value={userData.Family}
-        onChange={e => handleChange('Family', e.target.value)}
+        onChange={(e) => handleChange('Family', e.target.value)}
       />
 
       {!selectedRow && (
         <>
           {/* For adding a new user */}
           <DynamicInput
-            name='Password'
-            type='password'
+            name="Password"
+            type="password"
             value={userData.Password}
-            onChange={e => handleChange('Password', e.target.value)}
+            onChange={(e) => handleChange('Password', e.target.value)}
             required
           />
 
           <DynamicInput
-            name='Confirm Password'
-            type='password'
+            name="Confirm Password"
+            type="password"
             value={userData.ConfirmPassword}
-            onChange={e => handleChange('ConfirmPassword', e.target.value)}
+            onChange={(e) => handleChange('ConfirmPassword', e.target.value)}
             required
           />
         </>
@@ -290,48 +294,73 @@ useEffect(() => {
         <>
           {/* For editing an existing user */}
           <DynamicInput
-            name='Password'
-            type='password'
-            value=""
-            onChange={e => handleChange('Password', e.target.value)}
-            placeholder='Enter new password (optional)'
+            name="Password"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter new password (optional)"
           />
+          {/* Change Password Button */}
+          <button
+            onClick={changePassword}
+            style={{
+              marginTop: '-5px',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '5px',
+              background: 'linear-gradient(90deg, #e14aa7, #6761f0, #b23ace)',
+              color: '#fff',
+              cursor: 'pointer',
+              transition: 'background 0.3s ease',
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                'linear-gradient(90deg, #b23ace, #6761f0, #e14aa7)';
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background =
+                'linear-gradient(90deg, #e14aa7, #6761f0, #b23ace)';
+            }}
+          >
+            Change Password
+          </button>
         </>
       )}
 
       <DynamicInput
-        name='Email'
-        type='text'
+        name="Email"
+        type="text"
         value={userData.Email}
-        onChange={e => handleChange('Email', e.target.value)}
+        onChange={(e) => handleChange('Email', e.target.value)}
       />
 
       <DynamicInput
-        name='Mobile'
-        type='text'
+        name="Mobile"
+        type="text"
         value={userData.Mobile}
-        onChange={e => handleChange('Mobile', e.target.value)}
+        onChange={(e) => handleChange('Mobile', e.target.value)}
       />
 
       <DynamicInput
-        name='Website'
-        type='text'
+        name="Website"
+        type="text"
         value={userData.Website}
-        onChange={e => handleChange('Website', e.target.value)}
+        onChange={(e) => handleChange('Website', e.target.value)}
       />
 
-<DynamicSelector
-        name='User Type'
+      <DynamicSelector
+        name="User Type"
         options={userTypeOptions}
         selectedValue={userData.userType}
-        onChange={e => handleChange('userType', parseInt(e.target.value))}
-        label='User Type'
+        onChange={(e) => handleChange('userType', parseInt(e.target.value))}
+        label="User Type"
       />
 
+      {/* Optionally, you can add more fields or buttons as needed */}
     </TwoColumnLayout>
-  )
-})
+  );
+});
 
-User.displayName = 'User'
+User.displayName = 'User';
 
-export default User
+export default User;

@@ -210,9 +210,6 @@ export interface User {
   UserImageId?: string | null;
 }
 
-
-
-
 // Interface for MenuItem
 export interface MenuItem {
   ID: number;
@@ -231,8 +228,18 @@ export interface MenuItem {
   IsVisible: boolean;
   LastModified: string | null;
 }
+
+// src/services/api.services.ts
+
+// اینترفیس درخواست ChangePasswordByAdmin
+export interface ChangePasswordByAdminRequest {
+  UserId: string;    // شناسه کاربری
+  Password: string;   // رمز عبور جدید
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
+
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
@@ -588,6 +595,11 @@ class ApiService {
   async deleteUser(id: string): Promise<void> {
     await httpClient.post(apiConst.deleteUser, { ID: id });
   }
+
+  async changePasswordByAdmin(data: ChangePasswordByAdminRequest): Promise<void> {
+    await httpClient.post(apiConst.changePassword, data);
+  }
+
 }
 
 // یک خروجی برای استفاده در Context
