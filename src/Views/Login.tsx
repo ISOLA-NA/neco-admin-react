@@ -1,23 +1,22 @@
 // src/components/Autentications/Login.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from "react-icons/fa";
 
-import DynamicInput from '../components/utilities/DynamicInput';
-import DynamicSelector from '../components/utilities/DynamicSelector';
-import DynamicSwitcher from '../components/utilities/DynamicSwitcher';
-import { showAlert } from '../components/utilities/Alert/DynamicAlert';
+import DynamicInput from "../components/utilities/DynamicInput";
+import DynamicSelector from "../components/utilities/DynamicSelector";
+import DynamicSwitcher from "../components/utilities/DynamicSwitcher";
+import { showAlert } from "../components/utilities/Alert/DynamicAlert";
 
 import AppServices, {
   WebLoginRequest,
   WebLoginResponse,
   SendOtpRequest,
   SendOtpResponse,
+} from "../services/api.services";
 
-} from '../services/api.services';
-
-import Cookies from 'js-cookie';
-import CryptoJS from 'crypto-js';
+import Cookies from "js-cookie";
+import CryptoJS from "crypto-js";
 
 interface LoginProps {
   onLogin: () => void;
@@ -28,13 +27,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   // زبان انتخابی کاربر
-  const [language, setLanguage] = useState<string>('en');
-  const [languageError, setLanguageError] = useState<string>('');
+  const [language, setLanguage] = useState<string>("en");
+  const [languageError, setLanguageError] = useState<string>("");
 
   // مقادیر ورودی‌ها
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -42,8 +41,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   // گزینه‌های انتخاب زبان
   const languageOptions = [
-    { value: 'en', label: 'English' },
-    { value: 'fa', label: 'فارسی' },
+    { value: "en", label: "English" },
+    { value: "fa", label: "فارسی" },
   ];
 
   // توابع هندل کردن سوییچر و نمایش رمز عبور
@@ -57,23 +56,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   // تغییر زبان
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value);
-    if (e.target.value === '') {
-      setLanguageError('لطفاً زبان را انتخاب کنید.');
+    if (e.target.value === "") {
+      setLanguageError("لطفاً زبان را انتخاب کنید.");
     } else {
-      setLanguageError('');
+      setLanguageError("");
     }
   };
 
   // تابع تولید seqKey برای امنیت بیشتر
   const generateSeqKey = (): string => {
     const weekDays = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
     ];
     const d = new Date();
     const year = d.getUTCFullYear();
@@ -83,7 +82,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const dayOfWeek = d.getUTCDay();
 
     const myKey = `${year}-${month}-${dayOfMonth}-${hour}-${weekDays[dayOfWeek]}`;
-    return CryptoJS.SHA512(CryptoJS.enc.Utf8.parse(myKey)).toString(CryptoJS.enc.Hex);
+    return CryptoJS.SHA512(CryptoJS.enc.Utf8.parse(myKey)).toString(
+      CryptoJS.enc.Hex,
+    );
   };
 
   // زمان پیش‌فرض (ساعتی) برای اعتبار توکن
@@ -94,8 +95,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     e.preventDefault();
 
     // بررسی اینکه زبان انتخاب شده باشد
-    if (language === '') {
-      setLanguageError('لطفاً زبان را انتخاب کنید.');
+    if (language === "") {
+      setLanguageError("لطفاً زبان را انتخاب کنید.");
       return;
     }
 
@@ -105,13 +106,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       // اگر حالت OTP خاموش است => لاگین با Username/Password
       if (!isOtp) {
         if (!username || !password) {
-          showAlert('error', null, 'خطا', 'لطفاً نام کاربری و پسورد را وارد کنید.');
+          showAlert(
+            "error",
+            null,
+            "خطا",
+            "لطفاً نام کاربری و پسورد را وارد کنید.",
+          );
           return;
         }
 
         const seqKey = generateSeqKey();
         const passwordHash = CryptoJS.SHA512(
-          CryptoJS.enc.Utf8.parse(password)
+          CryptoJS.enc.Utf8.parse(password),
         ).toString(CryptoJS.enc.Hex);
 
         const loginData: WebLoginRequest = {
@@ -120,38 +126,44 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           SeqKey: seqKey,
         };
 
-        const response: WebLoginResponse = await AppServices.webLogin(loginData);
+        const response: WebLoginResponse = await AppServices.webLogin(
+          loginData,
+        );
 
         // بررسی پاسخ API
         // فرض بر این است که پاسخ مستقیماً MyUser را برمی‌گرداند.
         // اگر ساختار متفاوت است، آن را اصلاح کنید.
         if (!response || !response.MyUser) {
-          throw new Error('ساختار پاسخ API نامعتبر است یا MyUser وجود ندارد.');
+          throw new Error("ساختار پاسخ API نامعتبر است یا MyUser وجود ندارد.");
         }
 
         const { MyUser } = response;
 
         // ساخت توکن مثالی
         const token = `${MyUser.TTKK}:${MyUser.Username}`;
-        Cookies.set('token', token, { expires: defaultTokenHours / 24 });
+        Cookies.set("token", token, { expires: defaultTokenHours / 24 });
 
         // ثبت userId در کوکی
-        Cookies.set('userId', MyUser.ID.toString(), { expires: defaultTokenHours / 24 });
+        Cookies.set("userId", MyUser.ID.toString(), {
+          expires: defaultTokenHours / 24,
+        });
 
         // بررسی نوع کاربر
         if (MyUser.userType === 6 || MyUser.userType === 8) {
-          Cookies.set('authenticated', 'true', { expires: defaultTokenHours / 24 });
+          Cookies.set("authenticated", "true", {
+            expires: defaultTokenHours / 24,
+          });
           onLogin(); // اطلاع به والد که کاربر لاگین کرده
-          showAlert('success', null, 'موفقیت', 'شما با موفقیت وارد شدید.');
-          navigate('/home');
+          showAlert("success", null, "موفقیت", "شما با موفقیت وارد شدید.");
+          navigate("/");
         } else {
-          showAlert('error', null, 'خطا', 'کاربر معمولی نمی‌تواند لاگین کند.');
+          showAlert("error", null, "خطا", "کاربر معمولی نمی‌تواند لاگین کند.");
         }
-      } 
+      }
       // حالت OTP
       else {
         if (!phoneNumber) {
-          showAlert('error', null, 'خطا', 'لطفاً شماره تلفن را وارد کنید.');
+          showAlert("error", null, "خطا", "لطفاً شماره تلفن را وارد کنید.");
           return;
         }
 
@@ -161,27 +173,32 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         const otpData: SendOtpRequest = {
           UserName: phoneNumber,
-          Password: '', 
+          Password: "",
           SeqKey: seqKey,
         };
 
         // درخواست ارسال کد OTP
         const response: SendOtpResponse = await AppServices.sendOtp(otpData);
-        console.log('OTP Response:', response);
+        console.log("OTP Response:", response);
         if (response.success) {
-          showAlert('success', null, 'موفقیت', 'کد OTP ارسال شد.');
+          showAlert("success", null, "موفقیت", "کد OTP ارسال شد.");
           // اینجا می‌توانید منطق لازم برای تایید کد OTP را پیاده کنید
         } else {
-          showAlert('error', null, 'خطا', response.message || 'ارسال OTP ناموفق بود.');
+          showAlert(
+            "error",
+            null,
+            "خطا",
+            response.message || "ارسال OTP ناموفق بود.",
+          );
         }
       }
     } catch (error: any) {
-      console.error('Login/OTP Error:', error);
+      console.error("Login/OTP Error:", error);
       const message =
         error.response?.data?.message ||
         error.message ||
-        'خطایی در فرآیند لاگین رخ داده است.';
-      showAlert('error', null, 'خطا', message);
+        "خطایی در فرآیند لاگین رخ داده است.";
+      showAlert("error", null, "خطا", message);
     } finally {
       setLoading(false);
     }
@@ -252,7 +269,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               />
               <DynamicInput
                 name="Password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 leftIcon={<FaLock size={20} className="text-indigo-500" />}
@@ -276,7 +293,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button
                 type="submit"
                 className={`w-full mt-4 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base flex items-center justify-center ${
-                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                  loading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={loading}
               >
@@ -322,7 +339,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button
                 type="submit"
                 className={`w-full flex items-center justify-center gap-2 mt-4 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base ${
-                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                  loading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={loading}
               >

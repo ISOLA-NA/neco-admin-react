@@ -1,7 +1,7 @@
 // src/services/api.services.ts
 
 import httpClient from "./api.config";
-import { apiConst } from "./api.constant";
+import { apiConst, apiConstClient } from "./api.constant";
 
 // ================== اینترفیس‌ها ==================
 
@@ -200,14 +200,13 @@ export interface MenuItem {
 }
 // ساخت یک کلاس برای متدهای API
 class ApiService {
-
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
   async webLogin(userData: WebLoginRequest): Promise<WebLoginResponse> {
     const response = await httpClient.post<WebLoginResponse>(
       apiConst.webLogin,
-      userData
+      userData,
     );
     return response.data;
   }
@@ -215,7 +214,7 @@ class ApiService {
   async sendOtp(data: SendOtpRequest): Promise<SendOtpResponse> {
     const response = await httpClient.post<SendOtpResponse>(
       apiConst.sendOtp,
-      data
+      data,
     );
     return response.data;
   }
@@ -223,14 +222,14 @@ class ApiService {
   async loginWithOtp(data: LoginWithOtpRequest): Promise<LoginWithOtpResponse> {
     const response = await httpClient.post<LoginWithOtpResponse>(
       apiConst.loginWithOtp,
-      data
+      data,
     );
     return response.data;
   }
 
   async tokenSetup(): Promise<TokenSetupResponse> {
     const response = await httpClient.post<TokenSetupResponse>(
-      apiConst.tokenSetup
+      apiConst.tokenSetup,
     );
     return response.data;
   }
@@ -240,27 +239,27 @@ class ApiService {
   // ------------------------------------
   async getAllConfigurations(): Promise<ConfigurationItem[]> {
     const response = await httpClient.post<ConfigurationItem[]>(
-      apiConst.getAllConfiguration
+      apiConst.getAllConfiguration,
     );
     return response.data;
   }
 
   async insertConfiguration(
-    data: ConfigurationItem
+    data: ConfigurationItem,
   ): Promise<ConfigurationItem> {
     const response = await httpClient.post<ConfigurationItem>(
       apiConst.insertConfiguration,
-      data
+      data,
     );
     return response.data;
   }
 
   async updateConfiguration(
-    data: ConfigurationItem
+    data: ConfigurationItem,
   ): Promise<ConfigurationItem> {
     const response = await httpClient.post<ConfigurationItem>(
       apiConst.updateConfiguration,
-      data
+      data,
     );
     return response.data;
   }
@@ -274,28 +273,28 @@ class ApiService {
   // ------------------------------------
   async getAllProgramTemplates(): Promise<ProgramTemplateItem[]> {
     const response = await httpClient.post<ProgramTemplateItem[]>(
-      apiConst.getAllProgramTemplate
+      apiConst.getAllProgramTemplate,
     );
     return response.data;
   }
 
   async getAllDefaultRibbons(): Promise<DefaultRibbonItem[]> {
     const response = await httpClient.post<DefaultRibbonItem[]>(
-      apiConst.getAllDefaultRibbons
+      apiConst.getAllDefaultRibbons,
     );
     return response.data;
   }
 
   async getTableTransmittal(): Promise<EntityTypeItem[]> {
     const response = await httpClient.post<EntityTypeItem[]>(
-      apiConst.getTableTransmittal
+      apiConst.getTableTransmittal,
     );
     return response.data;
   }
 
   async getAllWfTemplate(): Promise<WfTemplateItem[]> {
     const response = await httpClient.post<WfTemplateItem[]>(
-      apiConst.getAllWfTemplate
+      apiConst.getAllWfTemplate,
     );
     return response.data;
   }
@@ -310,7 +309,7 @@ class ApiService {
   async insertAFBtn(data: AFBtnItem): Promise<AFBtnItem> {
     const response = await httpClient.post<AFBtnItem>(
       apiConst.insertAFBtn,
-      data
+      data,
     );
     return response.data;
   }
@@ -318,7 +317,7 @@ class ApiService {
   async updateAFBtn(data: AFBtnItem): Promise<AFBtnItem> {
     const response = await httpClient.post<AFBtnItem>(
       apiConst.updateAFBtn,
-      data
+      data,
     );
     return response.data;
   }
@@ -330,7 +329,7 @@ class ApiService {
   // دریافت ID کاربر
   async getIdByUserToken(): Promise<UserToken[]> {
     const response = await httpClient.post<UserToken[]>(
-      apiConst.getIdByUserToken
+      apiConst.getIdByUserToken,
     );
     return response.data;
   }
@@ -346,7 +345,7 @@ class ApiService {
   async insertCommand(data: CommandItem): Promise<CommandItem> {
     const response = await httpClient.post<CommandItem>(
       apiConst.insertCommand,
-      data
+      data,
     );
     return response.data;
   }
@@ -354,7 +353,7 @@ class ApiService {
   async updateCommand(data: CommandItem): Promise<CommandItem> {
     const response = await httpClient.post<CommandItem>(
       apiConst.updateCommand,
-      data
+      data,
     );
     return response.data;
   }
@@ -366,7 +365,7 @@ class ApiService {
   async getEnum(data: GetEnumRequest): Promise<GetEnumResponse> {
     const response = await httpClient.post<GetEnumResponse>(
       apiConst.getEnum,
-      data
+      data,
     );
     return response.data;
   }
@@ -383,37 +382,31 @@ class ApiService {
     return response.data;
   }
 
-    /**
+  /**
    * Insert a new Menu.
    * @param data - The Menu data to insert.
    */
-    async insertMenu(data: Menu): Promise<Menu> {
-      const response = await httpClient.post<Menu>(
-        apiConst.insertMenu,
-        data
-      );
-      return response.data;
-    }
-  
-    /**
-     * Update an existing Menu.
-     * @param data - The Menu data to update.
-     */
-    async updateMenu(data: Menu): Promise<Menu> {
-      const response = await httpClient.post<Menu>(
-        apiConst.updateMenu,
-        data
-      );
-      return response.data;
-    }
-  
-    /**
-     * Delete a Menu by ID.
-     * @param id - The ID of the Menu to delete.
-     */
-    async deleteMenu(id: number): Promise<void> {
-      await httpClient.post(apiConst.deleteMenu, { ID: id });
-    }
+  async insertMenu(data: Menu): Promise<Menu> {
+    const response = await httpClient.post<Menu>(apiConst.insertMenu, data);
+    return response.data;
+  }
+
+  /**
+   * Update an existing Menu.
+   * @param data - The Menu data to update.
+   */
+  async updateMenu(data: Menu): Promise<Menu> {
+    const response = await httpClient.post<Menu>(apiConst.updateMenu, data);
+    return response.data;
+  }
+
+  /**
+   * Delete a Menu by ID.
+   * @param id - The ID of the Menu to delete.
+   */
+  async deleteMenu(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenu, { ID: id });
+  }
 
   async getAllMenuTab(menuId: number): Promise<MenuTab[]> {
     const response = await httpClient.post<MenuTab[]>(apiConst.getAllMenuTab, {
@@ -428,7 +421,7 @@ class ApiService {
       apiConst.getAllMenuGroup,
       {
         ID: menuTabId, // مطمئن شوید که پارامتر ID در body ارسال می‌شود
-      }
+      },
     );
     return response.data;
   }
@@ -439,14 +432,14 @@ class ApiService {
       apiConst.getAllMenuItem,
       {
         ID: menuGroupId, // مطمئن شوید که پارامتر id در body ارسال می‌شود
-      }
+      },
     );
     return response.data;
   }
   async insertMenuTab(data: MenuTab): Promise<MenuTab> {
     const response = await httpClient.post<MenuTab>(
       apiConst.insertMenuTab,
-      data
+      data,
     );
     return response.data;
   }
@@ -458,7 +451,7 @@ class ApiService {
   async updateMenuTab(data: MenuTab): Promise<MenuTab> {
     const response = await httpClient.post<MenuTab>(
       apiConst.updateMenuTab,
-      data
+      data,
     );
     return response.data;
   }
@@ -482,7 +475,7 @@ class ApiService {
   async insertMenuGroup(data: MenuGroup): Promise<MenuGroup> {
     const response = await httpClient.post<MenuGroup>(
       apiConst.insertMenuGroup,
-      data
+      data,
     );
     return response.data;
   }
@@ -494,7 +487,7 @@ class ApiService {
   async updateMenuGroup(data: MenuGroup): Promise<MenuGroup> {
     const response = await httpClient.post<MenuGroup>(
       apiConst.updateMenuGroup,
-      data
+      data,
     );
     return response.data;
   }
@@ -518,7 +511,7 @@ class ApiService {
   async insertMenuItem(data: MenuItem): Promise<MenuItem> {
     const response = await httpClient.post<MenuItem>(
       apiConst.insertMenuItem,
-      data
+      data,
     );
     return response.data;
   }
@@ -530,7 +523,7 @@ class ApiService {
   async updateMenuItem(data: MenuItem): Promise<MenuItem> {
     const response = await httpClient.post<MenuItem>(
       apiConst.updateMenuItem,
-      data
+      data,
     );
     return response.data;
   }
@@ -541,6 +534,10 @@ class ApiService {
    */
   async deleteMenuItem(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteMenuItem, { ID: id });
+  }
+
+  async GetAllMenuClient() {
+    return await httpClient.post(apiConstClient.GetAllMenuClient);
   }
 }
 

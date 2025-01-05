@@ -5,11 +5,11 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import Client from "./Views/Client";
 import HomePage from "./components/TabHandler/tab/TabbedInterface"; // مسیر اصلاح شود
 import Login from "./Views/Login"; // مسیر اصلاح شود
 import Alert from "./components/utilities/Alert/DynamicAlert";
 import { APIProvider } from "./context/ApiContext";
-
 // کانتکست‌های جدید
 import { SubTabDefinitionsProvider } from "./context/SubTabDefinitionsContext";
 import { AddEditDeleteProvider } from "./context/AddEditDeleteContext";
@@ -39,28 +39,31 @@ const App: React.FC = () => {
     localStorage.removeItem("isAuthenticated");
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        </Routes>
+      </Router>
+    );
+  }
+
   return (
     <APIProvider>
       <SubTabDefinitionsProvider>
         <AddEditDeleteProvider>
           <Router>
             <Alert />
+
             <Routes>
-              <Route
-                path="/"
-                element={
-                  isAuthenticated ? (
-                    <HomePage onLogout={handleLogout} />
-                  ) : (
-                    <Navigate to="/login" replace />
-                  )
-                }
-              />
+              <Route path="/client" element={<Client />} />
+              <Route path="/" element={<HomePage onLogout={handleLogout} />} />
               <Route
                 path="/login"
                 element={
                   isAuthenticated ? (
-                    <Navigate to="/" replace />
+                    <Navigate to="/" />
                   ) : (
                     <Login onLogin={handleLogin} />
                   )
