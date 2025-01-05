@@ -3,9 +3,13 @@ import TwoColumnLayout from '../layout/TwoColumnLayout'
 import DynamicInput from '../utilities/DynamicInput'
 import DynamicSelector from '../utilities/DynamicSelector'
 import { useAddEditDelete } from '../../context/AddEditDeleteContext'
-import type { User as UserType } from '../../services/api.services'
+import type { GetEnumResponse, User as UserType } from '../../services/api.services'
 import { showAlert } from '../utilities/Alert/DynamicAlert'
+import AppServices from '../../services/api.services'
 
+
+
+ 
 export interface UserHandle {
   save: () => Promise<UserType | null>
 }
@@ -18,6 +22,30 @@ interface UserProps {
 
 const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   const { handleSaveUser } = useAddEditDelete()
+
+  const [userTypeOptions, setUserTypeOptions] = useState<{ value: string, label: string }[]>([])
+
+useEffect(() => {
+  // Fetch UserType options from API
+  const fetchUserTypes = async () => {
+    // setIsLoadingUserTypes(true)
+    try {
+      const response: GetEnumResponse = await AppServices.getEnum({ str: "UserType" })
+
+      console.log("rrrr",response.data)
+      const options = Object.entries(response).map(([key, val]) => ({
+        value: val.toString(),
+        label: key
+      }))
+      setUserTypeOptions(options)
+    } catch (error) {
+      console.error('Error fetching UserType enums:', error)
+    } 
+  }
+
+  fetchUserTypes()
+}, [])
+
 
   const [userData, setUserData] = useState({
     ID: selectedRow?.ID || null,
@@ -292,22 +320,13 @@ const User = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         onChange={e => handleChange('Website', e.target.value)}
       />
 
-      <DynamicSelector
+<DynamicSelector
         name='User Type'
-        options={userTypes}
-        selectedValue={userData.userType.toString()}
+        options={userTypeOptions}
+        selectedValue={userData.userType}
         onChange={e => handleChange('userType', parseInt(e.target.value))}
         label='User Type'
       />
-
-      <DynamicSelector
-        name='Status'
-        options={statusOptions}
-        selectedValue={userData.Status.toString()}
-        onChange={e => handleChange('Status', parseInt(e.target.value))}
-        label='Status'
-      />
-
 
     </TwoColumnLayout>
   )
