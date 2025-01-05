@@ -22,8 +22,9 @@ export default function SideBar() {
     <aside className="flex flex-col  h-full pt-12 px-2">
       <div
         className={
-          " cursor-pointer self-start rounded-md hover:bg-slate-400 duration-300 mb-2"
+          " cursor-pointer self-start rounded-md hover:bg-slate-400 duration-300 mb-2 tooltip tooltip-right"
         }
+        data-tip="Projects"
       >
         <MdApps size={25} />
       </div>

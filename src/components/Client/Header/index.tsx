@@ -36,7 +36,7 @@ export default function Header() {
           <div className="mr-3 cursor-pointer tooltip" data-tip="Settings">
             <GoGear size={25} className="hover:text-slate-500" />
           </div>
-          <div className="mr-3 cursor-pointer tooltip-left" data-tip="User">
+          <div className="mr-3 cursor-pointer tooltip" data-tip="User">
             <CiUser size={25} className="hover:text-slate-500" />
           </div>
         </div>
