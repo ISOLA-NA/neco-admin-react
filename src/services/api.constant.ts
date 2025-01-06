@@ -57,4 +57,9 @@ export const apiConst = Object.freeze({
   insertCompany: "api/Company/Insert",
   deleteCompany: "api/Company/Delete",
   updateCompany: "api/Company/Update",
+  getAllPostCat: "api/PostCat/GetAll",
+  addPostCat: "api/PostCat/Insert",
+  editPostCat: "api/PostCat/Update",
+  deletePostCat: "api/PostCat/Delete",
+  getAllProject:"api/Project/GetAll"
 });

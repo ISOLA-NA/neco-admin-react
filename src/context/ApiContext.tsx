@@ -22,6 +22,8 @@ import AppServices, {
   User,
   Role,
   Company,
+  PostCat,
+  Project
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -82,7 +84,16 @@ interface ApiContextType {
   insertCompany: (data: Company) => Promise<Company>;
   updateCompany: (data: Company) => Promise<Company>;
   deleteCompany: (id: number) => Promise<void>;
+
+  getAllPostCat: () => Promise<PostCat[]>;
+  insertPostCat: (data: PostCat) => Promise<PostCat>;
+  updatePostCat: (data: PostCat) => Promise<PostCat>;
+  deletePostCat: (id: number) => Promise<void>;
+
+  getAllProject: () => Promise<Project[]>;
+
 }
+
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
@@ -148,6 +159,14 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertCompany: AppServices.insertCompany.bind(AppServices),
     updateCompany: AppServices.updateCompany.bind(AppServices),
     deleteCompany: AppServices.deleteCompany.bind(AppServices),
+
+    getAllPostCat: AppServices.getAllPostCat.bind(AppServices),
+    insertPostCat: AppServices.insertPostCat.bind(AppServices),
+    updatePostCat: AppServices.updatePostCat.bind(AppServices),
+    deletePostCat: AppServices.deletePostCat.bind(AppServices),
+
+    getAllProject: AppServices.getAllProject.bind(AppServices),
+
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -181,4 +200,6 @@ export type {
   User,
   Role,
   Company,
+  PostCat,
+  Project
 };

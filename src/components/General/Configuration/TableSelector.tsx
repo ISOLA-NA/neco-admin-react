@@ -40,7 +40,6 @@ const TableSelector: React.FC<TableSelectorProps> = ({
           onDelete={() => {}}
           onDuplicate={() => {}}
           domLayout="autoHeight"
-          isRowSelected={false}
         />
       </div>
 

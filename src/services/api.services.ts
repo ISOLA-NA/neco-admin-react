@@ -255,12 +255,30 @@ export interface Company {
   Type?: string | null; // نوع می‌تواند مقدار نال یا یک رشته باشد
 }
 
-// src/services/api.services.ts
+// In src/services/api.services.ts
+
+export interface PostCat {
+  ID?: number; // Already optional
+  Name: string;
+  Description: string;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified?: string; // Make optional
+  ModifiedById?: string; // Make optional
+  PostsStr?: string;
+  ProjectsStr?: string;
+}
 
 // اینترفیس درخواست ChangePasswordByAdmin
 export interface ChangePasswordByAdminRequest {
   UserId: string; // شناسه کاربری
   Password: string; // رمز عبور جدید
+}
+
+export interface Project {
+  ID: any;
+  ProjectName: string;
+  State: number;
 }
 
 // ساخت یک کلاس برای متدهای API
@@ -681,6 +699,34 @@ class ApiService {
    */
   async deleteCompany(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteCompany, { ID: id });
+  }
+
+  // Get all post categories
+  async getAllPostCat(): Promise<PostCat[]> {
+    const response = await httpClient.post<PostCat[]>(apiConst.getAllPostCat);
+    return response.data;
+  }
+
+  // Insert new post category
+  async insertPostCat(data: PostCat): Promise<PostCat> {
+    const response = await httpClient.post<PostCat>(apiConst.addPostCat, data);
+    return response.data;
+  }
+
+  // Update existing post category
+  async updatePostCat(data: PostCat): Promise<PostCat> {
+    const response = await httpClient.post<PostCat>(apiConst.editPostCat, data);
+    return response.data;
+  }
+
+  // Delete post category
+  async deletePostCat(id: number): Promise<void> {
+    await httpClient.post(apiConst.deletePostCat, { ID: id });
+  }
+
+  async getAllProject(): Promise<Project[]> {
+    const response = await httpClient.post<Project[]>(apiConst.getAllProject);
+    return response.data;
   }
 }
 

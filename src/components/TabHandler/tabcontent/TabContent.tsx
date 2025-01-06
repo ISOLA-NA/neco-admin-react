@@ -18,7 +18,8 @@ import { useApi } from "../../../context/ApiContext";
 import { CommandHandle } from "../../General/CommandSettings";
 import { UserHandle } from "../../General/Users";
 import { RoleHandle } from "../../General/Roles";
-import { CompanyHandle } from "../../General/Enterprises"; // Add this import
+import { CompanyHandle } from "../../General/Enterprises";
+import {RoleGroupsHandle} from "../../General/RoleGroups"
 
 // Components
 import DynamicConfirm from "../../utilities/DynamicConfirm";
@@ -79,7 +80,8 @@ const TabContent: FC<TabContentProps> = ({
   const commandRef = useRef<CommandHandle>(null);
   const userRef = useRef<UserHandle>(null);
   const roleRef = useRef<RoleHandle>(null);
-  const companyRef = useRef<CompanyHandle>(null); // Add this with other refs
+  const companyRef = useRef<CompanyHandle>(null);
+  const roleGroupsRef = useRef<RoleGroupsHandle>(null);
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -176,11 +178,14 @@ const TabContent: FC<TabContentProps> = ({
         case "Users":
           data = await api.getAllUsers();
           break;
-        case "Roles": // اضافه شده
+        case "Roles":
           data = await api.getAllRoles();
           break;
-        case "Enterprises": // Add this case
+        case "Enterprises":
           data = await api.getAllCompanies();
+          break;
+          case "RoleGroups":
+          data = await api.getAllPostCat();
           break;
         default:
           data = rowData;
@@ -261,6 +266,13 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData();
           }
           break;
+          case "RoleGroups":
+          if (roleGroupsRef.current) {
+            await roleGroupsRef.current.save();
+            showAlert("success", null, "Saved", "Role Group added successfully.");
+            await fetchData();
+          }
+          break;
       }
       setIsPanelOpen(false);
       setIsAdding(false);
@@ -324,14 +336,14 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData();
           }
           break;
-        case "Roles": // اضافه شده
+        case "Roles":
           if (selectedRow && roleRef.current) {
             await roleRef.current.save();
             showAlert("success", null, "Updated", "Role updated successfully.");
             await fetchData();
           }
           break;
-        case "Enterprises": // Add this case
+        case "Enterprises":
           if (selectedRow && companyRef.current) {
             await companyRef.current.save();
             showAlert(
@@ -340,6 +352,13 @@ const TabContent: FC<TabContentProps> = ({
               "Updated",
               "Enterprise updated successfully."
             );
+            await fetchData();
+          }
+          break;
+          case "RoleGroups":
+          if (selectedRow && roleGroupsRef.current) {
+            await roleGroupsRef.current.save();
+            showAlert("success", null, "Updated", "Role Group updated successfully.");
             await fetchData();
           }
           break;
@@ -428,7 +447,10 @@ const TabContent: FC<TabContentProps> = ({
             break;
           case "Enterprises":
             await api.deleteCompany(pendingSelectedRow.ID);
-            break;
+          break;
+            case "RoleGroups":
+              await api.deletePostCat(pendingSelectedRow.ID);
+          break;
         }
         showAlert(
           "success",
@@ -493,8 +515,10 @@ const TabContent: FC<TabContentProps> = ({
         return userRef;
       case "Roles":
         return roleRef;
-      case "Enterprises": // Add this case
+      case "Enterprises":
         return companyRef;
+        case "RoleGroups":
+        return roleGroupsRef;
       default:
         return null;
     }
@@ -651,7 +675,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Users" ||
                     activeSubTab === "Ribbons" ||
                     activeSubTab === "Roles" ||
-                    activeSubTab === "Enterprises")
+                    activeSubTab === "Enterprises"||
+                    activeSubTab === "RoleGroups")
                     ? handleInsert
                     : undefined
                 }
@@ -662,7 +687,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Users" ||
                     activeSubTab === "Ribbons" ||
                     activeSubTab === "Roles" ||
-                    activeSubTab === "Enterprises")
+                    activeSubTab === "Enterprises"||
+                    activeSubTab === "RoleGroups")
                     ? handleUpdate
                     : undefined
                 }
