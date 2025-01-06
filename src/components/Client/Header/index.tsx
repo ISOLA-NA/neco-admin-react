@@ -8,7 +8,7 @@ import { CiUser } from "react-icons/ci";
 
 export default function Header() {
   return (
-    <nav className="p-0 pt-12 px-2">
+    <nav className="p-0 pt-10 pb-2 px-2">
       <div className="flex justify-between">
         <div className="flex flex-row items-center">
           <div className="mr-3 cursor-pointer tooltip" data-tip="Unkownd">

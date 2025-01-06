@@ -543,6 +543,9 @@ class ApiService {
   async GetZipFullMenuClient(id: number) {
     return await httpClient.post(apiConstClient.GetZipFullMenuClient, { id });
   }
+  async GetAllUserProject() {
+    return await httpClient.post(apiConstClient.GetAllUserProject);
+  }
   ////////////////////////////////////////////////////
 }
 
