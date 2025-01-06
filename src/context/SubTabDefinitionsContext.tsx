@@ -278,6 +278,29 @@ export const SubTabDefinitionsProvider: React.FC<{
         }
       },
 
+      Staffing: {
+        endpoint: api.getAllForPostAdmin,
+        columnDefs: [
+          {
+            headerName: "Project Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Owner Name",
+            field: "OwnerName",
+            filter: "agTextColumnFilter",
+          },
+
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
       // -------------------
       // MenuTab
       // -------------------

@@ -23,7 +23,8 @@ import AppServices, {
   Role,
   Company,
   PostCat,
-  Project
+  Project,
+  PostAdmin
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -91,7 +92,7 @@ interface ApiContextType {
   deletePostCat: (id: number) => Promise<void>;
 
   getAllProject: () => Promise<Project[]>;
-
+  getAllForPostAdmin: () => Promise<PostAdmin[]>;
 }
 
 
@@ -166,6 +167,8 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     deletePostCat: AppServices.deletePostCat.bind(AppServices),
 
     getAllProject: AppServices.getAllProject.bind(AppServices),
+    getAllForPostAdmin: AppServices.getAllForPostAdmin.bind(AppServices),
+
 
   };
 
@@ -201,5 +204,6 @@ export type {
   Role,
   Company,
   PostCat,
-  Project
+  Project,
+  PostAdmin
 };

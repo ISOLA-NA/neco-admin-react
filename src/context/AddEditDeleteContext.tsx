@@ -71,17 +71,28 @@ export interface UserData {
 }
 
 interface RoleData {
-  ID: any
-  Name: string
-  Description: string
-  IsVisible: boolean
-  Type: string
-  Grade: string
-  Competencies?: string
-  Authorization?: string
-  Responsibility?: string
-  PostCode: string
-  isStaticPost?: boolean
+  ID?: string;
+  Name: string;
+  IsVisible: boolean;
+  ModifiedById?: string;
+  Description?: string | null;
+  Type?: string | null;
+  Grade?: string | null;
+  Competencies?: string | null;
+  Authorization?: string | null;
+  Responsibility?: string | null;
+  PostCode?: string | null;
+  // اضافه کردن فیلدهای جدید
+  OwnerID?: string | null;
+  ParrentId?: string | null;
+  isAccessCreateProject: boolean;
+  isHaveAddressbar: boolean;
+  isStaticPost: boolean;
+  nCompanyID?: string | null;
+  nMenuID?: string | null;
+  nPostTypeID?: string | null;
+  nProjectID?: string | null;
+  status?: number;
 }
 
 interface CompanyData {
@@ -314,50 +325,68 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false)
     }
   }
-
   const handleSaveRole = async (data: RoleData): Promise<Role | null> => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      // یک آبجکت موقت از نوع Partial<Role> درست می‌کنیم تا فیلدهای دلخواه را اضافه کنیم
-      const roleRequest: Partial<Role> = {
-        Name: data.Name,
-        Description: data.Description,
-        IsVisible: data.IsVisible,
-        Type: data.Type,
-        Grade: data.Grade,
-        Competencies: data.Competencies,
-        Authorization: data.Authorization,
-        Responsibility: data.Responsibility,
-        PostCode: data.PostCode,
-        isStaticPost: data.isStaticPost
-      }
-
-      // اگر ID مقداری داشته باشد، آن را اضافه می‌کنیم. در غیر این صورت، اصلاً ارسال نمی‌شود.
       if (data.ID) {
-        roleRequest.ID = data.ID
-      }
+        // آبجکت برای update
+        const updateRoleRequest: Role = {
+          ID: data.ID,
+          Name: data.Name,
+          IsVisible: data.IsVisible,
+          LastModified: new Date().toISOString(),
+          CreateById: null,
+          Authorization: null,
+          Competencies: null,
+          Description: null,
+          Grade: null,
+          PostCode: null,
+          Responsibility: null,
+          Type: null,
+          OwnerID: data.OwnerID || null,
+          ParrentId: data.ParrentId || null,
+          isAccessCreateProject: data.isAccessCreateProject || false,
+          isHaveAddressbar: data.isHaveAddressbar || false,
+          isStaticPost: data.isStaticPost,
+          nCompanyID: data.nCompanyID || null,
+          nMenuID: data.nMenuID || null,
+          nPostTypeID: data.nPostTypeID || null,
+          nProjectID: data.nProjectID || null,
+          status: data.status || 1
+        };
 
-      let result: Role
-
-      if (roleRequest.ID) {
-        // به‌روزرسانی Role موجود
-        result = await api.updateRole(roleRequest as Role)
-        console.log('Role updated:', result)
+        const result = await api.updateRole(updateRoleRequest);
+        console.log('Role updated:', result);
+        return result;
       } else {
-        // افزودن Role جدید (بدون ID)
-        result = await api.insertRole(roleRequest as Role)
-        console.log('Role inserted:', result)
+        // آبجکت برای insert
+        const insertRoleRequest: Role = {
+          ID: "3fa85f64-5717-4562-b3fc-2c963f66afa6", // UUID پیش‌فرض
+          Name: data.Name,
+          IsVisible: true,
+          LastModified: new Date().toISOString(),
+          ModifiedById: "3fa85f64-5717-4562-b3fc-2c963f66afa6", // UUID پیش‌فرض
+          Authorization: "",
+          Competencies: "",
+          Description: "",
+          Grade: "",
+          PostCode: "",
+          Responsibility: "",
+          Type: "",
+          isStaticPost: false
+        };
+        
+        const result = await api.insertRole(insertRoleRequest);
+        console.log('Role inserted:', result);
+        return result;
       }
-
-      return result
     } catch (error) {
-      console.error('Error saving role:', error)
-      throw error
+      console.error('Error saving role:', error);
+      throw error;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-
+  };
   const handleSaveCompany = async (
     data: CompanyData
   ): Promise<Company | null> => {
@@ -402,42 +431,42 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleSaveRoleGroup = async (
     data: RoleGroupData
   ): Promise<PostCat | null> => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       const roleGroupRequest: PostCat = {
         Name: data.Name,
         Description: data.Description,
         IsGlobal: data.IsGlobal,
         IsVisible: data.IsVisible,
-        PostsStr: data.PostsStr || "",
-        ProjectsStr: data.ProjectsStr || "",
-      };
-  
+        PostsStr: data.PostsStr || '',
+        ProjectsStr: data.ProjectsStr || ''
+      }
+
       // اگر ID وجود داشت، آن را به درخواست اضافه کن
       if (data.ID) {
-        roleGroupRequest.ID = data.ID;
+        roleGroupRequest.ID = data.ID
       }
-  
-      let result: PostCat;
+
+      let result: PostCat
       if (data.ID) {
         // اگر ID وجود دارد از متد update استفاده کن
-        result = await api.updatePostCat(roleGroupRequest);
-        console.log('Role Group updated:', result);
+        result = await api.updatePostCat(roleGroupRequest)
+        console.log('Role Group updated:', result)
       } else {
         // اگر ID وجود ندارد از متد insert استفاده کن
-        result = await api.insertPostCat(roleGroupRequest);
-        console.log('Role Group inserted:', result);
+        result = await api.insertPostCat(roleGroupRequest)
+        console.log('Role Group inserted:', result)
       }
-  
-      return result;
+
+      return result
     } catch (error) {
-      console.error('Error saving role group:', error);
-      throw error;
+      console.error('Error saving role group:', error)
+      throw error
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
-  
+
   return (
     <AddEditDeleteContext.Provider
       value={{

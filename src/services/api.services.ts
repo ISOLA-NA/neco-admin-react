@@ -230,18 +230,33 @@ export interface MenuItem {
 
 export interface Role {
   ID?: string;
+  Name: string;
+  IsVisible: boolean;
+  isStaticPost: boolean;
   LastModified?: string;
   ModifiedById?: string;
-  Name: string;
-  Description: string;
-  IsVisible?: boolean;
-  Type?: string;
-  Grade: string;
-  Competencies?: string;
-  Authorization?: string;
-  Responsibility?: string;
-  PostCode: string;
-  isStaticPost?: boolean;
+  
+  // فیلدهای مربوط به insert
+  Authorization?: string | null;
+  Competencies?: string | null;
+  Description?: string | null;
+  Grade?: string | null;
+  PostCode?: string | null;
+  Responsibility?: string | null;
+  Type?: string | null;
+
+  // فیلدهای مربوط به update
+  CreateById?: string | null;
+  CreateDate?: string;
+  OwnerID?: string | null;
+  ParrentId?: string | null;
+  isAccessCreateProject?: boolean;
+  isHaveAddressbar?: boolean;
+  nCompanyID?: string | null;
+  nMenuID?: string | null;
+  nPostTypeID?: string | null;
+  nProjectID?: string | null;
+  status?: number;
 }
 
 export interface Company {
@@ -279,6 +294,31 @@ export interface Project {
   ID: any;
   ProjectName: string;
   State: number;
+}
+
+export interface PostAdmin {
+  ID: string;
+  Name: string;
+  CreateById: string | null;
+  CreateDate: string;
+  IsVisible: boolean;
+  LastModified: string;
+  ModifiedById: string;
+  OwnerID: string | null;
+  OwnerName: string | null;
+  ParentName: string | null;
+  ParrentId: string | null;
+  isAccessCreateProject: boolean;
+  isHaveAddressbar: boolean;
+  isStaticPost: boolean;
+  nCompanyID: string | null;
+  nCompanyName: string | null;
+  nMenuID: string | null;
+  nPostTypeID: string | null;
+  nPostTypeName: string | null;
+  nProjectID: string | null;
+  nProjectName: string | null;
+  status: number;
 }
 
 // ساخت یک کلاس برای متدهای API
@@ -726,6 +766,11 @@ class ApiService {
 
   async getAllProject(): Promise<Project[]> {
     const response = await httpClient.post<Project[]>(apiConst.getAllProject);
+    return response.data;
+  }
+
+  async getAllForPostAdmin(): Promise<PostAdmin[]> {
+    const response = await httpClient.post<PostAdmin[]>(apiConst.getAllForPostAdmin);
     return response.data;
   }
 }
