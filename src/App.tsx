@@ -59,16 +59,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/client" element={<Client />} />
               <Route path="/" element={<HomePage onLogout={handleLogout} />} />
-              <Route
-                path="/login"
-                element={
-                  isAuthenticated ? (
-                    <Navigate to="/" />
-                  ) : (
-                    <Login onLogin={handleLogin} />
-                  )
-                }
-              />
+              <Route path="/login" element={<Login onLogin={handleLogin} />} />
             </Routes>
           </Router>
         </AddEditDeleteProvider>
