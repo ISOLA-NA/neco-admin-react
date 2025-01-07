@@ -1,9 +1,9 @@
-import { MdApps } from "react-icons/md";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 
 import AppServices from "../../../services/api.services";
 import { useEffect, useState } from "react";
 import { unGZip } from "../../../utils/ungzip";
+import ProjectsBar from "./projects";
 export default function SideBar() {
   const [ribbon, setRibbon] = useState([]);
   const getAllMenuClient = async () => {
@@ -22,14 +22,7 @@ export default function SideBar() {
   }, []);
   return (
     <aside className="flex flex-col justify-between h-full py-12 px-2">
-      <div
-        className={
-          "cursor-pointer self-start rounded-md hover:bg-slate-400 duration-300 mb-2 tooltip tooltip-right"
-        }
-        data-tip="Projects"
-      >
-        <MdApps size={25} />
-      </div>
+      <ProjectsBar />
       <div className="h-[60vh] overflow-auto border p-1">
         {ribbon && (
           <ul className="menu bg-base-200">

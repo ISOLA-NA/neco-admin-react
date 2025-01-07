@@ -1,5 +1,13 @@
-import React, { PureComponent } from "react";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
+import { useProject } from "../../../context/Client/projects";
+import { SiCodefactor } from "react-icons/si";
+import { RiChatFollowUpLine } from "react-icons/ri";
+import { LuOctagonAlert } from "react-icons/lu";
+import { GoCommentDiscussion } from "react-icons/go";
+import { GoTasklist } from "react-icons/go";
+import { SiGotomeeting } from "react-icons/si";
+import { GoIssueReopened } from "react-icons/go";
+import { SlEnvolopeLetter } from "react-icons/sl";
 
 const data = [
   { name: "Group A", value: 400 },
@@ -37,8 +45,10 @@ const renderCustomizedLabel = ({
 };
 
 export default function ClientDashboard() {
+  const { data, loading, error } = useProject();
+
   return (
-    <div className="h-full">
+    <div className="h-full flex flex-col justify-between py-10">
       <div className="py-5 px-2 grid grid-cols-2 h-[200px]">
         <div className="flex flex-row">
           <ResponsiveContainer width="50%" height="100%">
@@ -137,9 +147,64 @@ export default function ClientDashboard() {
           </div>
         </div>
       </div>
-      <div className="py-5 px-2 grid grid-cols-4 h-[400px]">
-        <div></div>
-        <div className="col-span-3"></div>
+      <div className="py-5 px-2 grid grid-cols-4 h-[400px]  ">
+        <div className="bg-slate-50 flex flex-col justify-start items-center gap-2 p-2 overflow-auto">
+          {data.map((project) => (
+            <div
+              key={project.ID}
+              className="border p-2 rounded-lg w-full flex justify-start items-center cursor-pointer hover:bg-slate-100 hover:border-slate-500 duration-150"
+            >
+              <div className="mr-3">
+                <SiCodefactor />
+              </div>
+              <div className="truncate">{project.ProjectName}</div>
+            </div>
+          ))}
+        </div>
+        <div className="col-span-3 flex justify-between flex-wrap p-4 bg-slate-50 gap-3">
+          <div className="flex justify-center items-center grow  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
+            <div className="mr-2">
+              <LuOctagonAlert size={25} />
+            </div>
+            Alert
+          </div>
+          <div className="flex justify-center items-center grow  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
+            <div className="mr-2">
+              <RiChatFollowUpLine size={25} />
+            </div>
+            Follow Up
+          </div>
+          <div className="flex justify-center items-center grow  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
+            <div className="mr-2">
+              <GoCommentDiscussion size={25} />
+            </div>
+            Comments
+          </div>
+          <div className="flex justify-center items-center w-full  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
+            <div className="mr-2">
+              <GoTasklist size={25} />
+            </div>
+            Tasks
+          </div>
+          <div className="flex justify-center items-center grow  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
+            <div className="mr-2">
+              <SiGotomeeting size={25} />
+            </div>
+            Meetings
+          </div>
+          <div className="flex justify-center items-center grow  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
+            <div className="mr-2">
+              <GoIssueReopened size={25} />
+            </div>
+            Issues
+          </div>
+          <div className="flex justify-center items-center grow  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
+            <div className="mr-2">
+              <SlEnvolopeLetter size={25} />
+            </div>
+            Letters
+          </div>
+        </div>
       </div>
     </div>
   );
