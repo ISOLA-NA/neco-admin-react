@@ -190,8 +190,6 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     updateProgramType: AppServices.updateProgramType.bind(AppServices),
     deleteProgramType: AppServices.deleteProgramType.bind(AppServices),
 
-
-
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
