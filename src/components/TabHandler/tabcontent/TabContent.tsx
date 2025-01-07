@@ -20,7 +20,8 @@ import { UserHandle } from '../../General/Users'
 import { RoleHandle } from '../../General/Roles'
 import { CompanyHandle } from '../../General/Enterprises'
 import { RoleGroupsHandle } from '../../General/RoleGroups'
-import { StaffingHandle } from '../../General/Staffing' // مثلاً اینترفیس جدید
+import { StaffingHandle } from '../../General/Staffing'
+import { ProgramTemplateHandle } from "../../Programs/ProgramTemplate/ProgramTemplate"
 import DynamicConfirm from '../../utilities/DynamicConfirm'
 import DynamicInput from '../../utilities/DynamicInput'
 import { FaSave, FaEdit, FaTrash } from 'react-icons/fa'
@@ -82,6 +83,7 @@ const TabContent: FC<TabContentProps> = ({
   const companyRef = useRef<CompanyHandle>(null)
   const roleGroupsRef = useRef<RoleGroupsHandle>(null)
   const staffingRef = useRef<StaffingHandle>(null)
+  const programTemplateRef = useRef<ProgramTemplateHandle>(null)
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -190,6 +192,9 @@ const TabContent: FC<TabContentProps> = ({
         case 'Staffing':
           data = await api.getAllRoles()
           break
+          case 'ProgramTemplate':
+            data = await api.getAllProgramTemplates()
+            break
 
         default:
           data = rowData
@@ -286,6 +291,13 @@ const TabContent: FC<TabContentProps> = ({
           if (staffingRef.current) {
             await staffingRef.current.save()
             showAlert('success', null, 'Saved', 'Staffing added successfully.')
+            await fetchData()
+          }
+          break
+          case 'ProgramTemplate':
+          if (programTemplateRef.current) {
+            await programTemplateRef.current.save()
+            // showAlert('success', null, 'Saved', 'Program Template added successfully.')
             await fetchData()
           }
           break
@@ -390,6 +402,13 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData()
           }
           break
+          case 'ProgramTemplate':
+            if (programTemplateRef.current) {
+              await programTemplateRef.current.save()
+              // showAlert('success', null, 'Updated', 'Program Template updated successfully.')
+              await fetchData()
+            }
+            break
       }
       setIsPanelOpen(false)
       resetInputs()
@@ -482,6 +501,9 @@ const TabContent: FC<TabContentProps> = ({
           case 'Staffing':
             await api.deleteRole(pendingSelectedRow.ID)
             break
+            case 'ProgramTemplate':
+              await api.deleteProgramTemplate(pendingSelectedRow.ID)
+            break
         }
         showAlert(
           'success',
@@ -547,6 +569,8 @@ const TabContent: FC<TabContentProps> = ({
         return roleGroupsRef
       case 'Staffing':
         return staffingRef
+      case 'ProgramTemplate':
+        return programTemplateRef
       default:
         return null
     }
@@ -704,7 +728,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === 'Ribbons' ||
                     activeSubTab === 'Roles' ||
                     activeSubTab === 'Enterprises' ||
-                    activeSubTab === 'Staffing')
+                    activeSubTab === 'Staffing' ||
+                    activeSubTab === 'ProgramTemplate')
                     ? handleInsert
                     : undefined
                 }
@@ -717,7 +742,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === 'Roles' ||
                     activeSubTab === 'Enterprises' ||
                     activeSubTab === 'RoleGroups' ||
-                    activeSubTab === 'Staffing')
+                    activeSubTab === 'Staffing'||
+                    activeSubTab === 'ProgramTemplate')
                     ? handleUpdate
                     : undefined
                 }

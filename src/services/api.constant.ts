@@ -9,7 +9,6 @@ export const apiConst = Object.freeze({
   insertConfiguration: "api/Setting/Insert",
   updateConfiguration: "api/Setting/Update",
   deleteConfiguration: "api/Setting/Delete",
-  getAllProgramTemplate: "api/ProgramTemplate/GetAll",
   getAllDefaultRibbons: "api/Menu/GetAll",
   // EntityType جداول مختلف (LessonLearnedFormTemplate, CommentFormTemplate, ProcedureFormTemplate)
   getTableTransmittal: "api/EntityType/GetAllComplete",
@@ -63,4 +62,12 @@ export const apiConst = Object.freeze({
   deletePostCat: "api/PostCat/Delete",
   getAllProject:"api/Project/GetAll",
   getAllForPostAdmin:"/api/Post/GetAllForAdmin",
+  getAllProgramTemplate:"api/ProgramTemplate/GetAll",
+  insertProgramTemplate:"api/ProgramTemplate/Insert",
+  updateProgramTemplate:"api/ProgramTemplate/Update",
+  deleteProgramTemplate:"api/ProgramTemplate/Delete",
+  getAllProgramType: "api/ProgramType/GetAll",
+  insertProgramType: "api/ProgramType/Insert",
+  updateProgramType: "api/ProgramType/Update",
+  deleteProgramType: "api/ProgramType/Delete",
 });

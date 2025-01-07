@@ -1,6 +1,11 @@
-// src/components/General/ProgramTemplate.tsx
+// src/components/ProgramTemplate/ProgramTemplate.tsx
 
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import DynamicInput from "../../utilities/DynamicInput";
 import ListSelector from "../../ListSelector/ListSelector";
@@ -8,34 +13,20 @@ import DynamicSelector from "../../utilities/DynamicSelector";
 import DynamicModal from "../../utilities/DynamicModal";
 import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
-import AddProgramTemplate from "./AddProgramTemplate"; // اطمینان حاصل کنید که مسیر صحیح
+import AddProgramTemplate from "./AddProgramTemplate";
+import { useApi } from "../../../context/ApiContext";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
+import { ProgramTemplateItem, Project, ProgramTypeItem } from "../../../services/api.services";
 
-interface ApprovalFlowProps {
-  selectedRow: any;
+export interface ProgramTemplateHandle {
+  save: () => Promise<boolean>;
 }
 
-// داده‌های نمونه برای پروژه‌ها
-const relatedProjectsData = [
-  {
-    ID: "642bc0ce-4d93-474b-a869-6101211533d4",
-    ProjectName: "Project Alpha",
-    Name: "Project Alpha",
-    IsVisible: true,
-    IsIdea: false,
-    State: "Active",
-  },
-  {
-    ID: "a1b2c3d4-5678-90ab-cdef-1234567890ab",
-    ProjectName: "Project Beta",
-    Name: "Project Beta",
-    IsVisible: true,
-    IsIdea: false,
-    State: "Planning",
-  },
-  // می‌توانید پروژه‌های بیشتری اضافه کنید
-];
+interface ProgramTemplateProps {
+  selectedRow: ProgramTemplateItem | null;
+}
 
-// تابع برای دریافت پروژه‌های مرتبط
+// توابع کمکی برای پردازش رشته‌های جداشده با |
 function getAssociatedProjects(
   projectsStr?: string,
   projectsData?: { ID: string; Name: string }[]
@@ -44,70 +35,179 @@ function getAssociatedProjects(
   const safeProjectsStr = projectsStr || "";
   const projectsArray = safeProjectsStr.split("|").filter(Boolean);
   return safeProjectsData.filter((project) =>
-    projectsArray.includes(project.ID)
+    projectsArray.includes(String(project.ID))
   );
 }
 
-// گزینه‌های مربوط به نوع برنامه
-const typeOptions = [
-  { value: "1", label: "Type 1" },
-  { value: "2", label: "Type 2" },
-  { value: "3", label: "Type 3" },
-  { value: "4", label: "Type 4" },
-  { value: "5", label: "Type 5" },
-];
+// Program type options به صورت پویا از API دریافت می‌شود
+const ProgramTemplate = forwardRef<
+  ProgramTemplateHandle,
+  ProgramTemplateProps
+>(({ selectedRow }, ref) => {
+  const api = useApi();
 
-const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
-  const [programTemplateData, setProgramTemplateData] = useState<{
-    ID: string | number;
-    Name: string;
-    Duration: number | null;
-    PCost: number | null;
-    Description: string;
-    ProjectsStr: string;
-    IsGlobal: boolean;
-    ProgramTypeID: string;
-  }>({
-    ID: "",
-    Name: "",
-    Duration: null,
-    PCost: null,
-    Description: "",
-    ProjectsStr: "",
-    IsGlobal: false,
-    ProgramTypeID: "",
-  });
+  // State برای داده‌های برنامه تمپلیت
+  const [programTemplateData, setProgramTemplateData] = useState<ProgramTemplateItem>(
+    {
+      ID: selectedRow?.ID || undefined,
+      ModifiedById: selectedRow?.ModifiedById || undefined,
+      Name: selectedRow?.Name || "",
+      MetaColumnName: selectedRow?.MetaColumnName || "",
+      Duration: selectedRow?.Duration || "",
+      nProgramTypeID: selectedRow?.nProgramTypeID || null,
+      PCostAct: selectedRow?.PCostAct || 0,
+      PCostAprov: selectedRow?.PCostAprov || 0,
+      IsGlobal: selectedRow?.IsGlobal || false,
+      ProjectsStr: selectedRow?.ProjectsStr || "",
+      IsVisible: selectedRow?.IsVisible ?? true,
+      LastModified: selectedRow?.LastModified || undefined,
+    }
+  );
 
+  // State برای پروژه‌های دریافت شده از API
+  const [projectsData, setProjectsData] = useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
+
+  // State برای انواع برنامه‌ها دریافت شده از API
+  const [programTypes, setProgramTypes] = useState<ProgramTypeItem[]>([]);
+  const [loadingProgramTypes, setLoadingProgramTypes] = useState<boolean>(false);
+
+  // انتخاب ID‌های پروژه به صورت رشته
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>(
+    selectedRow?.ProjectsStr
+      ? selectedRow.ProjectsStr.split("|").filter(Boolean)
+      : []
+  );
+
+  // انتخاب ID نوع برنامه به صورت رشته
+  const [selectedProgramTypeId, setSelectedProgramTypeId] = useState<string>(
+    selectedRow?.nProgramTypeID ? String(selectedRow.nProgramTypeID) : ""
+  );
+
+  // دریافت پروژه‌ها از API هنگام بارگذاری کامپوننت
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoadingProjects(true);
+        const projects = await api.getAllProject();
+        setProjectsData(projects);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        showAlert("error", null, "Error", "Failed to fetch projects.");
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+    fetchProjects();
+  }, [api]);
+
+  // دریافت انواع برنامه‌ها از API هنگام بارگذاری کامپوننت
+  useEffect(() => {
+    const fetchProgramTypes = async () => {
+      try {
+        setLoadingProgramTypes(true);
+        const types = await api.getAllProgramType();
+        setProgramTypes(types);
+      } catch (error) {
+        console.error("Error fetching program types:", error);
+        showAlert("error", null, "Error", "Failed to fetch program types.");
+      } finally {
+        setLoadingProgramTypes(false);
+      }
+    };
+    fetchProgramTypes();
+  }, [api]);
+
+  // به‌روزرسانی داده‌های برنامه تمپلیت زمانی که `selectedRow` تغییر می‌کند
   useEffect(() => {
     if (selectedRow) {
       setProgramTemplateData({
-        ID: selectedRow.ID || "",
-        Name: selectedRow.Name || "",
-        Duration: selectedRow.Duration || null,
-        PCost: selectedRow.PCost || null,
-        Description: selectedRow.Description || "",
+        ID: selectedRow.ID,
+        ModifiedById: selectedRow.ModifiedById,
+        Name: selectedRow.Name,
+        MetaColumnName: selectedRow.MetaColumnName || "",
+        Duration: selectedRow.Duration,
+        nProgramTypeID: selectedRow.nProgramTypeID,
+        PCostAct: selectedRow.PCostAct,
+        PCostAprov: selectedRow.PCostAprov,
         ProjectsStr: selectedRow.ProjectsStr || "",
-        IsGlobal: selectedRow.IsGlobal || false,
-        ProgramTypeID: selectedRow.nProgramTypeID
-          ? String(selectedRow.nProgramTypeID)
-          : "",
+        IsGlobal: selectedRow.IsGlobal,
+        IsVisible: selectedRow.IsVisible,
+        LastModified: selectedRow.LastModified,
       });
+      setSelectedProjectIds(
+        selectedRow.ProjectsStr
+          ? selectedRow.ProjectsStr.split("|").filter(Boolean)
+          : []
+      );
+      setSelectedProgramTypeId(
+        selectedRow.nProgramTypeID ? String(selectedRow.nProgramTypeID) : ""
+      );
     } else {
       setProgramTemplateData({
-        ID: "",
         Name: "",
-        Duration: null,
-        PCost: null,
-        Description: "",
+        Duration: "0",
+        PCostAct: 0,
+        PCostAprov: 0,
         ProjectsStr: "",
         IsGlobal: false,
-        ProgramTypeID: "",
+        IsVisible: true,
+        nProgramTypeID: null,
+        MetaColumnName: "",
+        LastModified: null,
+        ModifiedById: null,
+        ID: 0,
       });
+      setSelectedProjectIds([]);
+      setSelectedProgramTypeId("");
     }
   }, [selectedRow]);
 
+  // متد save قابل دسترسی از والدین
+  useImperativeHandle(ref, () => ({
+    save: async () => {
+      try {
+        const templateData: ProgramTemplateItem = {
+          ...programTemplateData,
+          nProgramTypeID: selectedProgramTypeId
+            ? parseInt(selectedProgramTypeId)
+            : null,
+          PCostAct: programTemplateData.PCostAct || 0,
+          PCostAprov: programTemplateData.PCostAprov || 0,
+          IsVisible: programTemplateData.IsVisible,
+          ProjectsStr:
+            selectedProjectIds.length > 0
+              ? selectedProjectIds.join("|") + "|"
+              : "",
+          ModifiedById: programTemplateData.ModifiedById,
+          LastModified: programTemplateData.LastModified,
+          ID: programTemplateData.ID,
+        };
+
+        if (selectedRow) {
+          await api.updateProgramTemplate(templateData);
+        } else {
+          await api.insertProgramTemplate(templateData);
+        }
+
+        showAlert(
+          "success",
+          null,
+          selectedRow ? "Updated" : "Saved",
+          `Program Template ${selectedRow ? "updated" : "added"} successfully.`
+        );
+        return true;
+      } catch (error) {
+        console.error("Error saving program template:", error);
+        showAlert("error", null, "Error", "Failed to save program template.");
+        return false;
+      }
+    },
+  }));
+
+  // هندل تغییرات در فیلدهای ورودی
   const handleChange = (
-    field: keyof typeof programTemplateData,
+    field: keyof ProgramTemplateItem,
     value: any
   ) => {
     setProgramTemplateData((prev) => ({
@@ -116,29 +216,39 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
     }));
   };
 
+  // تعریف ستون‌ها برای جدول انتخاب پروژه‌ها
   const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
 
+  // هندل تغییرات انتخاب پروژه‌ها
   const handleProjectsChange = (selectedIds: (string | number)[]) => {
-    const newProjectsStr =
-      selectedIds.length > 0 ? selectedIds.join("|") + "|" : "";
-    handleChange("ProjectsStr", newProjectsStr);
+    const stringIds = selectedIds.map(id => String(id));
+    setSelectedProjectIds(stringIds);
   };
 
+  // هندل تغییر وضعیت Global
   const handleGlobalChange = (isGlobal: boolean) => {
     handleChange("IsGlobal", isGlobal);
   };
 
-  const handleProgramTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    handleChange("ProgramTypeID", e.target.value);
-  };
-
+  // محاسبه پروژه‌های مرتبط بر اساس ID‌های انتخاب شده
   const associatedProjects = getAssociatedProjects(
     programTemplateData.ProjectsStr,
-    relatedProjectsData
+    projectsData.map(proj => ({ ID: String(proj.ID), Name: proj.ProjectName }))
   );
-  const selectedProjectIds = associatedProjects.map((p) => p.ID);
 
-  // مدیریت وضعیت مدال برای ProgramType
+  // آماده‌سازی داده‌ها برای ListSelector
+  const projectsListData = projectsData.map((proj) => ({
+    ID: proj.ID,
+    Name: proj.ProjectName, // تغییر فیلد به Name برای سازگاری با ListSelector
+  }));
+
+  // آماده‌سازی داده‌ها برای DynamicSelector از انواع برنامه‌ها
+  const programTypeOptions = programTypes.map((type) => ({
+    value: String(type.ID),
+    label: type.Name,
+  }));
+
+  // مدیریت وضعیت Modal برای انتخاب نوع برنامه
   const [modalOpen, setModalOpen] = useState(false);
   const [currentSelector] = useState<string>("ProgramType");
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
@@ -159,26 +269,20 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
 
   const handleSelectButtonClick = () => {
     if (selectedRowData) {
-      handleChange("ProgramTypeID", selectedRowData.value);
+      handleChange("nProgramTypeID", parseInt(selectedRowData.value));
+      setSelectedProgramTypeId(selectedRowData.value);
       handleCloseModal();
     }
   };
 
   const getRowData = (selector: string) => {
     if (selector === "ProgramType") {
-      return typeOptions.map((option) => ({
-        value: option.value,
-        label: option.label,
-      }));
+      return programTypeOptions;
     }
     return [];
   };
 
-  // مدیریت وضعیت مدال برای انتخاب پروژه‌ها (شبیه FormsCommand)
-  const [selectedRowDataForProjects, setSelectedRowDataForProjects] =
-    useState<any>(null);
-
-  // مدیریت وضعیت مودال برای افزودن برنامه جدید
+  // مدیریت وضعیت Modal برای افزودن برنامه جدید
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleAddClick = () => {
@@ -187,7 +291,6 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
 
   const handleAddModalClose = () => {
     setIsAddModalOpen(false);
-    // در صورت نیاز، می‌توانید داده‌ها را مجدداً بارگذاری کنید
   };
 
   // تعریف ستون‌ها برای جدول جزئیات
@@ -195,22 +298,23 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
     { headerName: "ID", field: "ID", sortable: true, filter: true },
     { headerName: "Name", field: "Name", sortable: true, filter: true },
     {
-      headerName: "Description",
-      field: "Description",
-      sortable: true,
-      filter: true,
-    },
-    {
       headerName: "Is Global",
       field: "IsGlobal",
       sortable: true,
       filter: true,
     },
     { headerName: "Duration", field: "Duration", sortable: true, filter: true },
-    { headerName: "Cost", field: "PCost", sortable: true, filter: true },
+    { headerName: "Cost Act", field: "PCostAct", sortable: true, filter: true },
+    { headerName: "Cost Approved", field: "PCostAprov", sortable: true, filter: true },
     {
       headerName: "Program Type ID",
-      field: "ProgramTypeID",
+      field: "nProgramTypeID",
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: "Last Modified",
+      field: "LastModified",
       sortable: true,
       filter: true,
     },
@@ -221,24 +325,24 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
     {
       ID: programTemplateData.ID,
       Name: programTemplateData.Name,
-      Description: programTemplateData.Description,
+      MetaColumnName: programTemplateData.MetaColumnName,
       IsGlobal: programTemplateData.IsGlobal,
       Duration: programTemplateData.Duration,
-      PCost: programTemplateData.PCost,
-      ProgramTypeID: programTemplateData.ProgramTypeID,
+      PCostAct: programTemplateData.PCostAct,
+      PCostAprov: programTemplateData.PCostAprov,
+      nProgramTypeID: programTemplateData.nProgramTypeID,
+      LastModified: programTemplateData.LastModified,
     },
-    // می‌توانید داده‌های بیشتری اضافه کنید یا منطق مناسبی برای دریافت داده‌های مرتبط اضافه کنید
   ];
 
   return (
     <TwoColumnLayout>
-      {/* فرم اصلی */}
       <TwoColumnLayout.Item>
         <DynamicInput
           name="Program Name"
           type="text"
           value={programTemplateData.Name}
-          placeholder=""
+          placeholder="Enter program name"
           onChange={(e) => handleChange("Name", e.target.value)}
           required={true}
         />
@@ -249,77 +353,85 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
           name="Duration"
           type="number"
           value={programTemplateData.Duration}
-          placeholder=""
-          onChange={(e) => handleChange("Duration", e.target.value)}
+          placeholder="Enter duration"
+          onChange={(e) => handleChange("Duration", Number(e.target.value))}
           required={true}
         />
       </TwoColumnLayout.Item>
 
       <TwoColumnLayout.Item>
         <DynamicInput
-          name="Cost"
+          name="Cost Approved"
           type="number"
-          value={programTemplateData.PCost}
-          placeholder=""
-          onChange={(e) => handleChange("PCost", e.target.value)}
+          value={programTemplateData.PCostAprov}
+          placeholder="Enter approved cost"
+          onChange={(e) => handleChange("PCostAprov", Number(e.target.value))}
         />
       </TwoColumnLayout.Item>
 
+      {/* Updated ListSelector for Related Projects */}
       <TwoColumnLayout.Item>
         <ListSelector
           title="Related Projects"
           columnDefs={projectColumnDefs}
-          rowData={relatedProjectsData}
+          rowData={projectsListData}
           selectedIds={selectedProjectIds}
           onSelectionChange={handleProjectsChange}
           showSwitcher={true}
           isGlobal={programTemplateData.IsGlobal}
           onGlobalChange={handleGlobalChange}
+          loading={loadingProjects}
           ModalContentComponent={TableSelector}
           modalContentProps={{
             columnDefs: projectColumnDefs,
-            rowData: relatedProjectsData,
-            selectedRow: selectedRowDataForProjects,
+            rowData: projectsListData,
+            selectedRow: selectedRowData,
             onRowDoubleClick: () => {
-              if (selectedRowDataForProjects) {
+              if (selectedRowData) {
                 const newSelection = [
                   ...selectedProjectIds,
-                  selectedRowDataForProjects.ID,
+                  String(selectedRowData.ID),
                 ];
                 handleProjectsChange(newSelection);
               }
             },
-            onRowClick: (row: any) => setSelectedRowDataForProjects(row),
+            onRowClick: (row: any) =>
+              setSelectedRowData(row),
             onSelectButtonClick: () => {
-              if (selectedRowDataForProjects) {
+              if (selectedRowData) {
                 const newSelection = [
                   ...selectedProjectIds,
-                  selectedRowDataForProjects.ID,
+                  String(selectedRowData.ID),
                 ];
                 handleProjectsChange(newSelection);
               }
             },
-            isSelectDisabled: !selectedRowDataForProjects,
+            isSelectDisabled: !selectedRowData,
           }}
         />
       </TwoColumnLayout.Item>
 
+      {/* DynamicSelector برای انتخاب نوع برنامه به صورت پویا */}
       <TwoColumnLayout.Item>
         <DynamicSelector
-          options={typeOptions}
-          selectedValue={programTemplateData.ProgramTypeID}
-          onChange={handleProgramTypeChange}
+          options={programTypeOptions}
+          selectedValue={selectedProgramTypeId}
+          onChange={(e) => {
+            handleChange("nProgramTypeID", e.target.value ? parseInt(e.target.value) : null);
+            setSelectedProgramTypeId(e.target.value);
+          }}
           label="Type"
           showButton={true}
           onButtonClick={handleOpenModal}
           className="-mt-24"
+          loading={loadingProgramTypes} // افزودن وضعیت بارگذاری
         />
       </TwoColumnLayout.Item>
 
-      {/* مدال داینامیک برای انتخاب نوع برنامه شبیه FormsCommand */}
+      {/* Dynamic Modal برای انتخاب نوع برنامه */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
-          columnDefs={[{ headerName: "نام", field: "label" }]}
+          columnDefs={[{ headerName: "Name", field: "label" }]}
           rowData={getRowData(currentSelector)}
           selectedRow={selectedRowData}
           onRowDoubleClick={handleSelectButtonClick}
@@ -329,39 +441,34 @@ const ProgramTemplate: React.FC<ApprovalFlowProps> = ({ selectedRow }) => {
         />
       </DynamicModal>
 
-      {/* بخش جزئیات با استفاده از DataTable */}
-      <TwoColumnLayout.Item span={1} className="md:col-span-2">
+      {/* بخش جزئیات با DataTable */}
+      <TwoColumnLayout.Item span={2}>
         <div className="-mt-12">
           <DataTable
             columnDefs={detailColumnDefs}
             rowData={relatedDetailData}
-            onRowDoubleClick={() => {
-              /* اعمال دلخواه برای دوبل کلیک */
-            }}
-            setSelectedRowData={() => {
-              /* مدیریت انتخاب ردیف اگر نیاز است */
-            }}
+            onRowDoubleClick={() => {}}
+            setSelectedRowData={() => {}}
             showDuplicateIcon={false}
             showEditIcon={true}
-            showAddIcon={true} // فعال کردن دکمه Add
+            showAddIcon={true}
             showDeleteIcon={true}
-            onAdd={handleAddClick} // اتصال به تابع باز کردن مودال
+            onAdd={handleAddClick}
             onEdit={() => {}}
             onDelete={() => {}}
             onDuplicate={() => {}}
             domLayout="autoHeight"
-            isRowSelected={false} // می‌توانید این را بر اساس نیاز تغییر دهید
-            showSearch={true} // جستجو در جزئیات غیر فعال
+            showSearch={true}
           />
         </div>
       </TwoColumnLayout.Item>
 
-      {/* مودال داینامیک برای افزودن برنامه جدید */}
+      {/* Dynamic Modal برای افزودن برنامه جدید */}
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
         <AddProgramTemplate />
       </DynamicModal>
     </TwoColumnLayout>
   );
-};
+});
 
 export default ProgramTemplate;

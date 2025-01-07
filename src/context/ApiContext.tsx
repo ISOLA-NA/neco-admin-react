@@ -24,7 +24,8 @@ import AppServices, {
   Company,
   PostCat,
   Project,
-  PostAdmin
+  PostAdmin,
+  ProgramType,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -43,7 +44,6 @@ interface ApiContextType {
   deleteConfiguration: (id: number) => Promise<void>;
 
   // سایر سرویس‌ها
-  getAllProgramTemplates: () => Promise<ProgramTemplateItem[]>;
   getAllDefaultRibbons: () => Promise<DefaultRibbonItem[]>;
   getTableTransmittal: () => Promise<EntityTypeItem[]>;
   getAllWfTemplate: () => Promise<WfTemplateItem[]>;
@@ -93,6 +93,18 @@ interface ApiContextType {
 
   getAllProject: () => Promise<Project[]>;
   getAllForPostAdmin: () => Promise<PostAdmin[]>;
+
+  getAllProgramTemplates: () => Promise<ProgramTemplateItem[]>;
+  insertProgramTemplate: (data: ProgramTemplateItem) => Promise<ProgramTemplateItem>;
+  updateProgramTemplate: (data: ProgramTemplateItem) => Promise<ProgramTemplateItem>;
+  deleteProgramTemplate: (id: number) => Promise<void>;
+
+  getAllProgramType: () => Promise<ProgramType[]>;
+  insertProgramType: (data: ProgramType) => Promise<ProgramType>;
+  updateProgramType: (data: ProgramType) => Promise<ProgramType>;
+  deleteProgramType: (id: number) => Promise<void>;
+
+
 }
 
 
@@ -169,6 +181,16 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     getAllProject: AppServices.getAllProject.bind(AppServices),
     getAllForPostAdmin: AppServices.getAllForPostAdmin.bind(AppServices),
 
+    insertProgramTemplate: AppServices.insertProgramTemplate.bind(AppServices),
+    updateProgramTemplate: AppServices.updateProgramTemplate.bind(AppServices),
+    deleteProgramTemplate: AppServices.deleteProgramTemplate.bind(AppServices),
+
+    getAllProgramType: AppServices.getAllProgramType.bind(AppServices),
+    insertProgramType: AppServices.insertProgramType.bind(AppServices),
+    updateProgramType: AppServices.updateProgramType.bind(AppServices),
+    deleteProgramType: AppServices.deleteProgramType.bind(AppServices),
+
+
 
   };
 
@@ -205,5 +227,6 @@ export type {
   Company,
   PostCat,
   Project,
-  PostAdmin
+  PostAdmin,
+  ProgramType
 };

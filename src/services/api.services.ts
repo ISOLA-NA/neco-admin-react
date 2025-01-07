@@ -80,8 +80,19 @@ export interface DefaultRibbonItem {
 
 // ================== اینترفیس‌های ProgramTemplate ==================
 export interface ProgramTemplateItem {
-  ID: number;
+  ID?: number;
+  ModifiedById?: string | null;
   Name: string;
+  
+  MetaColumnName?: string;
+  Duration: string;
+  nProgramTypeID: number | null;
+  PCostAct: number;
+  PCostAprov: number;
+  IsGlobal: boolean;
+  ProjectsStr?: string | null;
+  IsVisible: boolean;
+  LastModified?: string | null;
 }
 
 // ================== EntityType ==================
@@ -319,6 +330,15 @@ export interface PostAdmin {
   nProjectID: string | null;
   nProjectName: string | null;
   status: number;
+}
+
+export interface ProgramType {
+  ID?: number;
+  Name: string;
+  Describtion: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string | null;
 }
 
 // ساخت یک کلاس برای متدهای API
@@ -773,6 +793,45 @@ class ApiService {
     const response = await httpClient.post<PostAdmin[]>(apiConst.getAllForPostAdmin);
     return response.data;
   }
+
+  async insertProgramTemplate(data: ProgramTemplateItem): Promise<ProgramTemplateItem> {
+  const response = await httpClient.post<ProgramTemplateItem>(
+    apiConst.insertProgramTemplate,
+    data
+  );
+  return response.data;
+}
+
+async updateProgramTemplate(data: ProgramTemplateItem): Promise<ProgramTemplateItem> {
+  const response = await httpClient.post<ProgramTemplateItem>(
+    apiConst.updateProgramTemplate,
+    data
+  );
+  return response.data;
+}
+
+async deleteProgramTemplate(id: number): Promise<void> {
+  await httpClient.post(apiConst.deleteProgramTemplate, { ID: id });
+}
+
+async getAllProgramType(): Promise<ProgramType[]> {
+  const response = await httpClient.post<ProgramType[]>(apiConst.getAllProgramType);
+  return response.data;
+}
+
+async insertProgramType(data: ProgramType): Promise<ProgramType> {
+  const response = await httpClient.post<ProgramType>(apiConst.insertProgramType, data);
+  return response.data;
+}
+
+async updateProgramType(data: ProgramType): Promise<ProgramType> {
+  const response = await httpClient.post<ProgramType>(apiConst.updateProgramType, data);
+  return response.data;
+}
+
+async deleteProgramType(id: number): Promise<void> {
+  await httpClient.post(apiConst.deleteProgramType, { ID: id });
+}
 }
 
 // یک خروجی برای استفاده در Context

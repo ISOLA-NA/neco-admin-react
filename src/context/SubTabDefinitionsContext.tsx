@@ -301,6 +301,23 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
 
+      ProgramTemplate: {
+        endpoint: api.getAllProgramTemplates,
+        columnDefs: [
+          {
+            headerName: 'Name',
+            field: 'Name',
+            filter: 'agTextColumnFilter'
+          }
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false
+        }
+      },
+
       // -------------------
       // MenuTab
       // -------------------

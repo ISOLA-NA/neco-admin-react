@@ -6,7 +6,8 @@ import {
   ConfigurationItem,
   Role,
   Company,
-  PostCat
+  PostCat,
+  ProgramTemplateItem
 } from './ApiContext'
 
 // Define CommandData if it's different from CommandItem
@@ -118,6 +119,24 @@ interface RoleGroupData {
   ProjectsStr?: string
 }
 
+// src/context/AddEditDeleteContext.tsx
+
+interface ProgramTemplateData {
+  ID?: number;
+  ModifiedById?: string; // اضافه کردن فیلد MissingById
+  Name: string;
+  Duration: string;
+  PCostAct: number;
+  PCostAprov: number;
+  IsGlobal: boolean;
+  ProjectsStr?: string | null; // تغییر نوع به string | null
+  IsVisible: boolean;
+  nProgramTypeID: number;
+  MetaColumnName?: string; // اگر ممکن است متا ستون نام خالی باشد
+  LastModified?: string;
+}
+
+
 interface AddEditDeleteContextType {
   handleAdd: () => void
   handleEdit: () => void
@@ -131,6 +150,7 @@ interface AddEditDeleteContextType {
   handleSaveRole: (data: RoleData) => Promise<Role | null>
   handleSaveCompany: (data: CompanyData) => Promise<Company | null>
   handleSaveRoleGroup: (data: RoleGroupData) => Promise<PostCat | null>
+  handleSaveProgramTemplate: (data: ProgramTemplateData) => Promise<ProgramTemplateItem | null>
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -173,6 +193,9 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log('Company deleted successfully!')
       } else if (subTabName === 'RoleGroups') {
         await api.deletePostCat(id)
+        console.log('Role Group deleted successfully!')
+      } else if (subTabName === 'ProgramTemplate') {
+        await api.deleteProgramTemplate(id)
         console.log('Role Group deleted successfully!')
       }
     } catch (error) {
@@ -328,7 +351,6 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     try {
       if (data.ID) {
-        
         // آبجکت برای update
         const updateRoleRequest: Role = {
           Name: data.Name,
@@ -463,6 +485,47 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }
 
+  const handleSaveProgramTemplate = async (
+    data: ProgramTemplateData
+  ): Promise<ProgramTemplateItem | null> => {
+    setIsLoading(true);
+    try {
+      const programTemplate: ProgramTemplateItem = {
+        ID: data.ID,
+        ModifiedById: data.ModifiedById, // اضافه کردن فیلد ModifiedById
+        Name: data.Name,
+        Duration: data.Duration,
+        PCostAct: data.PCostAct,
+        PCostAprov: data.PCostAprov,
+        IsGlobal: data.IsGlobal,
+        ProjectsStr: data.ProjectsStr ?? null, // مدیریت null برای ProjectsStr
+        IsVisible: data.IsVisible,
+        nProgramTypeID: data.nProgramTypeID,
+        MetaColumnName: data.MetaColumnName,
+        LastModified: data.LastModified,
+      };
+  
+      let result: ProgramTemplateItem;
+      if (programTemplate.ID) {
+        // ویرایش ProgramTemplate موجود
+        result = await api.updateProgramTemplate(programTemplate);
+        console.log('ProgramTemplate updated:', result);
+      } else {
+        // افزودن ProgramTemplate جدید
+        result = await api.insertProgramTemplate(programTemplate);
+        console.log('ProgramTemplate inserted:', result);
+      }
+  
+      return result;
+    } catch (error) {
+      console.error('Error saving ProgramTemplate:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -475,7 +538,8 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveUser,
         handleSaveRole,
         handleSaveCompany,
-        handleSaveRoleGroup
+        handleSaveRoleGroup,
+        handleSaveProgramTemplate
       }}
     >
       {children}
