@@ -273,8 +273,6 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }
 
-  // ... (imports remain the same)
-
   const handleSaveUser = async (data: UserData): Promise<User | null> => {
     setIsLoading(true)
     try {
@@ -325,24 +323,23 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false)
     }
   }
+
   const handleSaveRole = async (data: RoleData): Promise<Role | null> => {
     setIsLoading(true);
     try {
       if (data.ID) {
+        
         // آبجکت برای update
         const updateRoleRequest: Role = {
-          ID: data.ID,
           Name: data.Name,
           IsVisible: data.IsVisible,
-          LastModified: new Date().toISOString(),
-          CreateById: null,
-          Authorization: null,
-          Competencies: null,
-          Description: null,
-          Grade: null,
-          PostCode: null,
-          Responsibility: null,
-          Type: null,
+          Authorization: data.Authorization,
+          Competencies: data.Competencies,
+          Description: data.Description,
+          Grade: data.Grade,
+          PostCode: data.PostCode,
+          Responsibility: data.Responsibility,
+          Type: data.Type,
           OwnerID: data.OwnerID || null,
           ParrentId: data.ParrentId || null,
           isAccessCreateProject: data.isAccessCreateProject || false,
@@ -361,19 +358,17 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       } else {
         // آبجکت برای insert
         const insertRoleRequest: Role = {
-          ID: "3fa85f64-5717-4562-b3fc-2c963f66afa6", // UUID پیش‌فرض
           Name: data.Name,
           IsVisible: true,
           LastModified: new Date().toISOString(),
-          ModifiedById: "3fa85f64-5717-4562-b3fc-2c963f66afa6", // UUID پیش‌فرض
-          Authorization: "",
-          Competencies: "",
-          Description: "",
-          Grade: "",
-          PostCode: "",
-          Responsibility: "",
-          Type: "",
-          isStaticPost: false
+          Authorization: data.Authorization,
+          Competencies: data.Competencies,
+          Description: data.Description,
+          Grade: data.Grade,
+          PostCode: data.PostCode,
+          Responsibility: data.Responsibility,
+          Type: data.Type,
+          isStaticPost: data.isStaticPost
         };
         
         const result = await api.insertRole(insertRoleRequest);
@@ -387,6 +382,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+
   const handleSaveCompany = async (
     data: CompanyData
   ): Promise<Company | null> => {

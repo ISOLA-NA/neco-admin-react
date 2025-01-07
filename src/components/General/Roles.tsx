@@ -36,10 +36,24 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     Responsibility: "",
     PostCode: "",
     isStaticPost: false,
+    // Add these missing properties:
+    isAccessCreateProject: false,
+    isHaveAddressbar: false,
+    // Optional properties with default values:
+    LastModified: "",
+    ModifiedById: "",
+    CreateById: null,
+    CreateDate: "",
+    OwnerID: null,
+    ParrentId: null,
+    nCompanyID: null,
+    nMenuID: null,
+    nPostTypeID: null,
+    nProjectID: null,
+    status: 0
   });
 
   useEffect(() => {
-    console.log("Selected Row Data:", selectedRow); // برای دیباگ
     if (selectedRow) {
       setRoleData({
         ID: selectedRow.ID || "",
@@ -53,6 +67,20 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         Responsibility: selectedRow.Responsibility || "",
         PostCode: selectedRow.PostCode || "",
         isStaticPost: selectedRow.isStaticPost || false,
+        // Add missing properties:
+        isAccessCreateProject: selectedRow.isAccessCreateProject || false,
+        isHaveAddressbar: selectedRow.isHaveAddressbar || false,
+        LastModified: selectedRow.LastModified || "",
+        ModifiedById: selectedRow.ModifiedById || "",
+        CreateById: selectedRow.CreateById || null,
+        CreateDate: selectedRow.CreateDate || "",
+        OwnerID: selectedRow.OwnerID || null,
+        ParrentId: selectedRow.ParrentId || null,
+        nCompanyID: selectedRow.nCompanyID || null,
+        nMenuID: selectedRow.nMenuID || null,
+        nPostTypeID: selectedRow.nPostTypeID || null,
+        nProjectID: selectedRow.nProjectID || null,
+        status: selectedRow.status || 0
       });
     } else {
       setRoleData({
@@ -67,6 +95,20 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         Responsibility: "",
         PostCode: "",
         isStaticPost: false,
+        // Add missing properties with default values:
+        isAccessCreateProject: false,
+        isHaveAddressbar: false,
+        LastModified: "",
+        ModifiedById: "",
+        CreateById: null,
+        CreateDate: "",
+        OwnerID: null,
+        ParrentId: null,
+        nCompanyID: null,
+        nMenuID: null,
+        nPostTypeID: null,
+        nProjectID: null,
+        status: 0
       });
     }
   }, [selectedRow]);
@@ -75,22 +117,21 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     field: keyof typeof roleData,
     value: string | boolean
   ) => {
-    setRoleData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setRoleData((prev) => {
+      const updated = { ...prev, [field]: value };
+      console.log(`فیلد ${field} به مقدار ${value} تغییر کرد`);
+      return updated;
+    });
   };
 
-  // متد save که توسط context فراخوانی می‌شود
   const save = async () => {
     try {
+      console.log("داده‌های ذخیره‌شده نقش:", roleData); // برای دیباگ
       await handleSaveRole(roleData);
-      // در صورت نیاز می‌توانید عملیات دیگری نیز انجام دهید
-      showAlert("success", null, "Saved", "Role saved successfully.");
+      showAlert("success", null, "ذخیره شد", "نقش با موفقیت ذخیره شد.");
     } catch (error) {
-      // مدیریت خطا
-      console.error("Error saving role:", error);
-      showAlert("error", null, "Error", "Failed to save role.");
+      console.error("خطا در ذخیره‌سازی نقش:", error);
+      showAlert("error", null, "خطا", "ذخیره نقش ناموفق بود.");
     }
   };
 
