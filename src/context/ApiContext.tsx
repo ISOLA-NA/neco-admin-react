@@ -27,6 +27,7 @@ import AppServices, {
   PostAdmin,
   ProgramType,
   ProjectWithCalendar,
+  OdpWithExtra,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -110,6 +111,11 @@ interface ApiContextType {
   insertProgramType: (data: ProgramType) => Promise<ProgramType>;
   updateProgramType: (data: ProgramType) => Promise<ProgramType>;
   deleteProgramType: (id: number) => Promise<void>;
+
+  getAllOdpWithExtra: () => Promise<OdpWithExtra[]>;
+  insertOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>;
+  updateOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>;
+  deleteOdp: (id: number) => Promise<void>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -196,6 +202,11 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertProgramType: AppServices.insertProgramType.bind(AppServices),
     updateProgramType: AppServices.updateProgramType.bind(AppServices),
     deleteProgramType: AppServices.deleteProgramType.bind(AppServices),
+
+    getAllOdpWithExtra: AppServices.getAllOdpWithExtra.bind(AppServices),
+    insertOdp: AppServices.insertOdp.bind(AppServices),
+    updateOdp: AppServices.updateOdp.bind(AppServices),
+    deleteOdp: AppServices.deleteOdp.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -233,4 +244,6 @@ export type {
   Project,
   PostAdmin,
   ProgramType,
+  ProjectWithCalendar,
+  OdpWithExtra,
 };

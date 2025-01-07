@@ -371,6 +371,21 @@ export interface ProgramType {
   ModifiedById?: string | null;
 }
 
+export interface OdpWithExtra {
+  ID: number;
+  Name: string;
+  Address: string;
+  EntityTypeName: string;
+  IsVisible: boolean;
+  LastModified: string | null;
+  ModifiedById: string | null;
+  ProgramTemplateIDName: string | null;
+  WFTemplateName: string;
+  nEntityTypeID: number | null;
+  nProgramTemplateID: number | null;
+  nWFTemplateID: number | null;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -886,6 +901,33 @@ class ApiService {
 
   async deleteProgramType(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteProgramType, { ID: id });
+  }
+
+  async getAllOdpWithExtra(): Promise<OdpWithExtra[]> {
+    const response = await httpClient.post<OdpWithExtra[]>(
+      apiConst.getAllOdpWithExtra
+    );
+    return response.data;
+  }
+
+  async insertOdp(data: OdpWithExtra): Promise<OdpWithExtra> {
+    const response = await httpClient.post<OdpWithExtra>(
+      apiConst.insertOdp,
+      data
+    );
+    return response.data;
+  }
+
+  async updateOdp(data: OdpWithExtra): Promise<OdpWithExtra> {
+    const response = await httpClient.post<OdpWithExtra>(
+      apiConst.updateOdp,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteOdp(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteOdp, { ID: id });
   }
 }
 

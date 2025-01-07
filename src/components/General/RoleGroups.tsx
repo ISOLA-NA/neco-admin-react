@@ -70,7 +70,9 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
 
     // آیتم‌های انتخاب‌شده (ID ها)
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
-    const [selectedMemberIds, setSelectedMemberIds] = useState<(string | number)[]>([]);
+    const [selectedMemberIds, setSelectedMemberIds] = useState<
+      (string | number)[]
+    >([]);
 
     // داده‌های استاتیک اعضا (این داده‌ها را شما به‌صورت دستی قرار داده‌اید)
     const membersData = [

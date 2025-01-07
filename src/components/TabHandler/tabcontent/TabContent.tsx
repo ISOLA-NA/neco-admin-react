@@ -1,5 +1,3 @@
-// src/components/views/tabcontent/TabContent.tsx
-
 import React, {
   useState,
   useEffect,
@@ -23,6 +21,7 @@ import { RoleGroupsHandle } from "../../General/RoleGroups";
 import { StaffingHandle } from "../../General/Staffing";
 import { ProgramTemplateHandle } from "../../Programs/ProgramTemplate/ProgramTemplate";
 import { ProgramTypeHandle } from "../../Programs/ProgramTypes";
+import { OdpHandle } from "../../Projects/Odp";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
@@ -86,6 +85,7 @@ const TabContent: FC<TabContentProps> = ({
   const staffingRef = useRef<StaffingHandle>(null);
   const programTemplateRef = useRef<ProgramTemplateHandle>(null);
   const programTypeRef = useRef<ProgramTypeHandle>(null);
+  const odpRef = useRef<OdpHandle>(null);
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -203,6 +203,9 @@ const TabContent: FC<TabContentProps> = ({
         case "Projects":
           data = await api.getAllProjectsWithCalendar();
           break;
+        case "Odp":
+          data = await api.getAllOdpWithExtra();
+          break;
         default:
           data = rowData;
       }
@@ -219,7 +222,7 @@ const TabContent: FC<TabContentProps> = ({
     if (activeSubTab) {
       fetchData();
     }
-  }, [activeSubTab]); // فقط وابسته به activeSubTab باشد
+  }, [activeSubTab]);
 
   // Save/Update handlers
   const handleInsert = async () => {
@@ -234,7 +237,7 @@ const TabContent: FC<TabContentProps> = ({
               "Saved",
               "Configuration added successfully."
             );
-            await fetchData(); // فقط بعد از ذخیره موفقیت‌آمیز، دیتا را دوباره بگیریم
+            await fetchData();
           }
           break;
         case "Commands":
@@ -311,6 +314,12 @@ const TabContent: FC<TabContentProps> = ({
         case "ProgramTypes":
           if (programTypeRef.current) {
             await programTypeRef.current.save();
+            await fetchData();
+          }
+          break;
+        case "Odp":
+          if (odpRef.current) {
+            await odpRef.current.save();
             await fetchData();
           }
           break;
@@ -429,6 +438,12 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData();
           }
           break;
+        case "Odp":
+          if (odpRef.current) {
+            await odpRef.current.save();
+            await fetchData();
+          }
+          break;
       }
       setIsPanelOpen(false);
       resetInputs();
@@ -533,6 +548,9 @@ const TabContent: FC<TabContentProps> = ({
           case "Projects":
             await api.deleteProject(pendingSelectedRow.ID);
             break;
+          case "Odp":
+            await api.deleteOdp(pendingSelectedRow.ID);
+            break;
         }
         showAlert(
           "success",
@@ -607,6 +625,8 @@ const TabContent: FC<TabContentProps> = ({
         return programTemplateRef;
       case "ProgramTypes":
         return programTypeRef;
+      case "Odp":
+        return odpRef;
       default:
         return null;
     }
@@ -763,10 +783,12 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Users" ||
                     activeSubTab === "Ribbons" ||
                     activeSubTab === "Roles" ||
+                    activeSubTab === "RoleGroups" ||
                     activeSubTab === "Enterprises" ||
                     activeSubTab === "Staffing" ||
                     activeSubTab === "ProgramTemplate" ||
-                    activeSubTab === "ProgramTypes")
+                    activeSubTab === "ProgramTypes" ||
+                    activeSubTab === "Odp")
                     ? handleInsert
                     : undefined
                 }
@@ -781,7 +803,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "RoleGroups" ||
                     activeSubTab === "Staffing" ||
                     activeSubTab === "ProgramTemplate" ||
-                    activeSubTab === "ProgramTypes")
+                    activeSubTab === "ProgramTypes" ||
+                    activeSubTab === "Odp")
                     ? handleUpdate
                     : undefined
                 }

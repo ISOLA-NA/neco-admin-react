@@ -5,14 +5,14 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
-  ForwardRefRenderFunction
+  ForwardRefRenderFunction,
 } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
-import { showAlert } from '../utilities/Alert/DynamicAlert';
-import { useApi } from '../../context/ApiContext';
-import { ProgramType as IProgramType } from '../../services/api.services';
+import { showAlert } from "../utilities/Alert/DynamicAlert";
+import { useApi } from "../../context/ApiContext";
+import { ProgramType as IProgramType } from "../../services/api.services";
 
 // Define handle interface for ref
 export interface ProgramTypeHandle {
@@ -25,10 +25,10 @@ interface ProgramTypeProps {
 }
 
 // Implement the component
-const ProgramType: ForwardRefRenderFunction<ProgramTypeHandle, ProgramTypeProps> = (
-  { selectedRow },
-  ref
-) => {
+const ProgramType: ForwardRefRenderFunction<
+  ProgramTypeHandle,
+  ProgramTypeProps
+> = ({ selectedRow }, ref) => {
   const api = useApi();
 
   // State with complete ProgramType interface
@@ -37,7 +37,7 @@ const ProgramType: ForwardRefRenderFunction<ProgramTypeHandle, ProgramTypeProps>
     Describtion: "", // Note: This matches the API interface spelling
     IsVisible: true,
     ModifiedById: null,
-    LastModified: undefined
+    LastModified: undefined,
   });
 
   // Update data when selectedRow changes
@@ -49,7 +49,7 @@ const ProgramType: ForwardRefRenderFunction<ProgramTypeHandle, ProgramTypeProps>
         Describtion: selectedRow.Describtion,
         IsVisible: selectedRow.IsVisible,
         LastModified: selectedRow.LastModified,
-        ModifiedById: selectedRow.ModifiedById
+        ModifiedById: selectedRow.ModifiedById,
       });
     } else {
       setProgramTypeData({
@@ -57,16 +57,13 @@ const ProgramType: ForwardRefRenderFunction<ProgramTypeHandle, ProgramTypeProps>
         Describtion: "",
         IsVisible: true,
         ModifiedById: null,
-        LastModified: undefined
+        LastModified: undefined,
       });
     }
   }, [selectedRow]);
 
   // Handle input changes
-  const handleChange = (
-    field: keyof IProgramType,
-    value: any
-  ) => {
+  const handleChange = (field: keyof IProgramType, value: any) => {
     setProgramTypeData((prev) => ({
       ...prev,
       [field]: value,
@@ -78,39 +75,49 @@ const ProgramType: ForwardRefRenderFunction<ProgramTypeHandle, ProgramTypeProps>
     try {
       // Validation
       if (!programTypeData.Name.trim()) {
-        showAlert('warning', null, 'توجه', 'نام نوع برنامه نمی‌تواند خالی باشد.');
+        showAlert(
+          "warning",
+          null,
+          "توجه",
+          "نام نوع برنامه نمی‌تواند خالی باشد."
+        );
         return false;
       }
 
       const dataToSave: IProgramType = {
         ...programTypeData,
         LastModified: new Date().toISOString(),
-        IsVisible: programTypeData.IsVisible ?? true
+        IsVisible: programTypeData.IsVisible ?? true,
       };
 
       if (selectedRow?.ID) {
         // Update existing program type
         await api.updateProgramType({
           ...dataToSave,
-          ID: selectedRow.ID
+          ID: selectedRow.ID,
         });
-        showAlert('success', null, 'موفقیت', 'نوع برنامه با موفقیت به‌روزرسانی شد.');
+        showAlert(
+          "success",
+          null,
+          "موفقیت",
+          "نوع برنامه با موفقیت به‌روزرسانی شد."
+        );
       } else {
         // Create new program type
         await api.insertProgramType(dataToSave);
-        showAlert('success', null, 'موفقیت', 'نوع برنامه با موفقیت اضافه شد.');
+        showAlert("success", null, "موفقیت", "نوع برنامه با موفقیت اضافه شد.");
       }
       return true;
     } catch (error) {
-      console.error('Error saving ProgramType:', error);
-      showAlert('error', null, 'خطا', 'ذخیره نوع برنامه با شکست مواجه شد.');
+      console.error("Error saving ProgramType:", error);
+      showAlert("error", null, "خطا", "ذخیره نوع برنامه با شکست مواجه شد.");
       return false;
     }
   };
 
   // Expose save method via ref
   useImperativeHandle(ref, () => ({
-    save
+    save,
   }));
 
   return (
