@@ -7,7 +7,8 @@ import {
   Role,
   Company,
   PostCat,
-  ProgramTemplateItem
+  ProgramTemplateItem,
+  ProgramType
 } from './ApiContext'
 
 // Define CommandData if it's different from CommandItem
@@ -136,6 +137,15 @@ interface ProgramTemplateData {
   LastModified?: string;
 }
 
+interface ProgramTypeData {
+  ID?: number;
+  Name: string;
+  Describtion: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string | null;
+}
+
 
 interface AddEditDeleteContextType {
   handleAdd: () => void
@@ -151,6 +161,7 @@ interface AddEditDeleteContextType {
   handleSaveCompany: (data: CompanyData) => Promise<Company | null>
   handleSaveRoleGroup: (data: RoleGroupData) => Promise<PostCat | null>
   handleSaveProgramTemplate: (data: ProgramTemplateData) => Promise<ProgramTemplateItem | null>
+  handleSaveProgramType: (data: ProgramTypeData) => Promise<ProgramType | null>; // Add this line
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -196,6 +207,9 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log('Role Group deleted successfully!')
       } else if (subTabName === 'ProgramTemplate') {
         await api.deleteProgramTemplate(id)
+        console.log('Role Group deleted successfully!')
+      } else if (subTabName === 'ProgramTypes') {
+        await api.deleteProgramType(id)
         console.log('Role Group deleted successfully!')
       }
     } catch (error) {
@@ -524,6 +538,40 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+
+  const handleSaveProgramType = async (
+    data: ProgramTypeData
+  ): Promise<ProgramType | null> => {
+    setIsLoading(true);
+    try {
+      const programType: ProgramType = {
+        ID: data.ID,
+        Name: data.Name,
+        Describtion: data.Describtion,
+        IsVisible: data.IsVisible,
+        LastModified: data.LastModified,
+        ModifiedById: data.ModifiedById
+      };
+  
+      let result: ProgramType;
+      if (programType.ID) {
+        // Update existing ProgramType
+        result = await api.updateProgramType(programType);
+        console.log('ProgramType updated:', result);
+      } else {
+        // Add new ProgramType
+        result = await api.insertProgramType(programType);
+        console.log('ProgramType inserted:', result);
+      }
+  
+      return result;
+    } catch (error) {
+      console.error('Error saving ProgramType:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
 
   return (
@@ -539,7 +587,8 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveRole,
         handleSaveCompany,
         handleSaveRoleGroup,
-        handleSaveProgramTemplate
+        handleSaveProgramTemplate,
+        handleSaveProgramType  
       }}
     >
       {children}
