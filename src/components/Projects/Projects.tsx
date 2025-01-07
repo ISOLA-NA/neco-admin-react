@@ -1,39 +1,20 @@
-// src/components/General/Projects.tsx
-
 import React, { useState, useEffect } from "react";
-import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 
-interface EnterpriseDetailsProps {
+interface ProjectsProps {
   selectedRow: any;
 }
 
-const Projects: React.FC<EnterpriseDetailsProps> = ({ selectedRow }) => {
-  const [projectData, setEnterpriseData] = useState<{
-    ID: string | number;
-    ProjectName: string;
-    State: string;
-    AcualStartTime: string;
-    TotalDuration: number | null;
-    PCostAct: number | null;
-    PCostAprov: number | null;
-    IsIdea: string;
-    calendarName: string;
-    TaskNum: number | null;
-    RolesNum: number | null;
-    LettersNum: number | null;
-    MeetingsNum: number | null;
-    IssuesNum: number | null;
-    KnowledgeNum: number | null;
-  }>({
+const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
+  const [projectData, setProjectData] = useState({
     ID: "",
     ProjectName: "",
     State: "",
-    AcualStartTime: "",
+    CreateDate: "",
     TotalDuration: null,
     PCostAct: null,
     PCostAprov: null,
-    IsIdea: "",
+    IsIdea: false,
     calendarName: "",
     TaskNum: null,
     RolesNum: null,
@@ -45,15 +26,17 @@ const Projects: React.FC<EnterpriseDetailsProps> = ({ selectedRow }) => {
 
   useEffect(() => {
     if (selectedRow) {
-      setEnterpriseData({
+      setProjectData({
         ID: selectedRow.ID || "",
         ProjectName: selectedRow.ProjectName || "",
         State: selectedRow.State || "",
-        AcualStartTime: selectedRow.AcualStartTime || "",
+        CreateDate: selectedRow.CreateDate
+          ? formatDate(selectedRow.CreateDate)
+          : "",
         TotalDuration: selectedRow.TotalDuration || null,
         PCostAct: selectedRow.PCostAct || null,
         PCostAprov: selectedRow.PCostAprov || null,
-        IsIdea: selectedRow.IsIdea || "",
+        IsIdea: selectedRow.IsIdea || false,
         calendarName: selectedRow.calendarName || "",
         TaskNum: selectedRow.TaskNum || null,
         RolesNum: selectedRow.RolesNum || null,
@@ -62,186 +45,163 @@ const Projects: React.FC<EnterpriseDetailsProps> = ({ selectedRow }) => {
         IssuesNum: selectedRow.IssuesNum || null,
         KnowledgeNum: selectedRow.KnowledgeNum || null,
       });
-    } else {
-      setEnterpriseData({
-        ID: "",
-        ProjectName: "",
-        State: "",
-        AcualStartTime: "",
-        TotalDuration: null,
-        PCostAct: null,
-        PCostAprov: null,
-        IsIdea: "",
-        calendarName: "",
-        TaskNum: null,
-        RolesNum: null,
-        LettersNum: null,
-        MeetingsNum: null,
-        IssuesNum: null,
-        KnowledgeNum: null,
-      });
     }
   }, [selectedRow]);
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
   return (
-    <TwoColumnLayout>
-      <DynamicInput
-        name="ProjectName"
-        type="text"
-        value={projectData.ProjectName}
-        placeholder=""
-        disabled={true}
-        className="-mt-1"
-      />
-      <DynamicInput
-        name="State"
-        type="text"
-        value={projectData.State}
-        placeholder=""
-        disabled={true}
-        className="-mt-1"
-      />
-      <DynamicInput
-        name="Configuration"
-        type="text"
-        value=""
-        placeholder=""
-        disabled={true}
-        className="-mt-7"
-      />
-      <DynamicInput
-        name="Idea Start Date"
-        type="text"
-        value={projectData.AcualStartTime}
-        placeholder=""
-        disabled={true}
-        className="-mt-7"
-      />
-      <DynamicInput
-        name="Project Plan Duration"
-        value={projectData.TotalDuration}
-        type="text"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Budget Act"
-        value={projectData.PCostAct}
-        type="text"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Budget Approve"
-        type="text"
-        value={projectData.PCostAprov}
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Phase"
-        type="text"
-        value={projectData.IsIdea}
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Idea Plan Duration"
-        type="text"
-        value=""
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Assigned Calendars"
-        type="text"
-        value={projectData.calendarName}
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Project Chartered Date"
-        type="text"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Program Items Number"
-        type="text"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Tasks Number"
-        type="number"
-        value={projectData.TaskNum}
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Files Number"
-        type="number"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="File Size Sum"
-        type="number"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Roles"
-        type="number"
-        value={projectData.RolesNum}
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Letters Number"
-        value={projectData.LettersNum}
-        type="number"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Meeting Number"
-        value={projectData.MeetingsNum}
-        type="number"
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="Issues"
-        type="number"
-        value={projectData.IssuesNum}
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-      <DynamicInput
-        name="knowledges"
-        type="number"
-        value={projectData.KnowledgeNum}
-        placeholder=""
-        disabled={true}
-        className="-mt-5"
-      />
-    </TwoColumnLayout>
+    <div className="grid grid-cols-2 gap-x-8 gap-y-6 p-4">
+      <div className="space-y-6">
+        <DynamicInput
+          name="Project Name"
+          type="text"
+          value={projectData.ProjectName}
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Configuration"
+          type="text"
+          value=""
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Idea Start Date"
+          type="text"
+          value={projectData.CreateDate}
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Idea Plan Duration"
+          type="text"
+          value=""
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Planning Execution Budget"
+          type="text"
+          value={projectData.PCostAct}
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Assigned Calendars"
+          type="text"
+          value={projectData.calendarName}
+          disabled={true}
+          className="bg-[#fbe5d6]"
+        />
+      </div>
+
+      <div className="space-y-6">
+        <DynamicInput
+          name="Status"
+          type="text"
+          value={projectData.State}
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Phase"
+          type="text"
+          value={projectData.IsIdea ? "IsIdea" : "Project"}
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Project Chartered Date"
+          type="text"
+          value=""
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Project Plan Duration"
+          type="text"
+          value={projectData.TotalDuration}
+          disabled={true}
+        />
+
+        <DynamicInput
+          name="Project Approval Budget"
+          type="text"
+          value={projectData.PCostAprov}
+          disabled={true}
+        />
+
+        <div className="grid grid-cols-3 gap-4 mt-4">
+          <DynamicInput
+            name="Program Items"
+            type="number"
+            value=""
+            disabled={true}
+          />
+          <DynamicInput
+            name="Tasks"
+            type="number"
+            value={projectData.TaskNum}
+            disabled={true}
+          />
+          <DynamicInput name="Files" type="number" value="" disabled={true} />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <DynamicInput
+            name="File Size"
+            type="number"
+            value=""
+            disabled={true}
+          />
+          <DynamicInput
+            name="Roles"
+            type="number"
+            value={projectData.RolesNum}
+            disabled={true}
+          />
+          <DynamicInput
+            name="Letters"
+            type="number"
+            value={projectData.LettersNum}
+            disabled={true}
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <DynamicInput
+            name="Meetings"
+            type="number"
+            value={projectData.MeetingsNum}
+            disabled={true}
+          />
+          <DynamicInput
+            name="Issues"
+            type="number"
+            value={projectData.IssuesNum}
+            disabled={true}
+          />
+          <DynamicInput
+            name="Knowledge"
+            type="number"
+            value={projectData.KnowledgeNum}
+            disabled={true}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -26,6 +26,7 @@ import AppServices, {
   Project,
   PostAdmin,
   ProgramType,
+  ProjectWithCalendar,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -92,21 +93,24 @@ interface ApiContextType {
   deletePostCat: (id: number) => Promise<void>;
 
   getAllProject: () => Promise<Project[]>;
+  getAllProjectsWithCalendar: () => Promise<ProjectWithCalendar[]>;
+  deleteProject: (id: string) => Promise<void>;
   getAllForPostAdmin: () => Promise<PostAdmin[]>;
 
   getAllProgramTemplates: () => Promise<ProgramTemplateItem[]>;
-  insertProgramTemplate: (data: ProgramTemplateItem) => Promise<ProgramTemplateItem>;
-  updateProgramTemplate: (data: ProgramTemplateItem) => Promise<ProgramTemplateItem>;
+  insertProgramTemplate: (
+    data: ProgramTemplateItem
+  ) => Promise<ProgramTemplateItem>;
+  updateProgramTemplate: (
+    data: ProgramTemplateItem
+  ) => Promise<ProgramTemplateItem>;
   deleteProgramTemplate: (id: number) => Promise<void>;
 
   getAllProgramType: () => Promise<ProgramType[]>;
   insertProgramType: (data: ProgramType) => Promise<ProgramType>;
   updateProgramType: (data: ProgramType) => Promise<ProgramType>;
   deleteProgramType: (id: number) => Promise<void>;
-
-
 }
-
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
@@ -179,6 +183,9 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     deletePostCat: AppServices.deletePostCat.bind(AppServices),
 
     getAllProject: AppServices.getAllProject.bind(AppServices),
+    getAllProjectsWithCalendar:
+      AppServices.getAllProjectsWithCalendar.bind(AppServices),
+    deleteProject: AppServices.deleteProject.bind(AppServices),
     getAllForPostAdmin: AppServices.getAllForPostAdmin.bind(AppServices),
 
     insertProgramTemplate: AppServices.insertProgramTemplate.bind(AppServices),
@@ -189,7 +196,6 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertProgramType: AppServices.insertProgramType.bind(AppServices),
     updateProgramType: AppServices.updateProgramType.bind(AppServices),
     deleteProgramType: AppServices.deleteProgramType.bind(AppServices),
-
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -226,5 +232,5 @@ export type {
   PostCat,
   Project,
   PostAdmin,
-  ProgramType
+  ProgramType,
 };

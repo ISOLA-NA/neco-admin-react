@@ -83,7 +83,7 @@ export interface ProgramTemplateItem {
   ID?: number;
   ModifiedById?: string | null;
   Name: string;
-  
+
   MetaColumnName?: string;
   Duration: string;
   nProgramTypeID: number | null;
@@ -246,7 +246,7 @@ export interface Role {
   isStaticPost: boolean;
   LastModified?: string;
   ModifiedById?: string;
-  
+
   // فیلدهای مربوط به insert
   Authorization?: string | null;
   Competencies?: string | null;
@@ -305,6 +305,36 @@ export interface Project {
   ID: any;
   ProjectName: string;
   State: number;
+}
+
+export interface ProjectWithCalendar {
+  AccessGId: string;
+  AcualStartTime: string | null;
+  CreateDate: string;
+  ID: string;
+  IsIdea: boolean;
+  IsVisible: boolean;
+  IssuesNum: number;
+  KnowledgeNum: number;
+  LastModified: string;
+  LettersNum: number;
+  MeetingsNum: number;
+  PCostAct: number;
+  PCostAprov: number;
+  ParrentId: string | null;
+  Progress1: number;
+  Progress2: number;
+  Progress3: number;
+  ProjectName: string;
+  RCostAct: number;
+  RCostAprov: number;
+  RolesNum: number;
+  StarterPostId: string;
+  State: string;
+  TaskNum: number;
+  TotalDuration: number;
+  calendarName: string | null;
+  nCalendarID: string | null;
 }
 
 export interface PostAdmin {
@@ -789,49 +819,74 @@ class ApiService {
     return response.data;
   }
 
-  async getAllForPostAdmin(): Promise<PostAdmin[]> {
-    const response = await httpClient.post<PostAdmin[]>(apiConst.getAllForPostAdmin);
+  async getAllProjectsWithCalendar(): Promise<ProjectWithCalendar[]> {
+    const response = await httpClient.post<ProjectWithCalendar[]>(
+      apiConst.getAllProjectsWithCalendar
+    );
     return response.data;
   }
 
-  async insertProgramTemplate(data: ProgramTemplateItem): Promise<ProgramTemplateItem> {
-  const response = await httpClient.post<ProgramTemplateItem>(
-    apiConst.insertProgramTemplate,
-    data
-  );
-  return response.data;
-}
+  async deleteProject(id: string): Promise<void> {
+    await httpClient.post(apiConst.deleteProject, { ID: id });
+  }
 
-async updateProgramTemplate(data: ProgramTemplateItem): Promise<ProgramTemplateItem> {
-  const response = await httpClient.post<ProgramTemplateItem>(
-    apiConst.updateProgramTemplate,
-    data
-  );
-  return response.data;
-}
+  async getAllForPostAdmin(): Promise<PostAdmin[]> {
+    const response = await httpClient.post<PostAdmin[]>(
+      apiConst.getAllForPostAdmin
+    );
+    return response.data;
+  }
 
-async deleteProgramTemplate(id: number): Promise<void> {
-  await httpClient.post(apiConst.deleteProgramTemplate, { ID: id });
-}
+  async insertProgramTemplate(
+    data: ProgramTemplateItem
+  ): Promise<ProgramTemplateItem> {
+    const response = await httpClient.post<ProgramTemplateItem>(
+      apiConst.insertProgramTemplate,
+      data
+    );
+    return response.data;
+  }
 
-async getAllProgramType(): Promise<ProgramType[]> {
-  const response = await httpClient.post<ProgramType[]>(apiConst.getAllProgramType);
-  return response.data;
-}
+  async updateProgramTemplate(
+    data: ProgramTemplateItem
+  ): Promise<ProgramTemplateItem> {
+    const response = await httpClient.post<ProgramTemplateItem>(
+      apiConst.updateProgramTemplate,
+      data
+    );
+    return response.data;
+  }
 
-async insertProgramType(data: ProgramType): Promise<ProgramType> {
-  const response = await httpClient.post<ProgramType>(apiConst.insertProgramType, data);
-  return response.data;
-}
+  async deleteProgramTemplate(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteProgramTemplate, { ID: id });
+  }
 
-async updateProgramType(data: ProgramType): Promise<ProgramType> {
-  const response = await httpClient.post<ProgramType>(apiConst.updateProgramType, data);
-  return response.data;
-}
+  async getAllProgramType(): Promise<ProgramType[]> {
+    const response = await httpClient.post<ProgramType[]>(
+      apiConst.getAllProgramType
+    );
+    return response.data;
+  }
 
-async deleteProgramType(id: number): Promise<void> {
-  await httpClient.post(apiConst.deleteProgramType, { ID: id });
-}
+  async insertProgramType(data: ProgramType): Promise<ProgramType> {
+    const response = await httpClient.post<ProgramType>(
+      apiConst.insertProgramType,
+      data
+    );
+    return response.data;
+  }
+
+  async updateProgramType(data: ProgramType): Promise<ProgramType> {
+    const response = await httpClient.post<ProgramType>(
+      apiConst.updateProgramType,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteProgramType(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteProgramType, { ID: id });
+  }
 }
 
 // یک خروجی برای استفاده در Context
