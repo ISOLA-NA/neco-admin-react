@@ -398,6 +398,17 @@ export interface EntityCollection {
   ProjectsStr?: string | null
 }
 
+export interface Calendar {
+  ID?: number;
+  Name: string;
+  SpecialDay: string;
+  dateTimeRoutine: string;
+  IsVisible: boolean;
+  CreateDate?: string;
+  UpdateDate?: string;
+  CreatorId?: string;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -967,6 +978,33 @@ class ApiService {
   
   async deleteEntityCollection(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteEntityCollection, { ID: id });
+  }
+
+  async getAllCalendar(): Promise<Calendar[]> {
+    const response = await httpClient.post<Calendar[]>(
+      apiConst.getAllCalendar
+    );
+    return response.data;
+  }
+
+  async insertCalendar(data: Calendar): Promise<Calendar> {
+    const response = await httpClient.post<Calendar>(
+      apiConst.insertCalendar,
+      data
+    );
+    return response.data;
+  }
+
+  async updateCalendar(data: Calendar): Promise<Calendar> {
+    const response = await httpClient.post<Calendar>(
+      apiConst.updateCalendar,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteCalendar(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteCalendar, { ID: id });
   }
 }
 

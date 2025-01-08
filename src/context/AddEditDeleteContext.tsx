@@ -11,7 +11,7 @@ import {
   ProgramType,
   OdpWithExtra,
 } from "./ApiContext";
-import { EntityCollection } from "../services/api.services";
+import { Calendar, EntityCollection } from "../services/api.services";
 
 // Define CommandData if it's different from CommandItem
 interface CommandData {
@@ -175,6 +175,17 @@ interface ProcedureData {
   ProjectsStr?: string | null;
 }
 
+interface CalendarData {
+  ID?: number;
+  Name: string;
+  SpecialDay: string;
+  dateTimeRoutine: string;
+  IsVisible: boolean;
+  CreateDate?: string;
+  UpdateDate?: string;
+  CreatorId?: string;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
@@ -193,6 +204,8 @@ interface AddEditDeleteContextType {
   handleSaveProgramType: (data: ProgramTypeData) => Promise<ProgramType | null>;
   handleSaveOdp: (data: OdpData) => Promise<OdpWithExtra | null>;
   handleSaveProcedure: (data: ProcedureData) => Promise<EntityCollection | null>;
+  handleSaveCalendar: (data: CalendarData) => Promise<Calendar | null>;
+
 
 }
 
@@ -641,6 +654,42 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+
+  const handleSaveCalendar = async (
+    data: CalendarData
+  ): Promise<Calendar | null> => {
+    setIsLoading(true);
+    try {
+      const calendar: Calendar = {
+        ID: data.ID,
+        Name: data.Name,
+        SpecialDay: data.SpecialDay,
+        dateTimeRoutine: data.dateTimeRoutine,
+        IsVisible: data.IsVisible,
+        CreateDate: data.CreateDate || new Date().toISOString(),
+        UpdateDate: data.UpdateDate || new Date().toISOString(),
+        CreatorId: data.CreatorId
+      };
+  
+      let result: Calendar;
+      if (calendar.ID) {
+        // Update existing calendar
+        result = await api.updateCalendar(calendar);
+        console.log("Calendar updated:", result);
+      } else {
+        // Add new calendar
+        result = await api.insertCalendar(calendar);
+        console.log("Calendar inserted:", result);
+      }
+  
+      return result;
+    } catch (error) {
+      console.error("Error saving Calendar:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -656,7 +705,8 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveProgramTemplate,
         handleSaveProgramType,
         handleSaveOdp,
-        handleSaveProcedure
+        handleSaveProcedure,
+        handleSaveCalendar
       }}
     >
       {children}

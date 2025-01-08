@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext } from 'react'
 import AppServices, {
   WebLoginRequest,
   WebLoginResponse,
@@ -29,105 +29,111 @@ import AppServices, {
   ProjectWithCalendar,
   OdpWithExtra,
   EntityCollection,
-} from "../services/api.services";
+  Calendar
+} from '../services/api.services'
 
 // اینترفیس اکشن‌ها
 // در src/context/ApiContext.tsx
 interface ApiContextType {
   // متدهای OTP/Login
-  webLogin: (data: WebLoginRequest) => Promise<WebLoginResponse>;
-  sendOtp: (data: SendOtpRequest) => Promise<SendOtpResponse>;
-  loginWithOtp: (data: LoginWithOtpRequest) => Promise<LoginWithOtpResponse>;
-  tokenSetup: () => Promise<TokenSetupResponse>;
+  webLogin: (data: WebLoginRequest) => Promise<WebLoginResponse>
+  sendOtp: (data: SendOtpRequest) => Promise<SendOtpResponse>
+  loginWithOtp: (data: LoginWithOtpRequest) => Promise<LoginWithOtpResponse>
+  tokenSetup: () => Promise<TokenSetupResponse>
 
   // متدهای Configuration
-  getAllConfigurations: () => Promise<ConfigurationItem[]>;
-  insertConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>;
-  updateConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>;
-  deleteConfiguration: (id: number) => Promise<void>;
+  getAllConfigurations: () => Promise<ConfigurationItem[]>
+  insertConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>
+  updateConfiguration: (data: ConfigurationItem) => Promise<ConfigurationItem>
+  deleteConfiguration: (id: number) => Promise<void>
 
   // سایر سرویس‌ها
-  getAllDefaultRibbons: () => Promise<DefaultRibbonItem[]>;
-  getTableTransmittal: () => Promise<EntityTypeItem[]>;
-  getAllWfTemplate: () => Promise<WfTemplateItem[]>;
-  getAllAfbtn: () => Promise<AFBtnItem[]>;
-  getIdByUserToken: () => Promise<UserToken[]>;
+  getAllDefaultRibbons: () => Promise<DefaultRibbonItem[]>
+  getTableTransmittal: () => Promise<EntityTypeItem[]>
+  getAllWfTemplate: () => Promise<WfTemplateItem[]>
+  getAllAfbtn: () => Promise<AFBtnItem[]>
+  getIdByUserToken: () => Promise<UserToken[]>
 
   // متدهای AFBtn
-  insertAFBtn: (data: AFBtnItem) => Promise<AFBtnItem>;
-  updateAFBtn: (data: AFBtnItem) => Promise<AFBtnItem>;
-  deleteAFBtn: (id: number) => Promise<void>;
+  insertAFBtn: (data: AFBtnItem) => Promise<AFBtnItem>
+  updateAFBtn: (data: AFBtnItem) => Promise<AFBtnItem>
+  deleteAFBtn: (id: number) => Promise<void>
 
   // متدهای Command
-  getAllCommands: () => Promise<CommandItem[]>;
-  insertCommand: (data: CommandItem) => Promise<CommandItem>;
-  updateCommand: (data: CommandItem) => Promise<CommandItem>;
-  deleteCommand: (id: number) => Promise<void>;
+  getAllCommands: () => Promise<CommandItem[]>
+  insertCommand: (data: CommandItem) => Promise<CommandItem>
+  updateCommand: (data: CommandItem) => Promise<CommandItem>
+  deleteCommand: (id: number) => Promise<void>
 
   // متدهای Menu APIs
-  getAllMenu: () => Promise<Menu[]>;
-  insertMenu: (data: Menu) => Promise<Menu>;
-  updateMenu: (data: Menu) => Promise<Menu>;
-  deleteMenu: (id: number) => Promise<void>;
+  getAllMenu: () => Promise<Menu[]>
+  insertMenu: (data: Menu) => Promise<Menu>
+  updateMenu: (data: Menu) => Promise<Menu>
+  deleteMenu: (id: number) => Promise<void>
 
-  getAllMenuTab: (menuId: number) => Promise<MenuTab[]>;
-  getAllMenuGroup: (menuTabId: number) => Promise<MenuGroup[]>;
-  getAllMenuItem: (menuGroupId: number) => Promise<MenuItem[]>;
+  getAllMenuTab: (menuId: number) => Promise<MenuTab[]>
+  getAllMenuGroup: (menuTabId: number) => Promise<MenuGroup[]>
+  getAllMenuItem: (menuGroupId: number) => Promise<MenuItem[]>
 
-  getAllUsers: () => Promise<User[]>;
-  insertUser: (data: User) => Promise<User>;
-  updateUser: (data: User) => Promise<User>;
-  deleteUser: (id: string) => Promise<void>;
+  getAllUsers: () => Promise<User[]>
+  insertUser: (data: User) => Promise<User>
+  updateUser: (data: User) => Promise<User>
+  deleteUser: (id: string) => Promise<void>
 
-  getAllRoles: () => Promise<Role[]>;
-  insertRole: (data: Role) => Promise<Role>;
-  updateRole: (data: Role) => Promise<Role>;
-  deleteRole: (id: string) => Promise<void>;
+  getAllRoles: () => Promise<Role[]>
+  insertRole: (data: Role) => Promise<Role>
+  updateRole: (data: Role) => Promise<Role>
+  deleteRole: (id: string) => Promise<void>
 
-  getAllCompanies: () => Promise<Company[]>;
-  insertCompany: (data: Company) => Promise<Company>;
-  updateCompany: (data: Company) => Promise<Company>;
-  deleteCompany: (id: number) => Promise<void>;
+  getAllCompanies: () => Promise<Company[]>
+  insertCompany: (data: Company) => Promise<Company>
+  updateCompany: (data: Company) => Promise<Company>
+  deleteCompany: (id: number) => Promise<void>
 
-  getAllPostCat: () => Promise<PostCat[]>;
-  insertPostCat: (data: PostCat) => Promise<PostCat>;
-  updatePostCat: (data: PostCat) => Promise<PostCat>;
-  deletePostCat: (id: number) => Promise<void>;
+  getAllPostCat: () => Promise<PostCat[]>
+  insertPostCat: (data: PostCat) => Promise<PostCat>
+  updatePostCat: (data: PostCat) => Promise<PostCat>
+  deletePostCat: (id: number) => Promise<void>
 
-  getAllProject: () => Promise<Project[]>;
-  getAllProjectsWithCalendar: () => Promise<ProjectWithCalendar[]>;
-  deleteProject: (id: string) => Promise<void>;
-  getAllForPostAdmin: () => Promise<PostAdmin[]>;
+  getAllProject: () => Promise<Project[]>
+  getAllProjectsWithCalendar: () => Promise<ProjectWithCalendar[]>
+  deleteProject: (id: string) => Promise<void>
+  getAllForPostAdmin: () => Promise<PostAdmin[]>
 
-  getAllProgramTemplates: () => Promise<ProgramTemplateItem[]>;
+  getAllProgramTemplates: () => Promise<ProgramTemplateItem[]>
   insertProgramTemplate: (
     data: ProgramTemplateItem
-  ) => Promise<ProgramTemplateItem>;
+  ) => Promise<ProgramTemplateItem>
   updateProgramTemplate: (
     data: ProgramTemplateItem
-  ) => Promise<ProgramTemplateItem>;
-  deleteProgramTemplate: (id: number) => Promise<void>;
+  ) => Promise<ProgramTemplateItem>
+  deleteProgramTemplate: (id: number) => Promise<void>
 
-  getAllProgramType: () => Promise<ProgramType[]>;
-  insertProgramType: (data: ProgramType) => Promise<ProgramType>;
-  updateProgramType: (data: ProgramType) => Promise<ProgramType>;
-  deleteProgramType: (id: number) => Promise<void>;
+  getAllProgramType: () => Promise<ProgramType[]>
+  insertProgramType: (data: ProgramType) => Promise<ProgramType>
+  updateProgramType: (data: ProgramType) => Promise<ProgramType>
+  deleteProgramType: (id: number) => Promise<void>
 
-  getAllOdpWithExtra: () => Promise<OdpWithExtra[]>;
-  insertOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>;
-  updateOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>;
-  deleteOdp: (id: number) => Promise<void>;
+  getAllOdpWithExtra: () => Promise<OdpWithExtra[]>
+  insertOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>
+  updateOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>
+  deleteOdp: (id: number) => Promise<void>
 
-  getAllEntityCollection: () => Promise<EntityCollection[]>;
-  insertEntityCollection: (data: EntityCollection) => Promise<EntityCollection>;
-  updateEntityCollection: (data: EntityCollection) => Promise<EntityCollection>;
-  deleteEntityCollection: (id: number) => Promise<void>;
+  getAllEntityCollection: () => Promise<EntityCollection[]>
+  insertEntityCollection: (data: EntityCollection) => Promise<EntityCollection>
+  updateEntityCollection: (data: EntityCollection) => Promise<EntityCollection>
+  deleteEntityCollection: (id: number) => Promise<void>
+
+  getAllCalendar: () => Promise<Calendar[]>
+  insertCalendar: (data: Calendar) => Promise<Calendar>
+  updateCalendar: (data: Calendar) => Promise<Calendar>
+  deleteCalendar: (id: number) => Promise<void>
 }
 
-const ApiContext = createContext<ApiContextType | undefined>(undefined);
+const ApiContext = createContext<ApiContextType | undefined>(undefined)
 
 export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
+  children
 }) => {
   // در src/context/ApiContext.tsx
   const api: ApiContextType = {
@@ -214,22 +220,31 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     updateOdp: AppServices.updateOdp.bind(AppServices),
     deleteOdp: AppServices.deleteOdp.bind(AppServices),
 
-     getAllEntityCollection: AppServices.getAllEntityCollection.bind(AppServices),
-  insertEntityCollection: AppServices.insertEntityCollection.bind(AppServices),
-  updateEntityCollection: AppServices.updateEntityCollection.bind(AppServices),
-  deleteEntityCollection: AppServices.deleteEntityCollection.bind(AppServices),
-  };
+    getAllEntityCollection:
+      AppServices.getAllEntityCollection.bind(AppServices),
+    insertEntityCollection:
+      AppServices.insertEntityCollection.bind(AppServices),
+    updateEntityCollection:
+      AppServices.updateEntityCollection.bind(AppServices),
+    deleteEntityCollection:
+      AppServices.deleteEntityCollection.bind(AppServices),
 
-  return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
-};
+    getAllCalendar: AppServices.getAllCalendar.bind(AppServices),
+    insertCalendar: AppServices.insertCalendar.bind(AppServices),
+    updateCalendar: AppServices.updateCalendar.bind(AppServices),
+    deleteCalendar: AppServices.deleteCalendar.bind(AppServices)
+  }
+
+  return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>
+}
 
 export const useApi = (): ApiContextType => {
-  const context = useContext(ApiContext);
+  const context = useContext(ApiContext)
   if (!context) {
-    throw new Error("useApi باید داخل یک APIProvider استفاده شود");
+    throw new Error('useApi باید داخل یک APIProvider استفاده شود')
   }
-  return context;
-};
+  return context
+}
 
 // صادرات لازم برای تایپ‌ها
 export type {
@@ -256,5 +271,5 @@ export type {
   PostAdmin,
   ProgramType,
   ProjectWithCalendar,
-  OdpWithExtra,
-};
+  OdpWithExtra
+}

@@ -80,4 +80,8 @@ export const apiConst = Object.freeze({
   insertntityCollection:"api/EntityCollection/Insert",
   updatelEntityCollection:"api/EntityCollection/Update",
   deleteEntityCollection:"api/EntityCollection/Delete",
+  getAllCalendar: "api/Calendar/GetAll",
+  insertCalendar: "api/Calendar/Insert",
+  updateCalendar: "api/Calendar/Update",
+  deleteCalendar: "api/Calendar/Delete",
 });

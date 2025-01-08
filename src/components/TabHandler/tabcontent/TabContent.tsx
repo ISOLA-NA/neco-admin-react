@@ -22,6 +22,7 @@ import { StaffingHandle } from '../../General/Staffing'
 import { ProgramTemplateHandle } from '../../Programs/ProgramTemplate/ProgramTemplate'
 import { ProgramTypeHandle } from '../../Programs/ProgramTypes'
 import { ProcedureHandle } from '../../Projects/Procedures'
+import { CalendarHandle } from '../../Projects/Calendars'
 import { OdpHandle } from '../../Projects/Odp'
 import DynamicConfirm from '../../utilities/DynamicConfirm'
 import DynamicInput from '../../utilities/DynamicInput'
@@ -87,8 +88,8 @@ const TabContent: FC<TabContentProps> = ({
   const programTemplateRef = useRef<ProgramTemplateHandle>(null)
   const programTypeRef = useRef<ProgramTypeHandle>(null)
   const odpRef = useRef<OdpHandle>(null)
-  // Add this with other refs
   const procedureRef = useRef<ProcedureHandle>(null)
+  const calendarRef = useRef<CalendarHandle>(null)
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -212,6 +213,9 @@ const TabContent: FC<TabContentProps> = ({
         case 'Procedures':
           data = await api.getAllEntityCollection()
           break
+        case 'Calendars':
+          data = await api.getAllCalendar()
+          break
         default:
           data = rowData
       }
@@ -331,8 +335,19 @@ const TabContent: FC<TabContentProps> = ({
         case 'Procedures':
           if (procedureRef.current) {
             await procedureRef.current.save()
-            showAlert('success', null, 'Saved', 'Procedures added successfully.')
-
+            showAlert(
+              'success',
+              null,
+              'Saved',
+              'Procedures added successfully.'
+            )
+            await fetchData()
+          }
+          break
+        case 'Calendars':
+          if (calendarRef.current) {
+            await calendarRef.current.save()
+            showAlert('success', null, 'Saved', 'Calendar added successfully.')
             await fetchData()
           }
           break
@@ -463,6 +478,18 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData()
           }
           break
+        case 'Calendars':
+          if (calendarRef.current) {
+            await calendarRef.current.save()
+            showAlert(
+              'success',
+              null,
+              'Updated',
+              'Calendar updated successfully.'
+            )
+            await fetchData()
+          }
+          break
       }
       setIsPanelOpen(false)
       resetInputs()
@@ -573,6 +600,9 @@ const TabContent: FC<TabContentProps> = ({
           case 'Procedures':
             await api.deleteEntityCollection(pendingSelectedRow.ID)
             break
+          case 'Calendars':
+            await api.deleteCalendar(pendingSelectedRow.ID)
+            break
         }
         showAlert(
           'success',
@@ -646,6 +676,8 @@ const TabContent: FC<TabContentProps> = ({
         return odpRef
       case 'Procedures':
         return procedureRef
+        case 'Calendars':
+        return calendarRef
       default:
         return null
     }
@@ -808,7 +840,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === 'ProgramTemplate' ||
                     activeSubTab === 'ProgramTypes' ||
                     activeSubTab === 'Odp' ||
-                    activeSubTab === 'Procedures')
+                    activeSubTab === 'Procedures'||
+                    activeSubTab ==='Calendars')
                     ? handleInsert
                     : undefined
                 }
@@ -825,7 +858,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === 'ProgramTemplate' ||
                     activeSubTab === 'ProgramTypes' ||
                     activeSubTab === 'Odp' ||
-                    activeSubTab === 'Procedures')
+                    activeSubTab === 'Procedures'||
+                    activeSubTab ==='Calendars')
                     ? handleUpdate
                     : undefined
                 }
