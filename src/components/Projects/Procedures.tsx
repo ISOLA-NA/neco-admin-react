@@ -94,7 +94,7 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
         });
 
         if (projectsData.length > 0) {
-          const existingProjectIds = parseIds(selectedRow.ProjectsStr);
+          const existingProjectIds = parseIds(selectedRow.ProjectsStr ?? undefined);
           setSelectedProjectIds(existingProjectIds);
           console.log("Existing Project IDs:", existingProjectIds);
         }
@@ -178,10 +178,10 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
     }));
 
     const selectedProjectsForModal = getAssociatedProjects(
-      procedureData.ProjectsStr,
+      procedureData.ProjectsStr ?? undefined,
       projectsListData
     );
-
+    
     return (
       <TwoColumnLayout>
         {/* Name Input */}

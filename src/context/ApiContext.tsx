@@ -214,10 +214,10 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     updateOdp: AppServices.updateOdp.bind(AppServices),
     deleteOdp: AppServices.deleteOdp.bind(AppServices),
 
-    getAllEntityCollection: AppServices.getAllEntityCollection.bind(AppServices),
-    insertEntityCollection: AppServices.insertEntityCollection.bind(AppServices),
-    updateEntityCollection: AppServices.updateEntityCollection.bind(AppServices),
-    deleteEntityCollection: AppServices.deleteEntityCollection.bind(AppServices),
+     getAllEntityCollection: AppServices.getAllEntityCollection.bind(AppServices),
+  insertEntityCollection: AppServices.insertEntityCollection.bind(AppServices),
+  updateEntityCollection: AppServices.updateEntityCollection.bind(AppServices),
+  deleteEntityCollection: AppServices.deleteEntityCollection.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

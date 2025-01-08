@@ -313,7 +313,6 @@ const TabContent: FC<TabContentProps> = ({
         case 'ProgramTemplate':
           if (programTemplateRef.current) {
             await programTemplateRef.current.save()
-            // showAlert('success', null, 'Saved', 'Program Template added successfully.')
             await fetchData()
           }
           break

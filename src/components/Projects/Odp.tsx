@@ -51,32 +51,36 @@ export interface OdpWithExtra {
   WFTemplateName?: string;
 }
 
-export interface IODP extends OdpWithExtra {}
+// اگر IODP از OdpWithExtra به درستی ارث‌بری کرده باشد، نیازی به تعریف مجدد آن نیست
+// export interface IODP extends OdpWithExtra {}
 
-// متدهایی که از این کامپوننت به والد ارجاع داده می‌شود
 export interface OdpHandle {
   save: () => Promise<boolean>;
 }
 
-// پراپ‌های ورودی کامپوننت
 interface OdpProps {
   selectedRow: IODP | null;
 }
 
-// تایپ کمکی برای آیتم‌های جدول/مودال
+// تعریف Option
+interface Option {
+  value: string;
+  label: string;
+}
+
 interface ItemType {
   ID: number;
   Name: string;
 }
 
 // ---- توابع کمکی برای پردازش رشته‌های جداشده با "|" ----
-const parseIds = (idsStr?: string): string[] => {
+const parseIds = (idsStr?: string | null): string[] => {
   if (!idsStr) return [];
   return idsStr.split("|").filter(Boolean);
 };
 
 const getAssociatedProjects = (
-  projectsStr?: string,
+  projectsStr?: string | null,
   projectsData?: Array<{ ID: string; Name: string }>
 ) => {
   const projectIds = parseIds(projectsStr);
@@ -119,7 +123,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         setLoadingProgramTemplates(true);
         const res = await api.getAllProgramTemplates();
         const items: ItemType[] = res.map((pt) => ({
-          ID: pt.ID,
+          ID: pt.ID!, // فرض بر این که ID همیشه وجود دارد
           Name: pt.Name,
         }));
         setProgramTemplates(items);
@@ -139,7 +143,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   }, [api]);
 
   // ساخت options برای DynamicSelector مربوط به Program Template
-  const programTemplateOptions = programTemplates.map((item) => ({
+  const programTemplateOptions: Option[] = programTemplates.map((item) => ({
     value: item.ID.toString(),
     label: item.Name,
   }));
@@ -156,7 +160,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         setLoadingProjects(true);
         const res = await api.getAllProject();
         const items: ItemType[] = res.map((proj) => ({
-          ID: proj.ID,
+          ID: proj.ID!,
           Name: proj.ProjectName,
         }));
         setProjectsData(items);
@@ -169,6 +173,21 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     };
     fetchProjects();
   }, [api]);
+
+  // تعریف ستون‌های جدول برای پروژه‌ها
+  const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
+
+  // آماده‌سازی داده‌ها برای ListSelector (فرمت دهی پروژه‌ها به {ID, Name})
+  const projectsListData = projectsData.map((proj) => ({
+    ID: proj.ID,
+    Name: proj.Name,
+  }));
+
+  // آماده‌سازی پروژه‌های انتخاب‌شده برای نمایش در مودال
+  const selectedProjectsForModal = getAssociatedProjects(
+    OdpData.ProjectsStr ?? undefined,
+    projectsListData.map((p) => ({ ID: String(p.ID), Name: p.Name }))
+  );
 
   // ----------------------------------------------------------------
   // 3) مدیریت حالت انتخابی (Edit) یا جدید (Add)
@@ -186,14 +205,13 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         IsVisible: selectedRow.IsVisible ?? true,
         ModifiedById: selectedRow.ModifiedById,
         LastModified: selectedRow.LastModified,
-        ProjectsStr: selectedRow.ProjectsStr || "",
+        ProjectsStr: selectedRow.ProjectsStr ?? "",
       });
 
       // Parse and set selected project IDs
-      const projectIds = selectedRow.ProjectsStr
-        ? selectedRow.ProjectsStr.split("|").filter(Boolean)
-        : [];
-      setSelectedProjectIds(projectIds);
+      const existingProjectIds = parseIds(selectedRow.ProjectsStr ?? undefined);
+      setSelectedProjectIds(existingProjectIds);
+      console.log("Existing Project IDs:", existingProjectIds);
     } else {
       setOdpData({
         Name: "",
@@ -207,8 +225,9 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         ProjectsStr: "",
       });
       setSelectedProjectIds([]);
+      console.log("Creating a new ODP");
     }
-  }, [selectedRow]);
+  }, [selectedRow, projectsData]);
 
   // ----------------------------------------------------------------
   // 4) تابع کمکی تغییر فیلدها
@@ -228,26 +247,13 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 
   const handleProjectsChange = (selectedIds: (string | number)[]) => {
     setSelectedProjectIds(selectedIds.map(String));
+    console.log("Projects selected:", selectedIds);
   };
 
   const handleGlobalProjectsChange = (isGlobal: boolean) => {
     setIsGlobalProjects(isGlobal);
+    console.log("IsGlobalProjects changed to:", isGlobal);
   };
-
-  // تعریف ستون‌های جدول برای پروژه‌ها
-  const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
-
-  // آماده‌سازی داده‌ها برای ListSelector (فرمت دهی پروژه‌ها به {ID, Name})
-  const projectsListData = projectsData.map((proj) => ({
-    ID: proj.ID,
-    Name: proj.Name,
-  }));
-
-  // آماده‌سازی پروژه‌های انتخاب‌شده برای نمایش در مودال
-  const selectedProjectsForModal = getAssociatedProjects(
-    OdpData.ProjectsStr,
-    projectsListData.map((p) => ({ ...p, ID: String(p.ID) }))
-  );
 
   // ----------------------------------------------------------------
   // 6) مدیریت مودال‌های مربوط به Program Template, Form Template, Approval Flow
@@ -379,16 +385,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   // 8) رندر JSX کامپوننت با توجه به شرایط و تغییرات درخواستی
   // ----------------------------------------------------------------
 
-  // تعریف ستون‌های جدول برای Project Templates و Approval Flow Templates (در صورت نیاز)
-  const formTemplateOptions: ItemType[] = []; // باید با داده‌های واقعی پر شود
-  const approvalFlowTemplateOptions: ItemType[] = []; // باید با داده‌های واقعی پر شود
-
   // تعریف selectors برای حالت ویرایش
   const editModeSelectors = isEditMode ? (
     <>
       {/* Form Template Selector - Disabled in Edit Mode */}
       <DynamicSelector
-        options={formTemplateOptions} // Replace with actual API data
+        options={formTemplateOptions}
         selectedValue={OdpData.nEntityTypeID?.toString() ?? ""}
         onChange={(e: { target: { value: any } }) => {
           const val = e.target.value;
@@ -403,7 +405,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 
       {/* Approval Flow Template Selector - Disabled in Edit Mode */}
       <DynamicSelector
-        options={approvalFlowTemplateOptions} // Replace with actual API data
+        options={approvalFlowTemplateOptions}
         selectedValue={OdpData.nWFTemplateID?.toString() ?? ""}
         onChange={(e: { target: { value: any } }) => {
           const val = e.target.value;
@@ -420,7 +422,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 
   // تعریف selectors برای حالت افزودن (Add Mode)
   // در حالت افزودن، این selectors نشان داده نمی‌شوند
-  const addModeSelectors = !isEditMode ? null : null;
+  const addModeSelectors = null; // چون در کد شما در حالت افزودن نیازی به این selectors نیست
 
   // تعریف توابع رندر مودال‌ها
   const renderProgramTemplateModal = () => (
@@ -448,7 +450,10 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     >
       <TableSelector
         columnDefs={columnDefs}
-        rowData={formTemplateOptions} // Replace with actual API data
+        rowData={programTemplateOptions.map((opt) => ({
+          ID: Number(opt.value),
+          Name: opt.label,
+        }))}
         onRowDoubleClick={handleFormTemplateRowDoubleClick}
         onRowClick={handleFormTemplateRowClick}
         selectedRow={selectedFormTemplateRow}
@@ -466,7 +471,10 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     >
       <TableSelector
         columnDefs={columnDefs}
-        rowData={approvalFlowTemplateOptions} // Replace with actual API data
+        rowData={approvalFlowTemplateOptions.map((opt) => ({
+          ID: Number(opt.value),
+          Name: opt.label,
+        }))}
         onRowDoubleClick={handleApprovalFlowRowDoubleClick}
         onRowClick={handleApprovalFlowRowClick}
         selectedRow={selectedApprovalFlowRow}
@@ -484,31 +492,34 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           name="Odp Name"
           type="text"
           value={OdpData.Name}
-          placeholder=""
+          placeholder="نام ODP را وارد کنید"
           onChange={(e: {
             target: { value: string | number | boolean | null };
           }) => handleChange("Name", e.target.value)}
           required={true}
+          className="mb-4"
         />
 
         <CustomTextarea
           name="Description"
           value={OdpData.Description}
-          placeholder=""
+          placeholder="توضیحات را وارد کنید"
           onChange={(e: {
             target: { value: string | number | boolean | null };
           }) => handleChange("Description", e.target.value)}
+          className="mb-4"
         />
 
         <DynamicInput
           name="Address"
           type="text"
           value={OdpData.Address}
-          placeholder=""
+          placeholder="آدرس را وارد کنید"
           onChange={(e: {
             target: { value: string | number | boolean | null };
           }) => handleChange("Address", e.target.value)}
           required={true}
+          className="mb-4"
         />
 
         <DynamicSelector
@@ -523,6 +534,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           showButton={true}
           onButtonClick={handleOpenProgramTemplateModal}
           disabled={false}
+          className="mb-4"
         />
 
         {editModeSelectors}
@@ -562,4 +574,5 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   );
 };
 
+// تبدیل کامپوننت به forwardRef
 export default forwardRef(OdpComp);
