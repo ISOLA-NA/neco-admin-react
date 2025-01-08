@@ -1,24 +1,20 @@
-// src/utilities/DynamicInput.tsx
-
 import React, { ReactNode } from "react";
 import { classNames } from "primereact/utils";
 
 interface DynamicInputProps {
-  name: string; // نام ورودی
-  type: "text" | "number" | "password"; // نوع ورودی (text، number یا password)
-  value?: string | number | null; // مقدار ورودی
-  placeholder?: string; // جای‌نما
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; // مدیریت تغییر
-  leftIcon?: ReactNode; // عنصر سمت چپ
-  rightIcon?: ReactNode; // عنصر سمت راست
-  required?: boolean; // الزامی بودن
-  className?: string; // کلاس سفارشی برای سبک‌دهی
-  error?: boolean; // نمایش وضعیت خطا
-  errorMessage?: string; // پیام خطا
-  disabled?: boolean; // غیرفعال کردن ورودی
-  loading?: boolean; // وضعیت بارگذاری
-
-  // ویژ‌گی‌های اختیاری مربوط به ورودی‌های عددی
+  name: string;
+  type: "text" | "number" | "password";
+  value?: string | number | null;
+  placeholder?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
+  required?: boolean;
+  className?: string;
+  error?: boolean;
+  errorMessage?: string;
+  disabled?: boolean;
+  loading?: boolean;
   min?: number;
   max?: number;
   step?: number;
@@ -50,14 +46,12 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         disabled ? "opacity-50 cursor-not-allowed" : ""
       )}
     >
-      {/* آیکون سمت چپ - خارج از ورودی */}
       {leftIcon && (
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
           {leftIcon}
         </div>
       )}
 
-      {/* ورودی */}
       <input
         id={name}
         name={name}
@@ -80,15 +74,20 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         )}
       />
 
-      {/* برچسب بالای ورودی */}
       <label
         htmlFor={name}
-        className="absolute -top-3 left-3 bg-pink-100 px-2 text-sm text-gray-800"
+        className={classNames(
+          "absolute -top-3 left-3 bg-pink-100 px-2 text-sm text-gray-800",
+          "max-w-[calc(100%-24px)] overflow-hidden whitespace-nowrap",
+          "md:overflow-visible md:max-w-none",
+          "max-md:truncate max-md:after:content-['...']",
+          disabled ? "-top-4 transition-all duration-300" : ""
+        )}
+        title={name}
       >
         {name}
       </label>
 
-      {/* اسپینر بارگذاری سمت راست */}
       {loading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
           <svg
@@ -114,14 +113,12 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         </div>
       )}
 
-      {/* آیکون سمت راست (در صورت عدم بارگذاری) */}
       {rightIcon && !loading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-600">
           {rightIcon}
         </div>
       )}
 
-      {/* پیام خطا */}
       {error && errorMessage && (
         <p className="absolute mt-1 text-red-500 text-xs">{errorMessage}</p>
       )}

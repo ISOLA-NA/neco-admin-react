@@ -377,6 +377,67 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+      ProjectsAccess: {
+        endpoint: api.getAllProjectsWithCalendar,
+        columnDefs: [
+          {
+            headerName: "Project Name",
+            field: "ProjectName",
+            filter: "agTextColumnFilter",
+            minWidth: 140,
+          },
+          {
+            headerName: "Status",
+            field: "State",
+            filter: "agTextColumnFilter",
+            minWidth: 100,
+          },
+          {
+            headerName: "Act Start",
+            field: "AcualStartTime",
+            filter: "agDateColumnFilter",
+            minWidth: 110,
+          },
+          {
+            headerName: "Duration",
+            field: "TotalDuration",
+            filter: "agNumberColumnFilter",
+            minWidth: 100,
+          },
+          {
+            headerName: "Budget Act",
+            field: "PCostAct",
+            filter: "agNumberColumnFilter",
+            minWidth: 110,
+          },
+          {
+            headerName: "Budget Appr",
+            field: "PCostAprov",
+            filter: "agNumberColumnFilter",
+            minWidth: 110,
+          },
+          {
+            headerName: "Phase",
+            field: "IsIdea",
+            valueGetter: (params: any) =>
+              params.data.IsIdea ? "IsIdea" : "Project",
+            filter: "agTextColumnFilter",
+            minWidth: 100,
+          },
+          {
+            headerName: "Calendar",
+            field: "calendarName",
+            filter: "agTextColumnFilter",
+            minWidth: 120,
+          },
+        ],
+        iconVisibility: {
+          showAdd: false,
+          showEdit: false,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
       Odp: {
         endpoint: api.getAllOdpWithExtra,
         columnDefs: [

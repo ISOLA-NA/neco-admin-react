@@ -11,7 +11,11 @@ import {
   ProgramType,
   OdpWithExtra,
 } from "./ApiContext";
-import { Calendar, EntityCollection } from "../services/api.services";
+import {
+  AccessProject,
+  Calendar,
+  EntityCollection,
+} from "../services/api.services";
 
 // Define CommandData if it's different from CommandItem
 interface CommandData {
@@ -186,6 +190,32 @@ interface CalendarData {
   CreatorId?: string;
 }
 
+interface ProjectsAccessData {
+  ID: string;
+  AccessMode: number;
+  AllowToDownloadGroup: boolean;
+  AlowToAllTask: boolean;
+  AlowToEditRequest: boolean;
+  AlowToWordPrint: boolean;
+  CreateAlert: boolean;
+  CreateIssue: boolean;
+  CreateKnowledge: boolean;
+  CreateLetter: boolean;
+  CreateMeeting: boolean;
+  IsVisible: boolean;
+  PostName: string | null;
+  Show_Approval: boolean;
+  Show_Assignment: boolean;
+  Show_CheckList: boolean;
+  Show_Comment: boolean;
+  Show_Lessons: boolean;
+  Show_Logs: boolean;
+  Show_Procedure: boolean;
+  Show_Related: boolean;
+  nPostID: string;
+  nProjectID: string;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
@@ -203,10 +233,13 @@ interface AddEditDeleteContextType {
   ) => Promise<ProgramTemplateItem | null>;
   handleSaveProgramType: (data: ProgramTypeData) => Promise<ProgramType | null>;
   handleSaveOdp: (data: OdpData) => Promise<OdpWithExtra | null>;
-  handleSaveProcedure: (data: ProcedureData) => Promise<EntityCollection | null>;
+  handleSaveProcedure: (
+    data: ProcedureData
+  ) => Promise<EntityCollection | null>;
   handleSaveCalendar: (data: CalendarData) => Promise<Calendar | null>;
-
-
+  handleSaveProjectsAccess: (
+    data: ProjectsAccessData
+  ) => Promise<AccessProject | null>;
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -228,7 +261,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     console.log("Edit action triggered from context");
     // Logic to open edit form
   };
- 
+
   const handleDuplicate = () => {
     console.log("Duplicate action triggered from context");
     // Logic to duplicate a record
@@ -632,9 +665,9 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         IsVisible: data.IsVisible,
         LastModified: data.LastModified || new Date().toISOString(),
         ModifiedById: data.ModifiedById || null,
-        ProjectsStr: data.ProjectsStr || null
+        ProjectsStr: data.ProjectsStr || null,
       };
-  
+
       let result: EntityCollection;
       if (procedure.ID) {
         // Update existing procedure
@@ -645,7 +678,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         result = await api.insertEntityCollection(procedure);
         console.log("Procedure inserted:", result);
       }
-  
+
       return result;
     } catch (error) {
       console.error("Error saving Procedure:", error);
@@ -668,9 +701,9 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         IsVisible: data.IsVisible,
         CreateDate: data.CreateDate || new Date().toISOString(),
         UpdateDate: data.UpdateDate || new Date().toISOString(),
-        CreatorId: data.CreatorId
+        CreatorId: data.CreatorId,
       };
-  
+
       let result: Calendar;
       if (calendar.ID) {
         // Update existing calendar
@@ -681,10 +714,59 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         result = await api.insertCalendar(calendar);
         console.log("Calendar inserted:", result);
       }
-  
+
       return result;
     } catch (error) {
       console.error("Error saving Calendar:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleSaveProjectsAccess = async (
+    data: ProjectsAccessData
+  ): Promise<AccessProject | null> => {
+    setIsLoading(true);
+    try {
+      const accessProject: AccessProject = {
+        ID: data.ID,
+        AccessMode: data.AccessMode,
+        AllowToDownloadGroup: data.AllowToDownloadGroup,
+        AlowToAllTask: data.AlowToAllTask,
+        AlowToEditRequest: data.AlowToEditRequest,
+        AlowToWordPrint: data.AlowToWordPrint,
+        CreateAlert: data.CreateAlert,
+        CreateIssue: data.CreateIssue,
+        CreateKnowledge: data.CreateKnowledge,
+        CreateLetter: data.CreateLetter,
+        CreateMeeting: data.CreateMeeting,
+        IsVisible: data.IsVisible,
+        PostName: data.PostName,
+        Show_Approval: data.Show_Approval,
+        Show_Assignment: data.Show_Assignment,
+        Show_CheckList: data.Show_CheckList,
+        Show_Comment: data.Show_Comment,
+        Show_Lessons: data.Show_Lessons,
+        Show_Logs: data.Show_Logs,
+        Show_Procedure: data.Show_Procedure,
+        Show_Related: data.Show_Related,
+        nPostID: data.nPostID,
+        nProjectID: data.nProjectID,
+        LastModified: new Date().toISOString(),
+      };
+
+      let result: AccessProject;
+      if (accessProject.ID) {
+        result = await api.updateAccessProject(accessProject);
+        console.log("ProjectsAccess updated:", result);
+      } else {
+        result = await api.insertAccessProject(accessProject);
+        console.log("ProjectsAccess inserted:", result);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error saving ProjectsAccess:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -706,7 +788,8 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveProgramType,
         handleSaveOdp,
         handleSaveProcedure,
-        handleSaveCalendar
+        handleSaveCalendar,
+        handleSaveProjectsAccess,
       }}
     >
       {children}

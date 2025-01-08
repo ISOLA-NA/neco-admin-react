@@ -1,11 +1,6 @@
 // src/components/Projects/Procedures.tsx
 
-import {
-  useState,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
@@ -94,7 +89,9 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
         });
 
         if (projectsData.length > 0) {
-          const existingProjectIds = parseIds(selectedRow.ProjectsStr ?? undefined);
+          const existingProjectIds = parseIds(
+            selectedRow.ProjectsStr ?? undefined
+          );
           setSelectedProjectIds(existingProjectIds);
           console.log("Existing Project IDs:", existingProjectIds);
         }
@@ -181,7 +178,7 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
       procedureData.ProjectsStr ?? undefined,
       projectsListData
     );
-    
+
     return (
       <TwoColumnLayout>
         {/* Name Input */}
@@ -189,7 +186,6 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
           name="Name"
           type="text"
           value={procedureData.Name}
-          placeholder="Enter procedure name"
           onChange={(e) => handleChange("Name", e.target.value)}
           required
           className="mb-4"
@@ -199,33 +195,34 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
         <CustomTextarea
           name="Description"
           value={procedureData.Description || ""}
-          placeholder="Enter description"
           onChange={(e) => handleChange("Description", e.target.value)}
           className="mb-4"
         />
 
-        {/* Projects Selector */}
-        <ListSelector
-          title="Projects"
-          className="mb-4"
-          columnDefs={projectColumnDefs}
-          rowData={projectsListData}
-          selectedIds={selectedProjectIds}
-          onSelectionChange={handleProjectsChange}
-          showSwitcher={true}
-          isGlobal={procedureData.IsGlobal}
-          onGlobalChange={handleGlobalChange}
-          loading={loadingProjects}
-          ModalContentComponent={TableSelector}
-          modalContentProps={{
-            columnDefs: projectColumnDefs,
-            rowData: projectsListData,
-            selectedRows: selectedProjectsForModal,
-            onRowDoubleClick: (rows: any[]) =>
-              handleProjectsChange(rows.map((row) => row.ID)),
-            selectionMode: "multiple",
-          }}
-        />
+        <div className="-mt-10">
+          {/* Projects Selector */}
+          <ListSelector
+            title="Projects"
+            className="mb-4"
+            columnDefs={projectColumnDefs}
+            rowData={projectsListData}
+            selectedIds={selectedProjectIds}
+            onSelectionChange={handleProjectsChange}
+            showSwitcher={true}
+            isGlobal={procedureData.IsGlobal}
+            onGlobalChange={handleGlobalChange}
+            loading={loadingProjects}
+            ModalContentComponent={TableSelector}
+            modalContentProps={{
+              columnDefs: projectColumnDefs,
+              rowData: projectsListData,
+              selectedRows: selectedProjectsForModal,
+              onRowDoubleClick: (rows: any[]) =>
+                handleProjectsChange(rows.map((row) => row.ID)),
+              selectionMode: "multiple",
+            }}
+          />
+        </div>
       </TwoColumnLayout>
     );
   }

@@ -1,194 +1,194 @@
 // src/services/api.services.ts
 
-import httpClient from './api.config'
-import { apiConst } from './api.constant'
+import httpClient from "./api.config";
+import { apiConst } from "./api.constant";
 
 // ================== اینترفیس‌ها ==================
 
 // نمونه از AppSetting
 export interface AppSetting {
-  ID: number
-  Name: string
-  LetterBtns: string
+  ID: number;
+  Name: string;
+  LetterBtns: string;
 }
 
 // نمونه از کاربر
 export interface MyUser {
-  ID: string
-  TTKK: string
-  Username: string
-  Name: string
-  Email: string
-  userType?: number
+  ID: string;
+  TTKK: string;
+  Username: string;
+  Name: string;
+  Email: string;
+  userType?: number;
 }
 
 // برای لاگین (OTP و ...)
 export interface WebLoginResponse {
-  data: { MyUser: any; tokenLife: any }
-  AppSetting: AppSetting
-  MyUser: MyUser
+  data: { MyUser: any; tokenLife: any };
+  AppSetting: AppSetting;
+  MyUser: MyUser;
 }
 export interface SendOtpResponse {
-  success: boolean
-  message: string
+  success: boolean;
+  message: string;
 }
 export interface LoginWithOtpResponse {
-  AppSetting: AppSetting
-  MyUser: MyUser
+  AppSetting: AppSetting;
+  MyUser: MyUser;
 }
 export interface WebLoginRequest {
-  UserName: string
-  Password: string
-  SeqKey: string
+  UserName: string;
+  Password: string;
+  SeqKey: string;
 }
 export interface SendOtpRequest {
-  UserName: string
-  Password: string
-  SeqKey: string
+  UserName: string;
+  Password: string;
+  SeqKey: string;
 }
 export interface LoginWithOtpRequest {
-  UserName: string
-  Password: string
-  SeqKey: string
+  UserName: string;
+  Password: string;
+  SeqKey: string;
 }
 export interface TokenSetupResponse {
-  data: number
+  data: number;
 }
 
 // ================== اینترفیس‌های Config ==================
 export interface ConfigurationItem {
-  ID?: number
-  Name: string
-  Description: string
-  DefaultBtn?: string
-  LetterBtns?: string
-  MeetingBtns?: string
-  FirstIDProgramTemplate: number
-  SelMenuIDForMain: number
-  IsVisible: boolean
-  LastModified: string
-  EnityTypeIDForLessonLearn: number
-  EnityTypeIDForTaskCommnet: number
-  EnityTypeIDForProcesure: number
+  ID?: number;
+  Name: string;
+  Description: string;
+  DefaultBtn?: string;
+  LetterBtns?: string;
+  MeetingBtns?: string;
+  FirstIDProgramTemplate: number;
+  SelMenuIDForMain: number;
+  IsVisible: boolean;
+  LastModified: string;
+  EnityTypeIDForLessonLearn: number;
+  EnityTypeIDForTaskCommnet: number;
+  EnityTypeIDForProcesure: number;
 }
 
 // ================== اینترفیس‌های Menu/Ribbon ==================
 export interface DefaultRibbonItem {
-  ID: number
-  Name: string
+  ID: number;
+  Name: string;
 }
 
 // ================== اینترفیس‌های ProgramTemplate ==================
 export interface ProgramTemplateItem {
-  ID?: number
-  ModifiedById?: string | null
-  Name: string
+  ID?: number;
+  ModifiedById?: string | null;
+  Name: string;
 
-  MetaColumnName?: string
-  Duration: string
-  nProgramTypeID: number | null
-  PCostAct: number
-  PCostAprov: number
-  IsGlobal: boolean
-  ProjectsStr?: string | null
-  IsVisible: boolean
-  LastModified?: string | null
+  MetaColumnName?: string;
+  Duration: string;
+  nProgramTypeID: number | null;
+  PCostAct: number;
+  PCostAprov: number;
+  IsGlobal: boolean;
+  ProjectsStr?: string | null;
+  IsVisible: boolean;
+  LastModified?: string | null;
 }
 
 // ================== EntityType ==================
 export interface EntityTypeItem {
-  ID: number
-  Name: string
-  Category: string
+  ID: number;
+  Name: string;
+  Category: string;
 }
 
 export interface WfTemplateItem {
-  ID: number
-  Name: string
+  ID: number;
+  Name: string;
 }
 
 export interface AFBtnItem {
-  ID?: number // در Insert ممکن است خالی باشد
-  Name: string
-  Tooltip?: string
-  StateText?: string
-  Order?: number
-  WFStateForDeemed?: number
-  WFCommand?: number
-  IconImageId?: string | null
-  IsVisible?: boolean
-  LastModified?: string | null
-  ModifiedById?: number | null
+  ID?: number; // در Insert ممکن است خالی باشد
+  Name: string;
+  Tooltip?: string;
+  StateText?: string;
+  Order?: number;
+  WFStateForDeemed?: number;
+  WFCommand?: number;
+  IconImageId?: string | null;
+  IsVisible?: boolean;
+  LastModified?: string | null;
+  ModifiedById?: number | null;
 }
 
 // نمونه‌ی کاربر با توکن
 export interface UserToken {
-  ID: number
-  Name: string
+  ID: number;
+  Name: string;
 }
 
 // ================== CommandItem ==================
 export interface CommandItem {
-  ID?: number
-  Name: string
-  Describtion?: string
-  MainColumnIDName?: string
-  GroupName?: string
-  gridCmd?: string
-  tabCmd?: string
-  QR?: string
-  ViewMode?: any // می‌تواند string یا number باشد
-  DefaultColumns?: string | null
-  ReportParam?: string | null
-  ProjectIntensive?: boolean
-  ColorColumn?: string
-  InvisibleColumns?: string
-  ApiColumns?: string
-  SpParam?: string
-  CmdType?: number
-  ApiMode?: string
+  ID?: number;
+  Name: string;
+  Describtion?: string;
+  MainColumnIDName?: string;
+  GroupName?: string;
+  gridCmd?: string;
+  tabCmd?: string;
+  QR?: string;
+  ViewMode?: any; // می‌تواند string یا number باشد
+  DefaultColumns?: string | null;
+  ReportParam?: string | null;
+  ProjectIntensive?: boolean;
+  ColorColumn?: string;
+  InvisibleColumns?: string;
+  ApiColumns?: string;
+  SpParam?: string;
+  CmdType?: number;
+  ApiMode?: string;
 }
 
 export interface GetEnumRequest {
-  str: string
+  str: string;
 }
 
 // تعریف اینترفیس برای پاسخ getEnum
 export interface GetEnumResponse {
-  [key: string]: string
+  [key: string]: string;
 }
 
 export interface Menu {
-  ID?: number // Optional for creation
-  ModifiedById?: string // Optional, set by backend or current user
-  Name: string
-  Description: string
-  IsVisible?: boolean // Optional, default to true or as per your logic
-  LastModified?: string // Optional, set by backend
+  ID?: number; // Optional for creation
+  ModifiedById?: string; // Optional, set by backend or current user
+  Name: string;
+  Description: string;
+  IsVisible?: boolean; // Optional, default to true or as per your logic
+  LastModified?: string; // Optional, set by backend
 }
 
 // Interface for MenuTab
 export interface MenuTab {
-  ID: number
-  ModifiedById?: string | null
-  Name: string
-  Order: number
-  Description: string
-  nMenuId: number
-  IsVisible: boolean
-  LastModified: string | null
+  ID: number;
+  ModifiedById?: string | null;
+  Name: string;
+  Order: number;
+  Description: string;
+  nMenuId: number;
+  IsVisible: boolean;
+  LastModified: string | null;
 }
 
 // Interface for MenuGroup
 export interface MenuGroup {
-  ID: number
-  ModifiedById: string | null
-  Name: string
-  Order: number
-  Description: string
-  nMenuTabId: number
-  IsVisible: boolean
-  LastModified: string | null
+  ID: number;
+  ModifiedById: string | null;
+  Name: string;
+  Order: number;
+  Description: string;
+  nMenuTabId: number;
+  IsVisible: boolean;
+  LastModified: string | null;
 }
 
 // Add this interface with the other interfaces in api.services.ts
@@ -198,204 +198,204 @@ export interface MenuGroup {
 // src/context/ApiContext.tsx
 
 export interface User {
-  ID?: string | undefined
-  Username: string
-  Password?: string // این فیلد اجباری است
-  ConfirmPassword?: string // این فیلد نیز اجباری است
-  Status: number
-  MaxWrongPass: number
-  Name: string
-  Family: string
-  Email: string
-  Website: string
-  Mobile: string
-  TTKK: string
-  userType: number
-  Code: string
-  IsVisible: boolean
-  LastModified: string
-  ModifiedById?: string
-  CreateDate?: string | null
-  LastLoginTime?: string | null
-  UserImageId?: string | null
+  ID?: string | undefined;
+  Username: string;
+  Password?: string; // این فیلد اجباری است
+  ConfirmPassword?: string; // این فیلد نیز اجباری است
+  Status: number;
+  MaxWrongPass: number;
+  Name: string;
+  Family: string;
+  Email: string;
+  Website: string;
+  Mobile: string;
+  TTKK: string;
+  userType: number;
+  Code: string;
+  IsVisible: boolean;
+  LastModified: string;
+  ModifiedById?: string;
+  CreateDate?: string | null;
+  LastLoginTime?: string | null;
+  UserImageId?: string | null;
 }
 
 // Interface for MenuItem
 export interface MenuItem {
-  ID: number
-  ModifiedById: string | null
-  Name: string
-  Description: string
-  Order: number
-  IconImageId: string | null
-  Command: string
-  CommandWeb: string
-  CommandMobile: string
-  HelpText: string
-  KeyTip: string
-  Size: number
-  nMenuGroupId: number
-  IsVisible: boolean
-  LastModified: string | null
+  ID: number;
+  ModifiedById: string | null;
+  Name: string;
+  Description: string;
+  Order: number;
+  IconImageId: string | null;
+  Command: string;
+  CommandWeb: string;
+  CommandMobile: string;
+  HelpText: string;
+  KeyTip: string;
+  Size: number;
+  nMenuGroupId: number;
+  IsVisible: boolean;
+  LastModified: string | null;
 }
 
 export interface Role {
-  ID?: string
-  Name: string
-  IsVisible: boolean
-  isStaticPost: boolean
-  LastModified?: string
-  ModifiedById?: string
+  ID?: string;
+  Name: string;
+  IsVisible: boolean;
+  isStaticPost: boolean;
+  LastModified?: string;
+  ModifiedById?: string;
 
   // فیلدهای مربوط به insert
-  Authorization?: string | null
-  Competencies?: string | null
-  Description?: string | null
-  Grade?: string | null
-  PostCode?: string | null
-  Responsibility?: string | null
-  Type?: string | null
+  Authorization?: string | null;
+  Competencies?: string | null;
+  Description?: string | null;
+  Grade?: string | null;
+  PostCode?: string | null;
+  Responsibility?: string | null;
+  Type?: string | null;
 
   // فیلدهای مربوط به update
-  CreateById?: string | null
-  CreateDate?: string
-  OwnerID?: string | null
-  ParrentId?: string | null
-  isAccessCreateProject?: boolean
-  isHaveAddressbar?: boolean
-  nCompanyID?: string | null
-  nMenuID?: string | null
-  nPostTypeID?: string | null
-  nProjectID?: string | null
-  status?: number
+  CreateById?: string | null;
+  CreateDate?: string;
+  OwnerID?: string | null;
+  ParrentId?: string | null;
+  isAccessCreateProject?: boolean;
+  isHaveAddressbar?: boolean;
+  nCompanyID?: string | null;
+  nMenuID?: string | null;
+  nPostTypeID?: string | null;
+  nProjectID?: string | null;
+  status?: number;
 }
 
 export interface Company {
-  ID: number
-  Name: string
-  Description?: string // افزودن Description به صورت اختیاری
-  Information?: string | null // اطلاعات ممکن است خالی باشد
-  IsVisible: boolean
-  LastModified: string
-  ModifiedById?: string | null
-  Type?: string | null // نوع می‌تواند مقدار نال یا یک رشته باشد
+  ID: number;
+  Name: string;
+  Description?: string; // افزودن Description به صورت اختیاری
+  Information?: string | null; // اطلاعات ممکن است خالی باشد
+  IsVisible: boolean;
+  LastModified: string;
+  ModifiedById?: string | null;
+  Type?: string | null; // نوع می‌تواند مقدار نال یا یک رشته باشد
 }
 
 // In src/services/api.services.ts
 
 export interface PostCat {
-  ID?: number // Already optional
-  Name: string
-  Description: string
-  IsGlobal: boolean
-  IsVisible: boolean
-  LastModified?: string // Make optional
-  ModifiedById?: string // Make optional
-  PostsStr?: string
-  ProjectsStr?: string
+  ID?: number; // Already optional
+  Name: string;
+  Description: string;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified?: string; // Make optional
+  ModifiedById?: string; // Make optional
+  PostsStr?: string;
+  ProjectsStr?: string;
 }
 
 // اینترفیس درخواست ChangePasswordByAdmin
 export interface ChangePasswordByAdminRequest {
-  UserId: string // شناسه کاربری
-  Password: string // رمز عبور جدید
+  UserId: string; // شناسه کاربری
+  Password: string; // رمز عبور جدید
 }
 
 export interface Project {
-  ID: any
-  ProjectName: string
-  State: number
+  ID: any;
+  ProjectName: string;
+  State: number;
 }
 
 export interface ProjectWithCalendar {
-  AccessGId: string
-  AcualStartTime: string | null
-  CreateDate: string
-  ID: string
-  IsIdea: boolean
-  IsVisible: boolean
-  IssuesNum: number
-  KnowledgeNum: number
-  LastModified: string
-  LettersNum: number
-  MeetingsNum: number
-  PCostAct: number
-  PCostAprov: number
-  ParrentId: string | null
-  Progress1: number
-  Progress2: number
-  Progress3: number
-  ProjectName: string
-  RCostAct: number
-  RCostAprov: number
-  RolesNum: number
-  StarterPostId: string
-  State: string
-  TaskNum: number
-  TotalDuration: number
-  calendarName: string | null
-  nCalendarID: string | null
+  AccessGId: string;
+  AcualStartTime: string | null;
+  CreateDate: string;
+  ID: string;
+  IsIdea: boolean;
+  IsVisible: boolean;
+  IssuesNum: number;
+  KnowledgeNum: number;
+  LastModified: string;
+  LettersNum: number;
+  MeetingsNum: number;
+  PCostAct: number;
+  PCostAprov: number;
+  ParrentId: string | null;
+  Progress1: number;
+  Progress2: number;
+  Progress3: number;
+  ProjectName: string;
+  RCostAct: number;
+  RCostAprov: number;
+  RolesNum: number;
+  StarterPostId: string;
+  State: string;
+  TaskNum: number;
+  TotalDuration: number;
+  calendarName: string | null;
+  nCalendarID: string | null;
 }
 
 export interface PostAdmin {
-  ID: string
-  Name: string
-  CreateById: string | null
-  CreateDate: string
-  IsVisible: boolean
-  LastModified: string
-  ModifiedById: string
-  OwnerID: string | null
-  OwnerName: string | null
-  ParentName: string | null
-  ParrentId: string | null
-  isAccessCreateProject: boolean
-  isHaveAddressbar: boolean
-  isStaticPost: boolean
-  nCompanyID: string | null
-  nCompanyName: string | null
-  nMenuID: string | null
-  nPostTypeID: string | null
-  nPostTypeName: string | null
-  nProjectID: string | null
-  nProjectName: string | null
-  status: number
+  ID: string;
+  Name: string;
+  CreateById: string | null;
+  CreateDate: string;
+  IsVisible: boolean;
+  LastModified: string;
+  ModifiedById: string;
+  OwnerID: string | null;
+  OwnerName: string | null;
+  ParentName: string | null;
+  ParrentId: string | null;
+  isAccessCreateProject: boolean;
+  isHaveAddressbar: boolean;
+  isStaticPost: boolean;
+  nCompanyID: string | null;
+  nCompanyName: string | null;
+  nMenuID: string | null;
+  nPostTypeID: string | null;
+  nPostTypeName: string | null;
+  nProjectID: string | null;
+  nProjectName: string | null;
+  status: number;
 }
 
 export interface ProgramType {
-  ID?: number
-  Name: string
-  Describtion: string
-  IsVisible: boolean
-  LastModified?: string
-  ModifiedById?: string | null
+  ID?: number;
+  Name: string;
+  Describtion: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string | null;
 }
 
 export interface OdpWithExtra {
-  ID: number
-  Name: string
-  Address: string
-  EntityTypeName: string
-  IsVisible: boolean
-  LastModified: string | null
-  ModifiedById: string | null
-  ProgramTemplateIDName: string | null
-  WFTemplateName: string
-  nEntityTypeID: number | null
-  nProgramTemplateID: number | null
-  nWFTemplateID: number | null
+  ID: number;
+  Name: string;
+  Address: string;
+  EntityTypeName: string;
+  IsVisible: boolean;
+  LastModified: string | null;
+  ModifiedById: string | null;
+  ProgramTemplateIDName: string | null;
+  WFTemplateName: string;
+  nEntityTypeID: number | null;
+  nProgramTemplateID: number | null;
+  nWFTemplateID: number | null;
 }
 
 export interface EntityCollection {
-  ID?: number
-  Name: string
-  Description?: string | null
-  Configuration?: string | null
-  IsGlobal: boolean
-  IsVisible: boolean
-  LastModified?: string | null
-  ModifiedById?: string | null
-  ProjectsStr?: string | null
+  ID?: number;
+  Name: string;
+  Description?: string | null;
+  Configuration?: string | null;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified?: string | null;
+  ModifiedById?: string | null;
+  ProjectsStr?: string | null;
 }
 
 export interface Calendar {
@@ -409,176 +409,215 @@ export interface Calendar {
   CreatorId?: string;
 }
 
+export interface PostSmall {
+  ID: string;
+  IsStatic: boolean;
+  Name: string;
+  OwnerUserID: string;
+  ParrentId: string | null;
+  PostTypeID: string | null;
+  ProjectID: string | null;
+  isAccessCreateProject: boolean;
+  isHaveAddressbar: boolean;
+}
+
+export interface AccessProject {
+  ID: string;
+  AccessMode: number;
+  AllowToDownloadGroup: boolean;
+  AlowToAllTask: boolean;
+  AlowToEditRequest: boolean;
+  AlowToWordPrint: boolean;
+  CreateAlert: boolean;
+  CreateIssue: boolean;
+  CreateKnowledge: boolean;
+  CreateLetter: boolean;
+  CreateMeeting: boolean;
+  IsVisible: boolean;
+  LastModified: string;
+  PostName: string | null;
+  Show_Approval: boolean;
+  Show_Assignment: boolean;
+  Show_CheckList: boolean;
+  Show_Comment: boolean;
+  Show_Lessons: boolean;
+  Show_Logs: boolean;
+  Show_Procedure: boolean;
+  Show_Related: boolean;
+  nPostID: string;
+  nProjectID: string;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
   // متدهای عمومی (لاگین، OTP و ...)
   // ------------------------------------
-  async webLogin (userData: WebLoginRequest): Promise<WebLoginResponse> {
+  async webLogin(userData: WebLoginRequest): Promise<WebLoginResponse> {
     const response = await httpClient.post<WebLoginResponse>(
       apiConst.webLogin,
       userData
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async sendOtp (data: SendOtpRequest): Promise<SendOtpResponse> {
+  async sendOtp(data: SendOtpRequest): Promise<SendOtpResponse> {
     const response = await httpClient.post<SendOtpResponse>(
       apiConst.sendOtp,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async loginWithOtp (data: LoginWithOtpRequest): Promise<LoginWithOtpResponse> {
+  async loginWithOtp(data: LoginWithOtpRequest): Promise<LoginWithOtpResponse> {
     const response = await httpClient.post<LoginWithOtpResponse>(
       apiConst.loginWithOtp,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async tokenSetup (): Promise<TokenSetupResponse> {
+  async tokenSetup(): Promise<TokenSetupResponse> {
     const response = await httpClient.post<TokenSetupResponse>(
       apiConst.tokenSetup
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   // ------------------------------------
   // Configurations
   // ------------------------------------
-  async getAllConfigurations (): Promise<ConfigurationItem[]> {
+  async getAllConfigurations(): Promise<ConfigurationItem[]> {
     const response = await httpClient.post<ConfigurationItem[]>(
       apiConst.getAllConfiguration
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async insertConfiguration (
+  async insertConfiguration(
     data: ConfigurationItem
   ): Promise<ConfigurationItem> {
     const response = await httpClient.post<ConfigurationItem>(
       apiConst.insertConfiguration,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async updateConfiguration (
+  async updateConfiguration(
     data: ConfigurationItem
   ): Promise<ConfigurationItem> {
     const response = await httpClient.post<ConfigurationItem>(
       apiConst.updateConfiguration,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async deleteConfiguration (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteConfiguration, { ID: id })
+  async deleteConfiguration(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteConfiguration, { ID: id });
   }
 
   // ------------------------------------
   // Ribbon/ProgramTemplate/WFTemplate/AFBtn
   // ------------------------------------
-  async getAllProgramTemplates (): Promise<ProgramTemplateItem[]> {
+  async getAllProgramTemplates(): Promise<ProgramTemplateItem[]> {
     const response = await httpClient.post<ProgramTemplateItem[]>(
       apiConst.getAllProgramTemplate
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async getAllDefaultRibbons (): Promise<DefaultRibbonItem[]> {
+  async getAllDefaultRibbons(): Promise<DefaultRibbonItem[]> {
     const response = await httpClient.post<DefaultRibbonItem[]>(
       apiConst.getAllDefaultRibbons
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async getTableTransmittal (): Promise<EntityTypeItem[]> {
+  async getTableTransmittal(): Promise<EntityTypeItem[]> {
     const response = await httpClient.post<EntityTypeItem[]>(
       apiConst.getTableTransmittal
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async getAllWfTemplate (): Promise<WfTemplateItem[]> {
+  async getAllWfTemplate(): Promise<WfTemplateItem[]> {
     const response = await httpClient.post<WfTemplateItem[]>(
       apiConst.getAllWfTemplate
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   // ---- AFBtn ----
-  async getAllAfbtn (): Promise<AFBtnItem[]> {
-    const response = await httpClient.post<AFBtnItem[]>(apiConst.getAllAfbtn)
-    return response.data
+  async getAllAfbtn(): Promise<AFBtnItem[]> {
+    const response = await httpClient.post<AFBtnItem[]>(apiConst.getAllAfbtn);
+    return response.data;
   }
 
   // سه متد جدید: Insert - Update - Delete
-  async insertAFBtn (data: AFBtnItem): Promise<AFBtnItem> {
+  async insertAFBtn(data: AFBtnItem): Promise<AFBtnItem> {
     const response = await httpClient.post<AFBtnItem>(
       apiConst.insertAFBtn,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async updateAFBtn (data: AFBtnItem): Promise<AFBtnItem> {
+  async updateAFBtn(data: AFBtnItem): Promise<AFBtnItem> {
     const response = await httpClient.post<AFBtnItem>(
       apiConst.updateAFBtn,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async deleteAFBtn (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteAFBtn, { ID: id })
+  async deleteAFBtn(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteAFBtn, { ID: id });
   }
 
   // دریافت ID کاربر
-  async getIdByUserToken (): Promise<UserToken[]> {
+  async getIdByUserToken(): Promise<UserToken[]> {
     const response = await httpClient.post<UserToken[]>(
       apiConst.getIdByUserToken
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   // ------------------------------------
   // Command
   // ------------------------------------
-  async getAllCommands (): Promise<CommandItem[]> {
-    const response = await httpClient.post<CommandItem[]>(apiConst.getCommand)
-    return response.data
+  async getAllCommands(): Promise<CommandItem[]> {
+    const response = await httpClient.post<CommandItem[]>(apiConst.getCommand);
+    return response.data;
   }
 
-  async insertCommand (data: CommandItem): Promise<CommandItem> {
+  async insertCommand(data: CommandItem): Promise<CommandItem> {
     const response = await httpClient.post<CommandItem>(
       apiConst.insertCommand,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async updateCommand (data: CommandItem): Promise<CommandItem> {
+  async updateCommand(data: CommandItem): Promise<CommandItem> {
     const response = await httpClient.post<CommandItem>(
       apiConst.updateCommand,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async deleteCommand (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteCommand, { ID: id })
+  async deleteCommand(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteCommand, { ID: id });
   }
 
-  async getEnum (data: GetEnumRequest): Promise<GetEnumResponse> {
+  async getEnum(data: GetEnumRequest): Promise<GetEnumResponse> {
     const response = await httpClient.post<GetEnumResponse>(
       apiConst.getEnum,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   // -------------------
@@ -588,91 +627,91 @@ class ApiService {
   /**
    * Fetch all menus.
    */
-  async getAllMenu (): Promise<Menu[]> {
-    const response = await httpClient.post<Menu[]>(apiConst.getAllMenu)
-    return response.data
+  async getAllMenu(): Promise<Menu[]> {
+    const response = await httpClient.post<Menu[]>(apiConst.getAllMenu);
+    return response.data;
   }
 
   /**
    * Insert a new Menu.
    * @param data - The Menu data to insert.
    */
-  async insertMenu (data: Menu): Promise<Menu> {
-    const response = await httpClient.post<Menu>(apiConst.insertMenu, data)
-    return response.data
+  async insertMenu(data: Menu): Promise<Menu> {
+    const response = await httpClient.post<Menu>(apiConst.insertMenu, data);
+    return response.data;
   }
 
   /**
    * Update an existing Menu.
    * @param data - The Menu data to update.
    */
-  async updateMenu (data: Menu): Promise<Menu> {
-    const response = await httpClient.post<Menu>(apiConst.updateMenu, data)
-    return response.data
+  async updateMenu(data: Menu): Promise<Menu> {
+    const response = await httpClient.post<Menu>(apiConst.updateMenu, data);
+    return response.data;
   }
 
   /**
    * Delete a Menu by ID.
    * @param id - The ID of the Menu to delete.
    */
-  async deleteMenu (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteMenu, { ID: id })
+  async deleteMenu(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenu, { ID: id });
   }
 
-  async getAllMenuTab (menuId: number): Promise<MenuTab[]> {
+  async getAllMenuTab(menuId: number): Promise<MenuTab[]> {
     const response = await httpClient.post<MenuTab[]>(apiConst.getAllMenuTab, {
-      ID: menuId // مطمئن شوید که پارامتر ID در body ارسال می‌شود
-    })
-    return response.data
+      ID: menuId, // مطمئن شوید که پارامتر ID در body ارسال می‌شود
+    });
+    return response.data;
   }
 
   // دریافت MenuGroups با ID
-  async getAllMenuGroup (menuTabId: number): Promise<MenuGroup[]> {
+  async getAllMenuGroup(menuTabId: number): Promise<MenuGroup[]> {
     const response = await httpClient.post<MenuGroup[]>(
       apiConst.getAllMenuGroup,
       {
-        ID: menuTabId // مطمئن شوید که پارامتر ID در body ارسال می‌شود
+        ID: menuTabId, // مطمئن شوید که پارامتر ID در body ارسال می‌شود
       }
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   // دریافت MenuItems با ID
-  async getAllMenuItem (menuGroupId: number): Promise<MenuItem[]> {
+  async getAllMenuItem(menuGroupId: number): Promise<MenuItem[]> {
     const response = await httpClient.post<MenuItem[]>(
       apiConst.getAllMenuItem,
       {
-        ID: menuGroupId // مطمئن شوید که پارامتر id در body ارسال می‌شود
+        ID: menuGroupId, // مطمئن شوید که پارامتر id در body ارسال می‌شود
       }
-    )
-    return response.data
+    );
+    return response.data;
   }
-  async insertMenuTab (data: MenuTab): Promise<MenuTab> {
+  async insertMenuTab(data: MenuTab): Promise<MenuTab> {
     const response = await httpClient.post<MenuTab>(
       apiConst.insertMenuTab,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * Update an existing MenuTab.
    * @param data - The MenuTab data to update.
    */
-  async updateMenuTab (data: MenuTab): Promise<MenuTab> {
+  async updateMenuTab(data: MenuTab): Promise<MenuTab> {
     const response = await httpClient.post<MenuTab>(
       apiConst.updateMenuTab,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * Delete a MenuTab by ID.
    * @param id - The ID of the MenuTab to delete.
    */
-  async deleteMenuTab (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteMenuTab, { ID: id })
+  async deleteMenuTab(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuTab, { ID: id });
   }
 
   // -------------------
@@ -683,32 +722,32 @@ class ApiService {
    * درج یک MenuGroup جدید.
    * @param data - داده‌های MenuGroup برای درج.
    */
-  async insertMenuGroup (data: MenuGroup): Promise<MenuGroup> {
+  async insertMenuGroup(data: MenuGroup): Promise<MenuGroup> {
     const response = await httpClient.post<MenuGroup>(
       apiConst.insertMenuGroup,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * به‌روزرسانی یک MenuGroup موجود.
    * @param data - داده‌های MenuGroup برای به‌روزرسانی.
    */
-  async updateMenuGroup (data: MenuGroup): Promise<MenuGroup> {
+  async updateMenuGroup(data: MenuGroup): Promise<MenuGroup> {
     const response = await httpClient.post<MenuGroup>(
       apiConst.updateMenuGroup,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * حذف یک MenuGroup بر اساس ID.
    * @param id - شناسه MenuGroup برای حذف.
    */
-  async deleteMenuGroup (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteMenuGroup, { ID: id })
+  async deleteMenuGroup(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuGroup, { ID: id });
   }
 
   // -------------------
@@ -719,238 +758,238 @@ class ApiService {
    * درج یک MenuItem جدید.
    * @param data - داده‌های MenuItem برای درج.
    */
-  async insertMenuItem (data: MenuItem): Promise<MenuItem> {
+  async insertMenuItem(data: MenuItem): Promise<MenuItem> {
     const response = await httpClient.post<MenuItem>(
       apiConst.insertMenuItem,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * به‌روزرسانی یک MenuItem موجود.
    * @param data - داده‌های MenuItem برای به‌روزرسانی.
    */
-  async updateMenuItem (data: MenuItem): Promise<MenuItem> {
+  async updateMenuItem(data: MenuItem): Promise<MenuItem> {
     const response = await httpClient.post<MenuItem>(
       apiConst.updateMenuItem,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * حذف یک MenuItem بر اساس ID.
    * @param id - شناسه MenuItem برای حذف.
    */
-  async deleteMenuItem (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteMenuItem, { ID: id })
+  async deleteMenuItem(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteMenuItem, { ID: id });
   }
 
   // Add these methods to the ApiService class
-  async getAllUsers (): Promise<User[]> {
-    const response = await httpClient.post<User[]>(apiConst.getAllUser)
-    return response.data
+  async getAllUsers(): Promise<User[]> {
+    const response = await httpClient.post<User[]>(apiConst.getAllUser);
+    return response.data;
   }
 
-  async insertUser (data: User): Promise<User> {
-    const response = await httpClient.post<User>(apiConst.insertUser, data)
-    return response.data
+  async insertUser(data: User): Promise<User> {
+    const response = await httpClient.post<User>(apiConst.insertUser, data);
+    return response.data;
   }
 
-  async updateUser (data: User): Promise<User> {
-    const response = await httpClient.post<User>(apiConst.updateUser, data)
-    return response.data
+  async updateUser(data: User): Promise<User> {
+    const response = await httpClient.post<User>(apiConst.updateUser, data);
+    return response.data;
   }
 
-  async deleteUser (id: string): Promise<void> {
-    await httpClient.post(apiConst.deleteUser, { gid: id })
+  async deleteUser(id: string): Promise<void> {
+    await httpClient.post(apiConst.deleteUser, { gid: id });
   }
 
-  async changePasswordByAdmin (
+  async changePasswordByAdmin(
     data: ChangePasswordByAdminRequest
   ): Promise<void> {
-    await httpClient.post(apiConst.changePassword, data)
+    await httpClient.post(apiConst.changePassword, data);
   }
 
-  async getAllRoles (): Promise<Role[]> {
-    const response = await httpClient.post<Role[]>(apiConst.getAllRoles)
-    return response.data
+  async getAllRoles(): Promise<Role[]> {
+    const response = await httpClient.post<Role[]>(apiConst.getAllRoles);
+    return response.data;
   }
 
-  async insertRole (data: Role): Promise<Role> {
-    const response = await httpClient.post<Role>(apiConst.insertRole, data)
-    return response.data
+  async insertRole(data: Role): Promise<Role> {
+    const response = await httpClient.post<Role>(apiConst.insertRole, data);
+    return response.data;
   }
 
-  async updateRole (data: Role): Promise<Role> {
-    const response = await httpClient.post<Role>(apiConst.updateRole, data)
-    return response.data
+  async updateRole(data: Role): Promise<Role> {
+    const response = await httpClient.post<Role>(apiConst.updateRole, data);
+    return response.data;
   }
 
-  async deleteRole (id: string): Promise<void> {
-    await httpClient.post(apiConst.deleteRole, { gid: id })
+  async deleteRole(id: string): Promise<void> {
+    await httpClient.post(apiConst.deleteRole, { gid: id });
   }
 
-  async getAllCompanies (): Promise<Company[]> {
-    const response = await httpClient.post<Company[]>(apiConst.getAllCompany)
-    return response.data
+  async getAllCompanies(): Promise<Company[]> {
+    const response = await httpClient.post<Company[]>(apiConst.getAllCompany);
+    return response.data;
   }
 
   /**
    * درج یک شرکت جدید.
    * @param data - داده‌های شرکت برای درج.
    */
-  async insertCompany (data: Company): Promise<Company> {
+  async insertCompany(data: Company): Promise<Company> {
     const response = await httpClient.post<Company>(
       apiConst.insertCompany,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * به‌روزرسانی یک شرکت موجود.
    * @param data - داده‌های شرکت برای به‌روزرسانی.
    */
-  async updateCompany (data: Company): Promise<Company> {
+  async updateCompany(data: Company): Promise<Company> {
     const response = await httpClient.post<Company>(
       apiConst.updateCompany,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
   /**
    * حذف یک شرکت بر اساس ID.
    * @param id - شناسه شرکت برای حذف.
    */
-  async deleteCompany (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteCompany, { ID: id })
+  async deleteCompany(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteCompany, { ID: id });
   }
 
   // Get all post categories
-  async getAllPostCat (): Promise<PostCat[]> {
-    const response = await httpClient.post<PostCat[]>(apiConst.getAllPostCat)
-    return response.data
+  async getAllPostCat(): Promise<PostCat[]> {
+    const response = await httpClient.post<PostCat[]>(apiConst.getAllPostCat);
+    return response.data;
   }
 
   // Insert new post category
-  async insertPostCat (data: PostCat): Promise<PostCat> {
-    const response = await httpClient.post<PostCat>(apiConst.addPostCat, data)
-    return response.data
+  async insertPostCat(data: PostCat): Promise<PostCat> {
+    const response = await httpClient.post<PostCat>(apiConst.addPostCat, data);
+    return response.data;
   }
 
   // Update existing post category
-  async updatePostCat (data: PostCat): Promise<PostCat> {
-    const response = await httpClient.post<PostCat>(apiConst.editPostCat, data)
-    return response.data
+  async updatePostCat(data: PostCat): Promise<PostCat> {
+    const response = await httpClient.post<PostCat>(apiConst.editPostCat, data);
+    return response.data;
   }
 
   // Delete post category
-  async deletePostCat (id: number): Promise<void> {
-    await httpClient.post(apiConst.deletePostCat, { ID: id })
+  async deletePostCat(id: number): Promise<void> {
+    await httpClient.post(apiConst.deletePostCat, { ID: id });
   }
 
-  async getAllProject (): Promise<Project[]> {
-    const response = await httpClient.post<Project[]>(apiConst.getAllProject)
-    return response.data
+  async getAllProject(): Promise<Project[]> {
+    const response = await httpClient.post<Project[]>(apiConst.getAllProject);
+    return response.data;
   }
 
-  async getAllProjectsWithCalendar (): Promise<ProjectWithCalendar[]> {
+  async getAllProjectsWithCalendar(): Promise<ProjectWithCalendar[]> {
     const response = await httpClient.post<ProjectWithCalendar[]>(
       apiConst.getAllProjectsWithCalendar
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async deleteProject (id: string): Promise<void> {
-    await httpClient.post(apiConst.deleteProject, { ID: id })
+  async deleteProject(id: string): Promise<void> {
+    await httpClient.post(apiConst.deleteProject, { ID: id });
   }
 
-  async getAllForPostAdmin (): Promise<PostAdmin[]> {
+  async getAllForPostAdmin(): Promise<PostAdmin[]> {
     const response = await httpClient.post<PostAdmin[]>(
       apiConst.getAllForPostAdmin
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async insertProgramTemplate (
+  async insertProgramTemplate(
     data: ProgramTemplateItem
   ): Promise<ProgramTemplateItem> {
     const response = await httpClient.post<ProgramTemplateItem>(
       apiConst.insertProgramTemplate,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async updateProgramTemplate (
+  async updateProgramTemplate(
     data: ProgramTemplateItem
   ): Promise<ProgramTemplateItem> {
     const response = await httpClient.post<ProgramTemplateItem>(
       apiConst.updateProgramTemplate,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async deleteProgramTemplate (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteProgramTemplate, { ID: id })
+  async deleteProgramTemplate(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteProgramTemplate, { ID: id });
   }
 
-  async getAllProgramType (): Promise<ProgramType[]> {
+  async getAllProgramType(): Promise<ProgramType[]> {
     const response = await httpClient.post<ProgramType[]>(
       apiConst.getAllProgramType
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async insertProgramType (data: ProgramType): Promise<ProgramType> {
+  async insertProgramType(data: ProgramType): Promise<ProgramType> {
     const response = await httpClient.post<ProgramType>(
       apiConst.insertProgramType,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async updateProgramType (data: ProgramType): Promise<ProgramType> {
+  async updateProgramType(data: ProgramType): Promise<ProgramType> {
     const response = await httpClient.post<ProgramType>(
       apiConst.updateProgramType,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async deleteProgramType (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteProgramType, { ID: id })
+  async deleteProgramType(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteProgramType, { ID: id });
   }
 
-  async getAllOdpWithExtra (): Promise<OdpWithExtra[]> {
+  async getAllOdpWithExtra(): Promise<OdpWithExtra[]> {
     const response = await httpClient.post<OdpWithExtra[]>(
       apiConst.getAllOdpWithExtra
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async insertOdp (data: OdpWithExtra): Promise<OdpWithExtra> {
+  async insertOdp(data: OdpWithExtra): Promise<OdpWithExtra> {
     const response = await httpClient.post<OdpWithExtra>(
       apiConst.insertOdp,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async updateOdp (data: OdpWithExtra): Promise<OdpWithExtra> {
+  async updateOdp(data: OdpWithExtra): Promise<OdpWithExtra> {
     const response = await httpClient.post<OdpWithExtra>(
       apiConst.updateOdp,
       data
-    )
-    return response.data
+    );
+    return response.data;
   }
 
-  async deleteOdp (id: number): Promise<void> {
-    await httpClient.post(apiConst.deleteOdp, { ID: id })
+  async deleteOdp(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteOdp, { ID: id });
   }
 
   async getAllEntityCollection(): Promise<EntityCollection[]> {
@@ -959,31 +998,33 @@ class ApiService {
     );
     return response.data;
   }
-  
-  async insertEntityCollection(data: EntityCollection): Promise<EntityCollection> {
+
+  async insertEntityCollection(
+    data: EntityCollection
+  ): Promise<EntityCollection> {
     const response = await httpClient.post<EntityCollection>(
       apiConst.insertntityCollection,
       data
     );
     return response.data;
   }
-  
-  async updateEntityCollection(data: EntityCollection): Promise<EntityCollection> {
+
+  async updateEntityCollection(
+    data: EntityCollection
+  ): Promise<EntityCollection> {
     const response = await httpClient.post<EntityCollection>(
       apiConst.updatelEntityCollection,
       data
     );
     return response.data;
   }
-  
+
   async deleteEntityCollection(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteEntityCollection, { ID: id });
   }
 
   async getAllCalendar(): Promise<Calendar[]> {
-    const response = await httpClient.post<Calendar[]>(
-      apiConst.getAllCalendar
-    );
+    const response = await httpClient.post<Calendar[]>(apiConst.getAllCalendar);
     return response.data;
   }
 
@@ -1006,8 +1047,42 @@ class ApiService {
   async deleteCalendar(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteCalendar, { ID: id });
   }
+
+  async getPostSmall(): Promise<PostSmall[]> {
+    const response = await httpClient.post<PostSmall[]>(apiConst.getPostSmall);
+    return response.data;
+  }
+
+  // بعد از تغییر
+  async getPostsinProject(gid: string): Promise<AccessProject[]> {
+    const response = await httpClient.post<AccessProject[]>(
+      apiConst.getPostsinProjectServices,
+      { gid } // فیلد مدنظر سرور
+    );
+    return response.data;
+  }
+
+  async insertAccessProject(data: AccessProject): Promise<AccessProject> {
+    const response = await httpClient.post<AccessProject>(
+      apiConst.insertAccessProject,
+      data
+    );
+    return response.data;
+  }
+
+  async updateAccessProject(data: AccessProject): Promise<AccessProject> {
+    const response = await httpClient.post<AccessProject>(
+      apiConst.updateAccessProject,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteAccessProject(id: string): Promise<void> {
+    await httpClient.post(apiConst.deleteAccessProject, { ID: id });
+  }
 }
 
 // یک خروجی برای استفاده در Context
-const AppServices = new ApiService()
-export default AppServices
+const AppServices = new ApiService();
+export default AppServices;

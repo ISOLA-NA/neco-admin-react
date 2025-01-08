@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { RightProjectData, RightItem } from "../../../Views/tab/tabData";
+import {
+  RightProjectData,
+  RightItem,
+} from "../../../../components/TabHandler/tab/tabData";
 
 interface RightProjectAccessProps {
   selectedRow: any; // اینجا expects {id: string, ...}
