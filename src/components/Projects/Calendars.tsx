@@ -303,7 +303,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(({ selectedRow },
                     </span>
                     {hasValue && (
                       <span className="text-xs mt-1">
-                        {exceptionData[dateStr]}h
+                        {exceptionData[dateStr]}
                       </span>
                     )}
                   </div>
