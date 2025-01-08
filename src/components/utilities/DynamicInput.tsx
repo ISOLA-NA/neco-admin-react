@@ -17,6 +17,11 @@ interface DynamicInputProps {
   errorMessage?: string; // پیام خطا
   disabled?: boolean; // غیرفعال کردن ورودی
   loading?: boolean; // وضعیت بارگذاری
+
+  // ویژ‌گی‌های اختیاری مربوط به ورودی‌های عددی
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
@@ -33,6 +38,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   errorMessage = "",
   disabled = false,
   loading = false,
+  min,
+  max,
+  step,
 }) => {
   return (
     <div
@@ -60,6 +68,9 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         required={required}
         disabled={disabled || loading}
         aria-label={name}
+        min={typeof min !== "undefined" ? min : undefined}
+        max={typeof max !== "undefined" ? max : undefined}
+        step={typeof step !== "undefined" ? step : undefined}
         className={classNames(
           "peer w-full border border-purple-600 rounded-md px-4 py-2 pl-10 pr-10 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-300 text-gray-800 text-sm sm:text-base truncate",
           error
@@ -103,7 +114,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         </div>
       )}
 
-      {/* آیکون سمت راست */}
+      {/* آیکون سمت راست (در صورت عدم بارگذاری) */}
       {rightIcon && !loading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-600">
           {rightIcon}

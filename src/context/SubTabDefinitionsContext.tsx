@@ -385,6 +385,21 @@ export const SubTabDefinitionsProvider: React.FC<{
             field: "Name",
             filter: "agTextColumnFilter",
           },
+          {
+            headerName: "Address",
+            field: "Address",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "WFTemplateName",
+            field: "WFTemplateName",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "EntityTypeName",
+            field: "EntityTypeName",
+            filter: "agTextColumnFilter",
+          },
         ],
         iconVisibility: {
           showAdd: true,
@@ -422,7 +437,6 @@ export const SubTabDefinitionsProvider: React.FC<{
             field: "Name",
             filter: "agTextColumnFilter",
           },
-
         ],
         iconVisibility: {
           showAdd: true,

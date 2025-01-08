@@ -95,6 +95,18 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 ) => {
   const api = useApi();
 
+  const formTemplateOptions: Option[] = [
+    { value: "1", label: "Form Template 1" },
+    { value: "2", label: "Form Template 2" },
+    { value: "3", label: "Form Template 3" },
+  ];
+
+  const approvalFlowTemplateOptions: Option[] = [
+    { value: "1", label: "Approval Flow 1" },
+    { value: "2", label: "Approval Flow 2" },
+    { value: "3", label: "Approval Flow 3" },
+  ];
+
   // تشخیص حالت افزودن یا ویرایش
   const isEditMode = Boolean(selectedRow?.ID);
 
