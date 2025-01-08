@@ -28,6 +28,7 @@ import AppServices, {
   ProgramType,
   ProjectWithCalendar,
   OdpWithExtra,
+  EntityCollection,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -116,6 +117,11 @@ interface ApiContextType {
   insertOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>;
   updateOdp: (data: OdpWithExtra) => Promise<OdpWithExtra>;
   deleteOdp: (id: number) => Promise<void>;
+
+  getAllEntityCollection: () => Promise<EntityCollection[]>;
+  insertEntityCollection: (data: EntityCollection) => Promise<EntityCollection>;
+  updateEntityCollection: (data: EntityCollection) => Promise<EntityCollection>;
+  deleteEntityCollection: (id: number) => Promise<void>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -207,6 +213,11 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertOdp: AppServices.insertOdp.bind(AppServices),
     updateOdp: AppServices.updateOdp.bind(AppServices),
     deleteOdp: AppServices.deleteOdp.bind(AppServices),
+
+    getAllEntityCollection: AppServices.getAllEntityCollection.bind(AppServices),
+    insertEntityCollection: AppServices.insertEntityCollection.bind(AppServices),
+    updateEntityCollection: AppServices.updateEntityCollection.bind(AppServices),
+    deleteEntityCollection: AppServices.deleteEntityCollection.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

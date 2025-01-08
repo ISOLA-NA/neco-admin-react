@@ -393,6 +393,27 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+      Procedures: {
+        endpoint: api.getAllEntityCollection,
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Description",
+            field: "Description",
+            filter: "agTextColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
 
       // -------------------
       // MenuTab

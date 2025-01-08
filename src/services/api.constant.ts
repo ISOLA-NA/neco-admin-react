@@ -76,4 +76,8 @@ export const apiConst = Object.freeze({
   insertOdp: "api/KnowledgeType/Insert",
   updateOdp: "api/KnowledgeType/Update",
   deleteOdp: "api/KnowledgeType/Delete",
+  getAllEntityCollection:"api/EntityCollection/GetAll",
+  insertntityCollection:"api/EntityCollection/Insert",
+  updatelEntityCollection:"api/EntityCollection/Update",
+  deleteEntityCollection:"api/EntityCollection/Delete",
 });

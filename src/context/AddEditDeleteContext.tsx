@@ -11,6 +11,7 @@ import {
   ProgramType,
   OdpWithExtra,
 } from "./ApiContext";
+import { EntityCollection } from "../services/api.services";
 
 // Define CommandData if it's different from CommandItem
 interface CommandData {
@@ -162,10 +163,21 @@ interface OdpData {
   nWFTemplateID: number;
 }
 
+interface ProcedureData {
+  ID?: number;
+  Name: string;
+  Description?: string | null;
+  Configuration?: string | null;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified?: string | null;
+  ModifiedById?: string | null;
+  ProjectsStr?: string | null;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
-  handleDelete: (subTabName: string, id: number) => Promise<void>;
   handleDuplicate: () => void;
   handleSaveConfiguration: (
     data: ConfigurationData
@@ -180,6 +192,8 @@ interface AddEditDeleteContextType {
   ) => Promise<ProgramTemplateItem | null>;
   handleSaveProgramType: (data: ProgramTypeData) => Promise<ProgramType | null>;
   handleSaveOdp: (data: OdpData) => Promise<OdpWithExtra | null>;
+  handleSaveProcedure: (data: ProcedureData) => Promise<EntityCollection | null>;
+
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -201,43 +215,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     console.log("Edit action triggered from context");
     // Logic to open edit form
   };
-
-  const handleDelete = async (subTabName: string, id: number) => {
-    setIsLoading(true);
-    try {
-      if (subTabName === "Configurations") {
-        await api.deleteConfiguration(id);
-        console.log("Configuration deleted successfully!");
-      } else if (subTabName === "Commands") {
-        await api.deleteCommand(id);
-        console.log("Command deleted successfully!");
-      } else if (subTabName === "Users") {
-        await api.deleteUser(String(id));
-        console.log("User deleted successfully!");
-      } else if (subTabName === "Roles") {
-        await api.deleteRole(String(id));
-        console.log("User deleted successfully!");
-      } else if (subTabName === "Enterprises") {
-        await api.deleteCompany(id);
-        console.log("Company deleted successfully!");
-      } else if (subTabName === "RoleGroups") {
-        await api.deletePostCat(id);
-        console.log("Role Group deleted successfully!");
-      } else if (subTabName === "ProgramTemplate") {
-        await api.deleteProgramTemplate(id);
-        console.log("Role Group deleted successfully!");
-      } else if (subTabName === "ProgramTypes") {
-        await api.deleteProgramType(id);
-        console.log("Role Group deleted successfully!");
-      }
-    } catch (error) {
-      console.error("Error deleting record:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+ 
   const handleDuplicate = () => {
     console.log("Duplicate action triggered from context");
     // Logic to duplicate a record
@@ -626,12 +604,48 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+
+  const handleSaveProcedure = async (
+    data: ProcedureData
+  ): Promise<EntityCollection | null> => {
+    setIsLoading(true);
+    try {
+      const procedure: EntityCollection = {
+        ID: data.ID,
+        Name: data.Name,
+        Description: data.Description || null,
+        Configuration: data.Configuration || null,
+        IsGlobal: data.IsGlobal,
+        IsVisible: data.IsVisible,
+        LastModified: data.LastModified || new Date().toISOString(),
+        ModifiedById: data.ModifiedById || null,
+        ProjectsStr: data.ProjectsStr || null
+      };
+  
+      let result: EntityCollection;
+      if (procedure.ID) {
+        // Update existing procedure
+        result = await api.updateEntityCollection(procedure);
+        console.log("Procedure updated:", result);
+      } else {
+        // Add new procedure
+        result = await api.insertEntityCollection(procedure);
+        console.log("Procedure inserted:", result);
+      }
+  
+      return result;
+    } catch (error) {
+      console.error("Error saving Procedure:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <AddEditDeleteContext.Provider
       value={{
         handleAdd,
         handleEdit,
-        handleDelete,
         handleDuplicate,
         handleSaveConfiguration,
         handleSaveCommand,
@@ -642,6 +656,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveProgramTemplate,
         handleSaveProgramType,
         handleSaveOdp,
+        handleSaveProcedure
       }}
     >
       {children}

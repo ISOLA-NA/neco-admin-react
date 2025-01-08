@@ -1,213 +1,235 @@
-// src/components/General/Procedure.tsx
+// src/components/Projects/Procedures.tsx
 
-import React, { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import ListSelector from "../ListSelector/ListSelector";
-import DynamicModal from "../utilities/DynamicModal";
-import TableSelector from "../General/Configuration/TableSelector"; // Ensure the path is correct
+import TableSelector from "../General/Configuration/TableSelector";
+import { useApi } from "../../context/ApiContext";
+import { EntityCollection, Project } from "../../services/api.services";
+import { showAlert } from "../utilities/Alert/DynamicAlert";
+
+export interface ProcedureHandle {
+  save: () => Promise<boolean>;
+}
 
 interface ProcedureProps {
-  selectedRow: any;
+  selectedRow: EntityCollection | null;
 }
 
-const relatedProjectsData = [
-  {
-    ID: "1",
-    ProjectName: "Project Alpha",
-    Name: "Project Alpha",
-    IsVisible: true,
-    IsIdea: false,
-    State: "Active",
-  },
-  {
-    ID: "2",
-    ProjectName: "Project Beta",
-    Name: "Project Beta",
-    IsVisible: true,
-    IsIdea: false,
-    State: "Planning",
-  },
-  // Add more projects as needed...
-];
+// Helper functions for processing pipe-separated strings
+const parseIds = (idsStr?: string): string[] => {
+  if (!idsStr) return [];
+  return idsStr.split("|").filter(Boolean);
+};
 
-function getAssociatedProjects(
+const getAssociatedProjects = (
   projectsStr?: string,
-  projectsData?: { ID: string | number; Name: string }[]
-) {
-  const safeProjectsData = projectsData || [];
-  const safeProjectsStr = projectsStr || "";
-  const projectsArray = safeProjectsStr.split("|").filter(Boolean);
-  return safeProjectsData.filter(
-    (project) => projectsArray.includes(String(project.ID)) // Convert project.ID to string
+  projectsData?: Array<{ ID: string; Name: string }>
+) => {
+  const projectIds = parseIds(projectsStr);
+  return (projectsData || []).filter((project) =>
+    projectIds.includes(String(project.ID))
   );
-}
+};
 
-const Procedure: React.FC<ProcedureProps> = ({ selectedRow }) => {
-  const [procedureData, setProcedureData] = useState<{
-    ID: string | number;
-    Name: string;
-    Description: string;
-    ProjectsStr: string;
-    IsGlobal: boolean;
-  }>({
-    ID: "",
-    Name: "",
-    Description: "",
-    ProjectsStr: "",
-    IsGlobal: false,
-  });
+const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
+  ({ selectedRow }, ref) => {
+    const api = useApi();
 
-  // Modal states
-  const [modalOpen, setModalOpen] = useState(false);
-  const [currentSelector, setCurrentSelector] = useState<string>("Projects");
-  const [selectedRowData, setSelectedRowData] = useState<any>(null);
+    // Initial procedure data state
+    const [procedureData, setProcedureData] = useState<EntityCollection>({
+      Name: "",
+      Description: "",
+      Configuration: null,
+      IsGlobal: false,
+      IsVisible: true,
+      ProjectsStr: "",
+    });
 
-  useEffect(() => {
-    if (selectedRow) {
-      setProcedureData({
-        ID: selectedRow.ID || "",
-        Name: selectedRow.Name || "",
-        Description: selectedRow.Description || "",
-        ProjectsStr: selectedRow.ProjectsStr || "",
-        IsGlobal: selectedRow.IsGlobal || false,
-      });
-    } else {
-      setProcedureData({
-        ID: "",
-        Name: "",
-        Description: "",
-        ProjectsStr: "",
-        IsGlobal: false,
-      });
-    }
-  }, [selectedRow]);
+    // Projects state from API
+    const [projectsData, setProjectsData] = useState<Project[]>([]);
+    const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
 
-  const handleChange = (
-    field: keyof typeof procedureData,
-    value: string | boolean | (string | number)[]
-  ) => {
-    setProcedureData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+    // Selected items (IDs)
+    const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
 
-  const projectColumnDefs = [
-    { field: "Name", headerName: "Project Name" },
-    { field: "Description", headerName: "Description" },
-  ];
+    // Fetch projects from API
+    useEffect(() => {
+      const fetchProjects = async () => {
+        try {
+          setLoadingProjects(true);
+          const projects = await api.getAllProject();
+          setProjectsData(projects);
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+          showAlert("error", null, "Error", "Failed to fetch projects");
+        } finally {
+          setLoadingProjects(false);
+        }
+      };
+      fetchProjects();
+    }, [api]);
 
-  const handleProjectsChange = (selectedIds: (string | number)[]) => {
-    const uniqueSelectedIds = Array.from(new Set(selectedIds.map(String)));
-    const newProjectsStr =
-      uniqueSelectedIds.length > 0 ? uniqueSelectedIds.join("|") + "|" : "";
-    handleChange("ProjectsStr", newProjectsStr);
-  };
+    // Update state when selectedRow changes or projects load
+    useEffect(() => {
+      if (selectedRow) {
+        console.log("Editing existing Procedure:", selectedRow);
+        setProcedureData({
+          ID: selectedRow.ID,
+          Name: selectedRow.Name || "",
+          Description: selectedRow.Description || "",
+          Configuration: selectedRow.Configuration,
+          IsGlobal: selectedRow.IsGlobal || false,
+          IsVisible: selectedRow.IsVisible ?? true,
+          LastModified: selectedRow.LastModified,
+          ModifiedById: selectedRow.ModifiedById,
+          ProjectsStr: selectedRow.ProjectsStr || "",
+        });
 
-  const handleGlobalChange = (isGlobal: boolean) => {
-    handleChange("IsGlobal", isGlobal);
-  };
-
-  const associatedProjects = getAssociatedProjects(
-    procedureData.ProjectsStr,
-    relatedProjectsData
-  );
-  const selectedProjectIds = associatedProjects.map((p) => p.ID);
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setCurrentSelector("Projects");
-    setSelectedRowData(null);
-  };
-
-  const handleRowClick = (row: any) => {
-    setSelectedRowData(row);
-  };
-
-  const handleSelectButtonClick = () => {
-    if (selectedRowData) {
-      // Add the selected project to the list
-      const currentSelectedIds = selectedProjectIds.map((id) => String(id));
-      if (!currentSelectedIds.includes(String(selectedRowData.ID))) {
-        const newSelection = [
-          ...currentSelectedIds,
-          String(selectedRowData.ID),
-        ];
-        handleProjectsChange(newSelection);
+        if (projectsData.length > 0) {
+          const existingProjectIds = parseIds(selectedRow.ProjectsStr);
+          setSelectedProjectIds(existingProjectIds);
+          console.log("Existing Project IDs:", existingProjectIds);
+        }
+      } else {
+        console.log("Creating a new Procedure");
+        setProcedureData({
+          Name: "",
+          Description: "",
+          Configuration: null,
+          IsGlobal: false,
+          IsVisible: true,
+          ProjectsStr: "",
+        });
+        setSelectedProjectIds([]);
       }
-      handleCloseModal();
-    }
-  };
+    }, [selectedRow, projectsData]);
 
-  const handleRowDoubleClick = () => {
-    handleSelectButtonClick();
-  };
+    useImperativeHandle(ref, () => ({
+      async save() {
+        try {
+          if (!procedureData.Name.trim()) {
+            showAlert(
+              "error",
+              null,
+              "Validation Error",
+              "Procedure name is required"
+            );
+            return false;
+          }
 
-  return (
-    <div>
+          console.log("Final selected Project IDs:", selectedProjectIds);
+
+          const dataToSave: EntityCollection = {
+            ...procedureData,
+            ProjectsStr:
+              selectedProjectIds.join("|") +
+              (selectedProjectIds.length > 0 ? "|" : ""),
+            LastModified: new Date().toISOString(),
+          };
+
+          console.log("Data to be saved:", dataToSave);
+
+          if (selectedRow && selectedRow.ID) {
+            await api.updateEntityCollection(dataToSave);
+            console.log("Procedure updated successfully");
+          } else {
+            await api.insertEntityCollection(dataToSave);
+            console.log("Procedure inserted successfully");
+          }
+          return true;
+        } catch (error) {
+          console.error("Error saving procedure:", error);
+          showAlert("error", null, "Error", "Failed to save procedure data");
+          return false;
+        }
+      },
+    }));
+
+    const handleChange = (field: keyof EntityCollection, value: any) => {
+      setProcedureData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    };
+
+    const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
+
+    const handleProjectsChange = (selectedIds: (string | number)[]) => {
+      setSelectedProjectIds(selectedIds.map(String));
+      console.log("Projects selected:", selectedIds);
+    };
+
+    const handleGlobalChange = (isGlobal: boolean) => {
+      handleChange("IsGlobal", isGlobal);
+      console.log("IsGlobal changed to:", isGlobal);
+    };
+
+    const projectsListData = projectsData.map((proj) => ({
+      ID: proj.ID,
+      Name: proj.ProjectName,
+    }));
+
+    const selectedProjectsForModal = getAssociatedProjects(
+      procedureData.ProjectsStr,
+      projectsListData
+    );
+
+    return (
       <TwoColumnLayout>
         {/* Name Input */}
         <DynamicInput
           name="Name"
           type="text"
           value={procedureData.Name}
-          placeholder=""
+          placeholder="Enter procedure name"
           onChange={(e) => handleChange("Name", e.target.value)}
-          required={true}
+          required
+          className="mb-4"
         />
 
-        {/* Description Textarea */}
+        {/* Description */}
         <CustomTextarea
-          id="Description"
           name="Description"
-          value={procedureData.Description}
-          placeholder=""
+          value={procedureData.Description || ""}
+          placeholder="Enter description"
           onChange={(e) => handleChange("Description", e.target.value)}
+          className="mb-4"
         />
 
-        {/* Related Projects List Selector */}
+        {/* Projects Selector */}
         <ListSelector
-          title="Related Projects"
+          title="Projects"
+          className="mb-4"
           columnDefs={projectColumnDefs}
-          rowData={relatedProjectsData}
+          rowData={projectsListData}
           selectedIds={selectedProjectIds}
           onSelectionChange={handleProjectsChange}
           showSwitcher={true}
           isGlobal={procedureData.IsGlobal}
           onGlobalChange={handleGlobalChange}
+          loading={loadingProjects}
           ModalContentComponent={TableSelector}
           modalContentProps={{
             columnDefs: projectColumnDefs,
-            rowData: relatedProjectsData,
-            selectedRow: selectedRowData,
-            onRowDoubleClick: handleRowDoubleClick,
-            onRowClick: handleRowClick,
-            onSelectButtonClick: handleSelectButtonClick,
-            isSelectDisabled: !selectedRowData,
-            onClose: handleCloseModal,
-            onSelectFromButton: handleSelectButtonClick,
+            rowData: projectsListData,
+            selectedRows: selectedProjectsForModal,
+            onRowDoubleClick: (rows: any[]) =>
+              handleProjectsChange(rows.map((row) => row.ID)),
+            selectionMode: "multiple",
           }}
         />
       </TwoColumnLayout>
+    );
+  }
+);
 
-      {/* Dynamic Modal for Selecting Projects */}
-      <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
-        {currentSelector === "Projects" && (
-          <TableSelector
-            columnDefs={projectColumnDefs}
-            rowData={relatedProjectsData}
-            selectedRow={selectedRowData}
-            onRowDoubleClick={handleRowDoubleClick}
-            onRowClick={handleRowClick}
-            onSelectButtonClick={handleSelectButtonClick}
-            isSelectDisabled={!selectedRowData}
-          />
-        )}
-      </DynamicModal>
-    </div>
-  );
-};
-
+Procedure.displayName = "Procedure";
 export default Procedure;
