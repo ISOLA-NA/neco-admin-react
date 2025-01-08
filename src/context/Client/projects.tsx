@@ -33,9 +33,14 @@ interface Project {
 }
 
 interface ProjectContextType {
-  data: Project[];
+  projects: Project[];
   loading: boolean;
   error: string | null;
+  selectedProjects: Project[];
+  toggleProjectSelection: (project: Project) => void;
+  clearSelectedProjects: () => void;
+  selectAllProjects: () => void;
+  deselectAllProjects: () => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -47,7 +52,8 @@ interface ProjectProviderProps {
 export const ProjectProvider: React.FC<ProjectProviderProps> = ({
   children,
 }) => {
-  const [data, setData] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProjects, setSelectedProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,20 +63,58 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
     try {
       const response = await AppServices.GetAllUserProject();
       console.log("Projects", response);
-      setData(response.data);
+      const sortedProjects = response.data
+        .filter((project) => project.ProjectName !== "")
+        .sort((a, b) =>
+          a.ProjectName.toLowerCase().localeCompare(
+            b.ProjectName.toLowerCase(),
+          ),
+        );
+      setProjects(sortedProjects);
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      setError("Failed to fetch projects");
     } finally {
       setLoading(false);
     }
   };
 
+  const toggleProjectSelection = (project: Project) => {
+    setSelectedProjects(
+      (prevSelected) =>
+        prevSelected.some((p) => p.ID === project.ID)
+          ? prevSelected.filter((p) => p.ID !== project.ID) // Remove if already selected
+          : [...prevSelected, project], // Add if not selected
+    );
+  };
+
+  const clearSelectedProjects = () => {
+    setSelectedProjects([]);
+  };
+  const selectAllProjects = () => {
+    setSelectedProjects(projects);
+  };
+
+  const deselectAllProjects = () => {
+    setSelectedProjects([]);
+  };
   useEffect(() => {
     fetchData();
   }, []);
 
   return (
-    <ProjectContext.Provider value={{ data, loading, error }}>
+    <ProjectContext.Provider
+      value={{
+        projects,
+        loading,
+        error,
+        selectedProjects,
+        toggleProjectSelection,
+        clearSelectedProjects,
+        selectAllProjects,
+        deselectAllProjects,
+      }}
+    >
       {children}
     </ProjectContext.Provider>
   );
@@ -79,7 +123,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
 export const useProject = (): ProjectContextType => {
   const context = useContext(ProjectContext);
   if (!context) {
-    throw new Error("useProject must be used within an ProjectProvider");
+    throw new Error("useProject must be used within a ProjectProvider");
   }
   return context;
 };

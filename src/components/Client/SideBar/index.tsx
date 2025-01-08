@@ -4,8 +4,10 @@ import AppServices from "../../../services/api.services";
 import { useEffect, useState } from "react";
 import { unGZip } from "../../../utils/ungzip";
 import ProjectsBar from "./projects";
+import { useCommand } from "../../../context/Client/commands";
 export default function SideBar() {
   const [ribbon, setRibbon] = useState([]);
+  const { handleSetCommand } = useCommand();
   const getAllMenuClient = async () => {
     const res = await AppServices.GetAllMenuClient();
     console.log(res);
@@ -41,7 +43,26 @@ export default function SideBar() {
                                 <ul>
                                   {group.MenuItems.map((groupItem) => (
                                     <li key={groupItem.ID}>
-                                      <a>{groupItem.Name}</a>
+                                      <a
+                                        onClick={() => {
+                                          console.log(groupItem);
+                                          if (
+                                            groupItem.CommandWeb !== null &&
+                                            groupItem.CommandWeb !== ""
+                                          ) {
+                                            handleSetCommand(
+                                              groupItem.CommandWeb,
+                                            );
+                                          } else if (
+                                            groupItem.Command !== null &&
+                                            groupItem.Command !== ""
+                                          ) {
+                                            handleSetCommand(groupItem.Command);
+                                          }
+                                        }}
+                                      >
+                                        {groupItem.Name}
+                                      </a>
                                     </li>
                                   ))}
                                 </ul>

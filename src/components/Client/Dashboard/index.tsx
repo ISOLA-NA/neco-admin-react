@@ -45,14 +45,14 @@ const renderCustomizedLabel = ({
 };
 
 export default function ClientDashboard() {
-  const { data, loading, error } = useProject();
+  const { projects, selectedProjects, toggleProjectSelection } = useProject();
 
   return (
     <div className="h-full flex flex-col justify-between py-10">
       <div className="py-5 px-2 grid grid-cols-2 h-[200px]">
         <div className="flex flex-row">
           <ResponsiveContainer width="50%" height="100%">
-            <PieChart width={400} height={400}>
+            <PieChart width={200} height={200}>
               <Pie
                 data={data}
                 cx="50%"
@@ -149,17 +149,27 @@ export default function ClientDashboard() {
       </div>
       <div className="py-5 px-2 grid grid-cols-4 h-[400px]  ">
         <div className="bg-slate-50 flex flex-col justify-start items-center gap-2 p-2 overflow-auto">
-          {data.map((project) => (
-            <div
-              key={project.ID}
-              className="border p-2 rounded-lg w-full flex justify-start items-center cursor-pointer hover:bg-slate-100 hover:border-slate-500 duration-150"
-            >
-              <div className="mr-3">
-                <SiCodefactor />
+          {projects.map((project) => {
+            const isSelected = selectedProjects.some(
+              (selected) => selected.ID === project.ID,
+            );
+            return (
+              <div
+                key={project.ID}
+                className={`border p-2 rounded-lg w-full flex justify-start items-center cursor-pointer duration-150 ${
+                  isSelected
+                    ? "bg-blue-100 border-blue-500"
+                    : "hover:bg-slate-100 hover:border-slate-500"
+                }`}
+                onClick={() => toggleProjectSelection(project)}
+              >
+                <div className="mr-3">
+                  <SiCodefactor />
+                </div>
+                <div className="truncate">{project.ProjectName}</div>
               </div>
-              <div className="truncate">{project.ProjectName}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div className="col-span-3 flex justify-between flex-wrap p-4 bg-slate-50 gap-3">
           <div className="flex justify-center items-center grow  border rounded-xl text-center hover:bg-slate-100 hover:border-slate-500 cursor-pointer duration-150">
