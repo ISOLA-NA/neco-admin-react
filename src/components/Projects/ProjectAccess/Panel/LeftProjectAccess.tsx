@@ -5,6 +5,7 @@ import DataTable from "../../../TableDynamic/DataTable";
 import DynamicSelector from "../../../utilities/DynamicSelector";
 import { useApi } from "../../../../context/ApiContext";
 import { AccessProject, Role } from "../../../../services/api.services";
+import { showAlert } from "../../../utilities/Alert/DynamicAlert";
 
 interface LeftProjectAccessProps {
   selectedRow: {
@@ -12,8 +13,8 @@ interface LeftProjectAccessProps {
     // سایر فیلدها...
   };
   onDoubleClickSubItem: (data: AccessProject) => void;
-  onAdd?: () => void; // پراپ جدید برای افزودن
-  onEdit?: () => void; // پراپ جدید برای ویرایش
+  onAddFromLeft?: () => void;
+  onEditFromLeft?: () => void;
 }
 
 interface ValueGetterParams {
@@ -23,8 +24,8 @@ interface ValueGetterParams {
 const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   selectedRow,
   onDoubleClickSubItem,
-  onAdd,
-  onEdit,
+  onAddFromLeft,
+  onEditFromLeft,
 }) => {
   const api = useApi();
 
@@ -38,9 +39,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   const [errorPosts, setErrorPosts] = useState<string | null>(null);
   const [errorRoles, setErrorRoles] = useState<string | null>(null);
 
-  /**
-   * ساخت map از نقش‌ها
-   */
+  // ساخت map از نقش‌ها
   const rolesMap = useMemo(() => {
     const map: Record<string, string> = {};
     roles.forEach((role) => {
@@ -51,9 +50,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     return map;
   }, [roles]);
 
-  /**
-   * فقط ردیف‌هایی که نقش معتبر دارند را نشان می‌دهیم
-   */
+  // فیلتر کردن داده‌ها فقط برای نقش‌های معتبر
   const filteredRowData = useMemo(() => {
     return leftRowData.filter((item) => {
       const key = item.nPostID?.trim().toLowerCase();
@@ -61,9 +58,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     });
   }, [leftRowData, rolesMap]);
 
-  /**
-   * ستون‌های جدول
-   */
+  // ستون‌های جدول
   const leftColumnDefs = useMemo(
     () => [
       {
@@ -84,14 +79,12 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         field: "AccessMode",
         filter: "agNumberColumnFilter",
       },
-      // سایر ستون‌ها در صورت نیاز...
+      // سایر ستون‌ها...
     ],
     [rolesMap]
   );
 
-  /**
-   * واکشی پست‌های یک پروژه
-   */
+  // واکشی پست‌های پروژه
   useEffect(() => {
     const fetchPostsInProject = async () => {
       setIsLoadingPosts(true);
@@ -110,13 +103,10 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         setIsLoadingPosts(false);
       }
     };
-
     fetchPostsInProject();
   }, [selectedRow, api]);
 
-  /**
-   * واکشی نقش‌ها
-   */
+  // واکشی نقش‌ها
   useEffect(() => {
     const fetchRoles = async () => {
       setIsLoadingRoles(true);
@@ -131,49 +121,31 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         setIsLoadingRoles(false);
       }
     };
-
     fetchRoles();
   }, [api]);
 
-  /**
-   * کلیک روی سطر
-   */
+  // کلیک روی سطر
   const handleSubItemClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
   };
 
-  /**
-   * دوبار کلیک روی سطر (ارسال به سمت راست و فعال‌سازی حالت ویرایش)
-   */
+  // دوبار کلیک روی سطر
   const handleSubItemDoubleClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
     onDoubleClickSubItem(data);
-    // فراخوانی پراپ مربوط به ویرایش
-    if (onEdit) {
-      onEdit();
+    // فراخوانی متد ویرایش (در والد)
+    if (onEditFromLeft) {
+      onEditFromLeft();
     }
   };
 
-  /**
-   * تغییر در DynamicSelector
-   */
-  const handleSelectorChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
-    const selected = leftRowData.find((item) => item.ID === value) || null;
-    setSelectedSubItemRow(selected);
-  };
-
-  /**
-   * دکمه‌ی +
-   * وقتی روی Add کلیک می‌شود، متد onAdd فراخوانی می‌شود
-   */
+  // دکمه‌ی + (Add)
   const handleAdd = () => {
-    // ایجاد یک ردیف جدید با مقادیر پیش‌فرض
+    // ساخت یک رکورد جدید با ID موقت
     const newRow: AccessProject = {
-      ID: "TEMP_" + Date.now(),
+      ID: "TEMP_" + Date.now(), // ID موقت
       nPostID: "",
-      // سایر فیلدها با مقادیر پیش‌فرض یا خالی
-      // مثال:
+      nProjectID: selectedRow ? selectedRow.ID : "",
       AccessMode: 0,
       AllowToDownloadGroup: false,
       AlowToAllTask: false,
@@ -195,23 +167,40 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       Show_Logs: false,
       Show_Procedure: false,
       Show_Related: false,
-      nProjectID: "",
     };
 
-    // ارسال ردیف جدید به والد (پنل سمت راست)
     onDoubleClickSubItem(newRow);
 
-    // اعلام به والد که Add کلیک شده است
-    if (onAdd) {
-      onAdd();
+    // اگر والد هم نیاز دارد بداند Add شده است
+    if (onAddFromLeft) {
+      onAddFromLeft();
     }
+  };
+
+  // دکمه‌ی Edit
+  const handleEdit = () => {
+    if (selectedSubItemRow) {
+      onDoubleClickSubItem(selectedSubItemRow);
+
+      if (onEditFromLeft) {
+        onEditFromLeft();
+      }
+    } else {
+      showAlert("warning", null, "Warning", "Please select a row to edit.");
+    }
+  };
+
+  // تغییر در selector
+  const handleSelectorChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    const selected = leftRowData.find((item) => item.ID === value) || null;
+    setSelectedSubItemRow(selected);
   };
 
   const isLoading = isLoadingPosts || isLoadingRoles;
 
   return (
     <div className="h-full p-4">
-      {/* خطاها */}
       {errorPosts && <div className="error mb-4">{errorPosts}</div>}
       {errorRoles && <div className="error mb-4">{errorRoles}</div>}
 
@@ -234,8 +223,12 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         rowData={filteredRowData}
         onRowDoubleClick={handleSubItemDoubleClick}
         setSelectedRowData={handleSubItemClick}
-        onAdd={handleAdd} // ارسال متد handleAdd به DataTable
-        onEdit={() => {}}
+        showDuplicateIcon={false}
+        showEditIcon={true}
+        showAddIcon={true}
+        showDeleteIcon={false}
+        onAdd={handleAdd}
+        onEdit={handleEdit}
         onDelete={() => {}}
         onDuplicate={() => {}}
         isLoading={isLoading}

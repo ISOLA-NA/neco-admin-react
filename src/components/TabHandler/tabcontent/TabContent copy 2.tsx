@@ -1,5 +1,3 @@
-// src/components/TabContent.tsx
-
 import React, {
   useState,
   useEffect,
@@ -539,7 +537,7 @@ const TabContent: FC<TabContentProps> = ({
   // Row interaction handlers
   const handleDoubleClick = (data: any) => {
     onRowDoubleClick(data);
-    setIsAdding(false); // در اینجا isAdding را به false تنظیم می‌کنیم تا حالت Update فعال شود
+    setIsAdding(false);
     setIsPanelOpen(true);
     if (activeSubTab === "Ribbons") {
       setNameInput(data.Name);
@@ -604,6 +602,9 @@ const TabContent: FC<TabContentProps> = ({
             break;
           case "ProgramTemplate":
             await api.deleteProgramTemplate(pendingSelectedRow.ID);
+            break;
+          case "ProgramTypes":
+            await api.deleteProgramType(pendingSelectedRow.ID);
             break;
           case "ProgramTypes":
             await api.deleteProgramType(pendingSelectedRow.ID);
@@ -676,18 +677,6 @@ const TabContent: FC<TabContentProps> = ({
     setDescriptionInput(e.target.value);
   };
 
-  // متد جدید برای حالت ویرایش
-  const handleEditFromLeft = () => {
-    setIsAdding(false); // حالت ویرایش
-    setIsPanelOpen(true);
-  };
-
-  // متد مربوط به افزودن از سمت چپ
-  const handleAddFromLeft = () => {
-    setIsAdding(true); // حالت افزودن
-    setIsPanelOpen(true);
-  };
-
   // Determine which ref to use based on activeSubTab
   const getActiveRef = () => {
     switch (activeSubTab) {
@@ -720,6 +709,17 @@ const TabContent: FC<TabContentProps> = ({
       default:
         return null;
     }
+  };
+
+  const handleAddFromLeft = () => {
+    setIsPanelOpen(true); // پنل را باز می‌کنیم
+    setIsAdding(true); // حالت اضافه‌کردن را فعال می‌کنیم
+    // هر کار دیگری که لازم دارید...
+  };
+
+  const handleEditFromLeft = () => {
+    setIsAdding(false); // حالت ویرایش
+    setIsPanelOpen(true);
   };
 
   return (
@@ -764,14 +764,14 @@ const TabContent: FC<TabContentProps> = ({
           <DataTable
             columnDefs={columnDefs}
             rowData={fetchedRowData}
-            onRowDoubleClick={handleDoubleClick} // استفاده از متد handleDoubleClick جدید
+            onRowDoubleClick={handleDoubleClick}
             setSelectedRowData={handleRowClickLocal}
             showDuplicateIcon={showDuplicateIcon}
             showEditIcon={showEditIcon}
             showAddIcon={showAddIcon}
             showDeleteIcon={showDeleteIcon}
             onAdd={handleAddClick}
-            onEdit={onEdit} // ارسال پراپ onEdit به DataTable
+            onEdit={onEdit}
             onDelete={handleDeleteClick}
             onDuplicate={handleDuplicateClick}
             isLoading={isLoading}
@@ -949,3 +949,12 @@ const TabContent: FC<TabContentProps> = ({
 };
 
 export default TabContent;
+// 2/در جدول لفت پروجکت اکسس وقتی روی ادد کلیک کردم update در پنل هدر به save تبدیل بشه
+
+// 3/در جدول که در لفت  پروچکت اکسس است وقتی روی ردیف دابل کلیک کردم یا یک کلیک کردم و سپس روی ادیت جدول زدم save در پنل هدر به اپدیت تبدیل بشه
+
+// 4/وقتی روی ادد در جدول لفت پروجکت اکسس میزنم اطلاعات جدول لفت پروجکت اکسس پاک نشن
+
+// 5/ و در نهایت وقتی روی دلیت در جدول لفت پروجکت اکسس زدم api زیر کال بشه
+
+// deleteAccessProject

@@ -24,34 +24,35 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
     const [selectedPostAccess, setSelectedPostAccess] =
       useState<AccessProject | null>(null);
 
-    // تعریف متدهای save و update
+    // تعریف متدهای save و update با تشخیص insert/update
     useImperativeHandle(ref, () => ({
       async save() {
         try {
-          if (selectedPostAccess) {
-            await api.updateAccessProject(selectedPostAccess);
-            showAlert(
-              "success",
-              null,
-              "Saved",
-              "Project access saved successfully."
-            );
-          } else {
+          if (!selectedPostAccess) {
             showAlert(
               "warning",
               null,
               "Warning",
               "No project access selected to save."
             );
+            return;
           }
-        } catch (error) {
-          console.error("Error saving project access:", error);
-          showAlert("error", null, "Error", "Failed to save project access.");
-        }
-      },
-      async update() {
-        try {
-          if (selectedPostAccess) {
+
+          // اگر آی‌دی نداشت یا با TEMP شروع می‌شد => insert
+          if (
+            !selectedPostAccess.ID ||
+            selectedPostAccess.ID.startsWith("TEMP_")
+          ) {
+            const inserted = await api.insertAccessProject(selectedPostAccess);
+            showAlert(
+              "success",
+              null,
+              "Inserted",
+              "Project access inserted successfully."
+            );
+            setSelectedPostAccess(inserted);
+          } else {
+            // در غیر این صورت update
             await api.updateAccessProject(selectedPostAccess);
             showAlert(
               "success",
@@ -59,14 +60,33 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
               "Updated",
               "Project access updated successfully."
             );
-          } else {
+          }
+        } catch (error) {
+          console.error("Error saving project access:", error);
+          showAlert("error", null, "Error", "Failed to save project access.");
+        }
+      },
+
+      async update() {
+        // این متد اگر می‌خواهید فقط همیشه حالت ویرایش باشد
+        // در صورت تمایل می‌توانید همان منطق را تکرار کنید
+        try {
+          if (!selectedPostAccess) {
             showAlert(
               "warning",
               null,
               "Warning",
               "No project access selected to update."
             );
+            return;
           }
+          await api.updateAccessProject(selectedPostAccess);
+          showAlert(
+            "success",
+            null,
+            "Updated",
+            "Project access updated successfully."
+          );
         } catch (error) {
           console.error("Error updating project access:", error);
           showAlert("error", null, "Error", "Failed to update project access.");
@@ -90,8 +110,8 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
           <LeftProjectAccess
             selectedRow={selectedProject}
             onDoubleClickSubItem={handleLeftDoubleClick}
-            onAdd={onAddFromLeft} // ارسال پراپ افزودن
-            onEdit={onEditFromLeft} // ارسال پراپ ویرایش
+            onAddFromLeft={onAddFromLeft}
+            onEditFromLeft={onEditFromLeft}
           />
         </div>
 
