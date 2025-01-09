@@ -24,7 +24,9 @@ import { ProgramTypeHandle } from "../../Programs/ProgramTypes";
 import { ProcedureHandle } from "../../Projects/Procedures";
 import { CalendarHandle } from "../../Projects/Calendars";
 import { OdpHandle } from "../../Projects/Odp";
-import { ProjectAccessHandle } from "../../Projects/ProjectAccess/ProjectsAccess";
+import ProjectAccess, {
+  ProjectAccessHandle,
+} from "../../Projects/ProjectAccess/ProjectsAccess";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
@@ -867,7 +869,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "ProgramTypes" ||
                     activeSubTab === "Odp" ||
                     activeSubTab === "Procedures" ||
-                    activeSubTab === "Calendars")
+                    activeSubTab === "Calendars" ||
+                    activeSubTab === "ProjectsAccess")
                     ? handleInsert
                     : undefined
                 }
@@ -885,7 +888,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "ProgramTypes" ||
                     activeSubTab === "Odp" ||
                     activeSubTab === "Procedures" ||
-                    activeSubTab === "Calendars")
+                    activeSubTab === "Calendars" ||
+                    activeSubTab === "ProjectsAccess")
                     ? handleUpdate
                     : undefined
                 }
@@ -895,27 +899,13 @@ const TabContent: FC<TabContentProps> = ({
               />
             )}
 
+            {/* محتوای Right Panel */}
             {activeSubTab === "ProjectsAccess" && (
               <Suspense fallback={<div>Loading Projects Access...</div>}>
-                <div className="flex h-full w-full gap-4">
-                  <div className="w-1/2 bg-white rounded-lg shadow-lg">
-                    <LeftProjectAccess
-                      selectedRow={selectedRow}
-                      onDoubleClickSubItem={handleLeftProjectDoubleClick}
-                    />
-                  </div>
-                  <div className="w-1/2 bg-white rounded-lg shadow-lg">
-                    {showRightAccessPanel && selectedSubItemForRight ? (
-                      <RightProjectAccess
-                        selectedRow={selectedSubItemForRight}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-500">
-                        Select a role to view access settings
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <ProjectAccess
+                  ref={projectAccessRef}
+                  selectedProject={selectedRow}
+                />
               </Suspense>
             )}
 
@@ -946,3 +936,12 @@ const TabContent: FC<TabContentProps> = ({
 };
 
 export default TabContent;
+// 2/در جدول لفت پروجکت اکسس وقتی روی ادد کلیک کردم update در پنل هدر به save تبدیل بشه
+
+// 3/در جدول که در لفت  پروچکت اکسس است وقتی روی ردیف دابل کلیک کردم یا یک کلیک کردم و سپس روی ادیت جدول زدم save در پنل هدر به اپدیت تبدیل بشه
+
+// 4/وقتی روی ادد در جدول لفت پروجکت اکسس میزنم اطلاعات جدول لفت پروجکت اکسس پاک نشن
+
+// 5/ و در نهایت وقتی روی دلیت در جدول لفت پروجکت اکسس زدم api زیر کال بشه
+
+// deleteAccessProject
