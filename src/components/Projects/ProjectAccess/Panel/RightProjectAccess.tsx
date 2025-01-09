@@ -1,69 +1,16 @@
-import React, { useEffect, useState } from "react";
-import {
-  RightProjectData,
-  RightItem,
-} from "../../../../components/TabHandler/tab/tabData";
+import React from "react";
 
 interface RightProjectAccessProps {
-  selectedRow: any; // اینجا expects {id: string, ...}
-}
-
-interface CheckItem extends RightItem {
-  checked: boolean;
+  selectedRow: Record<string, any>;
 }
 
 const RightProjectAccess: React.FC<RightProjectAccessProps> = ({
   selectedRow,
 }) => {
-  const [items, setItems] = useState<CheckItem[]>([]);
-  const [selectAll, setSelectAll] = useState(false);
-
-  useEffect(() => {
-    if (selectedRow && selectedRow.id && RightProjectData[selectedRow.id]) {
-      const data = RightProjectData[selectedRow.id];
-      const mapped = data.map((d) => ({ ...d }));
-      setItems(mapped);
-      const allSelected =
-        mapped.length > 0 && mapped.every((item) => item.checked);
-      setSelectAll(allSelected);
-    } else {
-      setItems([]);
-      setSelectAll(false);
-    }
-  }, [selectedRow]);
-
-  const handleCheckboxChange = (index: number) => {
-    const newItems = [...items];
-    newItems[index].checked = !newItems[index].checked;
-    setItems(newItems);
-
-    const allSelected =
-      newItems.length > 0 && newItems.every((item) => item.checked);
-    setSelectAll(allSelected);
-  };
-
-  const handleSelectAllChange = () => {
-    const newSelectAll = !selectAll;
-    setSelectAll(newSelectAll);
-    const newItems = items.map((item) => ({ ...item, checked: newSelectAll }));
-    setItems(newItems);
-  };
-
-  if (!selectedRow || !selectedRow.id) {
-    return (
-      <div className="text-gray-500 flex justify-center items-center h-full">
-        No row selected.
-      </div>
-    );
-  }
-
-  if (!RightProjectData[selectedRow.id]) {
-    return (
-      <div className="text-gray-500 flex justify-center items-center h-full">
-        No data found for this selection.
-      </div>
-    );
-  }
+  // تمام کلیدهایی که مقدارشان بولین است
+  const booleanKeys = Object.keys(selectedRow).filter(
+    (key) => typeof selectedRow[key] === "boolean"
+  );
 
   return (
     <div
@@ -75,40 +22,34 @@ const RightProjectAccess: React.FC<RightProjectAccessProps> = ({
       <h2 className="text-center text-2xl font-bold text-gray-800 mb-4">
         Access
       </h2>
-      <div className="flex items-center mb-4">
-        <input
-          type="checkbox"
-          id="selectAll"
-          checked={selectAll}
-          onChange={handleSelectAllChange}
-          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-        />
-        <label htmlFor="selectAll" className="ml-2 text-gray-700">
-          Select All
-        </label>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="flex items-center border border-gray-400 p-2 rounded bg-white shadow-md hover:shadow-lg transition"
-          >
-            <input
-              type="checkbox"
-              checked={item.checked}
-              onChange={() => handleCheckboxChange(index)}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <label
-              className="ml-2 text-gray-700 whitespace-nowrap overflow-hidden overflow-ellipsis"
-              title={item.detail}
+      {booleanKeys.length === 0 ? (
+        <p className="text-center text-gray-500">
+          No boolean fields available.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {booleanKeys.map((key) => (
+            <div
+              key={key}
+              className="flex items-center border border-gray-400 p-2 rounded bg-white shadow-md hover:shadow-lg transition"
             >
-              {item.detail}
-            </label>
-          </div>
-        ))}
-      </div>
+              <input
+                type="checkbox"
+                checked={selectedRow[key]}
+                readOnly
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <label
+                className="ml-2 text-gray-700 whitespace-nowrap overflow-hidden overflow-ellipsis"
+                title={`${key}: ${selectedRow[key]}`}
+              >
+                {key}
+              </label>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

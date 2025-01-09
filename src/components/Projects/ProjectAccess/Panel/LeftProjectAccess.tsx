@@ -4,18 +4,16 @@ import DynamicSelector from "../../../utilities/DynamicSelector";
 import { useApi } from "../../../../context/ApiContext";
 import { AccessProject, Role } from "../../../../services/api.services";
 
-// تعریف اینترفیس‌ها برای بهبود ایمنی نوع
 interface LeftProjectAccessProps {
   selectedRow: {
     ID: string;
-    // سایر فیلدهای مرتبط
+    // ...
   };
   onDoubleClickSubItem: (data: AccessProject) => void;
 }
 
 interface ValueGetterParams {
   data: AccessProject;
-  // سایر فیلدهای مرتبط در صورت نیاز
 }
 
 const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
@@ -34,7 +32,9 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   const [errorPosts, setErrorPosts] = useState<string | null>(null);
   const [errorRoles, setErrorRoles] = useState<string | null>(null);
 
-  // ایجاد یک Map برای نقش‌ها برای جستجوی سریع‌تر
+  /**
+   * ساخت map از نقش‌ها
+   */
   const rolesMap = useMemo(() => {
     const map: Record<string, string> = {};
     roles.forEach((role) => {
@@ -45,7 +45,9 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     return map;
   }, [roles]);
 
-  // فیلتر کردن داده‌ها برای حذف ردیف‌های "No Match"
+  /**
+   * فقط ردیف‌هایی که نقش معتبر دارند را نشان می‌دهیم
+   */
   const filteredRowData = useMemo(() => {
     return leftRowData.filter((item) => {
       const key = item.nPostID?.trim().toLowerCase();
@@ -53,20 +55,20 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     });
   }, [leftRowData, rolesMap]);
 
-  // تعریف ستون‌ها با استفاده از useMemo برای بهینه‌سازی
+  /**
+   * ستون‌های جدول
+   */
   const leftColumnDefs = useMemo(
     () => [
       {
         headerName: "Name",
         valueGetter: (params: ValueGetterParams) => {
-          const record: AccessProject = params.data;
+          const record = params.data;
           if (!record.nPostID) {
             return "(No Match)";
           }
-
           const key = record.nPostID.trim().toLowerCase();
           const roleName = rolesMap[key];
-
           return roleName || "(No Match)";
         },
         filter: "agTextColumnFilter",
@@ -76,12 +78,14 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         field: "AccessMode",
         filter: "agNumberColumnFilter",
       },
-      // افزودن ستون‌های دیگر در صورت نیاز
+      // سایر ستون‌ها در صورت نیاز...
     ],
     [rolesMap]
   );
 
-  // دریافت پست‌های مرتبط با پروژه انتخاب شده
+  /**
+   * واکشی پست‌های یک پروژه
+   */
   useEffect(() => {
     const fetchPostsInProject = async () => {
       setIsLoadingPosts(true);
@@ -90,7 +94,6 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         if (selectedRow && selectedRow.ID) {
           const data = await api.getPostsinProject(selectedRow.ID);
           setLeftRowData(data);
-          console.log("Fetched Posts:", data);
         } else {
           setLeftRowData([]);
         }
@@ -105,7 +108,9 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     fetchPostsInProject();
   }, [selectedRow, api]);
 
-  // دریافت تمامی نقش‌ها
+  /**
+   * واکشی نقش‌ها
+   */
   useEffect(() => {
     const fetchRoles = async () => {
       setIsLoadingRoles(true);
@@ -113,7 +118,6 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       try {
         const roleData = await api.getAllRoles();
         setRoles(roleData);
-        console.log("Fetched Roles:", roleData);
       } catch (error) {
         console.error("Error fetching roles:", error);
         setErrorRoles("Failed to load roles.");
@@ -125,34 +129,73 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     fetchRoles();
   }, [api]);
 
-  // مدیریت کلیک روی سطر
+  /**
+   * کلیک روی سطر
+   */
   const handleSubItemClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
   };
 
-  // مدیریت دوبار کلیک روی سطر
+  /**
+   * دوبار کلیک روی سطر (ارسال به سمت راست)
+   */
   const handleSubItemDoubleClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
     onDoubleClickSubItem(data);
   };
 
-  // مدیریت تغییر انتخاب در DynamicSelector
+  /**
+   * تغییر در DynamicSelector
+   */
   const handleSelectorChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     const selected = leftRowData.find((item) => item.ID === value) || null;
     setSelectedSubItemRow(selected);
   };
 
-  // ترکیب وضعیت بارگذاری
+  /**
+   * دکمه‌ی +
+   * فقط یک آبجکت جدید (فیلدهای بولین = false) می‌سازیم و به سمت راست ارسال می‌کنیم
+   * بدون تغییر در داده‌های جدول (leftRowData)
+   */
+  const handleAdd = () => {
+    // -- اگر می‌خواهید صرفاً کلیدهای بولین را false کنید:
+    //   1. از اولین ردیف جدول برای تشخیص کلیدهای بولین استفاده می‌کنیم
+    //      (در صورت وجود نداشتن ردیف، با یک شیء خالی کار می‌کنیم)
+    const sampleRow = leftRowData[0] || {};
+    const newRow: Record<string, any> = {};
+
+    //   2. برای هر فیلد بولین، مقدار false می‌گذاریم
+    //      برای فیلدهای غیر بولین می‌توانید خالی بگذارید یا هر مقدار دیگری
+    for (const [key, value] of Object.entries(sampleRow)) {
+      if (typeof value === "boolean") {
+        newRow[key] = false;
+      } else {
+        // اگر می‌خواهید مقدار قبلی حفظ شود، می‌توانید همان را کپی کنید
+        // یا به صورت دلخواه خالی یا مقدار دیگری بگذارید
+        newRow[key] = value;
+      }
+    }
+
+    // یک شناسه‌ی موقت برای آبجکت می‌گذاریم (فقط جهت نمایش در سمت راست)
+    newRow.ID = "TEMP_" + Date.now();
+
+    // مثلا فیلدی مثل nPostID را خالی می‌گذاریم تا در جدول دیده نشود (No Match)
+    // اما در هر صورت ما قصد نداریم این newRow را به جدول اضافه کنیم
+    newRow.nPostID = "";
+
+    // -- حالا این ردیف جدید را تنها به سمت راست (RightProjectAccess) ارسال می‌کنیم:
+    onDoubleClickSubItem(newRow as AccessProject);
+  };
+
   const isLoading = isLoadingPosts || isLoadingRoles;
 
   return (
     <div className="h-full p-4">
-      {/* نمایش پیام‌های خطا در صورت وجود */}
+      {/* خطاها */}
       {errorPosts && <div className="error mb-4">{errorPosts}</div>}
       {errorRoles && <div className="error mb-4">{errorRoles}</div>}
 
-      {/* DynamicSelector با مدیریت تغییر صحیح */}
       <DynamicSelector
         label="جستجو"
         options={filteredRowData.map((item) => ({
@@ -165,17 +208,14 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         error={false}
       />
 
-      {/* نمایش نشانگر بارگذاری */}
       {isLoading && <div className="loading-indicator">در حال بارگذاری...</div>}
 
-      {/* جدول اصلی */}
       <DataTable
         columnDefs={leftColumnDefs}
         rowData={filteredRowData}
         onRowDoubleClick={handleSubItemDoubleClick}
         setSelectedRowData={handleSubItemClick}
-        // خالی گذاشتن هندلرهای CRUD
-        onAdd={() => {}}
+        onAdd={handleAdd} // <-- کلیک روی + این تابع را صدا می‌زند
         onEdit={() => {}}
         onDelete={() => {}}
         onDuplicate={() => {}}
