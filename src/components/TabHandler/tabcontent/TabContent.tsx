@@ -711,6 +711,12 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
+  const handleAddFromLeft = () => {
+    setIsPanelOpen(true); // پنل را باز می‌کنیم
+    setIsAdding(true); // حالت اضافه‌کردن را فعال می‌کنیم
+    // هر کار دیگری که لازم دارید...
+  };
+
   return (
     <div
       ref={containerRef}
@@ -905,6 +911,7 @@ const TabContent: FC<TabContentProps> = ({
                 <ProjectAccess
                   ref={projectAccessRef}
                   selectedProject={selectedRow}
+                  onAddFromLeft={handleAddFromLeft} // پراپ جدید
                 />
               </Suspense>
             )}

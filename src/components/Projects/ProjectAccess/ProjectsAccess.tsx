@@ -14,10 +14,11 @@ export interface ProjectAccessHandle {
 
 interface ProjectAccessProps {
   selectedProject?: any;
+  onAddFromLeft?: () => void; // پراپ جدید
 }
 
 const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
-  ({ selectedProject }, ref) => {
+  ({ selectedProject, onAddFromLeft }, ref) => {
     const api = useApi();
     const [selectedPostAccess, setSelectedPostAccess] =
       useState<AccessProject | null>(null);
@@ -84,6 +85,7 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
           <LeftProjectAccess
             selectedRow={selectedProject}
             onDoubleClickSubItem={handleLeftDoubleClick}
+            onAdd={onAddFromLeft} // ارسال پراپ جدید به LeftProjectAccess
           />
         </div>
 

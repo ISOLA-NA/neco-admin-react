@@ -1,3 +1,5 @@
+// src/components/ProjectsAccess/Panel/LeftProjectAccess.tsx
+
 import React, { useState, useEffect, useMemo, ChangeEvent } from "react";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicSelector from "../../../utilities/DynamicSelector";
@@ -7,9 +9,10 @@ import { AccessProject, Role } from "../../../../services/api.services";
 interface LeftProjectAccessProps {
   selectedRow: {
     ID: string;
-    // ...
+    // سایر فیلدها...
   };
   onDoubleClickSubItem: (data: AccessProject) => void;
+  onAdd?: () => void; // پراپ جدید
 }
 
 interface ValueGetterParams {
@@ -19,6 +22,7 @@ interface ValueGetterParams {
 const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   selectedRow,
   onDoubleClickSubItem,
+  onAdd, // پراپ جدید
 }) => {
   const api = useApi();
 
@@ -155,37 +159,46 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
 
   /**
    * دکمه‌ی +
-   * فقط یک آبجکت جدید (فیلدهای بولین = false) می‌سازیم و به سمت راست ارسال می‌کنیم
-   * بدون تغییر در داده‌های جدول (leftRowData)
+   * وقتی روی Add کلیک می‌شود، متد onAdd فراخوانی می‌شود
    */
   const handleAdd = () => {
-    // -- اگر می‌خواهید صرفاً کلیدهای بولین را false کنید:
-    //   1. از اولین ردیف جدول برای تشخیص کلیدهای بولین استفاده می‌کنیم
-    //      (در صورت وجود نداشتن ردیف، با یک شیء خالی کار می‌کنیم)
-    const sampleRow = leftRowData[0] || {};
-    const newRow: Record<string, any> = {};
+    // ایجاد یک ردیف جدید با مقادیر پیش‌فرض
+    const newRow: AccessProject = {
+      ID: "TEMP_" + Date.now(),
+      nPostID: "",
+      // سایر فیلدها با مقادیر پیش‌فرض یا خالی
+      // مثال:
+      AccessMode: 0,
+      AllowToDownloadGroup: false,
+      AlowToAllTask: false,
+      AlowToEditRequest: false,
+      AlowToWordPrint: false,
+      CreateAlert: false,
+      CreateIssue: false,
+      CreateKnowledge: false,
+      CreateLetter: false,
+      CreateMeeting: false,
+      IsVisible: false,
+      LastModified: "",
+      PostName: null,
+      Show_Approval: false,
+      Show_Assignment: false,
+      Show_CheckList: false,
+      Show_Comment: false,
+      Show_Lessons: false,
+      Show_Logs: false,
+      Show_Procedure: false,
+      Show_Related: false,
+      nProjectID: "",
+    };
 
-    //   2. برای هر فیلد بولین، مقدار false می‌گذاریم
-    //      برای فیلدهای غیر بولین می‌توانید خالی بگذارید یا هر مقدار دیگری
-    for (const [key, value] of Object.entries(sampleRow)) {
-      if (typeof value === "boolean") {
-        newRow[key] = false;
-      } else {
-        // اگر می‌خواهید مقدار قبلی حفظ شود، می‌توانید همان را کپی کنید
-        // یا به صورت دلخواه خالی یا مقدار دیگری بگذارید
-        newRow[key] = value;
-      }
+    // ارسال ردیف جدید به والد (پنل سمت راست)
+    onDoubleClickSubItem(newRow);
+
+    // اعلام به والد که Add کلیک شده است
+    if (onAdd) {
+      onAdd();
     }
-
-    // یک شناسه‌ی موقت برای آبجکت می‌گذاریم (فقط جهت نمایش در سمت راست)
-    newRow.ID = "TEMP_" + Date.now();
-
-    // مثلا فیلدی مثل nPostID را خالی می‌گذاریم تا در جدول دیده نشود (No Match)
-    // اما در هر صورت ما قصد نداریم این newRow را به جدول اضافه کنیم
-    newRow.nPostID = "";
-
-    // -- حالا این ردیف جدید را تنها به سمت راست (RightProjectAccess) ارسال می‌کنیم:
-    onDoubleClickSubItem(newRow as AccessProject);
   };
 
   const isLoading = isLoadingPosts || isLoadingRoles;
@@ -215,7 +228,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         rowData={filteredRowData}
         onRowDoubleClick={handleSubItemDoubleClick}
         setSelectedRowData={handleSubItemClick}
-        onAdd={handleAdd} // <-- کلیک روی + این تابع را صدا می‌زند
+        onAdd={handleAdd} // ارسال متد handleAdd به DataTable
         onEdit={() => {}}
         onDelete={() => {}}
         onDuplicate={() => {}}
