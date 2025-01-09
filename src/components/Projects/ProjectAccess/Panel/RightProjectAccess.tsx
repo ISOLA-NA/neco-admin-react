@@ -1,16 +1,48 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import DynamicSwitcher from "../../../utilities/DynamicSwitcher";
 
 interface RightProjectAccessProps {
   selectedRow: Record<string, any>;
+  onRowChange?: (updatedRow: Record<string, any>) => void;
 }
 
 const RightProjectAccess: React.FC<RightProjectAccessProps> = ({
   selectedRow,
+  onRowChange,
 }) => {
-  // تمام کلیدهایی که مقدارشان بولین است
   const booleanKeys = Object.keys(selectedRow).filter(
     (key) => typeof selectedRow[key] === "boolean"
   );
+
+  const [localRow, setLocalRow] = useState<Record<string, any>>({
+    ...selectedRow,
+  });
+
+  useEffect(() => {
+    setLocalRow({ ...selectedRow });
+  }, [selectedRow]);
+
+  const isReadMode = localRow.AccessMode === 1;
+
+  const handleToggleMode = () => {
+    const newMode = isReadMode ? 2 : 1;
+    const updatedRow = { ...localRow, AccessMode: newMode };
+    setLocalRow(updatedRow);
+    if (onRowChange) {
+      onRowChange(updatedRow);
+    }
+  };
+
+  const handleCheckboxChange = (key: string) => {
+    const updatedRow = {
+      ...localRow,
+      [key]: !localRow[key],
+    };
+    setLocalRow(updatedRow);
+    if (onRowChange) {
+      onRowChange(updatedRow);
+    }
+  };
 
   return (
     <div
@@ -19,10 +51,23 @@ const RightProjectAccess: React.FC<RightProjectAccessProps> = ({
         background: "linear-gradient(to bottom, #89CFF0, #FFC0CB)",
       }}
     >
+      {/* Mode Switcher Section */}
+      <div className="flex items-center justify-center mb-4">
+        <span className="mr-4 font-bold text-gray-800 text-lg">Mode:</span>
+        <DynamicSwitcher
+          isChecked={isReadMode}
+          onChange={handleToggleMode}
+          leftLabel="Read"
+          rightLabel="Write"
+        />
+      </div>
+
+      {/* Access Title */}
       <h2 className="text-center text-2xl font-bold text-gray-800 mb-4">
         Access
       </h2>
 
+      {/* Boolean Checkboxes */}
       {booleanKeys.length === 0 ? (
         <p className="text-center text-gray-500">
           No boolean fields available.
@@ -36,13 +81,13 @@ const RightProjectAccess: React.FC<RightProjectAccessProps> = ({
             >
               <input
                 type="checkbox"
-                checked={selectedRow[key]}
-                readOnly
+                checked={localRow[key]}
+                onChange={() => handleCheckboxChange(key)}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <label
                 className="ml-2 text-gray-700 whitespace-nowrap overflow-hidden overflow-ellipsis"
-                title={`${key}: ${selectedRow[key]}`}
+                title={`${key}: ${localRow[key]}`}
               >
                 {key}
               </label>

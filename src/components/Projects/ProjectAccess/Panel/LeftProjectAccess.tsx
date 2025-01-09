@@ -1,3 +1,4 @@
+// LeftProjectAccess.tsx
 import React, { useState, useEffect, useMemo, ChangeEvent } from "react";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicSelector from "../../../utilities/DynamicSelector";
@@ -14,11 +15,11 @@ import { showAlert } from "../../../utilities/Alert/DynamicAlert";
 interface LeftProjectAccessProps {
   selectedRow: {
     ID: string;
-    // سایر فیلدها...
   };
   onDoubleClickSubItem: (data: AccessProject) => void;
   onAddFromLeft?: () => void;
   onEditFromLeft?: () => void;
+  refreshTrigger: number;
 }
 
 interface ValueGetterParams {
@@ -30,30 +31,21 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   onDoubleClickSubItem,
   onAddFromLeft,
   onEditFromLeft,
+  refreshTrigger,
 }) => {
   const api = useApi();
-
-  // وضعیت‌های موجود
   const [leftRowData, setLeftRowData] = useState<AccessProject[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedSubItemRow, setSelectedSubItemRow] =
     useState<AccessProject | null>(null);
-
-  const [isLoadingPosts, setIsLoadingPosts] = useState<boolean>(false);
-  const [isLoadingRoles, setIsLoadingRoles] = useState<boolean>(false);
-  const [errorPosts, setErrorPosts] = useState<string | null>(null);
-  const [errorRoles, setErrorRoles] = useState<string | null>(null);
-
-  // وضعیت‌های جدید برای getPostSmall و مودال
   const [postSmallData, setPostSmallData] = useState<PostSmall[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isLoadingPostSmall, setIsLoadingPostSmall] = useState<boolean>(false);
-  const [errorPostSmall, setErrorPostSmall] = useState<string | null>(null);
   const [selectedPostSmall, setSelectedPostSmall] = useState<PostSmall | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // ساخت map از نقش‌ها
   const rolesMap = useMemo(() => {
     const map: Record<string, string> = {};
     roles.forEach((role) => {
@@ -64,7 +56,6 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     return map;
   }, [roles]);
 
-  // فیلتر کردن داده‌ها فقط برای نقش‌های معتبر
   const filteredRowData = useMemo(() => {
     return leftRowData.filter((item) => {
       const key = item.nPostID?.trim().toLowerCase();
@@ -72,116 +63,64 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     });
   }, [leftRowData, rolesMap]);
 
-  // ستون‌های جدول (بدون ستون Actions)
   const leftColumnDefs = useMemo(
     () => [
       {
         headerName: "Name",
         valueGetter: (params: ValueGetterParams) => {
           const record = params.data;
-          if (!record.nPostID) {
-            return "(No Match)";
-          }
+          if (!record.nPostID) return "(No Match)";
           const key = record.nPostID.trim().toLowerCase();
-          const roleName = rolesMap[key];
-          return roleName || "(No Match)";
+          return rolesMap[key] || "(No Match)";
         },
         filter: "agTextColumnFilter",
       },
-      {
-        headerName: "AccessMode",
-        field: "AccessMode",
-        filter: "agNumberColumnFilter",
-      },
-      // اگر ستون‌های دیگری نیاز دارید، اینجا اضافه کنید...
     ],
     [rolesMap]
   );
 
-  // واکشی پست‌های پروژه
   useEffect(() => {
-    const fetchPostsInProject = async () => {
-      setIsLoadingPosts(true);
-      setErrorPosts(null);
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
-        if (selectedRow && selectedRow.ID) {
-          const data = await api.getPostsinProject(selectedRow.ID);
-          console.log("Fetched Posts in Project:", data);
-          setLeftRowData(data);
-        } else {
-          setLeftRowData([]);
-        }
-      } catch (error) {
-        console.error("Error fetching posts in project:", error);
-        setErrorPosts("Failed to load posts.");
-      } finally {
-        setIsLoadingPosts(false);
-      }
-    };
-    fetchPostsInProject();
-  }, [selectedRow, api]);
+        const [postsData, rolesData, postSmallData] = await Promise.all([
+          selectedRow?.ID ? api.getPostsinProject(selectedRow.ID) : [],
+          api.getAllRoles(),
+          api.getPostSmall(),
+        ]);
 
-  // واکشی نقش‌ها
-  useEffect(() => {
-    const fetchRoles = async () => {
-      setIsLoadingRoles(true);
-      setErrorRoles(null);
-      try {
-        const roleData = await api.getAllRoles();
-        console.log("Fetched Roles:", roleData);
-        setRoles(roleData);
+        setLeftRowData(postsData);
+        setRoles(rolesData);
+        setPostSmallData(postSmallData);
       } catch (error) {
-        console.error("Error fetching roles:", error);
-        setErrorRoles("Failed to load roles.");
+        console.error("Error fetching data:", error);
+        setError("Failed to load data");
       } finally {
-        setIsLoadingRoles(false);
-      }
-    };
-    fetchRoles();
-  }, [api]);
-
-  // واکشی داده‌های getPostSmall
-  useEffect(() => {
-    const fetchPostSmall = async () => {
-      setIsLoadingPostSmall(true);
-      setErrorPostSmall(null);
-      try {
-        const data = await api.getPostSmall();
-        console.log("Fetched PostSmall Data:", data);
-        setPostSmallData(data);
-      } catch (error) {
-        console.error("Error fetching postSmall data:", error);
-        setErrorPostSmall("Failed to load postSmall data.");
-      } finally {
-        setIsLoadingPostSmall(false);
+        setIsLoading(false);
       }
     };
 
-    fetchPostSmall();
-  }, [api]);
+    fetchData();
+  }, [selectedRow, api, refreshTrigger]);
 
-  // کلیک روی سطر
   const handleSubItemClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
   };
 
-  // دوبار کلیک روی سطر
   const handleSubItemDoubleClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
     onDoubleClickSubItem(data);
-    // فراخوانی متد ویرایش (در والد)
     if (onEditFromLeft) {
       onEditFromLeft();
     }
   };
 
-  // دکمه‌ی + (Add)
   const handleAdd = () => {
-    // ساخت یک رکورد جدید با ID موقت
     const newRow: AccessProject = {
-      ID: "TEMP_" + Date.now(), // ID موقت
+      ID: `TEMP_${Date.now()}`,
       nPostID: "",
-      nProjectID: selectedRow ? selectedRow.ID : "",
+      nProjectID: selectedRow?.ID || "",
       AccessMode: 0,
       AllowToDownloadGroup: false,
       AlowToAllTask: false,
@@ -206,18 +145,14 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     };
 
     onDoubleClickSubItem(newRow);
-
-    // اگر والد هم نیاز دارد بداند Add شده است
     if (onAddFromLeft) {
       onAddFromLeft();
     }
   };
 
-  // دکمه‌ی Edit
   const handleEdit = () => {
     if (selectedSubItemRow) {
       onDoubleClickSubItem(selectedSubItemRow);
-
       if (onEditFromLeft) {
         onEditFromLeft();
       }
@@ -226,131 +161,80 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     }
   };
 
-  // دکمه‌ی Delete (از آیکون خود DataTable)
   const handleDelete = async () => {
     if (!selectedSubItemRow) {
       showAlert("warning", null, "Warning", "Please select a row to delete.");
       return;
     }
 
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete "${selectedSubItemRow.PostName}"?`
-    );
-    if (!confirmDelete) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${selectedSubItemRow.PostName}"?`
+      )
+    ) {
+      return;
+    }
 
     try {
       await api.deleteAccessProject(selectedSubItemRow.ID);
+      setLeftRowData((prevData) =>
+        prevData.filter((item) => item.ID !== selectedSubItemRow.ID)
+      );
+      setSelectedSubItemRow(null);
       showAlert(
         "success",
         null,
         "Success",
         "Access project deleted successfully."
       );
-      // به‌روزرسانی وضعیت با حذف ردیف
-      setLeftRowData((prevData) =>
-        prevData.filter((item) => item.ID !== selectedSubItemRow.ID)
-      );
-      // اگر ردیف انتخاب شده حذف شد، آن را خالی کنید
-      setSelectedSubItemRow(null);
     } catch (error) {
       console.error("Error deleting access project:", error);
       showAlert("error", null, "Error", "Failed to delete access project.");
     }
   };
 
-  // تغییر در selector
   const handleSelectorChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    console.log("Selected Value:", value);
-    const selected = postSmallData.find((item) => item.ID === value) || null;
-    if (selected) {
+    const selected = postSmallData.find((item) => item.ID === value);
+    if (selected && selectedSubItemRow) {
       setSelectedSubItemRow({
-        ...selectedSubItemRow!,
+        ...selectedSubItemRow,
         nPostID: selected.ID,
         PostName: selected.Name,
       });
-    } else {
-      setSelectedSubItemRow(null);
     }
   };
 
-  // هندلر برای باز کردن مودال
-  const handleButtonClick = () => {
-    setIsModalOpen(true);
-  };
-
-  // هندلر برای بستن مودال
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  // هندلر انتخاب ردیف در TableSelector
   const handleTableRowDoubleClick = (data: PostSmall) => {
     setSelectedPostSmall(data);
-    setSelectedSubItemRow({
-      ...selectedSubItemRow!,
-      nPostID: data.ID,
-      PostName: data.Name,
-    });
+    if (selectedSubItemRow) {
+      setSelectedSubItemRow({
+        ...selectedSubItemRow,
+        nPostID: data.ID,
+        PostName: data.Name,
+      });
+    }
     setIsModalOpen(false);
   };
-
-  // هندلر کلیک دکمه Select در TableSelector
-  const handleTableSelectButtonClick = () => {
-    if (selectedPostSmall) {
-      setSelectedSubItemRow({
-        ...selectedSubItemRow!,
-        nPostID: selectedPostSmall.ID,
-        PostName: selectedPostSmall.Name,
-      });
-      setIsModalOpen(false);
-    } else {
-      showAlert("warning", null, "Warning", "Please select a row to select.");
-    }
-  };
-
-  const isLoading = isLoadingPosts || isLoadingRoles || isLoadingPostSmall;
 
   return (
     <div className="h-full p-4">
-      {/* نمایش خطاها */}
-      {errorPosts && (
-        <div className="error mb-4 text-red-500">{errorPosts}</div>
-      )}
-      {errorRoles && (
-        <div className="error mb-4 text-red-500">{errorRoles}</div>
-      )}
-      {errorPostSmall && (
-        <div className="error mb-4 text-red-500">{errorPostSmall}</div>
-      )}
+      {error && <div className="error mb-4 text-red-500">{error}</div>}
 
-      {/* DynamicSelector با داده‌های getPostSmall */}
-      {!isLoadingPostSmall && postSmallData.length > 0 ? (
-        <DynamicSelector
-          label="جستجو"
-          options={postSmallData.map((item) => ({
-            value: item.ID,
-            label: item.Name || "NoName",
-          }))}
-          selectedValue={selectedSubItemRow ? selectedSubItemRow.nPostID : ""}
-          onChange={handleSelectorChange}
-          className="w-full mb-8"
-          error={false}
-          showButton={true}
-          onButtonClick={handleButtonClick}
-        />
-      ) : (
-        <div className="loading-indicator mb-8">
-          در حال بارگذاری گزینه‌ها...
-        </div>
-      )}
+      <DynamicSelector
+        label="جستجو"
+        options={postSmallData.map((item) => ({
+          value: item.ID,
+          label: item.Name || "NoName",
+        }))}
+        selectedValue={selectedSubItemRow?.nPostID || ""}
+        onChange={handleSelectorChange}
+        className="w-full mb-8"
+        error={false}
+        showButton={true}
+        onButtonClick={() => setIsModalOpen(true)}
+      />
 
-      {/* نمایش وضعیت بارگذاری */}
-      {isLoading && (
-        <div className="loading-indicator mb-4">در حال بارگذاری...</div>
-      )}
-
-      {/* جدول اصلی با ایکون‌های پیش‌فرض (Add, Edit, Delete) */}
       <DataTable
         columnDefs={leftColumnDefs}
         rowData={filteredRowData}
@@ -367,24 +251,28 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         isLoading={isLoading}
       />
 
-      {/* مودال با TableSelector */}
-      <DynamicModal isOpen={isModalOpen} onClose={handleCloseModal}>
+      <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="p-4">
           <h2 className="text-lg font-semibold mb-4">انتخاب PostSmall</h2>
-          {errorPostSmall && (
-            <div className="error mb-4 text-red-500">{errorPostSmall}</div>
-          )}
           <TableSelector
             columnDefs={[
               { headerName: "ID", field: "ID" },
               { headerName: "Name", field: "Name" },
-              // سایر ستون‌ها بر اساس نیاز
             ]}
             rowData={postSmallData}
             onRowDoubleClick={handleTableRowDoubleClick}
-            onRowClick={(data) => setSelectedPostSmall(data)}
-            onSelectButtonClick={handleTableSelectButtonClick}
-            isSelectDisabled={false}
+            onRowClick={setSelectedPostSmall}
+            onSelectButtonClick={() => {
+              if (selectedPostSmall && selectedSubItemRow) {
+                setSelectedSubItemRow({
+                  ...selectedSubItemRow,
+                  nPostID: selectedPostSmall.ID,
+                  PostName: selectedPostSmall.Name,
+                });
+                setIsModalOpen(false);
+              }
+            }}
+            isSelectDisabled={!selectedPostSmall}
           />
         </div>
       </DynamicModal>
