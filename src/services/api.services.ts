@@ -422,7 +422,7 @@ export interface PostSmall {
 }
 
 export interface AccessProject {
-  ID: string;
+  ID?: string;
   AccessMode: number;
   AllowToDownloadGroup: boolean;
   AlowToAllTask: boolean;
@@ -434,7 +434,7 @@ export interface AccessProject {
   CreateLetter: boolean;
   CreateMeeting: boolean;
   IsVisible: boolean;
-  LastModified: string;
+  LastModified?: string;
   PostName: string | null;
   Show_Approval: boolean;
   Show_Assignment: boolean;

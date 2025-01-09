@@ -1,4 +1,3 @@
-// LeftProjectAccess.tsx
 import React, { useState, useEffect, useMemo, ChangeEvent } from "react";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicSelector from "../../../utilities/DynamicSelector";
@@ -45,6 +44,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPostId, setSelectedPostId] = useState<string>("");
 
   const rolesMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -106,10 +106,12 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
 
   const handleSubItemClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
+    setSelectedPostId(data.nPostID); // Update selected post ID when clicking a row
   };
 
   const handleSubItemDoubleClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
+    setSelectedPostId(data.nPostID); // Update selected post ID when double-clicking a row
     onDoubleClickSubItem(data);
     if (onEditFromLeft) {
       onEditFromLeft();
@@ -117,9 +119,21 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   };
 
   const handleAdd = () => {
-    const newRow: AccessProject = {
-      ID: `TEMP_${Date.now()}`,
-      nPostID: "",
+    if (!selectedPostId) {
+      showAlert("warning", null, "Warning", "Please select a post first.");
+      return;
+    }
+
+    const selectedPost = postSmallData.find(
+      (post) => post.ID === selectedPostId
+    );
+    if (!selectedPost) {
+      showAlert("warning", null, "Warning", "Selected post not found.");
+      return;
+    }
+
+    const newRow: Omit<AccessProject, "ID" | "LastModified"> = {
+      nPostID: selectedPostId,
       nProjectID: selectedRow?.ID || "",
       AccessMode: 0,
       AllowToDownloadGroup: false,
@@ -131,9 +145,8 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       CreateKnowledge: false,
       CreateLetter: false,
       CreateMeeting: false,
-      IsVisible: false,
-      LastModified: "",
-      PostName: null,
+      IsVisible: true,
+      PostName: selectedPost.Name,
       Show_Approval: false,
       Show_Assignment: false,
       Show_CheckList: false,
@@ -144,7 +157,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       Show_Related: false,
     };
 
-    onDoubleClickSubItem(newRow);
+    onDoubleClickSubItem(newRow as AccessProject);
     if (onAddFromLeft) {
       onAddFromLeft();
     }
@@ -176,11 +189,12 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     }
 
     try {
-      await api.deleteAccessProject(selectedSubItemRow.ID);
+      await api.deleteAccessProject(selectedSubItemRow.ID!);
       setLeftRowData((prevData) =>
         prevData.filter((item) => item.ID !== selectedSubItemRow.ID)
       );
       setSelectedSubItemRow(null);
+      setSelectedPostId(""); // Reset selected post ID after deletion
       showAlert(
         "success",
         null,
@@ -195,24 +209,35 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
 
   const handleSelectorChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
+    setSelectedPostId(value); // Update selected post ID when changing selector
+
     const selected = postSmallData.find((item) => item.ID === value);
-    if (selected && selectedSubItemRow) {
-      setSelectedSubItemRow({
-        ...selectedSubItemRow,
-        nPostID: selected.ID,
-        PostName: selected.Name,
-      });
+    if (selected) {
+      // If we have a selected row, update it with new post data
+      if (selectedSubItemRow) {
+        const updatedRow = {
+          ...selectedSubItemRow,
+          nPostID: selected.ID,
+          PostName: selected.Name,
+        };
+        setSelectedSubItemRow(updatedRow);
+        onDoubleClickSubItem(updatedRow); // Notify parent of the change
+      }
     }
   };
 
   const handleTableRowDoubleClick = (data: PostSmall) => {
     setSelectedPostSmall(data);
+    setSelectedPostId(data.ID); // Update selected post ID when double-clicking in table selector
+
     if (selectedSubItemRow) {
-      setSelectedSubItemRow({
+      const updatedRow = {
         ...selectedSubItemRow,
         nPostID: data.ID,
         PostName: data.Name,
-      });
+      };
+      setSelectedSubItemRow(updatedRow);
+      onDoubleClickSubItem(updatedRow);
     }
     setIsModalOpen(false);
   };
@@ -227,7 +252,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
           value: item.ID,
           label: item.Name || "NoName",
         }))}
-        selectedValue={selectedSubItemRow?.nPostID || ""}
+        selectedValue={selectedPostId} // Use selectedPostId instead of selectedSubItemRow?.nPostID
         onChange={handleSelectorChange}
         className="w-full mb-8"
         error={false}
@@ -263,12 +288,17 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
             onRowDoubleClick={handleTableRowDoubleClick}
             onRowClick={setSelectedPostSmall}
             onSelectButtonClick={() => {
-              if (selectedPostSmall && selectedSubItemRow) {
-                setSelectedSubItemRow({
-                  ...selectedSubItemRow,
-                  nPostID: selectedPostSmall.ID,
-                  PostName: selectedPostSmall.Name,
-                });
+              if (selectedPostSmall) {
+                setSelectedPostId(selectedPostSmall.ID);
+                if (selectedSubItemRow) {
+                  const updatedRow = {
+                    ...selectedSubItemRow,
+                    nPostID: selectedPostSmall.ID,
+                    PostName: selectedPostSmall.Name,
+                  };
+                  setSelectedSubItemRow(updatedRow);
+                  onDoubleClickSubItem(updatedRow);
+                }
                 setIsModalOpen(false);
               }
             }}
