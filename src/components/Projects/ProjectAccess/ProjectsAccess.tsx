@@ -14,11 +14,12 @@ export interface ProjectAccessHandle {
 
 interface ProjectAccessProps {
   selectedProject?: any;
-  onAddFromLeft?: () => void; // پراپ جدید
+  onAddFromLeft?: () => void; // پراپ جدید برای افزودن
+  onEditFromLeft?: () => void; // پراپ جدید برای ویرایش
 }
 
 const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
-  ({ selectedProject, onAddFromLeft }, ref) => {
+  ({ selectedProject, onAddFromLeft, onEditFromLeft }, ref) => {
     const api = useApi();
     const [selectedPostAccess, setSelectedPostAccess] =
       useState<AccessProject | null>(null);
@@ -76,6 +77,10 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
     // Handler برای دوبار کلیک در سمت چپ
     const handleLeftDoubleClick = (data: AccessProject) => {
       setSelectedPostAccess(data);
+      // فراخوانی پراپ مربوط به ویرایش
+      if (onEditFromLeft) {
+        onEditFromLeft();
+      }
     };
 
     return (
@@ -85,7 +90,8 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
           <LeftProjectAccess
             selectedRow={selectedProject}
             onDoubleClickSubItem={handleLeftDoubleClick}
-            onAdd={onAddFromLeft} // ارسال پراپ جدید به LeftProjectAccess
+            onAdd={onAddFromLeft} // ارسال پراپ افزودن
+            onEdit={onEditFromLeft} // ارسال پراپ ویرایش
           />
         </div>
 

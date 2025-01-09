@@ -717,6 +717,11 @@ const TabContent: FC<TabContentProps> = ({
     // هر کار دیگری که لازم دارید...
   };
 
+  const handleEditFromLeft = () => {
+    setIsAdding(false); // حالت ویرایش
+    setIsPanelOpen(true);
+  };
+
   return (
     <div
       ref={containerRef}
@@ -911,7 +916,8 @@ const TabContent: FC<TabContentProps> = ({
                 <ProjectAccess
                   ref={projectAccessRef}
                   selectedProject={selectedRow}
-                  onAddFromLeft={handleAddFromLeft} // پراپ جدید
+                  onAddFromLeft={handleAddFromLeft}
+                  onEditFromLeft={handleEditFromLeft} // ارسال متد جدید
                 />
               </Suspense>
             )}

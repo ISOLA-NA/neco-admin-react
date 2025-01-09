@@ -12,7 +12,8 @@ interface LeftProjectAccessProps {
     // سایر فیلدها...
   };
   onDoubleClickSubItem: (data: AccessProject) => void;
-  onAdd?: () => void; // پراپ جدید
+  onAdd?: () => void; // پراپ جدید برای افزودن
+  onEdit?: () => void; // پراپ جدید برای ویرایش
 }
 
 interface ValueGetterParams {
@@ -22,7 +23,8 @@ interface ValueGetterParams {
 const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   selectedRow,
   onDoubleClickSubItem,
-  onAdd, // پراپ جدید
+  onAdd,
+  onEdit,
 }) => {
   const api = useApi();
 
@@ -141,11 +143,15 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   };
 
   /**
-   * دوبار کلیک روی سطر (ارسال به سمت راست)
+   * دوبار کلیک روی سطر (ارسال به سمت راست و فعال‌سازی حالت ویرایش)
    */
   const handleSubItemDoubleClick = (data: AccessProject) => {
     setSelectedSubItemRow(data);
     onDoubleClickSubItem(data);
+    // فراخوانی پراپ مربوط به ویرایش
+    if (onEdit) {
+      onEdit();
+    }
   };
 
   /**
