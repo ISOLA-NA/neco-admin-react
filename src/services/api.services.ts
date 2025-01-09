@@ -1079,7 +1079,7 @@ class ApiService {
   }
 
   async deleteAccessProject(id: string): Promise<void> {
-    await httpClient.post(apiConst.deleteAccessProject, { ID: id });
+    await httpClient.post(apiConst.deleteAccessProject, { gid: id });
   }
 }
 

@@ -72,7 +72,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     });
   }, [leftRowData, rolesMap]);
 
-  // ستون‌های جدول
+  // ستون‌های جدول (بدون ستون Actions)
   const leftColumnDefs = useMemo(
     () => [
       {
@@ -93,7 +93,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         field: "AccessMode",
         filter: "agNumberColumnFilter",
       },
-      // سایر ستون‌ها...
+      // اگر ستون‌های دیگری نیاز دارید، اینجا اضافه کنید...
     ],
     [rolesMap]
   );
@@ -106,7 +106,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       try {
         if (selectedRow && selectedRow.ID) {
           const data = await api.getPostsinProject(selectedRow.ID);
-          console.log("Fetched Posts in Project:", data); // اضافه کردن این خط
+          console.log("Fetched Posts in Project:", data);
           setLeftRowData(data);
         } else {
           setLeftRowData([]);
@@ -128,7 +128,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       setErrorRoles(null);
       try {
         const roleData = await api.getAllRoles();
-        console.log("Fetched Roles:", roleData); // اضافه کردن این خط
+        console.log("Fetched Roles:", roleData);
         setRoles(roleData);
       } catch (error) {
         console.error("Error fetching roles:", error);
@@ -147,7 +147,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       setErrorPostSmall(null);
       try {
         const data = await api.getPostSmall();
-        console.log("Fetched PostSmall Data:", data); // اضافه کردن این خط
+        console.log("Fetched PostSmall Data:", data);
         setPostSmallData(data);
       } catch (error) {
         console.error("Error fetching postSmall data:", error);
@@ -226,11 +226,43 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     }
   };
 
+  // دکمه‌ی Delete (از آیکون خود DataTable)
+  const handleDelete = async () => {
+    if (!selectedSubItemRow) {
+      showAlert("warning", null, "Warning", "Please select a row to delete.");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${selectedSubItemRow.PostName}"?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await api.deleteAccessProject(selectedSubItemRow.ID);
+      showAlert(
+        "success",
+        null,
+        "Success",
+        "Access project deleted successfully."
+      );
+      // به‌روزرسانی وضعیت با حذف ردیف
+      setLeftRowData((prevData) =>
+        prevData.filter((item) => item.ID !== selectedSubItemRow.ID)
+      );
+      // اگر ردیف انتخاب شده حذف شد، آن را خالی کنید
+      setSelectedSubItemRow(null);
+    } catch (error) {
+      console.error("Error deleting access project:", error);
+      showAlert("error", null, "Error", "Failed to delete access project.");
+    }
+  };
+
   // تغییر در selector
   const handleSelectorChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    console.log("Selected Value:", value); // اضافه کردن این خط
-    const selected = postSmallData.find((item) => item.ID === value) || null; // تغییر از leftRowData به postSmallData
+    console.log("Selected Value:", value);
+    const selected = postSmallData.find((item) => item.ID === value) || null;
     if (selected) {
       setSelectedSubItemRow({
         ...selectedSubItemRow!,
@@ -255,7 +287,6 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   // هندلر انتخاب ردیف در TableSelector
   const handleTableRowDoubleClick = (data: PostSmall) => {
     setSelectedPostSmall(data);
-    // بروزرسانی DynamicSelector با مقدار انتخاب شده
     setSelectedSubItemRow({
       ...selectedSubItemRow!,
       nPostID: data.ID,
@@ -319,7 +350,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         <div className="loading-indicator mb-4">در حال بارگذاری...</div>
       )}
 
-      {/* جدول اصلی */}
+      {/* جدول اصلی با ایکون‌های پیش‌فرض (Add, Edit, Delete) */}
       <DataTable
         columnDefs={leftColumnDefs}
         rowData={filteredRowData}
@@ -331,7 +362,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
         showDeleteIcon={true}
         onAdd={handleAdd}
         onEdit={handleEdit}
-        onDelete={() => {}}
+        onDelete={handleDelete}
         onDuplicate={() => {}}
         isLoading={isLoading}
       />
@@ -347,7 +378,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
             columnDefs={[
               { headerName: "ID", field: "ID" },
               { headerName: "Name", field: "Name" },
-              // سایر ستون‌ها بر اساس داده‌های PostSmall
+              // سایر ستون‌ها بر اساس نیاز
             ]}
             rowData={postSmallData}
             onRowDoubleClick={handleTableRowDoubleClick}
