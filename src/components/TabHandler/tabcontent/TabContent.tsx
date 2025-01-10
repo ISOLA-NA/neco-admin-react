@@ -29,16 +29,10 @@ import { OdpHandle } from "../../Projects/Odp";
 import ProjectAccess, {
   ProjectAccessHandle,
 } from "../../Projects/ProjectAccess/ProjectsAccess";
+import { ApprovalFlowHandle } from "../../ApprovalFlows/MainApproval/ApprovalFlows";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
-
-const LeftProjectAccess = React.lazy(
-  () => import("../../Projects/ProjectAccess/Panel/LeftProjectAccess")
-);
-const RightProjectAccess = React.lazy(
-  () => import("../../Projects/ProjectAccess/Panel/RightProjectAccess")
-);
 
 interface TabContentProps {
   component: React.LazyExoticComponent<React.ComponentType<any>> | null;
@@ -95,6 +89,7 @@ const TabContent: FC<TabContentProps> = ({
   const procedureRef = useRef<ProcedureHandle>(null);
   const calendarRef = useRef<CalendarHandle>(null);
   const projectAccessRef = useRef<ProjectAccessHandle>(null);
+  const approvalFlowRef = useRef<ApprovalFlowHandle>(null);
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -223,6 +218,10 @@ const TabContent: FC<TabContentProps> = ({
           break;
         case "ProjectsAccess":
           data = await api.getAllProjectsWithCalendar();
+          break;
+        // In the fetchData function, add this case
+        case "ApprovalFlows":
+          data = await api.getAllWfTemplate();
           break;
         default:
           data = rowData;
@@ -362,6 +361,19 @@ const TabContent: FC<TabContentProps> = ({
         case "ProjectsAccess":
           if (projectAccessRef.current) {
             await projectAccessRef.current.save();
+            await fetchData();
+          }
+          break;
+        // In the handleInsert function, add this case
+        case "ApprovalFlows":
+          if (approvalFlowRef.current) {
+            await approvalFlowRef.current.save();
+            showAlert(
+              "success",
+              null,
+              "Saved",
+              "Approval Flow added successfully."
+            );
             await fetchData();
           }
           break;
@@ -510,6 +522,18 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData();
           }
           break;
+        case "ApprovalFlows":
+          if (approvalFlowRef.current) {
+            await approvalFlowRef.current.save();
+            showAlert(
+              "success",
+              null,
+              "Updated",
+              "Approval Flow updated successfully."
+            );
+            await fetchData();
+          }
+          break;
       }
       setIsPanelOpen(false);
       resetInputs();
@@ -623,6 +647,9 @@ const TabContent: FC<TabContentProps> = ({
           case "ProjectsAccess":
             await api.deleteAccessProject(pendingSelectedRow.ID);
             break;
+          case "ApprovalFlows":
+            await api.deleteApprovalFlow(pendingSelectedRow.ID);
+            break;
         }
         showAlert(
           "success",
@@ -717,6 +744,8 @@ const TabContent: FC<TabContentProps> = ({
         return calendarRef;
       case "ProjectsAccess":
         return projectAccessRef;
+      case "ApprovalFlows":
+        return approvalFlowRef;
       default:
         return null;
     }
@@ -881,7 +910,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Odp" ||
                     activeSubTab === "Procedures" ||
                     activeSubTab === "Calendars" ||
-                    activeSubTab === "ProjectsAccess")
+                    activeSubTab === "ProjectsAccess" ||
+                    activeSubTab === "ApprovalFlows")
                     ? handleInsert
                     : undefined
                 }
@@ -900,7 +930,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Odp" ||
                     activeSubTab === "Procedures" ||
                     activeSubTab === "Calendars" ||
-                    activeSubTab === "ProjectsAccess")
+                    activeSubTab === "ProjectsAccess" ||
+                    activeSubTab === "ApprovalFlows")
                     ? handleUpdate
                     : undefined
                 }

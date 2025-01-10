@@ -10,10 +10,7 @@ export const apiConst = Object.freeze({
   updateConfiguration: "api/Setting/Update",
   deleteConfiguration: "api/Setting/Delete",
   getAllDefaultRibbons: "api/Menu/GetAll",
-  // EntityType جداول مختلف (LessonLearnedFormTemplate, CommentFormTemplate, ProcedureFormTemplate)
   getTableTransmittal: "api/EntityType/GetAllComplete",
-  // LessonLearnedAfTemplate
-  getAllWfTemplate: "api/WFTemplate/GetAll",
   getAllAfbtn: "api/AFBtn/GetAll",
   insertAFBtn: "api/AFBtn/Insert",
   updateAFBtn: "api/AFBtn/Update",
@@ -89,4 +86,11 @@ export const apiConst = Object.freeze({
   insertAccessProject: "api/AccessProject/Insert",
   updateAccessProject: "api/AccessProject/Update",
   deleteAccessProject: "api/AccessProject/Delete",
+  getAllNameMenu: "api/Setting/GetAll",
+  insertNameMenu: "api/Setting/Insert",
+  deleteNameMenu: "api/Setting/Delete",
+  getAllWfTemplate: "api/WFTemplate/GetAll",
+  addApprovalFlow: "api/WFTemplate/Insert",
+  deleteApprovalFlow: "api/WFTemplate/Delete",
+  editApprovalFlow: "api/WFTemplate/Update",
 });

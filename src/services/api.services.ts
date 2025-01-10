@@ -103,8 +103,16 @@ export interface EntityTypeItem {
 }
 
 export interface WfTemplateItem {
-  ID: number;
+  ID?: number;
   Name: string;
+  Describtion: string;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified?: string;
+  MaxDuration: number;
+  ModifiedById?: string;
+  PCost: number;
+  ProjectsStr?: string;
 }
 
 export interface AFBtnItem {
@@ -1080,6 +1088,28 @@ class ApiService {
 
   async deleteAccessProject(id: string): Promise<void> {
     await httpClient.post(apiConst.deleteAccessProject, { gid: id });
+  }
+
+  // In api.services.ts, add these methods to the ApiService class
+
+  async addApprovalFlow(data: WfTemplateItem): Promise<WfTemplateItem> {
+    const response = await httpClient.post<WfTemplateItem>(
+      apiConst.addApprovalFlow,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteApprovalFlow(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteApprovalFlow, { ID: id });
+  }
+
+  async editApprovalFlow(data: WfTemplateItem): Promise<WfTemplateItem> {
+    const response = await httpClient.post<WfTemplateItem>(
+      apiConst.editApprovalFlow,
+      data
+    );
+    return response.data;
   }
 }
 

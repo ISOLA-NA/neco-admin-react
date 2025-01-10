@@ -136,6 +136,10 @@ interface ApiContextType {
   insertAccessProject: (data: AccessProject) => Promise<AccessProject>;
   updateAccessProject: (data: AccessProject) => Promise<AccessProject>;
   deleteAccessProject: (id: string) => Promise<void>;
+
+  addApprovalFlow: (data: WfTemplateItem) => Promise<WfTemplateItem>;
+  deleteApprovalFlow: (id: number) => Promise<void>;
+  editApprovalFlow: (data: WfTemplateItem) => Promise<WfTemplateItem>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -247,6 +251,10 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertAccessProject: AppServices.insertAccessProject.bind(AppServices),
     updateAccessProject: AppServices.updateAccessProject.bind(AppServices),
     deleteAccessProject: AppServices.deleteAccessProject.bind(AppServices),
+
+    addApprovalFlow: AppServices.addApprovalFlow.bind(AppServices),
+    deleteApprovalFlow: AppServices.deleteApprovalFlow.bind(AppServices),
+    editApprovalFlow: AppServices.editApprovalFlow.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

@@ -5,7 +5,7 @@ import DynamicSelector from "../../utilities/DynamicSelector";
 import DynamicModal from "../../utilities/DynamicModal";
 import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
-import { subTabDataMapping, Role } from "../../Views/tab/tabData";
+import { subTabDataMapping, Role } from "../../TabHandler/tab/tabData";
 import { FaPlus, FaTimes, FaEdit } from "react-icons/fa";
 import BoxDeemed from "./BoxDeemed";
 import BoxPredecessor from "./BoxPredecessor "; // اطمینان از مسیر صحیح
@@ -502,7 +502,6 @@ const ApprovalFlowsTab: React.FC = () => {
             onDelete={handleDeleteRow}
             onDuplicate={handleDuplicateRow}
             domLayout="autoHeight"
-            isRowSelected={!!selectedRow}
           />
         </div>
 

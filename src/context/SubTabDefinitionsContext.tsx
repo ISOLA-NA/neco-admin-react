@@ -507,6 +507,45 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
 
+      // Add this to the subTabDefinitions object inside the useMemo hook
+
+      ApprovalFlows: {
+        endpoint: api.getAllWfTemplate,
+        columnDefs: [
+          {
+            headerName: "AF Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Duration",
+            field: "MaxDuration",
+            filter: "agNumberColumnFilter",
+          },
+          {
+            headerName: "Budget",
+            field: "PCost",
+            filter: "agNumberColumnFilter",
+          },
+          {
+            headerName: "Description",
+            field: "Describtion",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: "Global",
+            field: "IsGlobal",
+            filter: "agTextColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
+
       // -------------------
       // MenuTab
       // -------------------

@@ -15,6 +15,7 @@ import {
   AccessProject,
   Calendar,
   EntityCollection,
+  WfTemplateItem,
 } from "../services/api.services";
 
 // Define CommandData if it's different from CommandItem
@@ -216,6 +217,19 @@ interface ProjectsAccessData {
   nProjectID: string;
 }
 
+interface ApprovalFlowData {
+  ID?: number;
+  Name: string;
+  Describtion: string;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  MaxDuration: number;
+  PCost: number;
+  ProjectsStr?: string;
+  LastModified?: string;
+  ModifiedById?: string;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
@@ -240,6 +254,9 @@ interface AddEditDeleteContextType {
   handleSaveProjectsAccess: (
     data: ProjectsAccessData
   ) => Promise<AccessProject | null>;
+  handleSaveApprovalFlow: (
+    data: ApprovalFlowData
+  ) => Promise<WfTemplateItem | null>;
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -772,6 +789,43 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+
+  const handleSaveApprovalFlow = async (
+    data: ApprovalFlowData
+  ): Promise<WfTemplateItem | null> => {
+    setIsLoading(true);
+    try {
+      const approvalFlow: WfTemplateItem = {
+        ID: data.ID,
+        Name: data.Name,
+        Describtion: data.Describtion,
+        IsGlobal: data.IsGlobal,
+        IsVisible: data.IsVisible,
+        MaxDuration: data.MaxDuration,
+        PCost: data.PCost,
+        ProjectsStr: data.ProjectsStr,
+        LastModified: data.LastModified || new Date().toISOString(),
+        ModifiedById: data.ModifiedById,
+      };
+
+      let result: WfTemplateItem;
+      if (approvalFlow.ID) {
+        result = await api.editApprovalFlow(approvalFlow);
+        console.log("ApprovalFlow updated:", result);
+      } else {
+        result = await api.addApprovalFlow(approvalFlow);
+        console.log("ApprovalFlow inserted:", result);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error saving ApprovalFlow:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -790,6 +844,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveProcedure,
         handleSaveCalendar,
         handleSaveProjectsAccess,
+        handleSaveApprovalFlow,
       }}
     >
       {children}
