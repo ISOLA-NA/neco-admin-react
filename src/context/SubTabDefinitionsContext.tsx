@@ -268,7 +268,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         columnDefs: [
           {
             headerName: "Project Name",
-            field: "Name",
+            field: "nProjectName",
             filter: "agTextColumnFilter",
           },
           {
@@ -506,9 +506,6 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
-
-      // Add this to the subTabDefinitions object inside the useMemo hook
-
       ApprovalFlows: {
         endpoint: api.getAllWfTemplate,
         columnDefs: [
@@ -525,8 +522,6 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
-
-      // Add this to the subTabDefinitions object inside useMemo
       Forms: {
         endpoint: api.getTableTransmittal,
         columnDefs: [

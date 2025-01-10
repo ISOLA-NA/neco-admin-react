@@ -203,7 +203,7 @@ const TabContent: FC<TabContentProps> = ({
           data = await api.getAllPostCat();
           break;
         case "Staffing":
-          data = await api.getAllRoles();
+          data = await api.getAllForPostAdmin();
           break;
         case "ProgramTemplate":
           data = await api.getAllProgramTemplates();
