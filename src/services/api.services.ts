@@ -456,6 +456,29 @@ export interface AccessProject {
   nProjectID: string;
 }
 
+export interface EntityType {
+  ID: number;
+  Name: string;
+  Code: string;
+  IsDoc: boolean;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string | null;
+  ProjectsStr: string;
+  TemplateDocID: string | null;
+  TemplateExcelID: string | null;
+  nEntityCateAID: number | null;
+  nEntityCateBID: number | null;
+}
+
+export interface EntityTypeComplete extends EntityType {
+  EntityCateADescription: string | null;
+  EntityCateAName: string | null;
+  EntityCateBDescription: string | null;
+  EntityCateBName: string | null;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -539,13 +562,6 @@ class ApiService {
   async getAllDefaultRibbons(): Promise<DefaultRibbonItem[]> {
     const response = await httpClient.post<DefaultRibbonItem[]>(
       apiConst.getAllDefaultRibbons
-    );
-    return response.data;
-  }
-
-  async getTableTransmittal(): Promise<EntityTypeItem[]> {
-    const response = await httpClient.post<EntityTypeItem[]>(
-      apiConst.getTableTransmittal
     );
     return response.data;
   }
@@ -1108,6 +1124,48 @@ class ApiService {
     const response = await httpClient.post<WfTemplateItem>(
       apiConst.editApprovalFlow,
       data
+    );
+    return response.data;
+  }
+
+  async getAllEntityType(): Promise<EntityType[]> {
+    const response = await httpClient.post<EntityType[]>(
+      apiConst.getAllEntityType
+    );
+    return response.data;
+  }
+
+  async getTableTransmittal(): Promise<EntityTypeComplete[]> {
+    const response = await httpClient.post<EntityTypeComplete[]>(
+      apiConst.getTableTransmittal
+    );
+    return response.data;
+  }
+
+  async insertEntityType(data: EntityType): Promise<EntityType> {
+    const response = await httpClient.post<EntityType>(
+      apiConst.insertEntityType,
+      data
+    );
+    return response.data;
+  }
+
+  async updateEntityType(data: EntityType): Promise<EntityType> {
+    const response = await httpClient.post<EntityType>(
+      apiConst.updateEntityType,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteEntityType(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteEntityType, { ID: id });
+  }
+
+  async duplicateEntityType(id: number): Promise<EntityType> {
+    const response = await httpClient.post<EntityType>(
+      apiConst.duplicateEntityType,
+      { ID: id }
     );
     return response.data;
   }

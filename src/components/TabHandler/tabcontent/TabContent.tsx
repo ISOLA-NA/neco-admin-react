@@ -30,6 +30,7 @@ import ProjectAccess, {
   ProjectAccessHandle,
 } from "../../Projects/ProjectAccess/ProjectsAccess";
 import { ApprovalFlowHandle } from "../../ApprovalFlows/MainApproval/ApprovalFlows";
+import { FormsHandle } from "../../Forms/Forms";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
@@ -90,6 +91,7 @@ const TabContent: FC<TabContentProps> = ({
   const calendarRef = useRef<CalendarHandle>(null);
   const projectAccessRef = useRef<ProjectAccessHandle>(null);
   const approvalFlowRef = useRef<ApprovalFlowHandle>(null);
+  const formsRef = useRef<FormsHandle>(null);
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -222,6 +224,9 @@ const TabContent: FC<TabContentProps> = ({
         // In the fetchData function, add this case
         case "ApprovalFlows":
           data = await api.getAllWfTemplate();
+          break;
+        case "Forms":
+          data = await api.getTableTransmittal();
           break;
         default:
           data = rowData;
@@ -374,6 +379,13 @@ const TabContent: FC<TabContentProps> = ({
               "Saved",
               "Approval Flow added successfully."
             );
+            await fetchData();
+          }
+          break;
+        case "Forms":
+          if (formsRef.current) {
+            await formsRef.current.save();
+            showAlert("success", null, "Saved", "Form added successfully.");
             await fetchData();
           }
           break;
@@ -534,6 +546,13 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData();
           }
           break;
+        case "Forms":
+          if (formsRef.current) {
+            await formsRef.current.save();
+            showAlert("success", null, "Updated", "Form updated successfully.");
+            await fetchData();
+          }
+          break;
       }
       setIsPanelOpen(false);
       resetInputs();
@@ -650,6 +669,9 @@ const TabContent: FC<TabContentProps> = ({
           case "ApprovalFlows":
             await api.deleteApprovalFlow(pendingSelectedRow.ID);
             break;
+          case "Forms":
+            await api.deleteEntityType(pendingSelectedRow.ID);
+            break;
         }
         showAlert(
           "success",
@@ -746,6 +768,8 @@ const TabContent: FC<TabContentProps> = ({
         return projectAccessRef;
       case "ApprovalFlows":
         return approvalFlowRef;
+      case "Forms":
+        return formsRef;
       default:
         return null;
     }
@@ -911,7 +935,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Procedures" ||
                     activeSubTab === "Calendars" ||
                     activeSubTab === "ProjectsAccess" ||
-                    activeSubTab === "ApprovalFlows")
+                    activeSubTab === "ApprovalFlows" ||
+                    activeSubTab === "Forms")
                     ? handleInsert
                     : undefined
                 }
@@ -931,7 +956,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Procedures" ||
                     activeSubTab === "Calendars" ||
                     activeSubTab === "ProjectsAccess" ||
-                    activeSubTab === "ApprovalFlows")
+                    activeSubTab === "ApprovalFlows" ||
+                    activeSubTab === "Forms")
                     ? handleUpdate
                     : undefined
                 }

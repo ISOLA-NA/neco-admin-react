@@ -10,7 +10,6 @@ export const apiConst = Object.freeze({
   updateConfiguration: "api/Setting/Update",
   deleteConfiguration: "api/Setting/Delete",
   getAllDefaultRibbons: "api/Menu/GetAll",
-  getTableTransmittal: "api/EntityType/GetAllComplete",
   getAllAfbtn: "api/AFBtn/GetAll",
   insertAFBtn: "api/AFBtn/Insert",
   updateAFBtn: "api/AFBtn/Update",
@@ -93,4 +92,10 @@ export const apiConst = Object.freeze({
   addApprovalFlow: "api/WFTemplate/Insert",
   deleteApprovalFlow: "api/WFTemplate/Delete",
   editApprovalFlow: "api/WFTemplate/Update",
+  getAllEntityType: "api/EntityType/GetAll",
+  getTableTransmittal: "api/EntityType/GetAllComplete",
+  insertEntityType: "api/EntityType/Insert",
+  deleteEntityType: "api/EntityType/Delete",
+  updateEntityType: "api/EntityType/Update",
+  duplicateEntityType: "api/EntityType/Duplicate",
 });

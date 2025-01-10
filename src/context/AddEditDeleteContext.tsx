@@ -15,6 +15,7 @@ import {
   AccessProject,
   Calendar,
   EntityCollection,
+  EntityType,
   WfTemplateItem,
 } from "../services/api.services";
 
@@ -230,6 +231,22 @@ interface ApprovalFlowData {
   ModifiedById?: string;
 }
 
+interface FormData {
+  ID?: number;
+  Name: string;
+  Code: string;
+  IsDoc: boolean;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string | null;
+  ProjectsStr: string;
+  TemplateDocID: string | null;
+  TemplateExcelID: string | null;
+  nEntityCateAID: number | null;
+  nEntityCateBID: number | null;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
@@ -257,6 +274,7 @@ interface AddEditDeleteContextType {
   handleSaveApprovalFlow: (
     data: ApprovalFlowData
   ) => Promise<WfTemplateItem | null>;
+  handleSaveForm: (data: FormData) => Promise<EntityType | null>;
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -826,6 +844,43 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleSaveForm = async (data: FormData): Promise<EntityType | null> => {
+    setIsLoading(true);
+    try {
+      const formRequest: EntityType = {
+        ID: data.ID || 0,
+        Name: data.Name,
+        Code: data.Code || "",
+        IsDoc: data.IsDoc,
+        IsGlobal: data.IsGlobal,
+        IsVisible: data.IsVisible,
+        // LastModified: data.LastModified || new Date().toISOString(),
+        // ModifiedById: data.ModifiedById || "",
+        ProjectsStr: data.ProjectsStr || "",
+        TemplateDocID: data.TemplateDocID,
+        TemplateExcelID: data.TemplateExcelID,
+        nEntityCateAID: data.nEntityCateAID,
+        nEntityCateBID: data.nEntityCateBID,
+      };
+
+      let result: EntityType;
+      if (formRequest.ID) {
+        result = await api.updateEntityType(formRequest);
+        console.log("Form updated:", result);
+      } else {
+        result = await api.insertEntityType(formRequest);
+        console.log("Form inserted:", result);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error saving form:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -845,6 +900,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveCalendar,
         handleSaveProjectsAccess,
         handleSaveApprovalFlow,
+        handleSaveForm,
       }}
     >
       {children}

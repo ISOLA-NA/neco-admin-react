@@ -32,6 +32,8 @@ import AppServices, {
   Calendar,
   PostSmall,
   AccessProject,
+  EntityType,
+  EntityTypeComplete,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -51,7 +53,6 @@ interface ApiContextType {
 
   // سایر سرویس‌ها
   getAllDefaultRibbons: () => Promise<DefaultRibbonItem[]>;
-  getTableTransmittal: () => Promise<EntityTypeItem[]>;
   getAllWfTemplate: () => Promise<WfTemplateItem[]>;
   getAllAfbtn: () => Promise<AFBtnItem[]>;
   getIdByUserToken: () => Promise<UserToken[]>;
@@ -140,6 +141,13 @@ interface ApiContextType {
   addApprovalFlow: (data: WfTemplateItem) => Promise<WfTemplateItem>;
   deleteApprovalFlow: (id: number) => Promise<void>;
   editApprovalFlow: (data: WfTemplateItem) => Promise<WfTemplateItem>;
+
+  getAllEntityType: () => Promise<EntityType[]>;
+  getTableTransmittal: () => Promise<EntityTypeComplete[]>;
+  insertEntityType: (data: EntityType) => Promise<EntityType>;
+  updateEntityType: (data: EntityType) => Promise<EntityType>;
+  deleteEntityType: (id: number) => Promise<void>;
+  duplicateEntityType: (id: number) => Promise<EntityType>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -165,7 +173,6 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     getAllProgramTemplates:
       AppServices.getAllProgramTemplates.bind(AppServices),
     getAllDefaultRibbons: AppServices.getAllDefaultRibbons.bind(AppServices),
-    getTableTransmittal: AppServices.getTableTransmittal.bind(AppServices),
     getAllWfTemplate: AppServices.getAllWfTemplate.bind(AppServices),
     getAllAfbtn: AppServices.getAllAfbtn.bind(AppServices),
     getIdByUserToken: AppServices.getIdByUserToken.bind(AppServices),
@@ -255,6 +262,13 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     addApprovalFlow: AppServices.addApprovalFlow.bind(AppServices),
     deleteApprovalFlow: AppServices.deleteApprovalFlow.bind(AppServices),
     editApprovalFlow: AppServices.editApprovalFlow.bind(AppServices),
+
+    getAllEntityType: AppServices.getAllEntityType.bind(AppServices),
+    getTableTransmittal: AppServices.getTableTransmittal.bind(AppServices),
+    insertEntityType: AppServices.insertEntityType.bind(AppServices),
+    updateEntityType: AppServices.updateEntityType.bind(AppServices),
+    deleteEntityType: AppServices.deleteEntityType.bind(AppServices),
+    duplicateEntityType: AppServices.duplicateEntityType.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

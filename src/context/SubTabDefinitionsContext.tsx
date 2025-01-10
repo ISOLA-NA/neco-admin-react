@@ -517,32 +517,49 @@ export const SubTabDefinitionsProvider: React.FC<{
             field: "Name",
             filter: "agTextColumnFilter",
           },
-          {
-            headerName: "Duration",
-            field: "MaxDuration",
-            filter: "agNumberColumnFilter",
-          },
-          {
-            headerName: "Budget",
-            field: "PCost",
-            filter: "agNumberColumnFilter",
-          },
-          {
-            headerName: "Description",
-            field: "Describtion",
-            filter: "agTextColumnFilter",
-          },
-          {
-            headerName: "Global",
-            field: "IsGlobal",
-            filter: "agTextColumnFilter",
-          },
         ],
         iconVisibility: {
           showAdd: true,
           showEdit: true,
           showDelete: true,
           showDuplicate: false,
+        },
+      },
+
+      // Add this to the subTabDefinitions object inside useMemo
+      Forms: {
+        endpoint: api.getTableTransmittal,
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+            sortable: true,
+          },
+          {
+            headerName: "Transmittal",
+            field: "IsDoc", // Using Name field for Transmittal
+            filter: "agTextColumnFilter",
+            sortable: true,
+          },
+          {
+            headerName: "CatA",
+            field: "EntityCateAName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+          },
+          {
+            headerName: "CatB",
+            field: "EntityCateBName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: true, // Enabled since we have duplicateEntityType API
         },
       },
 
