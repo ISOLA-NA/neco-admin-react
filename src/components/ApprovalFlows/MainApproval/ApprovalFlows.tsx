@@ -14,7 +14,7 @@ import AddSubApprovalFlowModal from "../AddApprovalDialog/AddSubApprovalFlowModa
 import { FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import { useApi } from "../../../context/ApiContext";
 import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
-import { WfTemplateItem } from "../../../services/api.services";
+import { WfTemplateItem, Project } from "../../../services/api.services";
 
 export interface ApprovalFlowHandle {
   save: () => Promise<boolean>;
@@ -28,40 +28,16 @@ interface ApprovalFlowData extends WfTemplateItem {
   SubApprovalFlows: any[];
 }
 
-const relatedProjectsData = [
-  {
-    ID: "642bc0ce-4d93-474b-a869-6101211533d4",
-    ProjectName: "Project Alpha",
-    Name: "Project Alpha",
-    IsVisible: true,
-    IsIdea: false,
-    State: "Active",
-  },
-  {
-    ID: "a1b2c3d4-5678-90ab-cdef-1234567890ab",
-    ProjectName: "Project Beta",
-    Name: "Project Beta",
-    IsVisible: true,
-    IsIdea: false,
-    State: "Planning",
-  },
-];
-
-function getAssociatedProjects(
-  projectsStr?: string,
-  projectsData?: { ID: string; Name: string }[]
-) {
-  const safeProjectsData = projectsData || [];
-  const safeProjectsStr = projectsStr || "";
-  const projectsArray = safeProjectsStr.split("|").filter(Boolean);
-  return safeProjectsData.filter((project) =>
-    projectsArray.includes(project.ID)
-  );
+interface MappedProject {
+  ID: string | number;
+  Name: string;
 }
 
 const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   ({ selectedRow }, ref) => {
+    const api = useApi();
     const { handleSaveApprovalFlow } = useAddEditDelete();
+    const [projects, setProjects] = useState<Project[]>([]);
     const [approvalFlowData, setApprovalFlowData] = useState<ApprovalFlowData>({
       Name: "",
       Describtion: "",
@@ -76,6 +52,24 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
     const [selectedSubRowData, setSelectedSubRowData] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    useEffect(() => {
+      const fetchProjects = async () => {
+        try {
+          const projectsData = await api.getAllProject();
+          setProjects(projectsData);
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+        }
+      };
+      fetchProjects();
+    }, [api]);
+
+    // Map projects to match ListSelector's expected format
+    const mappedProjects: MappedProject[] = projects.map((project) => ({
+      ID: project.ID,
+      Name: project.ProjectName,
+    }));
 
     useEffect(() => {
       if (selectedRow) {
@@ -128,7 +122,13 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       }));
     };
 
-    const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
+    const projectColumnDefs = [
+      {
+        field: "Name",
+        headerName: "Project Name",
+        filter: "agTextColumnFilter",
+      },
+    ];
 
     const handleProjectsChange = (selectedIds: (string | number)[]) => {
       const newProjectsStr =
@@ -140,11 +140,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       handleChange("IsGlobal", isGlobal);
     };
 
-    const associatedProjects = getAssociatedProjects(
-      approvalFlowData.ProjectsStr,
-      relatedProjectsData
-    );
-    const selectedProjectIds = associatedProjects.map((p) => p.ID);
+    const getSelectedProjectIds = () => {
+      if (!approvalFlowData.ProjectsStr) return [];
+      return approvalFlowData.ProjectsStr.split("|").filter((id) => id);
+    };
+
+    const selectedProjectIds = getSelectedProjectIds();
 
     const handleRowClick = (row: any) => {
       setSelectedRowData(row);
@@ -152,11 +153,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
     const handleSelectButtonClick = () => {
       if (selectedRowData) {
-        const currentSelectedIds = selectedProjectIds.map((id) =>
-          id.toString()
-        );
-        if (!currentSelectedIds.includes(selectedRowData.ID)) {
-          const newSelection = [...currentSelectedIds, selectedRowData.ID];
+        const currentSelectedIds = getSelectedProjectIds();
+        if (!currentSelectedIds.includes(selectedRowData.ID.toString())) {
+          const newSelection = [
+            ...currentSelectedIds,
+            selectedRowData.ID.toString(),
+          ];
           handleProjectsChange(newSelection);
         }
         setSelectedRowData(null);
@@ -167,6 +169,18 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       handleSelectButtonClick();
     };
 
+    // Create modalContentProps
+    const modalContentProps = {
+      columnDefs: projectColumnDefs,
+      rowData: mappedProjects,
+      selectedRow: selectedRowData,
+      onRowDoubleClick: handleRowDoubleClick,
+      onRowClick: handleRowClick,
+      onSelectButtonClick: handleSelectButtonClick,
+      isSelectDisabled: !selectedRowData,
+    };
+
+    // SubApprovalFlow handlers
     const handleSubApprovalFlowEdit = (subFlow: any) => {
       console.log("Edit SubApprovalFlow:", subFlow);
     };
@@ -253,6 +267,11 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       handleSubApprovalFlowEdit(data);
     };
 
+    // Get selected projects for display
+    const selectedProjects = projects.filter((project) =>
+      selectedProjectIds.includes(project.ID.toString())
+    );
+
     return (
       <>
         <TwoColumnLayout>
@@ -276,26 +295,44 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             />
           </TwoColumnLayout.Item>
 
+          <TwoColumnLayout.Item span={1}>
+            <DynamicInput
+              name="Max Duration (Days)"
+              type="number"
+              value={approvalFlowData.MaxDuration.toString()}
+              placeholder="Enter max duration"
+              onChange={(e) =>
+                handleChange("MaxDuration", parseInt(e.target.value) || 0)
+              }
+              required={true}
+            />
+          </TwoColumnLayout.Item>
+
+          <TwoColumnLayout.Item span={1}>
+            <DynamicInput
+              name="Project Cost"
+              type="number"
+              value={approvalFlowData.PCost.toString()}
+              placeholder="Enter project cost"
+              onChange={(e) =>
+                handleChange("PCost", parseInt(e.target.value) || 0)
+              }
+              required={true}
+            />
+          </TwoColumnLayout.Item>
+
           <TwoColumnLayout.Item span={2} className="mt-10">
             <ListSelector
               title="Related Projects"
               columnDefs={projectColumnDefs}
-              rowData={relatedProjectsData}
+              rowData={mappedProjects}
               selectedIds={selectedProjectIds}
               onSelectionChange={handleProjectsChange}
               showSwitcher={true}
               isGlobal={approvalFlowData.IsGlobal}
               onGlobalChange={handleGlobalChange}
               ModalContentComponent={TableSelector}
-              modalContentProps={{
-                columnDefs: projectColumnDefs,
-                rowData: relatedProjectsData,
-                selectedRow: selectedRowData,
-                onRowDoubleClick: handleRowDoubleClick,
-                onRowClick: handleRowClick,
-                onSelectButtonClick: handleSelectButtonClick,
-                isSelectDisabled: !selectedRowData,
-              }}
+              modalContentProps={modalContentProps}
               className="-mt-8"
             />
           </TwoColumnLayout.Item>
