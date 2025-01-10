@@ -562,7 +562,23 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: true, // Enabled since we have duplicateEntityType API
         },
       },
-
+      Categories: {
+        endpoint: (params?: { categoryType: "cata" | "catb" }) =>
+          params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),
+        columnDefs: [
+          {
+            headerName: "Name",
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
       // -------------------
       // MenuTab
       // -------------------

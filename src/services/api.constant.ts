@@ -98,4 +98,12 @@ export const apiConst = Object.freeze({
   deleteEntityType: "api/EntityType/Delete",
   updateEntityType: "api/EntityType/Update",
   duplicateEntityType: "api/EntityType/Duplicate",
+  getAllCatA: "api/EntityCateA/GetAll",
+  insertCatA: "api/EntityCateA/Insert",
+  deleteCatA: "api/EntityCateA/Delete",
+  editCatA: "api/EntityCateA/Update",
+  getAllCatB: "api/EntityCateB/GetAll",
+  insertCatB: "api/EntityCateB/Insert",
+  deleteCatB: "api/EntityCateB/Delete",
+  editCatB: "api/EntityCateB/Update",
 });

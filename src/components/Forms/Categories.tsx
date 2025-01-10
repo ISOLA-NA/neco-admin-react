@@ -1,133 +1,171 @@
-// src/components/General/EnterpriseDetails.tsx
+// src/components/categories/Categories.tsx
 
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useEffect,
+} from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
-import DynamicInput from "../utilities/DynamicInput"; // اطمینان از مسیر صحیح
-import CustomTextarea from "../utilities/DynamicTextArea"; // اصلاح مسیر واردات
-import DynamicSelector from "../utilities/DynamicSelector"; // اطمینان از مسیر صحیح
+import DynamicInput from "../utilities/DynamicInput";
+import CustomTextarea from "../utilities/DynamicTextArea";
+import DynamicSelector from "../utilities/DynamicSelector"; // وارد کردن DynamicSelector
+import { useAddEditDelete } from "../../context/AddEditDeleteContext";
+import { CategoryItem } from "../../services/api.services";
 
-interface EnterpriseDetailsProps {
-  selectedRow: any;
-  categoryType: "cata" | "catb";
+export interface CategoryHandle {
+  save: () => Promise<any>;
+  getData: () => any;
 }
 
-interface Option {
-  value: string;
-  label: string;
+interface CategoriesProps {
+  selectedRow: CategoryItem | null;
+  selectedCategoryType: "cata" | "catb";
 }
 
-const EnterpriseDetails: React.FC<EnterpriseDetailsProps> = ({
-  selectedRow,
-  categoryType,
-}) => {
-  const [enterpriseData, setEnterpriseData] = useState<{
-    ID: string | number;
-    EnterpriseName: string;
-    Description: string;
-    Title: string;
-    GroupName: string; // اضافه کردن فیلد GroupName
-  }>({
-    ID: "",
-    EnterpriseName: "",
-    Description: "",
-    Title: "",
-    GroupName: "", // مقدار اولیه
-  });
+const Categories = forwardRef<CategoryHandle, CategoriesProps>(
+  ({ selectedRow, selectedCategoryType }, ref) => {
+    const { handleSaveCatA, handleSaveCatB } = useAddEditDelete();
 
-  const [errors, setErrors] = useState<{
-    GroupName?: string;
-    // سایر خطاها در صورت نیاز
-  }>({});
+    // وضعیت برای داده‌های فرم
+    const [formData, setFormData] = useState<
+      Omit<CategoryItem, "ID" | "ModifiedById"> & {
+        ID?: number | undefined;
+        ModifiedById?: number | undefined;
+      }
+    >({
+      ID: undefined,
+      Name: "",
+      Description: "",
+      IsVisible: true,
+      LastModified: new Date().toISOString(),
+      ModifiedById: undefined,
+    });
 
-  useEffect(() => {
-    if (selectedRow) {
-      setEnterpriseData({
-        ID: selectedRow.ID || "",
-        EnterpriseName: selectedRow.EnterpriseName || "",
-        Description: selectedRow.Description || "",
-        Title: selectedRow.Title || "",
-        GroupName: selectedRow.GroupName || "", // مقدار GroupName
-      });
-    } else {
-      setEnterpriseData({
-        ID: "",
-        EnterpriseName: "",
-        Description: "",
-        Title: "",
-        GroupName: "",
-      });
-    }
-  }, [selectedRow]);
+    // وضعیت برای نوع دسته‌بندی
+    const [categoryType, setCategoryType] = useState<"cata" | "catb">(
+      selectedCategoryType
+    );
 
-  const handleChange = (field: keyof typeof enterpriseData, value: string) => {
-    setEnterpriseData((prev) => ({
-      ...prev,
-      [field]: value,
+    useEffect(() => {
+      if (selectedRow) {
+        setFormData({
+          ID: selectedRow.ID ? Number(selectedRow.ID) : undefined,
+          Name: selectedRow.Name || "",
+          Description: selectedRow.Description || "",
+          IsVisible: selectedRow.IsVisible ?? true,
+          LastModified: selectedRow.LastModified || new Date().toISOString(),
+          ModifiedById: selectedRow.ModifiedById
+            ? Number(selectedRow.ModifiedById)
+            : undefined,
+        });
+        setCategoryType(selectedCategoryType); // نوع دسته‌بندی ثابت در حالت ویرایش
+      } else {
+        setFormData({
+          ID: undefined,
+          Name: "",
+          Description: "",
+          IsVisible: true,
+          LastModified: new Date().toISOString(),
+          ModifiedById: undefined,
+        });
+        setCategoryType(selectedCategoryType); // مقدار اولیه نوع دسته‌بندی در حالت افزودن
+      }
+    }, [selectedRow, selectedCategoryType]);
+
+    useImperativeHandle(ref, () => ({
+      save: async () => {
+        const saveData = {
+          ...formData,
+          categoryType, // استفاده از نوع دسته‌بندی فعلی
+          LastModified: new Date().toISOString(),
+        };
+
+        try {
+          if (categoryType === "cata") {
+            return await handleSaveCatA(saveData);
+          } else {
+            return await handleSaveCatB(saveData);
+          }
+        } catch (error) {
+          console.error("Error saving category:", error);
+          throw error;
+        }
+      },
+      getData: () => ({
+        ...formData,
+        categoryType,
+      }),
     }));
-  };
 
-  // تعریف گزینه‌های Select بر اساس categoryType
-  const groupOptions: Option[] =
-    categoryType === "cata"
-      ? [
-          { value: "cata1", label: "Cata Option 1" },
-          { value: "cata2", label: "Cata Option 2" },
-          // سایر گزینه‌های Cata
-        ]
-      : [
-          { value: "catb1", label: "Cat B Option 1" },
-          { value: "catb2", label: "Cat B Option 2" },
-          // سایر گزینه‌های Cat B
-        ];
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({
+        ...prev,
+        Name: e.target.value,
+      }));
+    };
 
-  const handleGroupNameChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    handleChange("GroupName", value);
-    // مثال ساده برای اعتبارسنجی
-    if (!value) {
-      setErrors((prev) => ({ ...prev, GroupName: "Group Name is required." }));
-    } else {
-      setErrors((prev) => ({ ...prev, GroupName: undefined }));
-    }
-  };
+    const handleDescriptionChange = (
+      e: React.ChangeEvent<HTMLTextAreaElement>
+    ) => {
+      setFormData((prev) => ({
+        ...prev,
+        Description: e.target.value,
+      }));
+    };
 
-  return (
-    <TwoColumnLayout>
-      {/* کامپوننت DynamicInput برای Title */}
-      <DynamicInput
-        name="Title"
-        type="text"
-        value={enterpriseData.Title}
-        placeholder=""
-        onChange={(e) => handleChange("Title", e.target.value)}
-      />
+    const handleCategoryTypeChange = (
+      e: React.ChangeEvent<HTMLSelectElement>
+    ) => {
+      setCategoryType(e.target.value as "cata" | "catb");
+    };
 
-      {/* استفاده از DynamicSelector برای GroupName */}
-      <div className="mb-4">
-        <DynamicSelector
-          label="Group Name"
-          options={groupOptions}
-          selectedValue={enterpriseData.GroupName}
-          onChange={handleGroupNameChange}
-          error={!!errors.GroupName}
-          errorMessage={errors.GroupName}
-          className="w-full"
-        />
+    // تعریف گزینه‌های دسته‌بندی با برچسب‌های فارسی
+    const categoryOptions = [
+      { value: "cata", label: "دسته‌بندی A" },
+      { value: "catb", label: "دسته‌بندی B" },
+    ];
+
+    return (
+      <div className="p-4">
+        <TwoColumnLayout>
+          <TwoColumnLayout.Item span={1}>
+            <DynamicInput
+              name="Name"
+              type="text"
+              value={formData.Name}
+              onChange={handleNameChange}
+              required
+            />
+          </TwoColumnLayout.Item>
+
+          <TwoColumnLayout.Item span={1}>
+            <DynamicSelector
+              name="categoryType"
+              label="نوع دسته‌بندی"
+              options={categoryOptions}
+              selectedValue={categoryType}
+              onChange={handleCategoryTypeChange}
+              disabled={!!selectedRow} // غیرفعال در حالت ویرایش
+              className="mb-4"
+            />
+          </TwoColumnLayout.Item>
+
+          <TwoColumnLayout.Item span={2}>
+            <CustomTextarea
+              name="Description"
+              value={formData.Description}
+              placeholder="توضیحات دسته‌بندی را وارد کنید"
+              onChange={handleDescriptionChange}
+              required
+            />
+          </TwoColumnLayout.Item>
+        </TwoColumnLayout>
       </div>
+    );
+  }
+);
 
-      {/* کامپوننت CustomTextarea برای Description */}
-      <CustomTextarea
-        id="Description"
-        name="Description"
-        value={enterpriseData.Description}
-        placeholder=""
-        onChange={(e) => handleChange("Description", e.target.value)}
-        label="Description"
-        required
-        // می‌توانید ویژگی‌های اضافی مانند leftElement یا rightElement را اضافه کنید
-      />
-    </TwoColumnLayout>
-  );
-};
+Categories.displayName = "Categories";
 
-export default EnterpriseDetails;
+export default Categories;

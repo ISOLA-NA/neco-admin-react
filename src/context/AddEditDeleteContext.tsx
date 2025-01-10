@@ -14,6 +14,7 @@ import {
 import {
   AccessProject,
   Calendar,
+  CategoryItem,
   EntityCollection,
   EntityType,
   WfTemplateItem,
@@ -247,6 +248,15 @@ interface FormData {
   nEntityCateBID: number | null;
 }
 
+interface CategoryData {
+  ID: number;
+  Name: string;
+  Description: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
@@ -275,6 +285,8 @@ interface AddEditDeleteContextType {
     data: ApprovalFlowData
   ) => Promise<WfTemplateItem | null>;
   handleSaveForm: (data: FormData) => Promise<EntityType | null>;
+  handleSaveCatA: (data: CategoryData) => Promise<CategoryData | null>;
+  handleSaveCatB: (data: CategoryData) => Promise<CategoryData | null>;
 }
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
@@ -880,7 +892,70 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+  // در AddEditDeleteContext.tsx
 
+  // در AddEditDeleteContext
+  const handleSaveCatA = async (
+    data: CategoryData
+  ): Promise<CategoryData | null> => {
+    setIsLoading(true);
+    try {
+      const categoryRequest: CategoryItem = {
+        ID: data.ID ? Number(data.ID) : undefined,
+        Name: data.Name,
+        Description: data.Description,
+        IsVisible: data.IsVisible,
+        LastModified: data.LastModified || new Date().toISOString(),
+        ModifiedById: data.ModifiedById ? Number(data.ModifiedById) : undefined,
+      };
+
+      let result;
+      if (categoryRequest.ID) {
+        result = await api.updateCatA(categoryRequest);
+        console.log("Category A updated:", result);
+      } else {
+        result = await api.insertCatA(categoryRequest);
+        console.log("Category A inserted:", result);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error saving Category A:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveCatB = async (
+    data: CategoryData
+  ): Promise<CategoryData | null> => {
+    setIsLoading(true);
+    try {
+      const categoryRequest: CategoryItem = {
+        ID: data.ID ? Number(data.ID) : undefined,
+        Name: data.Name,
+        Description: data.Description,
+        IsVisible: data.IsVisible,
+        LastModified: data.LastModified || new Date().toISOString(),
+        ModifiedById: data.ModifiedById ? Number(data.ModifiedById) : undefined,
+      };
+
+      let result;
+      if (categoryRequest.ID) {
+        result = await api.updateCatB(categoryRequest);
+        console.log("Category B updated:", result);
+      } else {
+        result = await api.insertCatB(categoryRequest);
+        console.log("Category B inserted:", result);
+      }
+      return result;
+    } catch (error) {
+      console.error("Error saving Category B:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -901,6 +976,8 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveProjectsAccess,
         handleSaveApprovalFlow,
         handleSaveForm,
+        handleSaveCatA,
+        handleSaveCatB,
       }}
     >
       {children}

@@ -31,6 +31,7 @@ import ProjectAccess, {
 } from "../../Projects/ProjectAccess/ProjectsAccess";
 import { ApprovalFlowHandle } from "../../ApprovalFlows/MainApproval/ApprovalFlows";
 import { FormsHandle } from "../../Forms/Forms";
+import { CategoryHandle } from "../../Forms/Categories";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
@@ -92,6 +93,10 @@ const TabContent: FC<TabContentProps> = ({
   const projectAccessRef = useRef<ProjectAccessHandle>(null);
   const approvalFlowRef = useRef<ApprovalFlowHandle>(null);
   const formsRef = useRef<FormsHandle>(null);
+  const categoriesRef = useRef<CategoryHandle>(null);
+  const [selectedCategoryType, setSelectedCategoryType] = useState<
+    "cata" | "catb"
+  >("cata");
 
   // State for DynamicConfirm
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -228,6 +233,15 @@ const TabContent: FC<TabContentProps> = ({
         case "Forms":
           data = await api.getTableTransmittal();
           break;
+        case "Categories":
+          if (selectedCategoryType === "cata") {
+            data = await api.getAllCatA();
+            console.log("Fetching CatA data:", data); // برای دیباگ
+          } else {
+            data = await api.getAllCatB();
+            console.log("Fetching CatB data:", data); // برای دیباگ
+          }
+          break;
         default:
           data = rowData;
       }
@@ -238,7 +252,18 @@ const TabContent: FC<TabContentProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [api, activeSubTab, rowData]);
+  }, [api, activeSubTab, rowData, selectedCategoryType]);
+
+  const handleCategoryTypeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newType = e.target.value as "cata" | "catb";
+    setSelectedCategoryType(newType);
+    // بعد از تغییر نوع، دیتا رو دوباره فچ میکنیم
+    if (activeSubTab === "Categories") {
+      fetchData();
+    }
+  };
 
   useEffect(() => {
     if (activeSubTab) {
@@ -386,6 +411,22 @@ const TabContent: FC<TabContentProps> = ({
           if (formsRef.current) {
             await formsRef.current.save();
             showAlert("success", null, "Saved", "Form added successfully.");
+            await fetchData();
+          }
+          break;
+        case "Categories":
+          if (categoriesRef.current) {
+            const result =
+              selectedCategoryType === "cata"
+                ? await api.insertCatA({
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  })
+                : await api.insertCatB({
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  });
+            showAlert("success", null, "Saved", "Category added successfully.");
             await fetchData();
           }
           break;
@@ -553,6 +594,27 @@ const TabContent: FC<TabContentProps> = ({
             await fetchData();
           }
           break;
+        case "Categories":
+          if (categoriesRef.current) {
+            const result =
+              selectedCategoryType === "cata"
+                ? await api.updateCatA({
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  })
+                : await api.updateCatB({
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  });
+            showAlert(
+              "success",
+              null,
+              "Updated",
+              "Category updated successfully."
+            );
+            await fetchData();
+          }
+          break;
       }
       setIsPanelOpen(false);
       resetInputs();
@@ -672,6 +734,13 @@ const TabContent: FC<TabContentProps> = ({
           case "Forms":
             await api.deleteEntityType(pendingSelectedRow.ID);
             break;
+          case "Categories":
+            if (selectedCategoryType === "cata") {
+              await api.deleteCatA(pendingSelectedRow.ID);
+            } else {
+              await api.deleteCatB(pendingSelectedRow.ID);
+            }
+            break;
         }
         showAlert(
           "success",
@@ -705,11 +774,6 @@ const TabContent: FC<TabContentProps> = ({
         "Please select a row to duplicate."
       );
     }
-  };
-
-  const handleLeftProjectDoubleClick = (subItemRow: any) => {
-    setSelectedSubItemForRight(subItemRow);
-    setShowRightAccessPanel(true);
   };
 
   const handleConfirm = async () => {
@@ -770,6 +834,8 @@ const TabContent: FC<TabContentProps> = ({
         return approvalFlowRef;
       case "Forms":
         return formsRef;
+      case "Categories":
+        return categoriesRef;
       default:
         return null;
     }
@@ -812,6 +878,19 @@ const TabContent: FC<TabContentProps> = ({
             )}
           </button>
         </div>
+
+        {activeSubTab === "Categories" && (
+          <div className="mb-4 p-2">
+            <select
+              className="w-full p-2 border rounded shadow-sm"
+              value={selectedCategoryType}
+              onChange={handleCategoryTypeChange}
+            >
+              <option value="cata">Category A</option>
+              <option value="catb">Category B</option>
+            </select>
+          </div>
+        )}
 
         <div className="h-full p-4 overflow-auto relative">
           <DataTable
@@ -936,7 +1015,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Calendars" ||
                     activeSubTab === "ProjectsAccess" ||
                     activeSubTab === "ApprovalFlows" ||
-                    activeSubTab === "Forms")
+                    activeSubTab === "Forms" ||
+                    activeSubTab === "Categories")
                     ? handleInsert
                     : undefined
                 }
@@ -957,7 +1037,8 @@ const TabContent: FC<TabContentProps> = ({
                     activeSubTab === "Calendars" ||
                     activeSubTab === "ProjectsAccess" ||
                     activeSubTab === "ApprovalFlows" ||
-                    activeSubTab === "Forms")
+                    activeSubTab === "Forms" ||
+                    activeSubTab === "Categories")
                     ? handleUpdate
                     : undefined
                 }
@@ -993,6 +1074,7 @@ const TabContent: FC<TabContentProps> = ({
                       }
                       selectedRow={isAdding ? null : selectedRow}
                       ref={getActiveRef()}
+                      selectedCategoryType={selectedCategoryType} // Add this line
                     />
                   </Suspense>
                 </div>

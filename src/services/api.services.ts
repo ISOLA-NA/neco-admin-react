@@ -479,6 +479,15 @@ export interface EntityTypeComplete extends EntityType {
   EntityCateBName: string | null;
 }
 
+export interface CategoryItem {
+  ID?: number;
+  Name: string;
+  Description: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -1168,6 +1177,57 @@ class ApiService {
       { ID: id }
     );
     return response.data;
+  }
+
+  async getAllCatA(): Promise<CategoryItem[]> {
+    const response = await httpClient.post<CategoryItem[]>(apiConst.getAllCatA);
+    return response.data;
+  }
+
+  async insertCatA(data: CategoryItem): Promise<CategoryItem> {
+    const response = await httpClient.post<CategoryItem>(
+      apiConst.insertCatA,
+      data
+    );
+    return response.data;
+  }
+
+  async updateCatA(data: CategoryItem): Promise<CategoryItem> {
+    const response = await httpClient.post<CategoryItem>(
+      apiConst.editCatA,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteCatA(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteCatA, { ID: id });
+  }
+
+  // Category B methods
+  async getAllCatB(): Promise<CategoryItem[]> {
+    const response = await httpClient.post<CategoryItem[]>(apiConst.getAllCatB);
+    return response.data;
+  }
+
+  async insertCatB(data: CategoryItem): Promise<CategoryItem> {
+    const response = await httpClient.post<CategoryItem>(
+      apiConst.insertCatB,
+      data
+    );
+    return response.data;
+  }
+
+  async updateCatB(data: CategoryItem): Promise<CategoryItem> {
+    const response = await httpClient.post<CategoryItem>(
+      apiConst.editCatB,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteCatB(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteCatB, { ID: id });
   }
 }
 

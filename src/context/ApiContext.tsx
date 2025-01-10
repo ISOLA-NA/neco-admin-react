@@ -34,6 +34,7 @@ import AppServices, {
   AccessProject,
   EntityType,
   EntityTypeComplete,
+  CategoryItem,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -148,6 +149,17 @@ interface ApiContextType {
   updateEntityType: (data: EntityType) => Promise<EntityType>;
   deleteEntityType: (id: number) => Promise<void>;
   duplicateEntityType: (id: number) => Promise<EntityType>;
+
+  getAllCatA: () => Promise<CategoryItem[]>;
+  insertCatA: (data: CategoryItem) => Promise<CategoryItem>;
+  updateCatA: (data: CategoryItem) => Promise<CategoryItem>;
+  deleteCatA: (id: number) => Promise<void>;
+
+  // Category B methods
+  getAllCatB: () => Promise<CategoryItem[]>;
+  insertCatB: (data: CategoryItem) => Promise<CategoryItem>;
+  updateCatB: (data: CategoryItem) => Promise<CategoryItem>;
+  deleteCatB: (id: number) => Promise<void>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -269,6 +281,17 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     updateEntityType: AppServices.updateEntityType.bind(AppServices),
     deleteEntityType: AppServices.deleteEntityType.bind(AppServices),
     duplicateEntityType: AppServices.duplicateEntityType.bind(AppServices),
+
+    getAllCatA: AppServices.getAllCatA.bind(AppServices),
+    insertCatA: AppServices.insertCatA.bind(AppServices),
+    updateCatA: AppServices.updateCatA.bind(AppServices),
+    deleteCatA: AppServices.deleteCatA.bind(AppServices),
+
+    // Category B methods
+    getAllCatB: AppServices.getAllCatB.bind(AppServices),
+    insertCatB: AppServices.insertCatB.bind(AppServices),
+    updateCatB: AppServices.updateCatB.bind(AppServices),
+    deleteCatB: AppServices.deleteCatB.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
