@@ -1,5 +1,5 @@
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from "recharts";
-import { useProject } from "../../../context/Client/projects";
+import { useProject } from "../../../../context/Client/projects";
 import { SiCodefactor } from "react-icons/si";
 import { RiChatFollowUpLine } from "react-icons/ri";
 import { LuOctagonAlert } from "react-icons/lu";
@@ -48,8 +48,8 @@ export default function ClientDashboard() {
   const { projects, selectedProjects, toggleProjectSelection } = useProject();
 
   return (
-    <div className="h-full flex flex-col justify-between py-10">
-      <div className="py-5 px-2 grid grid-cols-2 h-[200px]">
+    <div className=" flex flex-col justify-between ">
+      <div className="grid grid-cols-2 h-[200px]">
         <div className="flex flex-row">
           <ResponsiveContainer width="50%" height="100%">
             <PieChart width={200} height={200}>
