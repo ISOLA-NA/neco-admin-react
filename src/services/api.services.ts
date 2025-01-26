@@ -546,6 +546,9 @@ class ApiService {
   async GetAllUserProject() {
     return await httpClient.post(apiConstClient.GetAllUserProject);
   }
+  async GCMDZip(model: any) {
+    return await httpClient.post(apiConstClient.GCMDZip, model);
+  }
   ////////////////////////////////////////////////////
 }
 

@@ -15,6 +15,8 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^6.2.1",
+    "@progress/kendo-react-grid": "^9.3.1",
+    "@progress/kendo-theme-default": "^10.1.0",
     "@types/react-split-pane": "^0.1.67",
     "ag-grid-community": "^32.3.3",
     "ag-grid-react": "^32.3.3",

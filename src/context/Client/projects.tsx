@@ -71,6 +71,9 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
           ),
         );
       setProjects(sortedProjects);
+      if (sortedProjects.length > 0) {
+        setSelectedProjects([sortedProjects[0]]);
+      }
     } catch (err) {
       console.error(err);
       setError("Failed to fetch projects");
