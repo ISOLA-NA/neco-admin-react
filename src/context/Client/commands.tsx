@@ -16,7 +16,7 @@ import { unGZip } from "../../utils/ungzip";
 interface CommandContextType {
   command: string;
   handleSetCommand: (command: string) => void;
-  handleCommandDecorations: (e: FormEvent<HTMLFormElement>) => void;
+  handleCommandDecorations: () => void;
   tableData: any[];
   colsDef: any[];
 }
@@ -56,10 +56,7 @@ export const CommandProvider: React.FC<CommandProviderProps> = ({
     console.log(command);
   };
 
-  const handleCommandDecorations = async (e?: FormEvent<HTMLFormElement>) => {
-    if (e) {
-      e.preventDefault();
-    }
+  const handleCommandDecorations = async () => {
     if (command.trim() === "") return;
     let cmd = command.toLowerCase().replace("necopm:\\", "");
     if (cmd.startsWith("ncmd")) {

@@ -65,8 +65,7 @@ export default function Header() {
           </label>
         </div>
         <div className="flex items-center mr-4">
-          <form
-            onSubmit={handleCommandDecorations}
+          <div
             className={`${
               showCommandInput ? "opacity-100 mr-2 block" : "opacity-0 hidden"
             } `}
@@ -82,7 +81,7 @@ export default function Header() {
               />
               <VscDebugStart onClick={handleCommandDecorations} />
             </label>
-          </form>
+          </div>
           <div
             className="mr-3 cursor-pointer tooltip"
             data-tip="Commandbar"
