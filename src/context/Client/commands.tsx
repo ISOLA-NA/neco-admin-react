@@ -17,6 +17,8 @@ interface CommandContextType {
   command: string;
   handleSetCommand: (command: string) => void;
   handleCommandDecorations: (e: FormEvent<HTMLFormElement>) => void;
+  tableData: any[];
+  colsDef: any[];
 }
 
 interface GCMDModel {
@@ -45,6 +47,8 @@ export const CommandProvider: React.FC<CommandProviderProps> = ({
   children,
 }) => {
   const [command, setCommand] = useState<string>("NecoPm:\\ncmd\\mytasks");
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [colsDef, setColsDef] = useState<any[]>([]);
   const { selectedProjects } = useProject();
   const handleSetCommand = (command: string) => {
     setCommand(command);
@@ -84,7 +88,20 @@ export const CommandProvider: React.FC<CommandProviderProps> = ({
       try {
         const response = await AppServices.GCMDZip(model);
         const ugzipResponse = unGZip(response.data);
-        console.log("ugzipResponse", ugzipResponse);
+        if (ugzipResponse.DataTable.length > 0) {
+          setTableData(ugzipResponse.DataTable);
+
+          const cols = [];
+          for (const k in ugzipResponse.DataTable[0]) {
+            const colData = {
+              field: k,
+              title: k,
+            };
+            cols.push(colData);
+            setColsDef(cols);
+          }
+        }
+        console.log("ugzipResponse", ugzipResponse.DataTable);
       } catch (err) {
         console.error(err);
       }
@@ -93,14 +110,20 @@ export const CommandProvider: React.FC<CommandProviderProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (selectedProjects && selectedProjects.length > 0) {
-      handleCommandDecorations();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (selectedProjects && selectedProjects.length > 0) {
+  //     handleCommandDecorations();
+  //   }
+  // }, []);
   return (
     <CommandContext.Provider
-      value={{ command, handleSetCommand, handleCommandDecorations }}
+      value={{
+        command,
+        handleSetCommand,
+        handleCommandDecorations,
+        tableData,
+        colsDef,
+      }}
     >
       {children}
     </CommandContext.Provider>
@@ -110,7 +133,7 @@ export const CommandProvider: React.FC<CommandProviderProps> = ({
 export const useCommand = (): CommandContextType => {
   const context = useContext(CommandContext);
   if (!context) {
-    throw new Error("useProject must be used within an CommandProvider");
+    throw new Error("useCommand must be used within a CommandProvider");
   }
   return context;
 };

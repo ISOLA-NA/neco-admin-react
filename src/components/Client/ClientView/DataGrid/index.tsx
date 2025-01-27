@@ -4,22 +4,61 @@ import {
   GridToolbar,
 } from "@progress/kendo-react-grid";
 import "@progress/kendo-theme-default/dist/all.css";
+import { useCommand } from "../../../../context/Client/commands";
+import { useEffect, useState } from "react";
 
 export default function DataGrid() {
-  const data = [
-    { id: 1, name: "John Doe", age: 30, city: "New York" },
-    { id: 2, name: "Jane Smith", age: 25, city: "Los Angeles" },
-    { id: 3, name: "Michael Brown", age: 40, city: "Chicago" },
-  ];
+  const { handleCommandDecorations, tableData, colsDef } = useCommand();
+  console.log("tableData", tableData, colsDef);
+
+  useEffect(() => {
+    console.log("DataGrid view activated, executing commands...");
+    handleCommandDecorations();
+  }, []);
 
   return (
-    <div>
-      <Grid data={data} filterable resizable>
-        <Column field="id" title="ID" width="50px" />
-        <Column field="name" title="Name" />
-        <Column field="age" title="Age" width="100px" />
-        <Column field="city" title="City" />
+    <div className="h-full p-6">
+      <Grid
+        data={tableData}
+        resizable
+        size="small"
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "10px",
+          left: "10px",
+          bottom: "20px",
+        }}
+      >
+        {colsDef.map((col) => (
+          <Column
+            key={col.field}
+            field={col.field}
+            title={col.title}
+            width="150px"
+            cell={TruncatedCell}
+          />
+        ))}
       </Grid>
     </div>
   );
 }
+
+const TruncatedCell = (props: any) => {
+  const { dataItem, field } = props;
+  const cellValue = dataItem[field];
+
+  return (
+    <td
+      style={{
+        overflow: "hidden",
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis",
+        maxWidth: "150px", // Set max width for truncation
+      }}
+      title={cellValue} // Show full text on hover
+    >
+      {cellValue}
+    </td>
+  );
+};

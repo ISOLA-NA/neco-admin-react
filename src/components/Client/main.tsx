@@ -1,5 +1,5 @@
 import { ProjectProvider } from "../../context/Client/projects";
-import { CommandProvider, useCommand } from "../../context/Client/commands";
+import { CommandProvider } from "../../context/Client/commands";
 import ClientDashboard from "./ClientView/Dashboard";
 import KanbanBoard from "./ClientView/Kanban";
 import Header from "./Header";
@@ -12,7 +12,6 @@ type ViewType = "dashboard" | "kanban" | "table" | "calendar" | "charts";
 // export default function Client({ children }: { childre: React.ReactNode }) {
 export default function Client() {
   const [activeView, setActiveView] = useState<ViewType>("dashboard"); // Default view is Dashboard
-  const { handleCommandDecorations } = useCommand(); // گرفتن متد از CommandContext
 
   const renderView = () => {
     switch (activeView) {
@@ -22,21 +21,15 @@ export default function Client() {
         return <KanbanBoard />;
       case "table":
         return <DataGrid />;
-      case "calendar":
-        return <CalendarView />;
-      case "charts":
-        return <ChartsView />;
+      // case "calendar":
+      //   return <CalendarView />;
+      // case "charts":
+      //   return <ChartsView />;
       default:
         return <ClientDashboard />;
     }
   };
 
-  useEffect(() => {
-    if (activeView === "table") {
-      console.log("DataGrid view activated, executing commands...");
-      handleCommandDecorations();
-    }
-  }, [activeView, handleCommandDecorations]);
   return (
     <ProjectProvider>
       <CommandProvider>
@@ -48,7 +41,7 @@ export default function Client() {
             <Header />
             <hr />
             <Toolbar setActiveView={setActiveView} />
-            <div className="h-full py-10 px-2">{renderView()}</div>
+            <div className="h-full py-10 px-2 relative">{renderView()}</div>
           </div>
         </div>
       </CommandProvider>
