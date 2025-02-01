@@ -79,7 +79,6 @@ const TableController: React.FC = () => {
 
         {/* Textarea Section */}
         <CustomTextarea
-          id="tableHeaders"
           name="Type each Column Title on a separate line"
           value={textareaValue}
           onChange={handleTextareaChange}
@@ -117,7 +116,7 @@ const TableController: React.FC = () => {
               onEdit={() => {}}
               onDelete={() => {}}
               onDuplicate={() => {}}
-              isRowSelected={false}
+              // isRowSelected={false}
               showSearch={false}
               showAddNew={true}
             />

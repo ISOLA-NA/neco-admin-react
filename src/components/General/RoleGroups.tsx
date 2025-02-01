@@ -1,10 +1,10 @@
-// src/components/General/RoleGroups.tsx
-
 import {
   useState,
   useEffect,
   forwardRef,
   useImperativeHandle,
+  useMemo,
+  useRef,
 } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
@@ -12,7 +12,7 @@ import CustomTextarea from "../utilities/DynamicTextArea";
 import ListSelector from "../ListSelector/ListSelector";
 import TableSelector from "./Configuration/TableSelector";
 import { useApi } from "../../context/ApiContext";
-import { PostCat, Project } from "../../services/api.services";
+import { PostCat, Project, Role, Company, User } from "../../services/api.services";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 export interface RoleGroupsHandle {
@@ -23,39 +23,46 @@ interface RoleGroupsProps {
   selectedRow: PostCat | null;
 }
 
-// توابع کمکی برای پردازش رشته‌های جداشده با |
+interface ProcessedRole {
+  ID: string;
+  Name: string;
+  UserName: string;
+  UserFamily: string;
+  UserNameFromAllUser: string;
+  Enterprise: string;
+  SuperIndent: string;
+}
+
+interface ProjectListItem {
+  ID: string;
+  Name: string;
+}
+
+// Helper functions
 const parseIds = (idsStr?: string): string[] => {
   if (!idsStr) return [];
-  // فیلتر کردن مقادیر خالی برای جلوگیری از ایجاد "" در آرایه
   return idsStr.split("|").filter(Boolean);
 };
 
-const getAssociatedProjects = (
-  projectsStr?: string,
-  projectsData?: Array<{ ID: string; Name: string }>
+const getAssociatedItems = <T extends { ID: string; Name: string }>(
+  idsStr?: string,
+  itemsData?: T[]
 ) => {
-  const projectIds = parseIds(projectsStr);
-  return (projectsData || []).filter((project) =>
-    projectIds.includes(String(project.ID))
-  );
-};
-
-const getAssociatedMembers = (
-  postsStr?: string,
-  membersData?: Array<{ ID: number | string; Name: string }>
-) => {
-  const memberIds = parseIds(postsStr).map((id) => String(id));
-  return (membersData || []).filter((member) =>
-    memberIds.includes(String(member.ID))
-  );
+  const ids = parseIds(idsStr);
+  return (itemsData || []).filter((item) => ids.includes(String(item.ID)));
 };
 
 const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
   ({ selectedRow }, ref) => {
     const api = useApi();
+    const dataCache = useRef<{
+      projects?: Project[];
+      roles?: Role[];
+      companies?: Company[];
+      users?: User[];
+    }>({});
 
-    // وضعیت اولیه داده‌های گروه نقش
-    const [roleGroupData, setRoleGroupData] = useState<PostCat>({
+    const [formData, setFormData] = useState<PostCat>({
       Name: "",
       Description: "",
       IsGlobal: false,
@@ -64,48 +71,131 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
       ProjectsStr: "",
     });
 
-    // وضعیت پروژه‌ها از API
-    const [projectsData, setProjectsData] = useState<Project[]>([]);
-    const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
+    const [apiData, setApiData] = useState<{
+      projects: Project[];
+      roles: Role[];
+      companies: Company[];
+      users: User[];
+    }>({
+      projects: [],
+      roles: [],
+      companies: [],
+      users: [],
+    });
 
-    // آیتم‌های انتخاب‌شده (ID ها)
-    const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
-    const [selectedMemberIds, setSelectedMemberIds] = useState<
-      (string | number)[]
-    >([]);
+    const [selectedIds, setSelectedIds] = useState({
+      projects: [] as string[],
+      members: [] as string[]
+    });
 
-    // داده‌های استاتیک اعضا (این داده‌ها را شما به‌صورت دستی قرار داده‌اید)
-    const membersData = [
-      { ID: 1, Name: "User One" },
-      { ID: 2, Name: "User Two" },
-      { ID: 3, Name: "User Three" },
-      { ID: 4, Name: "User Four" },
-      { ID: 5, Name: "User Five" },
-    ];
+    const [loading, setLoading] = useState({
+      projects: true,
+      groupMembers: true,
+      allData: true
+    });
 
-    // فراخوانی API برای دریافت لیست پروژه‌ها
+    // Column definitions
+    const columnDefs = {
+      projects: [{ field: "Name", headerName: "Project Name" }],
+      members: [
+        { field: "Name", headerName: "Role" },
+        { field: "UserNameFromAllUser", headerName: "Name" },
+        { field: "UserFamily", headerName: "Family" },
+        { field: "Enterprise", headerName: "Enterprise" },
+        { field: "SuperIndent", headerName: "SuperIndent" }
+      ]
+    };
+
+    // Fetch data
     useEffect(() => {
-      const fetchProjects = async () => {
+      const fetchData = async () => {
         try {
-          setLoadingProjects(true);
-          const projects = await api.getAllProject();
-          setProjectsData(projects);
+          setLoading(prev => ({
+            ...prev,
+            allData: true,
+            projects: true,
+            groupMembers: true
+          }));
+
+          let projects = dataCache.current.projects;
+          let roles = dataCache.current.roles;
+          let companies = dataCache.current.companies;
+          let users = dataCache.current.users;
+
+          if (!projects) {
+            projects = await api.getAllProject();
+            dataCache.current.projects = projects;
+          }
+          if (!roles) {
+            roles = await api.getAllRoles();
+            dataCache.current.roles = roles;
+          }
+          if (!companies) {
+            companies = await api.getAllCompanies();
+            dataCache.current.companies = companies;
+          }
+          if (!users) {
+            users = await api.getAllUsers();
+            dataCache.current.users = users;
+          }
+
+          setApiData({
+            projects: projects || [],
+            roles: roles || [],
+            companies: companies || [],
+            users: users || []
+          });
+
         } catch (error) {
-          console.error("Error fetching projects:", error);
-          showAlert("error", null, "Error", "Failed to fetch projects");
+          console.error("Error fetching data:", error);
+          showAlert("error", null, "Error", "Failed to fetch data");
         } finally {
-          setLoadingProjects(false);
+          setLoading({
+            allData: false,
+            projects: false,
+            groupMembers: false
+          });
         }
       };
-      fetchProjects();
+
+      fetchData();
     }, [api]);
 
-    // زمانی که selectedRow تغییر می‌کند یا پروژه‌ها لود می‌شوند
+    // Process data
+    const processedData = useMemo(() => {
+      const processedRoles: ProcessedRole[] = apiData.roles
+        .filter(role => role.ID)
+        .map(role => {
+          const user = apiData.users.find(user => user.ID === role.OwnerID);
+          const company = apiData.companies.find(company => String(company.ID) === String(role.nCompanyID));
+          const superIndent = apiData.roles.find(item => item.ID === role.ParrentId)?.Name;
+
+          return {
+            ID: role.ID!,
+            Name: role.Name,
+            UserName: user?.Username || "",
+            UserFamily: user?.Family || "",
+            UserNameFromAllUser: user?.Name || "",
+            Enterprise: company?.Name || "",
+            SuperIndent: superIndent || "",
+          };
+        });
+
+      const projectsListData: ProjectListItem[] = apiData.projects.map((proj) => ({
+        ID: String(proj.ID),
+        Name: proj.ProjectName,
+      }));
+
+      return {
+        processedRoles,
+        projectsListData
+      };
+    }, [apiData]);
+
+    // Update form when selected row changes
     useEffect(() => {
-      if (selectedRow) {
-        // هنگام ویرایش
-        console.log("Editing existing Role Group:", selectedRow);
-        setRoleGroupData({
+      if (selectedRow && !loading.allData) {
+        setFormData({
           ID: selectedRow.ID,
           Name: selectedRow.Name || "",
           Description: selectedRow.Description || "",
@@ -117,21 +207,12 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           ProjectsStr: selectedRow.ProjectsStr || "",
         });
 
-        // تنظیم آی‌دی‌های انتخاب‌شده پروژه‌ها
-        if (projectsData.length > 0) {
-          const existingProjectIds = parseIds(selectedRow.ProjectsStr);
-          setSelectedProjectIds(existingProjectIds);
-          console.log("Existing Project IDs:", existingProjectIds);
-        }
-
-        // تنظیم آی‌دی‌های انتخاب‌شده اعضا
-        const existingMemberIds = parseIds(selectedRow.PostsStr);
-        setSelectedMemberIds(existingMemberIds);
-        console.log("Existing Member IDs:", existingMemberIds);
-      } else {
-        // اگر در حالت افزودن جدید هستیم
-        console.log("Creating a new Role Group");
-        setRoleGroupData({
+        setSelectedIds({
+          projects: parseIds(selectedRow.ProjectsStr),
+          members: parseIds(selectedRow.PostsStr)
+        });
+      } else if (!selectedRow) {
+        setFormData({
           Name: "",
           Description: "",
           IsGlobal: false,
@@ -139,53 +220,62 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           PostsStr: "",
           ProjectsStr: "",
         });
-        setSelectedProjectIds([]);
-        setSelectedMemberIds([]);
+        setSelectedIds({
+          projects: [],
+          members: []
+        });
       }
-    }, [selectedRow, projectsData]);
+    }, [selectedRow, loading.allData]);
 
-    // تابعی که از بیرون صدا زده می‌شود تا ذخیره انجام شود
+    // Event handlers
+    const handleProjectsChange = (selectedIds: (string | number)[]) => {
+      setSelectedIds(prev => ({
+        ...prev,
+        projects: selectedIds.map(String)
+      }));
+    };
+
+    const handleMembersChange = (selectedIds: (string | number)[]) => {
+      setSelectedIds(prev => ({
+        ...prev,
+        members: selectedIds.map(String)
+      }));
+    };
+
+    const handleGlobalChange = (isGlobal: boolean) => {
+      setFormData(prev => ({
+        ...prev,
+        IsGlobal: isGlobal
+      }));
+    };
+
+    const handleChange = (field: keyof PostCat, value: any) => {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+      }));
+    };
+
+    // Save functionality
     useImperativeHandle(ref, () => ({
       async save() {
         try {
-          // ساده‌ترین اعتبارسنجی: چک کردن خالی نبودن نام
-          if (!roleGroupData.Name.trim()) {
-            showAlert(
-              "error",
-              null,
-              "Validation Error",
-              "Role group name is required"
-            );
+          if (!formData.Name.trim()) {
+            showAlert("error", null, "Validation Error", "Role group name is required");
             return false;
           }
 
-          // لاگ کردن آی‌دی‌های نهایی انتخاب‌شده پروژه‌ها و اعضا
-          console.log("Final selected Project IDs:", selectedProjectIds);
-          console.log("Final selected Member IDs:", selectedMemberIds);
-
-          // آماده‌سازی داده‌ها برای ذخیره‌سازی
           const dataToSave: PostCat = {
-            ...roleGroupData,
-            ProjectsStr:
-              selectedProjectIds.join("|") +
-              (selectedProjectIds.length > 0 ? "|" : ""),
-            PostsStr:
-              selectedMemberIds.join("|") +
-              (selectedMemberIds.length > 0 ? "|" : ""),
+            ...formData,
+            ProjectsStr: selectedIds.projects.join("|") + (selectedIds.projects.length > 0 ? "|" : ""),
+            PostsStr: selectedIds.members.join("|") + (selectedIds.members.length > 0 ? "|" : ""),
             LastModified: new Date().toISOString(),
           };
 
-          console.log("Data to be saved:", dataToSave);
-
-          // تصمیم‌گیری برای آپدیت یا اینسرت
-          if (selectedRow && selectedRow.ID) {
-            // ویرایش
+          if (selectedRow?.ID) {
             await api.updatePostCat(dataToSave);
-            console.log("Role Group updated successfully");
           } else {
-            // اینسرت
             await api.insertPostCat(dataToSave);
-            console.log("Role Group inserted successfully");
           }
           return true;
         } catch (error) {
@@ -194,127 +284,65 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           return false;
         }
       },
-    }));
-
-    // هندل تغییرات فیلدهای فرم
-    const handleChange = (field: keyof PostCat, value: any) => {
-      setRoleGroupData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    };
-
-    // تعریف ستون‌های جدول برای پروژه‌ها (فقط نمایش نام پروژه)
-    const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
-
-    // تعریف ستون‌های جدول برای اعضا
-    const memberColumnDefs = [{ field: "Name", headerName: "Member Name" }];
-
-    // هندل تغییرات انتخاب پروژه‌ها
-    const handleProjectsChange = (selectedIds: (string | number)[]) => {
-      // تبدیل تمام ID ها به استرینگ برای هماهنگی در ذخیره
-      setSelectedProjectIds(selectedIds.map(String));
-      console.log("Projects selected:", selectedIds);
-    };
-
-    // هندل تغییرات انتخاب اعضا
-    const handleMembersChange = (selectedIds: (string | number)[]) => {
-      setSelectedMemberIds(selectedIds);
-      console.log("Members selected:", selectedIds);
-    };
-
-    // هندل تغییر وضعیت Global
-    const handleGlobalChange = (isGlobal: boolean) => {
-      handleChange("IsGlobal", isGlobal);
-      console.log("IsGlobal changed to:", isGlobal);
-    };
-
-    // آماده‌سازی داده‌ها برای ListSelector (فرمت دهی پروژه‌ها به {ID, Name})
-    const projectsListData = projectsData.map((proj) => ({
-      ID: proj.ID,
-      Name: proj.ProjectName,
-    }));
-
-    // آماده‌سازی داده‌ها برای ListSelector اعضا (داده‌های استاتیک)
-    const membersListData = membersData.map((member) => ({
-      ID: member.ID,
-      Name: member.Name,
-    }));
-
-    // آماده‌سازی پروژه‌های انتخاب‌شده برای نمایش در مودال
-    const selectedProjectsForModal = getAssociatedProjects(
-      roleGroupData.ProjectsStr,
-      projectsListData
-    );
-
-    // آماده‌سازی اعضای انتخاب‌شده برای نمایش در مودال
-    const selectedMembersForModal = getAssociatedMembers(
-      roleGroupData.PostsStr,
-      membersData
-    );
+    }), [api, formData, selectedIds, selectedRow?.ID]);
 
     return (
       <TwoColumnLayout>
-        {/* نام گروه نقش */}
         <DynamicInput
           name="Name"
           type="text"
-          value={roleGroupData.Name}
+          value={formData.Name}
           placeholder="Enter group name"
           onChange={(e) => handleChange("Name", e.target.value)}
           required
           className="mb-4"
         />
 
-        {/* توضیحات */}
         <CustomTextarea
           name="Description"
-          value={roleGroupData.Description || ""}
+          value={formData.Description || ""}
           placeholder="Enter description"
           onChange={(e) => handleChange("Description", e.target.value)}
           className="mb-4"
         />
 
-        {/* سلکتور پروژه‌ها */}
         <ListSelector
           title="Projects"
           className="mb-4"
-          columnDefs={projectColumnDefs}
-          rowData={projectsListData}
-          selectedIds={selectedProjectIds}
+          columnDefs={columnDefs.projects}
+          rowData={processedData.projectsListData}
+          selectedIds={selectedIds.projects}
           onSelectionChange={handleProjectsChange}
           showSwitcher={true}
-          isGlobal={roleGroupData.IsGlobal}
+          isGlobal={formData.IsGlobal}
           onGlobalChange={handleGlobalChange}
-          loading={loadingProjects}
+          loading={loading.projects}
           ModalContentComponent={TableSelector}
           modalContentProps={{
-            columnDefs: projectColumnDefs,
-            rowData: projectsListData,
-            selectedRows: selectedProjectsForModal,
-            onRowDoubleClick: (rows: any[]) =>
-              handleProjectsChange(rows.map((row) => row.ID)),
+            columnDefs: columnDefs.projects,
+            rowData: processedData.projectsListData,
+            selectedRows: getAssociatedItems(formData.ProjectsStr, processedData.projectsListData),
+            onRowDoubleClick: (rows: any[]) => handleProjectsChange(rows.map(row => row.ID)),
             selectionMode: "multiple",
           }}
         />
 
-        {/* سلکتور اعضا */}
         <ListSelector
           title="Members"
           className="mb-4"
-          columnDefs={memberColumnDefs}
-          rowData={membersListData}
-          selectedIds={selectedMemberIds}
+          columnDefs={columnDefs.members}
+          rowData={processedData.processedRoles}
+          selectedIds={selectedIds.members}
           onSelectionChange={handleMembersChange}
           showSwitcher={false}
           isGlobal={false}
+          loading={loading.groupMembers}
           ModalContentComponent={TableSelector}
           modalContentProps={{
-            columnDefs: memberColumnDefs,
-            rowData: membersListData,
-            selectedRows: selectedMembersForModal,
-            onRowDoubleClick: (rows: any[]) =>
-              handleMembersChange(rows.map((row) => row.ID)),
+            columnDefs: columnDefs.members,
+            rowData: processedData.processedRoles,
+            selectedRows: getAssociatedItems(formData.PostsStr, processedData.processedRoles),
+            onRowDoubleClick: (rows: any[]) => handleMembersChange(rows.map(row => row.ID)),
             selectionMode: "multiple",
           }}
         />

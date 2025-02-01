@@ -219,6 +219,7 @@ const DataTable: React.FC<DataTableProps> = ({
           overlayLoadingTemplate={
             '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height={80} width={80} /></div>'
           }
+          
         />
       </div>
 

@@ -1,5 +1,3 @@
-// src/components/Staffing.tsx
-
 import React, {
   useState,
   useEffect,
@@ -28,7 +26,6 @@ interface StaffingData {
   isAccessCreateProject: boolean;
   isHaveAddressbar: boolean;
   isStaticPost: boolean;
-  CreateDate: string; // Added CreateDate to the interface
 }
 
 export interface StaffingHandle {
@@ -59,8 +56,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
     nMenuID: selectedRow?.nMenuID || "",
     isAccessCreateProject: selectedRow?.isAccessCreateProject || false,
     isHaveAddressbar: selectedRow?.isHaveAddressbar || false,
-    isStaticPost: selectedRow?.isStaticPost || false,
-    CreateDate: selectedRow?.CreateDate || new Date().toISOString() // Initialize CreateDate
+    isStaticPost: selectedRow?.isStaticPost || false
   });
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -92,7 +88,6 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
         setMenus(menusData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        showAlert('error', null, 'خطا', 'خطا در دریافت داده‌ها');
       }
     };
 
@@ -112,8 +107,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
         nMenuID: selectedRow.nMenuID || "",
         isAccessCreateProject: selectedRow.isAccessCreateProject || false,
         isHaveAddressbar: selectedRow.isHaveAddressbar || false,
-        isStaticPost: selectedRow.isStaticPost || false,
-        CreateDate: selectedRow.CreateDate || new Date().toISOString() // Update CreateDate
+        isStaticPost: selectedRow.isStaticPost || false
       });
 
       if (selectedRow.nPostTypeID) {
@@ -126,7 +120,6 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
 
   const save = async (): Promise<void> => {
     console.log("Save function called");
-
     // بررسی اعتبارسنجی برای سمت داینامیک و پروژه
     if (staffingData.nPostTypeID) {
       const selectedRole = roles.find(role => role.ID === staffingData.nPostTypeID);
@@ -145,43 +138,61 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
 
     try {
       console.log("Proceeding to save data");
-      const roleData: Role = {
-        ID: staffingData.id || undefined, // اگر id وجود ندارد، undefined باشد
-        Name: staffingData.Name,
-        IsVisible: true,
-        LastModified: new Date().toISOString(),
-        CreateDate: staffingData.CreateDate, // Preserve/Create CreateDate
-        Authorization: null,
-        Competencies: null,
-        Description: null,
-        Grade: null,
-        PostCode: null,
-        Responsibility: null,
-        Type: null,
-        OwnerID: staffingData.OwnerID || null,
-        ParrentId: staffingData.ParentId || null,
-        isAccessCreateProject: staffingData.isAccessCreateProject,
-        isHaveAddressbar: staffingData.isHaveAddressbar,
-        isStaticPost: staffingData.isStaticPost,
-        nCompanyID: staffingData.nCompanyID || null,
-        nMenuID: staffingData.nMenuID || null,
-        nPostTypeID: staffingData.nPostTypeID || null,
-        nProjectID: staffingData.ProjectID || null,
-        status: 1
-      };
-
-      console.log("Role Data to be sent:", roleData);
-
       if (staffingData.id) {
-        // به‌روزرسانی نقش
+        const roleData: Role = {
+          ID: staffingData.id,
+          Name: staffingData.Name,
+          IsVisible: true,
+          LastModified: new Date().toISOString(),
+          CreateDate: new Date().toISOString(),
+          Authorization: null,
+          Competencies: null,
+          Description: null,
+          Grade: null,
+          PostCode: null,
+          Responsibility: null,
+          Type: null,
+          OwnerID: staffingData.OwnerID || null,
+          ParrentId: staffingData.ParentId || null,
+          isAccessCreateProject: staffingData.isAccessCreateProject,
+          isHaveAddressbar: staffingData.isHaveAddressbar,
+          isStaticPost: staffingData.isStaticPost,
+          nCompanyID: staffingData.nCompanyID || null,
+          nMenuID: staffingData.nMenuID || null,
+          nPostTypeID: staffingData.nPostTypeID || null,
+          nProjectID: staffingData.ProjectID || null,
+          status: 1
+        };
         await api.updateRole(roleData);
         console.log("Role updated successfully");
       } else {
-        // درج نقش جدید
+        const roleData: Role = {
+          ID: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          Name: staffingData.Name,
+          IsVisible: true,
+          LastModified: new Date().toISOString(),
+          ModifiedById: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          Authorization: "",
+          Competencies: "",
+          Description: "",
+          Grade: "",
+          PostCode: "",
+          Responsibility: "",
+          Type: null,
+          isAccessCreateProject: staffingData.isAccessCreateProject,
+          isHaveAddressbar: staffingData.isHaveAddressbar,
+          isStaticPost: staffingData.isStaticPost,
+          OwnerID: staffingData.OwnerID || null,
+          ParrentId: staffingData.ParentId || null,
+          nCompanyID: staffingData.nCompanyID || null,
+          nMenuID: staffingData.nMenuID || null,
+          nPostTypeID: staffingData.nPostTypeID || null,
+          nProjectID: staffingData.ProjectID || null,
+          status: 1
+        };
         await api.updateRole(roleData);
         console.log("Role inserted successfully");
       }
-
       showAlert('success', null, 'موفقیت', 'اطلاعات با موفقیت ذخیره شد');
     } catch (error) {
       console.error("Error in staffing save:", error);
@@ -359,17 +370,6 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
           leftLabel=""
           rightLabel="Show Command Bar"
         />
-        
-        {/* Optional: Display CreateDate (read-only) */}
-        <div className="mt-4">
-          <label className="block text-gray-700">Create Date</label>
-          <input
-            type="text"
-            value={new Date(staffingData.CreateDate).toLocaleString()}
-            readOnly
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
       </TwoColumnLayout>
 
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>

@@ -1,4 +1,12 @@
 {
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strict": false,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "ignoreDeprecations": "5.0"
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
