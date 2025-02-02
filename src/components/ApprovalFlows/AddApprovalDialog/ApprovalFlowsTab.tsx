@@ -1,5 +1,6 @@
 // ApprovalFlowsTab.tsx
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import DynamicModal from "../../utilities/DynamicModal";
@@ -8,10 +9,11 @@ import DataTable from "../../TableDynamic/DataTable";
 import { subTabDataMapping, Role } from "../../TabHandler/tab/tabData";
 import { FaPlus, FaTimes, FaEdit } from "react-icons/fa";
 import BoxDeemed from "./BoxDeemed";
-import BoxPredecessor from "./BoxPredecessor "; // اطمینان از مسیر صحیح
-import ListSelector from "../../ListSelector/ListSelector"; // اصلاح مسیر وارد کردن
-import ButtonComponent from "../../General/Configuration/ButtonComponent"; // وارد کردن کامپوننت ButtonComponent
+import BoxPredecessor from "./BoxPredecessor ";
+import ListSelector from "../../ListSelector/ListSelector";
+import ButtonComponent from "../../General/Configuration/ButtonComponent";
 import { v4 as uuidv4 } from "uuid";
+import { BoxTemplate } from "../../../services/api.services";
 
 interface TableRow {
   id: string;
@@ -33,50 +35,66 @@ interface ButtonListItem {
   Tooltip: string;
 }
 
-const ApprovalFlowsTab: React.FC = () => {
-  // سایر state‌ها
+interface ApprovalFlowsTabProps {
+  editData?: BoxTemplate | null; // باکسی که داریم ویرایش می‌کنیم
+  boxTemplates?: BoxTemplate[]; // کل باکس‌ها
+}
+
+const ApprovalFlowsTab: React.FC<ApprovalFlowsTabProps> = ({
+  editData,
+  boxTemplates = [],
+}) => {
+  // -- فیلدهای بالای فرم --
+  const [nameValue, setNameValue] = useState<string>("");
+  const [minAcceptValue, setMinAcceptValue] = useState<string>("");
+  const [minRejectValue, setMinRejectValue] = useState<string>("");
+  const [actDurationValue, setActDurationValue] = useState<string>("");
+  const [orderValue, setOrderValue] = useState<string>("");
+
   const [acceptChecked, setAcceptChecked] = useState<boolean>(false);
   const [rejectChecked, setRejectChecked] = useState<boolean>(false);
-  const [nameValue, setNameValue] = useState<string>("");
-  const [minAcceptValue, setMinAcceptValue] = useState<string>("1");
-  const [minRejectValue, setMinRejectValue] = useState<string>("1");
-  const [actDurationValue, setActDurationValue] = useState<string>("1");
-  const [orderValue, setOrderValue] = useState<string>("1");
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  // -- فیلدهای بخش Approval Context --
   const [staticPostValue, setStaticPostValue] = useState<string>("");
   const [selectedStaticPost, setSelectedStaticPost] = useState<Role | null>(
     null
   );
-  const [cost1, setCost1] = useState<string>("1");
-  const [cost2, setCost2] = useState<string>("1");
-  const [cost3, setCost3] = useState<string>("1");
-  const [weight1, setWeight1] = useState<string>("1");
-  const [weight2, setWeight2] = useState<string>("1");
-  const [weight3, setWeight3] = useState<string>("1");
+
+  const [cost1, setCost1] = useState<string>("");
+  const [cost2, setCost2] = useState<string>("");
+  const [cost3, setCost3] = useState<string>("");
+
+  const [weight1, setWeight1] = useState<string>("");
+  const [weight2, setWeight2] = useState<string>("");
+  const [weight3, setWeight3] = useState<string>("");
+
   const [vetoChecked, setVetoChecked] = useState<boolean>(false);
   const [requiredChecked, setRequiredChecked] = useState<boolean>(false);
-  const [codeValue, setCodeValue] = useState<string>("1");
+  const [codeValue, setCodeValue] = useState<string>("");
+
+  // جدول سمت چپ
   const [tableData, setTableData] = useState<TableRow[]>([]);
   const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
 
-  // State جدید برای Predecessors
+  // -- Predecessors --
+  // آرایه‌ای از IDهایی که کاربر تیک زده
   const [selectedPredecessors, setSelectedPredecessors] = useState<number[]>(
     []
   );
 
-  // State برای Default Action Buttons (ListSelector)
+  // برای ListSelector دکمه‌ها
   const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<
     (string | number)[]
   >([]);
 
-  // داده‌های نمونه برای buttonlist (Default Action Buttons)
-  const buttons: ButtonListItem[] = Array.from({ length: 20 }, (_, index) => ({
+  // داده نمونه
+  const buttons: ButtonListItem[] = Array.from({ length: 5 }, (_, index) => ({
     ID: index + 1,
     Name: `Button Item ${index + 1}`,
     Tooltip: `Tooltip for Button Item ${index + 1}`,
   }));
 
-  // ستون‌های جدول
+  // ستون‌های جدول Approval Context
   const columnDefs = [
     { headerName: "Post", field: "post", sortable: true, filter: true },
     { headerName: "Cost1", field: "cost1", sortable: true, filter: true },
@@ -88,8 +106,6 @@ const ApprovalFlowsTab: React.FC = () => {
     {
       headerName: "Required",
       field: "required",
-      sortable: true,
-      filter: true,
       cellRendererFramework: (params: any) => (
         <input type="checkbox" checked={params.value} readOnly />
       ),
@@ -97,8 +113,6 @@ const ApprovalFlowsTab: React.FC = () => {
     {
       headerName: "Veto",
       field: "veto",
-      sortable: true,
-      filter: true,
       cellRendererFramework: (params: any) => (
         <input type="checkbox" checked={params.value} readOnly />
       ),
@@ -106,7 +120,71 @@ const ApprovalFlowsTab: React.FC = () => {
     { headerName: "Code", field: "code", sortable: true, filter: true },
   ];
 
-  // گزینه‌های استاتیک پست
+  // وقتی editData تغییر کرد (حالت Edit یا Add):
+  useEffect(() => {
+    if (editData) {
+      // حالت ویرایش
+      setNameValue(editData.Name || "");
+      setActDurationValue(String(editData.MaxDuration || ""));
+      setOrderValue(String(editData.Order || ""));
+
+      // اگر PredecessorStr داشت، جدا کرده و در selectedPredecessors بریز
+      if (editData.PredecessorStr) {
+        const splittedIds = editData.PredecessorStr.split("|").filter(Boolean);
+        const numericIds = splittedIds.map((id) => parseInt(id, 10));
+        setSelectedPredecessors(numericIds);
+      } else {
+        setSelectedPredecessors([]);
+      }
+
+      // در صورت نیاز، فیلدهای دیگر را هم از editData پر کنید
+      setMinAcceptValue("");
+      setMinRejectValue("");
+      setAcceptChecked(false);
+      setRejectChecked(false);
+
+      setCost1("");
+      setCost2("");
+      setCost3("");
+      setWeight1("");
+      setWeight2("");
+      setWeight3("");
+      setRequiredChecked(false);
+      setVetoChecked(false);
+      setCodeValue("");
+      setStaticPostValue("");
+      setSelectedStaticPost(null);
+
+      // اگر بخواهید tableData را هم از editData بگیرید، در اینجا انجام دهید
+    } else {
+      // حالت Add
+      setNameValue("");
+      setMinAcceptValue("");
+      setMinRejectValue("");
+      setActDurationValue("");
+      setOrderValue("");
+      setAcceptChecked(false);
+      setRejectChecked(false);
+
+      setCost1("");
+      setCost2("");
+      setCost3("");
+      setWeight1("");
+      setWeight2("");
+      setWeight3("");
+      setVetoChecked(false);
+      setRequiredChecked(false);
+      setCodeValue("");
+      setStaticPostValue("");
+      setSelectedStaticPost(null);
+
+      setSelectedPredecessors([]);
+      setTableData([]);
+      setSelectedRow(null);
+    }
+  }, [editData]);
+
+  // لیست نقش‌ها برای Static Post
   const staticPostOptions = subTabDataMapping.Roles.rowData
     .filter((item: Role) => item.isStaticPost)
     .map((item: Role) => ({
@@ -114,26 +192,26 @@ const ApprovalFlowsTab: React.FC = () => {
       label: item.Name,
     }));
 
-  // مدیریت تغییر سلکتور استاتیک پست
+  // هندل تغییر سلکت Static Post
   const handleStaticPostChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setStaticPostValue(value);
     const selected = staticPostOptions.find((option) => option.value === value);
     if (selected) {
-      setSelectedStaticPost(
-        subTabDataMapping.Roles.rowData.find(
-          (role) => role.ID === selected.value
-        ) || null
+      const foundRole = subTabDataMapping.Roles.rowData.find(
+        (role) => role.ID === selected.value
       );
+      setSelectedStaticPost(foundRole || null);
     } else {
       setSelectedStaticPost(null);
     }
   };
 
+  // کنترل مودال انتخاب پست
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const openModal = () => {
     setIsModalOpen(true);
   };
-
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -144,111 +222,110 @@ const ApprovalFlowsTab: React.FC = () => {
     closeModal();
   };
 
+  // افزودن/ویرایش سطر جدول سمت چپ
   const handleAddOrUpdateRow = () => {
     if (!staticPostValue) {
-      alert("مقدار پست را انتخاب نکردید.");
+      alert("Static Post is empty!");
       return;
     }
 
     if (selectedRow) {
-      const updatedTableData = tableData.map((row) =>
-        row.id === selectedRow.id
+      // Edit
+      const updated = tableData.map((r) =>
+        r.id === selectedRow.id
           ? {
-              ...row,
+              ...r,
               post: selectedStaticPost ? selectedStaticPost.Name : "",
-              cost1: Number(cost1),
-              cost2: Number(cost2),
-              cost3: Number(cost3),
-              weight1: Number(weight1),
-              weight2: Number(weight2),
-              weight3: Number(weight3),
+              cost1: Number(cost1) || 0,
+              cost2: Number(cost2) || 0,
+              cost3: Number(cost3) || 0,
+              weight1: Number(weight1) || 0,
+              weight2: Number(weight2) || 0,
+              weight3: Number(weight3) || 0,
               required: requiredChecked,
               veto: vetoChecked,
-              code: Number(codeValue),
+              code: Number(codeValue) || 0,
             }
-          : row
+          : r
       );
-      setTableData(updatedTableData);
-      setSelectedRow(null);
+      setTableData(updated);
+      resetForm();
     } else {
+      // Add
       const newRow: TableRow = {
         id: uuidv4(),
         post: selectedStaticPost ? selectedStaticPost.Name : "",
-        cost1: Number(cost1),
-        cost2: Number(cost2),
-        cost3: Number(cost3),
-        weight1: Number(weight1),
-        weight2: Number(weight2),
-        weight3: Number(weight3),
+        cost1: Number(cost1) || 0,
+        cost2: Number(cost2) || 0,
+        cost3: Number(cost3) || 0,
+        weight1: Number(weight1) || 0,
+        weight2: Number(weight2) || 0,
+        weight3: Number(weight3) || 0,
         required: requiredChecked,
         veto: vetoChecked,
-        code: Number(codeValue),
+        code: Number(codeValue) || 0,
       };
       setTableData([...tableData, newRow]);
     }
-
-    resetForm();
   };
 
   const handleDeleteRow = () => {
-    if (selectedRow) {
-      const updatedTableData = tableData.filter(
-        (row) => row.id !== selectedRow.id
-      );
-      setTableData(updatedTableData);
-      setSelectedRow(null);
-      resetForm();
-    } else {
-      alert("هیچ ردیفی برای حذف انتخاب نشده است.");
+    if (!selectedRow) {
+      alert("No row is selected.");
+      return;
     }
+    const filtered = tableData.filter((r) => r.id !== selectedRow.id);
+    setTableData(filtered);
+    resetForm();
   };
 
   const handleDuplicateRow = () => {
-    if (selectedRow) {
-      const duplicatedRow: TableRow = {
-        ...selectedRow,
-        id: uuidv4(),
-      };
-      setTableData([...tableData, duplicatedRow]);
-    } else {
-      alert("هیچ ردیفی برای کپی انتخاب نشده است.");
+    if (!selectedRow) {
+      alert("No row is selected for duplicate.");
+      return;
     }
+    const duplicated: TableRow = {
+      ...selectedRow,
+      id: uuidv4(),
+    };
+    setTableData([...tableData, duplicated]);
   };
 
   const handleSelectRow = (data: TableRow) => {
     setSelectedRow(data);
     setStaticPostValue(data.post);
-    setSelectedStaticPost(
-      subTabDataMapping.Roles.rowData.find((role) => role.Name === data.post) ||
-        null
+    const foundRole = subTabDataMapping.Roles.rowData.find(
+      (r) => r.Name === data.post
     );
-    setCost1(data.cost1.toString());
-    setCost2(data.cost2.toString());
-    setCost3(data.cost3.toString());
-    setWeight1(data.weight1.toString());
-    setWeight2(data.weight2.toString());
-    setWeight3(data.weight3.toString());
+    setSelectedStaticPost(foundRole || null);
+
+    setCost1(String(data.cost1));
+    setCost2(String(data.cost2));
+    setCost3(String(data.cost3));
+    setWeight1(String(data.weight1));
+    setWeight2(String(data.weight2));
+    setWeight3(String(data.weight3));
     setRequiredChecked(data.required);
     setVetoChecked(data.veto);
-    setCodeValue(data.code.toString());
+    setCodeValue(String(data.code));
   };
 
   const resetForm = () => {
-    setCost1("1");
-    setCost2("1");
-    setCost3("1");
-    setWeight1("1");
-    setWeight2("1");
-    setWeight3("1");
-    setRequiredChecked(false);
-    setVetoChecked(false);
-    setCodeValue("1");
     setStaticPostValue("");
     setSelectedStaticPost(null);
+    setCost1("");
+    setCost2("");
+    setCost3("");
+    setWeight1("");
+    setWeight2("");
+    setWeight3("");
+    setRequiredChecked(false);
+    setVetoChecked(false);
+    setCodeValue("");
     setSelectedRow(null);
   };
 
-  // Handler برای تغییرات ListSelector (Default Action Buttons)
+  // تغییر انتخاب دکمه‌ها در ListSelector
   const handleSelectionChange = (
     type: string,
     selectedIds: (string | number)[]
@@ -256,7 +333,6 @@ const ApprovalFlowsTab: React.FC = () => {
     if (type === "DefaultBtn") {
       setSelectedDefaultBtnIds(selectedIds);
     }
-    // می‌توانید برای انواع دیگر نیز شرط‌های مشابه اضافه کنید
   };
 
   return (
@@ -269,7 +345,6 @@ const ApprovalFlowsTab: React.FC = () => {
               type="text"
               value={nameValue}
               onChange={(e) => setNameValue(e.target.value)}
-              className="mt-6"
             />
           </div>
 
@@ -317,7 +392,6 @@ const ApprovalFlowsTab: React.FC = () => {
               type="number"
               value={actDurationValue}
               onChange={(e) => setActDurationValue(e.target.value)}
-              className="mt-6"
             />
           </div>
 
@@ -327,7 +401,6 @@ const ApprovalFlowsTab: React.FC = () => {
               type="number"
               value={orderValue}
               onChange={(e) => setOrderValue(e.target.value)}
-              className="mt-6"
             />
           </div>
         </div>
@@ -371,7 +444,7 @@ const ApprovalFlowsTab: React.FC = () => {
 
           <div className="flex flex-row gap-x-4 w-full items-center">
             <div className="flex flex-col flex-2 ">
-              <label className="text-sm text-gray-700 ">Static Post</label>
+              <label className="text-sm text-gray-700">Static Post</label>
               <DynamicSelector
                 options={staticPostOptions}
                 selectedValue={staticPostValue}
@@ -380,7 +453,6 @@ const ApprovalFlowsTab: React.FC = () => {
                 showButton={true}
                 onButtonClick={openModal}
                 disabled={false}
-                className="w-full"
               />
             </div>
 
@@ -393,24 +465,20 @@ const ApprovalFlowsTab: React.FC = () => {
                   onChange={(e) => setWeight1(e.target.value)}
                 />
               </div>
-
               <div className="flex flex-col flex-1">
                 <DynamicInput
                   name="Weight2"
                   type="number"
                   value={weight2}
                   onChange={(e) => setWeight2(e.target.value)}
-                  className="w-full"
                 />
               </div>
-
               <div className="flex flex-col flex-1">
                 <DynamicInput
                   name="Weight3"
                   type="number"
                   value={weight3}
                   onChange={(e) => setWeight3(e.target.value)}
-                  className="w-full "
                 />
               </div>
 
@@ -432,7 +500,6 @@ const ApprovalFlowsTab: React.FC = () => {
                   type="number"
                   value={codeValue}
                   onChange={(e) => setCodeValue(e.target.value)}
-                  className="w-full"
                 />
               </div>
             </div>
@@ -447,24 +514,20 @@ const ApprovalFlowsTab: React.FC = () => {
                 onChange={(e) => setCost1(e.target.value)}
               />
             </div>
-
             <div className="flex flex-col flex-1">
               <DynamicInput
                 name="Cost2"
                 type="number"
                 value={cost2}
                 onChange={(e) => setCost2(e.target.value)}
-                className="w-full"
               />
             </div>
-
             <div className="flex flex-col flex-1">
               <DynamicInput
                 name="Cost3"
                 type="number"
                 value={cost3}
                 onChange={(e) => setCost3(e.target.value)}
-                className="w-full "
               />
             </div>
 
@@ -505,21 +568,19 @@ const ApprovalFlowsTab: React.FC = () => {
           />
         </div>
 
-        {/* باکس خاکستری جدید زیر جدول */}
         <BoxDeemed />
       </main>
 
       <aside className="w-64 bg-gray-100 p-4 border-l border-gray-300 overflow-auto space-y-4">
-        {/* استفاده از کامپوننت BoxPredecessor */}
         <BoxPredecessor
+          boxTemplates={boxTemplates}
           selectedPredecessors={selectedPredecessors}
           onSelectionChange={setSelectedPredecessors}
+          currentBoxId={editData ? editData.ID : 0} // برای فیلتر خود باکس
         />
 
-        {/* ListSelector - Default Action Buttons */}
         <ListSelector
           title="Button"
-          className="mt-7"
           columnDefs={[
             { headerName: "Name", field: "Name" },
             { headerName: "Tooltip", field: "Tooltip" },

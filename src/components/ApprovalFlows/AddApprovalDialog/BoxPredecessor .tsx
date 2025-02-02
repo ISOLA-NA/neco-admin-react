@@ -1,18 +1,24 @@
+// BoxPredecessor.tsx
+
 import React from "react";
 import { classNames } from "primereact/utils";
+import { BoxTemplate } from "../../../services/api.services";
 
 interface BoxPredecessorProps {
   className?: string;
+  boxTemplates: BoxTemplate[];
   selectedPredecessors: number[];
   onSelectionChange: (selected: number[]) => void;
+  currentBoxId?: number; // آی‌دی باکسی که داریم ویرایش می‌کنیم (نباید در چک‌باکس‌ها دیده شود)
 }
 
 const BoxPredecessor: React.FC<BoxPredecessorProps> = ({
   className,
+  boxTemplates,
   selectedPredecessors,
   onSelectionChange,
+  currentBoxId = 0,
 }) => {
-  // مدیریت تغییر وضعیت چک‌باکس‌ها
   const handleCheckboxChange = (value: number) => {
     if (selectedPredecessors.includes(value)) {
       onSelectionChange(selectedPredecessors.filter((item) => item !== value));
@@ -21,33 +27,33 @@ const BoxPredecessor: React.FC<BoxPredecessorProps> = ({
     }
   };
 
+  // فیلترکن: اگر box.ID === currentBoxId باشد، آن را نشان نده
+  const filteredBoxTemplates = boxTemplates.filter(
+    (box) => box.ID !== currentBoxId
+  );
+
   return (
     <div className={classNames("w-full", className)}>
-      {/* هدر */}
       <div className="flex justify-center items-center p-2 rounded-t-md bg-gradient-to-r from-purple-600 to-indigo-500 h-10">
         <h3 className="text-sm font-semibold text-white">Predecessor</h3>
       </div>
 
-      {/* محتوای چک‌باکس‌ها با قابلیت اسکرول عمودی */}
       <div className="max-h-64 overflow-y-auto bg-gray-50 rounded-b-md p-3 border border-t-0 border-gray-200">
         <div className="flex flex-col space-y-2">
-          {Array.from({ length: 30 }, (_, index) => {
-            const value = index + 1;
-            return (
-              <label
-                key={value}
-                className="flex items-center space-x-2 p-2 bg-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-300"
-              >
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-purple-600"
-                  checked={selectedPredecessors.includes(value)}
-                  onChange={() => handleCheckboxChange(value)}
-                />
-                <span className="text-gray-700">Predecessor {value}</span>
-              </label>
-            );
-          })}
+          {filteredBoxTemplates.map((box) => (
+            <label
+              key={box.ID}
+              className="flex items-center space-x-2 p-2 bg-white rounded-md shadow-sm hover:shadow-md transition-shadow"
+            >
+              <input
+                type="checkbox"
+                className="form-checkbox h-4 w-4 text-purple-600"
+                checked={selectedPredecessors.includes(box.ID)}
+                onChange={() => handleCheckboxChange(box.ID)}
+              />
+              <span className="text-gray-700">{box.Name}</span>
+            </label>
+          ))}
         </div>
       </div>
     </div>

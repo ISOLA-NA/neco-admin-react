@@ -488,6 +488,31 @@ export interface CategoryItem {
   ModifiedById?: string;
 }
 
+export interface BoxTemplate {
+  ID: number;
+  Name: string;
+  IsStage: boolean;
+  ActionMode: number;
+  PredecessorStr: string;
+  Left: number;
+  Top: number;
+  ActDuration: number;
+  MaxDuration: number;
+  nWFTemplateID: number;
+  DeemedEnabled: boolean;
+  DeemDay: number;
+  DeemCondition: number;
+  DeemAction: number;
+  PreviewsStateId: number | null;
+  BtnIDs: string | null;
+  ActionBtnID: number | null;
+  MinNumberForReject: number;
+  Order: number;
+  GoToPreviousStateID: number | null;
+  IsVisible: boolean;
+  LastModified: string;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -1228,6 +1253,14 @@ class ApiService {
 
   async deleteCatB(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteCatB, { ID: id });
+  }
+
+  async getAllBoxTemplatesByWfTemplateId(id: number): Promise<BoxTemplate[]> {
+    const response = await httpClient.post<BoxTemplate[]>(
+      apiConst.getAllBoxTemplatesByWfTemplateId,
+      { ID: id }
+    );
+    return response.data;
   }
 }
 

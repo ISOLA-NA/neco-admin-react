@@ -1,3 +1,5 @@
+// ApprovalFlow.tsx
+
 import React, {
   useState,
   useEffect,
@@ -14,7 +16,11 @@ import AddSubApprovalFlowModal from "../AddApprovalDialog/AddSubApprovalFlowModa
 import { FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import { useApi } from "../../../context/ApiContext";
 import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
-import { WfTemplateItem, Project } from "../../../services/api.services";
+import {
+  WfTemplateItem,
+  Project,
+  BoxTemplate,
+} from "../../../services/api.services";
 
 export interface ApprovalFlowHandle {
   save: () => Promise<boolean>;
@@ -24,6 +30,7 @@ interface ApprovalFlowProps {
   selectedRow: any;
 }
 
+// اگر می‌خواهید ساختار ApprovalFlowData را داشته باشید
 interface ApprovalFlowData extends WfTemplateItem {
   SubApprovalFlows: any[];
 }
@@ -37,8 +44,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   ({ selectedRow }, ref) => {
     const api = useApi();
     const { handleSaveApprovalFlow } = useAddEditDelete();
-    const [projects, setProjects] = useState<Project[]>([]);
+
     const [approvalFlowData, setApprovalFlowData] = useState<ApprovalFlowData>({
+      ID: 0,
       Name: "",
       Describtion: "",
       IsGlobal: false,
@@ -49,9 +57,21 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       SubApprovalFlows: [],
     });
 
-    const [selectedRowData, setSelectedRowData] = useState<any>(null);
-    const [selectedSubRowData, setSelectedSubRowData] = useState<any>(null);
+    // پروژه‌ها برای ListSelector
+    const [projects, setProjects] = useState<Project[]>([]);
+
+    // باکس‌های مربوط به این WfTemplate
+    const [boxTemplates, setBoxTemplates] = useState<BoxTemplate[]>([]);
+
+    // کنترل انتخاب یک باکس برای Edit / Delete
+    const [selectedSubRowData, setSelectedSubRowData] =
+      useState<BoxTemplate | null>(null);
+
+    // باز/بسته بودن مودال
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    // برای انتخاب پروژه در TableSelector
+    const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
     useEffect(() => {
       const fetchProjects = async () => {
@@ -65,11 +85,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       fetchProjects();
     }, [api]);
 
-    const mappedProjects: MappedProject[] = projects.map((project) => ({
-      ID: project.ID,
-      Name: project.ProjectName,
-    }));
-
+    // هروقت selectedRow عوض شد (انتخاب ApprovalFlow جدید یا Add)، مقداردهی می‌کنیم
     useEffect(() => {
       if (selectedRow) {
         setApprovalFlowData({
@@ -85,8 +101,25 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           ModifiedById: selectedRow.ModifiedById,
           SubApprovalFlows: selectedRow.SubApprovalFlows || [],
         });
+
+        if (selectedRow.ID) {
+          // گرفتن باکس‌های مربوط به این الگوی کاری
+          api
+            .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
+            .then((data) => {
+              setBoxTemplates(data);
+            })
+            .catch((err) => {
+              console.error("Error fetching BoxTemplates:", err);
+              setBoxTemplates([]);
+            });
+        } else {
+          setBoxTemplates([]);
+        }
       } else {
+        // حالت Add
         setApprovalFlowData({
+          ID: 0,
           Name: "",
           Describtion: "",
           IsGlobal: false,
@@ -96,9 +129,11 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           ProjectsStr: "",
           SubApprovalFlows: [],
         });
+        setBoxTemplates([]);
       }
-    }, [selectedRow]);
+    }, [selectedRow, api]);
 
+    // متد save که توسط والد فراخوانی می‌شود
     useImperativeHandle(ref, () => ({
       save: async () => {
         try {
@@ -120,6 +155,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         [field]: value,
       }));
     };
+
+    // برای ListSelector پروژه‌ها
+    const mappedProjects: MappedProject[] = projects.map((project) => ({
+      ID: project.ID,
+      Name: project.ProjectName,
+    }));
 
     const projectColumnDefs = [
       {
@@ -146,10 +187,10 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
     const selectedProjectIds = getSelectedProjectIds();
 
+    // TableSelector پروژ‌ه‌ها
     const handleRowClick = (row: any) => {
       setSelectedRowData(row);
     };
-
     const handleSelectButtonClick = () => {
       if (selectedRowData) {
         const currentSelectedIds = getSelectedProjectIds();
@@ -163,11 +204,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         setSelectedRowData(null);
       }
     };
-
     const handleRowDoubleClick = () => {
       handleSelectButtonClick();
     };
-
     const modalContentProps = {
       columnDefs: projectColumnDefs,
       rowData: mappedProjects,
@@ -178,33 +217,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       isSelectDisabled: !selectedRowData,
     };
 
-    const handleSubApprovalFlowEdit = (subFlow: any) => {
-      console.log("Edit SubApprovalFlow:", subFlow);
-    };
-
-    const handleSubApprovalFlowDelete = (subFlow: any) => {
-      const updatedSubFlows = approvalFlowData.SubApprovalFlows.filter(
-        (flow) => flow.ID !== subFlow.ID
-      );
-      setApprovalFlowData((prev) => ({
-        ...prev,
-        SubApprovalFlows: updatedSubFlows,
-      }));
-    };
-
-    const handleSubApprovalFlowDuplicate = (subFlow: any) => {
-      const newSubFlow = { ...subFlow, ID: `sub${Date.now()}` };
-      setApprovalFlowData((prev) => ({
-        ...prev,
-        SubApprovalFlows: [...prev.SubApprovalFlows, newSubFlow],
-      }));
-    };
-
-    const handleSubApprovalFlowAdd = () => {
-      setIsModalOpen(true);
-    };
-
-    const subApprovalFlowColumnDefs = [
+    // ستون‌های جدول boxTemplates
+    const boxTemplateColumnDefs = [
       {
         headerName: "Name",
         field: "Name",
@@ -212,20 +226,32 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         sortable: true,
       },
       {
-        headerName: "Description",
-        field: "Describtion",
+        headerName: "Predecessor",
+        field: "PredecessorStr",
         filter: "agTextColumnFilter",
         sortable: true,
+        flex: 1,
+        valueGetter: (params: any) => {
+          // اگر رشته‌ی پیش‌نیاز خالی است، مقداری برنگرداند
+          if (!params.data?.PredecessorStr) return "";
+
+          const predecessorIds =
+            params.data.PredecessorStr.split("|").filter(Boolean);
+
+          return predecessorIds
+            .map((id: string) => {
+              const found = boxTemplates.find(
+                (box) => box.ID.toString() === id
+              );
+              return found ? found.Name : id;
+            })
+            .join("- ");
+        },
       },
+
       {
-        headerName: "Duration",
+        headerName: "MaxDuration",
         field: "MaxDuration",
-        filter: "agNumberColumnFilter",
-        sortable: true,
-      },
-      {
-        headerName: "Budget",
-        field: "PCost",
         filter: "agNumberColumnFilter",
         sortable: true,
       },
@@ -235,21 +261,21 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         cellRendererFramework: (params: any) => (
           <div className="flex space-x-2">
             <button
-              onClick={() => handleSubApprovalFlowEdit(params.data)}
+              onClick={() => handleBoxTemplateEdit(params.data)}
               className="text-blue-600 hover:text-blue-800"
               title="Edit"
             >
               <FiEdit />
             </button>
             <button
-              onClick={() => handleSubApprovalFlowDelete(params.data)}
+              onClick={() => handleBoxTemplateDelete(params.data)}
               className="text-red-600 hover:text-red-800"
               title="Delete"
             >
               <FiTrash2 />
             </button>
             <button
-              onClick={() => handleSubApprovalFlowDuplicate(params.data)}
+              onClick={() => handleBoxTemplateDuplicate(params.data)}
               className="text-yellow-600 hover:text-yellow-800"
               title="Duplicate"
             >
@@ -260,8 +286,23 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       },
     ];
 
+    const handleBoxTemplateEdit = (box: BoxTemplate) => {
+      setSelectedSubRowData(box);
+      setIsModalOpen(true);
+    };
+
+    const handleBoxTemplateDelete = (box: BoxTemplate) => {
+      // منطق حذف
+      console.log("Delete BoxTemplate:", box);
+    };
+
+    const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
+      // منطق Duplicate
+      console.log("Duplicate BoxTemplate:", box);
+    };
+
     const handleSubRowDoubleClick = (data: any) => {
-      handleSubApprovalFlowEdit(data);
+      handleBoxTemplateEdit(data);
     };
 
     return (
@@ -292,11 +333,10 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               name="Max Duration (Days)"
               type="number"
               value={approvalFlowData.MaxDuration.toString()}
-              placeholder="Enter max duration"
+              placeholder=""
               onChange={(e) =>
                 handleChange("MaxDuration", parseInt(e.target.value) || 0)
               }
-              required={true}
             />
           </TwoColumnLayout.Item>
 
@@ -305,11 +345,10 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               name="Project Cost"
               type="number"
               value={approvalFlowData.PCost.toString()}
-              placeholder="Enter project cost"
+              placeholder=""
               onChange={(e) =>
                 handleChange("PCost", parseInt(e.target.value) || 0)
               }
-              required={true}
             />
           </TwoColumnLayout.Item>
 
@@ -332,22 +371,29 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           {selectedRow && (
             <TwoColumnLayout.Item span={2}>
               <DataTable
-                columnDefs={subApprovalFlowColumnDefs}
-                rowData={approvalFlowData.SubApprovalFlows}
+                columnDefs={boxTemplateColumnDefs}
+                rowData={boxTemplates}
                 onRowDoubleClick={handleSubRowDoubleClick}
                 setSelectedRowData={setSelectedSubRowData}
-                onAdd={handleSubApprovalFlowAdd}
+                onAdd={() => {
+                  // Add new BoxTemplate
+                  setSelectedSubRowData(null);
+                  setIsModalOpen(true);
+                }}
                 onEdit={() => {
-                  if (selectedSubRowData)
-                    handleSubApprovalFlowEdit(selectedSubRowData);
+                  if (selectedSubRowData) {
+                    handleBoxTemplateEdit(selectedSubRowData);
+                  }
                 }}
                 onDelete={() => {
-                  if (selectedSubRowData)
-                    handleSubApprovalFlowDelete(selectedSubRowData);
+                  if (selectedSubRowData) {
+                    handleBoxTemplateDelete(selectedSubRowData);
+                  }
                 }}
                 onDuplicate={() => {
-                  if (selectedSubRowData)
-                    handleSubApprovalFlowDuplicate(selectedSubRowData);
+                  if (selectedSubRowData) {
+                    handleBoxTemplateDuplicate(selectedSubRowData);
+                  }
                 }}
                 showDuplicateIcon={true}
                 showEditIcon={true}
@@ -362,6 +408,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         <AddSubApprovalFlowModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          editData={selectedSubRowData}
+          boxTemplates={boxTemplates}
         />
       </>
     );

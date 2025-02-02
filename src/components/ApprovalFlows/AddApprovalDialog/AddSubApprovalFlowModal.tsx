@@ -1,41 +1,37 @@
-// src/components/AddApprovalDialog/AddSubApprovalFlowModal.tsx
+// AddSubApprovalFlowModal.tsx
+
 import React, { useState } from "react";
 import DynamicModal from "../../utilities/DynamicModal";
 import ApprovalFlowsTab from "./ApprovalFlowsTab";
 import AlertTab from "./AlertTab";
+import { BoxTemplate } from "../../../services/api.services";
 
 interface AddSubApprovalFlowModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editData?: BoxTemplate | null; // باکس در حال ویرایش
+  boxTemplates?: BoxTemplate[]; // همه‌ی باکس‌ها
 }
 
 const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   isOpen,
   onClose,
+  editData,
+  boxTemplates = [],
 }) => {
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
 
-  // تابع برای ذخیره‌سازی داده‌ها
   const handleSave = () => {
-    // در اینجا می‌توانید منطق ذخیره‌سازی داده‌ها را اضافه کنید
-    // به عنوان مثال، ارسال داده‌ها به سرور یا بروزرسانی state‌های والد
-
-    // سپس مودال را ببندید
+    // منطق درج یا آپدیت BoxTemplate
     onClose();
   };
 
-  // تابع برای لغو و بستن مودال
   const handleCancel = () => {
-    // اگر نیاز به بازنشانی فرم قبل از بستن مودال دارید، اینجا انجام دهید
-    // به عنوان مثال: resetForm();
-
-    // مودال را ببندید بدون ذخیره‌سازی
     onClose();
   };
 
   return (
     <DynamicModal isOpen={isOpen} onClose={onClose}>
-      {/* تب‌ها */}
       <div
         role="tablist"
         className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"
@@ -56,13 +52,13 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         </button>
       </div>
 
-      {/* محتوای تب‌ها */}
       <div className="mt-4">
-        {activeTab === "approval" && <ApprovalFlowsTab />}
+        {activeTab === "approval" && (
+          <ApprovalFlowsTab editData={editData} boxTemplates={boxTemplates} />
+        )}
         {activeTab === "alert" && <AlertTab />}
       </div>
 
-      {/* دکمه‌های Save و Cancel */}
       <div className="flex justify-center mt-6 space-x-3">
         <button
           onClick={handleSave}

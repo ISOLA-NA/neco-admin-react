@@ -11,7 +11,6 @@ import AppServices, {
   ProgramTemplateItem,
   DefaultRibbonItem,
   EntityTypeItem,
-  WfTemplateItem,
   AFBtnItem,
   CommandItem,
   Menu,
@@ -35,6 +34,8 @@ import AppServices, {
   EntityType,
   EntityTypeComplete,
   CategoryItem,
+  WfTemplateItem,
+  BoxTemplate,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -160,6 +161,8 @@ interface ApiContextType {
   insertCatB: (data: CategoryItem) => Promise<CategoryItem>;
   updateCatB: (data: CategoryItem) => Promise<CategoryItem>;
   deleteCatB: (id: number) => Promise<void>;
+
+  getAllBoxTemplatesByWfTemplateId: (id: number) => Promise<BoxTemplate[]>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -292,6 +295,8 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertCatB: AppServices.insertCatB.bind(AppServices),
     updateCatB: AppServices.updateCatB.bind(AppServices),
     deleteCatB: AppServices.deleteCatB.bind(AppServices),
+    getAllBoxTemplatesByWfTemplateId:
+      AppServices.getAllBoxTemplatesByWfTemplateId.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
