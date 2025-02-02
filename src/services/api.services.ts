@@ -1262,6 +1262,27 @@ class ApiService {
     );
     return response.data;
   }
+
+  // ************** سه متد جدید برای WFBoxTemplate **************
+  async insertBoxTemplate(data: BoxTemplate): Promise<BoxTemplate> {
+    const response = await httpClient.post<BoxTemplate>(
+      apiConst.insertWFBoxTemplate,
+      data
+    );
+    return response.data;
+  }
+
+  async updateBoxTemplate(data: BoxTemplate): Promise<BoxTemplate> {
+    const response = await httpClient.post<BoxTemplate>(
+      apiConst.updateWFBoxTemplate,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteBoxTemplate(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteWFBoxTemplate, { ID: id });
+  }
 }
 
 // یک خروجی برای استفاده در Context

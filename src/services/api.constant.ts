@@ -107,4 +107,7 @@ export const apiConst = Object.freeze({
   deleteCatB: "api/EntityCateB/Delete",
   editCatB: "api/EntityCateB/Update",
   getAllBoxTemplatesByWfTemplateId: "api/WFBoxTemplate/GetAllByWFTemplatId",
+  insertWFBoxTemplate: "api/WFBoxTemplate/Insert",
+  updateWFBoxTemplate: "api/WFBoxTemplate/Update",
+  deleteWFBoxTemplate: "api/WFBoxTemplate/Delete",
 });

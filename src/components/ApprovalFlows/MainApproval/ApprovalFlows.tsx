@@ -30,7 +30,6 @@ interface ApprovalFlowProps {
   selectedRow: any;
 }
 
-// اگر می‌خواهید ساختار ApprovalFlowData را داشته باشید
 interface ApprovalFlowData extends WfTemplateItem {
   SubApprovalFlows: any[];
 }
@@ -42,6 +41,8 @@ interface MappedProject {
 
 const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   ({ selectedRow }, ref) => {
+    console.log("iddddddddd", selectedRow);
+
     const api = useApi();
     const { handleSaveApprovalFlow } = useAddEditDelete();
 
@@ -57,20 +58,11 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       SubApprovalFlows: [],
     });
 
-    // پروژه‌ها برای ListSelector
     const [projects, setProjects] = useState<Project[]>([]);
-
-    // باکس‌های مربوط به این WfTemplate
     const [boxTemplates, setBoxTemplates] = useState<BoxTemplate[]>([]);
-
-    // کنترل انتخاب یک باکس برای Edit / Delete
     const [selectedSubRowData, setSelectedSubRowData] =
       useState<BoxTemplate | null>(null);
-
-    // باز/بسته بودن مودال
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-    // برای انتخاب پروژه در TableSelector
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
     useEffect(() => {
@@ -85,7 +77,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       fetchProjects();
     }, [api]);
 
-    // هروقت selectedRow عوض شد (انتخاب ApprovalFlow جدید یا Add)، مقداردهی می‌کنیم
     useEffect(() => {
       if (selectedRow) {
         setApprovalFlowData({
@@ -103,7 +94,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         });
 
         if (selectedRow.ID) {
-          // گرفتن باکس‌های مربوط به این الگوی کاری
           api
             .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
             .then((data) => {
@@ -117,7 +107,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           setBoxTemplates([]);
         }
       } else {
-        // حالت Add
         setApprovalFlowData({
           ID: 0,
           Name: "",
@@ -133,7 +122,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       }
     }, [selectedRow, api]);
 
-    // متد save که توسط والد فراخوانی می‌شود
     useImperativeHandle(ref, () => ({
       save: async () => {
         try {
@@ -156,7 +144,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       }));
     };
 
-    // برای ListSelector پروژه‌ها
     const mappedProjects: MappedProject[] = projects.map((project) => ({
       ID: project.ID,
       Name: project.ProjectName,
@@ -187,10 +174,10 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
     const selectedProjectIds = getSelectedProjectIds();
 
-    // TableSelector پروژ‌ه‌ها
     const handleRowClick = (row: any) => {
       setSelectedRowData(row);
     };
+
     const handleSelectButtonClick = () => {
       if (selectedRowData) {
         const currentSelectedIds = getSelectedProjectIds();
@@ -204,9 +191,11 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         setSelectedRowData(null);
       }
     };
+
     const handleRowDoubleClick = () => {
       handleSelectButtonClick();
     };
+
     const modalContentProps = {
       columnDefs: projectColumnDefs,
       rowData: mappedProjects,
@@ -217,7 +206,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       isSelectDisabled: !selectedRowData,
     };
 
-    // ستون‌های جدول boxTemplates
     const boxTemplateColumnDefs = [
       {
         headerName: "Name",
@@ -232,12 +220,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         sortable: true,
         flex: 1,
         valueGetter: (params: any) => {
-          // اگر رشته‌ی پیش‌نیاز خالی است، مقداری برنگرداند
           if (!params.data?.PredecessorStr) return "";
-
           const predecessorIds =
             params.data.PredecessorStr.split("|").filter(Boolean);
-
           return predecessorIds
             .map((id: string) => {
               const found = boxTemplates.find(
@@ -248,7 +233,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             .join("- ");
         },
       },
-
       {
         headerName: "MaxDuration",
         field: "MaxDuration",
@@ -292,12 +276,10 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     };
 
     const handleBoxTemplateDelete = (box: BoxTemplate) => {
-      // منطق حذف
       console.log("Delete BoxTemplate:", box);
     };
 
     const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
-      // منطق Duplicate
       console.log("Duplicate BoxTemplate:", box);
     };
 
@@ -376,7 +358,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                 onRowDoubleClick={handleSubRowDoubleClick}
                 setSelectedRowData={setSelectedSubRowData}
                 onAdd={() => {
-                  // Add new BoxTemplate
                   setSelectedSubRowData(null);
                   setIsModalOpen(true);
                 }}

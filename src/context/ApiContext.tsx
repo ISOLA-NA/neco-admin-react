@@ -163,6 +163,9 @@ interface ApiContextType {
   deleteCatB: (id: number) => Promise<void>;
 
   getAllBoxTemplatesByWfTemplateId: (id: number) => Promise<BoxTemplate[]>;
+  insertBoxTemplate: (data: BoxTemplate) => Promise<BoxTemplate>;
+  updateBoxTemplate: (data: BoxTemplate) => Promise<BoxTemplate>;
+  deleteBoxTemplate: (id: number) => Promise<void>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -297,6 +300,9 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     deleteCatB: AppServices.deleteCatB.bind(AppServices),
     getAllBoxTemplatesByWfTemplateId:
       AppServices.getAllBoxTemplatesByWfTemplateId.bind(AppServices),
+    insertBoxTemplate: AppServices.insertBoxTemplate.bind(AppServices),
+    updateBoxTemplate: AppServices.updateBoxTemplate.bind(AppServices),
+    deleteBoxTemplate: AppServices.deleteBoxTemplate.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
