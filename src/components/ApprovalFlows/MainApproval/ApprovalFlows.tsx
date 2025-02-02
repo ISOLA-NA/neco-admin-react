@@ -65,7 +65,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       fetchProjects();
     }, [api]);
 
-    // Map projects to match ListSelector's expected format
     const mappedProjects: MappedProject[] = projects.map((project) => ({
       ID: project.ID,
       Name: project.ProjectName,
@@ -169,7 +168,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       handleSelectButtonClick();
     };
 
-    // Create modalContentProps
     const modalContentProps = {
       columnDefs: projectColumnDefs,
       rowData: mappedProjects,
@@ -180,7 +178,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       isSelectDisabled: !selectedRowData,
     };
 
-    // SubApprovalFlow handlers
     const handleSubApprovalFlowEdit = (subFlow: any) => {
       console.log("Edit SubApprovalFlow:", subFlow);
     };
@@ -267,11 +264,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       handleSubApprovalFlowEdit(data);
     };
 
-    // Get selected projects for display
-    const selectedProjects = projects.filter((project) =>
-      selectedProjectIds.includes(project.ID.toString())
-    );
-
     return (
       <>
         <TwoColumnLayout>
@@ -337,32 +329,34 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             />
           </TwoColumnLayout.Item>
 
-          <TwoColumnLayout.Item span={2}>
-            <DataTable
-              columnDefs={subApprovalFlowColumnDefs}
-              rowData={approvalFlowData.SubApprovalFlows}
-              onRowDoubleClick={handleSubRowDoubleClick}
-              setSelectedRowData={setSelectedSubRowData}
-              onAdd={handleSubApprovalFlowAdd}
-              onEdit={() => {
-                if (selectedSubRowData)
-                  handleSubApprovalFlowEdit(selectedSubRowData);
-              }}
-              onDelete={() => {
-                if (selectedSubRowData)
-                  handleSubApprovalFlowDelete(selectedSubRowData);
-              }}
-              onDuplicate={() => {
-                if (selectedSubRowData)
-                  handleSubApprovalFlowDuplicate(selectedSubRowData);
-              }}
-              showDuplicateIcon={true}
-              showEditIcon={true}
-              showAddIcon={true}
-              showDeleteIcon={true}
-              domLayout="autoHeight"
-            />
-          </TwoColumnLayout.Item>
+          {selectedRow && (
+            <TwoColumnLayout.Item span={2}>
+              <DataTable
+                columnDefs={subApprovalFlowColumnDefs}
+                rowData={approvalFlowData.SubApprovalFlows}
+                onRowDoubleClick={handleSubRowDoubleClick}
+                setSelectedRowData={setSelectedSubRowData}
+                onAdd={handleSubApprovalFlowAdd}
+                onEdit={() => {
+                  if (selectedSubRowData)
+                    handleSubApprovalFlowEdit(selectedSubRowData);
+                }}
+                onDelete={() => {
+                  if (selectedSubRowData)
+                    handleSubApprovalFlowDelete(selectedSubRowData);
+                }}
+                onDuplicate={() => {
+                  if (selectedSubRowData)
+                    handleSubApprovalFlowDuplicate(selectedSubRowData);
+                }}
+                showDuplicateIcon={true}
+                showEditIcon={true}
+                showAddIcon={true}
+                showDeleteIcon={true}
+                domLayout="autoHeight"
+              />
+            </TwoColumnLayout.Item>
+          )}
         </TwoColumnLayout>
 
         <AddSubApprovalFlowModal
