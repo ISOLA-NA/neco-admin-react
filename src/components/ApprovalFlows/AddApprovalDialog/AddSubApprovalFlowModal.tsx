@@ -62,105 +62,73 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         return;
       }
 
-      const firstRow = formData.tableData[0];
-      if (!firstRow.postID) {
-        alert("No postID found in the first row!");
-        return;
-      }
+      // ایجاد آرایه wfApprovals برای هر ردیف موجود در جدول
+      const wfApprovals = formData.tableData.map((row) => ({
+        nPostTypeID: null,
+        nPostID: row.postID,
+        // در حالت ویرایش از ID موجود در editData استفاده می‌شود، در حالت افزودن 0
+        nWFBoxTemplateID: editData ? editData.ID : 0,
+        PCost: row.cost1 || 0,
+        Weight: row.weight1 || 0,
+        IsVeto: row.veto,
+        IsRequired: row.required,
+        Code: row.code || null,
+        // اگر ردیف قبلاً وجود داشته باشد از مقدار موجود استفاده می‌شود
+        ID: editData ? row.ID : 0,
+        IsVisible: true,
+        LastModified: new Date().toISOString(),
+      }));
 
       const predecessorStr =
         formData.selectedPredecessors.length > 0
           ? formData.selectedPredecessors.join("|") + "|"
           : "";
-
       const btnIDsStr =
         formData.selectedDefaultBtnIds.length > 0
           ? formData.selectedDefaultBtnIds.join("|") + "|"
           : "";
 
-      let payload: any;
-      if (editData) {
-        payload = {
-          WFApproval: {
-            Code: firstRow.code || null,
-            ID: editData.ID,
-            IsRequired: firstRow.required,
-            IsVeto: firstRow.veto,
-            nPostID: firstRow.postID,
-            nPostTypeID: null,
-            nWFBoxTemplateID: editData.ID,
-            PCost: firstRow.cost1 || 0,
-            Weight: firstRow.weight1 || 0,
-          },
-          WFBT: {
-            ActDuration: parseInt(formData.actDurationValue, 10) || 0,
-            ActionMode: parseInt(formData.minAcceptValue, 10) || 0,
-            DeemAction: 0,
-            DeemCondition: 0,
-            DeemDay: 0,
-            DeemedEnabled: false,
-            ID: editData.ID,
-            IsStage: false,
-            IsVisible: true,
-            Left: 0,
-            MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
-            MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
-            Name: formData.nameValue || "",
-            nWFTemplateID: workflowTemplateId,
-            PredecessorStr: predecessorStr,
-            PreviousStateId: null,
-            Top: 0,
-            BtnIDs: btnIDsStr,
-          },
-        };
+      // payload نهایی که طبق نمونه JSON تنظیم شده است
+      let payload: any = {
+        WFBT: {
+          Name: formData.nameValue || "",
+          IsStage: false,
+          ActionMode: parseInt(formData.minAcceptValue, 10) || 0,
+          PredecessorStr: predecessorStr,
+          Left: 0.0,
+          Top: 0.0,
+          ActDuration: parseInt(formData.actDurationValue, 10) || 0.0,
+          MaxDuration: parseInt(formData.actDurationValue, 10) || 0.0,
+          nWFTemplateID: workflowTemplateId,
+          DeemedEnabled: false,
+          DeemDay: 0.0,
+          DeemCondition: 0,
+          DeemAction: 0,
+          PreviewsStateId: null,
+          BtnIDs: btnIDsStr,
+          ActionBtnID: null,
+          MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
+          Order: formData.orderValue ? parseInt(formData.orderValue, 10) : null,
+          GoToPreviousStateID: null,
+          ID: editData ? editData.ID : 0,
+          IsVisible: true,
+          LastModified: new Date().toISOString(),
+        },
+        WFAproval: wfApprovals,
+      };
 
+      if (editData) {
+        // ویرایش
         const result = await api.updateBoxTemplate(payload);
         console.log("BoxTemplate updated:", result);
-        if (onBoxTemplateInserted) {
-          onBoxTemplateInserted();
-        }
       } else {
-        payload = {
-          WFApproval: {
-            Code: null,
-            ID: 0,
-            IsRequired: null,
-            IsVeto: null,
-            IsVisible: true,
-            LastModified: new Date().toISOString(),
-            nPostID: firstRow.postID,
-            nPostTypeID: null,
-            nWFBoxTemplateID: 0,
-            PCost: 0,
-            Weight: 0,
-          },
-          WFBT: {
-            ActDuration: parseInt(formData.actDurationValue, 10) || 0,
-            ActionMode: parseInt(formData.minAcceptValue, 10) || 0,
-            DeemAction: 0,
-            DeemCondition: 0,
-            DeemDay: 0,
-            DeemedEnabled: false,
-            ID: 0,
-            IsStage: false,
-            IsVisible: true,
-            Left: 0,
-            MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
-            MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
-            Name: formData.nameValue || "",
-            nWFTemplateID: workflowTemplateId,
-            PredecessorStr: predecessorStr,
-            PreviousStateId: null,
-            Top: 0,
-            BtnIDs: btnIDsStr,
-          },
-        };
-
+        // درج
         const result = await api.insertBoxTemplate(payload);
         console.log("BoxTemplate inserted:", result);
-        if (onBoxTemplateInserted) {
-          onBoxTemplateInserted();
-        }
+      }
+
+      if (onBoxTemplateInserted) {
+        onBoxTemplateInserted();
       }
       onClose();
     } catch (error) {

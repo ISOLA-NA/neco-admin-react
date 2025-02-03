@@ -9,15 +9,22 @@ import DynamicSelector from "../../utilities/DynamicSelector";
 import DynamicModal from "../../utilities/DynamicModal";
 import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
-import { subTabDataMapping, Role } from "../../TabHandler/tab/tabData";
 import { FaPlus, FaTimes, FaEdit } from "react-icons/fa";
 import BoxDeemed from "./BoxDeemed";
-import BoxPredecessor from "./BoxPredecessor "
+import BoxPredecessor from "./BoxPredecessor ";
 import ListSelector from "../../ListSelector/ListSelector";
 import ButtonComponent from "../../General/Configuration/ButtonComponent";
 import { v4 as uuidv4 } from "uuid";
 import { BoxTemplate, AFBtnItem } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
+
+// تعریف اینترفیس Role (در صورت نیاز می‌توانید فیلدهای بیشتر اضافه کنید)
+export interface Role {
+  ID: string | number;
+  Name: string;
+  isStaticPost?: boolean;
+  // سایر فیلدها در صورت نیاز
+}
 
 // هر سطر جدول Approval Context
 export interface TableRow {
@@ -63,6 +70,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
   ({ editData, boxTemplates = [] }, ref) => {
     const api = useApi();
 
+    // استیت مربوط به دریافت Roles از API
+    const [allRoles, setAllRoles] = useState<Role[]>([]);
+
     // stateهای فرم
     const [nameValue, setNameValue] = useState<string>("");
     const [minAcceptValue, setMinAcceptValue] = useState<string>(""); // ActionMode
@@ -100,6 +110,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     // state برای نگهداری آی‌دی‌های انتخاب‌شده دکمه‌ها (اعدادی)
     const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<number[]>([]);
 
+    // دریافت لیست Roles از API
+    useEffect(() => {
+      const fetchRoles = async () => {
+        try {
+          const res = await api.getAllRoles();
+          setAllRoles(res);
+        } catch (error) {
+          console.error("Error fetching roles:", error);
+        }
+      };
+      fetchRoles();
+    }, [api]);
+
+    // دریافت لیست دکمه‌ها از API
     useEffect(() => {
       const fetchButtons = async () => {
         try {
@@ -137,6 +161,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       { headerName: "Code", field: "code", sortable: true, filter: true },
     ];
 
+    // ستون‌های جدول انتخاب پست (Roles)
+    const rolesColumnDefs = [
+      { headerName: "ID", field: "ID", sortable: true, filter: true },
+      { headerName: "Name", field: "Name", sortable: true, filter: true },
+    ];
+
     // مقداردهی اولیه (برای حالت ادیت یا افزودن)
     useEffect(() => {
       if (editData) {
@@ -165,10 +195,16 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           } else {
             setSelectedDefaultBtnIds([]);
           }
+          // اگر در editData اطلاعات Approval Flow موجود باشد
+          if ((editData as any).WFApprovals && Array.isArray((editData as any).WFApprovals)) {
+            setTableData((editData as any).WFApprovals);
+          } else if ((editData as any).WFApproval && Array.isArray((editData as any).WFApproval)) {
+            setTableData((editData as any).WFApproval);
+          }
           setInitialized(true);
         }
 
-        // سایر فیلدها (برای فرم اصلی)
+        // خالی کردن فیلدهای افزودن/ویرایش ردیف (local)
         setCost1("");
         setCost2("");
         setCost3("");
@@ -209,18 +245,18 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
     }, [editData, initialized]);
 
-    const staticPostOptions = subTabDataMapping.Roles.rowData
-      .filter((item: Role) => item.isStaticPost)
-      .map((item: Role) => ({
-        value: item.ID,
-        label: item.Name,
-      }));
+    // گزینه‌های مربوط به سلکت پست از لیست Roles دریافت‌شده از API
+    const staticPostOptions = allRoles.map((role) => ({
+      value: role.ID,
+      label: role.Name,
+    }));
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    const handleRowSelect = (data: Role) => {
+    // انتخاب پست از داخل مودال TableSelector
+    const handleRoleSelect = (data: Role) => {
       setSelectedStaticPost(data);
       setStaticPostValue(data.ID.toString());
       closeModal();
@@ -229,7 +265,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     // اعتبارسنجی فیلدهای Min (برای Add و Edit)
     const validateMinFields = (): boolean => {
       if (!acceptChecked && !rejectChecked) {
-        alert("لطفاً حداقل یکی از گزینه‌های Min Accept یا Min Reject را انتخاب کرده و مقدار معتبر وارد نمایید.");
+        alert(
+          "لطفاً حداقل یکی از گزینه‌های Min Accept یا Min Reject را انتخاب کرده و مقدار معتبر وارد نمایید."
+        );
         return false;
       }
       if (acceptChecked) {
@@ -257,13 +295,17 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       if (!validateMinFields()) {
         return;
       }
+
       if (selectedRow) {
+        // ویرایش ردیف انتخاب‌شده
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
                 ...r,
                 post: selectedStaticPost ? selectedStaticPost.Name : "",
-                postID: selectedStaticPost ? (selectedStaticPost.ID as string) : "",
+                postID: selectedStaticPost
+                  ? selectedStaticPost.ID.toString()
+                  : "",
                 cost1: Number(cost1) || 0,
                 cost2: Number(cost2) || 0,
                 cost3: Number(cost3) || 0,
@@ -279,10 +321,11 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setTableData(updated);
         resetForm();
       } else {
+        // افزودن ردیف جدید به جدول
         const newRow: TableRow = {
           id: uuidv4(),
           post: selectedStaticPost ? selectedStaticPost.Name : "",
-          postID: selectedStaticPost ? (selectedStaticPost.ID as string) : "",
+          postID: selectedStaticPost ? selectedStaticPost.ID.toString() : "",
           cost1: Number(cost1) || 0,
           cost2: Number(cost2) || 0,
           cost3: Number(cost3) || 0,
@@ -319,12 +362,11 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       setTableData([...tableData, duplicated]);
     };
 
+    // انتخاب ردیف از جدول Approval Context
     const handleSelectRow = (data: TableRow) => {
       setSelectedRow(data);
       setStaticPostValue(data.postID);
-      const foundRole = subTabDataMapping.Roles.rowData.find(
-        (r) => r.ID === data.postID
-      );
+      const foundRole = allRoles.find((r) => r.ID.toString() === data.postID);
       setSelectedStaticPost(foundRole || null);
 
       setCost1(String(data.cost1));
@@ -386,7 +428,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     return (
       <div className="flex flex-row h-full">
         <main className="flex-1 p-4 bg-white overflow-auto">
-          {/* ردیف اصلی: تمام اینپوت‌ها در یک خط با فاصله یکسان */}
+          {/* ردیف اصلی: تمام اینپوت‌ها در یک خط */}
           <div className="flex flex-row gap-x-4 w-full mt-4 items-center">
             <div className="flex flex-col">
               <DynamicInput
@@ -492,6 +534,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
+              {/* سلکت پست */}
               <div className="flex-1">
                 <label className="text-sm text-gray-700">Static Post</label>
                 <DynamicSelector
@@ -500,8 +543,8 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                   onChange={(e) => {
                     const val = e.target.value;
                     setStaticPostValue(val);
-                    const foundRole = subTabDataMapping.Roles.rowData.find(
-                      (r) => r.ID === val
+                    const foundRole = allRoles.find(
+                      (r) => r.ID.toString() === val
                     );
                     setSelectedStaticPost(foundRole || null);
                   }}
@@ -603,6 +646,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             </div>
           </div>
 
+          {/* جدول نمایش داده‌های وارد شده */}
           <div className="mt-4">
             <DataTable
               columnDefs={columnDefs}
@@ -668,9 +712,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
         <DynamicModal isOpen={isModalOpen} onClose={closeModal}>
           <TableSelector
-            columnDefs={subTabDataMapping.Roles.columnDefs}
-            rowData={subTabDataMapping.Roles.rowData}
-            onRowDoubleClick={handleRowSelect}
+            columnDefs={rolesColumnDefs}
+            rowData={allRoles}
+            onRowDoubleClick={handleRoleSelect}
             onRowClick={(data: Role) => setSelectedStaticPost(data)}
             onSelectButtonClick={() => {
               if (selectedStaticPost) {
