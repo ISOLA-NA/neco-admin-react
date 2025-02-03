@@ -24,7 +24,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   name,
   type,
   value,
-  placeholder = " ",
+  placeholder = "",
   onChange,
   leftIcon,
   rightIcon,
@@ -39,88 +39,93 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   step,
 }) => {
   return (
-    <div
-      className={classNames(
-        "relative flex items-center gap-2",
-        className,
-        disabled ? "opacity-50 cursor-not-allowed" : ""
-      )}
-    >
-      {leftIcon && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
-          {leftIcon}
-        </div>
-      )}
-
-      <input
-        id={name}
-        name={name}
-        type={type}
-        value={value ?? ""}
-        onChange={onChange}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled || loading}
-        aria-label={name}
-        min={typeof min !== "undefined" ? min : undefined}
-        max={typeof max !== "undefined" ? max : undefined}
-        step={typeof step !== "undefined" ? step : undefined}
-        className={classNames(
-          "peer w-full border border-purple-600 rounded-md px-4 py-2 pl-10 pr-10 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-300 text-gray-800 text-sm sm:text-base truncate",
-          error
-            ? "border-red-500 focus:border-red-500"
-            : "border-purple-600 focus:border-indigo-500",
-          disabled || loading ? "bg-gray-100 text-gray-500" : ""
-        )}
-      />
-
+    <div className={classNames("w-full", className)}>
+      {/* لیبل بالای فیلد */}
       <label
         htmlFor={name}
-        className={classNames(
-          "absolute -top-3 left-3 bg-pink-100 px-2 text-sm text-gray-800",
-          "max-w-[calc(100%-24px)] overflow-hidden whitespace-nowrap",
-          "md:overflow-visible md:max-w-none",
-          "max-md:truncate max-md:after:content-['...']",
-          disabled ? "-top-4 transition-all duration-300" : ""
-        )}
-        title={name}
+        className="block text-gray-700 text-sm font-medium mb-1"
       >
-        {name}
+        {name} {required && <span className="text-red-500">*</span>}
       </label>
 
-      {loading && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <svg
-            className="animate-spin h-5 w-5 text-purple-600"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            ></path>
-          </svg>
-        </div>
-      )}
+      {/* Wrapper برای قرارگیری آیکون‌ها و Input */}
+      <div className="relative">
+        {leftIcon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-purple-600">
+            {leftIcon}
+          </div>
+        )}
 
-      {rightIcon && !loading && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-purple-600">
-          {rightIcon}
-        </div>
-      )}
+        <input
+          id={name}
+          name={name}
+          type={type}
+          value={value ?? ""}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled || loading}
+          aria-label={name}
+          min={min}
+          max={max}
+          step={step}
+          // برای حذف آیکون اسپینر مرورگر در ورودی عددی
+          style={
+            type === "number"
+              ? {
+                  MozAppearance: "textfield",
+                  WebkitAppearance: "none",
+                }
+              : {}
+          }
+          className={classNames(
+            "w-full border rounded-md px-4 py-2 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition duration-300",
+            // اگر آیکون سمت چپ وجود داشته باشد، padding-left را افزایش می‌دهیم
+            leftIcon ? "pl-10" : "",
+            // اگر آیکون سمت راست یا لودینگ باشد، padding-right را افزایش می‌دهیم
+            rightIcon || loading ? "pr-10" : "",
+            error
+              ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+              : "border-purple-600 focus:border-indigo-500 focus:ring-purple-200",
+            disabled || loading ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+          )}
+        />
 
+        {loading && (
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <svg
+              className="animate-spin h-5 w-5 text-purple-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
+            </svg>
+          </div>
+        )}
+
+        {rightIcon && !loading && (
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-purple-600">
+            {rightIcon}
+          </div>
+        )}
+      </div>
+
+      {/* نمایش پیام خطا */}
       {error && errorMessage && (
-        <p className="absolute mt-1 text-red-500 text-xs">{errorMessage}</p>
+        <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>
       )}
     </div>
   );

@@ -12,7 +12,7 @@ import DataTable from "../../TableDynamic/DataTable";
 import { subTabDataMapping, Role } from "../../TabHandler/tab/tabData";
 import { FaPlus, FaTimes, FaEdit } from "react-icons/fa";
 import BoxDeemed from "./BoxDeemed";
-import BoxPredecessor from "./BoxPredecessor ";
+import BoxPredecessor from "./BoxPredecessor "
 import ListSelector from "../../ListSelector/ListSelector";
 import ButtonComponent from "../../General/Configuration/ButtonComponent";
 import { v4 as uuidv4 } from "uuid";
@@ -23,7 +23,7 @@ import { useApi } from "../../../context/ApiContext";
 export interface TableRow {
   id: string;
   post: string;
-  postID: string; // ممکن است عدد یا رشته باشد
+  postID: string;
   cost1: number;
   cost2: number;
   cost3: number;
@@ -38,19 +38,20 @@ export interface TableRow {
 // داده‌هایی که از این تب بیرون می‌دهیم
 export interface ApprovalFlowsTabData {
   nameValue: string;
-  minAcceptValue: string;
-  minRejectValue: string;
+  minAcceptValue: string; // مربوط به ActionMode
+  minRejectValue: string; // مربوط به MinNumberForReject
   actDurationValue: string;
   orderValue: string;
   acceptChecked: boolean;
   rejectChecked: boolean;
   tableData: TableRow[];
   selectedPredecessors: number[];
-  selectedDefaultBtnIds: (number)[];  // آرایه آی‌دی‌های *عددی* انتخاب‌شده برای Buttonها
+  selectedDefaultBtnIds: number[]; // آی‌دی‌های انتخاب‌شده دکمه‌ها (اعدادی)
 }
 
 export interface ApprovalFlowsTabRef {
   getFormData: () => ApprovalFlowsTabData;
+  validateMinFields: () => boolean;
 }
 
 interface ApprovalFlowsTabProps {
@@ -62,19 +63,19 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
   ({ editData, boxTemplates = [] }, ref) => {
     const api = useApi();
 
+    // stateهای فرم
     const [nameValue, setNameValue] = useState<string>("");
-    const [minAcceptValue, setMinAcceptValue] = useState<string>("");
-    const [minRejectValue, setMinRejectValue] = useState<string>("");
+    const [minAcceptValue, setMinAcceptValue] = useState<string>(""); // ActionMode
+    const [minRejectValue, setMinRejectValue] = useState<string>(""); // MinNumberForReject
     const [actDurationValue, setActDurationValue] = useState<string>("");
     const [orderValue, setOrderValue] = useState<string>("");
 
-    const [acceptChecked, setAcceptChecked] = useState<boolean>(false);
+    // چک‌باکس‌های مربوط به min
+    const [acceptChecked, setAcceptChecked] = useState<boolean>(true); // پیش‌فرض true
     const [rejectChecked, setRejectChecked] = useState<boolean>(false);
 
     const [staticPostValue, setStaticPostValue] = useState<string>("");
-    const [selectedStaticPost, setSelectedStaticPost] = useState<Role | null>(
-      null
-    );
+    const [selectedStaticPost, setSelectedStaticPost] = useState<Role | null>(null);
 
     const [cost1, setCost1] = useState<string>("");
     const [cost2, setCost2] = useState<string>("");
@@ -96,12 +97,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
     // state برای نگهداری لیست دکمه‌های واقعی دریافتی از سرور
     const [btnList, setBtnList] = useState<AFBtnItem[]>([]);
-    // state برای نگهداری آی‌دی‌های انتخاب‌شده دکمه‌ها (از نوع number)
-    const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<number[]>(
-      []
-    );
+    // state برای نگهداری آی‌دی‌های انتخاب‌شده دکمه‌ها (اعدادی)
+    const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<number[]>([]);
 
-    // دریافت لیست دکمه‌ها از API
     useEffect(() => {
       const fetchButtons = async () => {
         try {
@@ -119,24 +117,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       { headerName: "Cost1", field: "cost1", sortable: true, filter: true },
       { headerName: "Cost2", field: "cost2", sortable: true, filter: true },
       { headerName: "Cost3", field: "cost3", sortable: true, filter: true },
-      {
-        headerName: "Weight1",
-        field: "weight1",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Weight2",
-        field: "weight2",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Weight3",
-        field: "weight3",
-        sortable: true,
-        filter: true,
-      },
+      { headerName: "Weight1", field: "weight1", sortable: true, filter: true },
+      { headerName: "Weight2", field: "weight2", sortable: true, filter: true },
+      { headerName: "Weight3", field: "weight3", sortable: true, filter: true },
       {
         headerName: "Required",
         field: "required",
@@ -154,44 +137,38 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       { headerName: "Code", field: "code", sortable: true, filter: true },
     ];
 
-    // -- در حالت Edit اطلاعات اولیه را پر می‌کنیم --
+    // مقداردهی اولیه (برای حالت ادیت یا افزودن)
     useEffect(() => {
       if (editData) {
         setNameValue(editData.Name || "");
         setActDurationValue(String(editData.MaxDuration || ""));
-        setOrderValue(String(editData.Order || ""));
+        setOrderValue(editData.Order ? editData.Order.toString() : "");
+        setMinAcceptValue(
+          editData.ActionMode ? editData.ActionMode.toString() : ""
+        );
+        setMinRejectValue(
+          editData.MinNumberForReject ? editData.MinNumberForReject.toString() : ""
+        );
 
-        // فقط یک‌بار مقداردهی شود (با استفاده از فلگ initialized)
         if (!initialized) {
-          // اگر PredecessorStr داشت
           if (editData.PredecessorStr) {
-            const splittedIds =
-              editData.PredecessorStr.split("|").filter(Boolean);
+            const splittedIds = editData.PredecessorStr.split("|").filter(Boolean);
             const numericIds = splittedIds.map((idStr) => parseInt(idStr, 10));
             setSelectedPredecessors(numericIds);
           } else {
             setSelectedPredecessors([]);
           }
-
-          // اگر BtnIDs در دیتای دریافتی بود، آن را به عدد تبدیل کرده و در selectedDefaultBtnIds بگذارید
           if (editData.BtnIDs) {
             const splittedBtnIds = editData.BtnIDs.split("|").filter(Boolean);
-            // parseInt هر آیتم
             const numericBtnIds = splittedBtnIds.map((x) => parseInt(x, 10));
             setSelectedDefaultBtnIds(numericBtnIds);
           } else {
             setSelectedDefaultBtnIds([]);
           }
-
           setInitialized(true);
         }
 
-        // ریست سایر فیلدهای context
-        setMinAcceptValue("");
-        setMinRejectValue("");
-        setAcceptChecked(false);
-        setRejectChecked(false);
-
+        // سایر فیلدها (برای فرم اصلی)
         setCost1("");
         setCost2("");
         setCost3("");
@@ -204,13 +181,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setStaticPostValue("");
         setSelectedStaticPost(null);
       } else {
-        // حالت Add
         setNameValue("");
-        setMinAcceptValue("");
+        setMinAcceptValue("1"); // در حالت افزودن، پیش‌فرض 1
         setMinRejectValue("");
         setActDurationValue("");
         setOrderValue("");
-        setAcceptChecked(false);
+        setAcceptChecked(true);
         setRejectChecked(false);
 
         setCost1("");
@@ -229,7 +205,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setSelectedDefaultBtnIds([]);
         setTableData([]);
         setSelectedRow(null);
-
         setInitialized(false);
       }
     }, [editData, initialized]);
@@ -242,12 +217,8 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }));
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const openModal = () => {
-      setIsModalOpen(true);
-    };
-    const closeModal = () => {
-      setIsModalOpen(false);
-    };
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
 
     const handleRowSelect = (data: Role) => {
       setSelectedStaticPost(data);
@@ -255,22 +226,44 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       closeModal();
     };
 
+    // اعتبارسنجی فیلدهای Min (برای Add و Edit)
+    const validateMinFields = (): boolean => {
+      if (!acceptChecked && !rejectChecked) {
+        alert("لطفاً حداقل یکی از گزینه‌های Min Accept یا Min Reject را انتخاب کرده و مقدار معتبر وارد نمایید.");
+        return false;
+      }
+      if (acceptChecked) {
+        const val = parseInt(minAcceptValue, 10);
+        if (!minAcceptValue || isNaN(val) || val === 0) {
+          alert("لطفاً مقدار معتبر برای Min Accept (ActionMode) وارد نمایید.");
+          return false;
+        }
+      }
+      if (rejectChecked) {
+        const val = parseInt(minRejectValue, 10);
+        if (!minRejectValue || isNaN(val) || val === 0) {
+          alert("لطفاً مقدار معتبر برای Min Reject (MinNumberForReject) وارد نمایید.");
+          return false;
+        }
+      }
+      return true;
+    };
+
     const handleAddOrUpdateRow = () => {
       if (!staticPostValue) {
         alert("Static Post is empty!");
         return;
       }
-
+      if (!validateMinFields()) {
+        return;
+      }
       if (selectedRow) {
-        // ویرایش رکورد
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
                 ...r,
                 post: selectedStaticPost ? selectedStaticPost.Name : "",
-                postID: selectedStaticPost
-                  ? (selectedStaticPost.ID as string)
-                  : "",
+                postID: selectedStaticPost ? (selectedStaticPost.ID as string) : "",
                 cost1: Number(cost1) || 0,
                 cost2: Number(cost2) || 0,
                 cost3: Number(cost3) || 0,
@@ -286,7 +279,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setTableData(updated);
         resetForm();
       } else {
-        // درج رکورد جدید
         const newRow: TableRow = {
           id: uuidv4(),
           post: selectedStaticPost ? selectedStaticPost.Name : "",
@@ -361,14 +353,11 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       setSelectedRow(null);
     };
 
-    // وقتی در ListSelector آیتمی انتخاب یا حذف می‌شود
     const handleSelectionChange = (
       type: string,
       selectedIds: (string | number)[]
     ) => {
       if (type === "DefaultBtn") {
-        // چون قرار است اعداد را در selectedDefaultBtnIds نگه داریم،
-        // اگر selectedIds به‌صورت رشته باشد، آن‌ها را تبدیل به عدد می‌کنیم
         const numericIds = selectedIds.map((x) =>
           typeof x === "string" ? parseInt(x, 10) : x
         );
@@ -376,7 +365,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
     };
 
-    // متدی که از والد با ref صدا می‌شود
     useImperativeHandle(ref, () => ({
       getFormData: () => {
         return {
@@ -392,11 +380,13 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           selectedDefaultBtnIds,
         };
       },
+      validateMinFields: () => validateMinFields(),
     }));
 
     return (
       <div className="flex flex-row h-full">
         <main className="flex-1 p-4 bg-white overflow-auto">
+          {/* ردیف اصلی: تمام اینپوت‌ها در یک خط با فاصله یکسان */}
           <div className="flex flex-row gap-x-4 w-full mt-4 items-center">
             <div className="flex flex-col">
               <DynamicInput
@@ -464,6 +454,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             </div>
           </div>
 
+          {/* ادامه فرم اصلی */}
           <div className="mt-8 p-4 bg-gray-100 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-gray-700">
@@ -487,7 +478,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                     </>
                   )}
                 </button>
-
                 <button
                   type="button"
                   className={`flex items-center justify-center bg-red-500 text-white rounded-md p-2 hover:bg-red-600 transition-colors ${
@@ -501,8 +491,8 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               </div>
             </div>
 
-            <div className="flex flex-row gap-x-4 w-full items-center">
-              <div className="flex flex-col flex-2 ">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex-1">
                 <label className="text-sm text-gray-700">Static Post</label>
                 <DynamicSelector
                   options={staticPostOptions}
@@ -521,92 +511,94 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                   disabled={false}
                 />
               </div>
-
-              <div className="flex flex-row gap-x-4 w-full mt-10 items-center">
-                <div className="flex flex-col flex-1 ">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="w-24">
                   <DynamicInput
                     name="Weight1"
                     type="number"
                     value={weight1}
                     onChange={(e) => setWeight1(e.target.value)}
+                    className="w-24"
                   />
                 </div>
-                <div className="flex flex-col flex-1">
+                <div className="w-24">
                   <DynamicInput
                     name="Weight2"
                     type="number"
                     value={weight2}
                     onChange={(e) => setWeight2(e.target.value)}
+                    className="w-24"
                   />
                 </div>
-                <div className="flex flex-col flex-1">
+                <div className="w-24">
                   <DynamicInput
                     name="Weight3"
                     type="number"
                     value={weight3}
                     onChange={(e) => setWeight3(e.target.value)}
+                    className="w-24"
                   />
                 </div>
-
-                <div className="flex flex-col w-auto">
-                  <label className="flex items-center text-sm text-gray-700 mb-1">
+                <div className="flex items-center">
+                  <label className="flex items-center text-sm text-gray-700">
                     <input
                       type="checkbox"
                       checked={vetoChecked}
                       onChange={(e) => setVetoChecked(e.target.checked)}
-                      className="h-4 w-4 mr-2"
+                      className="h-4 w-4 mr-1"
                     />
                     Veto
                   </label>
                 </div>
-
-                <div className="flex flex-col flex-1">
+                <div className="w-20">
                   <DynamicInput
                     name="Code"
                     type="number"
                     value={codeValue}
                     onChange={(e) => setCodeValue(e.target.value)}
+                    className="w-20"
                   />
                 </div>
               </div>
-            </div>
-
-            <div className="flex flex-row gap-x-4 w-full mt-4 items-center">
-              <div className="flex flex-col flex-1 ">
-                <DynamicInput
-                  name="Cost1"
-                  type="number"
-                  value={cost1}
-                  onChange={(e) => setCost1(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col flex-1">
-                <DynamicInput
-                  name="Cost2"
-                  type="number"
-                  value={cost2}
-                  onChange={(e) => setCost2(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col flex-1">
-                <DynamicInput
-                  name="Cost3"
-                  type="number"
-                  value={cost3}
-                  onChange={(e) => setCost3(e.target.value)}
-                />
-              </div>
-
-              <div className="flex flex-col w-auto">
-                <label className="flex items-center text-sm text-gray-700 mb-1">
-                  <input
-                    type="checkbox"
-                    checked={requiredChecked}
-                    onChange={(e) => setRequiredChecked(e.target.checked)}
-                    className="h-4 w-4 mr-2"
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="w-24">
+                  <DynamicInput
+                    name="Cost1"
+                    type="number"
+                    value={cost1}
+                    onChange={(e) => setCost1(e.target.value)}
+                    className="w-24"
                   />
-                  Required
-                </label>
+                </div>
+                <div className="w-24">
+                  <DynamicInput
+                    name="Cost2"
+                    type="number"
+                    value={cost2}
+                    onChange={(e) => setCost2(e.target.value)}
+                    className="w-24"
+                  />
+                </div>
+                <div className="w-24">
+                  <DynamicInput
+                    name="Cost3"
+                    type="number"
+                    value={cost3}
+                    onChange={(e) => setCost3(e.target.value)}
+                    className="w-24"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={requiredChecked}
+                      onChange={(e) => setRequiredChecked(e.target.checked)}
+                      className="h-4 w-4 mr-1"
+                    />
+                    Required
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -644,16 +636,13 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             onSelectionChange={setSelectedPredecessors}
             currentBoxId={editData ? editData.ID : 0}
           />
-
           <ListSelector
             title="Button"
             columnDefs={[
               { headerName: "Name", field: "Name" },
               { headerName: "Tooltip", field: "Tooltip" },
             ]}
-            // منبع داده: btnList
-            rowData={btnList} 
-            // در اینجا selectedDefaultBtnIds از نوع number[] است
+            rowData={btnList}
             selectedIds={selectedDefaultBtnIds}
             onSelectionChange={(selectedIds: (string | number)[]) =>
               handleSelectionChange("DefaultBtn", selectedIds)

@@ -17,7 +17,7 @@ interface AddSubApprovalFlowModalProps {
   onBoxTemplateInserted?: () => void;
 }
 
-const AddSubApprovalFlowModal: React.FC<AddSubApprovalModalProps> = ({
+const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   isOpen,
   onClose,
   editData,
@@ -35,7 +35,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
-      // ریست‌های لازم
+      // در صورت نیاز ریست‌های لازم
     }
   }, [isOpen]);
 
@@ -43,6 +43,10 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalModalProps> = ({
     try {
       if (!approvalFlowsTabRef.current) {
         console.error("ApprovalFlowsTab ref is not attached!");
+        return;
+      }
+      // اعتبارسنجی فیلدهای Min قبل از ارسال
+      if (!approvalFlowsTabRef.current.validateMinFields()) {
         return;
       }
       const formData: ApprovalFlowsTabData =
@@ -90,7 +94,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalModalProps> = ({
           },
           WFBT: {
             ActDuration: parseInt(formData.actDurationValue, 10) || 0,
-            ActionMode: 1,
+            ActionMode: parseInt(formData.minAcceptValue, 10) || 0,
             DeemAction: 0,
             DeemCondition: 0,
             DeemDay: 0,
@@ -132,7 +136,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalModalProps> = ({
           },
           WFBT: {
             ActDuration: parseInt(formData.actDurationValue, 10) || 0,
-            ActionMode: 1,
+            ActionMode: parseInt(formData.minAcceptValue, 10) || 0,
             DeemAction: 0,
             DeemCondition: 0,
             DeemDay: 0,
@@ -215,4 +219,5 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalModalProps> = ({
   );
 };
 
+AddSubApprovalFlowModal.displayName = "AddSubApprovalFlowModal";
 export default AddSubApprovalFlowModal;
