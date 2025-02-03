@@ -1,6 +1,6 @@
 // AddSubApprovalFlowModal.tsx
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import DynamicModal from "../../utilities/DynamicModal";
 import ApprovalFlowsTab, {
   ApprovalFlowsTabRef,
@@ -13,11 +13,10 @@ import { useApi } from "../../../context/ApiContext";
 interface AddSubApprovalFlowModalProps {
   isOpen: boolean;
   onClose: () => void;
-  editData?: BoxTemplate | null; // باکس در حال ویرایش
-  boxTemplates?: BoxTemplate[]; // همه‌ی باکس‌ها
-  // نکته: این id همان selectedRow.ID در ApprovalFlow.tsx است
-  // تا بدانیم nWFTemplateID باید چه مقداری باشد
+  editData?: BoxTemplate | null;
+  boxTemplates?: BoxTemplate[];
   workflowTemplateId?: number;
+  onBoxTemplateInserted?: () => void; // دیگر شیء پاس نمی‌دهیم
 }
 
 const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
@@ -25,92 +24,139 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   onClose,
   editData,
   boxTemplates = [],
-  workflowTemplateId = 16, // پیش‌فرض
+  workflowTemplateId = 0,
+  onBoxTemplateInserted,
 }) => {
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
   const api = useApi();
 
-  // رف به کامپوننت ApprovalFlowsTab
-  const approvalFlowsTabRef = useRef<ApprovalFlowsTabRef>(null);
+  const approvalFlowsTabRef = useRef<ApprovalFlowsTabRef | null>(null);
+
+  const handleApprovalFlowsTabRef = (instance: ApprovalFlowsTabRef | null) => {
+    approvalFlowsTabRef.current = instance;
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      // ریست‌های لازم
+    }
+  }, [isOpen]);
 
   const handleSaveOrUpdate = async () => {
     try {
-      // گرفتن داده‌ها از داخل ApprovalFlowsTab
-      const formData: ApprovalFlowsTabData | undefined =
-        approvalFlowsTabRef.current?.getFormData();
+      if (!approvalFlowsTabRef.current) {
+        console.error("ApprovalFlowsTab ref is not attached!");
+        return;
+      }
+      const formData: ApprovalFlowsTabData =
+        approvalFlowsTabRef.current.getFormData();
 
       if (!formData) {
         console.error("No data from ApprovalFlowsTab!");
         return;
       }
 
-      // اگر سطرهای جدول Approval Context خالی بود:
       if (formData.tableData.length === 0) {
         alert("No row in Approval Context table!");
         return;
       }
 
-      // فعلاً فقط اولین سطر جدول را می‌گیریم (در صورت نیاز می‌توان حلقه یا روش دیگر استفاده کرد)
+      // اولین سطر را نمونه می‌گیریم
       const firstRow = formData.tableData[0];
-
       if (!firstRow.postID) {
         alert("No postID found in the first row!");
         return;
       }
 
-      // ساخت آبجکت جهت ارسال به سرور
-      // مقدار Name از nameValue
-      // actDuration از actDurationValue
-      // nWFTemplateID از props.workflowTemplateId
-      // ... مقادیر پیش‌فرض طبق مثالی که خودتان دادید
-
-      const payload = {
-        WFApproval: {
-          Code: firstRow.code || null, // از فیلد code در جدول
-          ID: 0,
-          IsRequired: firstRow.required, // از فیلد required
-          IsVeto: firstRow.veto, // از فیلد veto
-          nPostID: firstRow.postID, // از فیلد postID
-          nPostTypeID: null,
-          nWFBoxTemplateID: 0, // فعلاً 0 - تا زمانی که سرور مقدار نهایی بدهد
-          PCost: firstRow.cost1 || 0, // مثلاً cost1 را به WFApproval.PCost اختصاص دادیم
-          Weight: firstRow.weight1 || 0, // مثلاً weight1 را به WFApproval.Weight اختصاص دادیم
-        },
-        WFBT: {
-          ActDuration: parseInt(formData.actDurationValue, 10) || 0,
-          ActionMode: 1,
-          BFID: 0,
-          DeemAction: 0,
-          DeemCondition: 0,
-          DeemDay: 0,
-          DeemedEnabled: false,
-          ID: 0,
-          IsStage: false,
-          IsVisible: true,
-          Left: 0,
-          MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
-          MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
-          Name: formData.nameValue || "",
-          nWFTemplateID: workflowTemplateId, // همانی که از بیرون گرفتیم
-          PredecessorStr: null, // اگر خواستید از formData.selectedPredecessors تبدیل به "1|2|"... کنید
-          PreviousStateId: null,
-          Top: 0,
-        },
-      };
-
-      // ویرایش؟
+      let payload: any;
       if (editData) {
-        // آپدیت BoxTemplate
-        // برای مثال می‌توانید منطق متفاوتی داشته باشید
-        const updatedData = {
-          ...payload, // می‌توانید ساختار متفاوتی در آپدیت داشته باشید
+        // ویرایش
+        payload = {
+          WFApproval: {
+            Code: firstRow.code || null,
+            ID: editData.ID,
+            IsRequired: firstRow.required,
+            IsVeto: firstRow.veto,
+            nPostID: firstRow.postID,
+            nPostTypeID: null,
+            nWFBoxTemplateID: editData.ID,
+            PCost: firstRow.cost1 || 0,
+            Weight: firstRow.weight1 || 0,
+          },
+          WFBT: {
+            ActDuration: parseInt(formData.actDurationValue, 10) || 0,
+            ActionMode: 1,
+            BFID: 0,
+            DeemAction: 0,
+            DeemCondition: 0,
+            DeemDay: 0,
+            DeemedEnabled: false,
+            ID: editData.ID,
+            IsStage: false,
+            IsVisible: true,
+            Left: 0,
+            MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
+            MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
+            Name: formData.nameValue || "",
+            nWFTemplateID: workflowTemplateId,
+            PredecessorStr: null,
+            PreviousStateId: null,
+            Top: 0,
+          },
         };
-        const result = await api.updateBoxTemplate(updatedData as any);
+
+        const result = await api.updateBoxTemplate(payload);
         console.log("BoxTemplate updated:", result);
+
+        // به والد سیگنال می‌دهیم لیست را رفرش کند
+        if (onBoxTemplateInserted) {
+          onBoxTemplateInserted();
+        }
       } else {
-        // درج BoxTemplate
-        const result = await api.insertBoxTemplate(payload as any);
+        // درج
+        payload = {
+          WFApproval: {
+            Code: null,
+            ID: 0,
+            IsRequired: null,
+            IsVeto: null,
+            IsVisible: true,
+            LastModified: new Date().toISOString(),
+            nPostID: firstRow.postID,
+            nPostTypeID: null,
+            nWFBoxTemplateID: 0,
+            PCost: 0,
+            Weight: 0,
+          },
+          WFBT: {
+            ActDuration: parseInt(formData.actDurationValue, 10) || 0,
+            ActionMode: 1,
+            BFID: 0,
+            DeemAction: 0,
+            DeemCondition: 0,
+            DeemDay: 0,
+            DeemedEnabled: false,
+            ID: 0,
+            IsStage: false,
+            IsVisible: true,
+            Left: 0,
+            MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
+            MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
+            Name: formData.nameValue || "",
+            nWFTemplateID: workflowTemplateId,
+            PredecessorStr: null,
+            PreviousStateId: null,
+            Top: 0,
+          },
+        };
+
+        const result = await api.insertBoxTemplate(payload);
         console.log("BoxTemplate inserted:", result);
+
+        // به والد سیگنال می‌دهیم
+        if (onBoxTemplateInserted) {
+          onBoxTemplateInserted();
+        }
       }
 
       onClose();
@@ -144,7 +190,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       <div className="mt-4">
         {activeTab === "approval" && (
           <ApprovalFlowsTab
-            ref={approvalFlowsTabRef}
+            ref={handleApprovalFlowsTabRef}
             editData={editData}
             boxTemplates={boxTemplates}
           />

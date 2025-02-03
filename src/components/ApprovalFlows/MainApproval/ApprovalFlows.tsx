@@ -1,5 +1,3 @@
-// ApprovalFlow.tsx
-
 import React, {
   useState,
   useEffect,
@@ -27,7 +25,7 @@ export interface ApprovalFlowHandle {
 }
 
 interface ApprovalFlowProps {
-  selectedRow: any;
+  selectedRow: WfTemplateItem | null;
 }
 
 interface ApprovalFlowData extends WfTemplateItem {
@@ -41,8 +39,6 @@ interface MappedProject {
 
 const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   ({ selectedRow }, ref) => {
-    console.log("iddddddddd", selectedRow);
-
     const api = useApi();
     const { handleSaveApprovalFlow } = useAddEditDelete();
 
@@ -94,6 +90,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         });
 
         if (selectedRow.ID) {
+          // پس از انتخاب، لیست BoxTemplateها را می‌گیریم
           api
             .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
             .then((data) => {
@@ -107,6 +104,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           setBoxTemplates([]);
         }
       } else {
+        // حالت جدید یا هیچ ردیفی انتخاب نشده
         setApprovalFlowData({
           ID: 0,
           Name: "",
@@ -249,7 +247,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               className="text-blue-600 hover:text-blue-800"
               title="Edit"
             >
-              <FiEdit />
+              <span>
+                <FiEdit />
+              </span>
             </button>
             <button
               onClick={() => handleBoxTemplateDelete(params.data)}
@@ -277,14 +277,31 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
     const handleBoxTemplateDelete = (box: BoxTemplate) => {
       console.log("Delete BoxTemplate:", box);
+      // اگر متد حذف دارید، اینجا صدا بزنید
     };
 
     const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
       console.log("Duplicate BoxTemplate:", box);
+      // اگر متد duplicate دارید، اینجا پیاده کنید
     };
 
     const handleSubRowDoubleClick = (data: any) => {
       handleBoxTemplateEdit(data);
+    };
+
+    // 1) این تابع پس از هر درج/ویرایش موفق صدا می‌شود
+    // 2) ما در این روش reload می‌کنیم تا مطمئن شویم بلافاصله آپدیت را می‌بینیم
+    const handleBoxTemplatesChanged = async () => {
+      if (!approvalFlowData.ID) return;
+
+      try {
+        const newList = await api.getAllBoxTemplatesByWfTemplateId(
+          approvalFlowData.ID
+        );
+        setBoxTemplates(newList);
+      } catch (error) {
+        console.error("Error reloading boxTemplates:", error);
+      }
     };
 
     return (
@@ -350,8 +367,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             />
           </TwoColumnLayout.Item>
 
-          {selectedRow && (
-            <TwoColumnLayout.Item span={2}>
+          <TwoColumnLayout.Item span={2}>
+            {selectedRow && (
               <DataTable
                 columnDefs={boxTemplateColumnDefs}
                 rowData={boxTemplates}
@@ -382,15 +399,20 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                 showDeleteIcon={true}
                 domLayout="autoHeight"
               />
-            </TwoColumnLayout.Item>
-          )}
+            )}
+          </TwoColumnLayout.Item>
         </TwoColumnLayout>
 
+        {/* مدال درج/ویرایش BoxTemplate */}
         <AddSubApprovalFlowModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           editData={selectedSubRowData}
           boxTemplates={boxTemplates}
+          workflowTemplateId={selectedRow ? selectedRow.ID : 0}
+          // به‌جای passing the updatedBox, ما فقط سیگنال می‌دهیم
+          // که پس از Add/Edit دوباره reload کنیم
+          onBoxTemplateInserted={handleBoxTemplatesChanged}
         />
       </>
     );
@@ -398,5 +420,4 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 );
 
 ApprovalFlow.displayName = "ApprovalFlow";
-
 export default ApprovalFlow;

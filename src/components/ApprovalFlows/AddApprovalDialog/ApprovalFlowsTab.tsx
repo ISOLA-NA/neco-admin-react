@@ -20,10 +20,11 @@ import ButtonComponent from "../../General/Configuration/ButtonComponent";
 import { v4 as uuidv4 } from "uuid";
 import { BoxTemplate } from "../../../services/api.services";
 
+// هر سطر جدول Approval Context
 export interface TableRow {
   id: string;
-  post: string; // نام پست (نمایشی)
-  postID: string; // شناسه پست (برای استفاده در nPostID)
+  post: string;
+  postID: string;
   cost1: number;
   cost2: number;
   cost3: number;
@@ -35,18 +36,7 @@ export interface TableRow {
   code: number;
 }
 
-interface ButtonListItem {
-  ID: string | number;
-  Name: string;
-  Tooltip: string;
-}
-
-interface ApprovalFlowsTabProps {
-  editData?: BoxTemplate | null; // باکسی که داریم ویرایش می‌کنیم
-  boxTemplates?: BoxTemplate[]; // کل باکس‌ها
-}
-
-// اینترفیس داده‌ای که می‌خواهیم از این کامپوننت بیرون برگردانیم
+// داده‌هایی که از این تب بیرون می‌دهیم
 export interface ApprovalFlowsTabData {
   nameValue: string;
   minAcceptValue: string;
@@ -55,15 +45,17 @@ export interface ApprovalFlowsTabData {
   orderValue: string;
   acceptChecked: boolean;
   rejectChecked: boolean;
-  // اطلاعات جدول
   tableData: TableRow[];
-  // پیش‌نیازهای انتخابی
   selectedPredecessors: number[];
 }
 
-// اینترفیس Ref که می‌خواهیم در parent استفاده کنیم
 export interface ApprovalFlowsTabRef {
   getFormData: () => ApprovalFlowsTabData;
+}
+
+interface ApprovalFlowsTabProps {
+  editData?: BoxTemplate | null;
+  boxTemplates?: BoxTemplate[];
 }
 
 const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
@@ -105,7 +97,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       (string | number)[]
     >([]);
 
-    const buttons: ButtonListItem[] = Array.from({ length: 5 }, (_, index) => ({
+    const buttons = Array.from({ length: 5 }, (_, index) => ({
       ID: index + 1,
       Name: `Button Item ${index + 1}`,
       Tooltip: `Tooltip for Button Item ${index + 1}`,
@@ -151,7 +143,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       { headerName: "Code", field: "code", sortable: true, filter: true },
     ];
 
-    // مقداردهی مجدد اگر editData تغییر کند
+    // وقتی editData عوض شود
     useEffect(() => {
       if (editData) {
         setNameValue(editData.Name || "");
@@ -167,7 +159,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           setSelectedPredecessors([]);
         }
 
-        // موارد دیگر را ریست می‌کنیم
         setMinAcceptValue("");
         setMinRejectValue("");
         setAcceptChecked(false);
@@ -185,7 +176,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setStaticPostValue("");
         setSelectedStaticPost(null);
       } else {
-        // اگر چیزی برای ویرایش نداریم (در حالت add)
+        // حالت افزودن
         setNameValue("");
         setMinAcceptValue("");
         setMinRejectValue("");
@@ -212,31 +203,13 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
     }, [editData]);
 
-    // گزینه‌های static post را از subTabDataMapping.Roles می‌گیریم
+    // نقش‌های isStaticPost
     const staticPostOptions = subTabDataMapping.Roles.rowData
       .filter((item: Role) => item.isStaticPost)
       .map((item: Role) => ({
         value: item.ID,
         label: item.Name,
       }));
-
-    const handleStaticPostChange = (
-      e: React.ChangeEvent<HTMLSelectElement>
-    ) => {
-      const value = e.target.value;
-      setStaticPostValue(value);
-      const selected = staticPostOptions.find(
-        (option) => option.value === value
-      );
-      if (selected) {
-        const foundRole = subTabDataMapping.Roles.rowData.find(
-          (role) => role.ID === selected.value
-        );
-        setSelectedStaticPost(foundRole || null);
-      } else {
-        setSelectedStaticPost(null);
-      }
-    };
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const openModal = () => {
@@ -252,7 +225,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       closeModal();
     };
 
-    // افزودن یا ویرایش رکورد در جدول Approval Context
     const handleAddOrUpdateRow = () => {
       if (!staticPostValue) {
         alert("Static Post is empty!");
@@ -260,7 +232,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
 
       if (selectedRow) {
-        // ویرایش رکورد
+        // ویرایش رکورد جدول
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
@@ -284,7 +256,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setTableData(updated);
         resetForm();
       } else {
-        // افزودن رکورد جدید
+        // درج رکورد جدید در جدول
         const newRow: TableRow = {
           id: uuidv4(),
           post: selectedStaticPost ? selectedStaticPost.Name : "",
@@ -368,7 +340,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
     };
 
-    // این تابع را با استفاده از forwardRef به بیرون ارایه می‌کنیم
+    // متدی که از والد با ref صدا می‌خورد
     useImperativeHandle(ref, () => ({
       getFormData: () => {
         return {
@@ -498,7 +470,14 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 <DynamicSelector
                   options={staticPostOptions}
                   selectedValue={staticPostValue}
-                  onChange={handleStaticPostChange}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setStaticPostValue(val);
+                    const foundRole = subTabDataMapping.Roles.rowData.find(
+                      (r) => r.ID === val
+                    );
+                    setSelectedStaticPost(foundRole || null);
+                  }}
                   label=""
                   showButton={true}
                   onButtonClick={openModal}
@@ -679,5 +658,4 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 );
 
 ApprovalFlowsTab.displayName = "ApprovalFlowsTab";
-
 export default ApprovalFlowsTab;

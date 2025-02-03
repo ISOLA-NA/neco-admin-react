@@ -103,6 +103,7 @@ export interface EntityTypeItem {
 }
 
 export interface WfTemplateItem {
+  SubApprovalFlows: never[];
   ID?: number;
   Name: string;
   Describtion: string;
