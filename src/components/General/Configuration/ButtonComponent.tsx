@@ -1,13 +1,11 @@
-// src/components/General/ButtonComponent.tsx
-
-import React, { useState, useEffect, useCallback } from 'react';
-import DataTable from '../../TableDynamic/DataTable';
-import DynamicInput from '../../utilities/DynamicInput';
-import DynamicRadioGroup from '../../utilities/DynamicRadiogroup';
-import DynamicButton from '../../utilities/DynamicButtons';
-import FileUploadHandler, { InsertModel } from '../../../services/FileUploadHandler';
-import { useApi } from '../../../context/ApiContext';
-import { AFBtnItem } from '../../../services/api.services';
+import React, { useState, useEffect, useCallback } from "react";
+import DataTable from "../../TableDynamic/DataTable";
+import DynamicInput from "../../utilities/DynamicInput";
+import DynamicRadioGroup from "../../utilities/DynamicRadiogroup";
+import DynamicButton from "../../utilities/DynamicButtons";
+import FileUploadHandler, { InsertModel } from "../../../services/FileUploadHandler";
+import { useApi } from "../../../context/ApiContext";
+import { AFBtnItem } from "../../../services/api.services";
 
 interface ButtonComponentProps {
   columnDefs: { headerName: string; field: string }[];
@@ -17,22 +15,28 @@ interface ButtonComponentProps {
   isSelectDisabled: boolean;
   onClose: () => void;
   onSelectFromButton: () => void;
+  refreshButtons: () => void; // تابع برای به‌روز‌رسانی لیست دکمه‌ها
 }
 
 const ButtonComponent: React.FC<ButtonComponentProps> = ({
   columnDefs,
   onRowDoubleClick,
   onRowClick,
+  onSelectButtonClick,
+  isSelectDisabled,
+  onClose,
+  onSelectFromButton,
+  refreshButtons,
 }) => {
-  const api = useApi(); // برای دسترسی به متدهای API
+  const api = useApi();
 
   // وضعیت فرم
-  const [selectedState, setSelectedState] = useState<string>('accept');
-  const [selectedCommand, setSelectedCommand] = useState<string>('accept');
-  const [nameValue, setNameValue] = useState('');
-  const [stateTextValue, setStateTextValue] = useState('');
-  const [tooltipValue, setTooltipValue] = useState('');
-  const [orderValue, setOrderValue] = useState('');
+  const [selectedState, setSelectedState] = useState<string>("accept");
+  const [selectedCommand, setSelectedCommand] = useState<string>("accept");
+  const [nameValue, setNameValue] = useState("");
+  const [stateTextValue, setStateTextValue] = useState("");
+  const [tooltipValue, setTooltipValue] = useState("");
+  const [orderValue, setOrderValue] = useState("");
 
   const [selectedRow, setSelectedRow] = useState<AFBtnItem | null>(null);
   const [isRowClicked, setIsRowClicked] = useState<boolean>(false);
@@ -43,7 +47,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // شمارنده ریست
   const [resetCounter, setResetCounter] = useState<number>(0);
 
-  // داده‌های جدول
+  // داده‌های جدول (همیشه از API دریافت می‌شود)
   const [rowData, setRowData] = useState<AFBtnItem[]>([]);
 
   // وضعیت "Delete" button
@@ -54,39 +58,36 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
   // آپشن‌های رادیو
   const RadioOptionsState = [
-    { value: 'accept', label: 'Accept' },
-    { value: 'reject', label: 'Reject' },
-    { value: 'close', label: 'Close' },
+    { value: "accept", label: "Accept" },
+    { value: "reject", label: "Reject" },
+    { value: "close", label: "Close" },
   ];
   const RadioOptionsCommand = [
-    { value: 'accept', label: 'Accept' },
-    { value: 'reject', label: 'Reject' },
-    { value: 'close', label: 'Close' },
-    { value: 'client', label: 'Previous State Client' },
-    { value: 'admin', label: 'Previous State Admin' },
+    { value: "accept", label: "Accept" },
+    { value: "reject", label: "Reject" },
+    { value: "close", label: "Close" },
+    { value: "client", label: "Previous State Client" },
+    { value: "admin", label: "Previous State Admin" },
   ];
 
-  // دریافت تمام AFBtn ها از سرور
   const fetchAllAFBtn = async () => {
     try {
       const response = await api.getAllAfbtn();
-      setRowData(response); // response is AFBtnItem[]
+      setRowData(response);
     } catch (error) {
-      console.error('خطا در دریافت داده‌ها:', error);
+      console.error("Error fetching AFBtn data:", error);
     }
   };
 
-  // بارگذاری اولیه داده‌ها
   useEffect(() => {
     fetchAllAFBtn();
-  }, []);
+  }, [api]);
 
-  // تابع ریست فرم و انتخاب‌ها
   const handleReset = useCallback(() => {
-    setNameValue('');
-    setStateTextValue('');
-    setTooltipValue('');
-    setOrderValue('');
+    setNameValue("");
+    setStateTextValue("");
+    setTooltipValue("");
+    setOrderValue("");
     setSelectedState(RadioOptionsState[0].value);
     setSelectedCommand(RadioOptionsCommand[0].value);
     setSelectedFileId(null);
@@ -94,44 +95,38 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     setIsRowClicked(false);
     setResetCounter((prev) => prev + 1);
     setIsDeleteDisabled(true);
-    setImageError(false); // ریست کردن وضعیت خطای تصویر
-  }, []);
+    setImageError(false);
+  }, [RadioOptionsState, RadioOptionsCommand]);
 
-  // دکمه Add
   const handleAddClick = async () => {
     try {
       const newAFBtn: AFBtnItem = {
-        ID: 0, // فرض بر این است که سرور این مقدار را مدیریت می‌کند
+        ID: 0,
         Name: nameValue,
         Tooltip: tooltipValue,
         StateText: stateTextValue,
-        Order: parseInt(orderValue || '0'),
+        Order: parseInt(orderValue || "0"),
         WFStateForDeemed: radioToWFStateForDeemed(selectedState),
         WFCommand: radioToWFCommand(selectedCommand),
-        IconImageId: selectedFileId, // مقدار ID جدید است
+        IconImageId: selectedFileId,
         IsVisible: true,
         LastModified: null,
         ModifiedById: null,
       };
-
       await api.insertAFBtn(newAFBtn);
-      alert('آیتم جدید با موفقیت درج شد.');
-
-      // به‌روز رسانی داده‌های جدول
-      fetchAllAFBtn();
-
-      // ریست فرم
+      alert("آیتم جدید با موفقیت درج شد.");
+      await fetchAllAFBtn();
+      if (refreshButtons) refreshButtons();
       handleReset();
     } catch (error) {
-      console.error('خطا در درج آیتم AFBtn:', error);
-      alert('خطایی در درج رخ داد.');
+      console.error("Error inserting AFBtn:", error);
+      alert("خطایی در درج رخ داد.");
     }
   };
 
-  // دکمه Edit
   const handleEditClick = async () => {
     if (!selectedRow || !selectedRow.ID) {
-      alert('لطفاً یک ردیف را از جدول انتخاب کنید.');
+      alert("لطفاً یک ردیف را انتخاب کنید.");
       return;
     }
     try {
@@ -140,7 +135,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         Name: nameValue,
         Tooltip: tooltipValue,
         StateText: stateTextValue,
-        Order: parseInt(orderValue || '0'),
+        Order: parseInt(orderValue || "0"),
         WFStateForDeemed: radioToWFStateForDeemed(selectedState),
         WFCommand: radioToWFCommand(selectedCommand),
         IconImageId: selectedFileId,
@@ -148,74 +143,51 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         LastModified: null,
         ModifiedById: null,
       };
-
       await api.updateAFBtn(updatedAFBtn);
-      alert('آیتم با موفقیت ویرایش شد.');
-
-      // به‌روز رسانی داده‌های جدول
-      fetchAllAFBtn();
-
-      // ریست فرم
+      alert("آیتم با موفقیت ویرایش شد.");
+      await fetchAllAFBtn();
+      if (refreshButtons) refreshButtons();
       handleReset();
     } catch (error) {
-      console.error('خطا در ویرایش آیتم AFBtn:', error);
-      alert('خطایی در ویرایش رخ داد.');
+      console.error("Error updating AFBtn:", error);
+      alert("خطایی در ویرایش رخ داد.");
     }
   };
 
-  // دکمه Delete
   const handleDeleteClick = async () => {
     if (!selectedRow || !selectedRow.ID) {
-      alert('لطفاً یک ردیف را از جدول انتخاب کنید.');
+      alert("لطفاً یک ردیف را انتخاب کنید.");
       return;
     }
-
-    if (!window.confirm('آیا از حذف این آیتم مطمئن هستید؟')) {
+    if (!window.confirm("آیا از حذف این آیتم مطمئن هستید؟")) {
       return;
     }
-
     try {
       await api.deleteAFBtn(selectedRow.ID);
-      alert('آیتم با موفقیت حذف شد.');
-
-      // به‌روز رسانی داده‌های جدول
-      fetchAllAFBtn();
-
-      // ریست فرم
+      alert("آیتم با موفقیت حذف شد.");
+      await fetchAllAFBtn();
+      if (refreshButtons) refreshButtons();
       handleReset();
     } catch (error) {
-      console.error('خطا در حذف آیتم AFBtn:', error);
-      alert('خطایی در حذف رخ داد.');
+      console.error("Error deleting AFBtn:", error);
+      alert("خطایی در حذف رخ داد.");
     }
   };
 
-  // دکمه New
   const handleNewClick = () => {
     handleReset();
   };
 
-  // آپلود موفق
   const handleUploadSuccess = (insertModel: InsertModel) => {
-    // استفاده از ID جدید برای selectedFileId
     const newFileId = insertModel.ID || null;
-
-    // به‌روز رسانی سطر انتخابی (در صورت نیاز)
     if (selectedRow) {
       const updatedRow = { ...selectedRow, IconImageId: newFileId };
       setSelectedRow(updatedRow);
     }
-
-    // تنظیم selectedFileId برای Add/Edit
     setSelectedFileId(newFileId);
-
-    // ریست کردن preview
-    // handleReset();
-
-    // به‌روز رسانی داده‌های جدول
     fetchAllAFBtn();
   };
 
-  // وقتی ردیفی انتخاب می‌شود، دکمه Delete فعال می‌شود
   useEffect(() => {
     if (selectedRow) {
       setIsDeleteDisabled(false);
@@ -224,46 +196,43 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     }
   }, [selectedRow]);
 
-  // مپ کردن مقدار StateForDeemed به رادیو
   const mapWFStateForDeemedToRadio = (val: number) => {
     switch (val) {
       case 1:
-        return 'accept';
+        return "accept";
       case 2:
-        return 'reject';
+        return "reject";
       case 3:
-        return 'close';
+        return "close";
       default:
-        return 'accept';
+        return "accept";
     }
   };
 
-  // مپ کردن مقدار WFCommand به رادیو
   const mapWFCommandToRadio = (val: number) => {
     switch (val) {
       case 1:
-        return 'accept';
+        return "accept";
       case 2:
-        return 'close';
+        return "close";
       case 3:
-        return 'reject';
+        return "reject";
       case 4:
-        return 'client';
+        return "client";
       case 5:
-        return 'admin';
+        return "admin";
       default:
-        return 'accept';
+        return "accept";
     }
   };
 
-  // رادیو => عدد
   const radioToWFStateForDeemed = (radioVal: string): number => {
     switch (radioVal) {
-      case 'accept':
+      case "accept":
         return 1;
-      case 'reject':
+      case "reject":
         return 2;
-      case 'close':
+      case "close":
         return 3;
       default:
         return 1;
@@ -271,69 +240,56 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   };
   const radioToWFCommand = (radioVal: string): number => {
     switch (radioVal) {
-      case 'accept':
+      case "accept":
         return 1;
-      case 'close':
+      case "close":
         return 2;
-      case 'reject':
+      case "reject":
         return 3;
-      case 'client':
+      case "client":
         return 4;
-      case 'admin':
+      case "admin":
         return 5;
       default:
         return 1;
     }
   };
 
-  // دوبار کلیک روی ردیف جدول
   const handleRowDoubleClickLocal = (data: AFBtnItem) => {
     setSelectedRow(data);
     onRowDoubleClick(data);
   };
 
-  // کلیک روی ردیف جدول
   const handleRowClickLocal = (data: AFBtnItem) => {
-    try {
-      setSelectedRow(data);
-      onRowClick(data);
-      setIsRowClicked(true);
-
-      setNameValue(data.Name || '');
-      setStateTextValue(data.StateText || '');
-      setTooltipValue(data.Tooltip || '');
-      setOrderValue(data.Order?.toString() || '');
-
-      if (data.WFStateForDeemed !== undefined) {
-        setSelectedState(mapWFStateForDeemedToRadio(data.WFStateForDeemed));
-      } else {
-        setSelectedState(RadioOptionsState[0].value);
-      }
-
-      if (data.WFCommand !== undefined) {
-        setSelectedCommand(mapWFCommandToRadio(data.WFCommand));
-      } else {
-        setSelectedCommand(RadioOptionsCommand[0].value);
-      }
-
-      // اگر آیکون تصویر وجود داشت، مقدارش را ست کن
-      if (data.IconImageId) {
-        setSelectedFileId(data.IconImageId);
-        setImageError(false);
-      } else {
-        // وگرنه خالی بگذار که باعث دانلود از سرور هم نشود
-        setSelectedFileId(null);
-        setImageError(false);
-      }
-    } catch (error) {
-      console.error('خطا در handleRowClickLocal:', error);
+    setSelectedRow(data);
+    onRowClick(data);
+    setIsRowClicked(true);
+    setNameValue(data.Name || "");
+    setStateTextValue(data.StateText || "");
+    setTooltipValue(data.Tooltip || "");
+    setOrderValue(data.Order?.toString() || "");
+    if (data.WFStateForDeemed !== undefined) {
+      setSelectedState(mapWFStateForDeemedToRadio(data.WFStateForDeemed));
+    } else {
+      setSelectedState(RadioOptionsState[0].value);
+    }
+    if (data.WFCommand !== undefined) {
+      setSelectedCommand(mapWFCommandToRadio(data.WFCommand));
+    } else {
+      setSelectedCommand(RadioOptionsCommand[0].value);
+    }
+    if (data.IconImageId) {
+      setSelectedFileId(data.IconImageId);
+      setImageError(false);
+    } else {
+      setSelectedFileId(null);
+      setImageError(false);
     }
   };
 
   return (
-    <div className='w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4'>
-      {/* جدول بالایی */}
-      <div className='mb-4 w-full overflow-hidden'>
+    <div className="w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4">
+      <div className="mb-4 w-full overflow-hidden">
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
@@ -344,81 +300,65 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           onEdit={() => {}}
           onDelete={() => {}}
           onDuplicate={() => {}}
-          domLayout='autoHeight'
+          domLayout="autoHeight"
         />
       </div>
-
-      {/* بخش فرم */}
-      <div className='w-full grid grid-cols-1 lg:grid-cols-3 gap-4'>
-        {/* فیلدهای ورودی */}
-        <div className='lg:col-span-2'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <DynamicInput
-              name='Name'
-              type='text'
+              name="Name"
+              type="text"
               value={nameValue}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setNameValue(e.target.value)
-              }
-              className='sm:mr-2'
+              onChange={(e) => setNameValue(e.target.value)}
+              className="sm:mr-2"
             />
             <DynamicInput
-              name='StateText'
-              type='text'
+              name="StateText"
+              type="text"
               value={stateTextValue}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setStateTextValue(e.target.value)
-              }
-              className='sm:ml-2'
+              onChange={(e) => setStateTextValue(e.target.value)}
+              className="sm:ml-2"
             />
-
             <DynamicInput
-              name='Tooltip'
-              type='text'
+              name="Tooltip"
+              type="text"
               value={tooltipValue}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setTooltipValue(e.target.value)
-              }
-              className='sm:mr-2'
+              onChange={(e) => setTooltipValue(e.target.value)}
+              className="sm:mr-2"
             />
             <DynamicInput
-              name='Order'
-              type='text'
+              name="Order"
+              type="text"
               value={orderValue}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setOrderValue(e.target.value)
-              }
-              className='sm:ml-2'
+              onChange={(e) => setOrderValue(e.target.value)}
+              className="sm:ml-2"
             />
           </div>
-
-          {/* رادیو گروپ‌ها */}
-          <div className='mt-4 grid grid-cols-1 md:grid-cols-2 gap-2'>
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
             <DynamicRadioGroup
-              key={`state-${isRowClicked ? 'controlled' : 'uncontrolled'}`}
-              title='State:'
-              name='stateGroup'
+              key={`state-${isRowClicked ? "controlled" : "uncontrolled"}`}
+              title="State:"
+              name="stateGroup"
               options={RadioOptionsState}
               selectedValue={selectedState}
               onChange={(value) => setSelectedState(value)}
               isRowClicked={isRowClicked}
-              className=''
+              className=""
             />
             <DynamicRadioGroup
-              key={`command-${isRowClicked ? 'controlled' : 'uncontrolled'}`}
-              title='Command:'
-              name='commandGroup'
+              key={`command-${isRowClicked ? "controlled" : "uncontrolled"}`}
+              title="Command:"
+              name="commandGroup"
               options={RadioOptionsCommand}
               selectedValue={selectedCommand}
               onChange={(value) => setSelectedCommand(value)}
               isRowClicked={isRowClicked}
-              className=''
+              className=""
             />
           </div>
         </div>
-
-        {/* آپلود فایل (کنار فرم) */}
-        <div className='lg:col-span-1 flex flex-col items-start mt-4 lg:mt-0'>
+        <div className="lg:col-span-1 flex flex-col items-start mt-4 lg:mt-0">
           <FileUploadHandler
             selectedFileId={selectedFileId}
             onUploadSuccess={handleUploadSuccess}
@@ -427,35 +367,30 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           />
         </div>
       </div>
-
-      {/* نمایش پیش‌نمایش عکس با مدیریت خطا */}
-      <div className='mt-4'>
+      <div className="mt-4">
         {selectedFileId ? (
           <>
             {!imageError ? (
               <img
-                src={`/api/getImage/${selectedFileId}`} // فرض بر این است که این مسیر برای دریافت تصویر صحیح است
-                alt='Selected'
-                className='w-32 h-32 object-cover'
-                onError={() => setImageError(true)} // مدیریت خطای بارگذاری تصویر
+                src={`/api/getImage/${selectedFileId}`}
+                alt="Selected"
+                className="w-32 h-32 object-cover"
+                onError={() => setImageError(true)}
               />
             ) : (
-              <div>
-              </div>
+              <div></div>
             )}
           </>
         ) : (
           <p></p>
         )}
       </div>
-
-      {/* دکمه‌های پایین */}
-      <div className='mt-6 flex justify-start space-x-4'>
-        <DynamicButton text='Add' onClick={handleAddClick} isDisabled={false} />
-        <DynamicButton text='Edit' onClick={handleEditClick} isDisabled={!selectedRow} />
-        <DynamicButton text='New' onClick={handleNewClick} isDisabled={false} />
+      <div className="mt-6 flex justify-start space-x-4">
+        <DynamicButton text="Add" onClick={handleAddClick} isDisabled={false} />
+        <DynamicButton text="Edit" onClick={handleEditClick} isDisabled={!selectedRow} />
+        <DynamicButton text="New" onClick={handleNewClick} isDisabled={false} />
         <DynamicButton
-          text='Delete'
+          text="Delete"
           onClick={handleDeleteClick}
           isDisabled={isDeleteDisabled}
         />

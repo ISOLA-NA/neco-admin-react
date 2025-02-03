@@ -1,5 +1,3 @@
-// ApprovalFlowsTab.tsx
-
 import React, {
   useState,
   useEffect,
@@ -18,13 +16,14 @@ import BoxPredecessor from "./BoxPredecessor ";
 import ListSelector from "../../ListSelector/ListSelector";
 import ButtonComponent from "../../General/Configuration/ButtonComponent";
 import { v4 as uuidv4 } from "uuid";
-import { BoxTemplate } from "../../../services/api.services";
+import { BoxTemplate, AFBtnItem } from "../../../services/api.services";
+import { useApi } from "../../../context/ApiContext";
 
 // هر سطر جدول Approval Context
 export interface TableRow {
   id: string;
   post: string;
-  postID: string;
+  postID: string; // ممکن است عدد یا رشته باشد
   cost1: number;
   cost2: number;
   cost3: number;
@@ -47,6 +46,7 @@ export interface ApprovalFlowsTabData {
   rejectChecked: boolean;
   tableData: TableRow[];
   selectedPredecessors: number[];
+  selectedDefaultBtnIds: (number)[];  // آرایه آی‌دی‌های *عددی* انتخاب‌شده برای Buttonها
 }
 
 export interface ApprovalFlowsTabRef {
@@ -60,6 +60,8 @@ interface ApprovalFlowsTabProps {
 
 const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
   ({ editData, boxTemplates = [] }, ref) => {
+    const api = useApi();
+
     const [nameValue, setNameValue] = useState<string>("");
     const [minAcceptValue, setMinAcceptValue] = useState<string>("");
     const [minRejectValue, setMinRejectValue] = useState<string>("");
@@ -89,19 +91,28 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const [tableData, setTableData] = useState<TableRow[]>([]);
     const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
 
-    const [selectedPredecessors, setSelectedPredecessors] = useState<number[]>(
+    const [selectedPredecessors, setSelectedPredecessors] = useState<number[]>([]);
+    const [initialized, setInitialized] = useState<boolean>(false);
+
+    // state برای نگهداری لیست دکمه‌های واقعی دریافتی از سرور
+    const [btnList, setBtnList] = useState<AFBtnItem[]>([]);
+    // state برای نگهداری آی‌دی‌های انتخاب‌شده دکمه‌ها (از نوع number)
+    const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<number[]>(
       []
     );
 
-    const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<
-      (string | number)[]
-    >([]);
-
-    const buttons = Array.from({ length: 5 }, (_, index) => ({
-      ID: index + 1,
-      Name: `Button Item ${index + 1}`,
-      Tooltip: `Tooltip for Button Item ${index + 1}`,
-    }));
+    // دریافت لیست دکمه‌ها از API
+    useEffect(() => {
+      const fetchButtons = async () => {
+        try {
+          const res = await api.getAllAfbtn();
+          setBtnList(res);
+        } catch (error) {
+          console.error("Error fetching buttons:", error);
+        }
+      };
+      fetchButtons();
+    }, [api]);
 
     const columnDefs = [
       { headerName: "Post", field: "post", sortable: true, filter: true },
@@ -143,22 +154,39 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       { headerName: "Code", field: "code", sortable: true, filter: true },
     ];
 
-    // وقتی editData عوض شود
+    // -- در حالت Edit اطلاعات اولیه را پر می‌کنیم --
     useEffect(() => {
       if (editData) {
         setNameValue(editData.Name || "");
         setActDurationValue(String(editData.MaxDuration || ""));
         setOrderValue(String(editData.Order || ""));
 
-        if (editData.PredecessorStr) {
-          const splittedIds =
-            editData.PredecessorStr.split("|").filter(Boolean);
-          const numericIds = splittedIds.map((id) => parseInt(id, 10));
-          setSelectedPredecessors(numericIds);
-        } else {
-          setSelectedPredecessors([]);
+        // فقط یک‌بار مقداردهی شود (با استفاده از فلگ initialized)
+        if (!initialized) {
+          // اگر PredecessorStr داشت
+          if (editData.PredecessorStr) {
+            const splittedIds =
+              editData.PredecessorStr.split("|").filter(Boolean);
+            const numericIds = splittedIds.map((idStr) => parseInt(idStr, 10));
+            setSelectedPredecessors(numericIds);
+          } else {
+            setSelectedPredecessors([]);
+          }
+
+          // اگر BtnIDs در دیتای دریافتی بود، آن را به عدد تبدیل کرده و در selectedDefaultBtnIds بگذارید
+          if (editData.BtnIDs) {
+            const splittedBtnIds = editData.BtnIDs.split("|").filter(Boolean);
+            // parseInt هر آیتم
+            const numericBtnIds = splittedBtnIds.map((x) => parseInt(x, 10));
+            setSelectedDefaultBtnIds(numericBtnIds);
+          } else {
+            setSelectedDefaultBtnIds([]);
+          }
+
+          setInitialized(true);
         }
 
+        // ریست سایر فیلدهای context
         setMinAcceptValue("");
         setMinRejectValue("");
         setAcceptChecked(false);
@@ -176,7 +204,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setStaticPostValue("");
         setSelectedStaticPost(null);
       } else {
-        // حالت افزودن
+        // حالت Add
         setNameValue("");
         setMinAcceptValue("");
         setMinRejectValue("");
@@ -198,12 +226,14 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setSelectedStaticPost(null);
 
         setSelectedPredecessors([]);
+        setSelectedDefaultBtnIds([]);
         setTableData([]);
         setSelectedRow(null);
-      }
-    }, [editData]);
 
-    // نقش‌های isStaticPost
+        setInitialized(false);
+      }
+    }, [editData, initialized]);
+
     const staticPostOptions = subTabDataMapping.Roles.rowData
       .filter((item: Role) => item.isStaticPost)
       .map((item: Role) => ({
@@ -221,7 +251,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
     const handleRowSelect = (data: Role) => {
       setSelectedStaticPost(data);
-      setStaticPostValue(data.ID);
+      setStaticPostValue(data.ID.toString());
       closeModal();
     };
 
@@ -232,7 +262,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
 
       if (selectedRow) {
-        // ویرایش رکورد جدول
+        // ویرایش رکورد
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
@@ -256,7 +286,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setTableData(updated);
         resetForm();
       } else {
-        // درج رکورد جدید در جدول
+        // درج رکورد جدید
         const newRow: TableRow = {
           id: uuidv4(),
           post: selectedStaticPost ? selectedStaticPost.Name : "",
@@ -331,16 +361,22 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       setSelectedRow(null);
     };
 
+    // وقتی در ListSelector آیتمی انتخاب یا حذف می‌شود
     const handleSelectionChange = (
       type: string,
       selectedIds: (string | number)[]
     ) => {
       if (type === "DefaultBtn") {
-        setSelectedDefaultBtnIds(selectedIds);
+        // چون قرار است اعداد را در selectedDefaultBtnIds نگه داریم،
+        // اگر selectedIds به‌صورت رشته باشد، آن‌ها را تبدیل به عدد می‌کنیم
+        const numericIds = selectedIds.map((x) =>
+          typeof x === "string" ? parseInt(x, 10) : x
+        );
+        setSelectedDefaultBtnIds(numericIds as number[]);
       }
     };
 
-    // متدی که از والد با ref صدا می‌خورد
+    // متدی که از والد با ref صدا می‌شود
     useImperativeHandle(ref, () => ({
       getFormData: () => {
         return {
@@ -353,6 +389,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           rejectChecked,
           tableData,
           selectedPredecessors,
+          selectedDefaultBtnIds,
         };
       },
     }));
@@ -614,7 +651,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               { headerName: "Name", field: "Name" },
               { headerName: "Tooltip", field: "Tooltip" },
             ]}
-            rowData={buttons}
+            // منبع داده: btnList
+            rowData={btnList} 
+            // در اینجا selectedDefaultBtnIds از نوع number[] است
             selectedIds={selectedDefaultBtnIds}
             onSelectionChange={(selectedIds: (string | number)[]) =>
               handleSelectionChange("DefaultBtn", selectedIds)
@@ -627,10 +666,13 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 { headerName: "Name", field: "Name" },
                 { headerName: "Tooltip", field: "Tooltip" },
               ],
-              rowData: buttons,
-              onClose: closeModal,
-              onRowSelect: handleRowSelect,
-              onSelectFromButton: handleRowSelect,
+              rowData: btnList,
+              onRowDoubleClick: () => {},
+              onRowClick: () => {},
+              onSelectButtonClick: () => {},
+              isSelectDisabled: false,
+              onClose: () => {},
+              onSelectFromButton: () => {},
             }}
           />
         </aside>
@@ -643,7 +685,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             onRowClick={(data: Role) => setSelectedStaticPost(data)}
             onSelectButtonClick={() => {
               if (selectedStaticPost) {
-                setStaticPostValue(selectedStaticPost.ID);
+                setStaticPostValue(selectedStaticPost.ID.toString());
                 closeModal();
               } else {
                 alert("هیچ ردیفی انتخاب نشده است.");

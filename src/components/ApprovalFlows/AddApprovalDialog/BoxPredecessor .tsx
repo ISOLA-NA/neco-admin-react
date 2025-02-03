@@ -1,5 +1,3 @@
-// BoxPredecessor.tsx
-
 import React from "react";
 import { classNames } from "primereact/utils";
 import { BoxTemplate } from "../../../services/api.services";
@@ -27,7 +25,6 @@ const BoxPredecessor: React.FC<BoxPredecessorProps> = ({
     }
   };
 
-  // فیلترکن: اگر box.ID === currentBoxId باشد، آن را نشان نده
   const filteredBoxTemplates = boxTemplates.filter(
     (box) => box.ID !== currentBoxId
   );

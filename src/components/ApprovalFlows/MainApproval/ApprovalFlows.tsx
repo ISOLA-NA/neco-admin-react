@@ -228,7 +228,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               );
               return found ? found.Name : id;
             })
-            .join("- ");
+            .join(" - ");
         },
       },
       {
@@ -277,23 +277,21 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
     const handleBoxTemplateDelete = (box: BoxTemplate) => {
       console.log("Delete BoxTemplate:", box);
-      // اگر متد حذف دارید، اینجا صدا بزنید
+      // در صورت وجود متد حذف، اینجا فراخوانی شود
     };
 
     const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
       console.log("Duplicate BoxTemplate:", box);
-      // اگر متد duplicate دارید، اینجا پیاده کنید
+      // در صورت وجود متد duplicate، اینجا پیاده‌سازی شود
     };
 
     const handleSubRowDoubleClick = (data: any) => {
       handleBoxTemplateEdit(data);
     };
 
-    // 1) این تابع پس از هر درج/ویرایش موفق صدا می‌شود
-    // 2) ما در این روش reload می‌کنیم تا مطمئن شویم بلافاصله آپدیت را می‌بینیم
+    // پس از هر درج/ویرایش موفق، لیست مجدداً بارگذاری می‌شود
     const handleBoxTemplatesChanged = async () => {
       if (!approvalFlowData.ID) return;
-
       try {
         const newList = await api.getAllBoxTemplatesByWfTemplateId(
           approvalFlowData.ID
@@ -410,8 +408,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           editData={selectedSubRowData}
           boxTemplates={boxTemplates}
           workflowTemplateId={selectedRow ? selectedRow.ID : 0}
-          // به‌جای passing the updatedBox, ما فقط سیگنال می‌دهیم
-          // که پس از Add/Edit دوباره reload کنیم
           onBoxTemplateInserted={handleBoxTemplatesChanged}
         />
       </>

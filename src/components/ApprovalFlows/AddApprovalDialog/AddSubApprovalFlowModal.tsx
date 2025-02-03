@@ -1,5 +1,3 @@
-// AddSubApprovalFlowModal.tsx
-
 import React, { useState, useRef, useEffect } from "react";
 import DynamicModal from "../../utilities/DynamicModal";
 import ApprovalFlowsTab, {
@@ -16,10 +14,10 @@ interface AddSubApprovalFlowModalProps {
   editData?: BoxTemplate | null;
   boxTemplates?: BoxTemplate[];
   workflowTemplateId?: number;
-  onBoxTemplateInserted?: () => void; // دیگر شیء پاس نمی‌دهیم
+  onBoxTemplateInserted?: () => void;
 }
 
-const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
+const AddSubApprovalFlowModal: React.FC<AddSubApprovalModalProps> = ({
   isOpen,
   onClose,
   editData,
@@ -31,7 +29,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   const api = useApi();
 
   const approvalFlowsTabRef = useRef<ApprovalFlowsTabRef | null>(null);
-
   const handleApprovalFlowsTabRef = (instance: ApprovalFlowsTabRef | null) => {
     approvalFlowsTabRef.current = instance;
   };
@@ -61,16 +58,24 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         return;
       }
 
-      // اولین سطر را نمونه می‌گیریم
       const firstRow = formData.tableData[0];
       if (!firstRow.postID) {
         alert("No postID found in the first row!");
         return;
       }
 
+      const predecessorStr =
+        formData.selectedPredecessors.length > 0
+          ? formData.selectedPredecessors.join("|") + "|"
+          : "";
+
+      const btnIDsStr =
+        formData.selectedDefaultBtnIds.length > 0
+          ? formData.selectedDefaultBtnIds.join("|") + "|"
+          : "";
+
       let payload: any;
       if (editData) {
-        // ویرایش
         payload = {
           WFApproval: {
             Code: firstRow.code || null,
@@ -86,7 +91,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           WFBT: {
             ActDuration: parseInt(formData.actDurationValue, 10) || 0,
             ActionMode: 1,
-            BFID: 0,
             DeemAction: 0,
             DeemCondition: 0,
             DeemDay: 0,
@@ -99,21 +103,19 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
             MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
             Name: formData.nameValue || "",
             nWFTemplateID: workflowTemplateId,
-            PredecessorStr: null,
+            PredecessorStr: predecessorStr,
             PreviousStateId: null,
             Top: 0,
+            BtnIDs: btnIDsStr,
           },
         };
 
         const result = await api.updateBoxTemplate(payload);
         console.log("BoxTemplate updated:", result);
-
-        // به والد سیگنال می‌دهیم لیست را رفرش کند
         if (onBoxTemplateInserted) {
           onBoxTemplateInserted();
         }
       } else {
-        // درج
         payload = {
           WFApproval: {
             Code: null,
@@ -131,7 +133,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           WFBT: {
             ActDuration: parseInt(formData.actDurationValue, 10) || 0,
             ActionMode: 1,
-            BFID: 0,
             DeemAction: 0,
             DeemCondition: 0,
             DeemDay: 0,
@@ -144,21 +145,19 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
             MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
             Name: formData.nameValue || "",
             nWFTemplateID: workflowTemplateId,
-            PredecessorStr: null,
+            PredecessorStr: predecessorStr,
             PreviousStateId: null,
             Top: 0,
+            BtnIDs: btnIDsStr,
           },
         };
 
         const result = await api.insertBoxTemplate(payload);
         console.log("BoxTemplate inserted:", result);
-
-        // به والد سیگنال می‌دهیم
         if (onBoxTemplateInserted) {
           onBoxTemplateInserted();
         }
       }
-
       onClose();
     } catch (error) {
       console.error("Error in save/update BoxTemplate:", error);
