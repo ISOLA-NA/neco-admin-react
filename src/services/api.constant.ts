@@ -110,4 +110,5 @@ export const apiConst = Object.freeze({
   insertWFBoxTemplate: "api/WFBoxTemplate/Insert",
   updateWFBoxTemplate: "api/WFBoxTemplate/Update",
   deleteWFBoxTemplate: "api/WFBoxTemplate/Delete",
+  getApprovalContextData: "api/WFApprovTemplate/GetAllByTemplateBoxId",
 });

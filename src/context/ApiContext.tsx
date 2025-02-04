@@ -36,6 +36,7 @@ import AppServices, {
   CategoryItem,
   WfTemplateItem,
   BoxTemplate,
+  WFAproval,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -166,6 +167,8 @@ interface ApiContextType {
   insertBoxTemplate: (data: BoxTemplate) => Promise<BoxTemplate>;
   updateBoxTemplate: (data: BoxTemplate) => Promise<BoxTemplate>;
   deleteBoxTemplate: (id: number) => Promise<void>;
+
+  getApprovalContextData: (id: number) => Promise<WFAproval[]>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -303,6 +306,9 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertBoxTemplate: AppServices.insertBoxTemplate.bind(AppServices),
     updateBoxTemplate: AppServices.updateBoxTemplate.bind(AppServices),
     deleteBoxTemplate: AppServices.deleteBoxTemplate.bind(AppServices),
+
+    getApprovalContextData:
+      AppServices.getApprovalContextData.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

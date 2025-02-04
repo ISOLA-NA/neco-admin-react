@@ -103,7 +103,6 @@ export interface EntityTypeItem {
 }
 
 export interface WfTemplateItem {
-  SubApprovalFlows: never[];
   ID?: number;
   Name: string;
   Describtion: string;
@@ -510,6 +509,20 @@ export interface BoxTemplate {
   MinNumberForReject: number;
   Order: number;
   GoToPreviousStateID: number | null;
+  IsVisible: boolean;
+  LastModified: string;
+}
+
+export interface WFAproval {
+  nPostTypeID: number | null;
+  nPostID: number;
+  nWFBoxTemplateID: number;
+  PCost: number;
+  Weight: number;
+  IsVeto: boolean;
+  IsRequired: boolean;
+  Code: number | null;
+  ID: number;
   IsVisible: boolean;
   LastModified: string;
 }
@@ -1283,6 +1296,15 @@ class ApiService {
 
   async deleteBoxTemplate(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteWFBoxTemplate, { ID: id });
+  }
+
+  // در داخل کلاس ApiService اضافه کنید:
+  async getApprovalContextData(id: number): Promise<WFAproval[]> {
+    const response = await httpClient.post<WFAproval[]>(
+      apiConst.getApprovalContextData, // مسیر آدرس API: "api/WFApprovTemplate/GetAllByTemplateBoxId"
+      { ID: id }
+    );
+    return response.data;
   }
 }
 

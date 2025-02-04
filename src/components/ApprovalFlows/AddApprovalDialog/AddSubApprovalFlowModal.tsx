@@ -1,3 +1,4 @@
+// AddSubApprovalFlowModal.tsx
 import React, { useState, useRef, useEffect } from "react";
 import DynamicModal from "../../utilities/DynamicModal";
 import ApprovalFlowsTab, {
@@ -35,7 +36,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
-      // در صورت نیاز ریست‌های لازم
+      // ریست‌های لازم هنگام بسته شدن مودال در صورت نیاز
     }
   }, [isOpen]);
 
@@ -45,7 +46,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         console.error("ApprovalFlowsTab ref is not attached!");
         return;
       }
-      // اعتبارسنجی فیلدهای Min قبل از ارسال
       if (!approvalFlowsTabRef.current.validateMinFields()) {
         return;
       }
@@ -62,17 +62,16 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         return;
       }
 
-      // ایجاد آرایه wfApprovals برای هر ردیف موجود در جدول
       const wfApprovals = formData.tableData.map((row) => ({
         nPostTypeID: null,
-        nPostID: row.postID,
+        nPostID: row.nPostID,
         nWFBoxTemplateID: editData ? editData.ID : 0,
         PCost: row.cost1 || 0,
         Weight: row.weight1 || 0,
         IsVeto: row.veto,
         IsRequired: row.required,
         Code: row.code || null,
-        ID: editData ? row.ID : 0,
+        ID: editData ? row.id : 0,
         IsVisible: true,
         LastModified: new Date().toISOString(),
       }));
@@ -86,7 +85,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           ? formData.selectedDefaultBtnIds.join("|") + "|"
           : "";
 
-      // payload نهایی طبق ساختار موردنظر
       let payload: any = {
         WFBT: {
           Name: formData.nameValue || "",
@@ -120,11 +118,9 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       };
 
       if (editData) {
-        // ویرایش
         const result = await api.updateBoxTemplate(payload);
         console.log("BoxTemplate updated:", result);
       } else {
-        // درج
         const result = await api.insertBoxTemplate(payload);
         console.log("BoxTemplate inserted:", result);
       }
