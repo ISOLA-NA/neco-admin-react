@@ -39,7 +39,6 @@ export interface TableRow {
   required: boolean;
   veto: boolean;
   code: number;
-  // فیلد اختیاری برای نگهداری ID اصلی (در صورت نیاز)
   originalID?: number;
 }
 
@@ -135,7 +134,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       const fetchRoles = async () => {
         try {
           const res = await api.getAllRoles();
-          setAllRoles(res);
+          // در صورت نیاز بررسی کنید که پاسخ به صورت آرایه باشد
+          const roles = Array.isArray(res) ? res : res.data || [];
+          setAllRoles(roles);
         } catch (error) {
           console.error("Error fetching roles:", error);
         }
@@ -155,7 +156,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       fetchButtons();
     }, [api]);
 
-    // ستون‌های جدول Approval Context
+    // ستون‌های جدول Approval Context با تغییر در valueGetter برای ستون "Post"
     const columnDefs = [
       {
         headerName: "Post",
@@ -166,7 +167,22 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           const role = allRoles.find(
             (r) => r.ID.toString() === params.data.nPostID
           );
-          return role ? role.Name : params.data.nPostID;
+          if (role && role.Name) {
+            return role.Name;
+          } else {
+            // اگر نام نقش پیدا نشد اما حداقل یکی از فیلدهای هزینه یا وزن مقدار داشته باشد، مقدار nPostID را برگردانیم
+            if (
+              params.data.cost1 ||
+              params.data.weight1 ||
+              params.data.cost2 ||
+              params.data.weight2 ||
+              params.data.cost3 ||
+              params.data.weight3
+            ) {
+              return params.data.nPostID;
+            }
+            return "";
+          }
         },
       },
       { headerName: "Cost1", field: "cost1", sortable: true, filter: true },
@@ -237,10 +253,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           api
             .getApprovalContextData(editData.ID)
             .then((approvalData) => {
-              // نگاشت داده‌های دریافتی به فرمت TableRow
               const mappedRows: TableRow[] = approvalData.map((item) => ({
                 id: item.ID.toString(),
-                nPostID: item.nPostID, // فیلد اصلی از API
+                nPostID: item.nPostID,
                 cost1: item.PCost,
                 cost2: 0,
                 cost3: 0,

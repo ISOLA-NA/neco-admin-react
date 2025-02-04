@@ -29,6 +29,14 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
   const api = useApi();
 
+  // استفاده از modalKey برای ریست شدن کامل فرم در هر بار باز شدن مودال
+  const [modalKey, setModalKey] = useState<number>(Date.now());
+  useEffect(() => {
+    if (isOpen) {
+      setModalKey(Date.now());
+    }
+  }, [isOpen]);
+
   const approvalFlowsTabRef = useRef<ApprovalFlowsTabRef | null>(null);
   const handleApprovalFlowsTabRef = (instance: ApprovalFlowsTabRef | null) => {
     approvalFlowsTabRef.current = instance;
@@ -36,7 +44,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
-      // ریست‌های لازم هنگام بسته شدن مودال در صورت نیاز
+      // در صورت بسته شدن مودال، اگر نیاز به ریست کردن مقادیر داخلی باشد، می‌توانیم اینجا انجام دهیم
     }
   }, [isOpen]);
 
@@ -62,6 +70,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         return;
       }
 
+      // نگاشت داده‌های جدول Approval Context به آرایه wfApprovals
       const wfApprovals = formData.tableData.map((row) => ({
         nPostTypeID: null,
         nPostID: row.nPostID,
@@ -71,7 +80,8 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         IsVeto: row.veto,
         IsRequired: row.required,
         Code: row.code || null,
-        ID: editData ? row.id : 0,
+        // اگر row.id یک رشته عددی نباشد (مثلاً uuid)، مقدار 0 برگردانده شود.
+        ID: parseInt(row.id, 10) || 0,
         IsVisible: true,
         LastModified: new Date().toISOString(),
       }));
@@ -159,6 +169,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       <div className="mt-4">
         {activeTab === "approval" && (
           <ApprovalFlowsTab
+            key={modalKey}
             ref={handleApprovalFlowsTabRef}
             editData={editData}
             boxTemplates={boxTemplates}
