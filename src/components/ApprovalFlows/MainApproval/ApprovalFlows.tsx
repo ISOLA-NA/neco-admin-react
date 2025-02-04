@@ -90,7 +90,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         });
 
         if (selectedRow.ID) {
-          // پس از انتخاب، لیست BoxTemplateها را می‌گیریم
+          // دریافت لیست BoxTemplateها بعد از انتخاب ردیف
           api
             .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
             .then((data) => {
@@ -104,7 +104,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           setBoxTemplates([]);
         }
       } else {
-        // حالت جدید یا هیچ ردیفی انتخاب نشده
+        // حالت جدید یا عدم انتخاب ردیف
         setApprovalFlowData({
           ID: 0,
           Name: "",
@@ -247,9 +247,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               className="text-blue-600 hover:text-blue-800"
               title="Edit"
             >
-              <span>
-                <FiEdit />
-              </span>
+              <FiEdit />
             </button>
             <button
               onClick={() => handleBoxTemplateDelete(params.data)}
@@ -277,19 +275,19 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
     const handleBoxTemplateDelete = (box: BoxTemplate) => {
       console.log("Delete BoxTemplate:", box);
-      // در صورت وجود متد حذف، اینجا فراخوانی شود
+      // فراخوانی متد حذف در صورت وجود
     };
 
     const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
       console.log("Duplicate BoxTemplate:", box);
-      // در صورت وجود متد duplicate، اینجا پیاده‌سازی شود
+      // فراخوانی متد duplicate در صورت وجود
     };
 
     const handleSubRowDoubleClick = (data: any) => {
       handleBoxTemplateEdit(data);
     };
 
-    // پس از هر درج/ویرایش موفق، لیست مجدداً بارگذاری می‌شود
+    // بارگذاری مجدد لیست BoxTemplates پس از درج/ویرایش
     const handleBoxTemplatesChanged = async () => {
       if (!approvalFlowData.ID) return;
       try {
@@ -401,7 +399,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           </TwoColumnLayout.Item>
         </TwoColumnLayout>
 
-        {/* مدال درج/ویرایش BoxTemplate */}
         <AddSubApprovalFlowModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

@@ -10,20 +10,19 @@ import DynamicModal from "../../utilities/DynamicModal";
 import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
 import { FaPlus, FaTimes, FaEdit } from "react-icons/fa";
-import BoxDeemed from "./BoxDeemed";
 import BoxPredecessor from "./BoxPredecessor ";
 import ListSelector from "../../ListSelector/ListSelector";
 import ButtonComponent from "../../General/Configuration/ButtonComponent";
 import { v4 as uuidv4 } from "uuid";
 import { BoxTemplate, AFBtnItem } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
+import DeemedSection from "./BoxDeemed"; // استفاده از کامپوننت DeemedSection
 
-// تعریف اینترفیس Role (در صورت نیاز می‌توانید فیلدهای بیشتر اضافه کنید)
+// اینترفیس Role
 export interface Role {
   ID: string | number;
   Name: string;
   isStaticPost?: boolean;
-  // سایر فیلدها در صورت نیاز
 }
 
 // هر سطر جدول Approval Context
@@ -53,7 +52,13 @@ export interface ApprovalFlowsTabData {
   rejectChecked: boolean;
   tableData: TableRow[];
   selectedPredecessors: number[];
-  selectedDefaultBtnIds: number[]; // آی‌دی‌های انتخاب‌شده دکمه‌ها (اعدادی)
+  selectedDefaultBtnIds: number[];
+  // فیلدهای مربوط به Deemed:
+  deemDayValue: string;
+  deemConditionValue: string;
+  deemActionValue: string;
+  previewsStateIdValue: string;
+  goToPreviousStateIDValue: string;
 }
 
 export interface ApprovalFlowsTabRef {
@@ -70,22 +75,23 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
   ({ editData, boxTemplates = [] }, ref) => {
     const api = useApi();
 
-    // استیت مربوط به دریافت Roles از API
+    // دریافت لیست Roles
     const [allRoles, setAllRoles] = useState<Role[]>([]);
 
-    // stateهای فرم
+    // stateهای فرم Approval Context
     const [nameValue, setNameValue] = useState<string>("");
-    const [minAcceptValue, setMinAcceptValue] = useState<string>(""); // ActionMode
-    const [minRejectValue, setMinRejectValue] = useState<string>(""); // MinNumberForReject
+    const [minAcceptValue, setMinAcceptValue] = useState<string>("");
+    const [minRejectValue, setMinRejectValue] = useState<string>("");
     const [actDurationValue, setActDurationValue] = useState<string>("");
     const [orderValue, setOrderValue] = useState<string>("");
 
-    // چک‌باکس‌های مربوط به min
-    const [acceptChecked, setAcceptChecked] = useState<boolean>(true); // پیش‌فرض true
+    const [acceptChecked, setAcceptChecked] = useState<boolean>(true);
     const [rejectChecked, setRejectChecked] = useState<boolean>(false);
 
     const [staticPostValue, setStaticPostValue] = useState<string>("");
-    const [selectedStaticPost, setSelectedStaticPost] = useState<Role | null>(null);
+    const [selectedStaticPost, setSelectedStaticPost] = useState<Role | null>(
+      null
+    );
 
     const [cost1, setCost1] = useState<string>("");
     const [cost2, setCost2] = useState<string>("");
@@ -102,15 +108,27 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const [tableData, setTableData] = useState<TableRow[]>([]);
     const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
 
-    const [selectedPredecessors, setSelectedPredecessors] = useState<number[]>([]);
+    const [selectedPredecessors, setSelectedPredecessors] = useState<number[]>(
+      []
+    );
     const [initialized, setInitialized] = useState<boolean>(false);
 
-    // state برای نگهداری لیست دکمه‌های واقعی دریافتی از سرور
+    // state مربوط به دکمه‌ها
     const [btnList, setBtnList] = useState<AFBtnItem[]>([]);
-    // state برای نگهداری آی‌دی‌های انتخاب‌شده دکمه‌ها (اعدادی)
-    const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<number[]>([]);
+    const [selectedDefaultBtnIds, setSelectedDefaultBtnIds] = useState<
+      number[]
+    >([]);
 
-    // دریافت لیست Roles از API
+    // stateهای مربوط به Deemed
+    const [deemDay, setDeemDay] = useState<number>(0);
+    const [deemCondition, setDeemCondition] = useState<number>(0);
+    const [deemAction, setDeemAction] = useState<number>(0);
+    const [previewsStateId, setPreviewsStateId] = useState<number | null>(null);
+    const [goToPreviousStateID, setGoToPreviousStateID] = useState<
+      number | null
+    >(null);
+
+    // دریافت Roles از API
     useEffect(() => {
       const fetchRoles = async () => {
         try {
@@ -123,7 +141,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       fetchRoles();
     }, [api]);
 
-    // دریافت لیست دکمه‌ها از API
+    // دریافت لیست دکمه‌ها
     useEffect(() => {
       const fetchButtons = async () => {
         try {
@@ -161,13 +179,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       { headerName: "Code", field: "code", sortable: true, filter: true },
     ];
 
-    // ستون‌های جدول انتخاب پست (Roles)
     const rolesColumnDefs = [
       { headerName: "ID", field: "ID", sortable: true, filter: true },
       { headerName: "Name", field: "Name", sortable: true, filter: true },
     ];
 
-    // مقداردهی اولیه (برای حالت ادیت یا افزودن)
+    // مقداردهی اولیه بر اساس editData
     useEffect(() => {
       if (editData) {
         setNameValue(editData.Name || "");
@@ -177,12 +194,22 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           editData.ActionMode ? editData.ActionMode.toString() : ""
         );
         setMinRejectValue(
-          editData.MinNumberForReject ? editData.MinNumberForReject.toString() : ""
+          editData.MinNumberForReject
+            ? editData.MinNumberForReject.toString()
+            : ""
         );
+
+        // مقداردهی اولیه فیلدهای Deemed در حالت ادیت (در صورت وجود)
+        setDeemDay(editData.DeemDay || 0);
+        setDeemCondition(editData.DeemCondition || 0);
+        setDeemAction(editData.DeemAction || 0);
+        setPreviewsStateId(editData.PreviewsStateId || null);
+        setGoToPreviousStateID(editData.GoToPreviousStateID || null);
 
         if (!initialized) {
           if (editData.PredecessorStr) {
-            const splittedIds = editData.PredecessorStr.split("|").filter(Boolean);
+            const splittedIds =
+              editData.PredecessorStr.split("|").filter(Boolean);
             const numericIds = splittedIds.map((idStr) => parseInt(idStr, 10));
             setSelectedPredecessors(numericIds);
           } else {
@@ -195,16 +222,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           } else {
             setSelectedDefaultBtnIds([]);
           }
-          // اگر در editData اطلاعات Approval Flow موجود باشد
-          if ((editData as any).WFApprovals && Array.isArray((editData as any).WFApprovals)) {
+          if (
+            (editData as any).WFApprovals &&
+            Array.isArray((editData as any).WFApprovals)
+          ) {
             setTableData((editData as any).WFApprovals);
-          } else if ((editData as any).WFApproval && Array.isArray((editData as any).WFApproval)) {
+          } else if (
+            (editData as any).WFApproval &&
+            Array.isArray((editData as any).WFApproval)
+          ) {
             setTableData((editData as any).WFApproval);
           }
           setInitialized(true);
         }
 
-        // خالی کردن فیلدهای افزودن/ویرایش ردیف (local)
         setCost1("");
         setCost2("");
         setCost3("");
@@ -218,7 +249,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setSelectedStaticPost(null);
       } else {
         setNameValue("");
-        setMinAcceptValue("1"); // در حالت افزودن، پیش‌فرض 1
+        setMinAcceptValue("1");
         setMinRejectValue("");
         setActDurationValue("");
         setOrderValue("");
@@ -242,10 +273,16 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setTableData([]);
         setSelectedRow(null);
         setInitialized(false);
+
+        // مقداردهی اولیه Deemed در حالت افزودن
+        setDeemDay(0);
+        setDeemCondition(0);
+        setDeemAction(0);
+        setPreviewsStateId(null);
+        setGoToPreviousStateID(null);
       }
     }, [editData, initialized]);
 
-    // گزینه‌های مربوط به سلکت پست از لیست Roles دریافت‌شده از API
     const staticPostOptions = allRoles.map((role) => ({
       value: role.ID,
       label: role.Name,
@@ -255,14 +292,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    // انتخاب پست از داخل مودال TableSelector
     const handleRoleSelect = (data: Role) => {
       setSelectedStaticPost(data);
       setStaticPostValue(data.ID.toString());
       closeModal();
     };
 
-    // اعتبارسنجی فیلدهای Min (برای Add و Edit)
     const validateMinFields = (): boolean => {
       if (!acceptChecked && !rejectChecked) {
         alert(
@@ -280,7 +315,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       if (rejectChecked) {
         const val = parseInt(minRejectValue, 10);
         if (!minRejectValue || isNaN(val) || val === 0) {
-          alert("لطفاً مقدار معتبر برای Min Reject (MinNumberForReject) وارد نمایید.");
+          alert(
+            "لطفاً مقدار معتبر برای Min Reject (MinNumberForReject) وارد نمایید."
+          );
           return false;
         }
       }
@@ -297,7 +334,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
 
       if (selectedRow) {
-        // ویرایش ردیف انتخاب‌شده
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
@@ -321,7 +357,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setTableData(updated);
         resetForm();
       } else {
-        // افزودن ردیف جدید به جدول
         const newRow: TableRow = {
           id: uuidv4(),
           post: selectedStaticPost ? selectedStaticPost.Name : "",
@@ -362,7 +397,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       setTableData([...tableData, duplicated]);
     };
 
-    // انتخاب ردیف از جدول Approval Context
     const handleSelectRow = (data: TableRow) => {
       setSelectedRow(data);
       setStaticPostValue(data.postID);
@@ -407,6 +441,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
     };
 
+    // خروجی فرم شامل داده‌های Approval Context و Deemed
     useImperativeHandle(ref, () => ({
       getFormData: () => {
         return {
@@ -420,6 +455,13 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           tableData,
           selectedPredecessors,
           selectedDefaultBtnIds,
+          deemDayValue: deemDay.toString(),
+          deemConditionValue: deemCondition.toString(),
+          deemActionValue: deemAction.toString(),
+          previewsStateIdValue:
+            previewsStateId !== null ? previewsStateId.toString() : "",
+          goToPreviousStateIDValue:
+            goToPreviousStateID !== null ? goToPreviousStateID.toString() : "",
         };
       },
       validateMinFields: () => validateMinFields(),
@@ -428,7 +470,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     return (
       <div className="flex flex-row h-full">
         <main className="flex-1 p-4 bg-white overflow-auto">
-          {/* ردیف اصلی: تمام اینپوت‌ها در یک خط */}
+          {/* ردیف اصلی: فرم Approval Context */}
           <div className="flex flex-row gap-x-4 w-full mt-4 items-center">
             <div className="flex flex-col">
               <DynamicInput
@@ -496,7 +538,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             </div>
           </div>
 
-          {/* ادامه فرم اصلی */}
+          {/* بخش Approval Context (جدول و انتخاب پست‌ها) */}
           <div className="mt-8 p-4 bg-gray-100 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-gray-700">
@@ -646,7 +688,22 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             </div>
           </div>
 
-          {/* جدول نمایش داده‌های وارد شده */}
+          {/* کامپوننت DeemedSection جهت تنظیم فیلدهای مربوط به Deemed */}
+          <DeemedSection
+            deemDay={deemDay}
+            setDeemDay={setDeemDay}
+            deemCondition={deemCondition}
+            setDeemCondition={setDeemCondition}
+            deemAction={deemAction}
+            setDeemAction={setDeemAction}
+            previewsStateId={previewsStateId}
+            setPreviewsStateId={setPreviewsStateId}
+            goToPreviousStateID={goToPreviousStateID}
+            setGoToPreviousStateID={setGoToPreviousStateID}
+            boxTemplates={boxTemplates} // جهت دریافت لیست BoxTemplateها برای سلکت‌های مرتبط با Previous State
+          />
+
+          {/* جدول نمایش داده‌های Approval Context */}
           <div className="mt-4">
             <DataTable
               columnDefs={columnDefs}
@@ -669,8 +726,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               domLayout="autoHeight"
             />
           </div>
-
-          <BoxDeemed />
         </main>
 
         <aside className="w-64 bg-gray-100 p-4 border-l border-gray-300 overflow-auto space-y-4">

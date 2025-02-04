@@ -66,14 +66,12 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       const wfApprovals = formData.tableData.map((row) => ({
         nPostTypeID: null,
         nPostID: row.postID,
-        // در حالت ویرایش از ID موجود در editData استفاده می‌شود، در حالت افزودن 0
         nWFBoxTemplateID: editData ? editData.ID : 0,
         PCost: row.cost1 || 0,
         Weight: row.weight1 || 0,
         IsVeto: row.veto,
         IsRequired: row.required,
         Code: row.code || null,
-        // اگر ردیف قبلاً وجود داشته باشد از مقدار موجود استفاده می‌شود
         ID: editData ? row.ID : 0,
         IsVisible: true,
         LastModified: new Date().toISOString(),
@@ -88,7 +86,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           ? formData.selectedDefaultBtnIds.join("|") + "|"
           : "";
 
-      // payload نهایی که طبق نمونه JSON تنظیم شده است
+      // payload نهایی طبق ساختار موردنظر
       let payload: any = {
         WFBT: {
           Name: formData.nameValue || "",
@@ -97,19 +95,23 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           PredecessorStr: predecessorStr,
           Left: 0.0,
           Top: 0.0,
-          ActDuration: parseInt(formData.actDurationValue, 10) || 0.0,
-          MaxDuration: parseInt(formData.actDurationValue, 10) || 0.0,
+          ActDuration: parseInt(formData.actDurationValue, 10) || 0,
+          MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
           nWFTemplateID: workflowTemplateId,
           DeemedEnabled: false,
-          DeemDay: 0.0,
-          DeemCondition: 0,
-          DeemAction: 0,
-          PreviewsStateId: null,
+          DeemDay: parseInt(formData.deemDayValue, 10) || 0,
+          DeemCondition: parseInt(formData.deemConditionValue, 10) || 0,
+          DeemAction: parseInt(formData.deemActionValue, 10) || 0,
+          PreviewsStateId: formData.previewsStateIdValue
+            ? parseInt(formData.previewsStateIdValue, 10)
+            : null,
           BtnIDs: btnIDsStr,
           ActionBtnID: null,
           MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
           Order: formData.orderValue ? parseInt(formData.orderValue, 10) : null,
-          GoToPreviousStateID: null,
+          GoToPreviousStateID: formData.goToPreviousStateIDValue
+            ? parseInt(formData.goToPreviousStateIDValue, 10)
+            : null,
           ID: editData ? editData.ID : 0,
           IsVisible: true,
           LastModified: new Date().toISOString(),

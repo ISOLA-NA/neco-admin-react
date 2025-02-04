@@ -1,114 +1,166 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DynamicSelector from "../../utilities/DynamicSelector";
+import AppServices, { GetEnumResponse } from "../../../services/api.services";
 
-const DeemedSection: React.FC = () => {
-  const [deemedChecked, setDeemedChecked] = useState<boolean>(true);
-  const [afterValue, setAfterValue] = useState<number>(0);
-  const [fromValue, setFromValue] = useState<string>("");
-  const [statusValue, setStatusValue] = useState<string>("");
-  const [prevStateValue, setPrevStateValue] = useState<string>("");
-  const [actionButtonValue, setActionButtonValue] = useState<string>("");
+interface DeemedSectionProps {
+  deemDay: number;
+  setDeemDay: (val: number) => void;
+  deemCondition: number;
+  setDeemCondition: (val: number) => void;
+  deemAction: number;
+  setDeemAction: (val: number) => void;
+  previewsStateId: number | null;
+  setPreviewsStateId: (val: number | null) => void;
+  goToPreviousStateID: number | null;
+  setGoToPreviousStateID: (val: number | null) => void;
+  boxTemplates: { ID: number; Name: string }[];
+}
 
-  const fromOptions = [
-    { value: "duedate", label: "Due Date" },
-    { value: "seendate", label: "Seen Date" },
-    { value: "senddate", label: "Send Date" },
-  ];
+const DeemedSection: React.FC<DeemedSectionProps> = ({
+  deemDay,
+  setDeemDay,
+  deemCondition,
+  setDeemCondition,
+  deemAction,
+  setDeemAction,
+  previewsStateId,
+  setPreviewsStateId,
+  goToPreviousStateID,
+  setGoToPreviousStateID,
+  boxTemplates,
+}) => {
+  const [fromOptions, setFromOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+  const [statusOptions, setStatusOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+  const [loadingEnums, setLoadingEnums] = useState<boolean>(false);
+  const [errorEnums, setErrorEnums] = useState<string | null>(null);
 
-  const statusOptions = [
-    { value: "approved", label: "Approved" },
-    { value: "rejected", label: "Rejected" },
-    { value: "pending", label: "Pending" },
-  ];
+  useEffect(() => {
+    const fetchEnums = async () => {
+      setLoadingEnums(true);
+      setErrorEnums(null);
+      try {
+        // دریافت DeemCondition (برای From)
+        const response1: GetEnumResponse = await AppServices.getEnum({
+          str: "DeemCondition",
+        });
+        const fromOpts = Object.entries(response1).map(([key, val]) => ({
+          value: Number(val),
+          label: key,
+        }));
+        setFromOptions(fromOpts);
+      } catch (error) {
+        console.error("Error fetching DeemCondition enums:", error);
+        setErrorEnums("خطا در دریافت DeemCondition");
+      }
+      try {
+        // دریافت DeemAction (برای The status will set to)
+        const response2: GetEnumResponse = await AppServices.getEnum({
+          str: "DeemAction",
+        });
+        const statusOpts = Object.entries(response2).map(([key, val]) => ({
+          value: Number(val),
+          label: key,
+        }));
+        setStatusOptions(statusOpts);
+      } catch (error) {
+        console.error("Error fetching DeemAction enums:", error);
+        setErrorEnums("خطا در دریافت DeemAction");
+      } finally {
+        setLoadingEnums(false);
+      }
+    };
+    fetchEnums();
+  }, []);
 
-  const prevStateOptions = [
-    { value: "state1", label: "State 1" },
-    { value: "state2", label: "State 2" },
-    { value: "state3", label: "State 3" }, // Add more states if needed
-  ];
-
-  const actionButtonOptions = [
-    { value: "action1", label: "Action 1" },
-    { value: "action2", label: "Action 2" },
-  ];
+  // گزینه‌های مربوط به Previous State از boxTemplates (که در BoxPredecessor نمایش داده می‌شود)
+  const previousStateOptions = boxTemplates.map((box) => ({
+    value: box.ID,
+    label: box.Name,
+  }));
 
   return (
-    <div className="mt-4 bg-gray-200 p-2 flex flex-col space-y-2">
-      {/* CheckBox in a separate line */}
-      <div className="flex items-center">
-        <label className="flex items-center space-x-1 text-orange-600 font-semibold mb-6">
-          <input
-            type="checkbox"
-            checked={deemedChecked}
-            onChange={(e) => setDeemedChecked(e.target.checked)}
-            className="form-checkbox h-4 w-4 text-orange-600"
-          />
-          <span>Deemed as Approve Or Reject</span>
-        </label>
-      </div>
-
-      {/* Other inputs in a single line */}
-      <div className="flex flex-wrap items-center space-x-4 mb-12">
+    <div className="mt-4 bg-gray-200 p-2 rounded">
+      <div className="flex flex-col space-y-4">
         {/* After */}
-        <span className="text-sm text-gray-700">After</span>
-        <input
-          type="number"
-          value={afterValue}
-          onChange={(e) => setAfterValue(Number(e.target.value))}
-          className="border border-gray-300 rounded p-1 w-12 text-sm"
-        />
-        {/* From */}
-        <DynamicSelector
-          options={fromOptions}
-          selectedValue={fromValue}
-          onChange={(e) => setFromValue(e.target.value)}
-          label="From"
-          className="w-20"
-        />
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-700">After</span>
+          <input
+            type="number"
+            value={deemDay}
+            onChange={(e) => setDeemDay(Number(e.target.value))}
+            className="border border-gray-300 rounded p-1 w-16 text-sm"
+          />
+        </div>
 
-        {/* The status will set to */}
-        <DynamicSelector
-          options={statusOptions}
-          selectedValue={statusValue}
-          onChange={(e) => setStatusValue(e.target.value)}
-          label="The status will set to"
-          className="w-44 text-xs"
-        />
+        {/* From (DeemCondition) */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-700">From</span>
+          <DynamicSelector
+            options={fromOptions}
+            selectedValue={deemCondition.toString()}
+            onChange={(e) => setDeemCondition(Number(e.target.value))}
+            label=""
+            className="w-40"
+          />
+        </div>
 
-        {/* Previous State */}
-        <DynamicSelector
-          options={prevStateOptions}
-          selectedValue={prevStateValue}
-          onChange={(e) => setPrevStateValue(e.target.value)}
-          label="Previous State"
-          className="w-44"
-        />
+        {/* The status will set to (DeemAction) */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-700">The status will set to</span>
+          <DynamicSelector
+            options={statusOptions}
+            selectedValue={deemAction.toString()}
+            onChange={(e) => setDeemAction(Number(e.target.value))}
+            label=""
+            className="w-40"
+          />
+        </div>
 
-        {/* Select Action Button */}
-        <DynamicSelector
-          options={actionButtonOptions}
-          selectedValue={actionButtonValue}
-          onChange={(e) => setActionButtonValue(e.target.value)}
-          label="Select Action Button"
-          className="w-44"
-        />
+        {/* Previous State (PreviewsStateId) */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-700">Previous State</span>
+          <DynamicSelector
+            options={previousStateOptions}
+            selectedValue={
+              previewsStateId !== null ? previewsStateId.toString() : ""
+            }
+            onChange={(e) =>
+              setPreviewsStateId(e.target.value ? Number(e.target.value) : null)
+            }
+            label=""
+            className="w-40"
+          />
+        </div>
+
+        {/* If user clicks on a button with command "Go to Previous State By Admin", the previous state will set to: */}
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-700">
+            If user clicks on a button with command "Go to Previous State By
+            Admin", the previous state will set to:
+          </span>
+          <DynamicSelector
+            options={previousStateOptions}
+            selectedValue={
+              goToPreviousStateID !== null ? goToPreviousStateID.toString() : ""
+            }
+            onChange={(e) =>
+              setGoToPreviousStateID(
+                e.target.value ? Number(e.target.value) : null
+              )
+            }
+            label=""
+            className="w-40"
+          />
+        </div>
       </div>
-
-      {/* Added Section Resembling the Uploaded Image */}
-      <div className=" p-2 border border-gray-300 rounded bg-white">
-        <p className="text-sm text-gray-700 mb-2">
-          If user clicks on a button with command{" "}
-          <span className="font-bold">"Go to Previous State By Admin"</span>,
-          the previous state will set to:
-        </p>
-        <DynamicSelector
-          options={prevStateOptions}
-          selectedValue={prevStateValue}
-          onChange={(e) => setPrevStateValue(e.target.value)}
-          label="Previous State"
-          className="w-44"
-        />
-      </div>
+      {loadingEnums && (
+        <p className="text-xs text-gray-600 mt-2">Loading enums...</p>
+      )}
+      {errorEnums && <p className="text-xs text-red-600 mt-2">{errorEnums}</p>}
     </div>
   );
 };

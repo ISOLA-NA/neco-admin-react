@@ -27,7 +27,7 @@ interface DynamicSelectorProps {
 
 const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   name,
-  options,
+  options = [],
   selectedValue,
   onChange,
   label = "Select",
