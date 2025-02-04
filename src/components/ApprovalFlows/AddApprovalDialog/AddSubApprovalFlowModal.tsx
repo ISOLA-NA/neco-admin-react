@@ -57,7 +57,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         return;
       }
 
-      if (formData.tableData.length === 0) {
+      if (formData.tableData.length === 0 && !formData.isStage) {
         alert("No row in Approval Context table!");
         return;
       }
@@ -90,7 +90,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       let payload: any = {
         WFBT: {
           Name: formData.nameValue || "",
-          IsStage: false,
+          IsStage: formData.isStage,
           ActionMode: parseInt(formData.minAcceptValue, 10) || 0,
           PredecessorStr: predecessorStr,
           Left: 0.0,
@@ -98,7 +98,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           ActDuration: parseInt(formData.actDurationValue, 10) || 0,
           MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
           nWFTemplateID: workflowTemplateId,
-          DeemedEnabled: false,
+          DeemedEnabled: formData.deemedEnabled,
           DeemDay: parseInt(formData.deemDayValue, 10) || 0,
           DeemCondition: parseInt(formData.deemConditionValue, 10) || 0,
           DeemAction: parseInt(formData.deemActionValue, 10) || 0,

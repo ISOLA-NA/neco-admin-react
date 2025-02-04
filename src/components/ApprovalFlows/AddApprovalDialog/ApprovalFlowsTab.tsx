@@ -18,7 +18,7 @@ import { BoxTemplate, AFBtnItem } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
 import DeemedSection from "./BoxDeemed"; // استفاده از کامپوننت DeemedSection
 
-// اینترفیس Role
+// تعریف اینترفیس Role
 export interface Role {
   ID: string | number;
   Name: string;
@@ -59,6 +59,9 @@ export interface ApprovalFlowsTabData {
   deemActionValue: string;
   previewsStateIdValue: string;
   goToPreviousStateIDValue: string;
+  // فیلدهای جدید فرم
+  isStage: boolean;
+  deemedEnabled: boolean;
 }
 
 export interface ApprovalFlowsTabRef {
@@ -127,6 +130,10 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const [goToPreviousStateID, setGoToPreviousStateID] = useState<
       number | null
     >(null);
+
+    // stateهای جدید فرم
+    const [isStage, setIsStage] = useState<boolean>(false);
+    const [isDeemed, setIsDeemed] = useState<boolean>(true); // پیش‌فرض تیک خورده
 
     // دریافت Roles از API
     useEffect(() => {
@@ -305,7 +312,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         );
         return false;
       }
-      if (acceptChecked) {
+      if (acceptChecked && !isStage) {
         const val = parseInt(minAcceptValue, 10);
         if (!minAcceptValue || isNaN(val) || val === 0) {
           alert("لطفاً مقدار معتبر برای Min Accept (ActionMode) وارد نمایید.");
@@ -334,6 +341,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
 
       if (selectedRow) {
+        // ویرایش ردیف انتخاب‌شده
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
@@ -357,6 +365,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setTableData(updated);
         resetForm();
       } else {
+        // افزودن ردیف جدید به جدول
         const newRow: TableRow = {
           id: uuidv4(),
           post: selectedStaticPost ? selectedStaticPost.Name : "",
@@ -441,7 +450,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       }
     };
 
-    // خروجی فرم شامل داده‌های Approval Context و Deemed
+    // خروجی فرم شامل داده‌های Approval Context، Deemed و فیلدهای جدید
     useImperativeHandle(ref, () => ({
       getFormData: () => {
         return {
@@ -462,6 +471,8 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             previewsStateId !== null ? previewsStateId.toString() : "",
           goToPreviousStateIDValue:
             goToPreviousStateID !== null ? goToPreviousStateID.toString() : "",
+          isStage,
+          deemedEnabled: isDeemed,
         };
       },
       validateMinFields: () => validateMinFields(),
@@ -470,7 +481,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     return (
       <div className="flex flex-row h-full">
         <main className="flex-1 p-4 bg-white overflow-auto">
-          {/* ردیف اصلی: فرم Approval Context */}
+          {/* ردیف اصلی (نام، Act Duration و Order) */}
           <div className="flex flex-row gap-x-4 w-full mt-4 items-center">
             <div className="flex flex-col">
               <DynamicInput
@@ -480,45 +491,27 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 onChange={(e) => setNameValue(e.target.value)}
               />
             </div>
-
-            <div className="flex flex-col">
-              <label className="flex items-center text-sm text-gray-700 mb-1">
-                <input
-                  type="checkbox"
-                  checked={acceptChecked}
-                  onChange={(e) => setAcceptChecked(e.target.checked)}
-                  className="h-4 w-4 mr-2"
+            {/* فیلد Min Accept فقط در صورتی نمایش داده می‌شود که isStage=false */}
+            {!isStage && (
+              <div className="flex flex-col">
+                <label className="flex items-center text-sm text-gray-700 mb-1">
+                  <input
+                    type="checkbox"
+                    checked={acceptChecked}
+                    onChange={(e) => setAcceptChecked(e.target.checked)}
+                    className="h-4 w-4 mr-2"
+                  />
+                  <span>Min Accept</span>
+                </label>
+                <DynamicInput
+                  name=""
+                  type="number"
+                  value={minAcceptValue}
+                  onChange={(e) => setMinAcceptValue(e.target.value)}
+                  disabled={acceptChecked}
                 />
-                Min Accept
-              </label>
-              <DynamicInput
-                name=""
-                type="number"
-                value={minAcceptValue}
-                onChange={(e) => setMinAcceptValue(e.target.value)}
-                disabled={acceptChecked}
-              />
-            </div>
-
-            <div className="flex flex-col">
-              <label className="flex items-center text-sm text-gray-700 mb-1">
-                <input
-                  type="checkbox"
-                  checked={rejectChecked}
-                  onChange={(e) => setRejectChecked(e.target.checked)}
-                  className="h-4 w-4 mr-2"
-                />
-                Min Reject
-              </label>
-              <DynamicInput
-                name=""
-                type="number"
-                value={minRejectValue}
-                onChange={(e) => setMinRejectValue(e.target.value)}
-                disabled={rejectChecked}
-              />
-            </div>
-
+              </div>
+            )}
             <div className="flex flex-col">
               <DynamicInput
                 name="Act Duration"
@@ -527,7 +520,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 onChange={(e) => setActDurationValue(e.target.value)}
               />
             </div>
-
             <div className="flex flex-col">
               <DynamicInput
                 name="Order"
@@ -538,7 +530,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             </div>
           </div>
 
-          {/* بخش Approval Context (جدول و انتخاب پست‌ها) */}
+          {/* چک‌باکس Is Stage، دقیقاً بالای جعبه Approval Context */}
+          <div className="mt-6 mb-2">
+            <label className="flex items-center space-x-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={isStage}
+                onChange={(e) => setIsStage(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <span>Is Stage</span>
+            </label>
+          </div>
+
+          {/* جعبه Approval Context: همیشه نمایش داده می‌شود؛ تنها قسمت جدول حذف می‌شود اگر isStage تیک خورده باشد */}
           <div className="mt-8 p-4 bg-gray-100 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-gray-700">
@@ -686,9 +691,47 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 </div>
               </div>
             </div>
+            {/* تنها بخش جدول حذف می‌شود در صورت isStage === true */}
+            {!isStage && (
+              <div className="mt-4">
+                <DataTable
+                  columnDefs={columnDefs}
+                  rowData={tableData}
+                  onRowDoubleClick={(data) => {
+                    handleSelectRow(data);
+                  }}
+                  setSelectedRowData={(data) => {
+                    handleSelectRow(data);
+                  }}
+                  showDuplicateIcon={false}
+                  showEditIcon={false}
+                  showAddIcon={false}
+                  showDeleteIcon={false}
+                  showSearch={false}
+                  onAdd={() => {}}
+                  onEdit={() => {}}
+                  onDelete={handleDeleteRow}
+                  onDuplicate={handleDuplicateRow}
+                  domLayout="autoHeight"
+                />
+              </div>
+            )}
           </div>
 
-          {/* کامپوننت DeemedSection جهت تنظیم فیلدهای مربوط به Deemed */}
+          {/* چک‌باکس Deemed as Approved Or Reject (بالای بخش Deemed) */}
+          <div className="mt-6 mb-2">
+            <label className="flex items-center space-x-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={isDeemed}
+                onChange={(e) => setIsDeemed(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <span>Deemed as Approved Or Reject</span>
+            </label>
+          </div>
+
+          {/* بخش Deemed: در اینجا ورودی‌های بخش اصلی (باکس A) در صورت !isDeemed دیزیبل می‌شوند؛ اما باکس پایین (باکس B) همیشه نمایش داده می‌شود */}
           <DeemedSection
             deemDay={deemDay}
             setDeemDay={setDeemDay}
@@ -700,32 +743,10 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             setPreviewsStateId={setPreviewsStateId}
             goToPreviousStateID={goToPreviousStateID}
             setGoToPreviousStateID={setGoToPreviousStateID}
-            boxTemplates={boxTemplates} // جهت دریافت لیست BoxTemplateها برای سلکت‌های مرتبط با Previous State
+            boxTemplates={boxTemplates}
+            disableMain={!isDeemed} // اگر isDeemed برداشته شود، بخش A دیزیبل می‌شود
+            showAdminSection={true} // همیشه بخش admin (باکس B) نمایش داده شود
           />
-
-          {/* جدول نمایش داده‌های Approval Context */}
-          <div className="mt-4">
-            <DataTable
-              columnDefs={columnDefs}
-              rowData={tableData}
-              onRowDoubleClick={(data) => {
-                handleSelectRow(data);
-              }}
-              setSelectedRowData={(data) => {
-                handleSelectRow(data);
-              }}
-              showDuplicateIcon={false}
-              showEditIcon={false}
-              showAddIcon={false}
-              showDeleteIcon={false}
-              showSearch={false}
-              onAdd={() => {}}
-              onEdit={() => {}}
-              onDelete={handleDeleteRow}
-              onDuplicate={handleDuplicateRow}
-              domLayout="autoHeight"
-            />
-          </div>
         </main>
 
         <aside className="w-64 bg-gray-100 p-4 border-l border-gray-300 overflow-auto space-y-4">
