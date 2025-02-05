@@ -8,6 +8,7 @@ import ApprovalFlowsTab, {
 import AlertTab from "./AlertTab";
 import { BoxTemplate } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
 interface AddSubApprovalFlowModalProps {
   isOpen: boolean;
@@ -52,6 +53,12 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
     try {
       if (!approvalFlowsTabRef.current) {
         console.error("ApprovalFlowsTab ref is not attached!");
+        showAlert(
+          "error",
+          null,
+          "Error",
+          "An error occurred while adding the item"
+        );
         return;
       }
       if (!approvalFlowsTabRef.current.validateMinFields()) {
@@ -62,11 +69,22 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
       if (!formData) {
         console.error("No data from ApprovalFlowsTab!");
+        showAlert(
+          "error",
+          null,
+          "Error",
+          "An error occurred while adding the item"
+        );
         return;
       }
 
       if (formData.tableData.length === 0 && !formData.isStage) {
-        alert("No row in Approval Context table!");
+        showAlert(
+          "warning",
+          null,
+          "Warning",
+          "No row in Approval Context table!"
+        );
         return;
       }
 
@@ -114,7 +132,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
             ? parseInt(formData.previewsStateIdValue, 10)
             : null,
           BtnIDs: btnIDsStr,
-          ActionBtnID: formData.actionBtnID, // مقدار از فرم دریافت می‌شود
+          ActionBtnID: formData.actionBtnID,
           MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
           Order: formData.orderValue ? parseInt(formData.orderValue, 10) : null,
           GoToPreviousStateID: formData.goToPreviousStateIDValue
@@ -130,9 +148,11 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       if (editData) {
         const result = await api.updateBoxTemplate(payload);
         console.log("BoxTemplate updated:", result);
+        showAlert("success", null, "Success", "Edited Successfully");
       } else {
         const result = await api.insertBoxTemplate(payload);
         console.log("BoxTemplate inserted:", result);
+        showAlert("success", null, "Success", "Added Successfully");
       }
 
       if (onBoxTemplateInserted) {
@@ -141,6 +161,12 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       onClose();
     } catch (error) {
       console.error("Error in save/update BoxTemplate:", error);
+      showAlert(
+        "error",
+        null,
+        "Error",
+        "An error occurred while adding the item"
+      );
     }
   };
 

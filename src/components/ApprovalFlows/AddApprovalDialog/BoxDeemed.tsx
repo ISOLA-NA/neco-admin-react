@@ -41,13 +41,19 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
   actionBtnID,
   setActionBtnID,
 }) => {
-  const [fromOptions, setFromOptions] = useState<{ value: number; label: string }[]>([]);
-  const [statusOptions, setStatusOptions] = useState<{ value: number; label: string }[]>([]);
+  const [fromOptions, setFromOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+  const [statusOptions, setStatusOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
   const [loadingEnums, setLoadingEnums] = useState<boolean>(false);
   const [errorEnums, setErrorEnums] = useState<string | null>(null);
 
   // دریافت گزینه‌های مربوط به Action Button از طریق api.getAllAfbtn
-  const [localActionBtnOptions, setLocalActionBtnOptions] = useState<{ value: number; label: string }[]>([]);
+  const [localActionBtnOptions, setLocalActionBtnOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
   const api = useApi();
 
   useEffect(() => {
@@ -56,7 +62,9 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
       setErrorEnums(null);
       try {
         // دریافت enum مربوط به DeemCondition
-        const response1: GetEnumResponse = await AppServices.getEnum({ str: "DeemCondition" });
+        const response1: GetEnumResponse = await AppServices.getEnum({
+          str: "DeemCondition",
+        });
         const fromOpts = Object.entries(response1).map(([key, val]) => ({
           value: Number(val),
           label: key,
@@ -68,7 +76,9 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
       }
       try {
         // دریافت enum مربوط به DeemAction
-        const response2: GetEnumResponse = await AppServices.getEnum({ str: "DeemAction" });
+        const response2: GetEnumResponse = await AppServices.getEnum({
+          str: "DeemAction",
+        });
         const statusOpts = Object.entries(response2).map(([key, val]) => ({
           value: Number(val),
           label: key,
@@ -151,9 +161,13 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
           <div className="w-40">
             <DynamicSelector
               options={previousStateOptions}
-              selectedValue={previewsStateId !== null ? previewsStateId.toString() : ""}
+              selectedValue={
+                previewsStateId !== null ? previewsStateId.toString() : ""
+              }
               onChange={(e) =>
-                setPreviewsStateId(e.target.value ? Number(e.target.value) : null)
+                setPreviewsStateId(
+                  e.target.value ? Number(e.target.value) : null
+                )
               }
               label="Previous State"
               className="w-full"
@@ -187,13 +201,18 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
       <div className="bg-gray-100 p-2 rounded">
         <p className="text-sm text-gray-700 mb-2">
           If user clicks on a button with command{" "}
-          <span className="font-bold">"Go to Previous State By Admin"</span>, the previous state will set to:
+          <span className="font-bold">"Go to Previous State By Admin"</span>,
+          the previous state will set to:
         </p>
         <DynamicSelector
           options={previousStateOptions}
-          selectedValue={goToPreviousStateID !== null ? goToPreviousStateID.toString() : ""}
+          selectedValue={
+            goToPreviousStateID !== null ? goToPreviousStateID.toString() : ""
+          }
           onChange={(e) =>
-            setGoToPreviousStateID(e.target.value ? Number(e.target.value) : null)
+            setGoToPreviousStateID(
+              e.target.value ? Number(e.target.value) : null
+            )
           }
           label=""
           className="w-40"

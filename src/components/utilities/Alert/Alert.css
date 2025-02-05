@@ -55,3 +55,8 @@
     cursor: pointer;
 }
 
+/* DynamicAlert.css */
+.custom-toast-container {
+    z-index: 999 !important;
+  }
+  

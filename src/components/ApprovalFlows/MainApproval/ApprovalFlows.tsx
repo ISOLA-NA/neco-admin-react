@@ -20,6 +20,7 @@ import {
   Project,
   BoxTemplate,
 } from "../../../services/api.services";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
 export interface ApprovalFlowHandle {
   save: () => Promise<boolean>;
@@ -69,6 +70,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           setProjects(projectsData);
         } catch (error) {
           console.error("Error fetching projects:", error);
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "An error occurred while fetching projects"
+          );
         }
       };
       fetchProjects();
@@ -99,6 +106,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             })
             .catch((err) => {
               console.error("Error fetching BoxTemplates:", err);
+              showAlert(
+                "error",
+                null,
+                "Error",
+                "An error occurred while fetching BoxTemplates"
+              );
               setBoxTemplates([]);
             });
         } else {
@@ -125,9 +138,18 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       save: async () => {
         try {
           const result = await handleSaveApprovalFlow(approvalFlowData);
+          if (result) {
+            showAlert("success", null, "Success", "Edited Successfully");
+          }
           return result !== null;
         } catch (error) {
           console.error("Error saving approval flow:", error);
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "An error occurred while editing the item"
+          );
           return false;
         }
       },
@@ -186,6 +208,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             selectedRowData.ID.toString(),
           ];
           handleProjectsChange(newSelection);
+          showAlert("success", null, "Success", "Added Successfully");
         }
         setSelectedRowData(null);
       }
@@ -272,16 +295,19 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     const handleBoxTemplateEdit = (box: BoxTemplate) => {
       setSelectedSubRowData(box);
       setIsModalOpen(true);
+      showAlert("info", null, "Info", "Edited Successfully");
     };
 
     const handleBoxTemplateDelete = (box: BoxTemplate) => {
       console.log("Delete BoxTemplate:", box);
       // فراخوانی متد حذف در صورت وجود
+      showAlert("success", null, "Success", "Deleted Successfully");
     };
 
     const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
       console.log("Duplicate BoxTemplate:", box);
       // فراخوانی متد duplicate در صورت وجود
+      showAlert("info", null, "Info", "Added Successfully");
     };
 
     const handleSubRowDoubleClick = (data: any) => {
@@ -296,8 +322,15 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           approvalFlowData.ID
         );
         setBoxTemplates(newList);
+        showAlert("success", null, "Success", "Edited Successfully");
       } catch (error) {
         console.error("Error reloading boxTemplates:", error);
+        showAlert(
+          "error",
+          null,
+          "Error",
+          "An error occurred while editing the item"
+        );
       }
     };
 
@@ -367,9 +400,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           <TwoColumnLayout.Item span={2}>
             {selectedRow && (
               <>
-                {/* نمایش لودینگ در جدول Approval Context */}
                 <div className="mb-2">
-                  {/* در صورت نیاز می‌توانید شرط لودینگ را اضافه کنید */}
                   <p className="text-center text-sm text-gray-600">
                     Loading Approval Context...
                   </p>
@@ -398,10 +429,10 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                       handleBoxTemplateDuplicate(selectedSubRowData);
                     }
                   }}
-                  showDuplicateIcon={true}
+                  showDuplicateIcon={false}
                   showEditIcon={true}
                   showAddIcon={true}
-                  showDeleteIcon={true}
+                  showDeleteIcon={false}
                   domLayout="autoHeight"
                 />
               </>

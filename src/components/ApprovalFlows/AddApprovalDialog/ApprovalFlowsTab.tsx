@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import { BoxTemplate, AFBtnItem } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
 import DeemedSection from "./BoxDeemed";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
 // تعریف اینترفیس Role
 export interface Role {
@@ -87,7 +88,8 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const [actDurationValue, setActDurationValue] = useState<string>("");
     const [orderValue, setOrderValue] = useState<string>("");
 
-    const [acceptChecked, setAcceptChecked] = useState<boolean>(true);
+    // تغییر چک‌باکس‌ها: وقتی تیک خورده ورودی مربوطه اینیبل می‌شود
+    const [acceptChecked, setAcceptChecked] = useState<boolean>(false);
     const [rejectChecked, setRejectChecked] = useState<boolean>(false);
 
     const [staticPostValue, setStaticPostValue] = useState<string>("");
@@ -149,6 +151,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           setAllRoles(roles);
         } catch (error) {
           console.error("Error fetching roles:", error);
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "An error occurred while fetching roles"
+          );
         }
       };
       fetchRoles();
@@ -161,6 +169,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           setBtnList(res);
         } catch (error) {
           console.error("Error fetching buttons:", error);
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "An error occurred while fetching buttons"
+          );
         }
       };
       fetchButtons();
@@ -178,6 +192,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           setActionBtnOptions(options);
         } catch (error) {
           console.error("Error fetching configurations:", error);
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "An error occurred while fetching Action Button configurations"
+          );
         }
       };
       fetchConfigurations();
@@ -252,11 +272,19 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             ? editData.MinNumberForReject.toString()
             : ""
         );
+        // ست کردن وضعیت چک‌باکس‌ها در حالت ادیت
+        setAcceptChecked(!!editData.ActionMode);
+        setRejectChecked(!!editData.MinNumberForReject);
+
         setDeemDay(editData.DeemDay || 0);
         setDeemCondition(editData.DeemCondition || 0);
         setDeemAction(editData.DeemAction || 0);
         setPreviewsStateId(editData.PreviewsStateId || null);
         setGoToPreviousStateID(editData.GoToPreviousStateID || null);
+        // رفع مشکل نمایش مقدار Action Button در حالت ویرایش:
+        setActionBtnID(
+          typeof editData.ActionBtnID === "number" ? editData.ActionBtnID : null
+        );
 
         if (!initialized) {
           if (editData.PredecessorStr) {
@@ -297,6 +325,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             })
             .catch((err) => {
               console.error("Error fetching approval context data:", err);
+              showAlert(
+                "error",
+                null,
+                "Error",
+                "An error occurred while fetching approval context data"
+              );
               setTableData([]);
             })
             .finally(() => {
@@ -322,7 +356,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setMinRejectValue("");
         setActDurationValue("");
         setOrderValue("");
-        setAcceptChecked(true);
+        setAcceptChecked(false);
         setRejectChecked(false);
         setCost1("");
         setCost2("");
@@ -366,23 +400,34 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
     const validateMinFields = (): boolean => {
       if (!acceptChecked && !rejectChecked) {
-        alert(
-          "لطفاً حداقل یکی از گزینه‌های Min Accept یا Min Reject را انتخاب کرده و مقدار معتبر وارد نمایید."
+        showAlert(
+          "error",
+          null,
+          "Error",
+          "Please select at least one of Min Accept or Min Reject and enter a valid value."
         );
         return false;
       }
       if (acceptChecked && !isStage) {
         const val = parseInt(minAcceptValue, 10);
         if (!minAcceptValue || isNaN(val) || val === 0) {
-          alert("لطفاً مقدار معتبر برای Min Accept (ActionMode) وارد نمایید.");
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "An error occurred while editing the item"
+          );
           return false;
         }
       }
       if (rejectChecked) {
         const val = parseInt(minRejectValue, 10);
         if (!minRejectValue || isNaN(val) || val === 0) {
-          alert(
-            "لطفاً مقدار معتبر برای Min Reject (MinNumberForReject) وارد نمایید."
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "An error occurred while editing the item"
           );
           return false;
         }
@@ -392,7 +437,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
     const handleAddOrUpdateRow = () => {
       if (!staticPostValue) {
-        alert("Static Post is empty!");
+        showAlert("error", null, "Error", "Static Post is empty!");
         return;
       }
       if (!validateMinFields()) {
@@ -421,6 +466,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         );
         setTableData(updated);
         resetForm();
+        showAlert("success", null, "Success", "Edited Successfully");
       } else {
         const newRow: TableRow = {
           id: uuidv4(),
@@ -436,22 +482,24 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           code: Number(codeValue) || 0,
         };
         setTableData([...tableData, newRow]);
+        showAlert("success", null, "Success", "Added Successfully");
       }
     };
 
     const handleDeleteRow = () => {
       if (!selectedRow) {
-        alert("No row is selected.");
+        showAlert("error", null, "Error", "No row is selected.");
         return;
       }
       const filtered = tableData.filter((r) => r.id !== selectedRow.id);
       setTableData(filtered);
       resetForm();
+      showAlert("success", null, "Success", "Deleted Successfully");
     };
 
     const handleDuplicateRow = () => {
       if (!selectedRow) {
-        alert("No row is selected for duplicate.");
+        showAlert("error", null, "Error", "No row is selected for duplicate.");
         return;
       }
       const duplicated: TableRow = {
@@ -459,6 +507,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         id: uuidv4(),
       };
       setTableData([...tableData, duplicated]);
+      showAlert("success", null, "Success", "Added Successfully");
     };
 
     const handleSelectRow = (data: TableRow) => {
@@ -544,6 +593,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 onChange={(e) => setNameValue(e.target.value)}
               />
             </div>
+            {/* ورودی مربوط به Min Accept */}
             {!isStage && (
               <div className="flex flex-col">
                 <label className="flex items-center text-sm text-gray-700 mb-1">
@@ -560,11 +610,11 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                   type="number"
                   value={minAcceptValue}
                   onChange={(e) => setMinAcceptValue(e.target.value)}
-                  disabled={acceptChecked}
+                  disabled={!acceptChecked}
                 />
               </div>
             )}
-            {/* ورودی Min Reject همیشه نمایش داده می‌شود */}
+            {/* ورودی مربوط به Min Reject */}
             <div className="flex flex-col">
               <label className="flex items-center text-sm text-gray-700 mb-1">
                 <input
@@ -580,7 +630,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 type="number"
                 value={minRejectValue}
                 onChange={(e) => setMinRejectValue(e.target.value)}
-                disabled={rejectChecked}
+                disabled={!rejectChecked}
               />
             </div>
             <div className="flex flex-col">
@@ -760,7 +810,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               </div>
             </div>
             {!isStage && (
-              // تغییر: قرار دادن DataTable در یک container با ارتفاع ثابت (مثلاً 33vh)
               <div className="mt-4" style={{ height: "33vh" }}>
                 {approvalContextLoading ? (
                   <p className="text-center text-sm text-gray-600">
@@ -784,7 +833,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                     onEdit={() => {}}
                     onDelete={handleDeleteRow}
                     onDuplicate={handleDuplicateRow}
-                    // استفاده از domLayout="normal" تا ارتفاع ثابت والد در نظر گرفته شود
                     domLayout="normal"
                   />
                 )}
@@ -872,7 +920,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 setStaticPostValue(selectedStaticPost.ID.toString());
                 closeModal();
               } else {
-                alert("هیچ ردیفی انتخاب نشده است.");
+                showAlert("error", null, "Error", "No row is selected.");
               }
             }}
             isSelectDisabled={!selectedStaticPost}
