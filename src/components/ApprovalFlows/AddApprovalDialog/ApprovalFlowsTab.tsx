@@ -61,6 +61,7 @@ export interface ApprovalFlowsTabData {
   goToPreviousStateIDValue: string;
   isStage: boolean;
   deemedEnabled: boolean;
+  actionBtnID: number | null;
 }
 
 export interface ApprovalFlowsTabRef {
@@ -130,11 +131,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const [isStage, setIsStage] = useState<boolean>(false);
     const [isDeemed, setIsDeemed] = useState<boolean>(true);
 
+    // اضافه کردن state برای Action Button
+    const [actionBtnOptions, setActionBtnOptions] = useState<
+      { value: number; label: string }[]
+    >([]);
+    const [actionBtnID, setActionBtnID] = useState<number | null>(null);
+
+    // state لودینگ برای Approval Context
+    const [approvalContextLoading, setApprovalContextLoading] =
+      useState<boolean>(false);
+
     useEffect(() => {
       const fetchRoles = async () => {
         try {
           const res = await api.getAllRoles();
-          // در صورت نیاز بررسی کنید که پاسخ به صورت آرایه باشد
           const roles = Array.isArray(res) ? res : res.data || [];
           setAllRoles(roles);
         } catch (error) {
@@ -156,6 +166,23 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       fetchButtons();
     }, [api]);
 
+    // دریافت تنظیمات برای Action Button
+    useEffect(() => {
+      const fetchConfigurations = async () => {
+        try {
+          const res = await api.getAllConfigurations();
+          const options = res.map((conf: any) => ({
+            value: conf.ID,
+            label: conf.Name,
+          }));
+          setActionBtnOptions(options);
+        } catch (error) {
+          console.error("Error fetching configurations:", error);
+        }
+      };
+      fetchConfigurations();
+    }, [api]);
+
     // ستون‌های جدول Approval Context با تغییر در valueGetter برای ستون "Post"
     const columnDefs = [
       {
@@ -170,7 +197,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           if (role && role.Name) {
             return role.Name;
           } else {
-            // اگر نام نقش پیدا نشد اما حداقل یکی از فیلدهای هزینه یا وزن مقدار داشته باشد، مقدار nPostID را برگردانیم
             if (
               params.data.cost1 ||
               params.data.weight1 ||
@@ -226,7 +252,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             ? editData.MinNumberForReject.toString()
             : ""
         );
-
         setDeemDay(editData.DeemDay || 0);
         setDeemCondition(editData.DeemCondition || 0);
         setDeemAction(editData.DeemAction || 0);
@@ -250,6 +275,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             setSelectedDefaultBtnIds([]);
           }
           // دریافت داده‌های Approval Context از API جدید
+          setApprovalContextLoading(true);
           api
             .getApprovalContextData(editData.ID)
             .then((approvalData) => {
@@ -272,6 +298,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             .catch((err) => {
               console.error("Error fetching approval context data:", err);
               setTableData([]);
+            })
+            .finally(() => {
+              setApprovalContextLoading(false);
             });
           setInitialized(true);
         }
@@ -295,7 +324,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setOrderValue("");
         setAcceptChecked(true);
         setRejectChecked(false);
-
         setCost1("");
         setCost2("");
         setCost3("");
@@ -307,18 +335,17 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setCodeValue("");
         setStaticPostValue("");
         setSelectedStaticPost(null);
-
         setSelectedPredecessors([]);
         setSelectedDefaultBtnIds([]);
         setTableData([]);
         setSelectedRow(null);
         setInitialized(false);
-
         setDeemDay(0);
         setDeemCondition(0);
         setDeemAction(0);
         setPreviewsStateId(null);
         setGoToPreviousStateID(null);
+        setActionBtnID(null);
       }
     }, [editData, initialized, api]);
 
@@ -439,7 +466,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       setStaticPostValue(data.nPostID);
       const foundRole = allRoles.find((r) => r.ID.toString() === data.nPostID);
       setSelectedStaticPost(foundRole || null);
-
       setCost1(String(data.cost1));
       setCost2(String(data.cost2));
       setCost3(String(data.cost3));
@@ -500,6 +526,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             goToPreviousStateID !== null ? goToPreviousStateID.toString() : "",
           isStage,
           deemedEnabled: isDeemed,
+          actionBtnID,
         };
       },
       validateMinFields: () => validateMinFields(),
@@ -537,6 +564,25 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 />
               </div>
             )}
+            {/* ورودی Min Reject همیشه نمایش داده می‌شود */}
+            <div className="flex flex-col">
+              <label className="flex items-center text-sm text-gray-700 mb-1">
+                <input
+                  type="checkbox"
+                  checked={rejectChecked}
+                  onChange={(e) => setRejectChecked(e.target.checked)}
+                  className="h-4 w-4 mr-2"
+                />
+                <span>Min Reject</span>
+              </label>
+              <DynamicInput
+                name=""
+                type="number"
+                value={minRejectValue}
+                onChange={(e) => setMinRejectValue(e.target.value)}
+                disabled={rejectChecked}
+              />
+            </div>
             <div className="flex flex-col">
               <DynamicInput
                 name="Act Duration"
@@ -714,27 +760,34 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               </div>
             </div>
             {!isStage && (
-              <div className="mt-4">
-                <DataTable
-                  columnDefs={columnDefs}
-                  rowData={tableData}
-                  onRowDoubleClick={(data) => {
-                    handleSelectRow(data);
-                  }}
-                  setSelectedRowData={(data) => {
-                    handleSelectRow(data);
-                  }}
-                  showDuplicateIcon={false}
-                  showEditIcon={false}
-                  showAddIcon={false}
-                  showDeleteIcon={false}
-                  showSearch={false}
-                  onAdd={() => {}}
-                  onEdit={() => {}}
-                  onDelete={handleDeleteRow}
-                  onDuplicate={handleDuplicateRow}
-                  domLayout="autoHeight"
-                />
+              // تغییر: قرار دادن DataTable در یک container با ارتفاع ثابت (مثلاً 33vh)
+              <div className="mt-4" style={{ height: "33vh" }}>
+                {approvalContextLoading ? (
+                  <p className="text-center text-sm text-gray-600">
+                    Loading Approval Context...
+                  </p>
+                ) : (
+                  <DataTable
+                    columnDefs={columnDefs}
+                    rowData={tableData}
+                    onRowDoubleClick={(data) => {
+                      handleSelectRow(data);
+                    }}
+                    setSelectedRowData={(data) => {
+                      handleSelectRow(data);
+                    }}
+                    showDuplicateIcon={false}
+                    showEditIcon={false}
+                    showAddIcon={false}
+                    showDeleteIcon={false}
+                    onAdd={() => {}}
+                    onEdit={() => {}}
+                    onDelete={handleDeleteRow}
+                    onDuplicate={handleDuplicateRow}
+                    // استفاده از domLayout="normal" تا ارتفاع ثابت والد در نظر گرفته شود
+                    domLayout="normal"
+                  />
+                )}
               </div>
             )}
           </div>
@@ -765,6 +818,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             boxTemplates={boxTemplates}
             disableMain={!isDeemed}
             showAdminSection={true}
+            actionBtnOptions={actionBtnOptions}
+            actionBtnID={actionBtnID}
+            setActionBtnID={setActionBtnID}
           />
         </main>
 

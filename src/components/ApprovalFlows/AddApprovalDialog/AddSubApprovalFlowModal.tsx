@@ -114,7 +114,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
             ? parseInt(formData.previewsStateIdValue, 10)
             : null,
           BtnIDs: btnIDsStr,
-          ActionBtnID: null,
+          ActionBtnID: formData.actionBtnID, // مقدار از فرم دریافت می‌شود
           MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
           Order: formData.orderValue ? parseInt(formData.orderValue, 10) : null,
           GoToPreviousStateID: formData.goToPreviousStateIDValue

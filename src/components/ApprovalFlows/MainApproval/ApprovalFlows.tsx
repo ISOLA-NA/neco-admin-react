@@ -366,36 +366,45 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
           <TwoColumnLayout.Item span={2}>
             {selectedRow && (
-              <DataTable
-                columnDefs={boxTemplateColumnDefs}
-                rowData={boxTemplates}
-                onRowDoubleClick={handleSubRowDoubleClick}
-                setSelectedRowData={setSelectedSubRowData}
-                onAdd={() => {
-                  setSelectedSubRowData(null);
-                  setIsModalOpen(true);
-                }}
-                onEdit={() => {
-                  if (selectedSubRowData) {
-                    handleBoxTemplateEdit(selectedSubRowData);
-                  }
-                }}
-                onDelete={() => {
-                  if (selectedSubRowData) {
-                    handleBoxTemplateDelete(selectedSubRowData);
-                  }
-                }}
-                onDuplicate={() => {
-                  if (selectedSubRowData) {
-                    handleBoxTemplateDuplicate(selectedSubRowData);
-                  }
-                }}
-                showDuplicateIcon={true}
-                showEditIcon={true}
-                showAddIcon={true}
-                showDeleteIcon={true}
-                domLayout="autoHeight"
-              />
+              <>
+                {/* نمایش لودینگ در جدول Approval Context */}
+                <div className="mb-2">
+                  {/* در صورت نیاز می‌توانید شرط لودینگ را اضافه کنید */}
+                  <p className="text-center text-sm text-gray-600">
+                    Loading Approval Context...
+                  </p>
+                </div>
+                <DataTable
+                  columnDefs={boxTemplateColumnDefs}
+                  rowData={boxTemplates}
+                  onRowDoubleClick={handleSubRowDoubleClick}
+                  setSelectedRowData={setSelectedSubRowData}
+                  onAdd={() => {
+                    setSelectedSubRowData(null);
+                    setIsModalOpen(true);
+                  }}
+                  onEdit={() => {
+                    if (selectedSubRowData) {
+                      handleBoxTemplateEdit(selectedSubRowData);
+                    }
+                  }}
+                  onDelete={() => {
+                    if (selectedSubRowData) {
+                      handleBoxTemplateDelete(selectedSubRowData);
+                    }
+                  }}
+                  onDuplicate={() => {
+                    if (selectedSubRowData) {
+                      handleBoxTemplateDuplicate(selectedSubRowData);
+                    }
+                  }}
+                  showDuplicateIcon={true}
+                  showEditIcon={true}
+                  showAddIcon={true}
+                  showDeleteIcon={true}
+                  domLayout="autoHeight"
+                />
+              </>
             )}
           </TwoColumnLayout.Item>
         </TwoColumnLayout>
