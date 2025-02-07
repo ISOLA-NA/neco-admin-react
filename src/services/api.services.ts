@@ -527,6 +527,44 @@ export interface WFAproval {
   LastModified: string;
 }
 
+// src/services/api.services.ts
+
+export interface EntityField {
+  ID: number;
+  DisplayName: string;
+  IsShowGrid: boolean;
+  IsEditableInWF: boolean;
+  CountInReject: number | null;
+  WFBOXName: string;
+  nEntityTypeID: number;
+  ColumnType: number;
+  Code: string | null;
+  Description: string;
+  ShowInTab: string;
+  metaType1: string | null;
+  metaType2: string | null;
+  metaType3: string | null;
+  metaType4: string | null;
+  metaType5: string | null;
+  metaTypeJson: string | null;
+  IsForceReadOnly: boolean;
+  IsUnique: boolean;
+  IsRequire: boolean;
+  IsMainColumn: boolean;
+  PrintCode: string;
+  IsRTL: boolean;
+  orderValue: number;
+  ShowInAlert: boolean;
+  CreatedTime: string;
+  ModifiedTime: string;
+  ModifiedById: string;
+  LookupMode: string | null;
+  IsRequireInWf: boolean;
+  BoolMeta1: boolean;
+  IsVisible: boolean;
+  LastModified: string;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -1181,6 +1219,36 @@ class ApiService {
       apiConst.getAllEntityType
     );
     return response.data;
+  }
+
+  async getEntityFieldByEntityTypeId(
+    entityTypeId: number
+  ): Promise<EntityField[]> {
+    const response = await httpClient.post<EntityField[]>(
+      apiConst.getEntityFieldByEntityTypeId,
+      { ID: entityTypeId } // ارسال شناسه به صورت آبجکت در body
+    );
+    return response.data;
+  }
+
+  async insertEntityField(data: EntityField): Promise<EntityField> {
+    const response = await httpClient.post<EntityField>(
+      apiConst.insertEntityField,
+      data
+    );
+    return response.data;
+  }
+
+  async updateEntityField(data: EntityField): Promise<EntityField> {
+    const response = await httpClient.post<EntityField>(
+      apiConst.updateEntityField,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteEntityField(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteEntityField, { ID: id });
   }
 
   async getTableTransmittal(): Promise<EntityTypeComplete[]> {

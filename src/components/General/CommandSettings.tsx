@@ -115,7 +115,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
         setErrorApiModes(null);
         try {
           const response: GetEnumResponse = await AppServices.getEnum({
-            str: "CmdType",
+            str: "DeemAction",
           });
           const apiModeOptions = Object.entries(response).map(([key, val]) => ({
             value: val,

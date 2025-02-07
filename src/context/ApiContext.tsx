@@ -37,6 +37,7 @@ import AppServices, {
   WfTemplateItem,
   BoxTemplate,
   WFAproval,
+  EntityField,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -146,6 +147,13 @@ interface ApiContextType {
   editApprovalFlow: (data: WfTemplateItem) => Promise<WfTemplateItem>;
 
   getAllEntityType: () => Promise<EntityType[]>;
+  getEntityFieldByEntityTypeId: (
+    entityTypeId: number
+  ) => Promise<EntityField[]>;
+  insertEntityField: (data: EntityField) => Promise<EntityField>;
+  updateEntityField: (data: EntityField) => Promise<EntityField>;
+  deleteEntityField: (id: number) => Promise<void>;
+
   getTableTransmittal: () => Promise<EntityTypeComplete[]>;
   insertEntityType: (data: EntityType) => Promise<EntityType>;
   updateEntityType: (data: EntityType) => Promise<EntityType>;
@@ -285,6 +293,12 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     editApprovalFlow: AppServices.editApprovalFlow.bind(AppServices),
 
     getAllEntityType: AppServices.getAllEntityType.bind(AppServices),
+    getEntityFieldByEntityTypeId:
+      AppServices.getEntityFieldByEntityTypeId.bind(AppServices),
+    insertEntityField: AppServices.insertEntityField.bind(AppServices),
+    updateEntityField: AppServices.updateEntityField.bind(AppServices),
+    deleteEntityField: AppServices.deleteEntityField.bind(AppServices),
+
     getTableTransmittal: AppServices.getTableTransmittal.bind(AppServices),
     insertEntityType: AppServices.insertEntityType.bind(AppServices),
     updateEntityType: AppServices.updateEntityType.bind(AppServices),
