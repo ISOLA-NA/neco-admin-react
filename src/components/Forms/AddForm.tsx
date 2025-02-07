@@ -407,12 +407,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             className="md:col-span-1"
           />
           <CustomTextarea
-            id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Description"
-            label="Description"
+            placeholder=""
             error={!!errors.description}
             errorMessage={errors.description}
             className="md:col-span-1 -mt-10"
