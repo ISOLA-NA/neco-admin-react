@@ -1,8 +1,10 @@
+// src/components/AddColumnForm.tsx
 import React, { useState, useCallback, useEffect } from "react";
 import { useApi } from "../../context/ApiContext";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSelector from "../utilities/DynamicSelector";
+import { showAlert } from "../utilities/Alert/DynamicAlert"; // ایمپورت Alert
 
 // Import dynamic controllers
 import Component1 from "./ControllerForms/TextController";
@@ -348,8 +350,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     try {
       if (isEdit) {
         await updateEntityField(payload);
+        showAlert("success", undefined, "Success", "Edited successfully");
       } else {
         await insertEntityField(payload);
+        showAlert("success", undefined, "Success", "Added successfully");
       }
       setIsLoading(false);
       if (onSave) onSave();
@@ -358,6 +362,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       setIsLoading(false);
       setErrors({ form: "An error occurred." });
       console.error(error);
+      showAlert("error", undefined, "Error", "Something wrong occurred");
     }
   };
 

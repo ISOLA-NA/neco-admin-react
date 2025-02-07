@@ -8,7 +8,6 @@ interface NumberControllerProps {
     maxValue: number | "";
     defaultValue: number | "";
   }) => void;
-  // پراپ اختیاری برای دریافت مقادیر اولیه
   initialMeta?: {
     minValue: number | "";
     maxValue: number | "";
@@ -20,7 +19,6 @@ const NumberController: React.FC<NumberControllerProps> = ({
   onMetaChange,
   initialMeta,
 }) => {
-  // مقداردهی اولیه از initialMeta (یا مقدار خالی)
   const [minValue, setMinValue] = useState<number | "">(
     initialMeta?.minValue ?? ""
   );
@@ -30,10 +28,8 @@ const NumberController: React.FC<NumberControllerProps> = ({
   const [defaultValue, setDefaultValue] = useState<number | "">(
     initialMeta?.defaultValue ?? ""
   );
-  // flag برای انجام مقداردهی اولیه تنها یکبار
   const [initialized, setInitialized] = useState(false);
 
-  // اگر initialMeta وجود داشته باشد و هنوز مقداردهی اولیه انجام نشده باشد، مقادیر را ست می‌کنیم
   useEffect(() => {
     if (initialMeta && !initialized) {
       setMinValue(initialMeta.minValue);
@@ -58,7 +54,6 @@ const NumberController: React.FC<NumberControllerProps> = ({
     setDefaultValue(value);
   };
 
-  // ارسال مقادیر به والد در هر تغییر
   useEffect(() => {
     onMetaChange({ minValue, maxValue, defaultValue });
   }, [minValue, maxValue, defaultValue, onMetaChange]);

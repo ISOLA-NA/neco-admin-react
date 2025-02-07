@@ -1,3 +1,4 @@
+// src/components/FormsCommand1.tsx
 import React, {
   useState,
   useEffect,
@@ -17,6 +18,7 @@ import { subTabDataMapping, SubForm } from "../TabHandler/tab/tabData";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { useApi } from "../../context/ApiContext";
 import { EntityField } from "../../services/api.services";
+import { showAlert } from "../utilities/Alert/DynamicAlert"; // ایمپورت Alert
 
 // تعریف کامپوننت CheckBox
 const CheckBox: React.FC<{
@@ -280,10 +282,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       try {
         console.log("Form Data to Save:", formData);
         await handleSaveForm(formData);
-        alert("Form saved successfully!");
+        showAlert("success", undefined, "Success", "Form saved successfully!");
       } catch (error) {
         console.error("Error saving form:", error);
-        alert("Failed to save form.");
+        showAlert("error", undefined, "Error", "Failed to save form.");
       }
     },
   }));
@@ -432,8 +434,35 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               showAddIcon={true}
               showDeleteIcon={true}
               onAdd={handleAddClick}
-              onDelete={() => {
-                console.log("Delete clicked for entity field");
+              onDelete={async () => {
+                if (!selectedRowData) {
+                  showAlert(
+                    "error",
+                    undefined,
+                    "Error",
+                    "No row selected for deletion"
+                  );
+                  return;
+                }
+                try {
+                  await api.deleteEntityField(selectedRowData.ID);
+                  showAlert(
+                    "success",
+                    undefined,
+                    "Success",
+                    "Deleted successfully"
+                  );
+                  setSelectedRowData(null);
+                  refreshEntityFields();
+                } catch (error) {
+                  console.error("Error deleting entity field: ", error);
+                  showAlert(
+                    "error",
+                    undefined,
+                    "Error",
+                    "Something wrong occurred"
+                  );
+                }
               }}
               onDuplicate={() => {
                 console.log("Duplicate clicked for entity field");
