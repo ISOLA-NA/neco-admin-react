@@ -1,3 +1,5 @@
+// src/components/FormsCommand1.tsx
+
 import React, {
   useState,
   useEffect,
@@ -101,10 +103,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   // state مربوط به مودال افزودن/ویرایش ستون
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // state مربوط به فایل‌های آپلود شده
-  const [, setWordFile] = useState<File | null>(null);
-  const [, setExcelFile] = useState<File | null>(null);
-
   // واکشی پروژه‌ها
   useEffect(() => {
     const fetchProjects = async () => {
@@ -123,21 +121,20 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   }, [api]);
 
   // واکشی داده‌های EntityField بر اساس selectedRow.ID
-  const refreshEntityFields = async () => {
-    try {
-      if (selectedRow && selectedRow.ID) {
-        const fields = await api.getEntityFieldByEntityTypeId(selectedRow.ID);
-        setEntityFields(fields);
-      } else {
-        setEntityFields([]);
-      }
-    } catch (error) {
-      console.error("Error fetching entity fields:", error);
-    }
-  };
-
   useEffect(() => {
-    refreshEntityFields();
+    const fetchEntityFields = async () => {
+      try {
+        if (selectedRow && selectedRow.ID) {
+          const fields = await api.getEntityFieldByEntityTypeId(selectedRow.ID);
+          setEntityFields(fields);
+        } else {
+          setEntityFields([]);
+        }
+      } catch (error) {
+        console.error("Error fetching entity fields:", error);
+      }
+    };
+    fetchEntityFields();
   }, [api, selectedRow]);
 
   // تنظیم داده‌های فرم بر اساس ردیف انتخاب شده
@@ -257,6 +254,20 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     setEditingData(null);
   };
 
+  // آماده‌سازی داده‌های EntityField جهت نمایش در DataTable
+  const entityFieldData = entityFields.map((field) => ({
+    ID: field.ID,
+    DisplayName: field.DisplayName,
+    ColumnType: field.ColumnType,
+    IsShowGrid: field.IsShowGrid ? "Yes" : "No",
+    IsEditableInWF: field.IsEditableInWF ? "Yes" : "No",
+    LastModified: field.LastModified,
+  }));
+
+  // state مربوط به فایل‌های آپلود شده
+  const [, setWordFile] = useState<File | null>(null);
+  const [, setExcelFile] = useState<File | null>(null);
+
   const handleWordUpload = (file: File) => {
     setWordFile(file);
     console.log("Word file selected:", file);
@@ -267,14 +278,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     console.log("Excel file selected:", file);
   };
 
-  // آماده‌سازی داده‌های EntityField جهت نمایش در DataTable
-  const entityFieldData = entityFields.map((field) => ({
-    ...field, // تمام خصوصیات اصلی
-    display_IsShowGrid: field.IsShowGrid ? "Yes" : "No",
-    display_IsEditableInWF: field.IsEditableInWF ? "Yes" : "No",
-  }));
-
-  // ارائه متد save به صورت imperative (برای فراخوانی از خارج از کامپوننت)
+  // ارائه متد save به صورت imperative
   useImperativeHandle(ref, () => ({
     save: async () => {
       try {
@@ -353,7 +357,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             onChange={handleGlobalChange}
           />
         </TwoColumnLayout.Item>
-        <TwoColumnLayout.Item span={1}>
+        <TwoColumnLayout.Item span={2}>
           <ListSelector
             title="Related Projects"
             columnDefs={[{ field: "Name", headerName: "Project Name" }]}
@@ -401,13 +405,13 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 },
                 {
                   headerName: "Show Grid",
-                  field: "display_IsShowGrid",
+                  field: "IsShowGrid",
                   sortable: true,
                   filter: true,
                 },
                 {
                   headerName: "Editable in WF",
-                  field: "display_IsEditableInWF",
+                  field: "IsEditableInWF",
                   sortable: true,
                   filter: true,
                 },
@@ -419,12 +423,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 },
               ]}
               rowData={entityFieldData}
-              onEdit={() => {
-                if (selectedRowData) {
-                  handleEditClick(selectedRowData);
-                } else {
-                  console.warn("هیچ ردیفی انتخاب نشده است");
-                }
+              onEdit={(rowData: any) => {
+                handleEditClick(rowData);
               }}
               setSelectedRowData={setSelectedRowData}
               showDuplicateIcon={false}
@@ -440,9 +440,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               }}
               domLayout="autoHeight"
               showSearch={true}
-              onRowDoubleClick={function (data: any): void {
-                throw new Error("Function not implemented.");
-              }}
             />
           </div>
         </TwoColumnLayout.Item>
@@ -475,7 +472,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
         <AddColumnForm
           onClose={handleAddModalClose}
-          onSave={refreshEntityFields}
           isEdit={!!editingData}
           existingData={editingData}
         />

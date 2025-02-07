@@ -1,5 +1,4 @@
-// src/components/AddColumnForm.tsx
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useApi } from "../../context/ApiContext";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
@@ -121,19 +120,22 @@ const typeOfInformationOptions = [
 
 interface AddColumnFormProps {
   onClose: () => void;
+  onSave?: () => void;
   isEdit?: boolean;
   existingData?: any;
 }
 
 const AddColumnForm: React.FC<AddColumnFormProps> = ({
   onClose,
+  onSave,
   isEdit = false,
   existingData = null,
 }) => {
   const { insertEntityField, updateEntityField } = useApi();
+  console.log("existingData:", existingData);
 
-  // حالت اولیه فرم (در حالت ادیت از existingData استفاده می‌شود)
-  const [formData, setFormData] = useState({
+  // حالت اولیه فرم؛ در حالت ادیت از existingData استفاده می‌شود
+  const getInitialFormData = () => ({
     formName: existingData ? existingData.DisplayName : "",
     order: existingData ? String(existingData.orderValue) : "",
     description: existingData ? existingData.Description : "",
@@ -143,6 +145,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     isEditableInWf: existingData ? existingData.IsEditableInWF : false,
     allowedWfBoxName: existingData ? existingData.WFBOXName : "",
     showInAlert: existingData ? existingData.ShowInAlert : false,
+    // فقط formName (نام ستون) ضروری است
     typeOfInformation: existingData
       ? Object.keys(columnTypeMapping).find(
           (key) => columnTypeMapping[key] === existingData.ColumnType
@@ -157,13 +160,67 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInTab: existingData ? existingData.ShowInTab : "",
   });
 
+  const [formData, setFormData] = useState(getInitialFormData());
+
+  // متادیتای داینامیک (برای کنترلرهایی مثل NumberController)
+  const [dynamicMeta, setDynamicMeta] = useState<any>({});
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // متادیتای داینامیک دریافتی از کامپوننت‌های فرزند (مثلاً NumberController)
-  const [dynamicMeta, setDynamicMeta] = useState<any>({});
+  // ریست فرم در حالت افزودن (isEdit=false)
+  useEffect(() => {
+    if (!isEdit) {
+      setFormData({
+        formName: "",
+        order: "",
+        description: "",
+        command: "",
+        isRequiredInWf: false,
+        printCode: "",
+        isEditableInWf: false,
+        allowedWfBoxName: "",
+        showInAlert: false,
+        typeOfInformation: "component1",
+        required: false,
+        mainColumns: false,
+        showInListView: false,
+        rightToLeft: false,
+        readOnly: false,
+        metaColumnName: "",
+        showInTab: "",
+      });
+      setDynamicMeta({});
+      setErrors({});
+    }
+  }, [isEdit, existingData]);
 
-  // استفاده از useCallback برای ثابت نگه داشتن مرجع تابع handleMetaChange
+  // به روز رسانی state در حالت ادیت وقتی existingData تغییر می‌کند
+  useEffect(() => {
+    if (isEdit && existingData) {
+      setFormData(getInitialFormData());
+      if (
+        existingData.ColumnType === columnTypeMapping["component4"] ||
+        existingData.metaType1 ||
+        existingData.metaType2 ||
+        existingData.metaType3
+      ) {
+        setDynamicMeta({
+          defaultValue: existingData.metaType1
+            ? parseFloat(existingData.metaType1)
+            : "",
+          minValue: existingData.metaType2
+            ? parseFloat(existingData.metaType2)
+            : "",
+          maxValue: existingData.metaType3
+            ? parseFloat(existingData.metaType3)
+            : "",
+        });
+      }
+    }
+  }, [isEdit, existingData]);
+
+  // ثابت نگه داشتن مرجع تابع handleMetaChange
   const handleMetaChange = useCallback((meta: any) => {
     setDynamicMeta(meta);
   }, []);
@@ -186,17 +243,50 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }));
   };
 
-  // رندر کامپوننت داینامیک (مثلاً NumberController)
+  // محاسبه اولیه متادیتای داینامیک برای کنترلر عدد (component4)
+  const initialDynamicMeta =
+    isEdit && existingData && formData.typeOfInformation === "component4"
+      ? {
+          minValue: existingData.metaType2
+            ? parseFloat(existingData.metaType2)
+            : "",
+          maxValue: existingData.metaType3
+            ? parseFloat(existingData.metaType3)
+            : "",
+          defaultValue: existingData.metaType1
+            ? parseFloat(existingData.metaType1)
+            : "",
+        }
+      : undefined;
+
+  // رندر کامپوننت داینامیک
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
-    return SelectedComponent ? (
-      <SelectedComponent onMetaChange={handleMetaChange} />
-    ) : null;
+    if (!SelectedComponent) return null;
+    if (formData.typeOfInformation === "component4") {
+      return (
+        <SelectedComponent
+          onMetaChange={handleMetaChange}
+          initialMeta={initialDynamicMeta}
+        />
+      );
+    }
+    return <SelectedComponent onMetaChange={handleMetaChange} />;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
+
+    // اعتبارسنجی تنها بر روی formName
+    if (!formData.formName.trim()) {
+      setErrors({ formName: "Column Name is required." });
+      setIsLoading(false);
+      return;
+    }
+
+    const currentTimestamp = new Date().toISOString();
 
     const payload: any = {
       DisplayName: formData.formName,
@@ -208,7 +298,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
-      // در صورت انتخاب Number (component4) مقادیر متادیتا به رشته تبدیل می‌شوند
       metaType1:
         formData.typeOfInformation === "component4"
           ? dynamicMeta.defaultValue != null
@@ -236,18 +325,24 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       IsMainColumn: formData.mainColumns,
       IsRequireInWf: formData.isRequiredInWf,
       IsRTL: formData.rightToLeft,
-      orderValue: parseFloat(formData.order),
+      orderValue: parseFloat(formData.order) || 0,
       ShowInAlert: formData.showInAlert,
       ShowInTab: formData.showInTab,
-      CreatedTime: new Date().toISOString(),
-      ModifiedTime: new Date().toISOString(),
-      ModifiedById: null,
+      CreatedTime:
+        isEdit && existingData
+          ? existingData.CreatedTime
+          : new Date().toISOString(),
+      ModifiedTime: currentTimestamp,
+      ModifiedById:
+        isEdit && existingData
+          ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
+          : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
       LookupMode: null,
       BoolMeta1: false,
       metaType5: null,
-      ID: 0,
+      ID: isEdit && existingData ? existingData.ID : 0,
       IsVisible: true,
-      LastModified: null,
+      LastModified: currentTimestamp,
     };
 
     try {
@@ -257,6 +352,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         await insertEntityField(payload);
       }
       setIsLoading(false);
+      if (onSave) onSave();
       onClose();
     } catch (error: any) {
       setIsLoading(false);
@@ -280,7 +376,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
       <div className="w-full bg-white rounded-lg overflow-auto flex flex-col">
         <h2 className="text-3xl font-semibold mb-8 text-center">
-          Add New Column
+          {isEdit ? "Edit Column" : "Add New Column"}
         </h2>
         <form
           className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-12 flex-grow"
@@ -303,9 +399,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             value={formData.order}
             placeholder="Order"
             onChange={handleChange}
-            required
-            error={!!errors.order}
-            errorMessage={errors.order}
             className="md:col-span-1"
           />
           <CustomTextarea
@@ -314,7 +407,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             value={formData.description}
             onChange={handleChange}
             placeholder="Description"
-            required
             label="Description"
             error={!!errors.description}
             errorMessage={errors.description}
@@ -326,8 +418,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             selectedValue={formData.command}
             onChange={handleSelectChange}
             label="Command"
-            error={!!errors.command}
-            errorMessage={errors.command}
             className="md:col-span-1 -mt-16"
           />
           <div className="flex items-center md:col-span-1 -mt-8">
@@ -352,9 +442,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             value={formData.printCode}
             placeholder="Print Code"
             onChange={handleChange}
-            required
-            error={!!errors.printCode}
-            errorMessage={errors.printCode}
             className="md:col-span-1 -mt-8"
           />
           <div className="flex flex-col md:col-span-2 space-y-4 -mt-8">
@@ -381,9 +468,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 value={formData.allowedWfBoxName}
                 placeholder="Workflow Box Name"
                 onChange={handleChange}
-                required
-                error={!!errors.allowedWfBoxName}
-                errorMessage={errors.allowedWfBoxName}
                 className="flex-1"
               />
               <div className="flex items-center">
@@ -410,8 +494,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             selectedValue={formData.typeOfInformation}
             onChange={handleSelectChange}
             label="Type of Information"
-            error={!!errors.typeOfInformation}
-            errorMessage={errors.typeOfInformation}
             className="md:col-span-2 -mt-2"
           />
           <div className="flex flex-wrap md:col-span-2 space-x-4">
@@ -503,9 +585,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               value={formData.metaColumnName}
               onChange={handleChange}
               placeholder="Meta Column Name"
-              required
-              error={!!errors.metaColumnName}
-              errorMessage={errors.metaColumnName}
               className="flex-1"
             />
             <DynamicInput
@@ -514,9 +593,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               value={formData.showInTab}
               onChange={handleChange}
               placeholder="Show in Tab"
-              required
-              error={!!errors.showInTab}
-              errorMessage={errors.showInTab}
               className="flex-1"
             />
           </div>
@@ -529,6 +605,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               type="button"
               className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
               onClick={() => {
+                // پاکسازی فرم در صورت لغو
                 setFormData({
                   formName: "",
                   order: "",
@@ -548,8 +625,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   metaColumnName: "",
                   showInTab: "",
                 });
-                setErrors({});
                 setDynamicMeta({});
+                setErrors({});
                 onClose();
               }}
             >
@@ -562,7 +639,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               }`}
               disabled={isLoading}
             >
-              {isLoading ? "Adding..." : "Add Column"}
+              {isLoading
+                ? isEdit
+                  ? "Updating..."
+                  : "Adding..."
+                : isEdit
+                ? "Update Column"
+                : "Add Column"}
             </button>
           </div>
         </form>

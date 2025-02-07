@@ -8,14 +8,40 @@ interface NumberControllerProps {
     maxValue: number | "";
     defaultValue: number | "";
   }) => void;
+  // پراپ اختیاری برای دریافت مقادیر اولیه
+  initialMeta?: {
+    minValue: number | "";
+    maxValue: number | "";
+    defaultValue: number | "";
+  };
 }
 
 const NumberController: React.FC<NumberControllerProps> = ({
   onMetaChange,
+  initialMeta,
 }) => {
-  const [minValue, setMinValue] = useState<number | "">("");
-  const [maxValue, setMaxValue] = useState<number | "">("");
-  const [defaultValue, setDefaultValue] = useState<number | "">("");
+  // مقداردهی اولیه از initialMeta (یا مقدار خالی)
+  const [minValue, setMinValue] = useState<number | "">(
+    initialMeta?.minValue ?? ""
+  );
+  const [maxValue, setMaxValue] = useState<number | "">(
+    initialMeta?.maxValue ?? ""
+  );
+  const [defaultValue, setDefaultValue] = useState<number | "">(
+    initialMeta?.defaultValue ?? ""
+  );
+  // flag برای انجام مقداردهی اولیه تنها یکبار
+  const [initialized, setInitialized] = useState(false);
+
+  // اگر initialMeta وجود داشته باشد و هنوز مقداردهی اولیه انجام نشده باشد، مقادیر را ست می‌کنیم
+  useEffect(() => {
+    if (initialMeta && !initialized) {
+      setMinValue(initialMeta.minValue);
+      setMaxValue(initialMeta.maxValue);
+      setDefaultValue(initialMeta.defaultValue);
+      setInitialized(true);
+    }
+  }, [initialMeta, initialized]);
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value === "" ? "" : parseFloat(e.target.value);
@@ -32,6 +58,7 @@ const NumberController: React.FC<NumberControllerProps> = ({
     setDefaultValue(value);
   };
 
+  // ارسال مقادیر به والد در هر تغییر
   useEffect(() => {
     onMetaChange({ minValue, maxValue, defaultValue });
   }, [minValue, maxValue, defaultValue, onMetaChange]);
