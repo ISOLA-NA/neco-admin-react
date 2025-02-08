@@ -11,14 +11,12 @@ export interface Rule {
   title: string;
   value: any;
   name: string;
-  // در صورت نیاز، سایر کلیدهای اختصاصی (مانند entityField، entityValue، setting و …) را تعریف کنید
   [key: string]: any;
 }
 
 export function initEntity(entity: Entity): Rule {
   let field = entity.Field;
   let value = entity.Value;
-  // زمانی که از lessonLearn فراخوانی شود
   if (field === undefined) {
     field = entity;
     value = {

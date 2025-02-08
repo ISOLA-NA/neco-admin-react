@@ -1,109 +1,117 @@
-import React, { useState } from "react";
+// src/components/ControllerForms/ChoiceController.tsx
+import React, { useState, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 
 interface ChoiceControllerProps {
-  onChoicesChange?: (choices: string[]) => void; // مدیریت تغییر انتخاب‌ها
-  onDisplayTypeChange?: (type: "dropdown" | "radio" | "checkbox") => void; // تغییر نوع نمایش
+  onMetaChange: (meta: {
+    metaType1: string;
+    metaType2: "drop" | "radio" | "check";
+    metaType3: string;
+    metaType4: string;
+  }) => void;
+  initialMeta?: {
+    metaType1?: string;
+    metaType2?: "drop" | "radio" | "check";
+    metaType3?: string;
+    metaType4?: string;
+  };
 }
 
 const ChoiceController: React.FC<ChoiceControllerProps> = ({
-  onChoicesChange,
-  onDisplayTypeChange,
+  onMetaChange,
+  initialMeta,
 }) => {
-  const [choices, setChoices] = useState<string>("");
-  const [displayType, setDisplayType] = useState<
-    "dropdown" | "radio" | "checkbox"
-  >("dropdown");
-  const [defaultValue, setDefaultValue] = useState<string>("");
+  const [metaTypes, setMetaTypes] = useState({
+    metaType1: initialMeta?.metaType1 || "",
+    metaType2: initialMeta?.metaType2 || "drop",
+    metaType3: initialMeta?.metaType3 || "",
+    metaType4: initialMeta?.metaType4 || "",
+  });
 
-  const handleChoicesChange = (value: string) => {
-    const updatedChoices = value
-      .split("\n")
-      .map((choice) => choice.trim())
-      .filter(Boolean);
-    setChoices(value);
-    onChoicesChange?.(updatedChoices);
+  useEffect(() => {
+    onMetaChange(metaTypes);
+  }, [metaTypes, onMetaChange]);
+
+  const handleDisplayTypeChange = (type: "drop" | "radio" | "check") => {
+    setMetaTypes((prev) => ({ ...prev, metaType2: type }));
   };
 
-  const handleDisplayTypeChange = (type: "dropdown" | "radio" | "checkbox") => {
-    setDisplayType(type);
-    onDisplayTypeChange?.(type);
+  const handleChoicesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMetaTypes((prev) => ({ ...prev, metaType3: e.target.value }));
+  };
+
+  const handleDefaultValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMetaTypes((prev) => ({ ...prev, metaType1: e.target.value }));
   };
 
   return (
-    <div className="p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* انتخاب نوع نمایش */}
-        <div>
-          <label className="block text-gray-700 mb-2 font-medium">
+    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Display Type Selection */}
+        <div className="space-y-4">
+          <h3 className="text-gray-700 font-medium">
             Display choices using:
-          </label>
+          </h3>
           <div className="space-y-2">
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
                 name="displayType"
-                value="dropdown"
-                checked={displayType === "dropdown"}
-                onChange={() => handleDisplayTypeChange("dropdown")}
-                className="text-purple-600"
+                value="drop"
+                checked={metaTypes.metaType2 === "drop"}
+                onChange={() => handleDisplayTypeChange("drop")}
+                className="text-purple-600 focus:ring-purple-500"
               />
-              <span>Drop-Down Menu</span>
+              <span className="text-gray-700">Drop-Down Menu</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
                 name="displayType"
                 value="radio"
-                checked={displayType === "radio"}
+                checked={metaTypes.metaType2 === "radio"}
                 onChange={() => handleDisplayTypeChange("radio")}
-                className="text-purple-600"
+                className="text-purple-600 focus:ring-purple-500"
               />
-              <span>Radio Buttons</span>
+              <span className="text-gray-700">Radio Buttons</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="radio"
                 name="displayType"
-                value="checkbox"
-                checked={displayType === "checkbox"}
-                onChange={() => handleDisplayTypeChange("checkbox")}
-                className="text-purple-600"
+                value="check"
+                checked={metaTypes.metaType2 === "check"}
+                onChange={() => handleDisplayTypeChange("check")}
+                className="text-purple-600 focus:ring-purple-500"
               />
-              <span>Checkboxes (allow multiple selections)</span>
+              <span className="text-gray-700">Checkboxes</span>
             </label>
           </div>
         </div>
 
-        {/* لیست انتخاب‌ها */}
-        <div>
-          {/* <label className="block text-gray-700 mb-2 font-medium">
-            Type each choice on a separate line:
-          </label> */}
+        {/* Choices Input */}
+        <div className="space-y-4">
           <CustomTextarea
-            id="choices"
-            name="Type each choice on a separate line:"
-            value={choices}
-            onChange={(e) => handleChoicesChange(e.target.value)}
-            placeholder=""
-            rows={3}
-            className="resize-none mt-10"
+            name="choices"
+            value={metaTypes.metaType3}
+            onChange={handleChoicesChange}
+            placeholder="Type each choice on a separate line"
+            rows={4}
+            className="w-full resize-none"
           />
         </div>
       </div>
 
-      {/* مقدار پیش‌فرض */}
+      {/* Default Value Input */}
       <div className="mt-4">
-        {/* <label className="block text-gray-700 mb-2 font-medium">
-          Default value:
-        </label> */}
         <DynamicInput
           name="defaultValue"
           type="text"
-          value={defaultValue}
-          placeholder=""
-          onChange={(e) => setDefaultValue(e.target.value)}
+          value={metaTypes.metaType1}
+          onChange={handleDefaultValueChange}
+          placeholder="Default value"
+          className="w-full"
         />
       </div>
     </div>

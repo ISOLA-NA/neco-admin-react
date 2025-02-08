@@ -4,7 +4,7 @@ import { useApi } from "../../context/ApiContext";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSelector from "../utilities/DynamicSelector";
-import { showAlert } from "../utilities/Alert/DynamicAlert"; // ایمپورت Alert
+import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 // Import dynamic controllers
 import Component1 from "./ControllerForms/TextController";
@@ -36,19 +36,19 @@ import Component25 from "./ControllerForms/MapController";
 // نگاشت کامپوننت‌ها به شماره ColumnType مطابق با منطق initEntity شما
 const columnTypeMapping: { [key: string]: number } = {
   component1: 15, // Text → case 15 (Input Text)
-  component2: 1, // RichText → case 1 (Textarea)
-  component3: 2, // Choice → case 2
-  component4: 3, // Number → case 3
-  component5: 4, // Date Time → case 4
+  component2: 1,  // RichText → case 1 (Textarea)
+  component3: 2,  // Choice → case 2
+  component4: 3,  // Number → case 3
+  component5: 4,  // Date Time → case 4
   component6: 21, // Persian Date → case 21
-  component7: 5, // Lookup → case 5
+  component7: 5,  // Lookup → case 5
   component8: 19, // Post PickerList → case 19
   component9: 34, // Lookup RealValue → case 34
   component10: 35, // Lookup AdvanceTable → case 35
   component11: 17, // Advance LookupAdvanceTable → case 17
   component12: 30, // Lookup Image → case 30
-  component13: 6, // Yes No → case 6
-  component14: 9, // Attach File → case 9
+  component13: 6,  // Yes No → case 6
+  component14: 9,  // Attach File → case 9
   component15: 26, // Picture Box → case 26
   component16: 10, // Table → case 10
   component17: 16, // PFILookup → case 16
@@ -164,7 +164,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
   const [formData, setFormData] = useState(getInitialFormData());
 
-  // متادیتای داینامیک (برای کنترلرهایی مثل NumberController)
+  // متادیتای داینامیک (برای کنترلرهایی مثل NumberController و ChoiceController)
   const [dynamicMeta, setDynamicMeta] = useState<any>({});
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -199,81 +199,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
   // به روز رسانی state در حالت ادیت وقتی existingData تغییر می‌کند
   useEffect(() => {
-    if (isEdit && existingData) {
+    if (isEdit) {
       setFormData(getInitialFormData());
-      if (
-        existingData.ColumnType === columnTypeMapping["component4"] ||
-        existingData.metaType1 ||
-        existingData.metaType2 ||
-        existingData.metaType3
-      ) {
-        setDynamicMeta({
-          defaultValue: existingData.metaType1
-            ? parseFloat(existingData.metaType1)
-            : "",
-          minValue: existingData.metaType2
-            ? parseFloat(existingData.metaType2)
-            : "",
-          maxValue: existingData.metaType3
-            ? parseFloat(existingData.metaType3)
-            : "",
-        });
-      }
     }
   }, [isEdit, existingData]);
 
-  // ثابت نگه داشتن مرجع تابع handleMetaChange
-  const handleMetaChange = useCallback((meta: any) => {
-    setDynamicMeta(meta);
-  }, []);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // محاسبه اولیه متادیتای داینامیک برای کنترلر عدد (component4)
-  const initialDynamicMeta =
-    isEdit && existingData && formData.typeOfInformation === "component4"
-      ? {
-          minValue: existingData.metaType2
-            ? parseFloat(existingData.metaType2)
-            : "",
-          maxValue: existingData.metaType3
-            ? parseFloat(existingData.metaType3)
-            : "",
-          defaultValue: existingData.metaType1
-            ? parseFloat(existingData.metaType1)
-            : "",
-        }
-      : undefined;
-
-  // رندر کامپوننت داینامیک
-  const renderSelectedComponent = () => {
-    const SelectedComponent = componentMapping[formData.typeOfInformation];
-    if (!SelectedComponent) return null;
-    if (formData.typeOfInformation === "component4") {
-      return (
-        <SelectedComponent
-          onMetaChange={handleMetaChange}
-          initialMeta={initialDynamicMeta}
-        />
-      );
-    }
-    return <SelectedComponent onMetaChange={handleMetaChange} />;
+  const handleChange = (field: keyof typeof formData, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -300,23 +232,30 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
+      // اگر نوع انتخاب شده Number (component4) یا Choice (component3) باشد، از dynamicMeta استفاده می‌کنیم
       metaType1:
         formData.typeOfInformation === "component4"
           ? dynamicMeta.defaultValue != null
             ? dynamicMeta.defaultValue.toString()
             : ""
+          : formData.typeOfInformation === "component3"
+          ? dynamicMeta.metaType1 || formData.metaColumnName || ""
           : formData.metaColumnName || "",
       metaType2:
         formData.typeOfInformation === "component4"
           ? dynamicMeta.minValue != null
             ? dynamicMeta.minValue.toString()
             : ""
+          : formData.typeOfInformation === "component3"
+          ? dynamicMeta.metaType2 || ""
           : "",
       metaType3:
         formData.typeOfInformation === "component4"
           ? dynamicMeta.maxValue != null
             ? dynamicMeta.maxValue.toString()
             : ""
+          : formData.typeOfInformation === "component3"
+          ? dynamicMeta.metaType3 || ""
           : "",
       metaType4: formData.showInTab || "",
       metaTypeJson: null,
@@ -366,10 +305,53 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   };
 
-  const commandOptions = [
-    { value: "command1", label: "Command 1" },
-    { value: "command2", label: "Command 2" },
-  ];
+  // تنظیم initial meta برای کنترلر Number (component4)
+  const initialDynamicMeta =
+    isEdit && existingData && formData.typeOfInformation === "component4"
+      ? {
+          minValue: existingData.metaType2
+            ? parseFloat(existingData.metaType2)
+            : "",
+          maxValue: existingData.metaType3
+            ? parseFloat(existingData.metaType3)
+            : "",
+          defaultValue: existingData.metaType1
+            ? parseFloat(existingData.metaType1)
+            : "",
+        }
+      : undefined;
+
+  // تنظیم initial meta برای ChoiceController (component3)
+  const initialChoiceMeta =
+    isEdit && existingData && formData.typeOfInformation === "component3"
+      ? {
+          metaType1: existingData.metaType1 || "",
+          metaType2: existingData.metaType2 || "drop",
+          metaType3: existingData.metaType3 || "",
+        }
+      : undefined;
+
+  const renderSelectedComponent = () => {
+    const SelectedComponent = componentMapping[formData.typeOfInformation];
+    if (!SelectedComponent) return null;
+    if (formData.typeOfInformation === "component4") {
+      return (
+        <SelectedComponent
+          onMetaChange={setDynamicMeta}
+          initialMeta={initialDynamicMeta}
+        />
+      );
+    }
+    if (formData.typeOfInformation === "component3") {
+      return (
+        <SelectedComponent
+          onMetaChange={setDynamicMeta}
+          initialMeta={initialChoiceMeta}
+        />
+      );
+    }
+    return <SelectedComponent onMetaChange={setDynamicMeta} />;
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-4 -mt-16">
@@ -392,34 +374,32 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             type="text"
             value={formData.formName}
             placeholder="Column Name"
-            onChange={handleChange}
-            required
-            error={!!errors.formName}
-            errorMessage={errors.formName}
-            className="md:col-span-1"
+            onChange={(e) => handleChange("formName", e.target.value)}
+            required={true}
           />
           <DynamicInput
             name="order"
             type="number"
             value={formData.order}
             placeholder="Order"
-            onChange={handleChange}
+            onChange={(e) => handleChange("order", e.target.value)}
             className="md:col-span-1"
           />
           <CustomTextarea
             name="description"
             value={formData.description}
-            onChange={handleChange}
+            onChange={(e) => handleChange("description", e.target.value)}
             placeholder=""
-            error={!!errors.description}
-            errorMessage={errors.description}
             className="md:col-span-1 -mt-10"
           />
           <DynamicSelector
             name="command"
-            options={commandOptions}
+            options={[
+              { value: "command1", label: "Command 1" },
+              { value: "command2", label: "Command 2" },
+            ]}
             selectedValue={formData.command}
-            onChange={handleSelectChange}
+            onChange={(e) => handleChange("command", e.target.value)}
             label="Command"
             className="md:col-span-1 -mt-16"
           />
@@ -429,7 +409,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               id="isRequiredInWf"
               name="isRequiredInWf"
               checked={formData.isRequiredInWf}
-              onChange={handleChange}
+              onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
             <label
@@ -444,7 +424,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             type="text"
             value={formData.printCode}
             placeholder="Print Code"
-            onChange={handleChange}
+            onChange={(e) => handleChange("printCode", e.target.value)}
             className="md:col-span-1 -mt-8"
           />
           <div className="flex flex-col md:col-span-2 space-y-4 -mt-8">
@@ -455,7 +435,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   id="isEditableInWf"
                   name="isEditableInWf"
                   checked={formData.isEditableInWf}
-                  onChange={handleChange}
+                  onChange={(e) =>
+                    handleChange("isEditableInWf", e.target.checked)
+                  }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
                 <label
@@ -470,7 +452,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 type="text"
                 value={formData.allowedWfBoxName}
                 placeholder="Workflow Box Name"
-                onChange={handleChange}
+                onChange={(e) =>
+                  handleChange("allowedWfBoxName", e.target.value)
+                }
                 className="flex-1"
               />
               <div className="flex items-center">
@@ -479,7 +463,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   id="showInAlert"
                   name="showInAlert"
                   checked={formData.showInAlert}
-                  onChange={handleChange}
+                  onChange={(e) =>
+                    handleChange("showInAlert", e.target.checked)
+                  }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
                 <label
@@ -495,7 +481,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             name="typeOfInformation"
             options={typeOfInformationOptions}
             selectedValue={formData.typeOfInformation}
-            onChange={handleSelectChange}
+            onChange={(e) =>
+              handleChange("typeOfInformation", e.target.value)
+            }
             label="Type of Information"
             className="md:col-span-2 -mt-2"
           />
@@ -506,7 +494,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 id="required"
                 name="required"
                 checked={formData.required}
-                onChange={handleChange}
+                onChange={(e) => handleChange("required", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
               <label
@@ -522,7 +510,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 id="mainColumns"
                 name="mainColumns"
                 checked={formData.mainColumns}
-                onChange={handleChange}
+                onChange={(e) => handleChange("mainColumns", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
               <label
@@ -538,7 +526,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 id="showInListView"
                 name="showInListView"
                 checked={formData.showInListView}
-                onChange={handleChange}
+                onChange={(e) =>
+                  handleChange("showInListView", e.target.checked)
+                }
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
               <label
@@ -554,7 +544,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 id="rightToLeft"
                 name="rightToLeft"
                 checked={formData.rightToLeft}
-                onChange={handleChange}
+                onChange={(e) => handleChange("rightToLeft", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
               <label
@@ -572,7 +562,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 id="readOnly"
                 name="readOnly"
                 checked={formData.readOnly}
-                onChange={handleChange}
+                onChange={(e) => handleChange("readOnly", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
               <label
@@ -586,7 +576,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               name="metaColumnName"
               type="text"
               value={formData.metaColumnName}
-              onChange={handleChange}
+              onChange={(e) => handleChange("metaColumnName", e.target.value)}
               placeholder="Meta Column Name"
               className="flex-1"
             />
@@ -594,12 +584,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               name="showInTab"
               type="text"
               value={formData.showInTab}
-              onChange={handleChange}
+              onChange={(e) => handleChange("showInTab", e.target.value)}
               placeholder="Show in Tab"
               className="flex-1"
             />
           </div>
-          {/* رندر کامپوننت داینامیک (مثلاً NumberController) */}
+          {/* رندر کنترلر داینامیک (NumberController یا ChoiceController) */}
           <div className="mb-8 w-full md:col-span-2 -mt-8">
             {renderSelectedComponent()}
           </div>

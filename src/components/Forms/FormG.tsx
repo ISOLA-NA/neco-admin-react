@@ -7,6 +7,7 @@ import CtrTextBox from "./ControllerForms/TextController";
 import CtrTextArea from "./ControllerForms/RichTextController";
 import CtrRadio from "./ControllerForms/ChoiceController";
 import CtrInputNumber from "./ControllerForms/NumberController";
+import CtrSelect from "./ControllerForms/ChoiceController";
 // … سایر کامپوننت‌ها (به نام‌هایی مانند CtrSelect, CtrDatePicker, …)
 
 interface FormGProps {
@@ -21,6 +22,7 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrTextArea,
   CtrRadio,
   CtrInputNumber,
+  CtrSelect
   // … نگاشت سایر کامپوننت‌ها بر اساس rule.name
 };
 
