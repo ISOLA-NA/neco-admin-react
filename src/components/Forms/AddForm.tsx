@@ -1,5 +1,5 @@
 // src/components/AddColumnForm.tsx
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useApi } from "../../context/ApiContext";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
@@ -33,36 +33,36 @@ import Component23 from "./ControllerForms/ExcelCalculator";
 import Component24 from "./ControllerForms/TabController";
 import Component25 from "./ControllerForms/MapController";
 
-// نگاشت کامپوننت‌ها به شماره ColumnType مطابق با منطق initEntity شما
+// Mapping of column types
 const columnTypeMapping: { [key: string]: number } = {
-  component1: 15, // Text → case 15 (Input Text)
-  component2: 1,  // RichText → case 1 (Textarea)
-  component3: 2,  // Choice → case 2
-  component4: 3,  // Number → case 3
-  component5: 4,  // Date Time → case 4
-  component6: 21, // Persian Date → case 21
-  component7: 5,  // Lookup → case 5
-  component8: 19, // Post PickerList → case 19
-  component9: 34, // Lookup RealValue → case 34
-  component10: 35, // Lookup AdvanceTable → case 35
-  component11: 17, // Advance LookupAdvanceTable → case 17
-  component12: 30, // Lookup Image → case 30
-  component13: 6,  // Yes No → case 6
-  component14: 9,  // Attach File → case 9
-  component15: 26, // Picture Box → case 26
-  component16: 10, // Table → case 10
-  component17: 16, // PFILookup → case 16
-  component18: 20, // Seqnial Number → case 20
-  component19: 22, // Advance Table → case 22
-  component20: 24, // Word Panel → case 24
-  component21: 25, // Excecl Panel → case 25
-  component22: 27, // Calculated Field → case 27
-  component23: 29, // Excel Calculator → case 29
-  component24: 32, // Tab → case 32
-  component25: 28, // Map → case 28
+  component1: 15,
+  component2: 1,
+  component3: 2,
+  component4: 3,
+  component5: 4,
+  component6: 21,
+  component7: 5,
+  component8: 19,
+  component9: 34,
+  component10: 35,
+  component11: 17,
+  component12: 30,
+  component13: 6,
+  component14: 9,
+  component15: 26,
+  component16: 10,
+  component17: 16,
+  component18: 20,
+  component19: 22,
+  component20: 24,
+  component21: 25,
+  component22: 27,
+  component23: 29,
+  component24: 32,
+  component25: 28,
 };
 
-// نگاشت شناسه کامپوننت به کامپوننت مربوطه جهت رندر داینامیک
+// Mapping of component keys to components
 const componentMapping: { [key: string]: React.FC<any> } = {
   component1: Component1,
   component2: Component2,
@@ -91,7 +91,6 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component25: Component25,
 };
 
-// گزینه‌های "Type of Information" جهت انتخاب در فرم
 const typeOfInformationOptions = [
   { value: "component1", label: "Text" },
   { value: "component2", label: "RichText" },
@@ -136,7 +135,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const { insertEntityField, updateEntityField } = useApi();
   console.log("existingData:", existingData);
 
-  // حالت اولیه فرم؛ در حالت ادیت از existingData استفاده می‌شود
+  // getInitialFormData استخراج اطلاعات اصلی فرم از existingData (اگر وجود داشته باشد)
   const getInitialFormData = () => ({
     formName: existingData ? existingData.DisplayName : "",
     order: existingData ? String(existingData.orderValue) : "",
@@ -147,7 +146,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     isEditableInWf: existingData ? existingData.IsEditableInWF : false,
     allowedWfBoxName: existingData ? existingData.WFBOXName : "",
     showInAlert: existingData ? existingData.ShowInAlert : false,
-    // فقط formName (نام ستون) ضروری است
     typeOfInformation: existingData
       ? Object.keys(columnTypeMapping).find(
           (key) => columnTypeMapping[key] === existingData.ColumnType
@@ -158,19 +156,17 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInListView: existingData ? existingData.IsShowGrid : false,
     rightToLeft: existingData ? existingData.IsRTL : false,
     readOnly: existingData ? existingData.IsForceReadOnly : false,
-    metaColumnName: existingData ? existingData.metaType1 : "",
+    // metaColumnName در اینجا به عنوان ورودی مربوط به metaType4 استفاده می‌شود.
+    metaColumnName: existingData ? existingData.metaType4 : "",
     showInTab: existingData ? existingData.ShowInTab : "",
   });
 
   const [formData, setFormData] = useState(getInitialFormData());
-
-  // متادیتای داینامیک (برای کنترلرهایی مثل NumberController و ChoiceController)
+  // dynamicMeta از کنترلرهای داینامیک (مانند Number/Choice) دریافت می‌شود.
   const [dynamicMeta, setDynamicMeta] = useState<any>({});
-
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // ریست فرم در حالت افزودن (isEdit=false)
   useEffect(() => {
     if (!isEdit) {
       setFormData({
@@ -197,7 +193,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   }, [isEdit, existingData]);
 
-  // به روز رسانی state در حالت ادیت وقتی existingData تغییر می‌کند
   useEffect(() => {
     if (isEdit) {
       setFormData(getInitialFormData());
@@ -213,7 +208,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     setIsLoading(true);
     setErrors({});
 
-    // اعتبارسنجی تنها بر روی formName
     if (!formData.formName.trim()) {
       setErrors({ formName: "Column Name is required." });
       setIsLoading(false);
@@ -232,32 +226,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
-      // اگر نوع انتخاب شده Number (component4) یا Choice (component3) باشد، از dynamicMeta استفاده می‌کنیم
-      metaType1:
-        formData.typeOfInformation === "component4"
-          ? dynamicMeta.defaultValue != null
-            ? dynamicMeta.defaultValue.toString()
-            : ""
-          : formData.typeOfInformation === "component3"
-          ? dynamicMeta.metaType1 || formData.metaColumnName || ""
-          : formData.metaColumnName || "",
-      metaType2:
-        formData.typeOfInformation === "component4"
-          ? dynamicMeta.minValue != null
-            ? dynamicMeta.minValue.toString()
-            : ""
-          : formData.typeOfInformation === "component3"
-          ? dynamicMeta.metaType2 || ""
-          : "",
-      metaType3:
-        formData.typeOfInformation === "component4"
-          ? dynamicMeta.maxValue != null
-            ? dynamicMeta.maxValue.toString()
-            : ""
-          : formData.typeOfInformation === "component3"
-          ? dynamicMeta.metaType3 || ""
-          : "",
-      metaType4: formData.showInTab || "",
+      // dynamicMeta دریافتی از کنترلرهای داینامیک
+      metaType1: dynamicMeta.metaType1 || "",
+      metaType2: dynamicMeta.metaType2 || "",
+      metaType3: dynamicMeta.metaType3 || "",
+      // metaType4 از metaColumnName گرفته می‌شود.
+      metaType4: formData.metaColumnName || "",
       metaTypeJson: null,
       PrintCode: formData.printCode,
       IsForceReadOnly: formData.readOnly,
@@ -305,50 +279,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   };
 
-  // تنظیم initial meta برای کنترلر Number (component4)
-  const initialDynamicMeta =
-    isEdit && existingData && formData.typeOfInformation === "component4"
-      ? {
-          minValue: existingData.metaType2
-            ? parseFloat(existingData.metaType2)
-            : "",
-          maxValue: existingData.metaType3
-            ? parseFloat(existingData.metaType3)
-            : "",
-          defaultValue: existingData.metaType1
-            ? parseFloat(existingData.metaType1)
-            : "",
-        }
-      : undefined;
-
-  // تنظیم initial meta برای ChoiceController (component3)
-  const initialChoiceMeta =
-    isEdit && existingData && formData.typeOfInformation === "component3"
-      ? {
-          metaType1: existingData.metaType1 || "",
-          metaType2: existingData.metaType2 || "drop",
-          metaType3: existingData.metaType3 || "",
-        }
-      : undefined;
-
+  // renderSelectedComponent: اگر نوع انتخاب شده یکی از کنترلرهای داینامیک باشد (مانند Number یا Choice)
+  // داده موجودیت (existingData) را به عنوان prop (data) ارسال می‌کنیم.
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
-    if (formData.typeOfInformation === "component4") {
-      return (
-        <SelectedComponent
-          onMetaChange={setDynamicMeta}
-          initialMeta={initialDynamicMeta}
-        />
-      );
-    }
-    if (formData.typeOfInformation === "component3") {
-      return (
-        <SelectedComponent
-          onMetaChange={setDynamicMeta}
-          initialMeta={initialChoiceMeta}
-        />
-      );
+    if (formData.typeOfInformation === "component4" || formData.typeOfInformation === "component3") {
+      return <SelectedComponent onMetaChange={setDynamicMeta} data={existingData} />;
     }
     return <SelectedComponent onMetaChange={setDynamicMeta} />;
   };
@@ -412,10 +349,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label
-              htmlFor="isRequiredInWf"
-              className="ml-3 text-gray-700 font-medium"
-            >
+            <label htmlFor="isRequiredInWf" className="ml-3 text-gray-700 font-medium">
               Required in Workflow
             </label>
           </div>
@@ -435,15 +369,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   id="isEditableInWf"
                   name="isEditableInWf"
                   checked={formData.isEditableInWf}
-                  onChange={(e) =>
-                    handleChange("isEditableInWf", e.target.checked)
-                  }
+                  onChange={(e) => handleChange("isEditableInWf", e.target.checked)}
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label
-                  htmlFor="isEditableInWf"
-                  className="ml-3 text-gray-700 font-medium"
-                >
+                <label htmlFor="isEditableInWf" className="ml-3 text-gray-700 font-medium">
                   Editable in Workflow
                 </label>
               </div>
@@ -452,9 +381,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 type="text"
                 value={formData.allowedWfBoxName}
                 placeholder="Workflow Box Name"
-                onChange={(e) =>
-                  handleChange("allowedWfBoxName", e.target.value)
-                }
+                onChange={(e) => handleChange("allowedWfBoxName", e.target.value)}
                 className="flex-1"
               />
               <div className="flex items-center">
@@ -463,15 +390,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   id="showInAlert"
                   name="showInAlert"
                   checked={formData.showInAlert}
-                  onChange={(e) =>
-                    handleChange("showInAlert", e.target.checked)
-                  }
+                  onChange={(e) => handleChange("showInAlert", e.target.checked)}
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label
-                  htmlFor="showInAlert"
-                  className="ml-3 text-gray-700 font-medium"
-                >
+                <label htmlFor="showInAlert" className="ml-3 text-gray-700 font-medium">
                   Show in Alert
                 </label>
               </div>
@@ -481,9 +403,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             name="typeOfInformation"
             options={typeOfInformationOptions}
             selectedValue={formData.typeOfInformation}
-            onChange={(e) =>
-              handleChange("typeOfInformation", e.target.value)
-            }
+            onChange={(e) => handleChange("typeOfInformation", e.target.value)}
             label="Type of Information"
             className="md:col-span-2 -mt-2"
           />
@@ -497,10 +417,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("required", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="required"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="required" className="ml-3 text-gray-700 font-medium">
                 Required
               </label>
             </div>
@@ -513,10 +430,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("mainColumns", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="mainColumns"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="mainColumns" className="ml-3 text-gray-700 font-medium">
                 Main Columns
               </label>
             </div>
@@ -526,15 +440,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 id="showInListView"
                 name="showInListView"
                 checked={formData.showInListView}
-                onChange={(e) =>
-                  handleChange("showInListView", e.target.checked)
-                }
+                onChange={(e) => handleChange("showInListView", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="showInListView"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="showInListView" className="ml-3 text-gray-700 font-medium">
                 Show in List
               </label>
             </div>
@@ -547,10 +456,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("rightToLeft", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="rightToLeft"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="rightToLeft" className="ml-3 text-gray-700 font-medium">
                 Right to Left
               </label>
             </div>
@@ -565,10 +471,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("readOnly", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="readOnly"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="readOnly" className="ml-3 text-gray-700 font-medium">
                 Read Only
               </label>
             </div>
@@ -589,7 +492,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               className="flex-1"
             />
           </div>
-          {/* رندر کنترلر داینامیک (NumberController یا ChoiceController) */}
+          {/* رندر کنترلر داینامیک (مثل NumberController یا ChoiceController) */}
           <div className="mb-8 w-full md:col-span-2 -mt-8">
             {renderSelectedComponent()}
           </div>
@@ -598,7 +501,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               type="button"
               className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
               onClick={() => {
-                // پاکسازی فرم در صورت لغو
                 setFormData({
                   formName: "",
                   order: "",

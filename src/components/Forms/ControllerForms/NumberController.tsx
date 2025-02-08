@@ -4,40 +4,31 @@ import DynamicInput from "../../utilities/DynamicInput";
 
 interface NumberControllerProps {
   onMetaChange: (meta: {
-    minValue: number | "";
-    maxValue: number | "";
-    defaultValue: number | "";
+    metaType1: string; // default value
+    metaType2: string; // minimum value
+    metaType3: string; // maximum value
   }) => void;
-  initialMeta?: {
-    minValue: number | "";
-    maxValue: number | "";
-    defaultValue: number | "";
+  data?: {
+    metaType1?: string;
+    metaType2?: string;
+    metaType3?: string;
   };
 }
 
-const NumberController: React.FC<NumberControllerProps> = ({
-  onMetaChange,
-  initialMeta,
-}) => {
-  const [minValue, setMinValue] = useState<number | "">(
-    initialMeta?.minValue ?? ""
-  );
-  const [maxValue, setMaxValue] = useState<number | "">(
-    initialMeta?.maxValue ?? ""
-  );
-  const [defaultValue, setDefaultValue] = useState<number | "">(
-    initialMeta?.defaultValue ?? ""
-  );
-  const [initialized, setInitialized] = useState(false);
+const NumberController: React.FC<NumberControllerProps> = ({ onMetaChange, data }) => {
+  // مقدارهای اولیه بدون مقدار پیش‌فرض
+  const [minValue, setMinValue] = useState<number | "">("");
+  const [maxValue, setMaxValue] = useState<number | "">("");
+  const [defaultValue, setDefaultValue] = useState<number | "">("");
 
+  // در صورتی که داده (data) ارسال شده باشد، مقداردهی اولیه انجام می‌شود.
   useEffect(() => {
-    if (initialMeta && !initialized) {
-      setMinValue(initialMeta.minValue);
-      setMaxValue(initialMeta.maxValue);
-      setDefaultValue(initialMeta.defaultValue);
-      setInitialized(true);
+    if (data) {
+      setDefaultValue(data.metaType1 && data.metaType1 !== "" ? parseFloat(data.metaType1) : "");
+      setMinValue(data.metaType2 && data.metaType2 !== "" ? parseFloat(data.metaType2) : "");
+      setMaxValue(data.metaType3 && data.metaType3 !== "" ? parseFloat(data.metaType3) : "");
     }
-  }, [initialMeta, initialized]);
+  }, [data]);
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value === "" ? "" : parseFloat(e.target.value);
@@ -54,9 +45,14 @@ const NumberController: React.FC<NumberControllerProps> = ({
     setDefaultValue(value);
   };
 
+  // هر تغییر در state باعث به‌روزرسانی meta به صورت رشته می‌شود.
   useEffect(() => {
-    onMetaChange({ minValue, maxValue, defaultValue });
-  }, [minValue, maxValue, defaultValue, onMetaChange]);
+    onMetaChange({
+      metaType1: defaultValue === "" ? "" : defaultValue.toString(),
+      metaType2: minValue === "" ? "" : minValue.toString(),
+      metaType3: maxValue === "" ? "" : maxValue.toString(),
+    });
+  }, [defaultValue, minValue, maxValue, onMetaChange]);
 
   return (
     <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-4">
