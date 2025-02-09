@@ -1,4 +1,3 @@
-// src/components/PersianDatePicker.tsx
 import React from "react";
 import { Calendar, DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
@@ -36,10 +35,15 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
     { label: "اسفند", value: "11" },
   ];
 
+  // ایجاد لیست سال‌های شمسی از ۱۳۰۰ تا ۱۴۳۰
   const years = Array.from({ length: 1430 - 1300 + 1 }, (_, i) => {
     const persianYear = (1300 + i).toString();
     return { label: persianYear, value: persianYear };
   });
+
+  // تابع کمکی برای قالب‌بندی تاریخ شمسی بدون "j"
+  const formatPersian = (date: DateObject) =>
+    date.convert(persian).format("jYYYY/jMM/jDD").replace(/j/g, "");
 
   return (
     <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
@@ -47,21 +51,17 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
         انتخاب تاریخ
       </h2>
 
-      {/* نمایش تاریخ انتخاب شده */}
       {selectedDate && (
         <div className="mb-4 text-center">
           <span className="text-lg font-medium text-pink-600">
-            تاریخ انتخاب‌شده: {selectedDate.format("YYYY/MM/DD")}
+            تاریخ انتخاب‌شده: {formatPersian(selectedDate)}
           </span>
         </div>
       )}
 
       <div className="flex justify-center space-x-4 mb-4">
         <div>
-          <label
-            htmlFor="month"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-1">
             ماه
           </label>
           <select
@@ -79,10 +79,7 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
         </div>
 
         <div>
-          <label
-            htmlFor="year"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
             سال
           </label>
           <select
@@ -106,11 +103,13 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
           onChange={(date: DateObject | null) => onDateChange(date)}
           calendar={persian}
           locale={persian_fa}
+          format="jYYYY/jMM/jDD"
           className="w-full custom-calendar"
           currentDate={
             selectedYear && selectedMonth !== ""
               ? new DateObject({
                   calendar: persian,
+                  locale: persian_fa,
                   year: Number(selectedYear),
                   month: Number(selectedMonth) + 1,
                   day: selectedDate?.day || 1,

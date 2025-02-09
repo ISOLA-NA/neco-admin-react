@@ -226,11 +226,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
-      // dynamicMeta دریافتی از کنترلرهای داینامیک
       metaType1: dynamicMeta.metaType1 || "",
       metaType2: dynamicMeta.metaType2 || "",
       metaType3: dynamicMeta.metaType3 || "",
-      // metaType4 از metaColumnName گرفته می‌شود.
       metaType4: formData.metaColumnName || "",
       metaTypeJson: null,
       PrintCode: formData.printCode,
@@ -282,11 +280,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
-    // برای همه کنترلرها، prop data را ارسال می‌کنیم.
     return <SelectedComponent onMetaChange={setDynamicMeta} data={existingData} />;
   };
-  
-  
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-4 -mt-16">
       {isLoading && (
@@ -489,7 +485,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               className="flex-1"
             />
           </div>
-          {/* رندر کنترلر داینامیک (مثل NumberController یا ChoiceController) */}
+          {/* رندر کنترلر داینامیک (مثل  یا ChoiceController) */}
           <div className="mb-8 w-full md:col-span-2 -mt-8">
             {renderSelectedComponent()}
           </div>

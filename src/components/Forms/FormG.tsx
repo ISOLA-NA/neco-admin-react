@@ -8,7 +8,8 @@ import CtrTextArea from "./ControllerForms/RichTextController";
 import CtrRadio from "./ControllerForms/ChoiceController";
 import CtrInputNumber from "./ControllerForms/NumberController";
 import CtrSelect from "./ControllerForms/ChoiceController";
-// … سایر کامپوننت‌ها (به نام‌هایی مانند CtrSelect, CtrDatePicker, …)
+import CtrDatePicker from "./ControllerForms/DateTimeEnglishController";
+import CtrPersianDate from "./ControllerForms/DateTimePersianController";
 
 interface FormGProps {
   ctrForm: Rule[];
@@ -22,8 +23,9 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrTextArea,
   CtrRadio,
   CtrInputNumber,
-  CtrSelect
-  // … نگاشت سایر کامپوننت‌ها بر اساس rule.name
+  CtrSelect,
+  CtrDatePicker,
+  CtrPersianDate
 };
 
 const FormG: React.FC<FormGProps> = ({
