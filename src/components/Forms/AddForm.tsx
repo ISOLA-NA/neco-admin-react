@@ -279,17 +279,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   };
 
-  // renderSelectedComponent: اگر نوع انتخاب شده یکی از کنترلرهای داینامیک باشد (مانند Number یا Choice)
-  // داده موجودیت (existingData) را به عنوان prop (data) ارسال می‌کنیم.
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
-    if (formData.typeOfInformation === "component4" || formData.typeOfInformation === "component3") {
-      return <SelectedComponent onMetaChange={setDynamicMeta} data={existingData} />;
-    }
-    return <SelectedComponent onMetaChange={setDynamicMeta} />;
+    // برای همه کنترلرها، prop data را ارسال می‌کنیم.
+    return <SelectedComponent onMetaChange={setDynamicMeta} data={existingData} />;
   };
-
+  
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-white p-4 -mt-16">
       {isLoading && (
