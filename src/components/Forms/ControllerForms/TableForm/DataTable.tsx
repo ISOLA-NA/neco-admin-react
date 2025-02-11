@@ -1,3 +1,4 @@
+// src/components/TableDynamic/DataTable.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
@@ -6,7 +7,7 @@ import { TailSpin } from "react-loader-spinner";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import "./DataTable.css"; // فایل CSS اختصاصی
+import "./DataTable.css";
 
 interface DataTableProps {
   columnDefs: any[];
@@ -116,7 +117,8 @@ const DataTable: React.FC<DataTableProps> = ({
     onRowDoubleClick(event.data);
   };
 
-  const gridClasses = "ag-theme-quartz h-96 overflow-y-auto";
+  // استایل کلاس ag-theme-quartz را نگه می‌داریم اما ارتفاع ثابت را حذف می‌کنیم
+  const gridClasses = "ag-theme-quartz";
 
   const getRowClass = (params: any) => {
     return params.node.selected ? "ag-row-selected" : "";
@@ -129,9 +131,8 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   return (
-    // استفاده از کلاس "data-table-container" به عنوان wrapper
-    <div className="data-table-container w-full h-full flex flex-col relative">
-      <div className="flex items-center justify-between mb-4 bg-red-100 p-2">
+    <div className="w-full flex flex-col relative">
+      <div className="flex items-center justify-between mb-4 bg-red-100 p-2 ">
         {showSearch && (
           <div className="relative max-w-sm">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -199,14 +200,11 @@ const DataTable: React.FC<DataTableProps> = ({
         </div>
       </div>
 
-      <div className={gridClasses} style={{ marginTop: "-15px" }}>
+      <div className={gridClasses} style={{ width: "100%" }}>
         <AgGridReact
           onGridReady={onGridReady}
           columnDefs={columnDefs}
           rowData={filteredRowData}
-          pagination={false}
-          paginationPageSize={10}
-          animateRows={true}
           onRowClicked={handleRowClick}
           onRowDoubleClicked={handleRowDoubleClickInternal}
           domLayout={domLayout}

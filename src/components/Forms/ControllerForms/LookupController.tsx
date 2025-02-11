@@ -5,7 +5,7 @@ import { useApi } from "../../../context/ApiContext";
 // کامپوننت‌های سفارشی شما:
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList";
-import DataTable from "../../TableDynamic/DataTable";
+import DataTable from "./TableForm/DataTable";
 
 // تایپ‌های موردنیاز
 import {
@@ -94,13 +94,13 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
   // لیست Roles (مثال)
   const [roleRows, setRoleRows] = useState<Role[]>([]);
 
-  // مقداردهی اولیه tableData از داده‌های props (تنها در mount)
+  // ★ تغییر: مقداردهی اولیه tableData از داده‌های props (تنها یک بار در mount یا زمان تغییر data)
   useEffect(() => {
     if (data && data.metaType4 && data.metaType4.trim() !== "") {
       try {
-        const parsed = JSON.parse(data.metaType4) as any[];
+        const parsed = JSON.parse(data.metaType4);
         const normalized = Array.isArray(parsed)
-          ? parsed.map((item) => ({
+          ? parsed.map((item: any) => ({
               ...item,
               SrcFieldID:
                 item.SrcFieldID != null ? String(item.SrcFieldID) : "",
@@ -117,9 +117,12 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
         setTableData([]);
       }
     }
-  }, []); // dependency array خالی، تنها یک‌بار اجرا می‌شود
+  }, [data]);
 
-  // به‌روز رسانی metaType4 با تغییر tableData
+  // حذف اثر وابسته به metaTypesLookUp.metaType4 (برای جلوگیری از همگام‌سازی دوجانبه)
+  // در نتیجه تنها از tableData به metaTypesLookUp.metaType4 همگام‌سازی می‌کنیم:
+
+  // به‌روز رسانی metaType4 با تغییر tableData (در صورت تغییر مقدار)
   useEffect(() => {
     try {
       const asString = JSON.stringify(tableData);
@@ -225,7 +228,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
     }
   }, [metaTypesLookUp, removeSameName, oldLookup, onMetaChange]);
 
-  // افزودن ردیف جدید (با کلیک روی آیکون +)
+  // افزودن ردیف جدید (آیکون +)
   const onAddNew = () => {
     const newRow: TableRow = {
       ID: crypto.randomUUID(),
@@ -301,7 +304,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
+    <div className="flex flex-col gap-8 p-2 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
       {/* بخش بالایی: تنظیمات و Select ها */}
       <div className="flex gap-8">
         {/* سمت چپ */}
@@ -403,8 +406,8 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
         </div>
       </div>
 
-      {/* بخش پایینی: جدول Lookup درون یک کانتینر با پس‌زمینه سفید */}
-      <div className="mt-4 bg-white p-4 rounded shadow-lg">
+      {/* بخش پایینی: جدول Lookup */}
+      <div className="mb-100">
         <DataTable
           columnDefs={[
             {
@@ -421,11 +424,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
                 );
                 return matched ? matched.DisplayName : params.value;
               },
-              cellStyle: {
-                backgroundColor: "#fff",
-                padding: "4px",
-                border: "1px solid #ddd",
-              },
             },
             {
               headerName: "Operation",
@@ -441,21 +439,11 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
                 );
                 return matched ? matched.label : params.value;
               },
-              cellStyle: {
-                backgroundColor: "#fff",
-                padding: "4px",
-                border: "1px solid #ddd",
-              },
             },
             {
               headerName: "Filter Text",
               field: "FilterText",
               editable: true,
-              cellStyle: {
-                backgroundColor: "#fff",
-                padding: "4px",
-                border: "1px solid #ddd",
-              },
             },
             {
               headerName: "Des Field",
@@ -470,11 +458,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
                   (f) => String(f.ID) === String(params.value)
                 );
                 return matched ? matched.DisplayName : params.value;
-              },
-              cellStyle: {
-                backgroundColor: "#fff",
-                padding: "4px",
-                border: "1px solid #ddd",
               },
             },
           ]}

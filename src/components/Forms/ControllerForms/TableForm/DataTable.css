@@ -1,0 +1,13 @@
+/* استایل‌های سفارشی برای agSelectCellEditor و لیست بازشو */
+.ag-theme-quartz .ag-select-cell-editor,
+.ag-theme-quartz .ag-popup-editor,
+.ag-theme-quartz .ag-list {
+  background-color: #fff !important;
+  color: #000;
+  border: 1px solid #c10e0e;
+}
+
+.ag-theme-quartz .ag-cell {
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}

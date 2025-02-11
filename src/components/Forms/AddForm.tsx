@@ -551,7 +551,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             {renderSelectedComponent()}
           </div>
           {/* دکمه‌های Cancel و Submit */}
-          <div className="flex justify-center md:col-span-2 space-x-4 -mt-8">
+          <div className="flex justify-center md:col-span-2 space-x-4">
             <button
               type="button"
               className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
