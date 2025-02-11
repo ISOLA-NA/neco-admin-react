@@ -1,4 +1,5 @@
 // src/components/LookUpForms.tsx
+
 import React, { useState, useEffect } from "react";
 import { useApi } from "../../../context/ApiContext";
 
@@ -13,28 +14,27 @@ import {
   EntityType,
   GetEnumResponse,
   Role,
+  
 } from "../../../services/api.services";
 
-import AppServices from "../../../services/api.services";
+import AppServices from "../../../services/api.services"
 
+// رابط برای props (مشابه props در Vue)
 interface LookUpFormsProps {
   data?: {
-    metaType1?: string | null; // ID مربوط به EntityType
-    metaType2?: string | null; // ID مربوط به فیلد نمایش
-    metaType3?: string;        // نمایش drop|radio|check
-    metaType4?: string;        // داده‌های جدول به‌صورت JSON
-    LookupMode?: string | null;
-    CountInReject?: boolean;
-    BoolMeta1?: boolean;
-    // اضافه کردن metaType5 برای حالت ویرایش
-    metaType5?: string;
+    metaType1?: string | null;  // ID مربوط به EntityType (Get information from)
+    metaType2?: string | null;  // ID مربوط به فیلد انتخاب‌شده (What Column To Display)
+    metaType3?: string;         // نحوه‌ی نمایش (radio|drop|check)
+    metaType4?: string;         // داده‌های جدول به‌صورت JSON
+    LookupMode?: string | null; // مقدار انتخاب‌شده برای Modes
   };
-  onMetaChange?: (updatedMeta: any) => void;
+  onMetaChange?: (updatedMeta: any) => void; 
+  // اگر می‌خواهید تغییرات metaTypesLookUp را بیرون اطلاع دهید.
 }
 
 // شکل هر ردیف جدول Lookup
 interface TableRow {
-  ID: string;                // شناسه ردیف
+  ID: string;          // شناسه ردیف
   srcField: string | null;   // ID فیلد مبدأ
   operation: string | null;  // مقدار Operation (فیلتر)
   filterText: string;        // متن فیلتر
@@ -42,61 +42,50 @@ interface TableRow {
 }
 
 const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
-  // API methods از کانتکست
+  // متدهای API از Context
   const {
     getAllEntityType,
     getEntityFieldByEntityTypeId,
     getEnum,
-    getAllProject,
+    getAllRoles,
   } = useApi();
 
-  // state اصلی شبیه metaTypesLookUp
+  // state اصلی شبیه metaTypesLookUp در Vue
   const [metaTypesLookUp, setMetaTypesLookUp] = useState({
-    metaType1: data?.metaType1 ?? null,   // EntityType ID
-    metaType2: data?.metaType2 ?? null,   // Field ID
-    metaType3: data?.metaType3 ?? "",     // نوع نمایش
-    metaType4: data?.metaType4 ?? "",     // اطلاعات جدول (JSON)
-    LookupMode: data?.LookupMode ?? "",
+    metaType1: data?.metaType1 ?? null,  // EntityType ID
+    metaType2: data?.metaType2 ?? null,  // Field ID
+    metaType3: data?.metaType3 ?? "",    // نمایش drop|radio|check
+    metaType4: data?.metaType4 ?? "",    // اطلاعات جدول (JSON string)
+    LookupMode: data?.LookupMode ?? null // mode انتخاب‌شده
   });
 
-  // مقداردهی اولیه چک‌باکس‌ها
-  const [removeSameName, setRemoveSameName] = useState(data?.CountInReject ?? false);
-  const [oldLookup, setOldLookup] = useState(data?.BoolMeta1 ?? false);
+  // چک‌باکس RemoveSameName و Old Lookup (طبق کد Vue)
+  const [removeSameName, setRemoveSameName] = useState(false);
+  const [oldLookup, setOldLookup] = useState(false);
 
-  // ------ بخش مهم: مدیریت metaType5 (Pipe-Separated IDs) ------
-  // در حالت ویرایش اگر data?.metaType5 وجود داشت، آن را با split("|") در state می‌ریزیم:
-  const [defaultValueIDs, setDefaultValueIDs] = useState<string[]>(
-    data?.metaType5 ? data.metaType5.split("|") : []
-  );
-
-  // هر زمان defaultValueIDs آپدیت شود، آن را در metaType5 قرار می‌دهیم
-  useEffect(() => {
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      // به‌صورت pipe جدا می‌کنیم
-      metaType5: defaultValueIDs.join("|"),
-    }));
-  }, [defaultValueIDs]);
-
-  // لیست کامل موجودیت‌ها
+  // 1) لیست EntityTypeها -> برای "Get information from"
   const [getInformationFromList, setGetInformationFromList] = useState<EntityType[]>([]);
-  // لیست فیلدهای نمایش
+  // 2) ستون‌هایی که نمایش داده می‌شوند -> برای "What Column To Display"
   const [columnDisplayList, setColumnDisplayList] = useState<EntityField[]>([]);
-  // لیست فیلدهای srcField
+  // 3) ستون‌های srcField
   const [srcFieldList, setSrcFieldList] = useState<EntityField[]>([]);
-  // لیست فیلدهای desField
+  // 4) ستون‌های desField
   const [desFieldList, setDesFieldList] = useState<EntityField[]>([]);
-  // لیست Modeها
+  // 5) Modes (lookMode)
   const [modesList, setModesList] = useState<{ value: string; label: string }[]>([]);
-  // لیست Operationها
+  // 6) Operation (FilterOpration)
   const [operationList, setOperationList] = useState<{ value: string; label: string }[]>([]);
-  // داده‌های جدول
+
+  // داده‌های جدول اصلی Lookup
   const [tableData, setTableData] = useState<TableRow[]>([]);
-  // لیست Roles (مثال)
+
+  // داده‌های Default Value -> حالا می‌خواهیم از getAllRoles پر شود
   const [roleRows, setRoleRows] = useState<Role[]>([]);
+  const [defaultValues, setDefaultValues] = useState<string[][]>([[]]); 
+  // بسته به ساختار PostPickerList شما تغییر دهید.
 
   // -----------------------------
-  // parse اولیه از metaType4 به tableData
+  // لود اولیه: parse metaType4 برای tableData
   // -----------------------------
   useEffect(() => {
     if (metaTypesLookUp.metaType4) {
@@ -106,12 +95,11 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
           setTableData(parsed);
         }
       } catch (err) {
-        console.error("Error parsing metaTypesLookUp.metaType4 JSON:", err);
+        console.error("Error parsing metaType4 JSON:", err);
       }
-    } else {
-      setTableData([]);
     }
-  }, [metaTypesLookUp.metaType4]);
+    // eslint-disable-next-line
+  }, []);
 
   // -----------------------------
   // گرفتن لیست EntityTypeها
@@ -120,7 +108,9 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
     (async () => {
       try {
         const res = await getAllEntityType();
-        setGetInformationFromList(res);
+        setGetInformationFromList(res); 
+        // در Vue از getTableTransmittal استفاده می‌شد؛
+        // اینجا فرض کردیم getAllEntityType همان داده را می‌دهد.
       } catch (error) {
         console.error("Error fetching entity types:", error);
       }
@@ -128,7 +118,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
   }, [getAllEntityType]);
 
   // -----------------------------
-  // وقتی metaType1 تغییر کرد => فیلدها را می‌گیریم
+  // هر زمان metaTypesLookUp.metaType1 تغییر کرد => بیا فیلدهای مرتبطش را دریافت کن
   // -----------------------------
   useEffect(() => {
     (async () => {
@@ -138,6 +128,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
           const idAsNumber = Number(metaType1);
           if (!isNaN(idAsNumber)) {
             const fields = await getEntityFieldByEntityTypeId(idAsNumber);
+            // برای چهارتا منبع قرار می‌دهیم (What Column To Display, src, des)
             setColumnDisplayList(fields);
             setSrcFieldList(fields);
             setDesFieldList(fields);
@@ -146,6 +137,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
           console.error("Error fetching fields by entity type ID:", error);
         }
       } else {
+        // اگر خالی بود، آرایه را ریست کن
         setColumnDisplayList([]);
         setSrcFieldList([]);
         setDesFieldList([]);
@@ -161,9 +153,10 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
       try {
         // lookMode
         const lookModeResponse: GetEnumResponse = await AppServices.getEnum({ str: "lookMode" });
+        // تبدیل به آرایهٔ [{value,label}]
         const modes = Object.entries(lookModeResponse).map(([key, val]) => ({
-          value: String(val),
-          label: key,
+          value: val, // مقدار اصلی
+          label: key  // برچسب 
         }));
         setModesList(modes);
       } catch (error) {
@@ -172,12 +165,10 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
 
       try {
         // FilterOpration
-        const filterOperationResponse: GetEnumResponse = await AppServices.getEnum({
-          str: "FilterOpration",
-        });
+        const filterOperationResponse: GetEnumResponse = await AppServices.getEnum({ str: "FilterOpration" });
         const ops = Object.entries(filterOperationResponse).map(([key, val]) => ({
-          value: String(val),
-          label: key,
+          value: val,
+          label: key
         }));
         setOperationList(ops);
       } catch (error) {
@@ -187,45 +178,38 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
   }, [getEnum]);
 
   // -----------------------------
-  // فراخوانی getAllProject برای نمایش/مثال PostPickerList
+  // فراخوانی getAllRoles برای DefaultValues
   // -----------------------------
   useEffect(() => {
     (async () => {
       try {
-        const roles = await getAllProject();
-        console.log("Fetched roles:", roles);
+        const roles = await getAllRoles();
         setRoleRows(roles);
       } catch (error) {
         console.error("Error fetching roles:", error);
       }
     })();
-  }, [getAllProject]);
+  }, [getAllRoles]);
 
   // -----------------------------
-  // ارسال مقادیر به والد (onMetaChange)
+  // Watch شبیه Vue: هر تغییری در metaTypesLookUp => آن را به والد اطلاع می‌دهیم
   // -----------------------------
   useEffect(() => {
     if (onMetaChange) {
       const cloned = { ...metaTypesLookUp };
-      // تبدیل مقادیر metaType1, metaType2 به رشته
+      // تبدیل به رشته در صورت نیاز
       cloned.metaType1 = cloned.metaType1 ? String(cloned.metaType1) : "";
       cloned.metaType2 = cloned.metaType2 ? String(cloned.metaType2) : "";
-      cloned.LookupMode = cloned.LookupMode ?? "";
-      // اضافه‌کردن وضعیت چک‌باکس‌ها
-      cloned.removeSameName = removeSameName;
-      cloned.oldLookup = oldLookup;
-
-      // در نهایت فراخوانی
       onMetaChange(cloned);
     }
-  }, [metaTypesLookUp, removeSameName, oldLookup, onMetaChange]);
+  }, [metaTypesLookUp, onMetaChange]);
 
   // ----------------------------------
-  // متدهای مربوط به DataTable (Add Row)
+  // متدهای مربوط به جدول Lookup
   // ----------------------------------
   const onAddItem = () => {
     const newRow: TableRow = {
-      ID: crypto.randomUUID(),
+      ID: crypto.randomUUID(), // شناسه یونیک
       srcField: null,
       operation: null,
       filterText: "",
@@ -238,10 +222,10 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
     setTableData((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // ذخیره نهایی اطلاعات جدول در metaType4
   const handleSubmitRows = () => {
     try {
       const asString = JSON.stringify(tableData);
+      // در metaType4 قرار می‌دهیم
       setMetaTypesLookUp((prev) => ({ ...prev, metaType4: asString }));
       alert("Table data saved to metaType4 successfully!");
     } catch (error) {
@@ -251,7 +235,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
   };
 
   // ----------------------------------
-  // Event Handlers Select
+  // هندل کردن Select در بخش بالا
   // ----------------------------------
   const handleSelectInformationFrom = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setMetaTypesLookUp((prev) => ({ ...prev, metaType1: e.target.value || null }));
@@ -262,46 +246,11 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
   };
 
   const handleSelectMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLookupMode = e.target.value || "";
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      LookupMode: newLookupMode,
-    }));
+    setMetaTypesLookUp((prev) => ({ ...prev, LookupMode: e.target.value || null }));
   };
 
   const handleChangeDisplayType = (type: string) => {
     setMetaTypesLookUp((prev) => ({ ...prev, metaType3: type }));
-  };
-
-  // ----------------------------------
-  // مدیریت نام‌های پیش‌فرض برای نمایش (با استفاده از IDهای ذخیره شده)
-  // ----------------------------------
-  const [defaultValueNames, setDefaultValueNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    // در هر تغییر defaultValueIDs یا roleRows، نام‌ها را مجدداً می‌سازیم
-    const newNames = defaultValueIDs.map((id) => {
-      const found = roleRows.find((r) => String(r.ID) === String(id));
-      // فرض بر این است که در roleRows نام پروژه در فیلد ProjectName ذخیره شده است
-      return found ? found.ProjectName : `Unknown ID ${id}`;
-    });
-    setDefaultValueNames(newNames);
-  }, [defaultValueIDs, roleRows]);
-
-  // توابع برای اضافه و حذف ID در defaultValueIDs
-  const handleAddDefaultValueID = (id: string) => {
-    // اگر آیتم تکراری نباشد اضافه شود
-    setDefaultValueIDs((prev) => {
-      if (prev.includes(id)) return prev;
-      return [...prev, id];
-    });
-  };
-  const handleRemoveDefaultValueIndex = (index: number) => {
-    setDefaultValueIDs((prev) => {
-      const copy = [...prev];
-      copy.splice(index, 1);
-      return copy;
-    });
   };
 
   return (
@@ -316,7 +265,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
             label="Get information from"
             options={getInformationFromList.map((ent) => ({
               value: String(ent.ID),
-              label: ent.Name,
+              label: ent.Name
             }))}
             selectedValue={metaTypesLookUp.metaType1 || ""}
             onChange={handleSelectInformationFrom}
@@ -328,7 +277,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
             label="What Column To Display"
             options={columnDisplayList.map((field) => ({
               value: String(field.ID),
-              label: field.DisplayName,
+              label: field.DisplayName
             }))}
             selectedValue={metaTypesLookUp.metaType2 || ""}
             onChange={handleSelectColumnDisplay}
@@ -338,19 +287,18 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
           <DynamicSelector
             name="modes"
             label="Modes"
-            options={modesList}
+            options={modesList} // [{value, label}]
             selectedValue={metaTypesLookUp.LookupMode || ""}
             onChange={handleSelectMode}
           />
 
-          {/* Default Value (پست پیکر) */}
+          {/* Default Value با استفاده از نقش‌ها */}
           <PostPickerList
-            // ارسال نام‌های پیش‌فرض محاسبه‌شده به عنوان defaultValues (تنها ProjectNameها)
-            defaultValues={defaultValueNames}
-            // Callbacks برای اضافه/حذف
-            onAddID={handleAddDefaultValueID}
-            onRemoveIndex={handleRemoveDefaultValueIndex}
-            fullWidth={true}
+            defaultValues={defaultValues}
+            setDefaultValues={setDefaultValues}
+            columnDefs={[{ headerName: "Role Name", field: "Name" }]}
+            rowData={roleRows} 
+            // حالا به‌جای دادهٔ استاتیک، از getAllRoles
           />
         </div>
 
@@ -425,8 +373,10 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
               editable: true,
               cellEditor: "agSelectCellEditor",
               cellEditorParams: {
-                values: srcFieldList.map((f) => String(f.ID)),
+                // لیست IDها
+                values: srcFieldList.map((f) => String(f.ID))
               },
+              // اگر DataTable شما از AG-Grid یا مشابهش پشتیبانی کند:
               valueFormatter: (params: any) => {
                 const matched = srcFieldList.find(
                   (f) => String(f.ID) === String(params.value)
@@ -440,7 +390,8 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
               editable: true,
               cellEditor: "agSelectCellEditor",
               cellEditorParams: {
-                values: operationList.map((op) => op.value),
+                values: operationList.map((op) => op.value) 
+                // چون در modesList/operationList => { value, label }
               },
               valueFormatter: (params: any) => {
                 const matched = operationList.find(
@@ -452,7 +403,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
             {
               headerName: "Filter Text",
               field: "filterText",
-              editable: true,
+              editable: true
             },
             {
               headerName: "Des Field",
@@ -460,7 +411,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
               editable: true,
               cellEditor: "agSelectCellEditor",
               cellEditorParams: {
-                values: desFieldList.map((f) => String(f.ID)),
+                values: desFieldList.map((f) => String(f.ID))
               },
               valueFormatter: (params: any) => {
                 const matched = desFieldList.find(
@@ -468,30 +419,40 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
                 );
                 return matched ? matched.DisplayName : params.value;
               },
-            },
+            }
           ]}
           rowData={tableData}
+          // بسته به پیاده‌سازی DataTable سفارشی شما، پارامترهای زیر ممکن است متفاوت باشد
           setSelectedRowData={() => {}}
           showDuplicateIcon={false}
           showEditIcon={false}
           showAddIcon={false}
           showDeleteIcon={false}
-          showSearch={false}
+          onAdd={onAddItem}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onDuplicate={() => {}}
           domLayout="autoHeight"
           isRowSelected={false}
-          showAddNew={true}
-          onAddNew={onAddItem}
+          showSearch={false}
+          showAddNew={true} 
+          onAddNew={onAddItem} 
         />
-      </div>
+        <div className="mt-4 flex justify-between">
+          <button
+            onClick={onAddItem}
+            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+          >
+            Add Item
+          </button>
 
-      {/* دکمه‌ی ذخیره‌سازی داده‌های جدول */}
-      <div className="mt-4">
-        <button
-          onClick={handleSubmitRows}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Save Table Data
-        </button>
+          <button
+            onClick={handleSubmitRows}
+            className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
+          >
+            Submit Table
+          </button>
+        </div>
       </div>
     </div>
   );
