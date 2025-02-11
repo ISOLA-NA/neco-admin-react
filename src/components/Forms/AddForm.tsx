@@ -1,5 +1,4 @@
 // src/components/AddColumnForm.tsx
-
 import React, { useState, useEffect } from "react";
 import { useApi } from "../../context/ApiContext";
 import DynamicInput from "../utilities/DynamicInput";
@@ -135,7 +134,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 }) => {
   const { insertEntityField, updateEntityField } = useApi();
 
-  // getInitialFormData استخراج اطلاعات اصلی فرم از existingData (اگر وجود داشته باشد)
+  // استخراج اطلاعات اصلی فرم (بدون استفاده از metaColumnName، چون مقدار lookup از dynamicMeta گرفته می‌شود)
   const getInitialFormData = () => ({
     formName: existingData ? existingData.DisplayName : "",
     order: existingData ? String(existingData.orderValue) : "",
@@ -156,7 +155,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInListView: existingData ? existingData.IsShowGrid : false,
     rightToLeft: existingData ? existingData.IsRTL : false,
     readOnly: existingData ? existingData.IsForceReadOnly : false,
-    metaColumnName: existingData ? existingData.metaType4 : "",
+    // metaColumnName حذف می‌شود؛ مقدار lookup از dynamicMeta گرفته خواهد شد
+    metaColumnName: "",
     showInTab: existingData ? existingData.ShowInTab : "",
   });
 
@@ -165,7 +165,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // اگر فرم جدید باشد (isEdit=false) => ریست
+  // ریست فرم در حالت افزودن جدید
   useEffect(() => {
     if (!isEdit) {
       setFormData({
@@ -192,19 +192,19 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   }, [isEdit, existingData]);
 
-  // اگر حالت ویرایش است => پرکردن
+  // در حالت ویرایش فرم را مقداردهی اولیه می‌کنیم
   useEffect(() => {
     if (isEdit) {
       setFormData(getInitialFormData());
     }
   }, [isEdit, existingData]);
 
-  // وقتی مقدار فیلدی تغییر کرد
+  // تغییر مقادیر فرم
   const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // ذخیره (Submit)
+  // ذخیره فرم (Submit)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -217,14 +217,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
 
     const currentTimestamp = new Date().toISOString();
-
-    // LookupMode را اگر خالی نباشد، عددی می‌کنیم
     const lookupModeValue =
       dynamicMeta.LookupMode == null || dynamicMeta.LookupMode === ""
         ? null
         : Number(dynamicMeta.LookupMode);
-
-    // در اینجا مقدار metaType5 را از dynamicMeta هم می‌خوانیم:
     const metaType5Value = dynamicMeta.metaType5 || null;
 
     const payload: any = {
@@ -240,7 +236,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       metaType1: dynamicMeta.metaType1 || "",
       metaType2: dynamicMeta.metaType2 || "",
       metaType3: dynamicMeta.metaType3 || "",
-      metaType4: formData.metaColumnName || "",
+      // مقدار metaType4 از dynamicMeta گرفته می‌شود (تولید شده توسط کنترلر Lookup)
+      metaType4: dynamicMeta.metaType4 || "",
       metaTypeJson: null,
       PrintCode: formData.printCode,
       IsForceReadOnly: formData.readOnly,
@@ -252,19 +249,18 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       orderValue: parseFloat(formData.order) || 0,
       ShowInAlert: formData.showInAlert,
       ShowInTab: formData.showInTab,
-      CreatedTime: isEdit && existingData
-        ? existingData.CreatedTime
-        : new Date().toISOString(),
+      CreatedTime:
+        isEdit && existingData
+          ? existingData.CreatedTime
+          : new Date().toISOString(),
       ModifiedTime: currentTimestamp,
-      ModifiedById: isEdit && existingData
-        ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
-        : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+      ModifiedById:
+        isEdit && existingData
+          ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
+          : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
       LookupMode: lookupModeValue,
       BoolMeta1: dynamicMeta.oldLookup ? true : false,
-
-      // این بخش را تصحیح می‌کنیم تا مقدار metaType5 را ذخیره کند:
       metaType5: metaType5Value,
-
       ID: isEdit && existingData ? existingData.ID : 0,
       IsVisible: true,
       LastModified: currentTimestamp,
@@ -289,12 +285,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   };
 
-  // رندر کنترلر مناسب با typeOfInformation
+  // رندر کنترلر داینامیک (مثلاً Lookup)
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
-
-    // در حالت ادیت، مقادیر قبلی را به فرزند بدهیم
     const dataForChild = {
       metaType1: existingData?.metaType1 || "",
       metaType2: existingData?.metaType2 || "",
@@ -303,10 +297,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       LookupMode: existingData?.LookupMode || "",
       CountInReject: existingData?.CountInReject || false,
       BoolMeta1: existingData?.BoolMeta1 || false,
-      // اگر metaType5 در حالت ویرایش وجود دارد، به فرزند پاس بدهیم
       metaType5: existingData?.metaType5 || "",
     };
-
     return (
       <SelectedComponent
         onMetaChange={setDynamicMeta}
@@ -322,7 +314,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
         </div>
       )}
-
       <div className="w-full bg-white rounded-lg overflow-auto flex flex-col">
         <h2 className="text-3xl font-semibold mb-8 text-center">
           {isEdit ? "Edit Column" : "Add New Column"}
@@ -343,7 +334,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           {errors.formName && (
             <p className="text-red-500 md:col-span-2">{errors.formName}</p>
           )}
-
           {/* Order */}
           <DynamicInput
             name="order"
@@ -353,7 +343,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             onChange={(e) => handleChange("order", e.target.value)}
             className="md:col-span-1"
           />
-
           {/* Description */}
           <CustomTextarea
             name="description"
@@ -362,7 +351,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             placeholder=""
             className="md:col-span-1 -mt-10"
           />
-
           {/* Command */}
           <DynamicSelector
             name="command"
@@ -375,7 +363,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             label="Command"
             className="md:col-span-1 -mt-16"
           />
-
           {/* Required in Workflow */}
           <div className="flex items-center md:col-span-1 -mt-8">
             <input
@@ -386,11 +373,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label htmlFor="isRequiredInWf" className="ml-3 text-gray-700 font-medium">
+            <label
+              htmlFor="isRequiredInWf"
+              className="ml-3 text-gray-700 font-medium"
+            >
               Required in Workflow
             </label>
           </div>
-
           {/* PrintCode */}
           <DynamicInput
             name="printCode"
@@ -400,7 +389,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             onChange={(e) => handleChange("printCode", e.target.value)}
             className="md:col-span-1 -mt-8"
           />
-
           {/* Editable in WF, Workflow Box, Show in Alert */}
           <div className="flex flex-col md:col-span-2 space-y-4 -mt-8">
             <div className="flex items-center space-x-4">
@@ -415,36 +403,43 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label htmlFor="isEditableInWf" className="ml-3 text-gray-700 font-medium">
+                <label
+                  htmlFor="isEditableInWf"
+                  className="ml-3 text-gray-700 font-medium"
+                >
                   Editable in Workflow
                 </label>
               </div>
-
               <DynamicInput
                 name="allowedWfBoxName"
                 type="text"
                 value={formData.allowedWfBoxName}
                 placeholder="Workflow Box Name"
-                onChange={(e) => handleChange("allowedWfBoxName", e.target.value)}
+                onChange={(e) =>
+                  handleChange("allowedWfBoxName", e.target.value)
+                }
                 className="flex-1"
               />
-
               <div className="flex items-center">
                 <input
                   type="checkbox"
                   id="showInAlert"
                   name="showInAlert"
                   checked={formData.showInAlert}
-                  onChange={(e) => handleChange("showInAlert", e.target.checked)}
+                  onChange={(e) =>
+                    handleChange("showInAlert", e.target.checked)
+                  }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label htmlFor="showInAlert" className="ml-3 text-gray-700 font-medium">
+                <label
+                  htmlFor="showInAlert"
+                  className="ml-3 text-gray-700 font-medium"
+                >
                   Show in Alert
                 </label>
               </div>
             </div>
           </div>
-
           {/* Type of Information */}
           <DynamicSelector
             name="typeOfInformation"
@@ -454,7 +449,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             label="Type of Information"
             className="md:col-span-2 -mt-2"
           />
-
           {/* چند چک‌باکس در یک ردیف */}
           <div className="flex flex-wrap md:col-span-2 space-x-4">
             <div className="flex items-center">
@@ -466,7 +460,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("required", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="required" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="required"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Required
               </label>
             </div>
@@ -479,7 +476,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("mainColumns", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="mainColumns" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="mainColumns"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Main Columns
               </label>
             </div>
@@ -494,7 +494,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 }
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="showInListView" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="showInListView"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Show in List
               </label>
             </div>
@@ -507,12 +510,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("rightToLeft", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="rightToLeft" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="rightToLeft"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Right to Left
               </label>
             </div>
           </div>
-
           {/* چک‌باکس/اینپوت دیگر در یک ردیف */}
           <div className="flex flex-wrap md:col-span-2 space-x-4 -mt-2">
             <div className="flex items-center">
@@ -524,18 +529,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("readOnly", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="readOnly" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="readOnly"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Read Only
               </label>
             </div>
-            <DynamicInput
-              name="metaColumnName"
-              type="text"
-              value={formData.metaColumnName}
-              onChange={(e) => handleChange("metaColumnName", e.target.value)}
-              placeholder="Meta Column Name"
-              className="flex-1"
-            />
+            {/* حذف metaColumnName از فرم (چون مقدار lookup از dynamicMeta گرفته می‌شود) */}
             <DynamicInput
               name="showInTab"
               type="text"
@@ -545,19 +546,16 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               className="flex-1"
             />
           </div>
-
-          {/* کنترلر داینامیک (مثلا Lookup یا ...) */}
+          {/* کنترلر داینامیک (مثلاً Lookup) */}
           <div className="mb-8 w-full md:col-span-2 -mt-8">
             {renderSelectedComponent()}
           </div>
-
-          {/* دکمه های Cancel و Submit */}
+          {/* دکمه‌های Cancel و Submit */}
           <div className="flex justify-center md:col-span-2 space-x-4 -mt-8">
             <button
               type="button"
               className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
               onClick={() => {
-                // ریست
                 setFormData({
                   formName: "",
                   order: "",
