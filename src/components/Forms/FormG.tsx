@@ -12,6 +12,9 @@ import CtrDatePicker from "./ControllerForms/DateTimeEnglishController";
 import CtrPersianDate from "./ControllerForms/DateTimePersianController";
 import CtrLookup from "./ControllerForms/LookupController";
 import CtrLookupRealValue from "./ControllerForms/LookupRealValueController";
+import CtrLookupAdvanceTable from "./ControllerForms/LookUpAdvanceTable";
+import CtrAvanceLookupAdvanceTable from "./ControllerForms/AdvanceLookupAdvanceTable";
+import CtrLookupImage from "./ControllerForms/LookupImage";
 
 interface FormGProps {
   ctrForm: Rule[];
@@ -30,6 +33,9 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrPersianDate,
   CtrLookup,
   CtrLookupRealValue,
+  CtrLookupAdvanceTable,
+  CtrAvanceLookupAdvanceTable,
+  CtrLookupImage,
 };
 
 const FormG: React.FC<FormGProps> = ({

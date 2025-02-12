@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList";
-import DataTable from "./TableForm/DataTable";
+import DataTable from "../../TableDynamic/DataTable";
 import AppServices from "../../../services/api.services";
 import {
   EntityField,
@@ -46,7 +46,7 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
     getAllProject,
   } = useApi();
 
-  // مدیریت state اصلی مربوط به metaTypes (حذف metaType3 و removeSameName)
+  // state اصلی مربوط به metaTypes (حذف metaType3 و removeSameName)
   const [metaTypesLookUp, setMetaTypesLookUp] = useState({
     metaType1: data?.metaType1 ?? null,
     metaType2: data?.metaType2 ?? null,
@@ -55,7 +55,7 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
     metaType5: data?.metaType5 ?? "",
   });
 
-  // مدیریت Old Lookup (بقیه موارد سمت راست حذف شده‌اند)
+  // مدیریت Old Lookup
   const [oldLookup, setOldLookup] = useState(data?.BoolMeta1 ?? false);
 
   // مدیریت مقادیر پیش‌فرض (برای PostPickerList)
@@ -89,9 +89,17 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
   // لیست Roles (برای PostPickerList)
   const [roleRows, setRoleRows] = useState<Role[]>([]);
 
-  // مقداردهی اولیه جدول (در حالت ویرایش)
+  // flag برای اطمینان از مقداردهی اولیه جدول تنها یک‌بار
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+
+  // مقداردهی اولیه جدول (در حالت ویرایش) تنها یک‌بار
   useEffect(() => {
-    if (data && data.metaType4 && data.metaType4.trim() !== "") {
+    if (
+      !initialDataLoaded &&
+      data &&
+      data.metaType4 &&
+      data.metaType4.trim() !== ""
+    ) {
       try {
         const parsed = JSON.parse(data.metaType4);
         const normalized = Array.isArray(parsed)
@@ -110,21 +118,21 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
       } catch (err) {
         console.error("Error parsing data.metaType4 JSON:", err);
         setTableData([]);
+      } finally {
+        setInitialDataLoaded(true);
       }
     }
-  }, [data]);
+  }, [data, initialDataLoaded]);
 
   // به‌روزرسانی metaType4 هنگام تغییر tableData
   useEffect(() => {
     try {
       const asString = JSON.stringify(tableData);
-      if (asString !== metaTypesLookUp.metaType4) {
-        setMetaTypesLookUp((prev) => ({ ...prev, metaType4: asString }));
-      }
+      setMetaTypesLookUp((prev) => ({ ...prev, metaType4: asString }));
     } catch (error) {
       console.error("Error serializing table data:", error);
     }
-  }, [tableData, metaTypesLookUp.metaType4]);
+  }, [tableData]);
 
   // دریافت EntityType ها
   useEffect(() => {

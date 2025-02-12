@@ -17,7 +17,6 @@ import Component7 from "./ControllerForms/LookupController";
 import Component8 from "./ControllerForms/PostPickerList";
 import Component9 from "./ControllerForms/LookupRealValueController";
 import Component10 from "./ControllerForms/LookUpAdvanceTable";
-import Component11 from "./ControllerForms/AdvanceLookupAdvanceTable";
 import Component12 from "./ControllerForms/LookupImage";
 import Component13 from "./ControllerForms/YesNoController";
 import Component14 from "./ControllerForms/AttachFileController";
@@ -32,6 +31,7 @@ import Component22 from "./ControllerForms/CalculatedField";
 import Component23 from "./ControllerForms/ExcelCalculator";
 import Component24 from "./ControllerForms/TabController";
 import Component25 from "./ControllerForms/MapController";
+import Component26 from "./ControllerForms/AdvanceLookupAdvanceTable";
 
 // Mapping of column types
 const columnTypeMapping: { [key: string]: number } = {
@@ -60,6 +60,7 @@ const columnTypeMapping: { [key: string]: number } = {
   component23: 29,
   component24: 32,
   component25: 28,
+  component26: 36,
 };
 
 // Mapping of component keys to components
@@ -74,7 +75,6 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component8: Component8,
   component9: Component9,
   component10: Component10,
-  component11: Component11,
   component12: Component12,
   component13: Component13,
   component14: Component14,
@@ -89,6 +89,7 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component23: Component23,
   component24: Component24,
   component25: Component25,
+  component26: Component26,
 };
 
 const typeOfInformationOptions = [
@@ -102,7 +103,7 @@ const typeOfInformationOptions = [
   { value: "component8", label: "Post PickerList" },
   { value: "component9", label: "Lookup RealValue" },
   { value: "component10", label: "Lookup AdvanceTable" },
-  { value: "component11", label: "Advance LookupAdvanceTable" },
+  { value: "component26", label: "Advance Lookup AdvanceTable" },
   { value: "component12", label: "Lookup Image" },
   { value: "component13", label: "Yes No" },
   { value: "component14", label: "Attach File" },
@@ -260,6 +261,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
       LookupMode: lookupModeValue,
       BoolMeta1: dynamicMeta.oldLookup ? true : false,
+      CountInReject: dynamicMeta.removeSameName ? true : false,
       metaType5: metaType5Value,
       ID: isEdit && existingData ? existingData.ID : 0,
       IsVisible: true,
@@ -298,6 +300,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       CountInReject: existingData?.CountInReject || false,
       BoolMeta1: existingData?.BoolMeta1 || false,
       metaType5: existingData?.metaType5 || "",
+      removeSameName: existingData?.CountInReject || false,
     };
     return (
       <SelectedComponent

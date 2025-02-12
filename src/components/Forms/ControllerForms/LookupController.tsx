@@ -5,7 +5,7 @@ import { useApi } from "../../../context/ApiContext";
 // کامپوننت‌های سفارشی شما:
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList";
-import DataTable from "./TableForm/DataTable";
+import DataTable from "../../TableDynamic/DataTable";
 
 // تایپ‌های موردنیاز
 import {
@@ -304,7 +304,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-2 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
+    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
       {/* بخش بالایی: تنظیمات و Select ها */}
       <div className="flex gap-8">
         {/* سمت چپ */}
@@ -407,7 +407,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
       </div>
 
       {/* بخش پایینی: جدول Lookup */}
-      <div className="mb-100">
+      <div className="mt-4">
         <DataTable
           columnDefs={[
             {
