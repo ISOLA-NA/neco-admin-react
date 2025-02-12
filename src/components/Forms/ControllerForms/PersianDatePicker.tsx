@@ -61,7 +61,10 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
 
       <div className="flex justify-center space-x-4 mb-4">
         <div>
-          <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="month"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             ماه
           </label>
           <select
@@ -79,7 +82,10 @@ const PersianDatePicker: React.FC<PersianDatePickerProps> = ({
         </div>
 
         <div>
-          <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="year"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             سال
           </label>
           <select
