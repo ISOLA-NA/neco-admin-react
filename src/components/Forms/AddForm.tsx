@@ -32,6 +32,8 @@ import Component23 from "./ControllerForms/ExcelCalculator";
 import Component24 from "./ControllerForms/TabController";
 import Component25 from "./ControllerForms/MapController";
 import Component26 from "./ControllerForms/AdvanceLookupAdvanceTable";
+import Component27 from "./ControllerForms/HyperLinkController";
+import Component28 from "./ControllerForms/SelectUserInPost";
 
 // Mapping of column types
 const columnTypeMapping: { [key: string]: number } = {
@@ -61,6 +63,8 @@ const columnTypeMapping: { [key: string]: number } = {
   component24: 32,
   component25: 28,
   component26: 36,
+  component27:7,
+  component28:8
 };
 
 // Mapping of component keys to components
@@ -90,6 +94,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component24: Component24,
   component25: Component25,
   component26: Component26,
+  component27: Component27,
+  component28:Component28
 };
 
 const typeOfInformationOptions = [
@@ -100,11 +106,13 @@ const typeOfInformationOptions = [
   { value: "component5", label: "Date Time" },
   { value: "component6", label: "Persian Date" },
   { value: "component7", label: "Lookup" },
+  { value: "component27", label: "Hyper Link" },
   { value: "component8", label: "Post PickerList" },
   { value: "component9", label: "Lookup RealValue" },
   { value: "component10", label: "Lookup AdvanceTable" },
   { value: "component26", label: "Advance Lookup AdvanceTable" },
   { value: "component12", label: "Lookup Image" },
+  { value: "component28", label: "Select User In Post" },
   { value: "component13", label: "Yes No" },
   { value: "component14", label: "Attach File" },
   { value: "component15", label: "Picture Box" },
@@ -228,7 +236,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       DisplayName: formData.formName,
       IsShowGrid: formData.showInListView,
       IsEditableInWF: formData.isEditableInWf,
-      CountInReject: dynamicMeta.removeSameName ? true : false,
       WFBOXName: formData.allowedWfBoxName,
       nEntityTypeID: 5,
       ColumnType: columnTypeMapping[formData.typeOfInformation],

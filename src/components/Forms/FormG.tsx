@@ -15,6 +15,9 @@ import CtrLookupRealValue from "./ControllerForms/LookupRealValueController";
 import CtrLookupAdvanceTable from "./ControllerForms/LookUpAdvanceTable";
 import CtrAvanceLookupAdvanceTable from "./ControllerForms/AdvanceLookupAdvanceTable";
 import CtrLookupImage from "./ControllerForms/LookupImage";
+import CtrSwitch from "./ControllerForms/YesNoController";
+import CtrHyperLink from "./ControllerForms/HyperLinkController";
+import CtrSelectUserInPost from "./ControllerForms/SelectUserInPost";
 
 interface FormGProps {
   ctrForm: Rule[];
@@ -36,6 +39,9 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrLookupAdvanceTable,
   CtrAvanceLookupAdvanceTable,
   CtrLookupImage,
+  CtrSwitch,
+  CtrHyperLink,
+  CtrSelectUserInPost
 };
 
 const FormG: React.FC<FormGProps> = ({
