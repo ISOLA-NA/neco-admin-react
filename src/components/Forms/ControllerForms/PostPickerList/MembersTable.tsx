@@ -4,24 +4,20 @@ import DataTable from "../../../TableDynamic/DataTable"; // مسیر را مطا
 import { useApi } from "../../../../context/ApiContext";
 import ReusableButton from "../../../utilities/DynamicButtons";
 
-interface MembersTableProps {
-  onSelect: (roleName: string) => void;
-  onClose: () => void;
+export interface SelectedItem {
+  id: string;
+  name: string;
 }
 
-interface ProcessedRole {
-  ID: string;
-  Name: string;
-  UserNameFromAllUser: string;
-  UserFamily: string;
-  Enterprise: string;
-  SuperIndent: string;
+interface MembersTableProps {
+  onSelect: (selected: SelectedItem[]) => void;
+  onClose: () => void;
 }
 
 const MembersTable: React.FC<MembersTableProps> = ({ onSelect, onClose }) => {
   const api = useApi();
-  const [membersList, setMembersList] = useState<ProcessedRole[]>([]);
-  const [selectedRow, setSelectedRow] = useState<ProcessedRole | null>(null);
+  const [membersList, setMembersList] = useState<any[]>([]);
+  const [selectedRow, setSelectedRow] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const columnDefs = [
@@ -48,7 +44,7 @@ const MembersTable: React.FC<MembersTableProps> = ({ onSelect, onClose }) => {
           const superIndent =
             roles.find((r: any) => r.ID === role.ParrentId)?.Name || "";
           return {
-            ID: role.ID,
+            ...role,
             Name: role.Name,
             UserNameFromAllUser: user?.Name || "",
             UserFamily: user?.Family || "",
@@ -72,14 +68,14 @@ const MembersTable: React.FC<MembersTableProps> = ({ onSelect, onClose }) => {
   };
 
   const handleRowDoubleClick = (data: any) => {
-    if (data && data.Name) {
-      onSelect(data.Name);
+    if (data && data.ID && data.Name) {
+      onSelect([{ id: String(data.ID), name: data.Name }]);
     }
   };
 
   const handleSelectClick = () => {
-    if (selectedRow && selectedRow.Name) {
-      onSelect(selectedRow.Name);
+    if (selectedRow && selectedRow.ID && selectedRow.Name) {
+      onSelect([{ id: String(selectedRow.ID), name: selectedRow.Name }]);
     }
   };
 
@@ -103,7 +99,6 @@ const MembersTable: React.FC<MembersTableProps> = ({ onSelect, onClose }) => {
           isLoading={loading}
         />
       </div>
-
       <div className="flex justify-center mt-4">
         <ReusableButton
           text="Select"
