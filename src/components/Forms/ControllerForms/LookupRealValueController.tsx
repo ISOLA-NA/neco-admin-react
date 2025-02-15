@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
-import PostPickerList from "./PostPickerList";
+import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
 import AppServices from "../../../services/api.services";
 import {

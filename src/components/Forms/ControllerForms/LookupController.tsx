@@ -4,7 +4,7 @@ import { useApi } from "../../../context/ApiContext";
 
 // کامپوننت‌های سفارشی شما:
 import DynamicSelector from "../../utilities/DynamicSelector";
-import PostPickerList from "./PostPickerList";
+import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
 
 // تایپ‌های موردنیاز

@@ -14,7 +14,7 @@ import Component4 from "./ControllerForms/NumberController";
 import Component5 from "./ControllerForms/DateTimeEnglishController";
 import Component6 from "./ControllerForms/DateTimePersianController";
 import Component7 from "./ControllerForms/LookupController";
-import Component8 from "./ControllerForms/PostPickerList";
+import Component8 from "./ControllerForms/PostPickerList/PostPickerList";
 import Component9 from "./ControllerForms/LookupRealValueController";
 import Component10 from "./ControllerForms/LookUpAdvanceTable";
 import Component12 from "./ControllerForms/LookupImage";

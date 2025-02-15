@@ -39,6 +39,7 @@ import AppServices, {
   WFAproval,
   EntityField,
   PostType,
+  GetEnumResponse,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -179,6 +180,9 @@ interface ApiContextType {
   deleteBoxTemplate: (id: number) => Promise<void>;
 
   getApprovalContextData: (id: number) => Promise<WFAproval[]>;
+
+  getEnum: (data: { str: string }) => Promise<GetEnumResponse>;
+
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -240,8 +244,6 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     updateRole: AppServices.updateRole.bind(AppServices),
     deleteRole: AppServices.deleteRole.bind(AppServices),
     getAllPostTypes: AppServices.getAllPostTypes.bind(AppServices),
-    
-
     getAllCompanies: AppServices.getAllCompanies.bind(AppServices),
     insertCompany: AppServices.insertCompany.bind(AppServices),
     updateCompany: AppServices.updateCompany.bind(AppServices),
@@ -327,6 +329,8 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
 
     getApprovalContextData:
       AppServices.getApprovalContextData.bind(AppServices),
+      getEnum: AppServices.getEnum.bind(AppServices),
+
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

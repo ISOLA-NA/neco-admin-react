@@ -1,4 +1,5 @@
-import React from "react";
+// TableSelector.tsx
+import React, { useState } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import ReusableButton from "../../utilities/DynamicButtons";
 
@@ -10,10 +11,12 @@ interface ColumnDef {
 interface TableSelectorProps {
   columnDefs: ColumnDef[];
   rowData: any[];
-  selectedRow?: any;
+  // این دو تابع برای کلیک و دابل کلیک روی ردیف
   onRowDoubleClick: (data: any) => void;
   onRowClick: (data: any) => void;
-  onSelectButtonClick: () => void;
+  // این تابع هنگام کلیک روی دکمه Select فراخوانی می‌شود
+  onSelectButtonClick: (data: any) => void;
+  // کنترل فعال یا غیرفعال بودن دکمه Select
   isSelectDisabled: boolean;
 }
 
@@ -25,15 +28,34 @@ const TableSelector: React.FC<TableSelectorProps> = ({
   onSelectButtonClick,
   isSelectDisabled,
 }) => {
+  const [localSelectedRow, setLocalSelectedRow] = useState<any>(null);
+
+  // وقتی روی ردیفی کلیک می‌کنیم، state محلی بروز شود
+  const handleRowClick = (data: any) => {
+    setLocalSelectedRow(data);
+    onRowClick(data);
+  };
+
+  // وقتی دکمه Select زده شد، اگر ردیفی انتخاب شده باشد به والد بده
+  const handleSelectClick = () => {
+    if (localSelectedRow) {
+      onSelectButtonClick(localSelectedRow);
+    }
+  };
+
+  // وقتی دابل کلیک شد، بدون نیاز به دکمه Select، مستقیم به والد بده
+  const handleRowDoubleClickInternal = (data: any) => {
+    onRowDoubleClick(data);
+  };
+
   return (
     <div className="bg-white rounded-lg p-4 flex flex-col h-full">
-      {/* Table Section with fixed height and vertical scroll */}
       <div className="flex-grow overflow-y-auto mb-4">
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
-          onRowDoubleClick={onRowDoubleClick}
-          setSelectedRowData={onRowClick}
+          onRowDoubleClick={handleRowDoubleClickInternal}
+          setSelectedRowData={handleRowClick}
           showDuplicateIcon={false}
           onAdd={() => {}}
           onEdit={() => {}}
@@ -43,12 +65,11 @@ const TableSelector: React.FC<TableSelectorProps> = ({
         />
       </div>
 
-      {/* Select Button with a fixed position at the bottom */}
       <div className="mt-4 flex justify-center">
         <ReusableButton
           text="Select"
-          onClick={onSelectButtonClick}
-          isDisabled={isSelectDisabled}
+          onClick={handleSelectClick}
+          isDisabled={isSelectDisabled || !localSelectedRow}
           className="w-48"
         />
       </div>
