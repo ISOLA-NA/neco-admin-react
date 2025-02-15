@@ -1,6 +1,7 @@
 // src/services/api.constant.ts
 export const apiConst = Object.freeze({
-  webLogin: "api/Login/LoginO",
+  // webLogin: "api/Login/LoginO",
+  webLogin: "api/Login/LoginONew",
   sendOtp: "api/SendOtp",
   loginWithOtp: "api/loginWithOtp",
   tokenSetup: "api/tokenSetup",
@@ -48,6 +49,7 @@ export const apiConst = Object.freeze({
   insertRole: "api/Post/Insert",
   updateRole: "api/Post/Update",
   deleteRole: "api/Post/Delete",
+  getAllPostTypes:"api/PostType/GetAll",
   getAllCompany: "api/Company/GetAll",
   insertCompany: "api/Company/Insert",
   deleteCompany: "api/Company/Delete",

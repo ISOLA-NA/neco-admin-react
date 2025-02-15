@@ -1,15 +1,8 @@
-// src/components/ControllerForms/HyperLinkController.tsx
 import React, { useState, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 
 interface HyperLinkControllerProps {
-  /**
-   * onMetaChange: تابعی برای ارسال شیء متادیتا به والد.
-   * شیء ارسالی شامل:
-   * - metaType1: مقدار ورودی کاربر (متن وارد شده)
-   * - metaType2: مقدار ثابت "hyper"
-   * - metaType3, metaType4: سایر اطلاعات (در صورت نیاز)
-   */
+
   onMetaChange: (meta: {
     metaType1: string;
     metaType2: string;

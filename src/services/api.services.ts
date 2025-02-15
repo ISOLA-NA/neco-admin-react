@@ -278,6 +278,15 @@ export interface Role {
   status?: number;
 }
 
+export interface PostType {
+  ID?: string;
+  Name: string;
+  IsVisible: boolean;
+  LastModified?: string;
+  ModifiedById?: string;
+  Description?: string | null;
+}
+
 export interface Company {
   ID: number;
   Name: string;
@@ -924,6 +933,11 @@ class ApiService {
 
   async getAllRoles(): Promise<Role[]> {
     const response = await httpClient.post<Role[]>(apiConst.getAllRoles);
+    return response.data;
+  }
+
+  async getAllPostTypes(): Promise<PostType[]> {
+    const response = await httpClient.post<PostType[]>(apiConst.getAllPostTypes);
     return response.data;
   }
 

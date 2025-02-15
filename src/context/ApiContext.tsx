@@ -38,6 +38,7 @@ import AppServices, {
   BoxTemplate,
   WFAproval,
   EntityField,
+  PostType,
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -91,6 +92,7 @@ interface ApiContextType {
   insertRole: (data: Role) => Promise<Role>;
   updateRole: (data: Role) => Promise<Role>;
   deleteRole: (id: string) => Promise<void>;
+  getAllPostTypes: () => Promise<PostType[]>;
 
   getAllCompanies: () => Promise<Company[]>;
   insertCompany: (data: Company) => Promise<Company>;
@@ -237,6 +239,8 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     insertRole: AppServices.insertRole.bind(AppServices),
     updateRole: AppServices.updateRole.bind(AppServices),
     deleteRole: AppServices.deleteRole.bind(AppServices),
+    getAllPostTypes: AppServices.getAllPostTypes.bind(AppServices),
+    
 
     getAllCompanies: AppServices.getAllCompanies.bind(AppServices),
     insertCompany: AppServices.insertCompany.bind(AppServices),

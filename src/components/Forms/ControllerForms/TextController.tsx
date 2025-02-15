@@ -1,34 +1,22 @@
-// src/components/ControllerForms/TextController.tsx
 import React, { useState, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 
 interface TextControllerProps {
-  /**
-   * onMetaChange: تابعی برای ارسال شیء متادیتا به والد.
-   * شیء ارسالی شامل:
-   * - metaType1: مقدار پیش‌فرض (Default Value)
-   * - metaType2, metaType3, metaType4: (در صورت نیاز) سایر اطلاعات متادیتا
-   */
+
   onMetaChange: (meta: {
     metaType1: string;
     metaType2: string | null;
     metaType3: string | null;
     metaType4: string | null;
   }) => void;
-  /**
-   * data: (اختیاری) داده اولیه جهت مقداردهی اولیه کنترلر در حالت ویرایش.
-   * انتظار می‌رود اگر موجود باشد، شامل کلیدهای metaType1، metaType2، metaType3 و metaType4 باشد.
-   * برای این کنترلر، مقدار متنی مورد نظر از data.metaType1 خوانده می‌شود.
-   */
+
   data?: {
     metaType1?: string;
     metaType2?: string;
     metaType3?: string;
     metaType4?: string;
   };
-  /**
-   * isDisable: (اختیاری) اگر true باشد، ورودی غیرقابل ویرایش می‌شود.
-   */
+
   isDisable?: boolean;
 }
 
