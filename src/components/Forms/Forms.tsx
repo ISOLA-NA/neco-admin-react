@@ -507,7 +507,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           onSave={refreshEntityFields}
           isEdit={!!editingData}
           existingData={editingData}
-        />
+          entityTypeId={selectedRow?.ID}  // اضافه کردن مقدار selectedRow.ID
+          />
       </DynamicModal>
     </div>
   );

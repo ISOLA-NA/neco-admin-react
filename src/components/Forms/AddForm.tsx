@@ -63,8 +63,8 @@ const columnTypeMapping: { [key: string]: number } = {
   component24: 32,
   component25: 28,
   component26: 36,
-  component27:7,
-  component28:8
+  component27: 7,
+  component28: 8
 };
 
 // Mapping of component keys to components
@@ -95,7 +95,7 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component25: Component25,
   component26: Component26,
   component27: Component27,
-  component28:Component28
+  component28: Component28
 };
 
 const typeOfInformationOptions = [
@@ -132,7 +132,8 @@ interface AddColumnFormProps {
   onClose: () => void;
   onSave?: () => void;
   isEdit?: boolean;
-  existingData?: any; // اطلاعاتی که در حالت ویرایش وجود دارد
+  existingData?: any;
+  entityTypeId?: string; // مقدار nEntityTypeID از selectedRow
 }
 
 const AddColumnForm: React.FC<AddColumnFormProps> = ({
@@ -140,10 +141,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   onSave,
   isEdit = false,
   existingData = null,
+  entityTypeId
 }) => {
   const { insertEntityField, updateEntityField } = useApi();
 
-  // استخراج اطلاعات اصلی فرم (بدون استفاده از metaColumnName، چون مقدار lookup از dynamicMeta گرفته می‌شود)
+  // استخراج اطلاعات اصلی فرم
   const getInitialFormData = () => ({
     formName: existingData ? existingData.DisplayName : "",
     order: existingData ? String(existingData.orderValue) : "",
@@ -164,7 +166,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInListView: existingData ? existingData.IsShowGrid : false,
     rightToLeft: existingData ? existingData.IsRTL : false,
     readOnly: existingData ? existingData.IsForceReadOnly : false,
-    // metaColumnName حذف می‌شود؛ مقدار lookup از dynamicMeta گرفته خواهد شد
     metaColumnName: "",
     showInTab: existingData ? existingData.ShowInTab : "",
   });
@@ -213,6 +214,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // console.log("formData",formData)
   // ذخیره فرم (Submit)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,22 +233,22 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         ? null
         : Number(dynamicMeta.LookupMode);
     const metaType5Value = dynamicMeta.metaType5 || null;
-
     const payload: any = {
       DisplayName: formData.formName,
       IsShowGrid: formData.showInListView,
       IsEditableInWF: formData.isEditableInWf,
       WFBOXName: formData.allowedWfBoxName,
-      nEntityTypeID: 5,
+      nEntityTypeID:  entityTypeId, // استفاده از optional chaining
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
       metaType1: dynamicMeta.metaType1 || "",
       metaType2: dynamicMeta.metaType2 || "",
       metaType3: dynamicMeta.metaType3 || "",
-      // مقدار metaType4 از dynamicMeta گرفته می‌شود (تولید شده توسط کنترلر Lookup)
+      // metaType4 از dynamicMeta گرفته می‌شود
       metaType4: dynamicMeta.metaType4 || "",
-      metaTypeJson: null,
+      // metaTypeJson از dynamicMeta گرفته می‌شود
+      metaTypeJson: dynamicMeta.metaTypeJson || null,
       PrintCode: formData.printCode,
       IsForceReadOnly: formData.readOnly,
       IsUnique: false,
@@ -294,7 +296,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   };
 
-  // رندر کنترلر داینامیک (مثلاً Lookup)
+  // رندر کنترلر داینامیک (مثلاً Lookup، SeqenialNumber و ...)
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
@@ -308,6 +310,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       BoolMeta1: existingData?.BoolMeta1 || false,
       metaType5: existingData?.metaType5 || "",
       removeSameName: existingData?.CountInReject || false,
+      metaTypeJson: existingData?.metaTypeJson || "",
     };
     return (
       <SelectedComponent
@@ -546,7 +549,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 Read Only
               </label>
             </div>
-            {/* حذف metaColumnName از فرم (چون مقدار lookup از dynamicMeta گرفته می‌شود) */}
             <DynamicInput
               name="showInTab"
               type="text"
@@ -556,7 +558,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               className="flex-1"
             />
           </div>
-          {/* کنترلر داینامیک (مثلاً Lookup) */}
+          {/* کنترلر داینامیک (مثلاً Lookup, SeqenialNumber, ...) */}
           <div className="mb-8 w-full md:col-span-2 -mt-8">
             {renderSelectedComponent()}
           </div>

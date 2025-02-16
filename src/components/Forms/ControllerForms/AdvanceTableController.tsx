@@ -1,18 +1,60 @@
-import React, { useState } from "react";
-import DynamicSelector from "../../utilities/DynamicSelector"; // مسیر فایل DynamicSelector را اصلاح کنید
+// src/components/ControllerForms/AdvanceTable.tsx
+import React, { useEffect, useState } from "react";
+import DynamicSelector from "../../utilities/DynamicSelector"; // مسیر را مطابق ساختار پروژه اصلاح کنید
+import { useApi } from "../../../context/ApiContext"; // مسیر را مطابق ساختار پروژه اصلاح کنید
 
-const AdvanceTable: React.FC = () => {
-  const [selectedForm, setSelectedForm] = useState("");
-  const [isGalleryMode, setIsGalleryMode] = useState(false);
+interface AdvanceTableProps {
+  onMetaChange?: (data: any) => void;
+  data?: any; // اطلاعات موجود در حالت ویرایش
+}
 
-  const formOptions = [
-    { value: "form1", label: "Form 1" },
-    { value: "form2", label: "Form 2" },
-    { value: "form3", label: "Form 3" },
-  ];
+const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data }) => {
+  const { getAllEntityType } = useApi();
+  const [formOptions, setFormOptions] = useState<{ value: string; label: string }[]>([]);
+  const [selectedForm, setSelectedForm] = useState<string>("");
+  const [isGalleryMode, setIsGalleryMode] = useState<boolean>(false);
+  const [initialized, setInitialized] = useState<boolean>(false);
+
+  // دریافت گزینه‌های فرم از API
+  useEffect(() => {
+    const fetchEntityTypes = async () => {
+      try {
+        const entityTypes = await getAllEntityType();
+        // فرض می‌کنیم هر آیتم دارای فیلدهای ID و Name است
+        const options = entityTypes.map((entity: any) => ({
+          value: String(entity.ID),
+          label: entity.Name || `Entity ${entity.ID}`,
+        }));
+        setFormOptions(options);
+      } catch (error) {
+        console.error("Error fetching entity types:", error);
+      }
+    };
+
+    fetchEntityTypes();
+  }, [getAllEntityType]);
+
+  // تنظیم stateهای اولیه در حالت ویرایش تنها یک بار
+  useEffect(() => {
+    if (!initialized && data) {
+      setSelectedForm(data.metaType1 || "");
+      setIsGalleryMode(String(data.metaType2) === "1");
+      setInitialized(true);
+    }
+  }, [data, initialized]);
+
+  // ارسال تغییرات به کامپوننت پدر (مثلاً AddColumnForm)
+  useEffect(() => {
+    if (onMetaChange) {
+      onMetaChange({
+        metaType1: selectedForm,
+        metaType2: isGalleryMode ? "1" : "0", // ارسال به صورت رشته
+      });
+    }
+  }, [selectedForm, isGalleryMode, onMetaChange]);
 
   return (
-    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex items-center justify-center">
       <div className="flex flex-col gap-4 w-64">
         {/* منوی انتخاب فرم */}
         <DynamicSelector
@@ -22,7 +64,6 @@ const AdvanceTable: React.FC = () => {
           onChange={(e) => setSelectedForm(e.target.value)}
           label="Show Form"
         />
-
         {/* چک‌باکس حالت گالری */}
         <div className="flex items-center space-x-2">
           <input
