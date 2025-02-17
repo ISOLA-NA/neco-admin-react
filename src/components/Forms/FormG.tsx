@@ -20,6 +20,7 @@ import CtrHyperLink from "./ControllerForms/HyperLinkController";
 import CtrSelectUserInPost from "./ControllerForms/SelectUserInPost";
 import CtrPFILookup from "./ControllerForms/PfiLookUpController";
 import CtrCalCulatedField from "./ControllerForms/CalculatedField";
+import CtrExcelCalculator from "./ControllerForms/ExcelCalculator";
 
 
 interface FormGProps {
@@ -46,7 +47,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrHyperLink,
   CtrSelectUserInPost,
   CtrPFILookup,
-  CtrCalCulatedField
+  CtrCalCulatedField,
+  CtrExcelCalculator
 };
 
 const FormG: React.FC<FormGProps> = ({
