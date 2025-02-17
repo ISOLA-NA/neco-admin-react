@@ -1,7 +1,9 @@
+// FileUploadHandler.tsx
+
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import fileService from "./api.servicesFile"; // مسیر صحیح را بررسی کنید
-import apiService from "./api.services";       // مسیر صحیح را بررسی کنید
+import apiService from "./api.services"; // مسیر صحیح را بررسی کنید
 import ImageUploader from "../components/utilities/ImageUploader";
 
 export interface InsertModel {
@@ -36,11 +38,27 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // state داخلی برای preview در صورت عدم استفاده از props
+  const [internalPreviewUrl, setInternalPreviewUrl] = useState<string | null>(
+    null
+  );
+
+  // تابع کمکی به‌روز‌رسانی preview
+  const updatePreview = (url: string | null) => {
+    if (onPreviewUrlChange) {
+      onPreviewUrlChange(url);
+    } else {
+      setInternalPreviewUrl(url);
+    }
+  };
+
+  // استفاده از preview نهایی: اگر externalPreviewUrl وجود داشته باشد، اولویت دارد
+  const finalPreviewUrl = externalPreviewUrl ?? internalPreviewUrl;
 
   // دانلود فایل در صورت وجود selectedFileId
   useEffect(() => {
     if (!selectedFileId || selectedFileId.trim() === "") {
-      if (onPreviewUrlChange) onPreviewUrlChange(null);
+      updatePreview(null);
       return;
     }
     setIsLoading(true);
@@ -67,14 +85,14 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
               mimeType = "image/png";
             }
             const blob = new Blob([uint8Array], { type: mimeType });
-            const objectUrl = (window.URL || window.webkitURL).createObjectURL(blob);
-            if (onPreviewUrlChange) {
-              onPreviewUrlChange(objectUrl);
-            }
+            const objectUrl = (window.URL || window.webkitURL).createObjectURL(
+              blob
+            );
+            updatePreview(objectUrl);
             console.log("Downloaded preview URL:", objectUrl);
           })
           .catch(() => {
-            if (onPreviewUrlChange) onPreviewUrlChange(null);
+            updatePreview(null);
             console.error("Error downloading file");
           })
           .finally(() => {
@@ -83,7 +101,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
       })
       .catch((err) => {
         console.error("Error in getFile:", err);
-        if (onPreviewUrlChange) onPreviewUrlChange(null);
+        updatePreview(null);
         setIsLoading(false);
       });
     return () => {
@@ -93,8 +111,8 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
 
   // ریست کردن preview URL در صورت تغییر resetCounter
   useEffect(() => {
-    if (resetCounter > 0 && onPreviewUrlChange) {
-      onPreviewUrlChange(null);
+    if (resetCounter > 0) {
+      updatePreview(null);
       console.log("Preview reset due to resetCounter:", resetCounter);
     }
   }, [resetCounter, onPreviewUrlChange]);
@@ -162,8 +180,10 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
               if (insertRes && insertRes.status) {
                 const insertedModel: InsertModel = insertRes.data;
                 if (onUploadSuccess) onUploadSuccess(insertedModel);
-                const previewUrl = (window.URL || window.webkitURL).createObjectURL(file);
-                if (onPreviewUrlChange) onPreviewUrlChange(previewUrl);
+                const previewUrl = (
+                  window.URL || window.webkitURL
+                ).createObjectURL(file);
+                updatePreview(previewUrl);
                 console.log("Uploaded preview URL:", previewUrl);
               } else {
                 setErrorMessage("Failed to insert file info to database.");
@@ -192,10 +212,12 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
         <ImageUploader
           key={`image-uploader-${resetCounter}-${selectedFileId}`}
           onUpload={handleFileUpload}
-          externalPreviewUrl={externalPreviewUrl}
+          externalPreviewUrl={finalPreviewUrl}
         />
       </div>
-      {isLoading && <p className="text-blue-500 mt-2">Uploading/downloading...</p>}
+      {isLoading && (
+        <p className="text-blue-500 mt-2">Uploading/downloading...</p>
+      )}
       {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
     </div>
   );

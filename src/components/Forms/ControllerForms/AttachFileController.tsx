@@ -1,8 +1,11 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicModal from "../../utilities/DynamicModal";
 import { FaTrash, FaEye } from "react-icons/fa";
-import FileUploadHandler, { InsertModel } from "../../../services/FileUploadHandler";
+import FileUploadHandler, {
+  InsertModel,
+} from "../../../services/FileUploadHandler";
+import fileService from "../../../services/api.servicesFile";
 
 interface AttachFileProps {
   onMetaChange?: (data: any) => void;
@@ -10,16 +13,35 @@ interface AttachFileProps {
 }
 
 const AttachFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
-  // در حالت ادیت، شناسه فایل از داده‌های اولیه گرفته می‌شود
+  // اگر در حالت ویرایش شناسه فایل وجود داشته باشد، از آن استفاده می‌کنیم
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data?.metaType1 || null
   );
+  const [fileName, setFileName] = useState<string>(data?.fileName || "");
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+  // دریافت نام فایل از سرویس اگر شناسه فایل موجود باشد
+  useEffect(() => {
+    if (selectedFileId) {
+      fileService
+        .getFile(selectedFileId)
+        .then((res) => {
+          // فرض بر این است که res.data شامل FileName می‌باشد
+          setFileName(res.data.FileName);
+        })
+        .catch((err) => {
+          console.error("Error fetching file info:", err);
+        });
+    } else {
+      setFileName("");
+    }
+  }, [selectedFileId]);
+
   const handleUploadSuccess = (insertedModel: InsertModel) => {
     setSelectedFileId(insertedModel.ID || null);
+    setFileName(insertedModel.FileName);
     if (onMetaChange) {
       onMetaChange({ metaType1: insertedModel.ID || null });
     }
@@ -28,6 +50,7 @@ const AttachFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
   const handleReset = () => {
     setSelectedFileId(null);
     setResetCounter((prev) => prev + 1);
+    setFileName("");
     if (onMetaChange) {
       onMetaChange({ metaType1: null });
     }
@@ -43,8 +66,6 @@ const AttachFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
     }
   };
 
-  console.log("initialData", data);
-
   // استفاده از useCallback برای جلوگیری از تغییر مکرر تابع
   const handlePreviewUrlChange = useCallback((url: string | null) => {
     setPreviewUrl(url);
@@ -52,7 +73,7 @@ const AttachFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
 
   return (
     <div className="flex flex-col items-center w-full mt-10">
-      {/* ردیف بالا: Trash، Input و Show */}
+      {/* ردیف بالا: دکمه Reset، ورودی و دکمه Show */}
       <div className="flex items-center gap-2 w-full">
         {selectedFileId && (
           <button
@@ -66,18 +87,20 @@ const AttachFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
         )}
 
         <DynamicInput
-          name="fileId"
+          name="fileName"
           type="text"
-          value={selectedFileId || ""}
+          value={fileName || ""}
           placeholder="No file selected"
-          className="flex-grow -mt-6" 
+          className="flex-grow -mt-6"
         />
 
         <button
           type="button"
           onClick={handleShowFile}
           className={`flex items-center px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 ${
-            previewUrl ? "hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"
+            previewUrl
+              ? "hover:bg-purple-700"
+              : "bg-gray-400 cursor-not-allowed"
           }`}
           disabled={!previewUrl}
         >
@@ -115,7 +138,9 @@ const AttachFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
             title="Click to delete the file"
           />
         ) : (
-          <p className="text-gray-500 text-center">No file available to display.</p>
+          <p className="text-gray-500 text-center">
+            No file available to display.
+          </p>
         )}
       </DynamicModal>
     </div>

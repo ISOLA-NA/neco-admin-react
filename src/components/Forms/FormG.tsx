@@ -24,6 +24,7 @@ import CtrExcelCalculator from "./ControllerForms/ExcelCalculator";
 import CtrMap from "./ControllerForms/MapController";
 import Tab from "./ControllerForms/TabController";
 import CtrUpload from "./ControllerForms/AttachFileController";
+import CtrPictureBox from "./ControllerForms/PictureBoxController";
 
 interface FormGProps {
   ctrForm: Rule[];
@@ -53,7 +54,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrExcelCalculator,
   CtrMap,
   Tab,
-  CtrUpload
+  CtrUpload,
+  CtrPictureBox,
 };
 
 const FormG: React.FC<FormGProps> = ({
