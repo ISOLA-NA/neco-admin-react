@@ -19,6 +19,7 @@ import CtrSwitch from "./ControllerForms/YesNoController";
 import CtrHyperLink from "./ControllerForms/HyperLinkController";
 import CtrSelectUserInPost from "./ControllerForms/SelectUserInPost";
 import CtrPFILookup from "./ControllerForms/PfiLookUpController";
+import CtrCalCulatedField from "./ControllerForms/CalculatedField";
 
 
 interface FormGProps {
@@ -44,7 +45,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrSwitch,
   CtrHyperLink,
   CtrSelectUserInPost,
-  CtrPFILookup
+  CtrPFILookup,
+  CtrCalCulatedField
 };
 
 const FormG: React.FC<FormGProps> = ({
