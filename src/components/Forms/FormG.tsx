@@ -22,6 +22,7 @@ import CtrPFILookup from "./ControllerForms/PfiLookUpController";
 import CtrCalCulatedField from "./ControllerForms/CalculatedField";
 import CtrExcelCalculator from "./ControllerForms/ExcelCalculator";
 import CtrMap from "./ControllerForms/MapController";
+import Tab from "./ControllerForms/TabController";
 
 interface FormGProps {
   ctrForm: Rule[];
@@ -49,7 +50,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrPFILookup,
   CtrCalCulatedField,
   CtrExcelCalculator,
-  CtrMap
+  CtrMap,
+  Tab
 };
 
 const FormG: React.FC<FormGProps> = ({
