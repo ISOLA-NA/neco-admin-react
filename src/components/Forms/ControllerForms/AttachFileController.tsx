@@ -1,116 +1,121 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicModal from "../../utilities/DynamicModal";
-import { FaTrash, FaUpload, FaEye } from "react-icons/fa";
+import { FaTrash, FaEye } from "react-icons/fa";
+import FileUploadHandler, { InsertModel } from "../../../services/FileUploadHandler";
 
-const AttachFile: React.FC = () => {
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+interface AttachFileProps {
+  onMetaChange?: (data: any) => void;
+  data?: any;
+}
+
+const AttachFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
+  // در حالت ادیت، شناسه فایل از داده‌های اولیه گرفته می‌شود
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(
+    data?.metaType1 || null
+  );
+  const [resetCounter, setResetCounter] = useState<number>(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFileName(file.name);
-      const fileReader = new FileReader();
-      fileReader.onload = () => {
-        setFileUrl(fileReader.result as string);
-      };
-      fileReader.readAsDataURL(file);
+  const handleUploadSuccess = (insertedModel: InsertModel) => {
+    setSelectedFileId(insertedModel.ID || null);
+    if (onMetaChange) {
+      onMetaChange({ metaType1: insertedModel.ID || null });
     }
   };
 
-  const handleShowFile = () => {
-    if (fileUrl) {
+  const handleReset = () => {
+    setSelectedFileId(null);
+    setResetCounter((prev) => prev + 1);
+    if (onMetaChange) {
+      onMetaChange({ metaType1: null });
+    }
+    setPreviewUrl(null);
+  };
+
+  const handleShowFile = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (previewUrl) {
       setIsModalOpen(true);
     } else {
       alert("No file uploaded!");
     }
   };
 
-  const handleReset = () => {
-    setFileName(null);
-    setFileUrl(null);
-  };
+  console.log("initialData", data);
 
-  const handleImageClick = () => {
-    if (window.confirm("Do you want to delete the uploaded file?")) {
-      handleReset();
-      setIsModalOpen(false);
-    }
-  };
+  // استفاده از useCallback برای جلوگیری از تغییر مکرر تابع
+  const handlePreviewUrlChange = useCallback((url: string | null) => {
+    setPreviewUrl(url);
+  }, []);
 
   return (
-    <div className="flex flex-col items-start space-y-6 p-8 border border-gray-300 rounded-lg shadow-md bg-gradient-to-r from-pink-100 to-blue-100">
-      <div className="flex items-center w-full space-x-4">
-        {/* Reset Button (Trash Icon) - Moved to the Left */}
-        {fileName && (
+    <div className="flex flex-col items-center w-full mt-10">
+      {/* ردیف بالا: Trash، Input و Show */}
+      <div className="flex items-center gap-2 w-full">
+        {selectedFileId && (
           <button
+            type="button"
             onClick={handleReset}
-            className="flex items-center justify-center bg-red-500 text-white text-sm font-semibold px-3 py-1 rounded-full hover:bg-red-700 transition duration-300"
-            title="Delete file"
+            title="Reset file"
+            className="bg-red-500 text-white p-1 rounded hover:bg-red-700 transition duration-300"
           >
-            <FaTrash />
+            <FaTrash size={16} />
           </button>
         )}
 
-        {/* DynamicInput */}
         <DynamicInput
-          name=""
+          name="fileId"
           type="text"
-          value={fileName || ""}
+          value={selectedFileId || ""}
           placeholder="No file selected"
-          className="flex-grow"
+          className="flex-grow -mt-6" 
         />
 
-        {/* Upload Button */}
-        <label
-          htmlFor="file-upload"
-          className="flex items-center px-4 py-2 bg-purple-500 text-white font-semibold rounded-lg cursor-pointer hover:bg-purple-700 transition duration-300"
-        >
-          <FaUpload className="mr-2" />
-          Upload
-        </label>
-        <input
-          id="file-upload"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-      </div>
-
-      {/* Show Button Centered */}
-      <div className="flex justify-center w-full">
         <button
-          type="button" // Prevent default form submission
+          type="button"
           onClick={handleShowFile}
-          className={`flex items-center px-6 py-2 font-semibold text-white rounded-lg transition duration-300 ${
-            fileUrl
-              ? "bg-purple-500 hover:bg-purple-700"
-              : "bg-gray-400 cursor-not-allowed"
+          className={`flex items-center px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 ${
+            previewUrl ? "hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"
           }`}
-          disabled={!fileUrl}
+          disabled={!previewUrl}
         >
-          <FaEye className="mr-2" />
+          <FaEye size={16} className="mr-1" />
           Show
         </button>
       </div>
 
-      {/* DynamicModal */}
+      {/* FileUploadHandler با ارسال externalPreviewUrl */}
+      <div className="w-full mt-4">
+        <FileUploadHandler
+          selectedFileId={selectedFileId}
+          resetCounter={resetCounter}
+          onReset={() => {}}
+          onUploadSuccess={handleUploadSuccess}
+          onPreviewUrlChange={handlePreviewUrlChange}
+          externalPreviewUrl={previewUrl}
+        />
+      </div>
+
+      {/* مدال نمایش پیش‌نمایش فایل */}
       <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        {fileUrl ? (
+        {previewUrl ? (
           <img
-            src={fileUrl}
+            src={previewUrl}
             alt="Uploaded Preview"
             className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform transform hover:scale-105"
-            onClick={handleImageClick}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm("Do you want to delete the uploaded file?")) {
+                handleReset();
+                setIsModalOpen(false);
+              }
+            }}
             title="Click to delete the file"
           />
         ) : (
-          <p className="text-gray-500 text-center">
-            No file available to display.
-          </p>
+          <p className="text-gray-500 text-center">No file available to display.</p>
         )}
       </DynamicModal>
     </div>

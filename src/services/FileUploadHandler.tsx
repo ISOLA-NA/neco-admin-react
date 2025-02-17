@@ -1,9 +1,7 @@
-// src/services/FileUploadHandler.tsx
-
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import fileService from "./api.servicesFile"; // Ensure correct path
-import apiService from "./api.services";      // Ensure correct path
+import fileService from "./api.servicesFile"; // مسیر صحیح را بررسی کنید
+import apiService from "./api.services";       // مسیر صحیح را بررسی کنید
 import ImageUploader from "../components/utilities/ImageUploader";
 
 export interface InsertModel {
@@ -23,6 +21,8 @@ interface FileUploadHandlerProps {
   onUploadSuccess?: (insertModel: InsertModel) => void;
   resetCounter: number;
   onReset: () => void;
+  onPreviewUrlChange?: (url: string | null) => void;
+  externalPreviewUrl?: string | null;
 }
 
 const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
@@ -30,15 +30,76 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
   onUploadSuccess,
   resetCounter,
   onReset,
+  onPreviewUrlChange,
+  externalPreviewUrl,
 }) => {
-  const [uploadedFileInfo, setUploadedFileInfo] = useState<InsertModel | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [uploadedPreviewUrl, setUploadedPreviewUrl] = useState<string | null>(null);
-  const [downloadedPreviewUrl, setDownloadedPreviewUrl] = useState<string | null>(null);
+  // دانلود فایل در صورت وجود selectedFileId
+  useEffect(() => {
+    if (!selectedFileId || selectedFileId.trim() === "") {
+      if (onPreviewUrlChange) onPreviewUrlChange(null);
+      return;
+    }
+    setIsLoading(true);
+    setErrorMessage(null);
 
+    let didCancel = false;
+    fileService
+      .getFile(selectedFileId)
+      .then((res) => {
+        console.log("getFile response:", res.data);
+        const downloadingFileObject = {
+          FileName: res.data.FileIQ + res.data.FileType,
+          FolderName: res.data.FolderName,
+          cacheBust: Date.now(),
+        };
+        fileService
+          .download(downloadingFileObject)
+          .then((downloadRes) => {
+            const uint8Array = new Uint8Array(downloadRes.data);
+            let mimeType = "application/octet-stream";
+            if (res.data.FileType === ".jpg" || res.data.FileType === ".jpeg") {
+              mimeType = "image/jpeg";
+            } else if (res.data.FileType === ".png") {
+              mimeType = "image/png";
+            }
+            const blob = new Blob([uint8Array], { type: mimeType });
+            const objectUrl = (window.URL || window.webkitURL).createObjectURL(blob);
+            if (onPreviewUrlChange) {
+              onPreviewUrlChange(objectUrl);
+            }
+            console.log("Downloaded preview URL:", objectUrl);
+          })
+          .catch(() => {
+            if (onPreviewUrlChange) onPreviewUrlChange(null);
+            console.error("Error downloading file");
+          })
+          .finally(() => {
+            if (!didCancel) setIsLoading(false);
+          });
+      })
+      .catch((err) => {
+        console.error("Error in getFile:", err);
+        if (onPreviewUrlChange) onPreviewUrlChange(null);
+        setIsLoading(false);
+      });
+    return () => {
+      didCancel = true;
+    };
+  }, [selectedFileId, onPreviewUrlChange]);
+
+  // ریست کردن preview URL در صورت تغییر resetCounter
+  useEffect(() => {
+    if (resetCounter > 0 && onPreviewUrlChange) {
+      onPreviewUrlChange(null);
+      console.log("Preview reset due to resetCounter:", resetCounter);
+    }
+  }, [resetCounter, onPreviewUrlChange]);
+
+  // دریافت شناسه کاربر برای آپلود
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -55,186 +116,86 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     fetchUserId();
   }, []);
 
-  useEffect(() => {
-    const downloadFile = async () => {
-      if (!selectedFileId || selectedFileId.trim() === "") {
-        setDownloadedPreviewUrl(null);
-        return;
-      }
-
-      if (uploadedPreviewUrl) {
-        // If there's an uploaded preview, don't download from server
-        return;
-      }
-
-      setIsLoading(true);
-      setErrorMessage(null);
-      setUploadedPreviewUrl(null);
-
-      try {
-        const res = await fileService.getFile(selectedFileId);
-
-        if (!res.data) {
-          setErrorMessage("File not found.");
-          setDownloadedPreviewUrl(null);
-          return;
-        }
-
-        const { FileIQ, FileType, FolderName } = res.data;
-        const obj = {
-          FileName: `${FileIQ}${FileType}`,
-          FolderName: FolderName,
-          cacheBust: Date.now(), // Add cache busting parameter
-        };
-
-        const downloadResponse = await fileService.download(obj);
-
-        const blob = new Blob([downloadResponse.data], {
-          type: "application/octet-stream",
-        });
-
-        const objectUrl = URL.createObjectURL(blob);
-        setDownloadedPreviewUrl(objectUrl);
-        console.log("Downloaded preview URL set:", objectUrl);
-      } catch (err: any) {
-        console.error("Error downloading file:", err);
-        setUploadedPreviewUrl(null);
-        setDownloadedPreviewUrl(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    downloadFile();
-  }, [selectedFileId, uploadedPreviewUrl]);
-
-  useEffect(() => {
-    if (resetCounter > 0) {
-      setDownloadedPreviewUrl(null);
-      setUploadedPreviewUrl(null);
-      console.log("Preview reset due to resetCounter:", resetCounter);
-    }
-  }, [resetCounter]);
-
-  useEffect(() => {
-    return () => {
-      if (downloadedPreviewUrl) {
-        URL.revokeObjectURL(downloadedPreviewUrl);
-      }
-      if (uploadedPreviewUrl) {
-        URL.revokeObjectURL(uploadedPreviewUrl);
-      }
-    };
-  }, [downloadedPreviewUrl, uploadedPreviewUrl]);
-
-  const dateFormat = (inputDate: Date, format: string): string => {
-    const date = new Date(inputDate);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-
-    let formatted = format.replace("MM", month.toString().padStart(2, "0"));
-
-    if (formatted.includes("yyyy")) {
-      formatted = formatted.replace("yyyy", year.toString());
-    } else if (formatted.includes("yy")) {
-      formatted = formatted.replace("yy", year.toString().substr(2, 2));
-    }
-
-    formatted = formatted.replace("dd", day.toString().padStart(2, "0"));
-    return formatted;
-  };
-
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = (file: File) => {
     console.log("Uploading file:", file.name);
     setIsLoading(true);
     setErrorMessage(null);
-    setUploadedPreviewUrl(null);
-    setDownloadedPreviewUrl(null); // Clear previous download preview
 
-    try {
-      const allowedExtensions = ["jpg", "jpeg", "png"];
-      const fileExtension = file.name.split(".").pop()?.toLowerCase();
-      if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-        setErrorMessage("Please select only jpg, jpeg, or png files.");
-        setIsLoading(false);
-        return;
-      }
-
-      const ID = uuidv4();
-      const FileIQ = uuidv4();
-
-      const folderName = dateFormat(new Date(), "yy-MM-dd");
-      const generatedFileName = `${FileIQ}.${fileExtension}`;
-
-      const formData = new FormData();
-      formData.append("FileName", generatedFileName);
-      formData.append("FolderName", folderName);
-      formData.append("file", file);
-
-      const uploadResponse = await fileService.uploadFile(formData);
-      console.log("Upload response:", uploadResponse);
-
-      if (uploadResponse && uploadResponse.status) {
-        const { FileSize } = uploadResponse.data;
-
-        const insertModel: InsertModel = {
-          ID: ID,
-          FileIQ: FileIQ,
-          FileName: generatedFileName,
-          FileSize: FileSize || file.size,
-          FolderName: folderName,
-          IsVisible: true,
-          LastModified: null,
-          SenderID: userId,
-          FileType: `.${fileExtension}`,
-        };
-
-        const insertResponse = await fileService.insert(insertModel);
-
-        if (insertResponse && insertResponse.status) {
-          const insertedModel: InsertModel = insertResponse.data;
-          setUploadedFileInfo(insertedModel);
-
-          const previewUrl = URL.createObjectURL(file);
-          setUploadedPreviewUrl(previewUrl);
-          console.log("Uploaded preview URL set:", previewUrl);
-
-          alert("File uploaded and inserted successfully.");
-
-          if (onUploadSuccess) {
-            onUploadSuccess(insertedModel);
-          }
-        } else {
-          setErrorMessage("Failed to insert file info to database.");
-        }
-      } else {
-        setErrorMessage("File upload failed.");
-      }
-    } catch (error: any) {
-      console.error("Error uploading or inserting file:", error);
-      setErrorMessage("Error uploading or inserting file.");
-      setUploadedFileInfo(null);
-      setUploadedPreviewUrl(null);
-      setDownloadedPreviewUrl(null);
-      onReset();
-    } finally {
+    const allowedExtensions = ["jpg", "jpeg", "png"];
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      setErrorMessage("Please select only jpg, jpeg, or png files.");
       setIsLoading(false);
+      return;
     }
-  };
 
-  const previewSrc = uploadedPreviewUrl || downloadedPreviewUrl;
+    const ID = uuidv4();
+    const FileIQ = uuidv4();
+    const folderName = new Date().toISOString().split("T")[0];
+    const generatedFileName = `${FileIQ}.${fileExtension}`;
+
+    const formData = new FormData();
+    formData.append("FileName", generatedFileName);
+    formData.append("FolderName", folderName);
+    formData.append("file", file);
+
+    fileService
+      .uploadFile(formData)
+      .then((uploadRes) => {
+        console.log("Upload response:", uploadRes);
+        if (uploadRes && uploadRes.status) {
+          const { FileSize } = uploadRes.data;
+          const insertModel: InsertModel = {
+            ID: ID,
+            FileIQ: FileIQ,
+            FileName: generatedFileName,
+            FileSize: FileSize || file.size,
+            FolderName: folderName,
+            IsVisible: true,
+            LastModified: null,
+            SenderID: userId,
+            FileType: `.${fileExtension}`,
+          };
+          fileService
+            .insert(insertModel)
+            .then((insertRes) => {
+              if (insertRes && insertRes.status) {
+                const insertedModel: InsertModel = insertRes.data;
+                if (onUploadSuccess) onUploadSuccess(insertedModel);
+                const previewUrl = (window.URL || window.webkitURL).createObjectURL(file);
+                if (onPreviewUrlChange) onPreviewUrlChange(previewUrl);
+                console.log("Uploaded preview URL:", previewUrl);
+              } else {
+                setErrorMessage("Failed to insert file info to database.");
+              }
+            })
+            .catch((err) => {
+              console.error("Error inserting file info:", err);
+              setErrorMessage("Error inserting file info to database.");
+            })
+            .finally(() => setIsLoading(false));
+        } else {
+          setErrorMessage("File upload failed.");
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Error uploading file:", err);
+        setErrorMessage("Error uploading file.");
+        setIsLoading(false);
+      });
+  };
 
   return (
     <div className="flex flex-col items-center rounded-lg w-full">
       <div className="w-full flex flex-col items-center space-y-4">
         <ImageUploader
-          key={`image-uploader-${resetCounter}-${selectedFileId}-${uploadedPreviewUrl}-${downloadedPreviewUrl}`}
+          key={`image-uploader-${resetCounter}-${selectedFileId}`}
           onUpload={handleFileUpload}
-          externalPreviewUrl={previewSrc}
+          externalPreviewUrl={externalPreviewUrl}
         />
       </div>
-      {isLoading && <p className="text-blue-500 mt-2">Uploading...</p>}
+      {isLoading && <p className="text-blue-500 mt-2">Uploading/downloading...</p>}
       {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
     </div>
   );
