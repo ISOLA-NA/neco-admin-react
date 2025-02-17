@@ -21,7 +21,7 @@ import CtrSelectUserInPost from "./ControllerForms/SelectUserInPost";
 import CtrPFILookup from "./ControllerForms/PfiLookUpController";
 import CtrCalCulatedField from "./ControllerForms/CalculatedField";
 import CtrExcelCalculator from "./ControllerForms/ExcelCalculator";
-
+import CtrMap from "./ControllerForms/MapController";
 
 interface FormGProps {
   ctrForm: Rule[];
@@ -48,7 +48,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrSelectUserInPost,
   CtrPFILookup,
   CtrCalCulatedField,
-  CtrExcelCalculator
+  CtrExcelCalculator,
+  CtrMap
 };
 
 const FormG: React.FC<FormGProps> = ({

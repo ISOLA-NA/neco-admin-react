@@ -1,19 +1,68 @@
 // src/components/MapModalButtonPigeon.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DynamicModal from "../../utilities/DynamicModal";
 import { Map, Marker, Bounds } from "pigeon-maps";
 
-const MapModalButtonPigeon: React.FC = () => {
+interface MapModalButtonPigeonProps {
+  onMetaChange?: (meta: { metaType1: string }) => void;
+  data?: { metaType1?: string }; // داده‌هایی که از فرم والد دریافت می‌شوند
+}
+
+const MapModalButtonPigeon: React.FC<MapModalButtonPigeonProps> = ({
+  onMetaChange,
+  data,
+}) => {
+  const defaultLocation: [number, number] = [35.6892, 51.389]; // مختصات پیش‌فرض (تهران)
+
+  // تابعی برای تجزیه مقدار `metaType1` به مختصات و زوم
+  const parseMetaType1 = (meta: string): { location: [number, number]; zoom: number } => {
+    try {
+      const [latlng, zoomStr] = meta.split("|");
+      const [latStr, lngStr] = latlng.split(",");
+      return { location: [parseFloat(latStr), parseFloat(lngStr)], zoom: parseInt(zoomStr, 10) };
+    } catch (error) {
+      return { location: defaultLocation, zoom: 6 };
+    }
+  };
+
+  // مقدار اولیه از `data?.metaType1` گرفته می‌شود
+  const [markerLocation, setMarkerLocation] = useState<[number, number]>(
+    data?.metaType1 ? parseMetaType1(data.metaType1).location : defaultLocation
+  );
+  const [zoom, setZoom] = useState<number>(
+    data?.metaType1 ? parseMetaType1(data.metaType1).zoom : 6
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // مختصات مارکر، شروع از مرکز تهران
-  const [markerLocation, setMarkerLocation] = useState<[number, number]>([
-    35.6892, 51.389,
-  ]);
+
+  // هر تغییری در `markerLocation` یا `zoom` مقدار جدید را به `onMetaChange` ارسال می‌کند
+  useEffect(() => {
+    if (onMetaChange) {
+      onMetaChange({
+        metaType1: `${markerLocation[0]},${markerLocation[1]}|${Math.floor(zoom)}`,
+      });
+    }
+  }, [markerLocation, zoom, onMetaChange]);
+
+  // زمانی که `data?.metaType1` تغییر کند (مثلاً هنگام ویرایش)، مقدار را تنظیم کن
+  useEffect(() => {
+    if (data?.metaType1) {
+      const parsed = parseMetaType1(data.metaType1);
+      setMarkerLocation(parsed.location);
+      setZoom(parsed.zoom);
+    }
+  }, [data?.metaType1]);
 
   const handleOpenModal = () => {
+    // مقدار ذخیره‌شده در `data.metaType1` بررسی شود، در غیر این‌صورت مقدار پیش‌فرض تنظیم شود
+    if (data?.metaType1) {
+      const parsed = parseMetaType1(data.metaType1);
+      setMarkerLocation(parsed.location);
+      setZoom(parsed.zoom);
+    } else {
+      setMarkerLocation(defaultLocation);
+      setZoom(6);
+    }
     setIsModalOpen(true);
-    // هر بار باز شدن مودال، مارکر در مرکز تهران
-    setMarkerLocation([35.6892, 51.389]);
   };
 
   const handleCloseModal = () => {
@@ -22,41 +71,43 @@ const MapModalButtonPigeon: React.FC = () => {
 
   const handleBoundsChanged = ({
     center,
+    zoom: newZoom,
   }: {
     center: [number, number];
     zoom: number;
     bounds: Bounds;
     initial: boolean;
   }) => {
-    // هر بار نقشه حرکت کرد، مارکر به مرکز نقشه می‌رود
     setMarkerLocation(center);
+    setZoom(newZoom);
   };
 
   const handleMapClick = ({ latLng }: { latLng: [number, number] }) => {
-    // با کلیک روی نقشه، مارکر به محل کلیک می‌رود
     setMarkerLocation(latLng);
   };
 
   const handleSelect = () => {
-    console.log("Selected Lat/Lng: ", {
-      lat: markerLocation[0],
-      lng: markerLocation[1],
-    });
+    // مقدار جدید `metaType1` را ثبت کن و مودال را ببند
+    const metaType1Value = `${markerLocation[0]},${markerLocation[1]}|${Math.floor(zoom)}`;
+    console.log("Selected metaType1:", metaType1Value);
+    if (onMetaChange) {
+      onMetaChange({ metaType1: metaType1Value });
+    }
     setIsModalOpen(false);
   };
 
   return (
-    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100  rounded-lg flex items-center justify-center">
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex items-center justify-center">
       <div className="flex flex-col items-center justify-center gap-4">
-        <button className="btn btn-primary" onClick={handleOpenModal}>
+        <button type="button" className="btn btn-primary" onClick={handleOpenModal}>
           نمایش نقشه (Pigeon Maps)
         </button>
         <DynamicModal isOpen={isModalOpen} onClose={handleCloseModal}>
           <div className="flex-1 flex flex-col">
             <div className="flex-1">
               <Map
-                defaultCenter={[35.6892, 51.389]}
-                defaultZoom={13}
+                center={markerLocation}
+                zoom={zoom}
                 height={500}
                 onBoundsChanged={handleBoundsChanged}
                 onClick={handleMapClick}
@@ -65,11 +116,7 @@ const MapModalButtonPigeon: React.FC = () => {
               </Map>
             </div>
             <div className="mt-4 flex justify-center items-center">
-              <button
-                className="btn btn-success"
-                onClick={handleSelect}
-                type="button"
-              >
+              <button type="button" className="btn btn-success" onClick={handleSelect}>
                 Select
               </button>
             </div>
