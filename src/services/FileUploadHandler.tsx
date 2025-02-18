@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import fileService from "./api.servicesFile"; // مسیر صحیح را بررسی کنید
-import apiService from "./api.services"; // مسیر صحیح را بررسی کنید
+import fileService from "./api.servicesFile";
+import apiService from "./api.services";
 import ImageUploader from "../components/utilities/ImageUploader";
 
 export interface InsertModel {
@@ -25,6 +25,15 @@ interface FileUploadHandlerProps {
   onReset: () => void;
   onPreviewUrlChange?: (url: string | null) => void;
   externalPreviewUrl?: string | null;
+  /**
+   * در صورتی که بخواهید فرمت های مجاز را محدود کنید
+   * مثلاً ["doc","docx"] یا ["jpg","jpeg","png"]
+   */
+  allowedExtensions?: string[];
+  /**
+   * اگر در حالت ویرایش هستیم و نیاز به نمایش قسمت آپلود نداریم، این مقدار true خواهد بود.
+   */
+  hideUploader?: boolean;
 }
 
 const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
@@ -34,14 +43,13 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
   onReset,
   onPreviewUrlChange,
   externalPreviewUrl,
+  allowedExtensions, // <-- پراپ جدید
+  hideUploader = false, // مقدار پیش‌فرض false
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // state داخلی برای preview در صورت عدم استفاده از props
-  const [internalPreviewUrl, setInternalPreviewUrl] = useState<string | null>(
-    null
-  );
+  const [internalPreviewUrl, setInternalPreviewUrl] = useState<string | null>(null);
 
   // تابع کمکی به‌روز‌رسانی preview
   const updatePreview = (url: string | null) => {
@@ -52,10 +60,8 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     }
   };
 
-  // استفاده از preview نهایی: اگر externalPreviewUrl وجود داشته باشد، اولویت دارد
   const finalPreviewUrl = externalPreviewUrl ?? internalPreviewUrl;
 
-  // دانلود فایل در صورت وجود selectedFileId
   useEffect(() => {
     if (!selectedFileId || selectedFileId.trim() === "") {
       updatePreview(null);
@@ -68,7 +74,7 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     fileService
       .getFile(selectedFileId)
       .then((res) => {
-        console.log("getFile response:", res.data);
+        // مثالی از دریافت اطلاعات فایل از سرور
         const downloadingFileObject = {
           FileName: res.data.FileIQ + res.data.FileType,
           FolderName: res.data.FolderName,
@@ -79,43 +85,44 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
           .then((downloadRes) => {
             const uint8Array = new Uint8Array(downloadRes.data);
             let mimeType = "application/octet-stream";
+
+            // بر اساس نوع فایل می‌توانید mimeType را تعیین کنید
             if (res.data.FileType === ".jpg" || res.data.FileType === ".jpeg") {
               mimeType = "image/jpeg";
             } else if (res.data.FileType === ".png") {
               mimeType = "image/png";
+            } else if (res.data.FileType === ".doc") {
+              mimeType = "application/msword";
+            } else if (res.data.FileType === ".docx") {
+              mimeType =
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
             }
             const blob = new Blob([uint8Array], { type: mimeType });
-            const objectUrl = (window.URL || window.webkitURL).createObjectURL(
-              blob
-            );
+            const objectUrl = (window.URL || window.webkitURL).createObjectURL(blob);
             updatePreview(objectUrl);
-            console.log("Downloaded preview URL:", objectUrl);
           })
           .catch(() => {
             updatePreview(null);
-            console.error("Error downloading file");
           })
           .finally(() => {
             if (!didCancel) setIsLoading(false);
           });
       })
       .catch((err) => {
-        console.error("Error in getFile:", err);
         updatePreview(null);
         setIsLoading(false);
       });
     return () => {
       didCancel = true;
     };
-  }, [selectedFileId, onPreviewUrlChange]);
+  }, [selectedFileId]);
 
-  // ریست کردن preview URL در صورت تغییر resetCounter
+  // ریست کردن preview در صورت تغییر resetCounter
   useEffect(() => {
     if (resetCounter > 0) {
       updatePreview(null);
-      console.log("Preview reset due to resetCounter:", resetCounter);
     }
-  }, [resetCounter, onPreviewUrlChange]);
+  }, [resetCounter]);
 
   // دریافت شناسه کاربر برای آپلود
   useEffect(() => {
@@ -124,10 +131,8 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
         const res = await apiService.getIdByUserToken();
         if (res && res.length > 0) {
           setUserId(res[0].ID.toString());
-          console.log("User ID fetched:", res[0].ID.toString());
         }
       } catch (err: any) {
-        console.error("Error fetching user ID:", err);
         setErrorMessage("Error fetching user information.");
       }
     };
@@ -135,14 +140,17 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
   }, []);
 
   const handleFileUpload = (file: File) => {
-    console.log("Uploading file:", file.name);
     setIsLoading(true);
     setErrorMessage(null);
 
-    const allowedExtensions = ["jpg", "jpeg", "png"];
+    // اگر چیزی ست نشده باشد پیش فرض بر فرمت‌های تصویری است
+    const validExtensions = allowedExtensions || ["jpg", "jpeg", "png"];
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
-    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-      setErrorMessage("Please select only jpg, jpeg, or png files.");
+
+    if (!fileExtension || !validExtensions.includes(fileExtension)) {
+      setErrorMessage(
+        `Please select only ${validExtensions.join(", ")} files.`
+      );
       setIsLoading(false);
       return;
     }
@@ -160,7 +168,6 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     fileService
       .uploadFile(formData)
       .then((uploadRes) => {
-        console.log("Upload response:", uploadRes);
         if (uploadRes && uploadRes.status) {
           const { FileSize } = uploadRes.data;
           const insertModel: InsertModel = {
@@ -180,17 +187,24 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
               if (insertRes && insertRes.status) {
                 const insertedModel: InsertModel = insertRes.data;
                 if (onUploadSuccess) onUploadSuccess(insertedModel);
-                const previewUrl = (
-                  window.URL || window.webkitURL
-                ).createObjectURL(file);
-                updatePreview(previewUrl);
-                console.log("Uploaded preview URL:", previewUrl);
+
+                // تولید Preview برای فایل‌هایی که قابل نمایش تصویری هستند
+                if (
+                  fileExtension === "jpg" ||
+                  fileExtension === "jpeg" ||
+                  fileExtension === "png"
+                ) {
+                  const previewUrl = URL.createObjectURL(file);
+                  updatePreview(previewUrl);
+                } else {
+                  // برای فایل‌های غیرتصویری، Preview تصویر ندارد
+                  updatePreview(null);
+                }
               } else {
                 setErrorMessage("Failed to insert file info to database.");
               }
             })
             .catch((err) => {
-              console.error("Error inserting file info:", err);
               setErrorMessage("Error inserting file info to database.");
             })
             .finally(() => setIsLoading(false));
@@ -200,7 +214,6 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
         }
       })
       .catch((err) => {
-        console.error("Error uploading file:", err);
         setErrorMessage("Error uploading file.");
         setIsLoading(false);
       });
@@ -208,15 +221,19 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
 
   return (
     <div className="flex flex-col items-center rounded-lg w-full">
-      <div className="w-full flex flex-col items-center space-y-4">
-        <ImageUploader
-          key={`image-uploader-${resetCounter}-${selectedFileId}`}
-          onUpload={handleFileUpload}
-          externalPreviewUrl={finalPreviewUrl}
-        />
-      </div>
+      {/* بخش آپلود تنها در صورتی نمایش داده می‌شود که hideUploader برابر false باشد */}
+      {!hideUploader && (
+        <div className="w-full flex flex-col items-center space-y-4">
+          <ImageUploader
+            key={`image-uploader-${resetCounter}-${selectedFileId}`}
+            onUpload={handleFileUpload}
+            externalPreviewUrl={finalPreviewUrl}
+            allowedExtensions={allowedExtensions}  
+          />
+        </div>
+      )}
       {isLoading && (
-        <p className="text-blue-500 mt-2">Uploading/downloading...</p>
+        <p className="text-blue-500 mt-2">Uploading / downloading ...</p>
       )}
       {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
     </div>

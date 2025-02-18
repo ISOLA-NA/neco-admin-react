@@ -25,6 +25,8 @@ import CtrMap from "./ControllerForms/MapController";
 import Tab from "./ControllerForms/TabController";
 import CtrUpload from "./ControllerForms/AttachFileController";
 import CtrPictureBox from "./ControllerForms/PictureBoxController";
+import CtrWordPanel from "./ControllerForms/WordPanelController";
+import CtrExcelPanel from "./ControllerForms/ExceclPanelController";
 
 interface FormGProps {
   ctrForm: Rule[];
@@ -56,6 +58,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   Tab,
   CtrUpload,
   CtrPictureBox,
+  CtrWordPanel,
+  CtrExcelPanel
 };
 
 const FormG: React.FC<FormGProps> = ({

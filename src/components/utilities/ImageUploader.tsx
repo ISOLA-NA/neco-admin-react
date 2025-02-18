@@ -6,19 +6,30 @@ import { FiImage } from "react-icons/fi";
 interface ImageUploaderProps {
   onUpload: (file: File) => void;
   externalPreviewUrl?: string | null;
+  /**
+   * پسوندهای مجاز. مثلاً ["doc", "docx"] یا ["jpg", "jpeg", "png"]
+   */
+  allowedExtensions?: string[];
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   onUpload,
   externalPreviewUrl,
+  allowedExtensions,
 }) => {
   const [internalPreview, setInternalPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  // ساخت رشته‌ی accept از پسوندهای مجاز
+  const acceptStr = allowedExtensions
+    ? allowedExtensions.map((ext) => `.${ext}`).join(",")
+    : "image/*"; // پیش‌فرض اگر چیزی ارسال نشده باشد
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       onUpload(file);
+      // اگر بخواهید پیش‌نمایش بسازید (برای تصاویر)
       const previewUrl = URL.createObjectURL(file);
       setInternalPreview(previewUrl);
     }
@@ -45,6 +56,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
+  // اگر از بیرون آدرس preview بیاید، در اولویت است
   useEffect(() => {
     if (externalPreviewUrl) {
       setInternalPreview(null);
@@ -53,7 +65,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const previewSrc = externalPreviewUrl || internalPreview;
 
-  // Clean up the object URL when the component unmounts or when a new file is uploaded
   useEffect(() => {
     return () => {
       if (internalPreview) {
@@ -77,9 +88,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
+        {/* فیلد آپلود با accept بر اساس پسوندهای مجاز */}
         <input
           type="file"
-          accept="image/*"
+          accept={acceptStr}
           onChange={handleFileChange}
           className="absolute inset-0 opacity-0 cursor-pointer"
         />
@@ -92,7 +104,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         ) : (
           <div className="flex flex-col items-center justify-center text-gray-400">
             <FiImage size={48} />
-            <p className="mt-2 text-sm">Drag &amp; Drop or Click to Upload Image</p>
+            <p className="mt-2 text-sm">
+              Drag &amp; Drop or Click to Upload File
+            </p>
           </div>
         )}
       </div>
