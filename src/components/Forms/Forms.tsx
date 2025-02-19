@@ -3,7 +3,7 @@ import React, {
   useState,
   useEffect,
   forwardRef,
-  useImperativeHandle,
+  useImperativeHandle
 } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
@@ -18,7 +18,8 @@ import { subTabDataMapping, SubForm } from "../TabHandler/tab/tabData";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { useApi } from "../../context/ApiContext";
 import { EntityField } from "../../services/api.services";
-import { showAlert } from "../utilities/Alert/DynamicAlert"; // ایمپورت Alert
+import { showAlert } from "../utilities/Alert/DynamicAlert";
+import ColumnViewModal from "./ColumnViewModal";
 
 // تعریف کامپوننت CheckBox
 const CheckBox: React.FC<{
@@ -47,13 +48,13 @@ interface FormsCommand1Props {
 const aCategoryOptions = [
   { value: "1", label: "Category A1" },
   { value: "2", label: "Category A2" },
-  { value: "3", label: "Category A3" },
+  { value: "3", label: "Category A3" }
 ];
 
 const bCategoryOptions = [
   { value: "1", label: "Category B1" },
   { value: "2", label: "Category B2" },
-  { value: "3", label: "Category B3" },
+  { value: "3", label: "Category B3" }
 ];
 
 // تابع استخراج شناسه پروژه‌ها از رشته
@@ -80,7 +81,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     TemplateDocID: null,
     TemplateExcelID: null,
     nEntityCateAID: null,
-    nEntityCateBID: null,
+    nEntityCateBID: null
   });
 
   // state زیرفرم‌ها
@@ -95,13 +96,13 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const [editingData, setEditingData] = useState<any>(null);
   // state مربوط به مودال انتخاب دسته‌بندی
   const [modalOpen, setModalOpen] = useState(false);
-  const [currentSelector, setCurrentSelector] = useState<"A" | "B" | null>(
-    null
-  );
+  const [currentSelector, setCurrentSelector] = useState<"A" | "B" | null>(null);
   // state مربوط به ردیف انتخاب شده از جدول (برای استفاده در مودال انتخاب دسته‌بندی یا سایر موارد)
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
   // state مربوط به مودال افزودن/ویرایش ستون
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  // state مربوط به مودال نمایش اطلاعات (View)
+  const [viewModalOpen, setViewModalOpen] = useState(false);
 
   // state مربوط به فایل‌های آپلود شده
   const [, setWordFile] = useState<File | null>(null);
@@ -114,7 +115,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         const projects = await api.getAllProject();
         const mappedProjects = projects.map((project: any) => ({
           ID: project.ID,
-          Name: project.ProjectName,
+          Name: project.ProjectName
         }));
         setProjectData(mappedProjects);
       } catch (error) {
@@ -158,7 +159,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         TemplateDocID: selectedRow.TemplateDocID || null,
         TemplateExcelID: selectedRow.TemplateExcelID || null,
         nEntityCateAID: selectedRow.nEntityCateAID || null,
-        nEntityCateBID: selectedRow.nEntityCateBID || null,
+        nEntityCateBID: selectedRow.nEntityCateBID || null
       });
       const selectedID = selectedRow.ID;
       const fetchedSubForms =
@@ -178,7 +179,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         TemplateDocID: null,
         TemplateExcelID: null,
         nEntityCateAID: null,
-        nEntityCateBID: null,
+        nEntityCateBID: null
       });
       setSubForms([]);
     }
@@ -273,7 +274,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const entityFieldData = entityFields.map((field) => ({
     ...field, // تمام خصوصیات اصلی
     display_IsShowGrid: field.IsShowGrid ? "Yes" : "No",
-    display_IsEditableInWF: field.IsEditableInWF ? "Yes" : "No",
+    display_IsEditableInWF: field.IsEditableInWF ? "Yes" : "No"
   }));
 
   // ارائه متد save به صورت imperative (برای فراخوانی از خارج از کامپوننت)
@@ -287,7 +288,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         console.error("Error saving form:", error);
         showAlert("error", undefined, "Error", "Failed to save form.");
       }
-    },
+    }
   }));
 
   return (
@@ -374,7 +375,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               onRowDoubleClick: handleSelectButtonClick,
               onRowClick: handleRowClick,
               onSelectButtonClick: handleSelectButtonClick,
-              isSelectDisabled: !selectedRowData,
+              isSelectDisabled: !selectedRowData
             }}
           />
         </TwoColumnLayout.Item>
@@ -393,32 +394,32 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                   headerName: "Display Name",
                   field: "DisplayName",
                   sortable: true,
-                  filter: true,
+                  filter: true
                 },
                 {
                   headerName: "Column Type",
                   field: "ColumnType",
                   sortable: true,
-                  filter: true,
+                  filter: true
                 },
                 {
                   headerName: "Show Grid",
                   field: "display_IsShowGrid",
                   sortable: true,
-                  filter: true,
+                  filter: true
                 },
                 {
                   headerName: "Editable in WF",
                   field: "display_IsEditableInWF",
                   sortable: true,
-                  filter: true,
+                  filter: true
                 },
                 {
                   headerName: "Last Modified",
                   field: "LastModified",
                   sortable: true,
-                  filter: true,
-                },
+                  filter: true
+                }
               ]}
               rowData={entityFieldData}
               onEdit={() => {
@@ -427,6 +428,11 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 } else {
                   console.warn("هیچ ردیفی انتخاب نشده است");
                 }
+              }}
+              // دکمه View همیشه فعال است؛ با کلیک روی آن مودال باز می‌شود
+              showViewIcon={true}
+              onView={() => {
+                setViewModalOpen(true);
               }}
               setSelectedRowData={setSelectedRowData}
               showDuplicateIcon={false}
@@ -477,6 +483,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         </TwoColumnLayout.Item>
       </TwoColumnLayout>
 
+      {/* مودال انتخاب دسته‌بندی */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
           columnDefs={[{ headerName: "Name", field: "Name" }]}
@@ -484,12 +491,12 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             currentSelector === "A"
               ? aCategoryOptions.map((option) => ({
                   value: option.value,
-                  label: option.label,
+                  label: option.label
                 }))
               : currentSelector === "B"
               ? bCategoryOptions.map((option) => ({
                   value: option.value,
-                  label: option.label,
+                  label: option.label
                 }))
               : []
           }
@@ -501,15 +508,23 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         />
       </DynamicModal>
 
+      {/* مودال افزودن/ویرایش ستون */}
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
         <AddColumnForm
           onClose={handleAddModalClose}
           onSave={refreshEntityFields}
           isEdit={!!editingData}
           existingData={editingData}
-          entityTypeId={selectedRow?.ID}  // اضافه کردن مقدار selectedRow.ID
-          />
+          entityTypeId={selectedRow?.ID} // اضافه کردن مقدار selectedRow.ID
+        />
       </DynamicModal>
+
+      {/* مودال نمایش اطلاعات (View) با استفاده از کامپوننت ColumnViewModal */}
+      <ColumnViewModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        entityFields={entityFields}
+      />
     </div>
   );
 });

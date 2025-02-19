@@ -1,7 +1,8 @@
+// src/TableDynamic/DataTable.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
-import { FiPlus, FiTrash2, FiEdit, FiCopy } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiEdit, FiCopy, FiEye } from "react-icons/fi";
 import { TailSpin } from "react-loader-spinner";
 
 import "ag-grid-community/styles/ag-grid.css";
@@ -17,6 +18,9 @@ interface DataTableProps {
   showEditIcon?: boolean;
   showAddIcon?: boolean;
   showDeleteIcon?: boolean;
+  // prop های جدید برای آیکون view
+  showViewIcon?: boolean;
+  onView?: () => void;
   onAdd: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -37,6 +41,8 @@ const DataTable: React.FC<DataTableProps> = ({
   showEditIcon = true,
   showAddIcon = true,
   showDeleteIcon = true,
+  showViewIcon = false,
+  onView = () => {},
   onAdd,
   onEdit,
   onDelete,
@@ -194,6 +200,16 @@ const DataTable: React.FC<DataTableProps> = ({
               onClick={onAdd}
             >
               <FiPlus size={25} />
+            </button>
+          )}
+
+          {showViewIcon && (
+            <button
+              className="text-gray-600 hover:text-gray-800 transition"
+              title="View"
+              onClick={onView}
+            >
+              <FiEye size={25} />
             </button>
           )}
         </div>
