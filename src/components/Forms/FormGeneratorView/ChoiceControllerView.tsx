@@ -6,16 +6,15 @@ import DynamicCheckboxView from "../../utilities/DynamicCheckbox";
 
 interface ChoiceControllerViewProps {
   data?: {
-    metaType1?: string; // default value; برای check می‌تواند یک رشته جداشده با کاما باشد
-    metaType2?: "drop" | "radio" | "check"; // نوع نمایش
-    metaType3?: string; // choices list (هر گزینه در یک خط)
+    metaType1?: string;
+    metaType2?: "drop" | "radio" | "check";
+    metaType3?: string;
   };
 }
 
 const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => {
   if (!data) return null;
 
-  // استخراج گزینه‌ها از metaType3؛ هر خط یک گزینه محسوب می‌شود
   const options = data.metaType3
     ? data.metaType3
         .split("\n")
@@ -51,7 +50,6 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
       );
     case "check":
       {
-        // برای چک‌باکس، اگر metaType1 شامل چند مقدار باشد (جداشده با کاما)
         const selectedValues = data.metaType1
           ? data.metaType1.split(",").map((v) => v.trim())
           : [];
