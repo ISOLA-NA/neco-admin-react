@@ -21,14 +21,16 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
   const [metaType2, setMetaType2] = useState<"drop" | "radio" | "check">("drop");
   const [metaType3, setMetaType3] = useState<string>("");
 
+  // مقداردهی اولیه تنها یک‌بار (در mount)؛ به این ترتیب تغییرات کاربر در ادیت حفظ می‌شود
   useEffect(() => {
     if (data) {
       setMetaType1(data.metaType1 || "");
       setMetaType2(data.metaType2 || "drop");
       setMetaType3(data.metaType3 || "");
     }
-  }, [data]);
+  }, []); // dependency خالی
 
+  // ارسال تغییرات به والد در هر تغییر
   useEffect(() => {
     onMetaChange({ metaType1, metaType2, metaType3 });
   }, [metaType1, metaType2, metaType3, onMetaChange]);
@@ -86,7 +88,7 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
             name="metaType3"
             value={metaType3}
             onChange={(e) => setMetaType3(e.target.value)}
-            placeholder=""
+            placeholder="Enter each choice on a new line"
             rows={3}
             className="resize-none"
           />
@@ -96,7 +98,7 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
             type="text"
             value={metaType1}
             onChange={(e) => setMetaType1(e.target.value)}
-            placeholder=""
+            placeholder="Enter default value"
           />
         </div>
       </div>

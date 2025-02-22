@@ -2,10 +2,12 @@ import React from "react";
 import { EntityField } from "../../../services/api.services";
 import CtrTextBoxView from "./CtrTextBoxView";
 import RichTextControllerView from "./RichTextControllerView";
+import ChoiceController from "./ChoiceControllerView"
 
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
   1: RichTextControllerView,
+  2: ChoiceController,
 };
 
 interface FormGeneratorViewProps {
