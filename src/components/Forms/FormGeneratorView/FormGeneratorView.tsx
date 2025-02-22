@@ -4,12 +4,16 @@ import CtrTextBoxView from "./CtrTextBoxView";
 import RichTextControllerView from "./RichTextControllerView";
 import ChoiceController from "./ChoiceControllerView"
 import NumberController from "./NumberControllerView"
+import DateTimeSelector from "./DateTimeSelectorView"
+import PersianCalendarPickerView from "./PersianCalendarPickerView"
 
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
   1: RichTextControllerView,
   2: ChoiceController,
-  3:NumberController
+  3:NumberController,
+  4:DateTimeSelector,
+  21:PersianCalendarPickerView
 };
 
 interface FormGeneratorViewProps {

@@ -3,7 +3,7 @@ import { classNames } from "primereact/utils";
 
 interface DynamicInputProps {
   name: string;
-  type: "text" | "number" | "password";
+  type: "text" | "number" | "password" | "date" | "time";
   value?: string | number | null;
   placeholder?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -40,13 +40,16 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 }) => {
   return (
     <div className={classNames("w-full", className)}>
-      {/* لیبل بالای فیلد */}
-      <label
-        htmlFor={name}
-        className="block text-gray-700 text-sm font-medium mb-1"
-      >
-        {name} {required && <span className="text-red-500">*</span>}
-      </label>
+      {/* فقط در صورتی که name مقدار داشته باشد، برچسب نمایش داده شود */}
+      {name && (
+        <label
+          htmlFor={name}
+          className="block text-gray-700 text-sm font-medium mb-1"
+        >
+          {name}
+          {required && <span className="text-red-500"> *</span>}
+        </label>
+      )}
 
       {/* Wrapper برای قرارگیری آیکون‌ها و Input */}
       <div className="relative">
@@ -60,6 +63,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           id={name}
           name={name}
           type={type}
+          // اگر value خالی یا null باشد، رشته‌ی خالی ارسال می‌کنیم
           value={value ?? ""}
           onChange={onChange}
           placeholder={placeholder}
@@ -69,7 +73,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           min={min}
           max={max}
           step={step}
-          // برای حذف آیکون اسپینر مرورگر در ورودی عددی
+          // حذف اسپینر مرورگر در ورودی عددی
           style={
             type === "number"
               ? {
@@ -80,14 +84,16 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           }
           className={classNames(
             "w-full border rounded-md px-4 py-2 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition duration-300",
-            // اگر آیکون سمت چپ وجود داشته باشد، padding-left را افزایش می‌دهیم
+            // افزایش padding-left اگر آیکون سمت چپ وجود داشته باشد
             leftIcon ? "pl-10" : "",
-            // اگر آیکون سمت راست یا لودینگ باشد، padding-right را افزایش می‌دهیم
+            // افزایش padding-right اگر آیکون سمت راست یا لودینگ باشد
             rightIcon || loading ? "pr-10" : "",
             error
               ? "border-red-500 focus:border-red-500 focus:ring-red-200"
               : "border-purple-600 focus:border-indigo-500 focus:ring-purple-200",
-            disabled || loading ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+            disabled || loading
+              ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+              : ""
           )}
         />
 
