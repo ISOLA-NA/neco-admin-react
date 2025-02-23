@@ -13,6 +13,7 @@ import LookUpImageView from "./LookUpImageView";
 import AdvanceLookupAdvanceTableView from "./AdvanceLookupAdvanceTableView";
 import HyperLinkView from "./HyperLinkView";
 import YesNoView from "./YesNoView";
+import SelectUserInPostView from "./SelectUserInPostView";
 
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
@@ -27,7 +28,8 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   30:LookUpImageView,
   36:AdvanceLookupAdvanceTableView,
   7:HyperLinkView,
-  6:YesNoView
+  6:YesNoView,
+  8:SelectUserInPostView
 };
 
 interface FormGeneratorViewProps {
