@@ -14,6 +14,8 @@ import AdvanceLookupAdvanceTableView from "./AdvanceLookupAdvanceTableView";
 import HyperLinkView from "./HyperLinkView";
 import YesNoView from "./YesNoView";
 import SelectUserInPostView from "./SelectUserInPostView";
+import AttachFileView from "./AttachFileView";
+import PictureBoxView from "./PictureBoxView";
 
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
@@ -29,7 +31,9 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   36:AdvanceLookupAdvanceTableView,
   7:HyperLinkView,
   6:YesNoView,
-  8:SelectUserInPostView
+  8:SelectUserInPostView,
+  9:AttachFileView,
+  26:PictureBoxView
 };
 
 interface FormGeneratorViewProps {
