@@ -6,6 +6,11 @@ import ChoiceController from "./ChoiceControllerView"
 import NumberController from "./NumberControllerView"
 import DateTimeSelector from "./DateTimeSelectorView"
 import PersianCalendarPickerView from "./PersianCalendarPickerView"
+import LookUpFormsView from "./LookUpFormsView";
+import LookUpRealValueView from "./LookUpRealValueView"
+import LookUpAdvanceTableView from "./LookUpAdvanceTableView";
+import LookUpImageView from "./LookUpImageView";
+import AdvanceLookupAdvanceTableView from "./AdvanceLookupAdvanceTableView";
 
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
@@ -13,7 +18,12 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   2: ChoiceController,
   3:NumberController,
   4:DateTimeSelector,
-  21:PersianCalendarPickerView
+  21:PersianCalendarPickerView,
+  5:LookUpFormsView,
+  34:LookUpRealValueView,
+  35:LookUpAdvanceTableView,
+  30:LookUpImageView,
+  36:AdvanceLookupAdvanceTableView
 };
 
 interface FormGeneratorViewProps {
