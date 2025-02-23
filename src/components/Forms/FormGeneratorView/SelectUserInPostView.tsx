@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import { useApi } from "../../../context/ApiContext";
-import { PostType, UserType } from "../../../services/api.services";
+import { PostType, User } from "../../../services/api.services";
 
 interface SelectUserInPostViewProps {
   data?: {
@@ -16,7 +16,7 @@ const SelectUserInPostView: React.FC<SelectUserInPostViewProps> = ({ data }) => 
   const { getAllUsers, getAllPostTypes } = useApi();
 
   // استیت برای ذخیره لیست کاربران
-  const [users, setUsers] = useState<UserType[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   // استیت برای ذخیره لیست PostTypes
   const [postTypes, setPostTypes] = useState<PostType[]>([]);
   // استیت برای نمایش نام انتخاب‌شده در لیبل
