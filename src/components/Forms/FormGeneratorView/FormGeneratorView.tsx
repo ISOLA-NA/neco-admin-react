@@ -21,6 +21,12 @@ import TableControllerView from "./TableControllerView";
 import PfiLookupView from "./PfiLookUpView";
 import SeqenialNumberView from "./SeqenialNumberView";
 import AdvanceTableView from "./AdvanceTableControllerView";
+import WordPanelView from "./WordPanelView";
+import ExcelPanelView from "./ExcellPanelView";
+import CalculatedFieldView from "./CalculatedFieldView";
+import ExcellCalculatorView from "./ExcellCalculatorView";
+import TabView from "./TabView";
+import MapView from "./MapView";
 
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
@@ -43,7 +49,13 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   10:TableControllerView,
   16:PfiLookupView,
   20:SeqenialNumberView,
-  22:AdvanceTableView
+  22:AdvanceTableView,
+  24:WordPanelView,
+  25:ExcelPanelView,
+  27:CalculatedFieldView,
+  29:ExcellCalculatorView,
+  32:TabView,
+  28:MapView
 };
 
 interface FormGeneratorViewProps {
