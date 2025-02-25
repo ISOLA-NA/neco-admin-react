@@ -1,5 +1,5 @@
-// src/components/ControllerForms/TableController.tsx
-import React, { useState, useEffect, useRef } from "react";
+// src/components/TableController.tsx
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 import DynamicModal from "../../utilities/DynamicModal";
@@ -16,82 +16,78 @@ interface TableControllerProps {
     metaType2?: string;
     metaType3?: string;
   };
-}
+};
 
-const TableController: React.FC<TableControllerProps> = ({
-  onMetaChange,
-  data,
-}) => {
-  // ثابت: عناوین ستون‌ها (a1, a2, a3)
-  const fixedHeaders = [
+// تابع تولید هدرها: اگر رشته دارای delimiter "|" باشد، آن را تقسیم می‌کند؛ در غیر این صورت fallback به تقسیم مساوی
+const getHeadersFromMeta = (meta: string) => {
+  if (meta.includes("|")) {
+    const parts = meta.split("|").filter((part) => part.trim() !== "");
+    return parts.map((p, i) => ({ headerName: p, field: `a${i + 1}` }));
+  }
+  const columns = 3;
+  const trimmed = meta.trim();
+  if (trimmed.length % columns === 0 && trimmed.length !== 0) {
+    const partLength = trimmed.length / columns;
+    const parts: string[] = [];
+    for (let i = 0; i < columns; i++) {
+      parts.push(trimmed.substring(i * partLength, (i + 1) * partLength));
+    }
+    return [
+      { headerName: parts[0], field: "a1" },
+      { headerName: parts[1], field: "a2" },
+      { headerName: parts[2], field: "a3" },
+    ];
+  }
+  return [
     { headerName: "a1", field: "a1" },
     { headerName: "a2", field: "a2" },
     { headerName: "a3", field: "a3" },
   ];
+};
 
-  // تابعی برای مرتب‌سازی یک ردیف دریافتی طبق fixedHeaders
-  const reorderRow = (row: any): Record<string, any> => {
-    const newRow: Record<string, any> = {};
-    fixedHeaders.forEach((header) => {
-      newRow[header.field] = row[header.field] || "";
-    });
-    return newRow;
-  };
+const TableController: React.FC<TableControllerProps> = ({ onMetaChange, data }) => {
+  // مقدار اولیه هدرها از data.metaType1 (با newlineها) یا مقدار پیش‌فرض
+  const initialMetaType1 = data?.metaType1 ? data.metaType1 : "a\nb\nc";
+  const [displayHeaderInput, setDisplayHeaderInput] = useState<string>(initialMetaType1);
 
-  // در حالت ادیت، اگر metaType3 موجود باشد، داده‌ها پارس شده و به همراه یک شناسه (id) به آرایه تبدیل می‌شوند.
-  const initialTableData: Record<string, any>[] =
-    data?.metaType3 && data.metaType3.trim() !== ""
-      ? JSON.parse(data.metaType3).map((row: any, index: number) => ({
-          ...reorderRow(row),
-          id: index,
-        }))
-      : [];
+  // برای تولید هدرهای جدول، متن multiline را به صورت delimiter "|" تبدیل می‌کنیم.
+  const computedHeaderForTable = displayHeaderInput.replace(/\n/g, "|");
+  const dynamicHeaders = useMemo(() => getHeadersFromMeta(computedHeaderForTable), [computedHeaderForTable]);
 
-  // نگهداری شمارنده برای id ردیف‌های جدید
+  // Fix Row
+  const [isRowFixed, setIsRowFixed] = useState<boolean>(!!data?.metaType2);
+  const [fixRowValue, setFixRowValue] = useState<string>(data?.metaType2 || "");
+
+  // داده‌های جدول: اگر data.metaType3 موجود باشد، آن را به صورت JSON پارس می‌کنیم.
+  let initialTableData: Record<string, any>[] = [];
+  if (data?.metaType3 && data.metaType3.trim() !== "") {
+    try {
+      initialTableData = JSON.parse(data.metaType3).map((row: any, index: number) => ({
+        ...row,
+        id: index,
+      }));
+    } catch (err) {
+      console.error("Error parsing data.metaType3 JSON:", err);
+      initialTableData = [];
+    }
+  }
+  const [tableData, setTableData] = useState<Record<string, any>[]>(initialTableData);
   const nextRowId = useRef(initialTableData.length);
 
-  // تکست اریا: اگر metaType1 موجود نباشد، پیش‌فرض "a1\na2\na3" در نظر گرفته می‌شود.
-  const initialTextarea = data?.metaType1
-    ? data.metaType1
-    : fixedHeaders.map((h) => h.field).join("\n");
-
-  const [isRowFixed, setIsRowFixed] = useState<boolean>(
-    data?.metaType2 ? true : false
-  );
-  const [fixRowValue, setFixRowValue] = useState<string>(data?.metaType2 || "");
-  const [textareaValue, setTextareaValue] = useState<string>(initialTextarea);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [tableData, setTableData] =
-    useState<Record<string, any>[]>(initialTableData);
-
-  // به‌روزرسانی meta هر زمان که مقادیر تغییر کنند
+  // به‌روزرسانی metaها: در اینجا metaType1 همان متن multiline (با \n) حفظ می‌شود.
   useEffect(() => {
-    // metaType1: همان متنی که در تکست اریا نوشته شده (با جداکننده "\n")
-    const computedMeta1 = textareaValue
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line !== "")
-      .join("\n");
-
-    // metaType2: مقدار Fix Row (اگر تیک انتخاب شده باشد)
+    const computedMeta1 = displayHeaderInput.trim(); // newlineها حفظ می‌شوند
     const computedMeta2 = isRowFixed ? fixRowValue : "";
-
-    // فیلتر کردن ردیف‌هایی که همه سلول‌هایشان خالی است
     const filteredTableData = tableData.filter((row) =>
-      fixedHeaders.some((header) => row[header.field]?.toString().trim() !== "")
+      ["a1", "a2", "a3"].some((key) => row[key]?.toString().trim() !== "")
     );
-
-    // metaType3: ساخت ردیف‌های جدول با کلیدهای ثابت a1، a2 و a3 (id در خروجی لحاظ نمی‌شود)
     const computedMeta3 = JSON.stringify(
-      filteredTableData.map((row) => {
-        const newRow: Record<string, any> = {};
-        fixedHeaders.forEach((header) => {
-          newRow[header.field] = row[header.field];
-        });
-        return newRow;
-      })
+      filteredTableData.map((row) => ({
+        a1: row.a1,
+        a2: row.a2,
+        a3: row.a3,
+      }))
     );
-
     if (onMetaChange) {
       onMetaChange({
         metaType1: computedMeta1,
@@ -99,52 +95,37 @@ const TableController: React.FC<TableControllerProps> = ({
         metaType3: computedMeta3,
       });
     }
-  }, [
-    isRowFixed,
-    fixRowValue,
-    textareaValue,
-    tableData,
-    onMetaChange,
-    fixedHeaders,
-  ]);
+  }, [isRowFixed, fixRowValue, displayHeaderInput, tableData, onMetaChange]);
 
-  // تغییر وضعیت تیک Fix Row
   const handleFixRowChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsRowFixed(e.target.checked);
   };
 
-  // تغییر مقدار ورودی Fix Row
   const handleFixRowValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFixRowValue(e.target.value);
   };
 
-  // تغییر مقدار تکست اریا (عنوان ستون‌ها)
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setTextareaValue(e.target.value);
+  // تغییر ورودی تکست اریا: مقدار وارد شده را به صورت multiline نگه می‌دارد.
+  const handleHeaderInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDisplayHeaderInput(e.target.value);
   };
 
-  // باز کردن مودال جدول
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const handleDefValClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsModalOpen(true);
   };
 
-  // بستن مودال جدول (دکمه Save)
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
 
-  // افزودن ردیف جدید به جدول با کلیدهای ثابت (a1, a2, a3)
   const handleAddRow = () => {
-    const newRow: Record<string, any> = { id: nextRowId.current };
-    fixedHeaders.forEach((header) => {
-      newRow[header.field] = "";
-    });
+    const newRow: Record<string, any> = { id: nextRowId.current, a1: "", a2: "", a3: "" };
     nextRowId.current += 1;
     setTableData([...tableData, newRow]);
   };
 
-  // تغییر مقدار سلول‌های جدول
   const handleCellChange = (event: any) => {
     const { rowIndex, colDef, newValue } = event;
     const updatedTableData = [...tableData];
@@ -158,11 +139,7 @@ const TableController: React.FC<TableControllerProps> = ({
         {/* Fix Row */}
         <div className="flex items-center space-x-4 mb-4">
           <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={isRowFixed}
-              onChange={handleFixRowChange}
-            />
+            <input type="checkbox" checked={isRowFixed} onChange={handleFixRowChange} />
             <span>Fix Row</span>
           </label>
           <DynamicInput
@@ -173,16 +150,15 @@ const TableController: React.FC<TableControllerProps> = ({
           />
         </div>
 
-        {/* تکست اریا برای عنوان ستون‌ها */}
+        {/* تکست اریا برای هدرهای جدول به صورت multiline */}
         <CustomTextarea
           name="columnTitles"
-          value={textareaValue}
-          onChange={handleTextareaChange}
-          placeholder="Enter each column title on a separate line"
-          rows={3}
+          value={displayHeaderInput}
+          onChange={handleHeaderInputChange}
+          placeholder="Enter each header on a new line"
+          rows={displayHeaderInput.split("\n").length || 1}
         />
 
-        {/* دکمه Def Val */}
         <button
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           onClick={handleDefValClick}
@@ -195,7 +171,7 @@ const TableController: React.FC<TableControllerProps> = ({
           <h2 className="text-lg font-bold mb-4">Dynamic Table</h2>
           <div style={{ height: "400px", overflow: "auto" }}>
             <DataTable
-              columnDefs={fixedHeaders.map((header) => ({
+              columnDefs={getHeadersFromMeta(computedHeaderForTable).map((header) => ({
                 headerName: header.headerName,
                 field: header.field,
                 editable: true,
@@ -213,7 +189,8 @@ const TableController: React.FC<TableControllerProps> = ({
               onDelete={() => {}}
               onDuplicate={() => {}}
               showSearch={false}
-              showAddNew={false} // غیرفعال کردن اضافه شدن خودکار ردیف خالی
+              showAddNew={false}
+              domLayout="autoHeight"
             />
             <div className="flex flex-col space-y-2 mt-4">
               <button
