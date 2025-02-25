@@ -1,8 +1,14 @@
 {
-  "name": "my-project",
+  "name": "admin-share",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+"files": [
+    "src"
+  ],
+  "exports":{
+   "@/formg":"./src/components/Forms/FormGeneratorView/FormGeneratorView.tsx"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
