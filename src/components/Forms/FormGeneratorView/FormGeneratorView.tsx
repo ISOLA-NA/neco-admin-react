@@ -18,6 +18,9 @@ import AttachFileView from "./AttachFileView";
 import PictureBoxView from "./PictureBoxView";
 import PostPickerListView from "./PostPickerListView";
 import TableControllerView from "./TableControllerView";
+import PfiLookupView from "./PfiLookUpView";
+import SeqenialNumberView from "./SeqenialNumberView";
+import AdvanceTableView from "./AdvanceTableControllerView";
 
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
@@ -37,7 +40,10 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   9:AttachFileView,
   26:PictureBoxView,
   19:PostPickerListView,
-  10:TableControllerView
+  10:TableControllerView,
+  16:PfiLookupView,
+  20:SeqenialNumberView,
+  22:AdvanceTableView
 };
 
 interface FormGeneratorViewProps {
