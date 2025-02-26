@@ -4,6 +4,7 @@ import React, {
   useEffect,
   forwardRef,
   useImperativeHandle,
+  useRef,
 } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
@@ -11,17 +12,37 @@ import DynamicSelector from "../utilities/DynamicSelector";
 import ListSelector from "../ListSelector/ListSelector";
 import DynamicModal from "../utilities/DynamicModal";
 import TableSelector from "../General/Configuration/TableSelector";
-import HandlerUplodeExcellAccess from "../utilities/HandlerUplodeExcellAccess";
 import DataTable from "../TableDynamic/DataTable";
 import AddColumnForm from "./AddForm";
-import { subTabDataMapping, SubForm } from "../TabHandler/tab/tabData";
+import FormGeneratorView from "./FormGeneratorView/FormGeneratorView";
+import UploadFilesPanel from "./UploadFilesPanel";
+
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { useApi } from "../../context/ApiContext";
-import { EntityField } from "../../services/api.services";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
-import FormGeneratorView from "./FormGeneratorView/FormGeneratorView";
 
-// تعریف کامپوننت CheckBox
+import apiService from "../../services/api.services";
+import fileService from "../../services/api.servicesFile";
+import { v4 as uuidv4 } from "uuid";
+
+// نوع (interface) فیلدهای فرم:
+interface IFormData {
+  ID: string;
+  Name: string;
+  Code: string;
+  IsDoc: boolean;
+  IsGlobal: boolean;
+  IsVisible: boolean;
+  LastModified: string;
+  ModifiedById: number | null;
+  ProjectsStr: string;
+  TemplateDocID: string | null;   // فقط شناسه فایل ورد
+  TemplateExcelID: string | null; // فقط شناسه فایل اکسل
+  nEntityCateAID: number | null;
+  nEntityCateBID: number | null;
+}
+
+// برای نمایش چک‌باکس
 const CheckBox: React.FC<{
   label: string;
   checked: boolean;
@@ -41,34 +62,67 @@ const CheckBox: React.FC<{
   </div>
 );
 
-interface FormsCommand1Props {
-  selectedRow: any; // اطلاعات ردیف انتخاب شده (مثلاً فرم اصلی یا نوع فرم)
-}
-
+// آپشن‌های انتخابی برای دو دسته (A, B)
 const aCategoryOptions = [
   { value: "1", label: "Category A1" },
   { value: "2", label: "Category A2" },
   { value: "3", label: "Category A3" },
 ];
-
 const bCategoryOptions = [
   { value: "1", label: "Category B1" },
   { value: "2", label: "Category B2" },
   { value: "3", label: "Category B3" },
 ];
 
-// تابع استخراج شناسه پروژه‌ها از رشته
+// تابع کمکی برای جدا کردن Project IDs از استرینگ
 const extractProjectIds = (projectsStr: string): string[] => {
   if (!projectsStr) return [];
   return projectsStr.split("|").filter(Boolean);
 };
 
+interface FormsCommand1Props {
+  selectedRow: any; // اطلاعات ردیف انتخاب شده (در صورت ویرایش)
+}
+
+// این متد برای گرفتن نام فایل از سرویس فایل با استفاده از شناسه
+async function fetchFileNameById(fileId: string) {
+  if (!fileId) return "";
+  try {
+    const response = await fileService.getById(fileId);
+    // بسته به ساختار پاسخ سرویس فایل، این بخش را تنظیم کنید
+    if (response && response.status && response.data) {
+      // ممکن است نام فایل در فیلدهای مختلفی باشد مثل FileName یا OriginalFileName
+      return response.data.FileName || "";
+    }
+  } catch (error) {
+    console.error("Error fetching file info:", error);
+  }
+  return "";
+}
+
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
+  // این متد از Context گرفته شده تا بتوانیم ذخیره فرم را انجام دهیم
   const { handleSaveForm } = useAddEditDelete();
   const api = useApi();
 
-  // state مربوط به فرم اصلی
-  const [formData, setFormData] = useState({
+  // شناسه کاربر برای آپلود فایل:
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const res = await apiService.getIdByUserToken();
+        if (res && res.length > 0) {
+          setUserId(res[0].ID.toString());
+        }
+      } catch (err) {
+        console.error("Error fetching user id:", err);
+      }
+    };
+    fetchUserId();
+  }, []);
+
+  // داده‌های اصلی فرم
+  const [formData, setFormData] = useState<IFormData>({
     ID: "",
     Name: "",
     Code: "",
@@ -78,46 +132,46 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     LastModified: new Date().toISOString(),
     ModifiedById: null,
     ProjectsStr: "",
-    TemplateDocID: null,
-    TemplateExcelID: null,
+    TemplateDocID: null,   // شناسه فایل ورد
+    TemplateExcelID: null, // شناسه فایل اکسل
     nEntityCateAID: null,
     nEntityCateBID: null,
   });
 
-  // state زیرفرم‌ها
-  const [subForms, setSubForms] = useState<SubForm[]>([]);
-  // state مربوط به پروژه‌ها برای ListSelector
-  const [projectData, setProjectData] = useState<
-    { ID: string; Name: string }[]
-  >([]);
-  // state داده‌های EntityField دریافتی از API جدید
-  const [entityFields, setEntityFields] = useState<EntityField[]>([]);
-  // state داده ستون انتخاب شده جهت ویرایش در مودال AddColumnForm
-  const [editingData, setEditingData] = useState<any>(null);
-  // state مربوط به مودال انتخاب دسته‌بندی
-  const [modalOpen, setModalOpen] = useState(false);
-  const [currentSelector, setCurrentSelector] = useState<"A" | "B" | null>(
-    null
+  // برای نمایش نام فایل ورد و اکسل در رابط کاربری:
+  const [wordFileName, setWordFileName] = useState<string>("");
+  const [excelFileName, setExcelFileName] = useState<string>("");
+
+  // مثال: لیست پروژه‌ها
+  const [projectData, setProjectData] = useState<{ ID: string; Name: string }[]>(
+    []
   );
-  // state مربوط به ردیف انتخاب شده از جدول (برای استفاده در مودال انتخاب دسته‌بندی یا سایر موارد)
+
+  // داده‌های جدولی (مانند فیلدهای انتیتی)
+  const [entityFields, setEntityFields] = useState<any[]>([]);
+
+  // برای کنترل مدال انتخاب Category A/B
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentSelector, setCurrentSelector] = useState<"A" | "B" | null>(null);
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
-  // state مربوط به مودال افزودن/ویرایش ستون
+
+  // برای کنترل مدال افزودن/ویرایش فیلد
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  // state مربوط به مودال نمایش اطلاعات (View)
+  const [editingData, setEditingData] = useState<any>(null);
+
+  // برای نمایش فرم جنریت شده
   const [viewModalOpen, setViewModalOpen] = useState(false);
 
-  // state مربوط به فایل‌های آپلود شده
-  const [, setWordFile] = useState<File | null>(null);
-  const [, setExcelFile] = useState<File | null>(null);
-
-  // واکشی پروژه‌ها
+  // ----------------------------------------------------------------------------
+  // 1) گرفتن لیست پروژه‌ها از سرور (مثلاً مثل Vue که catA, catB و ... می‌گرفت)
+  // ----------------------------------------------------------------------------
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const projects = await api.getAllProject();
-        const mappedProjects = projects.map((project: any) => ({
-          ID: project.ID,
-          Name: project.ProjectName,
+        const mappedProjects = projects.map((p: any) => ({
+          ID: p.ID,
+          Name: p.ProjectName,
         }));
         setProjectData(mappedProjects);
       } catch (error) {
@@ -127,34 +181,19 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     fetchProjects();
   }, [api]);
 
-  // واکشی داده‌های EntityField بر اساس selectedRow.ID
-  const refreshEntityFields = async () => {
-    try {
-      if (selectedRow && selectedRow.ID) {
-        const fields = await api.getEntityFieldByEntityTypeId(selectedRow.ID);
-        setEntityFields(fields);
-      } else {
-        setEntityFields([]);
-      }
-    } catch (error) {
-      console.error("Error fetching entity fields:", error);
-    }
-  };
-
-  useEffect(() => {
-    refreshEntityFields();
-  }, [api, selectedRow]);
-
-  // تنظیم داده‌های فرم بر اساس ردیف انتخاب شده
+  // ----------------------------------------------------------------------------
+  // 2) اگر در حالت ادیت هستیم (selectedRow موجود است)، مقادیر را در state بریزیم
+  // ----------------------------------------------------------------------------
   useEffect(() => {
     if (selectedRow) {
+      // حالت ادیت
       setFormData({
         ID: selectedRow.ID || "",
         Name: selectedRow.Name || "",
         Code: selectedRow.Code || "",
         IsDoc: selectedRow.IsDoc || false,
         IsGlobal: selectedRow.IsGlobal || false,
-        IsVisible: selectedRow.IsVisible || true,
+        IsVisible: selectedRow.IsVisible ?? true,
         LastModified: selectedRow.LastModified || new Date().toISOString(),
         ModifiedById: selectedRow.ModifiedById || null,
         ProjectsStr: selectedRow.ProjectsStr || "",
@@ -163,11 +202,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         nEntityCateAID: selectedRow.nEntityCateAID || null,
         nEntityCateBID: selectedRow.nEntityCateBID || null,
       });
-      const selectedID = selectedRow.ID;
-      const fetchedSubForms =
-        subTabDataMapping.Forms.subForms?.[selectedID] || [];
-      setSubForms(fetchedSubForms);
     } else {
+      // حالت افزودن (selectedRow خالی)
       setFormData({
         ID: "",
         Name: "",
@@ -183,43 +219,69 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         nEntityCateAID: null,
         nEntityCateBID: null,
       });
-      setSubForms([]);
+      setWordFileName("");
+      setExcelFileName("");
     }
   }, [selectedRow]);
 
-  const handleChange = (field: keyof typeof formData, value: any) => {
+  // ----------------------------------------------------------------------------
+  // 3) واکشی نام فایل‌ها وقتی TemplateDocID یا TemplateExcelID تغییر می‌کند
+  // (معادل watch در Vue)
+  // ----------------------------------------------------------------------------
+  useEffect(() => {
+    const getDocName = async () => {
+      if (formData.TemplateDocID) {
+        const name = await fetchFileNameById(formData.TemplateDocID);
+        setWordFileName(name);
+      } else {
+        setWordFileName("");
+      }
+    };
+    getDocName();
+  }, [formData.TemplateDocID]);
+
+  useEffect(() => {
+    const getExcelName = async () => {
+      if (formData.TemplateExcelID) {
+        const name = await fetchFileNameById(formData.TemplateExcelID);
+        setExcelFileName(name);
+      } else {
+        setExcelFileName("");
+      }
+    };
+    getExcelName();
+  }, [formData.TemplateExcelID]);
+
+  // ----------------------------------------------------------------------------
+  // 4) واکشی فیلدهای انتیتی (TableRightShowData در Vue) در صورت وجود selectedRow.ID
+  // ----------------------------------------------------------------------------
+  const refreshEntityFields = async () => {
+    if (formData.ID) {
+      try {
+        const fields = await api.getEntityFieldByEntityTypeId(formData.ID);
+        setEntityFields(fields);
+      } catch (error) {
+        console.error("Error fetching entity fields:", error);
+      }
+    } else {
+      setEntityFields([]);
+    }
+  };
+
+  useEffect(() => {
+    refreshEntityFields();
+  }, [formData.ID, api]);
+
+  // ----------------------------------------------------------------------------
+  // متد تغییر مقادیر فرم
+  // ----------------------------------------------------------------------------
+  const handleChange = (field: keyof IFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleProjectSelectionChange = (selectedIds: (string | number)[]) => {
-    const selectedIdsStr = selectedIds.map(String).join("|") + "|";
-    handleChange("ProjectsStr", selectedIdsStr);
-  };
-
-  const handleGlobalChange = (val: boolean) => {
-    handleChange("IsGlobal", val);
-  };
-
-  const handleACategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOption = aCategoryOptions.find(
-      (option) => option.label === e.target.value
-    );
-    handleChange(
-      "nEntityCateAID",
-      selectedOption ? parseInt(selectedOption.value) : null
-    );
-  };
-
-  const handleBCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOption = bCategoryOptions.find(
-      (option) => option.label === e.target.value
-    );
-    handleChange(
-      "nEntityCateBID",
-      selectedOption ? parseInt(selectedOption.value) : null
-    );
-  };
-
+  // ----------------------------------------------------------------------------
+  // Selector دسته A یا B (مثل نمایش دیالوگ در Vue)
+  // ----------------------------------------------------------------------------
   const handleOpenModal = (selector: "A" | "B") => {
     setCurrentSelector(selector);
     setSelectedRowData(null);
@@ -238,52 +300,136 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
 
   const handleSelectButtonClick = () => {
     if (selectedRowData && currentSelector) {
-      const field =
-        currentSelector === "A" ? "nEntityCateAID" : "nEntityCateBID";
-      handleChange(field, selectedRowData.value);
+      // فرضاً مقدار A را در nEntityCateAID و مقدار B را در nEntityCateBID بریزیم
+      if (currentSelector === "A") {
+        handleChange("nEntityCateAID", parseInt(selectedRowData.value));
+      } else {
+        handleChange("nEntityCateBID", parseInt(selectedRowData.value));
+      }
       handleCloseModal();
     }
   };
 
-  // حالت افزودن ستون جدید (Add)
+  // ----------------------------------------------------------------------------
+  // 5) توابع آپلود و حذف فایل
+  // ----------------------------------------------------------------------------
+  // آپلود فایل با بررسی پسوند و ذخیره در دیتابیس فایل
+  const handleFileUpload = async (file: File, allowedExtensions: string[]) => {
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      throw new Error(
+        `تنها فایل‌های با پسوند ${allowedExtensions.join(", ")} مجاز هستند.`
+      );
+    }
+    // ساخت یک ID جدید برای فایل
+    const ID = uuidv4();
+    const FileIQ = uuidv4();
+    const folderName = new Date().toISOString().split("T")[0];
+    const generatedFileName = `${FileIQ}.${fileExtension}`;
+
+    const formDataFile = new FormData();
+    formDataFile.append("FileName", generatedFileName);
+    formDataFile.append("FolderName", folderName);
+    formDataFile.append("file", file);
+
+    // آپلود فایل
+    const uploadRes = await fileService.uploadFile(formDataFile);
+    if (uploadRes && uploadRes.status) {
+      const { FileSize } = uploadRes.data;
+      // درج رکورد فایل در دیتابیس
+      const insertModel = {
+        ID,
+        FileIQ,
+        FileName: generatedFileName,
+        FileSize: FileSize || file.size,
+        FolderName: folderName,
+        IsVisible: true,
+        LastModified: null,
+        SenderID: userId,
+        FileType: `.${fileExtension}`,
+      };
+      const insertRes = await fileService.insert(insertModel);
+      if (insertRes && insertRes.status) {
+        return insertRes.data;
+      }
+      throw new Error("خطا در درج رکورد فایل در دیتابیس.");
+    } else {
+      throw new Error("آپلود فایل با خطا مواجه شد.");
+    }
+  };
+
+  // آپلود ورد
+  const handleWordUpload = async (file: File) => {
+    try {
+      const result = await handleFileUpload(file, ["doc", "docx"]);
+      // حالا TemplateDocID را با شناسه فایل برگردانده شده ست می‌کنیم
+      handleChange("TemplateDocID", result.ID);
+      // و نام فایل را در state می‌گذاریم
+      setWordFileName(result.FileName);
+      showAlert("success", undefined, "موفقیت", "فایل ورد با موفقیت آپلود شد.");
+    } catch (error: any) {
+      showAlert(
+        "error",
+        undefined,
+        "خطا",
+        error.message || "آپلود فایل ورد با خطا مواجه شد."
+      );
+    }
+  };
+
+  // آپلود اکسل
+  const handleExcelUpload = async (file: File) => {
+    try {
+      const result = await handleFileUpload(file, ["xls", "xlsx"]);
+      handleChange("TemplateExcelID", result.ID);
+      setExcelFileName(result.FileName);
+      showAlert("success", undefined, "موفقیت", "فایل اکسل با موفقیت آپلود شد.");
+    } catch (error: any) {
+      showAlert(
+        "error",
+        undefined,
+        "خطا",
+        error.message || "آپلود فایل اکسل با خطا مواجه شد."
+      );
+    }
+  };
+
+  // حذف ورد
+  const handleDeleteWord = () => {
+    handleChange("TemplateDocID", null);
+    setWordFileName("");
+  };
+
+  // حذف اکسل
+  const handleDeleteExcel = () => {
+    handleChange("TemplateExcelID", null);
+    setExcelFileName("");
+  };
+
+  // ----------------------------------------------------------------------------
+  // 6) افزودن/ویرایش/حذف فیلدهای انتیتی (TableRightShowData)
+  // ----------------------------------------------------------------------------
   const handleAddClick = () => {
     setEditingData(null);
     setIsAddModalOpen(true);
   };
-
-  // حالت ویرایش ستون (Edit)
   const handleEditClick = (rowData: any) => {
     setEditingData(rowData);
     setIsAddModalOpen(true);
   };
-
   const handleAddModalClose = () => {
     setIsAddModalOpen(false);
     setEditingData(null);
   };
 
-  const handleWordUpload = (file: File) => {
-    setWordFile(file);
-    console.log("Word file selected:", file);
-  };
-
-  const handleExcelUpload = (file: File) => {
-    setExcelFile(file);
-    console.log("Excel file selected:", file);
-  };
-
-  // آماده‌سازی داده‌های EntityField جهت نمایش در DataTable
-  const entityFieldData = entityFields.map((field) => ({
-    ...field, // تمام خصوصیات اصلی
-    display_IsShowGrid: field.IsShowGrid ? "Yes" : "No",
-    display_IsEditableInWF: field.IsEditableInWF ? "Yes" : "No",
-  }));
-
-  // ارائه متد save به صورت imperative (برای فراخوانی از خارج از کامپوننت)
+  // ----------------------------------------------------------------------------
+  // 7) تابعی که از والد (مثلاً دکمه ذخیره در Toolbar) صدا می‌خورد
+  // ----------------------------------------------------------------------------
   useImperativeHandle(ref, () => ({
     save: async () => {
       try {
-        console.log("Form Data to Save:", formData);
+        console.log("[FormsCommand1.save] formData =>", formData);
+        // متد handleSaveForm توسط context تعریف شده (در سوال اشاره شده)
         await handleSaveForm(formData);
         showAlert("success", undefined, "Success", "Form saved successfully!");
       } catch (error) {
@@ -293,8 +439,21 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     },
   }));
 
+  // ----------------------------------------------------------------------------
+  // 8) داده‌های جدول برای نمایش فیلدها (مثل TableRightShowData در Vue)
+  // ----------------------------------------------------------------------------
+  const entityFieldData = entityFields.map((field) => ({
+    ...field,
+    display_IsShowGrid: field.IsShowGrid ? "Yes" : "No",
+    display_IsEditableInWF: field.IsEditableInWF ? "Yes" : "No",
+  }));
+
+  // ----------------------------------------------------------------------------
+  // رندر کامپوننت
+  // ----------------------------------------------------------------------------
   return (
     <div>
+      {/* مثلا شبیه ساختار ویو شما */}
       <TwoColumnLayout>
         <TwoColumnLayout.Item span={1}>
           <DynamicInput
@@ -321,10 +480,18 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             options={aCategoryOptions}
             selectedValue={
               aCategoryOptions.find(
-                (option) => option.value === String(formData.nEntityCateAID)
+                (option) => +option.value === formData.nEntityCateAID
               )?.label || ""
             }
-            onChange={handleACategoryChange}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const selectedOption = aCategoryOptions.find(
+                (opt) => opt.label === e.target.value
+              );
+              handleChange(
+                "nEntityCateAID",
+                selectedOption ? parseInt(selectedOption.value) : null
+              );
+            }}
             label="Category A"
             showButton={true}
             onButtonClick={() => handleOpenModal("A")}
@@ -335,15 +502,24 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             options={bCategoryOptions}
             selectedValue={
               bCategoryOptions.find(
-                (option) => option.value === String(formData.nEntityCateBID)
+                (option) => +option.value === formData.nEntityCateBID
               )?.label || ""
             }
-            onChange={handleBCategoryChange}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const selectedOption = bCategoryOptions.find(
+                (opt) => opt.label === e.target.value
+              );
+              handleChange(
+                "nEntityCateBID",
+                selectedOption ? parseInt(selectedOption.value) : null
+              );
+            }}
             label="Category B"
             showButton={true}
             onButtonClick={() => handleOpenModal("B")}
           />
         </TwoColumnLayout.Item>
+
         <TwoColumnLayout.Item span={1}>
           <CheckBox
             label="Is Document"
@@ -355,19 +531,23 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           <CheckBox
             label="Is Global"
             checked={formData.IsGlobal}
-            onChange={handleGlobalChange}
+            onChange={(val) => handleChange("IsGlobal", val)}
           />
         </TwoColumnLayout.Item>
+
         <TwoColumnLayout.Item span={1}>
           <ListSelector
             title="Related Projects"
             columnDefs={[{ field: "Name", headerName: "Project Name" }]}
             rowData={projectData}
             selectedIds={extractProjectIds(formData.ProjectsStr)}
-            onSelectionChange={handleProjectSelectionChange}
+            onSelectionChange={(selectedIds) => {
+              const str = selectedIds.map(String).join("|") + "|";
+              handleChange("ProjectsStr", str);
+            }}
             showSwitcher={true}
             isGlobal={formData.IsGlobal}
-            onGlobalChange={handleGlobalChange}
+            onGlobalChange={(val) => handleChange("IsGlobal", val)}
             className="-mt-5"
             ModalContentComponent={TableSelector}
             modalContentProps={{
@@ -381,147 +561,139 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             }}
           />
         </TwoColumnLayout.Item>
+
+        {/* آپلود ورد و اکسل - همانند Vue که با label و دکمه حذف و ... داشت */}
         <TwoColumnLayout.Item span={2}>
-          <HandlerUplodeExcellAccess
+            <UploadFilesPanel
             onWordUpload={handleWordUpload}
             onExcelUpload={handleExcelUpload}
+            wordFileName={wordFileName}
+            excelFileName={excelFileName}
+            onDeleteWord={handleDeleteWord}
+            onDeleteExcel={handleDeleteExcel}
           />
         </TwoColumnLayout.Item>
+
+        {/* جدول فیلدها (TableRightShowData) */}
         <TwoColumnLayout.Item span={2}>
-          <div className="-mt-4">
-            <DataTable
-              columnDefs={[
-                { headerName: "ID", field: "ID", sortable: true, filter: true },
-                {
-                  headerName: "Display Name",
-                  field: "DisplayName",
-                  sortable: true,
-                  filter: true,
-                },
-                {
-                  headerName: "Column Type",
-                  field: "ColumnType",
-                  sortable: true,
-                  filter: true,
-                },
-                {
-                  headerName: "Show Grid",
-                  field: "display_IsShowGrid",
-                  sortable: true,
-                  filter: true,
-                },
-                {
-                  headerName: "Editable in WF",
-                  field: "display_IsEditableInWF",
-                  sortable: true,
-                  filter: true,
-                },
-                {
-                  headerName: "Last Modified",
-                  field: "LastModified",
-                  sortable: true,
-                  filter: true,
-                },
-              ]}
-              rowData={entityFieldData}
-              onEdit={() => {
-                if (selectedRowData) {
-                  handleEditClick(selectedRowData);
-                } else {
-                  console.warn("هیچ ردیفی انتخاب نشده است");
-                }
-              }}
-              // دکمه View همیشه فعال است؛ با کلیک روی آن مودال باز می‌شود
-              showViewIcon={true}
-              onView={() => {
-                setViewModalOpen(true);
-              }}
-              setSelectedRowData={setSelectedRowData}
-              showDuplicateIcon={false}
-              showEditIcon={true}
-              showAddIcon={true}
-              showDeleteIcon={true}
-              onAdd={handleAddClick}
-              onDelete={async () => {
-                if (!selectedRowData) {
-                  showAlert(
-                    "error",
-                    undefined,
-                    "Error",
-                    "No row selected for deletion"
-                  );
-                  return;
-                }
-                try {
-                  await api.deleteEntityField(selectedRowData.ID);
-                  showAlert(
-                    "success",
-                    undefined,
-                    "Success",
-                    "Deleted successfully"
-                  );
-                  setSelectedRowData(null);
-                  refreshEntityFields();
-                } catch (error) {
-                  console.error("Error deleting entity field: ", error);
-                  showAlert(
-                    "error",
-                    undefined,
-                    "Error",
-                    "Something wrong occurred"
-                  );
-                }
-              }}
-              onDuplicate={() => {
-                console.log("Duplicate clicked for entity field");
-              }}
-              domLayout="autoHeight"
-              showSearch={true}
-              onRowDoubleClick={function (data: any): void {
-                throw new Error("Function not implemented.");
-              }}
-            />
-          </div>
+          <DataTable
+            columnDefs={[
+              { headerName: "ID", field: "ID", sortable: true, filter: true },
+              {
+                headerName: "Display Name",
+                field: "DisplayName",
+                sortable: true,
+                filter: true,
+              },
+              {
+                headerName: "Column Type",
+                field: "ColumnType",
+                sortable: true,
+                filter: true,
+              },
+              {
+                headerName: "Show Grid",
+                field: "display_IsShowGrid",
+                sortable: true,
+                filter: true,
+              },
+              {
+                headerName: "Editable in WF",
+                field: "display_IsEditableInWF",
+                sortable: true,
+                filter: true,
+              },
+              {
+                headerName: "Last Modified",
+                field: "LastModified",
+                sortable: true,
+                filter: true,
+              },
+            ]}
+            rowData={entityFieldData}
+            setSelectedRowData={setSelectedRowData}
+            onAdd={handleAddClick}
+            onEdit={() => {
+              if (selectedRowData) {
+                handleEditClick(selectedRowData);
+              } else {
+                showAlert("error", undefined, "Error", "No row is selected!");
+              }
+            }}
+            onDelete={async () => {
+              if (!selectedRowData) {
+                showAlert(
+                  "error",
+                  undefined,
+                  "Error",
+                  "No row selected for deletion"
+                );
+                return;
+              }
+              try {
+                await api.deleteEntityField(selectedRowData.ID);
+                showAlert("success", undefined, "Success", "Deleted successfully");
+                setSelectedRowData(null);
+                refreshEntityFields();
+              } catch (error) {
+                showAlert("error", undefined, "Error", "Delete failed!");
+              }
+            }}
+            showDuplicateIcon={false}
+            showEditIcon={true}
+            showAddIcon={true}
+            showDeleteIcon={true}
+            showViewIcon={true}
+            onView={() => setViewModalOpen(true)}
+            domLayout="autoHeight"
+            showSearch={true}
+            onRowDoubleClick={(rowData) => {
+              // می‌توانید باز هم handleEditClick(rowData) را صدا بزنید یا هر کاری
+            }}
+          />
         </TwoColumnLayout.Item>
       </TwoColumnLayout>
 
-      {/* مودال انتخاب دسته‌بندی */}
+      {/* مدال انتخاب Category A یا B */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
-          columnDefs={[{ headerName: "Name", field: "Name" }]}
+          columnDefs={[{ headerName: "Name", field: "label" }]}
           rowData={
             currentSelector === "A"
-              ? aCategoryOptions.map((option) => ({
-                  value: option.value,
-                  label: option.label,
+              ? aCategoryOptions.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
                 }))
               : currentSelector === "B"
-              ? bCategoryOptions.map((option) => ({
-                  value: option.value,
-                  label: option.label,
+              ? bCategoryOptions.map((opt) => ({
+                  value: opt.value,
+                  label: opt.label,
                 }))
               : []
           }
           selectedRow={selectedRowData}
-          onRowDoubleClick={handleSelectButtonClick}
           onRowClick={handleRowClick}
+          onRowDoubleClick={handleSelectButtonClick}
           onSelectButtonClick={handleSelectButtonClick}
           isSelectDisabled={!selectedRowData}
         />
       </DynamicModal>
 
-      {/* مودال افزودن/ویرایش ستون */}
+      {/* مدال افزودن فیلد */}
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
         <AddColumnForm
-          onClose={handleAddModalClose}
-          onSave={refreshEntityFields}
-          isEdit={!!editingData}
           existingData={editingData}
-          entityTypeId={selectedRow?.ID} // اضافه کردن مقدار selectedRow.ID
+          isEdit={!!editingData}
+          entityTypeId={formData.ID}
+          onClose={handleAddModalClose}
+          onSave={() => {
+            refreshEntityFields();
+            handleAddModalClose();
+          }}
         />
       </DynamicModal>
 
-      {/* مودال نمایش اطلاعات (View) با استفاده از کامپوننت ColumnViewModal */}
+      {/* مدال نمایش فرم جنریت شده (فرم داینامیک) */}
       <FormGeneratorView
         isOpen={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
