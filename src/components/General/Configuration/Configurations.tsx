@@ -305,6 +305,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             showButton={true}
             onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}
             loading={loading}
+            className="-mt-5"
           />
 
           {/* DynamicSelector - Default Ribbon */}
@@ -320,6 +321,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             showButton={true}
             onButtonClick={() => handleOpenModal("SelMenuIDForMain")}
             loading={loading}
+            className="-mt-5"
           />
 
           {/* DynamicSelector - Lesson Learned Form */}
@@ -336,8 +338,8 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             label="Lesson Learned Form"
             showButton={true}
             onButtonClick={() => handleOpenModal("Lesson Learned Form")}
-            className="mt-7"
             loading={loading}
+            className="-mt-5"
           />
 
           {/* DynamicSelector - Lesson Learned Af Template */}
@@ -354,8 +356,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             label="Lesson Learned Af Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("Lesson Learned Af Template")}
-            className="mt-7"
             loading={loading}
+            className="-mt-5"
+
           />
 
           {/* DynamicSelector - Comment Form Template */}
@@ -372,7 +375,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             label="Comment Form Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("Comment Form Template")}
-            className="mt-7"
+            className="-mt-5"
             loading={loading}
           />
 
@@ -390,14 +393,13 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             label="Procedure Form Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("Procedure Form Template")}
-            className="mt-7"
+            className="-mt-5"
             loading={loading}
           />
 
           {/* ListSelector - Default Action Buttons */}
           <ListSelector
             title="Default Action Buttons"
-            className="mt-7"
             columnDefs={[
               { headerName: "Name", field: "Name" },
               { headerName: "Tooltip", field: "Tooltip" },
@@ -430,7 +432,6 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           {/* ListSelector - Letter Action Buttons */}
           <ListSelector
             title="Letter Action Buttons"
-            className="mt-7"
             columnDefs={[
               { headerName: "Name", field: "Name" },
               { headerName: "Tooltip", field: "Tooltip" },
@@ -465,7 +466,6 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           {/* ListSelector - Meeting Action Buttons */}
           <ListSelector
             title="Meeting Action Buttons"
-            className="mt-7"
             columnDefs={[
               { headerName: "Name", field: "Name" },
               { headerName: "Tooltip", field: "Tooltip" },

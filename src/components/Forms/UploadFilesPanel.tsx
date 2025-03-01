@@ -1,5 +1,6 @@
+// src/components/UploadFilesPanel.tsx
 import React, { useRef } from "react";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiDownload } from "react-icons/fi";
 
 interface UploadFilesPanelProps {
   onWordUpload: (file: File) => void;
@@ -8,6 +9,8 @@ interface UploadFilesPanelProps {
   excelFileName: string;
   onDeleteWord: () => void;
   onDeleteExcel: () => void;
+  onDownloadWord?: () => void;
+  onDownloadExcel?: () => void;
 }
 
 const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
@@ -17,6 +20,8 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
   excelFileName,
   onDeleteWord,
   onDeleteExcel,
+  onDownloadWord,
+  onDownloadExcel,
 }) => {
   const wordInputRef = useRef<HTMLInputElement | null>(null);
   const excelInputRef = useRef<HTMLInputElement | null>(null);
@@ -42,21 +47,37 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
   };
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex items-center space-x-6">
       {/* بخش فایل ورد */}
-      <div className="flex items-center">
+      <div className="flex items-center space-x-2">
+        {wordFileName && (
+          <>
+            <button
+              type="button"
+              onClick={onDownloadWord}
+              className="p-2 border border-gray-300 rounded"
+              title="دانلود فایل ورد"
+            >
+              <FiDownload size={18} />
+            </button>
+            <span className="text-gray-700 max-w-[150px] truncate">
+              {wordFileName}
+            </span>
+          </>
+        )}
         <button
           type="button"
           onClick={handleWordClick}
           className="bg-blue-600 text-white px-4 py-2 rounded"
         >
-          {wordFileName ? wordFileName : "فایل ورد پیدا نشد"}
+          {wordFileName ? "تغییر فایل" : "انتخاب فایل"}
         </button>
         {wordFileName && (
           <button
             type="button"
             onClick={onDeleteWord}
-            className="text-red-500 ml-2"
+            className="text-red-500 p-2"
+            title="حذف فایل"
           >
             <FiTrash2 size={18} />
           </button>
@@ -71,19 +92,35 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
       </div>
 
       {/* بخش فایل اکسل */}
-      <div className="flex items-center">
+      <div className="flex items-center space-x-2">
+        {excelFileName && (
+          <>
+            <button
+              type="button"
+              onClick={onDownloadExcel}
+              className="p-2 border border-gray-300 rounded"
+              title="دانلود فایل اکسل"
+            >
+              <FiDownload size={18} />
+            </button>
+            <span className="text-gray-700 max-w-[150px] truncate">
+              {excelFileName}
+            </span>
+          </>
+        )}
         <button
           type="button"
           onClick={handleExcelClick}
           className="bg-pink-600 text-white px-4 py-2 rounded"
         >
-          {excelFileName ? excelFileName : "فایل اکسل پیدا نشد"}
+          {excelFileName ? "تغییر فایل" : "انتخاب فایل"}
         </button>
         {excelFileName && (
           <button
             type="button"
             onClick={onDeleteExcel}
-            className="text-red-500 ml-2"
+            className="text-red-500 p-2"
+            title="حذف فایل"
           >
             <FiTrash2 size={18} />
           </button>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "primereact/utils";
 
 interface Option {
@@ -15,7 +15,6 @@ interface DynamicSelectorProps {
   showButton?: boolean;
   onButtonClick?: () => void;
   leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
   error?: boolean;
   errorMessage?: string;
   className?: string;
@@ -32,86 +31,130 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   showButton = false,
   onButtonClick,
   leftIcon,
-  rightIcon,
   error = false,
   errorMessage = "",
   className,
   disabled = false,
   loading = false,
 }) => {
+  // وضعیت باز/بسته بودن منو
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // تغییر وضعیت منو
+  const handleToggleDropdown = () => {
+    if (!disabled && !loading) {
+      setOpen(!open);
+    }
+  };
+
+  // انتخاب گزینه
+  const handleOptionClick = (value: string) => {
+    // شبیه‌سازی رویداد change برای سازگاری با onChange دریافت شده
+    onChange({ target: { name, value } } as React.ChangeEvent<HTMLSelectElement>);
+    setOpen(false);
+  };
+
+  // بستن منو هنگام کلیک بیرون از کامپوننت
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // استایل ثابت برای هر گزینه
+  const optionStyle = {
+    height: "2.25rem",
+    lineHeight: "2.25rem",
+  };
+
   return (
     <div
+      ref={containerRef}
       className={classNames(
         "relative flex flex-col gap-1",
         className,
         disabled ? "opacity-75 cursor-not-allowed" : ""
       )}
     >
-      {/* لیبل شناور با فاصله مناسب */}
       {label && (
-        <label
-          htmlFor={name}
-          className="block text-sm text-gray-600 mb-1"
-          title={label}
-        >
+        <label htmlFor={name} className="block text-xs text-gray-600 mb-1" title={label}>
           {label}
         </label>
       )}
 
-      <div className="relative">
-        {/* آیکون سمت چپ */}
-        {leftIcon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
-            {leftIcon}
-          </div>
-        )}
-
-        <select
-          className={classNames(
-            "select select-primary w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 transition",
-            disabled ? "bg-gray-300 text-gray-800" : "bg-white"
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          {leftIcon && (
+            <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
+              {leftIcon}
+            </div>
           )}
-          id={name}
-          name={name}
-          value={selectedValue}
-          onChange={onChange}
-          disabled={disabled}
-          aria-label={label}
-        >
-          <option value="" disabled hidden>
-            {loading ? "Loading..." : "Select an option"}
-          </option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value} className="truncate">
-              {option.label}
-            </option>
-          ))}
-        </select>
 
-        {loading && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            <svg
-              className="animate-spin h-5 w-5 text-purple-600"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
+          {/* دکمه نمایش انتخاب فعلی */}
+          <button
+            type="button"
+            onClick={handleToggleDropdown}
+            disabled={disabled}
+            className={classNames(
+              "w-full text-xs h-9 border border-purple-500 rounded transition focus:outline-none focus:ring-1 focus:ring-purple-500 flex items-center pl-2 pr-2 justify-between",
+              disabled ? "bg-gray-300 text-gray-800" : "bg-white"
+            )}
+          >
+            <span className="truncate">
+              {options.find((o) => o.value === selectedValue)?.label || "انتخاب کنید"}
+            </span>
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
             </svg>
-          </div>
-        )}
+          </button>
+
+          {/* منوی بازشونده با اسکرول عمودی و افقی */}
+          {open && (
+            <div className="absolute left-0 top-full mt-1 w-full bg-white border border-purple-500 rounded shadow-lg z-10 max-h-60 overflow-auto">
+              {options.map((option) => (
+                <div
+                  key={option.value}
+                  onClick={() => handleOptionClick(option.value)}
+                  style={optionStyle}
+                  className="cursor-pointer text-xs px-2 hover:bg-purple-100 whitespace-nowrap"
+                >
+                  {option.label}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {loading && (
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <svg
+                className="animate-spin h-4 w-4 text-purple-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+            </div>
+          )}
+        </div>
 
         {showButton && !loading && (
           <button
@@ -119,7 +162,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
             onClick={onButtonClick}
             disabled={disabled}
             className={classNames(
-              "absolute right-3 top-1/2 transform -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-md shadow-sm transition-colors duration-300",
+              "bg-purple-600 text-white px-2 py-1 rounded text-xs shadow-sm transition-colors duration-300 h-9 flex items-center justify-center",
               disabled ? "bg-gray-500 cursor-not-allowed" : "hover:bg-pink-500"
             )}
             title="اضافه کردن"

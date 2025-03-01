@@ -40,18 +40,16 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
 }) => {
   return (
     <div className={classNames("w-full", className)}>
-      {/* فقط در صورتی که name مقدار داشته باشد، برچسب نمایش داده شود */}
       {name && (
         <label
           htmlFor={name}
-          className="block text-gray-700 text-sm font-medium mb-1"
+          className="block text-xs text-gray-600 mb-1"
         >
           {name}
           {required && <span className="text-red-500"> *</span>}
         </label>
       )}
 
-      {/* Wrapper برای قرارگیری آیکون‌ها و Input */}
       <div className="relative">
         {leftIcon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-purple-600">
@@ -63,7 +61,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           id={name}
           name={name}
           type={type}
-          // اگر value خالی یا null باشد، رشته‌ی خالی ارسال می‌کنیم
           value={value ?? ""}
           onChange={onChange}
           placeholder={placeholder}
@@ -73,7 +70,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           min={min}
           max={max}
           step={step}
-          // حذف اسپینر مرورگر در ورودی عددی
           style={
             type === "number"
               ? {
@@ -83,17 +79,15 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               : {}
           }
           className={classNames(
-            "w-full border rounded-md px-4 py-2 bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 transition duration-300",
-            // افزایش padding-left اگر آیکون سمت چپ وجود داشته باشد
-            leftIcon ? "pl-10" : "",
-            // افزایش padding-right اگر آیکون سمت راست یا لودینگ باشد
-            rightIcon || loading ? "pr-10" : "",
+            "w-full text-xs h-9 border rounded transition duration-300 focus:outline-none focus:ring-1",
+            leftIcon ? "pl-10" : "pl-2",
+            rightIcon || loading ? "pr-10" : "pr-2",
             error
               ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-              : "border-purple-600 focus:border-indigo-500 focus:ring-purple-200",
+              : "border-purple-500 focus:border-indigo-500 focus:ring-purple-200",
             disabled || loading
               ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-              : ""
+              : "bg-white text-gray-800"
           )}
         />
 
@@ -129,7 +123,6 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         )}
       </div>
 
-      {/* نمایش پیام خطا */}
       {error && errorMessage && (
         <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>
       )}
