@@ -471,6 +471,7 @@ export interface EntityType {
   Code: string;
   IsDoc: boolean;
   IsGlobal: boolean;
+  IsMegaForm:boolean;
   IsVisible: boolean;
   LastModified?: string;
   ModifiedById?: string | null;

@@ -232,6 +232,8 @@ const TabContent: FC<TabContentProps> = ({
           break;
         case "Forms":
           data = await api.getTableTransmittal();
+          console.log("Data from getTableTransmittal: ", data);
+
           break;
         case "Categories":
           if (selectedCategoryType === "cata") {

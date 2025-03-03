@@ -237,6 +237,7 @@ interface FormData {
   Name: string;
   Code: string;
   IsDoc: boolean;
+  IsMegaForm:boolean;
   IsGlobal: boolean;
   IsVisible: boolean;
   LastModified?: string;
@@ -717,7 +718,6 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
 
       let result: EntityCollection;
       if (procedure.ID) {
-        // Update existing procedure
         result = await api.updateEntityCollection(procedure);
         console.log("Procedure updated:", result);
       } else {
@@ -864,10 +864,9 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         Name: data.Name,
         Code: data.Code || "",
         IsDoc: data.IsDoc,
+        IsMegaForm:data.IsMegaForm,
         IsGlobal: data.IsGlobal,
         IsVisible: data.IsVisible,
-        // LastModified: data.LastModified || new Date().toISOString(),
-        // ModifiedById: data.ModifiedById || "",
         ProjectsStr: data.ProjectsStr || "",
         TemplateDocID: data.TemplateDocID,
         TemplateExcelID: data.TemplateExcelID,

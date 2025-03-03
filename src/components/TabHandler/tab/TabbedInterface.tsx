@@ -223,7 +223,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   // وقتی روی سطر دوبار کلیک شود
   const handleRowDoubleClick = (rowData: any) => {
-    console.log("Row double-clicked:", rowData);
+    console.log("Row double-clicked:", rowData.IsMegaForm);
     setSelectedRow(rowData);
   };
 
