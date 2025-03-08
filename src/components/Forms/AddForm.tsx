@@ -164,7 +164,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       label: "Command : @wf , info : For Letter Wf",
     },
   ];
-  const [commandOptions, setCommandOptions] = useState(initialCommandOptions);
+  const [commandOptions] = useState(initialCommandOptions);
 
   // استخراج اطلاعات اصلی فرم
   const getInitialFormData = () => ({
@@ -189,6 +189,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     readOnly: existingData ? existingData.IsForceReadOnly : false,
     metaColumnName: "",
     showInTab: existingData ? existingData.ShowInTab : "",
+    // این فیلد جدید برای وضعیت CountInReject:
+    countInReject: existingData ? existingData.CountInReject : false,
   });
 
   const [formData, setFormData] = useState(getInitialFormData());
@@ -196,9 +198,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // ریست فرم در حالت افزودن جدید
+  // در حالت ویرایش فرم را مقداردهی اولیه می‌کنیم
   useEffect(() => {
-    if (!isEdit) {
+    if (isEdit) {
+      setFormData(getInitialFormData());
+    } else {
+      // اگر حالت جدید است
       setFormData({
         formName: "",
         order: "",
@@ -217,17 +222,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         readOnly: false,
         metaColumnName: "",
         showInTab: "",
+        countInReject: false,
       });
       setDynamicMeta({});
       setErrors({});
     }
-  }, [isEdit, existingData]);
-
-  // در حالت ویرایش فرم را مقداردهی اولیه می‌کنیم
-  useEffect(() => {
-    if (isEdit) {
-      setFormData(getInitialFormData());
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, existingData]);
 
   // تغییر مقادیر فرم
@@ -255,11 +255,16 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
 
     const currentTimestamp = new Date().toISOString();
+
+    // اگر از کنترلر فرزند هم چیزی می‌خواهید (مثلا lookupMode)، بگیرید
+    // ولی اینجا فعلا مهم نیست
     const lookupModeValue =
       dynamicMeta.LookupMode == null || dynamicMeta.LookupMode === ""
         ? null
         : Number(dynamicMeta.LookupMode);
+
     const metaType5Value = dynamicMeta.metaType5 || null;
+
     const payload: any = {
       DisplayName: formData.formName,
       IsShowGrid: formData.showInListView,
@@ -284,18 +289,17 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       orderValue: parseFloat(formData.order) || 0,
       ShowInAlert: formData.showInAlert,
       ShowInTab: formData.showInTab,
-      CreatedTime:
-        isEdit && existingData
-          ? existingData.CreatedTime
-          : new Date().toISOString(),
+      CreatedTime: isEdit && existingData
+        ? existingData.CreatedTime
+        : new Date().toISOString(),
       ModifiedTime: currentTimestamp,
-      ModifiedById:
-        isEdit && existingData
-          ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
-          : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+      ModifiedById: isEdit && existingData
+        ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
+        : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
       LookupMode: lookupModeValue,
       BoolMeta1: dynamicMeta.oldLookup ? true : false,
-      CountInReject: dynamicMeta.removeSameName ? true : false,
+      // اینجا مقدار چک‌باکس مربوط به CountInReject را هم می‌گذاریم:
+      CountInReject: formData.countInReject,
       metaType5: metaType5Value,
       ID: isEdit && existingData ? existingData.ID : 0,
       IsVisible: true,
@@ -311,13 +315,15 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         showAlert("success", undefined, "Success", "Added successfully");
       }
       setIsLoading(false);
+
+      // موفقیت
       if (onSave) onSave();
       onClose();
     } catch (error: any) {
       setIsLoading(false);
       setErrors({ form: "An error occurred." });
       console.error(error);
-      showAlert("error", undefined, "Error", "Something wrong occurred");
+      showAlert("error", undefined, "Error", "Something went wrong");
     }
   };
 
@@ -347,8 +353,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
   // تعیین نوع‌های اطلاعاتی که در آن‌ها فیلد Program Meta Column Name نشان داده نشود
   const hiddenTypesForProgramMeta = [
-    "component9", // Lookup RealValue
-    "component7", // Lookup
+    "component9",  // Lookup RealValue
+    "component7",  // Lookup
     "component26", // Advance Lookup AdvanceTable
     "component19", // Advance Table
     "component10", // Lookup AdvanceTable
@@ -548,6 +554,21 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             </div>
           </div>
 
+          {/* چک‌باکس جدید برای Count In Reject */}
+          <div className="flex items-center md:col-span-2">
+            <input
+              type="checkbox"
+              id="countInReject"
+              name="countInReject"
+              checked={formData.countInReject}
+              onChange={(e) => handleChange("countInReject", e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="countInReject" className="ml-3 text-gray-700 font-medium">
+              Count In Reject
+            </label>
+          </div>
+
           {/* ردیف Read Only, Show in Tab و Program Meta Column Name */}
           <div className="flex flex-wrap md:col-span-2 space-x-4 items-center">
             <div className="flex items-center">
@@ -571,6 +592,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               placeholder="Show in Tab"
               className="flex-1"
             />
+            {/* در برخی نوع‌ها metaType4 پنهان می‌ماند */}
             {!hiddenTypesForProgramMeta.includes(formData.typeOfInformation) && (
               <DynamicInput
                 name="programMetaColumnName"
@@ -578,7 +600,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 value={dynamicMeta.metaType4 || ""}
                 placeholder="Program Meta Column Name"
                 onChange={(e) =>
-                  setDynamicMeta((prev: any) => ({ ...prev, metaType4: e.target.value }))
+                  setDynamicMeta((prev: any) => ({
+                    ...prev,
+                    metaType4: e.target.value
+                  }))
                 }
                 className="flex-1"
               />
@@ -614,6 +639,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   readOnly: false,
                   metaColumnName: "",
                   showInTab: "",
+                  countInReject: false,
                 });
                 setDynamicMeta({});
                 setErrors({});

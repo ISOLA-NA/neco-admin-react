@@ -124,7 +124,7 @@ const typeOfInformationOptions = [
 /**
  * تابع کمکی برای واکشی نام فایل با استفاده از FileID
  */
-async function fetchFileNameById (fileId: string) {
+async function fetchFileNameById(fileId: string) {
   if (!fileId) return ''
   try {
     const response = await fileService.getFile(fileId)
@@ -141,7 +141,6 @@ async function fetchFileNameById (fileId: string) {
  * کامپوننت اصلی: FormsCommand1
  */
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
-  // کانتکست‌های لازم
   const { handleSaveForm } = useAddEditDelete()
   const api = useApi()
 
@@ -173,9 +172,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const [excelFileName, setExcelFileName] = useState<string>('')
 
   // داده‌های پروژه (جهت انتخاب پروژه)
-  const [projectData, setProjectData] = useState<
-    { ID: string; Name: string }[]
-  >([])
+  const [projectData, setProjectData] = useState<{ ID: string; Name: string }[]>(
+    []
+  )
 
   // استیت فیلدهای انتیتی
   const [entityFields, setEntityFields] = useState<any[]>([])
@@ -282,8 +281,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           Name: selectedRow.Name || '',
           Code: selectedRow.Code || '',
           IsDoc: !!selectedRow.IsDoc,
-          IsVisible: !!selectedRow.IsVisible,
           IsMegaForm: !!selectedRow.IsMegaForm,
+          IsVisible: !!selectedRow.IsVisible,
           LastModified: selectedRow.LastModified || new Date().toISOString(),
           ModifiedById: selectedRow.ModifiedById || null,
           ProjectsStr: selectedRow.ProjectsStr || '',
@@ -544,7 +543,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.download = FileName // نام فایل نهایی برای دانلود
+        link.download = FileName
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -583,8 +582,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   }
 
   /**
-   * وقتی کاربر مقدار سلولی را تغییر می‌دهد (در جدول فیلدها)
-   * فعلاً فقط در State داخلی ثبت می‌کنیم.
+   * در این متد فقط مقدار در state آپدیت می‌شود
+   * تا تغییرات در جدول نمایش داده شود
+   * ولی فراخوانی آپدیت سرور انجام نمی‌دهیم.
    */
   const handleCellValueChanged = (params: any) => {
     if (!params?.data || !params.colDef?.field) return
@@ -597,8 +597,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       [updatedFieldName]: updatedFieldValue
     }
 
-    // جایگزینی در آرایه فیلدها
-    const rowIndex = entityFields.findIndex(f => f.ID === params.data.ID)
+    const rowIndex = entityFields.findIndex(f => f.ID === updatedData.ID)
     if (rowIndex !== -1) {
       const newFields = [...entityFields]
       newFields[rowIndex] = updatedData
@@ -624,7 +623,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   }))
 
   /**
-   * تعریف ستون‌های DataTable برای نمایش فیلدهای انتیتی
+   * ستون‌های DataTable برای نمایش فیلدهای انتیتی
    */
   const newColumnDefs = [
     {
@@ -765,11 +764,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
 
   return (
     <div style={{ width: '100%', boxSizing: 'border-box' }}>
-      {/* 
-        برای واکنش‌گرایی بهتر، از TwoColumnLayout استفاده می‌کنیم 
-        که در فایل TwoColumnLayout.tsx تعریف شده و همراه با TwoColumnLayout.css
-        در سایزهای کوچک، یک‌ستونی و در سایزهای بزرگ، دوستونی خواهد بود.
-      */}
       <TwoColumnLayout>
         <TwoColumnLayout.Item span={1}>
           <DynamicInput
@@ -891,19 +885,13 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           />
         </TwoColumnLayout.Item>
 
-        {/* 
-          تغییر اصلی برای چسباندن جدول به پایین:
-          به‌جای ارتفاع ثابت ۴۰۰پیکسل، Flex را ست می‌کنیم. 
-          domLayout در DataTable هم بهتر است autoHeight باشد.
-        */}
         <TwoColumnLayout.Item span={2}>
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
-              height: 'calc(100vh - 600px)', // هر عددی که مایلید از ارتفاع کل کم شود
-              border: '1px solid #f8d1d1' // برای تست
+              height: 'calc(100vh - 600px)'
             }}
           >
             <DataTable
@@ -916,6 +904,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               onCellClicked={params => {
                 setSelectedRowData(params.data)
               }}
+              onCellValueChanged={handleCellValueChanged} 
               onAdd={handleAddClick}
               onEdit={() => {
                 if (selectedRowData) {
@@ -936,12 +925,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 }
                 try {
                   await api.deleteEntityField(selectedRowData.ID)
-                  showAlert(
-                    'success',
-                    undefined,
-                    'Success',
-                    'Deleted successfully'
-                  )
+                  showAlert('success', undefined, 'Success', 'Deleted successfully')
                   setSelectedRowData(null)
                   refreshEntityFields()
                 } catch (error) {
@@ -954,12 +938,11 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               showDeleteIcon={true}
               showViewIcon={true}
               onView={() => setViewModalOpen(true)}
-              domLayout='autoHeight' // جدول بسته به محتوایش ارتفاع می‌گیرد
+              domLayout='autoHeight'
               showSearch={true}
               onRowDoubleClick={rowData => handleEditClick(rowData)}
-              onCellValueChanged={handleCellValueChanged}
               onDuplicate={() => {
-                // فقط برای رفع خطاهای عدم وجود متد onDuplicate
+                // فقط در صورت نیاز
               }}
             />
           </div>
