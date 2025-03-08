@@ -36,21 +36,10 @@ interface IFormData {
   nEntityCateBID: number | null;
 }
 
-const aCategoryOptions = [
-  { value: "1", label: "Category A1" },
-  { value: "2", label: "Category A2" },
-  { value: "3", label: "Category A3" },
-];
-const bCategoryOptions = [
-  { value: "1", label: "Category B1" },
-  { value: "2", label: "Category B2" },
-  { value: "3", label: "Category B3" },
-];
-
-const extractProjectIds = (projectsStr: string): string[] => {
-  if (!projectsStr) return [];
-  return projectsStr.split("|").filter(Boolean);
-};
+interface CategoryOption {
+  value: string;
+  label: string;
+}
 
 interface FormsCommand1Props {
   selectedRow: any;
@@ -71,7 +60,7 @@ async function fetchFileNameById(fileId: string) {
 }
 
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
-  console.log("rrrrrrrrrr", selectedRow);
+  console.log("Selected Row:", selectedRow);
 
   const { handleSaveForm } = useAddEditDelete();
   const api = useApi();
@@ -113,6 +102,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
 
   const [viewModalOpen, setViewModalOpen] = useState(false);
 
+  // state for Category options fetched from API
+  const [catAOptions, setCatAOptions] = useState<CategoryOption[]>([]);
+  const [catBOptions, setCatBOptions] = useState<CategoryOption[]>([]);
+
   // واکشی شناسه کاربر
   useEffect(() => {
     const fetchUserId = async () => {
@@ -126,6 +119,42 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       }
     };
     fetchUserId();
+  }, []);
+
+  // واکشی گزینه‌های Category A از API
+  useEffect(() => {
+    const fetchCatAOptions = async () => {
+      try {
+        const response = await apiService.getAllCatA();
+        // تبدیل داده به فرمت مورد نیاز
+        const options = response.map((cat: any) => ({
+          value: cat.ID?.toString() || "",
+          label: cat.Name,
+        }));
+        setCatAOptions(options);
+      } catch (error) {
+        console.error("Error fetching Category A options:", error);
+      }
+    };
+    fetchCatAOptions();
+  }, []);
+
+  // واکشی گزینه‌های Category B از API
+  useEffect(() => {
+    const fetchCatBOptions = async () => {
+      try {
+        const response = await apiService.getAllCatB();
+        // تبدیل داده به فرمت مورد نیاز
+        const options = response.map((cat: any) => ({
+          value: cat.ID?.toString() || "",
+          label: cat.Name,
+        }));
+        setCatBOptions(options);
+      } catch (error) {
+        console.error("Error fetching Category B options:", error);
+      }
+    };
+    fetchCatBOptions();
   }, []);
 
   // گرفتن لیست پروژه‌ها از سرور
@@ -149,7 +178,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   useEffect(() => {
     const updateFormDataAndFiles = async () => {
       if (selectedRow) {
-        console.log("aaaaaaaaaaaa");
         setFormData({
           ID: selectedRow.ID || "",
           Name: selectedRow.Name || "",
@@ -203,12 +231,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     updateFormDataAndFiles();
   }, [selectedRow]);
 
-  // لاگ گرفتن مقادیر selectedRow به ترتیب با نشانگرهای aaaaaaaaaaaaaaa، bbbbbbbbbbbbbbbb و ccccccccccc
+  // لاگ گرفتن مقادیر selectedRow (برای اشکال‌زدایی)
   useEffect(() => {
     if (selectedRow) {
-      console.log("aaaaaaaaaaaaaaa", selectedRow);
-      console.log("bbbbbbbbbbbbbbb", selectedRow);
-      console.log("ccccccccccc", selectedRow);
+      console.log("Selected Row:", selectedRow);
     }
   }, [selectedRow]);
 
@@ -287,9 +313,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const handleSelectButtonClick = () => {
     if (selectedRowData && currentSelector) {
       if (currentSelector === "A") {
-        handleChange("nEntityCateAID", parseInt(selectedRowData.value));
+        handleChange("nEntityCateAID", selectedRowData.value ? parseInt(selectedRowData.value) : null);
       } else {
-        handleChange("nEntityCateBID", parseInt(selectedRowData.value));
+        handleChange("nEntityCateBID", selectedRowData.value ? parseInt(selectedRowData.value) : null);
       }
       handleCloseModal();
     }
@@ -473,26 +499,15 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             value={formData.Code}
             placeholder="Enter command"
             onChange={(e) => handleChange("Code", e.target.value)}
-            required={true}
           />
         </TwoColumnLayout.Item>
 
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
-            options={aCategoryOptions}
-            selectedValue={
-              aCategoryOptions.find(
-                (option) => +option.value === formData.nEntityCateAID
-              )?.label || ""
-            }
+            options={catAOptions}
+            selectedValue={formData.nEntityCateAID ? formData.nEntityCateAID.toString() : ""}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              const selectedOption = aCategoryOptions.find(
-                (opt) => opt.label === e.target.value
-              );
-              handleChange(
-                "nEntityCateAID",
-                selectedOption ? parseInt(selectedOption.value) : null
-              );
+              handleChange("nEntityCateAID", e.target.value ? parseInt(e.target.value) : null);
             }}
             label="Category A"
             showButton={true}
@@ -502,20 +517,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
 
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
-            options={bCategoryOptions}
-            selectedValue={
-              bCategoryOptions.find(
-                (option) => +option.value === formData.nEntityCateBID
-              )?.label || ""
-            }
+            options={catBOptions}
+            selectedValue={formData.nEntityCateBID ? formData.nEntityCateBID.toString() : ""}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              const selectedOption = bCategoryOptions.find(
-                (opt) => opt.label === e.target.value
-              );
-              handleChange(
-                "nEntityCateBID",
-                selectedOption ? parseInt(selectedOption.value) : null
-              );
+              handleChange("nEntityCateBID", e.target.value ? parseInt(e.target.value) : null);
             }}
             label="Category B"
             showButton={true}
@@ -548,7 +553,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           />
         </TwoColumnLayout.Item>
 
-        <TwoColumnLayout.Item span={2} className="-mt-5">
+        <TwoColumnLayout.Item span={2} className="mt-5">
           <UploadFilesPanel
             onWordUpload={handleWordUpload}
             onExcelUpload={handleExcelUpload}
@@ -561,12 +566,12 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           />
         </TwoColumnLayout.Item>
 
-        <TwoColumnLayout.Item span={1} className="mt-5">
+        <TwoColumnLayout.Item span={1} className="mt-10">
           <ListSelector
             title="Related Projects"
             columnDefs={[{ field: "Name", headerName: "Project Name" }]}
             rowData={projectData}
-            selectedIds={extractProjectIds(formData.ProjectsStr)}
+            selectedIds={formData.ProjectsStr.split("|").filter(Boolean)}
             onSelectionChange={(selectedIds) => {
               const str = selectedIds.map(String).join("|") + "|";
               handleChange("ProjectsStr", str);
@@ -666,12 +671,12 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           columnDefs={[{ headerName: "Name", field: "label" }]}
           rowData={
             currentSelector === "A"
-              ? aCategoryOptions.map((opt) => ({
+              ? catAOptions.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))
               : currentSelector === "B"
-              ? bCategoryOptions.map((opt) => ({
+              ? catBOptions.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))

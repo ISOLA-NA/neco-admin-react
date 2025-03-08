@@ -1,10 +1,9 @@
-// src/components/UploadFilesPanel.tsx
-import React, { useRef } from "react";
-import { FiTrash2, FiDownload } from "react-icons/fi";
+import React, { useRef, useState } from "react";
+import { FiTrash2, FiDownload, FiLoader } from "react-icons/fi";
 
 interface UploadFilesPanelProps {
-  onWordUpload: (file: File) => void;
-  onExcelUpload: (file: File) => void;
+  onWordUpload: (file: File) => Promise<any>;
+  onExcelUpload: (file: File) => Promise<any>;
   wordFileName: string;
   excelFileName: string;
   onDeleteWord: () => void;
@@ -26,6 +25,9 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
   const wordInputRef = useRef<HTMLInputElement | null>(null);
   const excelInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [wordLoading, setWordLoading] = useState(false);
+  const [excelLoading, setExcelLoading] = useState(false);
+
   const handleWordClick = () => {
     wordInputRef.current?.click();
   };
@@ -34,15 +36,29 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
     excelInputRef.current?.click();
   };
 
-  const handleWordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWordChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      onWordUpload(e.target.files[0]);
+      try {
+        setWordLoading(true);
+        await onWordUpload(e.target.files[0]);
+      } catch (error) {
+        console.error("Error uploading Word file:", error);
+      } finally {
+        setWordLoading(false);
+      }
     }
   };
 
-  const handleExcelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExcelChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      onExcelUpload(e.target.files[0]);
+      try {
+        setExcelLoading(true);
+        await onExcelUpload(e.target.files[0]);
+      } catch (error) {
+        console.error("Error uploading Excel file:", error);
+      } finally {
+        setExcelLoading(false);
+      }
     }
   };
 
@@ -68,9 +84,13 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
         <button
           type="button"
           onClick={handleWordClick}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-600 text-white px-4 py-2 rounded flex items-center"
+          disabled={wordLoading}
         >
-          {wordFileName ? "تغییر فایل" : "انتخاب فایل"}
+          {wordLoading ? (
+            <FiLoader className="animate-spin mr-2" size={18} />
+          ) : null}
+          {wordFileName ? "تغییر فایل" : "آپلود فایل ورد"}
         </button>
         {wordFileName && (
           <button
@@ -111,9 +131,13 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
         <button
           type="button"
           onClick={handleExcelClick}
-          className="bg-pink-600 text-white px-4 py-2 rounded"
+          className="bg-pink-600 text-white px-4 py-2 rounded flex items-center"
+          disabled={excelLoading}
         >
-          {excelFileName ? "تغییر فایل" : "انتخاب فایل"}
+          {excelLoading ? (
+            <FiLoader className="animate-spin mr-2" size={18} />
+          ) : null}
+          {excelFileName ? "تغییر فایل" : "آپلود فایل اکسل"}
         </button>
         {excelFileName && (
           <button

@@ -64,6 +64,7 @@ const DataTable: React.FC<DataTableProps> = ({
     setFilteredRowData(rowData);
   }, [rowData]);
 
+  // تابع جستجو
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
@@ -88,8 +89,10 @@ const DataTable: React.FC<DataTableProps> = ({
     }
   };
 
+  // وقتی گرید آماده شد
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api;
+    // ستون‌ها را مطابق عرض جدول اندازه بزن
     params.api.sizeColumnsToFit();
 
     if (isLoading) {
@@ -97,12 +100,19 @@ const DataTable: React.FC<DataTableProps> = ({
     }
   };
 
+  // وقتی اندازه‌ی گرید تغییر کرد، دوباره ستون‌ها را فیت کن
+  const onGridSizeChanged = (params: any) => {
+    params.api.sizeColumnsToFit();
+  };
+
+  // هر بار که ستون‌ها یا داده‌ها تغییر کرد، دوباره سایز را رفرش کن
   useEffect(() => {
     if (gridApiRef.current) {
       gridApiRef.current.sizeColumnsToFit();
     }
   }, [columnDefs, filteredRowData]);
 
+  // نمایش یا مخفی کردن اسپینر لودینگ
   useEffect(() => {
     if (gridApiRef.current) {
       if (isLoading) {
@@ -122,22 +132,29 @@ const DataTable: React.FC<DataTableProps> = ({
     onRowDoubleClick(event.data);
   };
 
-  const gridClasses = "ag-theme-quartz h-96 overflow-y-auto";
+  // کلاس‌های دلخواه برای گرید
+  const gridClasses = "ag-theme-quartz w-full h-full overflow-y-auto";
 
+  // برای ردیف انتخاب‌شده (مثلاً هایلایت)
   const getRowClass = (params: any) => {
     return params.node.selected ? "ag-row-selected" : "";
   };
 
+  // آپشن‌های سفارشی گرید
   const gridOptions = {
     getRowClass: getRowClass,
-    overlayLoadingTemplate:
-      '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height={80} width={80} /></div>',
   };
 
+  // استایل پایه دکمه‌های آیکون
+  // از کلاس‌های tailwind استفاده می‌کنیم: رنگ پس‌زمینه ملایم، بوردر گرد،
+  // افکت هاور، و غیرفعال‌سازی وقتی ردیفی انتخاب نشده
+  const baseIconButton =
+    "rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none";
+
   return (
-    // استفاده از کلاس "data-table-container" به عنوان wrapper
-    <div className="data-table-container w-full h-full flex flex-col relative">
-      <div className="flex items-center justify-between mb-4 bg-red-100 p-2">
+    <div className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2">
+      {/* نوار بالای جستجو و آیکون‌ها */}
+      <div className="flex items-center justify-between mb-4 bg-red-100 p-2 rounded-md shadow-sm">
         {showSearch && (
           <div className="relative max-w-sm">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -146,7 +163,7 @@ const DataTable: React.FC<DataTableProps> = ({
               placeholder="جستجو..."
               value={searchText}
               onChange={onSearchChange}
-              className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition shadow-sm"
               style={{ fontFamily: "inherit" }}
             />
           </div>
@@ -155,87 +172,103 @@ const DataTable: React.FC<DataTableProps> = ({
         <div className="flex items-center space-x-4">
           {showDuplicateIcon && (
             <button
-              className={`text-yellow-600 hover:text-yellow-800 transition ${
-                !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`
+                ${baseIconButton} 
+                bg-yellow-50 hover:bg-yellow-100 text-yellow-600 
+                ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
+              `}
               title="Duplicate"
               onClick={onDuplicate}
               disabled={!isRowSelected}
             >
-              <FiCopy size={25} />
+              <FiCopy size={20} />
             </button>
           )}
 
           {showEditIcon && (
             <button
-              className={`text-blue-600 hover:text-blue-800 transition ${
-                !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`
+                ${baseIconButton} 
+                bg-blue-50 hover:bg-blue-100 text-blue-600 
+                ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
+              `}
               title="Edit"
               onClick={onEdit}
               disabled={!isRowSelected}
             >
-              <FiEdit size={25} />
+              <FiEdit size={20} />
             </button>
           )}
 
           {showDeleteIcon && (
             <button
-              className={`text-red-600 hover:text-red-800 transition ${
-                !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`
+                ${baseIconButton}
+                bg-red-50 hover:bg-red-100 text-red-600
+                ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
+              `}
               title="Delete"
               onClick={onDelete}
               disabled={!isRowSelected}
             >
-              <FiTrash2 size={25} />
+              <FiTrash2 size={20} />
             </button>
           )}
 
           {showAddIcon && (
             <button
               type="button"
-              className="text-green-600 hover:text-green-800 transition"
+              className={`
+                ${baseIconButton} 
+                bg-green-50 hover:bg-green-100 text-green-600
+              `}
               title="Add"
               onClick={onAdd}
             >
-              <FiPlus size={25} />
+              <FiPlus size={20} />
             </button>
           )}
 
           {showViewIcon && (
             <button
-              className="text-gray-600 hover:text-gray-800 transition"
+              className={`
+                ${baseIconButton}
+                bg-gray-50 hover:bg-gray-100 text-gray-600
+              `}
               title="View"
               onClick={onView}
             >
-              <FiEye size={25} />
+              <FiEye size={20} />
             </button>
           )}
         </div>
       </div>
 
-      <div className={gridClasses} style={{ marginTop: "-15px" }}>
-        <AgGridReact
-          onGridReady={onGridReady}
-          columnDefs={columnDefs}
-          rowData={filteredRowData}
-          pagination={false}
-          paginationPageSize={10}
-          animateRows={true}
-          onRowClicked={handleRowClick}
-          onRowDoubleClicked={handleRowDoubleClickInternal}
-          domLayout={domLayout}
-          suppressHorizontalScroll={false}
-          rowSelection="single"
-          gridOptions={gridOptions}
-          singleClickEdit={true}
-          stopEditingWhenCellsLoseFocus={true}
-          onCellValueChanged={onCellValueChanged}
-          overlayLoadingTemplate={
-            '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height={80} width={80} /></div>'
-          }
-        />
+      {/* بخش جدول که تمام فضای باقیمانده را می‌گیرد */}
+      <div className="flex-grow" style={{ minHeight: 0 }}>
+        <div className={gridClasses}>
+          <AgGridReact
+            onGridReady={onGridReady}
+            onGridSizeChanged={onGridSizeChanged}
+            columnDefs={columnDefs}
+            rowData={filteredRowData}
+            pagination={false}
+            paginationPageSize={10}
+            animateRows={true}
+            onRowClicked={handleRowClick}
+            onRowDoubleClicked={handleRowDoubleClickInternal}
+            domLayout={domLayout} // normal یا autoHeight
+            suppressHorizontalScroll={false}
+            rowSelection="single"
+            gridOptions={gridOptions}
+            singleClickEdit={true}
+            stopEditingWhenCellsLoseFocus={true}
+            onCellValueChanged={onCellValueChanged}
+            overlayLoadingTemplate={
+              '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height={80} width={80} /></div>'
+            }
+          />
+        </div>
       </div>
 
       {showAddNew && (

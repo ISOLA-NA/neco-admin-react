@@ -1,19 +1,36 @@
-.data-table-container .ag-theme-quartz,
-.data-table-container .ag-theme-quartz-dark {
-  --ag-foreground-color: rgb(255, 255, 255);
-  --ag-background-color: rgb(0, 0, 0);
-  --ag-header-foreground-color: rgb(0, 0, 0);
-  --ag-header-background-color: rgb(235, 72, 155);
-  --ag-odd-row-background-color: rgba(255, 0, 0, 0.03); /* استفاده از rgba برای شفافیت */
-  --ag-header-column-resize-handle-color: rgb(255, 255, 255);
-  --ag-background-color: to right, #7e3af2, #6366f1;
-  background: linear-gradient(to right, #ec4899, #7e3af2, #6366f1);
+/* استایل‌های کلی برای DataTable */
+.data-table-container {
+  /* برای کمی لطافت ظاهری */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* استایل برای ردیف‌های انتخاب شده */
+/* تم ag-theme-quartz با تنظیم رنگ پس‌زمینه‌ی کلی و رنگ هدر */
+.data-table-container .ag-theme-quartz,
+.data-table-container .ag-theme-quartz-dark {
+  /* پس‌زمینه‌ی اصلی جدول */
+  background-color: #fff4e7; 
+
+  /* رنگ‌های متغیر برای AgGrid */
+  --ag-background-color: #fff4e7;
+  --ag-foreground-color: #333;
+  --ag-header-foreground-color: #333;
+
+  /* رنگ پس‌زمینه‌ی هدر */
+  --ag-header-background-color: #fcb9b9;
+
+  /* رنگ ردیف‌های فرد (سایه‌روشن ملایم) */
+  --ag-odd-row-background-color: #fff1ec;
+
+  /* رنگ دستگیره تغییر سایز ستون */
+  --ag-header-column-resize-handle-color: #999;
+}
+
+/* ردیف انتخاب‌شده */
 .data-table-container .ag-theme-quartz .ag-row-selected {
-  background-color: #7e3af2 !important;
-  color: rgb(255, 255, 255) !important;
+  /* پس‌زمینه‌ای هماهنگ با پالت رنگی شما */
+  background-color: #f7e6e8 !important;
+  color: #111 !important;
 }
 
 /* استایل برای اینپوت جستجو */
@@ -37,14 +54,9 @@
   color: #999;
 }
 
-/* اضافه کردن padding-left برای جلوگیری از قرار گرفتن متن زیر آیکون */
+/* برای جلوگیری از تداخل متن با آیکون جستجو */
 .data-table-container .search-input {
   padding-left: 2.5rem;
-}
-
-/* استایل‌های آیکون‌های عملیات */
-.data-table-container .action-icons .react-icons {
-  margin-left: 0.5rem;
 }
 
 /* حالت autoHeight */
@@ -52,7 +64,9 @@
   height: auto !important;
 }
 
-.data-table-container .ag-filter-body-wrapper.ag-simple-filter-body-wrapper {
+/* سفارشی‌سازی رنگ پس‌زمینه فیلترهای AgGrid (در صورت نیاز) */
+.data-table-container
+  .ag-filter-body-wrapper.ag-simple-filter-body-wrapper {
   background-color: black;
 }
 
@@ -66,3 +80,5 @@
   color: #7e3af2;
   background-color: rgba(255, 255, 255, 0.8);
 }
+
+/* سایر استایل‌های دلخواه ... */
