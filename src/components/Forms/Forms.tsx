@@ -45,6 +45,68 @@ interface FormsCommand1Props {
   selectedRow: any;
 }
 
+// نگاشت typeOfInformation (ستون‌های فرم) برای تبدیل شناسه عددی به نام مرتبط
+const columnTypeMapping: { [key: string]: number } = {
+  component1: 15,
+  component2: 1,
+  component3: 2,
+  component4: 3,
+  component5: 4,
+  component6: 21,
+  component7: 5,
+  component8: 19,
+  component9: 34,
+  component10: 35,
+  component11: 17,
+  component12: 30,
+  component13: 6,
+  component14: 9,
+  component15: 26,
+  component16: 10,
+  component17: 16,
+  component18: 20,
+  component19: 22,
+  component20: 24,
+  component21: 25,
+  component22: 27,
+  component23: 29,
+  component24: 32,
+  component25: 28,
+  component26: 36,
+  component27: 7,
+  component28: 8,
+};
+
+const typeOfInformationOptions = [
+  { value: "component1", label: "Text" },
+  { value: "component2", label: "RichText" },
+  { value: "component3", label: "Choice" },
+  { value: "component4", label: "Number" },
+  { value: "component5", label: "Date Time" },
+  { value: "component6", label: "Persian Date" },
+  { value: "component7", label: "Lookup" },
+  { value: "component27", label: "Hyper Link" },
+  { value: "component8", label: "Post PickerList" },
+  { value: "component9", label: "Lookup RealValue" },
+  { value: "component10", label: "Lookup AdvanceTable" },
+  { value: "component26", label: "Advance Lookup AdvanceTable" },
+  { value: "component12", label: "Lookup Image" },
+  { value: "component28", label: "Select User In Post" },
+  { value: "component13", label: "Yes No" },
+  { value: "component14", label: "Attach File" },
+  { value: "component15", label: "Picture Box" },
+  { value: "component16", label: "Table" },
+  { value: "component17", label: "Pfi Lookup" },
+  { value: "component18", label: "Seqnial Number" },
+  { value: "component19", label: "Advance Table" },
+  { value: "component20", label: "Word Panel" },
+  { value: "component21", label: "Excecl Panel" },
+  { value: "component22", label: "Calculated Field" },
+  { value: "component23", label: "Excel Calculator" },
+  { value: "component24", label: "Tab" },
+  { value: "component25", label: "Map" },
+];
+
 // واکشی نام فایل جهت استفاده از getFile
 async function fetchFileNameById(fileId: string) {
   if (!fileId) return "";
@@ -126,7 +188,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     const fetchCatAOptions = async () => {
       try {
         const response = await apiService.getAllCatA();
-        // تبدیل داده به فرمت مورد نیاز
         const options = response.map((cat: any) => ({
           value: cat.ID?.toString() || "",
           label: cat.Name,
@@ -144,7 +205,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     const fetchCatBOptions = async () => {
       try {
         const response = await apiService.getAllCatB();
-        // تبدیل داده به فرمت مورد نیاز
         const options = response.map((cat: any) => ({
           value: cat.ID?.toString() || "",
           label: cat.Name,
@@ -174,7 +234,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     fetchProjects();
   }, [api]);
 
-  // در صورت ویرایش selectedRow را در فرم بریز و مقادیر را لاگ کن
+  // به‌روزرسانی مقادیر فرم در صورت ویرایش selectedRow
   useEffect(() => {
     const updateFormDataAndFiles = async () => {
       if (selectedRow) {
@@ -208,7 +268,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           setExcelFileName("");
         }
       } else {
-        // حالت درج (بدون selectedRow)
         setFormData({
           ID: "",
           Name: "",
@@ -230,20 +289,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     };
     updateFormDataAndFiles();
   }, [selectedRow]);
-
-  // لاگ گرفتن مقادیر selectedRow (برای اشکال‌زدایی)
-  useEffect(() => {
-    if (selectedRow) {
-      console.log("Selected Row:", selectedRow);
-    }
-  }, [selectedRow]);
-
-  // لاگ گرفتن مقادیر فرم در حالت ویرایش
-  useEffect(() => {
-    if (isEditMode) {
-      console.log("Edit mode formData:", formData);
-    }
-  }, [formData, isEditMode]);
 
   // واکشی نام فایل‌ها هنگام تغییر TemplateDocID/TemplateExcelID
   useEffect(() => {
@@ -288,12 +333,12 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     refreshEntityFields();
   }, [formData.ID, api]);
 
-  // متد تغییر فیلدهای فرم
+  // تغییر فیلدهای فرم
   const handleChange = (field: keyof IFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Selector دسته A یا B
+  // باز کردن مدال انتخاب برای Category A/B
   const handleOpenModal = (selector: "A" | "B") => {
     setCurrentSelector(selector);
     setSelectedRowData(null);
@@ -313,9 +358,15 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const handleSelectButtonClick = () => {
     if (selectedRowData && currentSelector) {
       if (currentSelector === "A") {
-        handleChange("nEntityCateAID", selectedRowData.value ? parseInt(selectedRowData.value) : null);
+        handleChange(
+          "nEntityCateAID",
+          selectedRowData.value ? parseInt(selectedRowData.value) : null
+        );
       } else {
-        handleChange("nEntityCateBID", selectedRowData.value ? parseInt(selectedRowData.value) : null);
+        handleChange(
+          "nEntityCateBID",
+          selectedRowData.value ? parseInt(selectedRowData.value) : null
+        );
       }
       handleCloseModal();
     }
@@ -446,14 +497,54 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     setIsAddModalOpen(true);
   };
 
+  // در صورت ویرایش، اگر selectedRowData موجود باشد، از آن به عنوان جدیدترین داده‌ها برای ویرایش استفاده می‌کنیم
   const handleEditClick = (rowData: any) => {
-    setEditingData(rowData);
+    const dataToEdit = selectedRowData || rowData;
+    setEditingData(dataToEdit);
     setIsAddModalOpen(true);
   };
 
   const handleAddModalClose = () => {
     setIsAddModalOpen(false);
     setEditingData(null);
+  };
+
+  // رویداد ویرایش سلول‌ها در جدول
+  const handleCellValueChanged = async (params: any) => {
+    if (!params?.data || !params.colDef?.field) return;
+
+    // نام ستون (مثلاً DisplayName یا CountInReject و ...)
+    const updatedFieldName = params.colDef.field;
+
+    // مقدار جدیدی که کاربر وارد کرده یا در چک‌باکس تغییر داده
+    const updatedFieldValue = params.newValue;
+
+    // ابتدا صرفاً در state محلی (entityFields) به‌روزرسانی می‌کنیم
+    const updatedData = {
+      ...params.data,
+      [updatedFieldName]: updatedFieldValue,
+    };
+
+    // جایگزینی ردیف اصلاح‌شده در آرایه‌ی entityFields
+    const rowIndex = entityFields.findIndex((f) => f.ID === params.data.ID);
+    if (rowIndex !== -1) {
+      const newFields = [...entityFields];
+      newFields[rowIndex] = updatedData;
+      setEntityFields(newFields);
+    }
+    setSelectedRowData(updatedData); // به‌روزکردن ردیف انتخابی در state
+
+    // ــ اینجا دیگر نمی‌خواهیم بلافاصله آپدیت سرور بزنیم ــ
+    // اگر بخواهید آپدیت فوری را کاملاً حذف کنید، می‌توانید کلاً کامنت کنید:
+    /*
+    try {
+      await api.updateEntityField(updatedData);
+      showAlert("success", undefined, "Success", "Field updated successfully!");
+    } catch (err) {
+      console.error("Error updating field:", err);
+      showAlert("error", undefined, "Error", "Failed to update field.");
+    }
+    */
   };
 
   // متد ذخیره (فراخوانی از والد)
@@ -471,12 +562,118 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     },
   }));
 
-  // داده‌های جدول برای نمایش فیلدها
-  const entityFieldData = entityFields.map((field) => ({
-    ...field,
-    display_IsShowGrid: field.IsShowGrid ? "Yes" : "No",
-    display_IsEditableInWF: field.IsEditableInWF ? "Yes" : "No",
-  }));
+  // تعریف ستون‌های DataTable
+  const newColumnDefs = [
+    {
+      headerName: "Order",
+      field: "orderValue",
+      editable: true,
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: "Column Name",
+      field: "DisplayName",
+      editable: true,
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: "Type",
+      field: "ColumnType",
+      editable: false,
+      sortable: true,
+      filter: true,
+      valueGetter: (params: any) => {
+        const option = typeOfInformationOptions.find(
+          (opt) => columnTypeMapping[opt.value] === params.data.ColumnType
+        );
+        return option ? option.label : params.data.ColumnType;
+      },
+    },
+    {
+      headerName: "Command",
+      field: "Code",
+      editable: true,
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: "Show In List",
+      field: "IsShowGrid",
+      editable: true,
+      sortable: true,
+      filter: true,
+      cellRendererFramework: (params: any) => (
+        <input type="checkbox" checked={!!params.value} readOnly style={{ margin: 0 }} />
+      ),
+      cellEditor: "agCheckboxCellEditor",
+      cellEditorParams: {
+        checkboxTrueValue: true,
+        checkboxFalseValue: false,
+      },
+    },
+    {
+      headerName: "Required",
+      field: "IsRequire",
+      editable: true,
+      sortable: true,
+      filter: true,
+      cellRendererFramework: (params: any) => (
+        <input type="checkbox" checked={!!params.value} readOnly style={{ margin: 0 }} />
+      ),
+      cellEditor: "agCheckboxCellEditor",
+      cellEditorParams: {
+        checkboxTrueValue: true,
+        checkboxFalseValue: false,
+      },
+    },
+    {
+      headerName: "Main Column",
+      field: "IsMainColumn",
+      editable: true,
+      sortable: true,
+      filter: true,
+      cellRendererFramework: (params: any) => (
+        <input type="checkbox" checked={!!params.value} readOnly style={{ margin: 0 }} />
+      ),
+      cellEditor: "agCheckboxCellEditor",
+      cellEditorParams: {
+        checkboxTrueValue: true,
+        checkboxFalseValue: false,
+      },
+    },
+    {
+      headerName: "Is Rtl",
+      field: "IsRTL",
+      editable: true,
+      sortable: true,
+      filter: true,
+      cellRendererFramework: (params: any) => (
+        <input type="checkbox" checked={!!params.value} readOnly style={{ margin: 0 }} />
+      ),
+      cellEditor: "agCheckboxCellEditor",
+      cellEditorParams: {
+        checkboxTrueValue: true,
+        checkboxFalseValue: false,
+      },
+    },
+    {
+      headerName: "Count In Reject",
+      field: "CountInReject", // نام درست فیلد
+      editable: true,
+      sortable: true,
+      filter: true,
+      cellRendererFramework: (params: any) => (
+        <input type="checkbox" checked={!!params.value} readOnly style={{ margin: 0 }} />
+      ),
+      cellEditor: "agCheckboxCellEditor",
+      cellEditorParams: {
+        checkboxTrueValue: true,
+        checkboxFalseValue: false,
+      },
+    },
+  ];
 
   return (
     <div>
@@ -505,9 +702,14 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
             options={catAOptions}
-            selectedValue={formData.nEntityCateAID ? formData.nEntityCateAID.toString() : ""}
+            selectedValue={
+              formData.nEntityCateAID ? formData.nEntityCateAID.toString() : ""
+            }
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              handleChange("nEntityCateAID", e.target.value ? parseInt(e.target.value) : null);
+              handleChange(
+                "nEntityCateAID",
+                e.target.value ? parseInt(e.target.value) : null
+              );
             }}
             label="Category A"
             showButton={true}
@@ -518,9 +720,14 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
             options={catBOptions}
-            selectedValue={formData.nEntityCateBID ? formData.nEntityCateBID.toString() : ""}
+            selectedValue={
+              formData.nEntityCateBID ? formData.nEntityCateBID.toString() : ""
+            }
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              handleChange("nEntityCateBID", e.target.value ? parseInt(e.target.value) : null);
+              handleChange(
+                "nEntityCateBID",
+                e.target.value ? parseInt(e.target.value) : null
+              );
             }}
             label="Category B"
             showButton={true}
@@ -594,74 +801,54 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         </TwoColumnLayout.Item>
 
         <TwoColumnLayout.Item span={2}>
-          <DataTable
-            columnDefs={[
-              { headerName: "ID", field: "ID", sortable: true, filter: true },
-              {
-                headerName: "Display Name",
-                field: "DisplayName",
-                sortable: true,
-                filter: true,
-              },
-              {
-                headerName: "Column Type",
-                field: "ColumnType",
-                sortable: true,
-                filter: true,
-              },
-              {
-                headerName: "Show Grid",
-                field: "display_IsShowGrid",
-                sortable: true,
-                filter: true,
-              },
-              {
-                headerName: "Editable in WF",
-                field: "display_IsEditableInWF",
-                sortable: true,
-                filter: true,
-              },
-              {
-                headerName: "Last Modified",
-                field: "LastModified",
-                sortable: true,
-                filter: true,
-              },
-            ]}
-            rowData={entityFieldData}
-            setSelectedRowData={setSelectedRowData}
-            onAdd={handleAddClick}
-            onEdit={() => {
-              if (selectedRowData) {
-                handleEditClick(selectedRowData);
-              } else {
-                showAlert("error", undefined, "Error", "No row is selected!");
-              }
-            }}
-            onDelete={async () => {
-              if (!selectedRowData) {
-                showAlert("error", undefined, "Error", "No row selected for deletion");
-                return;
-              }
-              try {
-                await api.deleteEntityField(selectedRowData.ID);
-                showAlert("success", undefined, "Success", "Deleted successfully");
-                setSelectedRowData(null);
-                refreshEntityFields();
-              } catch (error) {
-                showAlert("error", undefined, "Error", "Delete failed!");
-              }
-            }}
-            showDuplicateIcon={false}
-            showEditIcon={true}
-            showAddIcon={true}
-            showDeleteIcon={true}
-            showViewIcon={true}
-            onView={() => setViewModalOpen(true)}
-            domLayout="autoHeight"
-            showSearch={true}
-            onRowDoubleClick={(rowData) => handleEditClick(rowData)}
-          />
+          {/* container با ارتفاع ثابت برای اسکرول عمودی */}
+          <div style={{ height: "400px" }}>
+            <DataTable
+              columnDefs={newColumnDefs}
+              rowData={entityFields}
+              setSelectedRowData={setSelectedRowData}
+              // با این گزینه روی یک کلیک، ویرایش فعال می‌شود
+              gridOptions={{
+                singleClickEdit: true,
+              }}
+              // وقتی کاربر روی سلول کلیک کرد، همان ردیف انتخاب شود:
+              onCellClicked={(params) => {
+                setSelectedRowData(params.data);
+              }}
+              onAdd={handleAddClick}
+              onEdit={() => {
+                if (selectedRowData) {
+                  handleEditClick(selectedRowData);
+                } else {
+                  showAlert("error", undefined, "Error", "No row is selected!");
+                }
+              }}
+              onDelete={async () => {
+                if (!selectedRowData) {
+                  showAlert("error", undefined, "Error", "No row selected for deletion");
+                  return;
+                }
+                try {
+                  await api.deleteEntityField(selectedRowData.ID);
+                  showAlert("success", undefined, "Success", "Deleted successfully");
+                  setSelectedRowData(null);
+                  refreshEntityFields();
+                } catch (error) {
+                  showAlert("error", undefined, "Error", "Delete failed!");
+                }
+              }}
+              showDuplicateIcon={false}
+              showEditIcon={true}
+              showAddIcon={true}
+              showDeleteIcon={true}
+              showViewIcon={true}
+              onView={() => setViewModalOpen(true)}
+              domLayout="autoHeight"
+              showSearch={true}
+              onRowDoubleClick={(rowData) => handleEditClick(rowData)}
+              onCellValueChanged={handleCellValueChanged}
+            />
+          </div>
         </TwoColumnLayout.Item>
       </TwoColumnLayout>
 

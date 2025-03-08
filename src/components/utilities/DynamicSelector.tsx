@@ -20,6 +20,7 @@ interface DynamicSelectorProps {
   className?: string;
   disabled?: boolean;
   loading?: boolean;
+  allowCustom?: boolean; // prop جدید جهت تایپ مقدار دلخواه
 }
 
 const DynamicSelector: React.FC<DynamicSelectorProps> = ({
@@ -36,23 +37,32 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   className,
   disabled = false,
   loading = false,
+  allowCustom = false,
 }) => {
-  // وضعیت باز/بسته بودن منو
   const [open, setOpen] = useState(false);
+  const [customInput, setCustomInput] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // تغییر وضعیت منو
   const handleToggleDropdown = () => {
     if (!disabled && !loading) {
       setOpen(!open);
     }
   };
 
-  // انتخاب گزینه
   const handleOptionClick = (value: string) => {
-    // شبیه‌سازی رویداد change برای سازگاری با onChange دریافت شده
     onChange({ target: { name, value } } as React.ChangeEvent<HTMLSelectElement>);
     setOpen(false);
+    setCustomInput("");
+  };
+
+  // اضافه کردن گزینه دلخواه
+  const handleAddCustomOption = () => {
+    if (customInput.trim()) {
+      // ابتدا ارسال رویداد با مقدار تایپ‌شده
+      onChange({ target: { name, value: customInput } } as React.ChangeEvent<HTMLSelectElement>);
+      setOpen(false);
+      setCustomInput("");
+    }
   };
 
   // بستن منو هنگام کلیک بیرون از کامپوننت
@@ -62,12 +72,10 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
         setOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // استایل ثابت برای هر گزینه
   const optionStyle = {
     height: "2.25rem",
     lineHeight: "2.25rem",
@@ -96,7 +104,6 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
             </div>
           )}
 
-          {/* دکمه نمایش انتخاب فعلی */}
           <button
             type="button"
             onClick={handleToggleDropdown}
@@ -107,16 +114,32 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
             )}
           >
             <span className="truncate">
-              {options.find((o) => o.value === selectedValue)?.label || "انتخاب کنید"}
+              {options.find((o) => o.value === selectedValue)?.label || selectedValue || "انتخاب کنید"}
             </span>
             <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
-          {/* منوی بازشونده با اسکرول عمودی و افقی */}
           {open && (
             <div className="absolute left-0 top-full mt-1 w-full bg-white border border-purple-500 rounded shadow-lg z-10 max-h-60 overflow-auto">
+              {allowCustom && (
+                <div className="p-2 border-b border-gray-200">
+                  <input
+                    type="text"
+                    className="w-full text-xs border border-gray-300 rounded px-2 py-1"
+                    placeholder="Type custom value..."
+                    value={customInput}
+                    onChange={(e) => setCustomInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddCustomOption();
+                      }
+                    }}
+                  />
+                </div>
+              )}
               {options.map((option) => (
                 <div
                   key={option.value}
@@ -127,6 +150,15 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                   {option.label}
                 </div>
               ))}
+              {allowCustom && customInput.trim() !== "" && (
+                <div
+                  onClick={handleAddCustomOption}
+                  style={optionStyle}
+                  className="cursor-pointer text-xs px-2 hover:bg-purple-100 whitespace-nowrap font-semibold"
+                >
+                  Add "{customInput}"
+                </div>
+              )}
             </div>
           )}
 
