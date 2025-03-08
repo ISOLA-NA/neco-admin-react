@@ -57,8 +57,16 @@ const App: React.FC = () => {
                   )
                 }
               />
-            <Route path="/login1" element={<Login1 />} />
-
+              <Route
+                path="/login"
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <Login onLogin={handleLogin} />
+                  )
+                }
+              />
               
             </Routes>
           </Router>
