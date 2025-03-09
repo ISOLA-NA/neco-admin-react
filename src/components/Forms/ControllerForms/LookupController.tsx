@@ -388,7 +388,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
       </div>
 
       {/* جدول Lookup در ظرف با ارتفاع 600 پیکسلی و اسکرول */}
-      <div className="mt-4" style={{ height: "400px", overflowY: "auto" }}>
+      <div className="mt-4" style={{ height: "300px", overflowY: "auto" }}>
         <div className="flex-grow h-full">
           <DataTable
             columnDefs={[
