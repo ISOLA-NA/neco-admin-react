@@ -13,6 +13,7 @@ interface PersianCalendarPickerViewProps {
     metaType2?: string; // "none"، "today" یا "selected"
     metaType3?: string; // تاریخ به فرمت میلادی (مثلاً "2025-01-23 00:00:00")
     metaType4?: string;
+    DisplayName?: string;
   };
 }
 
@@ -74,13 +75,18 @@ const PersianCalendarPickerView: React.FC<PersianCalendarPickerViewProps> = ({ d
 
   return (
     <div className="p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg space-y-4">
+      {data.DisplayName && (
+        <p className="block text-xs text-gray-600 mb-1">
+          {data.DisplayName}
+        </p>
+      )}
       {formatType === "dateonly" ? (
         <div className="relative">
           <DynamicInput
-            name="" // بدون برچسب
+            name=""
             type="text"
             value={dateValue}
-            placeholder="" // در صورت خالی بودن، هیچ متنی نمایش داده نشود
+            placeholder=""
             disabled
             className="w-full p-2 pr-10 border rounded focus:outline-none focus:border-gray-700"
           />

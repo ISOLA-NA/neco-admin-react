@@ -8,6 +8,7 @@ interface CtrTextBoxViewProps {
     metaType2?: string | null;
     metaType3?: string | null;
     metaType4?: string | null;
+    DisplayName?: string;
   };
   isDisable?: boolean;
 }
@@ -18,26 +19,27 @@ const CtrTextBoxView: React.FC<CtrTextBoxViewProps> = ({
 }) => {
   const [metaTypes, setMetaTypes] = useState({
     metaType1: data?.metaType1 || "",
-    metaType2: data?.metaType2 || null,
-    metaType3: data?.metaType3 || null,
-    metaType4: data?.metaType4 || null,
+    metaType2: data?.metaType2 || "",
+    metaType3: data?.metaType3 || "",
+    metaType4: data?.metaType4 || "",
   });
 
   useEffect(() => {
     if (data) {
       setMetaTypes({
         metaType1: data.metaType1 || "",
-        metaType2: data.metaType2 || null,
-        metaType3: data.metaType3 || null,
-        metaType4: data.metaType4 || null,
+        metaType2: data.metaType2 || "",
+        metaType3: data.metaType3 || "",
+        metaType4: data.metaType4 || "",
       });
     }
   }, [data]);
 
   return (
     <div className="mt-10 bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+
       <DynamicInput
-        name="Default Value"
+        name={data?.DisplayName || "Default Value"}
         type="text"
         value={metaTypes.metaType1}
         placeholder=" "

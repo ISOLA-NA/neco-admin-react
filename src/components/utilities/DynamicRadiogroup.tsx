@@ -29,7 +29,7 @@ const DynamicRadioGroup: React.FC<DynamicRadioGroupProps> = ({
 }) => {
   return (
     <div className={`flex items-start space-x-4 ${className || ''}`}>
-      <span className='text-lg font-semibold whitespace-nowrap'>{title}</span>
+      <span className='text-base font-semibold whitespace-nowrap'>{title}</span>
       <div className='flex flex-wrap items-center gap-2'>
         {options.map(option => {
           const radioId = `${name}-${option.value}`;

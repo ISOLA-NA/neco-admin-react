@@ -85,7 +85,7 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
             Type each choice on a separate line:
           </div>
           <CustomTextarea
-            name="metaType3"
+            name=""
             value={metaType3}
             onChange={(e) => setMetaType3(e.target.value)}
             placeholder="Enter each choice on a new line"
@@ -94,7 +94,7 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
           />
           <div className="mt-4 font-medium text-gray-700">Default value:</div>
           <DynamicInput
-            name="metaType1"
+            name=""
             type="text"
             value={metaType1}
             onChange={(e) => setMetaType1(e.target.value)}

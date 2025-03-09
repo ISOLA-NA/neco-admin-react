@@ -1,73 +1,79 @@
+// src/components/ControllerForms/PfiLookup.tsx
 import React, { useState, useEffect } from "react";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import { useApi } from "../../../context/ApiContext";
 import { GetEnumResponse, EntityType } from "../../../services/api.services";
+import AppServices from "../../../services/api.services";
 
 interface PfiLookupProps {
-  onMetaChange: (meta: any) => void;
-  data?: any;
+  onMetaChange: (updatedMeta: any) => void;
+  data?: {
+    metaType1?: string | number | string[];
+    LookupMode?: string | number;
+  };
 }
 
 const PfiLookup: React.FC<PfiLookupProps> = ({ onMetaChange, data }) => {
+  // تابع مقداردهی اولیه برای state metaTypes
+  const getInitialMetaTypes = () => ({
+    metaType1: data && data.metaType1 != null 
+      ? String(Array.isArray(data.metaType1) ? data.metaType1[0] : data.metaType1)
+      : "",
+    LookupMode: data && data.LookupMode != null 
+      ? String(data.LookupMode)
+      : "",
+  });
+
+  const [metaTypes, setMetaTypes] = useState(getInitialMetaTypes());
+
+  // دریافت entity types و تنظیم گزینه‌های مربوط به آن
   const { getAllEntityType, getEnum } = useApi();
+  const [entityTypes, setEntityTypes] = useState<Array<{ value: string; label: string }>>([]);
+  const [modeOptions, setModeOptions] = useState<Array<{ value: string; label: string }>>([]);
 
-  const [entityTypes, setEntityTypes] = useState<Array<{ value: any; label: string }>>([]);
-  const [modeOptions, setModeOptions] = useState<Array<{ value: number; label: string }>>([]);
-  const [selectedEntityType, setSelectedEntityType] = useState<any>("");
-  const [selectedMode, setSelectedMode] = useState<any>("");
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isModeInitialized, setIsModeInitialized] = useState(false);
-
-  // دریافت Entity Types از API و تنظیم گزینه‌ها
   useEffect(() => {
+    // دریافت Entity Types
     getAllEntityType()
       .then((res: EntityType[]) => {
         const options = res.map((item) => ({
-          value: item.ID,
+          value: item.ID.toString(),
           label: item.Name,
         }));
         setEntityTypes(options);
-        // فقط در اولین بار مقداردهی کنیم
-        if (!isInitialized && data && data.metaType1) {
-          setSelectedEntityType(data.metaType1);
-          onMetaChange((prev: any) => ({ ...prev, metaType1: data.metaType1 }));
-          setIsInitialized(true);
-        }
       })
       .catch((error) => console.error("Error fetching entity types:", error));
-  }, [data, getAllEntityType, onMetaChange, isInitialized]);
+  }, [getAllEntityType]);
 
-  // دریافت Enum مربوط به Modes از API و تنظیم گزینه‌ها
   useEffect(() => {
+    // دریافت Enum مربوط به Modes
     getEnum({ str: "lookMode" })
-      .then((response: GetEnumResponse) => {
-        const opts = Object.entries(response).map(([key, val]) => ({
-          value: Number(val),
-          label: key,
-        }));
+      .then((response: GetEnumResponse | any) => {
+        const opts = Array.isArray(response)
+          ? response
+          : Object.entries(response).map(([key, val]) => ({
+              value: String(val),
+              label: key,
+            }));
         setModeOptions(opts);
-        // فقط در اولین بار مقداردهی کنیم
-        if (!isModeInitialized && data && data.LookupMode) {
-          setSelectedMode(data.LookupMode);
-          onMetaChange((prev: any) => ({ ...prev, LookupMode: data.LookupMode }));
-          setIsModeInitialized(true);
-        }
       })
       .catch((error) => console.error("Error fetching modes:", error));
-  }, [data, getEnum, onMetaChange, isModeInitialized]);
+  }, [getEnum]);
 
-  // هندل تغییر در انتخاب Entity Type
+  // هنگامی که state metaTypes تغییر کرد، آن را به والد ارسال می‌کنیم
+  useEffect(() => {
+    onMetaChange(metaTypes);
+  }, [metaTypes, onMetaChange]);
+
+  // Handler برای تغییر Entity Type
   const handleEntityTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    setSelectedEntityType(val);
-    onMetaChange((prev: any) => ({ ...prev, metaType1: val }));
+    const value = e.target.value;
+    setMetaTypes((prev) => ({ ...prev, metaType1: value }));
   };
 
-  // هندل تغییر در انتخاب Mode
+  // Handler برای تغییر Mode
   const handleModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    setSelectedMode(val);
-    onMetaChange((prev: any) => ({ ...prev, LookupMode: Number(val) }));
+    const value = e.target.value;
+    setMetaTypes((prev) => ({ ...prev, LookupMode: value }));
   };
 
   return (
@@ -75,19 +81,17 @@ const PfiLookup: React.FC<PfiLookupProps> = ({ onMetaChange, data }) => {
       <div className="flex flex-col gap-4 w-64">
         <DynamicSelector
           name="entityType"
+          label="Select Entity Type"
           options={entityTypes}
-          selectedValue={selectedEntityType}
+          selectedValue={metaTypes.metaType1}
           onChange={handleEntityTypeChange}
-          label="Select Entity Types"
-          rightIcon={null}
         />
         <DynamicSelector
           name="mode"
-          options={modeOptions}
-          selectedValue={selectedMode}
-          onChange={handleModeChange}
           label="Modes"
-          rightIcon={null}
+          options={modeOptions}
+          selectedValue={metaTypes.LookupMode}
+          onChange={handleModeChange}
         />
       </div>
     </div>

@@ -1,13 +1,17 @@
 import React from "react";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 
-interface RichTextControllerViewProps {}
+interface RichTextControllerViewProps {
+  data?: {
+    DisplayName?: string;
+  };
+}
 
-const RichTextControllerView: React.FC<RichTextControllerViewProps> = () => {
+const RichTextControllerView: React.FC<RichTextControllerViewProps> = ({ data }) => {
   return (
     <div className="mt-10">
       <CustomTextarea
-        name="RichTextView"
+        name={data?.DisplayName || "RichTextView"}
         value=""
         placeholder=" "
         rows={3}

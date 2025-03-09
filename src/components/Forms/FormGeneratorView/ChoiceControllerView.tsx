@@ -9,6 +9,7 @@ interface ChoiceControllerViewProps {
     metaType1?: string;
     metaType2?: "drop" | "radio" | "check";
     metaType3?: string;
+    DisplayName?: string;
   };
 }
 
@@ -25,6 +26,8 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
         .filter((opt) => opt.value.length > 0)
     : [];
 
+  const displayName = data.DisplayName || "Choose an option:";
+
   switch (data.metaType2) {
     case "drop":
       return (
@@ -33,7 +36,7 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
           options={options}
           selectedValue={data.metaType1 || ""}
           onChange={() => {}}
-          label="Select an option"
+          label={displayName}
           disabled={true}
         />
       );
@@ -41,30 +44,34 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
       return (
         <DynamicRadioGroup
           options={options}
-          title="Choose an option:"
+          title={displayName}
           name="choiceView"
           selectedValue={data.metaType1 || ""}
           onChange={() => {}}
           isRowClicked={true}
         />
       );
-    case "check":
-      {
-        const selectedValues = data.metaType1
-          ? data.metaType1.split(",").map((v) => v.trim())
-          : [];
-        return (
-          <div className="flex flex-row gap-2">
-            {options.map((option, index) => (
+    case "check": {
+      const selectedValues = data.metaType1
+        ? data.metaType1.split(",").map((v) => v.trim())
+        : [];
+      return (
+        <div className="flex items-start space-x-4">
+          <span className="text-lg font-semibold whitespace-nowrap">
+            {displayName}
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {options.map((option) => (
               <DynamicCheckboxView
-                key={index}
+                key={option.value}
                 name={option.label}
                 checked={selectedValues.includes(option.value)}
               />
             ))}
           </div>
-        );
-      }
+        </div>
+      );
+    }
     default:
       return null;
   }

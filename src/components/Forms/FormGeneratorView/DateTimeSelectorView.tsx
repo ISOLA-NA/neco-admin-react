@@ -9,6 +9,7 @@ interface DateTimeSelectorViewProps {
     metaType2?: string; // "none"، "date picker" یا "selected"
     metaType3?: string; // برای dateonly: "YYYY-MM-DD" یا "MM/DD/YYYY"؛ برای datetime: "YYYY-MM-DD HH:mm:ss" یا "MM/DD/YYYY HH:mm:ss"
     metaType4?: string;
+    DisplayName?: string;
   };
 }
 
@@ -48,24 +49,19 @@ const DateTimeSelectorView: React.FC<DateTimeSelectorViewProps> = ({ data }) => 
 
   // منطق تعیین مقدار ورودی
   if (defaultType === "none") {
-    // اگر گزینه "none" انتخاب شده باشد، ورودی کاملاً خالی می‌ماند
     dateValue = "";
     timeValue = "";
   } else if (rawDate === "" || rawDate.toLowerCase().includes("mm/dd/yyyy")) {
-    // اگر هیچ مقداری وارد نشده باشد یا شامل placeholder باشد
     if (defaultType === "date picker") {
-      // اگر گزینه date picker انتخاب شده باشد، تاریخ (و زمان در حالت datetime) امروز نمایش داده می‌شود
       dateValue = todayISO;
       if (formatType === "datetime") {
         timeValue = currentTime;
       }
     } else {
-      // در حالت selected ورودی خالی نمایش داده می‌شود
       dateValue = "";
       timeValue = "";
     }
   } else {
-    // اگر کاربر مقداری وارد کرده باشد، مقدار وارد شده را پردازش می‌کنیم
     if (formatType === "dateonly") {
       if (rawDate.includes("/")) {
         dateValue = convertUSDateToISO(rawDate);
@@ -94,13 +90,18 @@ const DateTimeSelectorView: React.FC<DateTimeSelectorViewProps> = ({ data }) => 
 
   return (
     <div className="p-4 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg space-y-4">
+      {data.DisplayName && (
+        <p className="text-xs font-semibold text-gray-800">
+          {data.DisplayName}
+        </p>
+      )}
       {formatType === "dateonly" ? (
         <div className="relative">
           <DynamicInput
-            name="" // بدون برچسب
+            name=""
             type="text"
             value={dateValue}
-            placeholder="" // در صورت خالی بودن، هیچ متنی نمایش داده نشود
+            placeholder=""
             disabled
             className="w-full p-2 pr-10 border rounded focus:outline-none focus:border-gray-700"
           />
