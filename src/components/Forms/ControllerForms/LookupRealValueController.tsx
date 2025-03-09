@@ -1,6 +1,5 @@
 // src/components/ControllerForms/Lookuprealvalue.tsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
@@ -13,20 +12,18 @@ import {
   Role,
 } from "../../../services/api.services";
 
-// تعریف prop های مورد نیاز برای کامپوننت
 interface LookuprealvalueProps {
   data?: {
-    metaType1?: string | null; // ID مربوط به EntityType
-    metaType2?: string | null; // ID مربوط به فیلد نمایش
+    metaType1?: string | number | null; // ID مربوط به EntityType
+    metaType2?: string | number | null; // ID مربوط به فیلد نمایش
     metaType4?: string; // اطلاعات جدول به‌صورت JSON
-    LookupMode?: string | null;
+    LookupMode?: string | number | null;
     BoolMeta1?: boolean; // مشخص‌کننده Old Lookup
     metaType5?: string; // برای نگهداری مقادیر پیش‌فرض (به صورت Pipe-Separated)
   };
   onMetaChange?: (updatedMeta: any) => void;
 }
 
-// تعریف نوع هر ردیف جدول Lookup
 interface TableRow {
   ID: string;
   SrcFieldID: string | null;
@@ -35,82 +32,36 @@ interface TableRow {
   DesFieldID: string | null;
 }
 
-const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
-  data,
-  onMetaChange,
-}) => {
-  const {
-    getAllEntityType,
-    getEntityFieldByEntityTypeId,
-    getEnum,
-    getAllProject,
-  } = useApi();
+const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange }) => {
+  const { getAllEntityType, getEntityFieldByEntityTypeId, getEnum, getAllProject } = useApi();
 
-  // state اصلی مربوط به metaTypes (حذف metaType3 و removeSameName)
+  // مقداردهی اولیه state تنها در mount (تمامی مقادیر به صورت رشته تنظیم می‌شوند)
   const [metaTypesLookUp, setMetaTypesLookUp] = useState({
-    metaType1: data?.metaType1 ?? null,
-    metaType2: data?.metaType2 ?? null,
+    metaType1: data && data.metaType1 != null ? String(data.metaType1) : "",
+    metaType2: data && data.metaType2 != null ? String(data.metaType2) : "",
+    LookupMode: data && data.LookupMode != null ? String(data.LookupMode) : "",
     metaType4: data?.metaType4 ?? "",
-    LookupMode: data?.LookupMode ?? "",
     metaType5: data?.metaType5 ?? "",
   });
 
-  // مدیریت Old Lookup
+  // مقداردهی اولیه سایر state ها تنها یکبار
   const [oldLookup, setOldLookup] = useState(data?.BoolMeta1 ?? false);
-
-  // مدیریت مقادیر پیش‌فرض (برای PostPickerList)
   const [defaultValueIDs, setDefaultValueIDs] = useState<string[]>(
     data?.metaType5 ? data.metaType5.split("|") : []
   );
-  useEffect(() => {
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      metaType5: defaultValueIDs.join("|"),
-    }));
-  }, [defaultValueIDs]);
-
-  // لیست‌های مربوط به EntityType و فیلدها
-  const [getInformationFromList, setGetInformationFromList] = useState<
-    EntityType[]
-  >([]);
-  const [columnDisplayList, setColumnDisplayList] = useState<EntityField[]>([]);
-  const [srcFieldList, setSrcFieldList] = useState<EntityField[]>([]);
-  const [desFieldList, setDesFieldList] = useState<EntityField[]>([]);
-  const [modesList, setModesList] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [operationList, setOperationList] = useState<
-    { value: string; label: string }[]
-  >([]);
-
-  // داده‌های جدول Lookup
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
-  // لیست Roles (برای PostPickerList)
-  const [roleRows, setRoleRows] = useState<Role[]>([]);
-
-  // flag برای اطمینان از مقداردهی اولیه جدول تنها یک‌بار
-  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
-
-  // مقداردهی اولیه جدول (در حالت ویرایش) تنها یک‌بار
+  // مقداردهی اولیه tableData از data.metaType4 (فقط یکبار)
   useEffect(() => {
-    if (
-      !initialDataLoaded &&
-      data &&
-      data.metaType4 &&
-      data.metaType4.trim() !== ""
-    ) {
+    if (data && data.metaType4 && data.metaType4.trim() !== "") {
       try {
         const parsed = JSON.parse(data.metaType4);
         const normalized = Array.isArray(parsed)
           ? parsed.map((item: any) => ({
               ...item,
-              SrcFieldID:
-                item.SrcFieldID != null ? String(item.SrcFieldID) : "",
-              FilterOpration:
-                item.FilterOpration != null ? String(item.FilterOpration) : "",
-              DesFieldID:
-                item.DesFieldID != null ? String(item.DesFieldID) : "",
+              SrcFieldID: item.SrcFieldID ? String(item.SrcFieldID) : null,
+              FilterOpration: item.FilterOpration ? String(item.FilterOpration) : null,
+              DesFieldID: item.DesFieldID ? String(item.DesFieldID) : null,
               FilterText: item.FilterText || "",
             }))
           : [];
@@ -118,13 +69,13 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
       } catch (err) {
         console.error("Error parsing data.metaType4 JSON:", err);
         setTableData([]);
-      } finally {
-        setInitialDataLoaded(true);
       }
+    } else {
+      setTableData([]);
     }
-  }, [data, initialDataLoaded]);
+  }, []); // تنها در mount
 
-  // به‌روزرسانی metaType4 هنگام تغییر tableData
+  // به‌روز‌رسانی metaType4 فقط وابسته به tableData
   useEffect(() => {
     try {
       const asString = JSON.stringify(tableData);
@@ -135,6 +86,7 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
   }, [tableData]);
 
   // دریافت EntityType ها
+  const [getInformationFromList, setGetInformationFromList] = useState<EntityType[]>([]);
   useEffect(() => {
     (async () => {
       try {
@@ -147,6 +99,9 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
   }, [getAllEntityType]);
 
   // دریافت فیلدهای مربوط به EntityType انتخاب‌شده
+  const [columnDisplayList, setColumnDisplayList] = useState<EntityField[]>([]);
+  const [srcFieldList, setSrcFieldList] = useState<EntityField[]>([]);
+  const [desFieldList, setDesFieldList] = useState<EntityField[]>([]);
   useEffect(() => {
     (async () => {
       const { metaType1 } = metaTypesLookUp;
@@ -171,12 +126,12 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
   }, [metaTypesLookUp.metaType1, getEntityFieldByEntityTypeId]);
 
   // دریافت Enums برای Modes و FilterOpration
+  const [modesList, setModesList] = useState<{ value: string; label: string }[]>([]);
+  const [operationList, setOperationList] = useState<{ value: string; label: string }[]>([]);
   useEffect(() => {
     (async () => {
       try {
-        const lookModeResponse: GetEnumResponse = await AppServices.getEnum({
-          str: "lookMode",
-        });
+        const lookModeResponse: GetEnumResponse = await AppServices.getEnum({ str: "lookMode" });
         const modes = Object.entries(lookModeResponse).map(([key, val]) => ({
           value: String(val),
           label: key,
@@ -185,48 +140,33 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
       } catch (error) {
         console.error("Error fetching lookMode:", error);
       }
-
       try {
-        const filterOperationResponse: GetEnumResponse =
-          await AppServices.getEnum({ str: "FilterOpration" });
-        const ops = Object.entries(filterOperationResponse).map(
-          ([key, val]) => ({
-            value: String(val),
-            label: key,
-          })
-        );
+        const filterOperationResponse: GetEnumResponse = await AppServices.getEnum({ str: "FilterOpration" });
+        const ops = Object.entries(filterOperationResponse).map(([key, val]) => ({
+          value: String(val),
+          label: key,
+        }));
         setOperationList(ops);
       } catch (error) {
         console.error("Error fetching FilterOpration:", error);
       }
     })();
-  }, [getEnum]);
+  }, []);
 
-  // دریافت Roles (برای PostPickerList)
+  // دریافت پروژه‌ها برای PostPickerList
+  const [roleRows, setRoleRows] = useState<Role[]>([]);
   useEffect(() => {
     (async () => {
       try {
-        const roles = await getAllProject();
-        setRoleRows(roles);
+        const projects = await getAllProject();
+        setRoleRows(projects);
       } catch (error) {
-        console.error("Error fetching roles:", error);
+        console.error("Error fetching projects:", error);
       }
     })();
   }, [getAllProject]);
 
-  // ارسال مقادیر به کامپوننت پدر (در صورت وجود)
-  useEffect(() => {
-    if (onMetaChange) {
-      const cloned = { ...metaTypesLookUp };
-      cloned.metaType1 = cloned.metaType1 ? String(cloned.metaType1) : "";
-      cloned.metaType2 = cloned.metaType2 ? String(cloned.metaType2) : "";
-      cloned.LookupMode = cloned.LookupMode ?? "";
-      cloned.oldLookup = oldLookup;
-      onMetaChange(cloned);
-    }
-  }, [metaTypesLookUp, oldLookup, onMetaChange]);
-
-  // مدیریت نام‌های پیش‌فرض (برای PostPickerList)
+  // به‌روز‌رسانی نام‌های پیش‌فرض بر اساس defaultValueIDs
   const [defaultValueNames, setDefaultValueNames] = useState<string[]>([]);
   useEffect(() => {
     const newNames = defaultValueIDs.map((id) => {
@@ -236,11 +176,53 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
     setDefaultValueNames(newNames);
   }, [defaultValueIDs, roleRows]);
 
+  // ارسال مقادیر به والد وقتی stateهای اصلی تغییر می‌کنند
+  useEffect(() => {
+    if (onMetaChange) {
+      onMetaChange({
+        ...metaTypesLookUp,
+        BoolMeta1: oldLookup,
+        metaType5: defaultValueIDs.join("|"),
+        metaType4: JSON.stringify(tableData),
+      });
+    }
+  }, [metaTypesLookUp, oldLookup, defaultValueIDs, tableData, onMetaChange]);
+
+  // تابع به‌روز‌رسانی state metaTypesLookUp و فراخوانی onMetaChange
+  const updateMeta = useCallback(
+    (updatedFields: Partial<typeof metaTypesLookUp>) => {
+      setMetaTypesLookUp((prev) => {
+        const newState = { ...prev, ...updatedFields };
+        if (onMetaChange) {
+          onMetaChange({
+            ...newState,
+            BoolMeta1: oldLookup,
+            metaType5: defaultValueIDs.join("|"),
+            metaType4: JSON.stringify(tableData),
+          });
+        }
+        return newState;
+      });
+    },
+    [onMetaChange, oldLookup, defaultValueIDs, tableData]
+  );
+
+  // Event handlers برای Select ها
+  const handleSelectInformationFrom = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateMeta({ metaType1: e.target.value });
+  };
+
+  const handleSelectColumnDisplay = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateMeta({ metaType2: e.target.value });
+  };
+
+  const handleSelectMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateMeta({ LookupMode: e.target.value });
+  };
+
+  // توابع مربوط به PostPickerList
   const handleAddDefaultValueID = (id: string) => {
-    setDefaultValueIDs((prev) => {
-      if (prev.includes(id)) return prev;
-      return [...prev, id];
-    });
+    setDefaultValueIDs((prev) => (prev.includes(id) ? prev : [...prev, id]));
   };
 
   const handleRemoveDefaultValueIndex = (index: number) => {
@@ -251,34 +233,7 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
     });
   };
 
-  // Event handlers برای تغییر Select ها
-  const handleSelectInformationFrom = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      metaType1: e.target.value || null,
-    }));
-  };
-
-  const handleSelectColumnDisplay = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      metaType2: e.target.value || null,
-    }));
-  };
-
-  const handleSelectMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLookupMode = e.target.value || "";
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      LookupMode: newLookupMode,
-    }));
-  };
-
-  // افزودن ردیف جدید به جدول Lookup
+  // توابع مربوط به جدول Lookup
   const onAddNew = () => {
     const newRow: TableRow = {
       ID: crypto.randomUUID(),
@@ -287,10 +242,10 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
       FilterText: "",
       DesFieldID: "",
     };
+    updateMeta({});
     setTableData((prev) => [...prev, newRow]);
   };
 
-  // به‌روزرسانی سلول‌های جدول هنگام تغییر مقدار
   const handleCellValueChanged = (event: any) => {
     const updatedRow = event.data;
     setTableData((prev) =>
@@ -299,8 +254,8 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-8 p-2 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
-      {/* بخش بالایی: Selectors و تنظیمات */}
+    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
+      {/* بخش تنظیمات و Select ها */}
       <div className="flex gap-8">
         {/* سمت چپ */}
         <div className="flex flex-col space-y-6 w-1/2">
@@ -335,6 +290,7 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
           />
 
           <PostPickerList
+            sourceType="projects"
             defaultValues={defaultValueNames}
             onAddID={handleAddDefaultValueID}
             onRemoveIndex={handleRemoveDefaultValueIndex}
@@ -348,7 +304,10 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
             <input
               type="checkbox"
               checked={oldLookup}
-              onChange={(e) => setOldLookup(e.target.checked)}
+              onChange={(e) => {
+                setOldLookup(e.target.checked);
+                updateMeta({}); // فراخوانی onMetaChange
+              }}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
             <label className="text-gray-700 font-medium">Old Lookup</label>
@@ -356,8 +315,8 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
         </div>
       </div>
 
-      {/* بخش پایینی: جدول Lookup */}
-      <div className="mb-100">
+      {/* بخش جدول Lookup */}
+      <div className="mt-4" style={{ height: "300px", overflowY: "auto" }}>
         <DataTable
           columnDefs={[
             {
@@ -366,11 +325,11 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
               editable: true,
               cellEditor: "agSelectCellEditor",
               cellEditorParams: {
-                values: srcFieldList.map((f) => String(f.ID)),
+                values: srcFieldList.map((f) => (f.ID ? String(f.ID) : "")),
               },
               valueFormatter: (params: any) => {
                 const matched = srcFieldList.find(
-                  (f) => String(f.ID) === String(params.value)
+                  (f) => f.ID && String(f.ID) === String(params.value)
                 );
                 return matched ? matched.DisplayName : params.value;
               },
@@ -401,11 +360,11 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
               editable: true,
               cellEditor: "agSelectCellEditor",
               cellEditorParams: {
-                values: desFieldList.map((f) => String(f.ID)),
+                values: desFieldList.map((f) => (f.ID ? String(f.ID) : "")),
               },
               valueFormatter: (params: any) => {
                 const matched = desFieldList.find(
-                  (f) => String(f.ID) === String(params.value)
+                  (f) => f.ID && String(f.ID) === String(params.value)
                 );
                 return matched ? matched.DisplayName : params.value;
               },
@@ -415,14 +374,15 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
           setSelectedRowData={() => {}}
           showDuplicateIcon={false}
           showEditIcon={false}
-          showAddIcon={true} // نمایش آیکون افزودن ردیف
+          showAddIcon={true}
           showDeleteIcon={false}
           onAdd={onAddNew}
           onEdit={() => {}}
           onDelete={() => {}}
           onDuplicate={() => {}}
           onCellValueChanged={handleCellValueChanged}
-          domLayout="autoHeight"
+          // استفاده از domLayout "normal" برای پرکردن فضای والد
+          domLayout="normal"
           isRowSelected={false}
           showSearch={false}
         />
