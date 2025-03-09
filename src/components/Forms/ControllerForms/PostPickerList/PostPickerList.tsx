@@ -1,58 +1,63 @@
-// PostPickerList.tsx
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import DynamicModal from "../../../utilities/DynamicModal";
-import RolePickerTabs from "./RolePickerTabs"; // مسیر را مطابق پروژه تنظیم کنید
+import RolePickerTabs from "./RolePickerTabs"; // برای حالت roles
 import { useApi } from "../../../../context/ApiContext";
-import { SelectedItem } from "./MembersTable";
+import TableSelector from "../../../General/Configuration/TableSelector"; // برای حالت projects
+
+export interface SelectedItem {
+  id: string;
+  name: string;
+}
 
 interface PostPickerListProps {
-  initialMetaType?: string; // به عنوان مثال "4|5|6"
-  data?: { metaType1?: string };
+  defaultValues?: string[]; // لیست نام‌های پیش‌فرض
+  onAddID?: (id: string) => void;
+  onRemoveIndex?: (index: number) => void;
   fullWidth?: boolean;
-  onMetaChange?: (meta: { metaType1: string }) => void;
+  sourceType?: "roles" | "projects";
 }
 
 const PostPickerList: React.FC<PostPickerListProps> = ({
-  initialMetaType = "",
-  data,
+  defaultValues = [],
+  onAddID,
+  onRemoveIndex,
   fullWidth = false,
-  onMetaChange,
+  sourceType = "roles",
 }) => {
   const api = useApi();
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingInitial, setIsLoadingInitial] = useState<boolean>(false);
 
-  // تعیین مقدار اولیه از initialMetaType یا data.metaType1 (در حالت ویرایش)
-  const initMeta = initialMetaType || data?.metaType1 || "";
+  // در حالت "projects" داده‌های پروژه را ذخیره می‌کنیم
+  const [projectsData, setProjectsData] = useState<any[]>([]);
 
-  // بارگذاری آیتم‌های اولیه در حالت ویرایش
+  // بارگذاری اولیه – اگر defaultValues وجود داشته باشد
   useEffect(() => {
-    if (initMeta) {
-      const ids = initMeta.split("|").filter(Boolean);
-      const loadInitial = async () => {
-        setIsLoadingInitial(true);
-        try {
-          const rolesData = await api.getAllRoles();
-          const initialItems: SelectedItem[] = rolesData
-            .filter((role: any) => ids.includes(String(role.ID)))
-            .map((role: any) => ({
-              id: String(role.ID),
-              name: role.Name,
-            }));
-          setSelectedItems(initialItems);
-        } catch (error) {
-          console.error("Error loading initial metaType:", error);
-        } finally {
-          setIsLoadingInitial(false);
-        }
-      };
-      loadInitial();
-    }
-  }, [initMeta, api]);
+    // اگر حالت roles است، فرض می‌کنیم defaultValues شامل نام‌های انتخاب شده است.
+    const initial = defaultValues.map((name, index) => ({
+      id: String(index),
+      name,
+    }));
+    setSelectedItems(initial);
+  }, [defaultValues]);
 
-  // دریافت آیتم‌های انتخاب شده از تب‌های RolePickerTabs
+  // اگر sourceType برابر "projects" باشد، داده‌های پروژه را لود می‌کنیم
+  useEffect(() => {
+    if (sourceType === "projects") {
+      (async () => {
+        try {
+          const projects = await api.getAllProject();
+          setProjectsData(projects);
+        } catch (error) {
+          console.error("Error loading projects:", error);
+        }
+      })();
+    }
+  }, [api, sourceType]);
+
+  // در حالت roles از تب‌های انتخاب استفاده می‌شود
   const handleSelectRole = (selected: SelectedItem[]) => {
     setSelectedItems((prev) => {
       const newItems = selected.filter(
@@ -61,21 +66,53 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
       return [...prev, ...newItems];
     });
     setIsModalOpen(false);
+    // ارسال آیدی به والد در صورت وجود
+    selected.forEach((item) => onAddID && onAddID(item.id));
   };
 
-  const handleRemoveItem = (id: string) => {
-    setSelectedItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // ساخت metaType به صورت رشته‌ای از آیدی‌ها با جداکننده "|"
-  const metaType = selectedItems.map((item) => item.id).join("|");
-
-  // ارسال metaType به والد (مثلاً کنترلر Lookup) از طریق onMetaChange
-  useEffect(() => {
-    if (onMetaChange) {
-      onMetaChange({ metaType1: metaType });
+  // در حالت projects: وقتی یک پروژه انتخاب شد
+  const handleSelectProject = (rowData: any) => {
+    if (rowData && rowData.ID && rowData.ProjectName) {
+      const newItem: SelectedItem = {
+        id: String(rowData.ID),
+        name: rowData.ProjectName,
+      };
+      setSelectedItems([newItem]);
+      setIsModalOpen(false);
+      onAddID && onAddID(newItem.id);
     }
-  }, [metaType, onMetaChange]);
+  };
+
+  const handleRemoveItem = (id: string, index: number) => {
+    setSelectedItems((prev) => prev.filter((item) => item.id !== id));
+    onRemoveIndex && onRemoveIndex(index);
+  };
+
+  // تعیین محتوای مودال بر اساس sourceType
+  let modalContent = null;
+  if (sourceType === "roles") {
+    modalContent = (
+      <div className="p-4 min-h-[400px] min-w-[600px]">
+        <RolePickerTabs
+          onSelect={handleSelectRole}
+          onClose={() => setIsModalOpen(false)}
+        />
+      </div>
+    );
+  } else if (sourceType === "projects") {
+    modalContent = (
+      <div className="p-4 min-h-[400px] min-w-[600px]">
+        <TableSelector
+          columnDefs={[{ headerName: "Project Name", field: "ProjectName" }]}
+          rowData={projectsData}
+          onRowDoubleClick={handleSelectProject}
+          onRowClick={() => {}}
+          onSelectButtonClick={handleSelectProject}
+          isSelectDisabled={false}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -105,7 +142,7 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
           </div>
         ) : selectedItems.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {selectedItems.map((item) => (
+            {selectedItems.map((item, index) => (
               <div
                 key={item.id}
                 className="flex items-center bg-gray-100 px-3 py-1 rounded-md"
@@ -113,7 +150,7 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
                 <span>{item.name}</span>
                 <button
                   type="button"
-                  onClick={() => handleRemoveItem(item.id)}
+                  onClick={() => handleRemoveItem(item.id, index)}
                   className="text-red-500 ml-2 hover:text-red-700"
                 >
                   <FaTimes size={14} />
@@ -126,14 +163,12 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
         )}
       </div>
 
-      {/* مودال نمایش RolePickerTabs */}
-      <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="p-4 min-h-[400px] min-w-[600px]">
-          <RolePickerTabs
-            onSelect={handleSelectRole}
-            onClose={() => setIsModalOpen(false)}
-          />
-        </div>
+      {/* مودال انتخاب */}
+      <DynamicModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      >
+        {modalContent}
       </DynamicModal>
     </div>
   );

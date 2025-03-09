@@ -1,4 +1,3 @@
-// RoleGroupPostPicker.tsx
 import React, { useState, useEffect } from "react";
 import DataTable from "../../../TableDynamic/DataTable"; // مسیر را مطابق پروژه تنظیم کنید
 import { useApi } from "../../../../context/ApiContext";
@@ -89,8 +88,10 @@ const RoleGroupPostPicker: React.FC<RoleGroupPostPickerProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg flex flex-col h-full">
-      <div className="flex-grow mb-4">
+    // تعیین ارتفاع ثابت برای والد جدول
+    <div className="bg-white p-4 rounded-lg flex flex-col" style={{ height: '600px' }}>
+      {/* تنظیم ارتفاع برای ظرف DataTable */}
+      <div className="flex-grow mb-4" style={{ height: '100%' }}>
         <DataTable
           columnDefs={columnDefs}
           rowData={roleGroups}

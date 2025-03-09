@@ -289,7 +289,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
   return (
     <div className="w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4">
-      <div className="mb-4 w-full overflow-hidden">
+      {/* بخش جدول */}
+      <div className="mb-4 w-full overflow-hidden" style={{ height: "400px", overflowY: "auto" }}>
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
@@ -300,7 +301,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           onEdit={() => {}}
           onDelete={() => {}}
           onDuplicate={() => {}}
-          domLayout="autoHeight"
+          // استفاده از domLayout "normal" برای استفاده از ارتفاع والد
+          domLayout="normal"
         />
       </div>
       <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
