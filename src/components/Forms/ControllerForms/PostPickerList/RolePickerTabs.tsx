@@ -19,6 +19,7 @@ const RolePickerTabs: React.FC<RolePickerTabsProps> = ({
       {/* سربرگ تب‌ها */}
       <div className="flex border-b mb-4">
         <button
+          type="button"
           className={`px-4 py-2 ${
             activeTab === "roles" ? "border-b-2 border-blue-500 font-bold" : ""
           }`}
@@ -27,6 +28,7 @@ const RolePickerTabs: React.FC<RolePickerTabsProps> = ({
           Roles
         </button>
         <button
+        type="button"
           className={`px-4 py-2 ${
             activeTab === "roleGroups"
               ? "border-b-2 border-blue-500 font-bold"

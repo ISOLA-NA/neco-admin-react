@@ -1,3 +1,4 @@
+// MembersTable.tsx
 import React, { useEffect, useState } from "react";
 import DataTable from "../../../TableDynamic/DataTable"; // مسیر را مطابق پروژه خود تنظیم کنید
 import { useApi } from "../../../../context/ApiContext";
@@ -79,27 +80,26 @@ const MembersTable: React.FC<MembersTableProps> = ({ onSelect, onClose }) => {
   };
 
   return (
-    // تعیین ارتفاع ثابت برای والد جدول
-    <div className="bg-white p-4 rounded-lg flex flex-col" style={{ height: '600px' }}>
-      {/* تنظیم ارتفاع برای ظرف DataTable */}
-      <div className="flex-grow mb-4" style={{ height: '100%' }}>
-        <DataTable
-          columnDefs={columnDefs}
-          rowData={membersList}
-          onRowDoubleClick={handleRowDoubleClick}
-          setSelectedRowData={handleRowClick}
-          showDuplicateIcon={false}
-          showEditIcon={false}
-          showAddIcon={false}
-          showDeleteIcon={false}
-          onAdd={() => {}}
-          onEdit={() => {}}
-          onDelete={() => {}}
-          onDuplicate={() => {}}
-          showSearch={true}
-          isLoading={loading}
-        />
-      </div>
+    <div className="bg-white p-4 rounded-lg flex flex-col h-full">
+     <div className="flex-grow mb-4" style={{ height: "400px" }}>
+  <DataTable
+    columnDefs={columnDefs}
+    rowData={membersList}
+    onRowDoubleClick={handleRowDoubleClick}
+    setSelectedRowData={handleRowClick}
+    showDuplicateIcon={false}
+    showEditIcon={false}
+    showAddIcon={false}
+    showDeleteIcon={false}
+    onAdd={() => {}}
+    onEdit={() => {}}
+    onDelete={() => {}}
+    onDuplicate={() => {}}
+    showSearch={true}
+    isLoading={loading}
+  />
+</div>
+
       <div className="flex justify-center mt-4">
         <ReusableButton
           text="Select"
