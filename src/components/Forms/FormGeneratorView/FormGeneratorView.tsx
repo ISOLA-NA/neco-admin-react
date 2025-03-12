@@ -30,6 +30,7 @@ const CalculatedFieldView = React.lazy(() => import("./CalculatedFieldView"));
 const ExcellCalculatorView = React.lazy(() => import("./ExcellCalculatorView"));
 const TabView = React.lazy(() => import("./TabView"));
 const MapView = React.lazy(() => import("./MapView"));
+const TitleView = React.lazy(() => import("./TitleView"));
 
 // نگاشت type به کامپوننت مربوطه
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
@@ -60,6 +61,7 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   29: ExcellCalculatorView,
   32: TabView,
   28: MapView,
+  11:TitleView
 };
 
 interface FormGeneratorViewProps {
