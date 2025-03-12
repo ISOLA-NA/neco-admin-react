@@ -28,6 +28,21 @@ export interface WebLoginResponse {
   AppSetting: AppSetting;
   MyUser: MyUser;
 }
+
+export interface Post {
+  ID: string;
+  Name: string;
+  IsStatic: boolean;
+  isAccessCreateProject: boolean;
+  isHaveAddressbar: boolean;
+  Categories: string[];
+}
+
+export interface PostUserResponse {
+  Posts: Post[];
+}
+
+
 export interface SendOtpResponse {
   success: boolean;
   message: string;
@@ -587,6 +602,14 @@ class ApiService {
     );
     return response.data;
   }
+
+  async postUser(): Promise<PostUserResponse> {
+    const response = await httpClient.post<PostUserResponse>(
+      apiConst.postUser
+    );
+    return response.data;
+  }
+  
 
   async sendOtp(data: SendOtpRequest): Promise<SendOtpResponse> {
     const response = await httpClient.post<SendOtpResponse>(

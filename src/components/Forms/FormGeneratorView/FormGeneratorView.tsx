@@ -33,7 +33,7 @@ const MapView = React.lazy(() => import("./MapView"));
 const TitleView = React.lazy(() => import("./TitleView"));
 const SectionView = React.lazy(() => import("./SectionView"));
 const SubSectionView = React.lazy(() => import("./SubSectionView"));
-const MePostSelectorView = React.lazy(() => import("./MePostSelector"));
+const MePostSelectorView = React.lazy(() => import("./MePostSelectorView"));
 const AdvanceWfView = React.lazy(() => import("./AdvanceWfView"));
 
 // نگاشت type به کامپوننت مربوطه

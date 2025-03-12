@@ -6,6 +6,7 @@ export const apiConst = Object.freeze({
   loginWithOtp: "api/loginWithOtp",
   tokenSetup: "api/tokenSetup",
   getIdByUserToken: "api/user/GetByToken",
+  postUser: "api/post/GetAllByUser",
   getAllConfiguration: "api/Setting/GetAll",
   insertConfiguration: "api/Setting/Insert",
   updateConfiguration: "api/Setting/Update",
