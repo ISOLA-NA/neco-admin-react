@@ -1,4 +1,3 @@
-// src/components/AttachFileView.tsx
 import React, { useState, useCallback, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicModal from "../../utilities/DynamicModal";
@@ -16,7 +15,7 @@ interface AttachFileViewProps {
 }
 
 const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) => {
-  // مقدار اولیه fileName حالا به عنوان رشته خالی است؛ در صورت دریافت فایل، نام فایل در state ذخیره می‌شود
+  // مقدار اولیه fileId و fileName از data
   const [fileId, setFileId] = useState<string | null>(data.metaType1 || null);
   const [fileName, setFileName] = useState<string>(data.fileName || "");
   const [resetCounter, setResetCounter] = useState<number>(0);
@@ -24,13 +23,23 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showUploadHandler, setShowUploadHandler] = useState<boolean>(false);
 
+  // لاگ گرفتن از پراپ DisplayName
+  useEffect(() => {
+    console.log("DisplayName prop in AttachFileView:", data?.DisplayName);
+  }, [data?.DisplayName]);
+
+  // لاگ تغییرات fileId و fileName
+  useEffect(() => {
+    console.log("Current fileId:", fileId, "and fileName:", fileName);
+  }, [fileId, fileName]);
+
   // دریافت preview URL فایل آپلود شده با استفاده از منطق دانلود مشابه FileUploadHandler
   useEffect(() => {
     if (fileId) {
       fileService
         .getFile(fileId)
         .then((res) => {
-          // در اینجا اطلاعات فایل دریافت می‌شود و سپس فایل دانلود و blob ساخته می‌شود
+          // دریافت اطلاعات فایل و ساخت blob جهت ایجاد preview URL
           const downloadingFileObject = {
             FileName: res.data.FileIQ + res.data.FileType,
             FolderName: res.data.FolderName,
@@ -49,8 +58,9 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
               const blob = new Blob([uint8Array], { type: mimeType });
               const objectUrl = URL.createObjectURL(blob);
               setPreviewUrl(objectUrl);
-              // همچنین نام فایل دریافت شده از سرور را در state ذخیره می‌کنیم
+              // ذخیره نام فایل دریافتی از سرور در state
               setFileName(res.data.FileName);
+              console.log("File downloaded. Updated previewUrl and fileName:", objectUrl, res.data.FileName);
             })
             .catch((err) => {
               console.error("Error downloading file:", err);
@@ -70,6 +80,7 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
   const handleUploadSuccess = (insertedModel: InsertModel) => {
     setFileId(insertedModel.ID || null);
     setFileName(insertedModel.FileName);
+    console.log("Upload success. Inserted model:", insertedModel);
     if (onMetaChange) {
       onMetaChange({ metaType1: insertedModel.ID || null });
     }
@@ -79,6 +90,7 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
     setFileId(null);
     setResetCounter((prev) => prev + 1);
     setFileName("");
+    console.log("File reset triggered.");
     if (onMetaChange) {
       onMetaChange({ metaType1: null });
     }
@@ -89,8 +101,10 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
     e.preventDefault();
     if (previewUrl) {
       setIsModalOpen(true);
+      console.log("Showing file preview.");
     } else {
       alert("No file uploaded!");
+      console.log("Attempted to view file, but no previewUrl available.");
     }
   };
 
@@ -98,6 +112,7 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
     setShowUploadHandler((prev) => !prev);
     // در زمان تغییر وضعیت آپلود، preview پاک می‌شود
     setPreviewUrl(null);
+    console.log("Toggle upload handler. showUploadHandler:", !showUploadHandler);
   };
 
   return (
@@ -114,7 +129,7 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
           </button>
         )}
 
-        {/* در اینجا به جای placeholder ثابت، مقدار fileName که از سرور گرفته شده استفاده می‌شود */}
+        {/* استفاده از DynamicInput برای نمایش fileName؛ در صورت عدم وجود، placeholder خالی است */}
         <DynamicInput
           name={data?.DisplayName || "File Name"}
           type="text"

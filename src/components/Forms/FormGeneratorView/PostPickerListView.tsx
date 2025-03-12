@@ -1,4 +1,3 @@
-// src/components/PostPickerListView.tsx
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import DynamicModal from "../../utilities/DynamicModal";
@@ -9,6 +8,7 @@ import { SelectedItem } from "../ControllerForms/PostPickerList/MembersTable";
 interface PostPickerListViewProps {
   data?: {
     metaType1?: string;
+    DisplayName?: string;
   };
   fullWidth?: boolean;
   onMetaChange?: (meta: { metaType1: string }) => void;
@@ -27,7 +27,12 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
   // مقدار اولیه metaType از data.metaType1
   const initMeta = data?.metaType1 || "";
 
-  // بارگذاری آیتم‌های اولیه (در حالت ویرایش)
+  // لاگ گرفتن از data?.DisplayName
+  useEffect(() => {
+    console.log("DisplayName prop in PostPickerListView:", data?.DisplayName);
+  }, [data?.DisplayName]);
+
+  // بارگذاری آیتم‌های اولیه (در حالت ویرایش) بر اساس initMeta
   useEffect(() => {
     if (initMeta) {
       const ids = initMeta.split("|").filter(Boolean);
@@ -60,7 +65,7 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
     }
   }, [selectedItems, onMetaChange]);
 
-  // دریافت آیتم‌های انتخاب‌شده از RolePickerTabs (اضافه کردن آیتم‌های جدید)
+  // هندلر دریافت آیتم‌های انتخاب‌شده از RolePickerTabs
   const handleSelectRole = (selected: SelectedItem[]) => {
     setSelectedItems((prev) => {
       const newItems = selected.filter(
@@ -71,6 +76,7 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
     setIsModalOpen(false);
   };
 
+  // حذف یک آیتم از لیست انتخاب‌شده
   const handleRemoveItem = (id: string) => {
     setSelectedItems((prev) => prev.filter((item) => item.id !== id));
   };
@@ -80,10 +86,10 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
       className="p-4 bg-white rounded-lg border border-gray-300 relative"
       style={{ minHeight: "120px", width: fullWidth ? "100%" : "auto" }}
     >
-      {/* بخش بالایی: عنوان و دکمه Add */}
+      {/* بخش بالایی: عنوان (DisplayName از data) و دکمه Add */}
       <div className="flex items-center justify-between mb-2">
         <label className="text-gray-700 text-sm font-semibold">
-          Default Value(s)
+          {data?.DisplayName ? data.DisplayName : "Default Value(s)"}
         </label>
         <button
           type="button"
