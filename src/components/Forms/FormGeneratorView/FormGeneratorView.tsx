@@ -33,6 +33,8 @@ const MapView = React.lazy(() => import("./MapView"));
 const TitleView = React.lazy(() => import("./TitleView"));
 const SectionView = React.lazy(() => import("./SectionView"));
 const SubSectionView = React.lazy(() => import("./SubSectionView"));
+const MePostSelectorView = React.lazy(() => import("./MePostSelector"));
+const AdvanceWfView = React.lazy(() => import("./AdvanceWfView"));
 
 // نگاشت type به کامپوننت مربوطه
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
@@ -65,7 +67,9 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   28: MapView,
   11:TitleView,
   12:SectionView,
-  13:SubSectionView
+  13:SubSectionView,
+  18:MePostSelectorView,
+  23:AdvanceWfView
 };
 
 interface FormGeneratorViewProps {

@@ -37,6 +37,8 @@ import Component28 from "./ControllerForms/SelectUserInPost";
 import Component29 from "./ControllerForms/TitleController";
 import Component30 from "./ControllerForms/SectionController";
 import Component31 from "./ControllerForms/SubSectionController";
+import Component32 from "./ControllerForms/MePostSelectorController";
+import Component33 from "./ControllerForms/AdvanceWf";
 
 // Mapping of column types
 const columnTypeMapping: { [key: string]: number } = {
@@ -70,7 +72,9 @@ const columnTypeMapping: { [key: string]: number } = {
   component28: 8,
   component29:11,
   component30:12,
-  component31:13
+  component31:13,
+  component32:18,
+  component33:23
 };
 
 // Mapping of component keys to components
@@ -105,6 +109,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component29:Component29,
   component30:Component30,
   component31:Component31,
+  component32:Component32,
+  component33:Component33,
 };
 
 const typeOfInformationOptions = [
@@ -130,8 +136,10 @@ const typeOfInformationOptions = [
   { value: "component15", label: "Picture Box" },
   { value: "component16", label: "Table" },
   { value: "component17", label: "Pfi Lookup" },
+  { value: "component32", label: "MePostSelector" },
   { value: "component18", label: "Seqnial Number" },
   { value: "component19", label: "Advance Table" },
+  { value: "component33", label: "Advance wf" },
   { value: "component20", label: "Word Panel" },
   { value: "component21", label: "Excecl Panel" },
   { value: "component22", label: "Calculated Field" },
