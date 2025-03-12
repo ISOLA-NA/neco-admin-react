@@ -1,33 +1,37 @@
-import React from "react";
+// src/components/FormGeneratorView.tsx
+import React, { Suspense } from "react";
 import { EntityField } from "../../../services/api.services";
-import CtrTextBoxView from "./CtrTextBoxView";
-import RichTextControllerView from "./RichTextControllerView";
-import ChoiceController from "./ChoiceControllerView";
-import NumberController from "./NumberControllerView";
-import DateTimeSelector from "./DateTimeSelectorView";
-import PersianCalendarPickerView from "./PersianCalendarPickerView";
-import LookUpFormsView from "./LookUpFormsView";
-import LookUpRealValueView from "./LookUpRealValueView";
-import LookUpAdvanceTableView from "./LookUpAdvanceTableView";
-import LookUpImageView from "./LookUpImageView";
-import AdvanceLookupAdvanceTableView from "./AdvanceLookupAdvanceTableView";
-import HyperLinkView from "./HyperLinkView";
-import YesNoView from "./YesNoView";
-import SelectUserInPostView from "./SelectUserInPostView";
-import AttachFileView from "./AttachFileView";
-import PictureBoxView from "./PictureBoxView";
-import PostPickerListView from "./PostPickerListView";
-import TableControllerView from "./TableControllerView";
-import PfiLookupView from "./PfiLookUpView";
-import SeqenialNumberView from "./SeqenialNumberView";
-import AdvanceTableView from "./AdvanceTableControllerView";
-import WordPanelView from "./WordPanelView";
-import ExcelPanelView from "./ExcellPanelView";
-import CalculatedFieldView from "./CalculatedFieldView";
-import ExcellCalculatorView from "./ExcellCalculatorView";
-import TabView from "./TabView";
-import MapView from "./MapView";
 
+// ایمپورت‌های lazy تمامی کامپوننت‌های داینامیک
+const CtrTextBoxView = React.lazy(() => import("./CtrTextBoxView"));
+const RichTextControllerView = React.lazy(() => import("./RichTextControllerView"));
+const ChoiceController = React.lazy(() => import("./ChoiceControllerView"));
+const NumberController = React.lazy(() => import("./NumberControllerView"));
+const DateTimeSelector = React.lazy(() => import("./DateTimeSelectorView"));
+const PersianCalendarPickerView = React.lazy(() => import("./PersianCalendarPickerView"));
+const LookUpFormsView = React.lazy(() => import("./LookUpFormsView"));
+const LookUpRealValueView = React.lazy(() => import("./LookUpRealValueView"));
+const LookUpAdvanceTableView = React.lazy(() => import("./LookUpAdvanceTableView"));
+const LookUpImageView = React.lazy(() => import("./LookUpImageView"));
+const AdvanceLookupAdvanceTableView = React.lazy(() => import("./AdvanceLookupAdvanceTableView"));
+const HyperLinkView = React.lazy(() => import("./HyperLinkView"));
+const YesNoView = React.lazy(() => import("./YesNoView"));
+const SelectUserInPostView = React.lazy(() => import("./SelectUserInPostView"));
+const AttachFileView = React.lazy(() => import("./AttachFileView"));
+const PictureBoxView = React.lazy(() => import("./PictureBoxView"));
+const PostPickerListView = React.lazy(() => import("./PostPickerListView"));
+const TableControllerView = React.lazy(() => import("./TableControllerView"));
+const PfiLookupView = React.lazy(() => import("./PfiLookUpView"));
+const SeqenialNumberView = React.lazy(() => import("./SeqenialNumberView"));
+const AdvanceTableView = React.lazy(() => import("./AdvanceTableControllerView"));
+const WordPanelView = React.lazy(() => import("./WordPanelView"));
+const ExcelPanelView = React.lazy(() => import("./ExcellPanelView"));
+const CalculatedFieldView = React.lazy(() => import("./CalculatedFieldView"));
+const ExcellCalculatorView = React.lazy(() => import("./ExcellCalculatorView"));
+const TabView = React.lazy(() => import("./TabView"));
+const MapView = React.lazy(() => import("./MapView"));
+
+// نگاشت type به کامپوننت مربوطه
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
   1: RichTextControllerView,
@@ -55,7 +59,7 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   27: CalculatedFieldView,
   29: ExcellCalculatorView,
   32: TabView,
-  28: MapView
+  28: MapView,
 };
 
 interface FormGeneratorViewProps {
@@ -104,7 +108,9 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
             if (!ViewComponent) return null;
             return (
               <div key={index} className="mb-4">
-                <ViewComponent data={field} selectedRow={selectedRow} />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <ViewComponent data={field} selectedRow={selectedRow} />
+                </Suspense>
               </div>
             );
           })}

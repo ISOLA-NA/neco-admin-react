@@ -16,58 +16,75 @@ interface AttachFileViewProps {
 }
 
 const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) => {
+  // مقدار اولیه fileName حالا به عنوان رشته خالی است؛ در صورت دریافت فایل، نام فایل در state ذخیره می‌شود
   const [fileId, setFileId] = useState<string | null>(data.metaType1 || null);
-  const [fileName, setFileName] = useState<string>(data.fileName || "No file selected");
+  const [fileName, setFileName] = useState<string>(data.fileName || "");
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showUploadHandler, setShowUploadHandler] = useState<boolean>(false);
 
-  // واکشی اطلاعات فایل (نام و URL پیش‌نمایش) در صورت وجود fileId
+  // دریافت preview URL فایل آپلود شده با استفاده از منطق دانلود مشابه FileUploadHandler
   useEffect(() => {
     if (fileId) {
-      fileService.getFile(fileId)
+      fileService
+        .getFile(fileId)
         .then((res) => {
-          // فرض بر این است که res.data شامل FileName و FileIQ (URL پیش‌نمایش) است
-          setFileName(res.data.FileName);
-          setPreviewUrl(res.data.FileIQ || null);
+          // در اینجا اطلاعات فایل دریافت می‌شود و سپس فایل دانلود و blob ساخته می‌شود
+          const downloadingFileObject = {
+            FileName: res.data.FileIQ + res.data.FileType,
+            FolderName: res.data.FolderName,
+            cacheBust: Date.now(),
+          };
+          return fileService
+            .download(downloadingFileObject)
+            .then((downloadRes) => {
+              const uint8Array = new Uint8Array(downloadRes.data);
+              let mimeType = "application/octet-stream";
+              if (res.data.FileType === ".jpg" || res.data.FileType === ".jpeg") {
+                mimeType = "image/jpeg";
+              } else if (res.data.FileType === ".png") {
+                mimeType = "image/png";
+              }
+              const blob = new Blob([uint8Array], { type: mimeType });
+              const objectUrl = URL.createObjectURL(blob);
+              setPreviewUrl(objectUrl);
+              // همچنین نام فایل دریافت شده از سرور را در state ذخیره می‌کنیم
+              setFileName(res.data.FileName);
+            })
+            .catch((err) => {
+              console.error("Error downloading file:", err);
+              setPreviewUrl(null);
+            });
         })
         .catch((err) => {
           console.error("Error fetching file info:", err);
+          setPreviewUrl(null);
         });
     } else {
-      setFileName("No file selected");
       setPreviewUrl(null);
+      setFileName("");
     }
   }, [fileId]);
 
-  // Callback جهت دریافت تغییرات URL پیش‌نمایش از FileUploadHandler
-  const handlePreviewUrlChange = useCallback((url: string | null) => {
-    setPreviewUrl(url);
-  }, []);
-
-  // در صورت آپلود موفق فایل جدید
   const handleUploadSuccess = (insertedModel: InsertModel) => {
     setFileId(insertedModel.ID || null);
     setFileName(insertedModel.FileName);
     if (onMetaChange) {
       onMetaChange({ metaType1: insertedModel.ID || null });
     }
-    setShowUploadHandler(false);
   };
 
-  // حذف فایل
   const handleReset = () => {
     setFileId(null);
-    setResetCounter(prev => prev + 1);
-    setFileName("No file selected");
+    setResetCounter((prev) => prev + 1);
+    setFileName("");
     if (onMetaChange) {
       onMetaChange({ metaType1: null });
     }
     setPreviewUrl(null);
   };
 
-  // بازکردن مدال جهت نمایش پیش‌نمایش فایل
   const handleShowFile = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (previewUrl) {
@@ -77,15 +94,14 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
     }
   };
 
-  // تغییر وضعیت نمایش بخش آپلود؛ با کلیک روی دکمه Upload، بخش آپلود ظاهر/مخفی می‌شود و previewUrl پاک می‌شود
   const handleToggleUploadHandler = () => {
-    setShowUploadHandler(prev => !prev);
+    setShowUploadHandler((prev) => !prev);
+    // در زمان تغییر وضعیت آپلود، preview پاک می‌شود
     setPreviewUrl(null);
   };
 
   return (
     <div className="flex flex-col items-center w-full mt-10">
-      {/* سطر اصلی: دکمه Delete، DynamicInput (label از DisplayName) نمایش نام فایل، دکمه Upload و دکمه View */}
       <div className="flex flex-row items-center gap-2 w-full">
         {fileId && (
           <button
@@ -98,11 +114,12 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
           </button>
         )}
 
+        {/* در اینجا به جای placeholder ثابت، مقدار fileName که از سرور گرفته شده استفاده می‌شود */}
         <DynamicInput
           name={data?.DisplayName || "File Name"}
           type="text"
           value={fileName}
-          placeholder="No file selected"
+          placeholder=""
           disabled
           className="flex-grow"
         />
@@ -131,7 +148,6 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
         </button>
       </div>
 
-      {/* بخش آپلود: تنها زمانی نمایش داده می‌شود که showUploadHandler فعال باشد */}
       {showUploadHandler && (
         <div className="w-full mt-4">
           <FileUploadHandler
@@ -139,8 +155,9 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
             resetCounter={resetCounter}
             onReset={() => {}}
             onUploadSuccess={handleUploadSuccess}
-            onPreviewUrlChange={handlePreviewUrlChange}
-            externalPreviewUrl={null} // باکس آپلود خالی
+            onPreviewUrlChange={(url) => setPreviewUrl(url)}
+            externalPreviewUrl={null}
+            allowedExtensions={["jpg", "jpeg", "png", "doc", "docx", "xlsx", "xls"]}
           />
           <button
             type="button"
@@ -152,7 +169,6 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
         </div>
       )}
 
-      {/* FileUploadHandler مخفی جهت واکشی previewUrl در پس‌زمینه (در صورت عدم نمایش بخش آپلود) */}
       {fileId && !showUploadHandler && (
         <div className="hidden">
           <FileUploadHandler
@@ -160,13 +176,13 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
             resetCounter={resetCounter}
             onReset={() => {}}
             onUploadSuccess={() => {}}
-            onPreviewUrlChange={handlePreviewUrlChange}
+            onPreviewUrlChange={(url) => setPreviewUrl(url)}
             externalPreviewUrl={previewUrl}
+            allowedExtensions={["jpg", "jpeg", "png", "doc", "docx", "xlsx", "xls"]}
           />
         </div>
       )}
 
-      {/* مدال نمایش پیش‌نمایش فایل با ارتفاع حداکثر 300px و عرض نصف صفحه */}
       <DynamicModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

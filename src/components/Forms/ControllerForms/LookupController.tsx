@@ -3,13 +3,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
-import PostPickerList from "./PostPickerList/PostPickerList"; 
+import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
 import AppServices from "../../../services/api.services";
 
-/**
- * ساختار پراپ‌های کامپوننت LookUpForms
- */
 interface LookUpFormsProps {
   data?: {
     metaType1?: string | number | null;
@@ -24,9 +21,7 @@ interface LookUpFormsProps {
   onMetaChange?: (updatedMeta: any) => void;
 }
 
-/**
- * ساختار هر ردیف در جدول فیلترها
- */
+
 interface TableRow {
   ID: string;
   SrcFieldID: string | null;
@@ -405,8 +400,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
                 editable: true,
                 cellEditor: "agSelectCellEditor",
                 cellEditorParams: {
-                  values: srcFieldList.map((f: any) =>
-                    f.ID ? String(f.ID) : ""
+                  values: srcFieldList.map((f: any) => f.ID ? String(f.ID) : ""
                   ),
                 },
                 valueFormatter: (params: any) => {
@@ -442,8 +436,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
                 editable: true,
                 cellEditor: "agSelectCellEditor",
                 cellEditorParams: {
-                  values: desFieldList.map((f: any) =>
-                    f.ID ? String(f.ID) : ""
+                  values: desFieldList.map((f: any) => f.ID ? String(f.ID) : ""
                   ),
                 },
                 valueFormatter: (params: any) => {
@@ -455,20 +448,20 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({ data, onMetaChange }) => {
               },
             ]}
             rowData={tableData}
-            setSelectedRowData={() => {}}
+            setSelectedRowData={() => { } }
             showDuplicateIcon={false}
             showEditIcon={false}
             showAddIcon={true}
             showDeleteIcon={false}
             onAdd={handleAddNewRow}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onDuplicate={() => {}}
+            onEdit={() => { } }
+            onDelete={() => { } }
+            onDuplicate={() => { } }
             onCellValueChanged={handleCellValueChanged}
             domLayout="normal"
-            isRowSelected={false}
-            showSearch={false}
-          />
+            showSearch={false} onRowDoubleClick={function (data: any): void {
+              throw new Error("Function not implemented.");
+            } }          />
         </div>
       </div>
     </div>
