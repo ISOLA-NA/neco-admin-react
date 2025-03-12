@@ -35,6 +35,8 @@ import Component26 from "./ControllerForms/AdvanceLookupAdvanceTable";
 import Component27 from "./ControllerForms/HyperLinkController";
 import Component28 from "./ControllerForms/SelectUserInPost";
 import Component29 from "./ControllerForms/TitleController";
+import Component30 from "./ControllerForms/SectionController";
+import Component31 from "./ControllerForms/SubSectionController";
 
 // Mapping of column types
 const columnTypeMapping: { [key: string]: number } = {
@@ -67,6 +69,8 @@ const columnTypeMapping: { [key: string]: number } = {
   component27: 7,
   component28: 8,
   component29:11,
+  component30:12,
+  component31:13
 };
 
 // Mapping of component keys to components
@@ -99,6 +103,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component27: Component27,
   component28: Component28,
   component29:Component29,
+  component30:Component30,
+  component31:Component31,
 };
 
 const typeOfInformationOptions = [
@@ -115,6 +121,8 @@ const typeOfInformationOptions = [
   { value: "component10", label: "Lookup AdvanceTable" },
   { value: "component26", label: "Advance Lookup AdvanceTable" },
   { value: "component29", label: "Title" },
+  { value: "component30", label: "Section" },
+  { value: "component31", label: "SubSection" },
   { value: "component12", label: "Lookup Image" },
   { value: "component28", label: "Select User In Post" },
   { value: "component13", label: "Yes No" },
