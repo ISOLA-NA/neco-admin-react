@@ -100,7 +100,7 @@ const MapModalButtonPigeon: React.FC<MapModalButtonPigeonProps> = ({
     <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex items-center justify-center">
       <div className="flex flex-col items-center justify-center gap-4">
         <button type="button" className="btn btn-primary" onClick={handleOpenModal}>
-          نمایش نقشه (Pigeon Maps)
+        Choose your area
         </button>
         <DynamicModal isOpen={isModalOpen} onClose={handleCloseModal}>
           <div className="flex-1 flex flex-col">
