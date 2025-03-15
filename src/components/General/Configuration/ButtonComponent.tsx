@@ -288,114 +288,113 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4">
-      {/* بخش جدول */}
-      <div className="mb-4 w-full overflow-hidden" style={{ height: "400px", overflowY: "auto" }}>
-        <DataTable
-          columnDefs={columnDefs}
-          rowData={rowData}
-          onRowDoubleClick={handleRowDoubleClickLocal}
-          setSelectedRowData={handleRowClickLocal}
-          showDuplicateIcon={false}
-          onAdd={() => {}}
-          onEdit={() => {}}
-          onDelete={() => {}}
-          onDuplicate={() => {}}
-          // استفاده از domLayout "normal" برای استفاده از ارتفاع والد
-          domLayout="normal"
-        />
-      </div>
-      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <DynamicInput
-              name="Name"
-              type="text"
-              value={nameValue}
-              onChange={(e) => setNameValue(e.target.value)}
-              className="sm:mr-2"
-            />
-            <DynamicInput
-              name="StateText"
-              type="text"
-              value={stateTextValue}
-              onChange={(e) => setStateTextValue(e.target.value)}
-              className="sm:ml-2"
-            />
-            <DynamicInput
-              name="Tooltip"
-              type="text"
-              value={tooltipValue}
-              onChange={(e) => setTooltipValue(e.target.value)}
-              className="sm:mr-2"
-            />
-            <DynamicInput
-              name="Order"
-              type="text"
-              value={orderValue}
-              onChange={(e) => setOrderValue(e.target.value)}
-              className="sm:ml-2"
-            />
-          </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
-            <DynamicRadioGroup
-              key={`state-${isRowClicked ? "controlled" : "uncontrolled"}`}
-              title="State:"
-              name="stateGroup"
-              options={RadioOptionsState}
-              selectedValue={selectedState}
-              onChange={(value) => setSelectedState(value)}
-              isRowClicked={isRowClicked}
-              className=""
-            />
-            <DynamicRadioGroup
-              key={`command-${isRowClicked ? "controlled" : "uncontrolled"}`}
-              title="Command:"
-              name="commandGroup"
-              options={RadioOptionsCommand}
-              selectedValue={selectedCommand}
-              onChange={(value) => setSelectedCommand(value)}
-              isRowClicked={isRowClicked}
-              className=""
-            />
-          </div>
-        </div>
-        <div className="lg:col-span-1 flex flex-col items-start mt-4 lg:mt-0">
-          <FileUploadHandler
-            selectedFileId={selectedFileId}
-            onUploadSuccess={handleUploadSuccess}
-            resetCounter={resetCounter}
-            onReset={handleReset}
+    <div className="w-full h-full bg-gray-50 p-6">
+      <div className="bg-white rounded-lg shadow p-6">
+        {/* بخش جدول */}
+        <div className="mb-6 h-96 overflow-auto">
+          <DataTable
+            columnDefs={columnDefs}
+            rowData={rowData}
+            onRowDoubleClick={handleRowDoubleClickLocal}
+            setSelectedRowData={handleRowClickLocal}
+            showDuplicateIcon={false}
+            onAdd={() => {}}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            onDuplicate={() => {}}
+            domLayout="normal"
           />
         </div>
-      </div>
-      <div className="mt-4">
-        {selectedFileId ? (
-          <>
-            {!imageError ? (
-              <img
-                src={`/api/getImage/${selectedFileId}`}
-                alt="Selected"
-                className="w-32 h-32 object-cover"
-                onError={() => setImageError(true)}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <DynamicInput
+                name="Name"
+                type="text"
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
+                className="border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
               />
-            ) : (
-              <div></div>
-            )}
-          </>
-        ) : (
-          <p></p>
-        )}
-      </div>
-      <div className="mt-6 flex justify-start space-x-4">
-        <DynamicButton text="Add" onClick={handleAddClick} isDisabled={false} />
-        <DynamicButton text="Edit" onClick={handleEditClick} isDisabled={!selectedRow} />
-        <DynamicButton text="New" onClick={handleNewClick} isDisabled={false} />
-        <DynamicButton
-          text="Delete"
-          onClick={handleDeleteClick}
-          isDisabled={isDeleteDisabled}
-        />
+              <DynamicInput
+                name="StateText"
+                type="text"
+                value={stateTextValue}
+                onChange={(e) => setStateTextValue(e.target.value)}
+                className="border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+              <DynamicInput
+                name="Tooltip"
+                type="text"
+                value={tooltipValue}
+                onChange={(e) => setTooltipValue(e.target.value)}
+                className="border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+              <DynamicInput
+                name="Order"
+                type="text"
+                value={orderValue}
+                onChange={(e) => setOrderValue(e.target.value)}
+                className="border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+              />
+            </div>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <DynamicRadioGroup
+                key={`state-${isRowClicked ? "controlled" : "uncontrolled"}`}
+                title="State:"
+                name="stateGroup"
+                options={RadioOptionsState}
+                selectedValue={selectedState}
+                onChange={(value) => setSelectedState(value)}
+                isRowClicked={isRowClicked}
+                className="p-2 border rounded"
+              />
+              <DynamicRadioGroup
+                key={`command-${isRowClicked ? "controlled" : "uncontrolled"}`}
+                title="Command:"
+                name="commandGroup"
+                options={RadioOptionsCommand}
+                selectedValue={selectedCommand}
+                onChange={(value) => setSelectedCommand(value)}
+                isRowClicked={isRowClicked}
+                className="p-2 border rounded"
+              />
+            </div>
+          </div>
+          <div className="lg:col-span-1 flex flex-col items-center">
+            <FileUploadHandler
+              selectedFileId={selectedFileId}
+              onUploadSuccess={handleUploadSuccess}
+              resetCounter={resetCounter}
+              onReset={handleReset}
+            />
+          </div>
+        </div>
+        {/* <div className="mt-4 flex justify-center">
+          {selectedFileId ? (
+            <>
+              {!imageError ? (
+                <img
+                  src={`/api/getImage/${selectedFileId}`}
+                  alt="Selected"
+                  className="w-32 h-32 object-cover rounded shadow"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-32 h-32 flex items-center justify-center bg-gray-200 rounded">
+                  <span className="text-sm text-gray-500">تصویر نامعتبر</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-gray-500 text-sm">هیچ تصویری انتخاب نشده است.</p>
+          )}
+        </div> */}
+        <div className="mt-6 flex flex-wrap justify-center gap-4">
+          <DynamicButton text="Add" onClick={handleAddClick} isDisabled={false} className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded transition" />
+          <DynamicButton text="Edit" onClick={handleEditClick} isDisabled={!selectedRow} className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition" />
+          <DynamicButton text="New" onClick={handleNewClick} isDisabled={false} className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition" />
+          <DynamicButton text="Delete" onClick={handleDeleteClick} isDisabled={isDeleteDisabled} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition" />
+        </div>
       </div>
     </div>
   );
