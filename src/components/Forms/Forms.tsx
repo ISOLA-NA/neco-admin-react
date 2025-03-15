@@ -88,7 +88,13 @@ const columnTypeMapping: { [key: string]: number } = {
   component25: 28,
   component26: 36,
   component27: 7,
-  component28: 8
+  component28: 8,
+  component29: 11,
+  component30: 12,
+  component31: 13,
+  component32: 14,
+  component33: 18,
+  component34: 23
 }
 
 const typeOfInformationOptions = [
@@ -118,7 +124,13 @@ const typeOfInformationOptions = [
   { value: 'component22', label: 'Calculated Field' },
   { value: 'component23', label: 'Excel Calculator' },
   { value: 'component24', label: 'Tab' },
-  { value: 'component25', label: 'Map' }
+  { value: 'component25', label: 'Map' },
+  { value: 'component29', label: 'Title' },
+  { value: 'component30', label: 'Section' },
+  { value: 'component31', label: 'Sub Section' },
+  { value: 'component32', label: 'New Line' },
+  { value: 'component33', label: 'Mepost Selector' },
+  { value: 'component34', label: 'Advance WF' }
 ]
 
 /**
