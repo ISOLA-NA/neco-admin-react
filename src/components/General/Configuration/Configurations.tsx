@@ -1,15 +1,14 @@
 // src/components/Views/tab/Configuration.tsx
 
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import TwoColumnLayout from '../../layout/TwoColumnLayout'
-import CustomTextarea from '../../utilities/DynamicTextArea'
-import DynamicInput from '../../utilities/DynamicInput'
-import DynamicSelector from '../../utilities/DynamicSelector'
-import ListSelector from '../../ListSelector/ListSelector'
-import DynamicModal from '../../utilities/DynamicModal'
-import TableSelector from '../Configuration/TableSelector'
-import ButtonComponent from '../Configuration/ButtonComponent'
-
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import TwoColumnLayout from "../../layout/TwoColumnLayout";
+import CustomTextarea from "../../utilities/DynamicTextArea";
+import DynamicInput from "../../utilities/DynamicInput";
+import DynamicSelector from "../../utilities/DynamicSelector";
+import ListSelector from "../../ListSelector/ListSelector";
+import DynamicModal from "../../utilities/DynamicModal";
+import TableSelector from "../Configuration/TableSelector";
+import ButtonComponent from "../Configuration/ButtonComponent";
 import {
   useApi,
   EntityTypeItem,
@@ -17,73 +16,97 @@ import {
   ProgramTemplateItem,
   DefaultRibbonItem,
   AFBtnItem,
-  ConfigurationItem
-} from '../../../context/ApiContext'
+  ConfigurationItem,
+} from "../../../context/ApiContext";
 
 interface ConfigurationProps {
-  selectedRow: any
-  onSave?: (data: ConfigurationItem) => void
+  selectedRow: any;
+  onSave?: (data: ConfigurationItem) => void;
 }
 
 export interface ConfigurationHandle {
-  save: () => Promise<ConfigurationItem | null>
+  /**
+   * این متد برای ذخیره (Insert یا Update) در دیتابیس استفاده می‌شود
+   */
+  save: () => Promise<ConfigurationItem | null>;
+  /**
+   * این متد فقط بررسی می‌کند آیا فیلد Name خالی است یا نه
+   */
+  checkNameFilled: () => boolean;
 }
 
 const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
   ({ selectedRow }, ref) => {
-    const api = useApi()
+    const api = useApi();
 
-    // مقداردهی اولیه state
+    // state اصلی برای نگهداری داده‌های فرم Configuration
     const [configData, setConfigData] = useState({
-      id: '',
-      Name: '',
-      FirstIDProgramTemplate: '',
-      SelMenuIDForMain: '',
-      Description: '',
+      id: "",
+      Name: "",
+      FirstIDProgramTemplate: "",
+      SelMenuIDForMain: "",
+      Description: "",
       IsVisible: true,
-      LastModified: '',
-      DefaultBtn: '',
-      LetterBtns: '',
-      MeetingBtns: '',
-      EnityTypeIDForLessonLearn: '',
-      EnityTypeIDForTaskCommnet: '',
-      EnityTypeIDForProcesure: '',
-      WFTemplateIDForLessonLearn: ''
-    })
+      LastModified: "",
+      DefaultBtn: "",
+      LetterBtns: "",
+      MeetingBtns: "",
+      EnityTypeIDForLessonLearn: "",
+      EnityTypeIDForTaskCommnet: "",
+      EnityTypeIDForProcesure: "",
+      WFTemplateIDForLessonLearn: "",
+    });
 
-    const [descriptionError, setDescriptionError] = useState(false)
-    const [modalOpen, setModalOpen] = useState(false)
+    const [descriptionError, setDescriptionError] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
     const [currentSelector, setCurrentSelector] = useState<
-      | 'DefaultBtn'
-      | 'LetterBtns'
-      | 'MeetingBtns'
-      | 'FirstIDProgramTemplate'
-      | 'SelMenuIDForMain'
-      | 'Lesson Learned Form'
-      | 'Lesson Learned Af Template'
-      | 'Comment Form Template'
-      | 'Procedure Form Template'
+      | "DefaultBtn"
+      | "LetterBtns"
+      | "MeetingBtns"
+      | "FirstIDProgramTemplate"
+      | "SelMenuIDForMain"
+      | "Lesson Learned Form"
+      | "Lesson Learned Af Template"
+      | "Comment Form Template"
+      | "Procedure Form Template"
       | null
-    >(null)
-    const [selectedRowData, setSelectedRowData] = useState<any>(null)
+    >(null);
 
-    // داده‌هایی که از API می‌آیند
-    const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>([])
-    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([])
-    const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([])
-    const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([])
-    const [afButtons, setAfButtons] = useState<AFBtnItem[]>([])
+    const [selectedRowData, setSelectedRowData] = useState<any>(null);
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const [loading, setLoading] = useState<boolean>(true)
+    // داده‌هایی که از API بارگیری می‌شوند
+    const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>([]);
+    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
+    const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
+    const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
+    const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
 
-    // متد ذخیره‌سازی با بررسی مقدار Name
-    const handleSave = async (): Promise<ConfigurationItem | null> => {
-      if (!configData.Name.trim()) {
-        alert('لطفاً مقدار Name را پر کنید')
-        return null
+    // این تابع وظیفه دارد مقدار فیلد Name را بررسی کند
+    // اگر خالی باشد، false برمی‌گرداند
+    useImperativeHandle(ref, () => ({
+      save: handleSave,
+      checkNameFilled: () => {
+        return configData.Name.trim().length > 0;
+      },
+    }));
+
+    // تابع کمکی برای به‌روزرسانی state
+    const handleChange = (field: keyof typeof configData, value: string | number) => {
+      setConfigData((prev) => ({
+        ...prev,
+        [field]: value.toString(),
+      }));
+
+      if (field === "Description" && typeof value === "string") {
+        setDescriptionError(value.length < 10);
       }
+    };
+
+    // متد اصلی برای ذخیره در دیتابیس (Insert یا Update)
+    const handleSave = async (): Promise<ConfigurationItem | null> => {
       try {
-        setLoading(true)
+        setLoading(true);
 
         const newConfig: ConfigurationItem = {
           ...(configData.id && { ID: parseInt(configData.id) }),
@@ -99,229 +122,209 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           EnityTypeIDForLessonLearn: Number(configData.EnityTypeIDForLessonLearn) || 0,
           EnityTypeIDForTaskCommnet: Number(configData.EnityTypeIDForTaskCommnet) || 0,
           EnityTypeIDForProcesure: Number(configData.EnityTypeIDForProcesure) || 0,
-          WFTemplateIDForLessonLearn: Number(configData.WFTemplateIDForLessonLearn) || 0
-        }
+          WFTemplateIDForLessonLearn: Number(configData.WFTemplateIDForLessonLearn) || 0,
+        };
 
-        let updatedConfig: ConfigurationItem
+        let updatedConfig: ConfigurationItem;
         if (newConfig.ID) {
-          // اگر ID داشته باشیم، رکورد را آپدیت می‌کنیم
-          updatedConfig = await api.updateConfiguration(newConfig)
+          // حالت ویرایش
+          updatedConfig = await api.updateConfiguration(newConfig);
         } else {
-          // در غیر این صورت، درج رکورد جدید
-          updatedConfig = await api.insertConfiguration(newConfig)
+          // حالت درج رکورد جدید
+          updatedConfig = await api.insertConfiguration(newConfig);
         }
 
-        return updatedConfig
+        return updatedConfig;
       } catch (error) {
-        console.error('Error saving configuration:', error)
-        throw error
+        console.error("Error saving configuration:", error);
+        throw error;
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    // امکان صدا زدن متد save از بیرون
-    useImperativeHandle(ref, () => ({
-      save: handleSave
-    }))
-
-    // تابع کمکی برای تغییر در state
-    const handleChange = (
-      field: keyof typeof configData,
-      value: string | number
-    ) => {
-      setConfigData(prev => ({
-        ...prev,
-        [field]: value.toString()
-      }))
-
-      if (field === 'Description' && typeof value === 'string') {
-        setDescriptionError(value.length < 10)
+    // با استفاده از این تابع می‌توانیم داده مناسب را به مودال جدول بفرستیم
+    // بر اساس selector فعلی تصمیم می‌گیرد کدام آرایه را برگرداند
+    const getRowData = (selector: string | null) => {
+      if (!selector) return [];
+      switch (selector) {
+        case "FirstIDProgramTemplate":
+          return programTemplates;
+        case "SelMenuIDForMain":
+          return defaultRibbons;
+        case "Lesson Learned Form":
+        case "Comment Form Template":
+        case "Procedure Form Template":
+          return entityTypes;
+        case "Lesson Learned Af Template":
+          return wfTemplates;
+        case "DefaultBtn":
+        case "LetterBtns":
+        case "MeetingBtns":
+          return afButtons;
+        default:
+          return [];
       }
-    }
+    };
 
-    // نگاشت فیلدها برای سلکتورها
-    const selectorToFieldMap: { [key: string]: keyof typeof configData } = {
-      DefaultBtn: 'DefaultBtn',
-      LetterBtns: 'LetterBtns',
-      MeetingBtns: 'MeetingBtns',
-      FirstIDProgramTemplate: 'FirstIDProgramTemplate',
-      SelMenuIDForMain: 'SelMenuIDForMain',
-      'Lesson Learned Form': 'EnityTypeIDForLessonLearn',
-      'Lesson Learned Af Template': 'WFTemplateIDForLessonLearn',
-      'Comment Form Template': 'EnityTypeIDForTaskCommnet',
-      'Procedure Form Template': 'EnityTypeIDForProcesure'
-    }
-
-    // در فیلدهای چندمقداری مثل اکشن‌باتن‌ها، مقدارها به صورت pipe ذخیره می‌شوند
+    // در فیلدهای چندمقداری (مانند اکشن‌باتن‌ها)، مقدار با pipe جدا می‌شود
     const handleSelectionChange = (
       field: keyof typeof configData,
       selectedIds: (number | string)[]
     ) => {
-      const idsString = selectedIds.join('|') + '|'
-      handleChange(field, idsString)
-    }
+      const idsString = selectedIds.join("|") + "|";
+      handleChange(field, idsString);
+    };
 
-    // وقتی از داخل مودال یک ردیف انتخاب می‌شود
+    // وقتی در مودال یک ردیف را انتخاب می‌کنیم و دکمه Select می‌زنیم
     const handleSelectButtonClick = () => {
       if (selectedRowData && currentSelector) {
-        const field = selectorToFieldMap[currentSelector]
+        const fieldMap: { [key: string]: keyof typeof configData } = {
+          DefaultBtn: "DefaultBtn",
+          LetterBtns: "LetterBtns",
+          MeetingBtns: "MeetingBtns",
+          FirstIDProgramTemplate: "FirstIDProgramTemplate",
+          SelMenuIDForMain: "SelMenuIDForMain",
+          "Lesson Learned Form": "EnityTypeIDForLessonLearn",
+          "Lesson Learned Af Template": "WFTemplateIDForLessonLearn",
+          "Comment Form Template": "EnityTypeIDForTaskCommnet",
+          "Procedure Form Template": "EnityTypeIDForProcesure",
+        };
+        const field = fieldMap[currentSelector];
         if (field) {
-          const selectedId = selectedRowData.ID.toString()
-          handleChange(field, selectedId)
-          handleCloseModal()
+          const selectedId = selectedRowData.ID.toString();
+          handleChange(field, selectedId);
+          handleCloseModal();
         }
-      } else {
-        console.warn('No row selected or selector is null')
       }
-    }
+    };
 
-    // دریافت داده‌ها از API
+    // باز و بسته شدن مودال
+    const handleOpenModal = (
+      selector:
+        | "DefaultBtn"
+        | "LetterBtns"
+        | "MeetingBtns"
+        | "FirstIDProgramTemplate"
+        | "SelMenuIDForMain"
+        | "Lesson Learned Form"
+        | "Lesson Learned Af Template"
+        | "Comment Form Template"
+        | "Procedure Form Template"
+    ) => {
+      setCurrentSelector(selector);
+      setModalOpen(true);
+    };
+    const handleCloseModal = () => {
+      setModalOpen(false);
+      setSelectedRowData(null);
+      setCurrentSelector(null);
+    };
+
+    // وقتی روی یک سطر از جدول کلیک می‌کنیم تا انتخاب شود
+    const handleRowClick = (rowData: any) => {
+      setSelectedRowData(rowData);
+    };
+
+    // تابع کمکی برای پردازش مقادیر چندانتخابی (ListSelector)
+    const parseIds = (ids: string): number[] => {
+      return ids
+        .split("|")
+        .map((id) => parseInt(id))
+        .filter((id) => !isNaN(id));
+    };
+
+    // برگرداندن آرایه از آی‌دی‌های انتخاب‌شده برای اکشن‌باتن‌ها
+    const defaultBtnIds = parseIds(configData.DefaultBtn);
+    const letterBtnIds = parseIds(configData.LetterBtns);
+    const meetingBtnIds = parseIds(configData.MeetingBtns);
+
+    // بارگذاری داده‌های لازم از API
     useEffect(() => {
       const fetchInitialData = async () => {
         try {
-          setLoading(true)
+          setLoading(true);
+          // همزمان چند API را فراخوانی می‌کنیم
           const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
             await Promise.all([
               api.getAllProgramTemplates(),
               api.getAllDefaultRibbons(),
               api.getTableTransmittal(),
               api.getAllWfTemplate(),
-              api.getAllAfbtn()
-            ])
+              api.getAllAfbtn(),
+            ]);
 
-          setProgramTemplates(templates)
-          setDefaultRibbons(ribbons)
-          setEntityTypes(entities)
-          setWfTemplates(wfTemplatesData)
-          setAfButtons(afButtonsData)
+          setProgramTemplates(templates);
+          setDefaultRibbons(ribbons);
+          setEntityTypes(entities);
+          setWfTemplates(wfTemplatesData);
+          setAfButtons(afButtonsData);
         } catch (error) {
-          console.error('Error fetching initial data:', error)
+          console.error("Error fetching initial data:", error);
         } finally {
-          setLoading(false)
+          setLoading(false);
         }
-      }
+      };
 
-      fetchInitialData()
-    }, [api])
+      fetchInitialData();
+    }, [api]);
 
-    // بروزرسانی state هنگام تغییر سطر انتخابی
+    // وقتی کاربر در تب اصلی یک سطر انتخاب می‌کند (selectedRow)، اگر آن سطر عوض شود، باید فرم را پر کنیم
     useEffect(() => {
       if (selectedRow) {
         setConfigData({
-          id: selectedRow?.ID?.toString() || '',
-          Name: selectedRow?.Name || '',
-          FirstIDProgramTemplate: (selectedRow?.FirstIDProgramTemplate || '')
+          id: selectedRow?.ID?.toString() || "",
+          Name: selectedRow?.Name || "",
+          FirstIDProgramTemplate: (selectedRow?.FirstIDProgramTemplate || "")
             .toString()
-            .replace(/\|+$/, ''),
-          SelMenuIDForMain: (selectedRow?.SelMenuIDForMain || '')
+            .replace(/\|+$/, ""),
+          SelMenuIDForMain: (selectedRow?.SelMenuIDForMain || "")
             .toString()
-            .replace(/\|+$/, ''),
-          Description: selectedRow?.Description || '',
+            .replace(/\|+$/, ""),
+          Description: selectedRow?.Description || "",
           IsVisible: selectedRow?.IsVisible ?? true,
-          LastModified: selectedRow?.LastModified || '',
-          DefaultBtn: selectedRow?.DefaultBtn || '',
-          LetterBtns: selectedRow?.LetterBtns || '',
-          MeetingBtns: selectedRow?.MeetingBtns || '',
-          EnityTypeIDForLessonLearn: (selectedRow?.EnityTypeIDForLessonLearn || '')
+          LastModified: selectedRow?.LastModified || "",
+          DefaultBtn: selectedRow?.DefaultBtn || "",
+          LetterBtns: selectedRow?.LetterBtns || "",
+          MeetingBtns: selectedRow?.MeetingBtns || "",
+          EnityTypeIDForLessonLearn: (selectedRow?.EnityTypeIDForLessonLearn || "")
             .toString()
-            .replace(/\|+$/, ''),
-          EnityTypeIDForTaskCommnet: (selectedRow?.EnityTypeIDForTaskCommnet || '')
+            .replace(/\|+$/, ""),
+          EnityTypeIDForTaskCommnet: (selectedRow?.EnityTypeIDForTaskCommnet || "")
             .toString()
-            .replace(/\|+$/, ''),
-          EnityTypeIDForProcesure: (selectedRow?.EnityTypeIDForProcesure || '')
+            .replace(/\|+$/, ""),
+          EnityTypeIDForProcesure: (selectedRow?.EnityTypeIDForProcesure || "")
             .toString()
-            .replace(/\|+$/, ''),
-          WFTemplateIDForLessonLearn: (selectedRow?.WFTemplateIDForLessonLearn || '')
+            .replace(/\|+$/, ""),
+          WFTemplateIDForLessonLearn: (selectedRow?.WFTemplateIDForLessonLearn || "")
             .toString()
-            .replace(/\|+$/, '')
-        })
+            .replace(/\|+$/, ""),
+        });
       } else {
+        // اگر هیچ ردیفی انتخاب نشده باشد، فرم را خالی می‌کنیم
         setConfigData({
-          id: '',
-          Name: '',
-          FirstIDProgramTemplate: '',
-          SelMenuIDForMain: '',
-          Description: '',
+          id: "",
+          Name: "",
+          FirstIDProgramTemplate: "",
+          SelMenuIDForMain: "",
+          Description: "",
           IsVisible: true,
-          LastModified: '',
-          DefaultBtn: '',
-          LetterBtns: '',
-          MeetingBtns: '',
-          EnityTypeIDForLessonLearn: '',
-          EnityTypeIDForTaskCommnet: '',
-          EnityTypeIDForProcesure: '',
-          WFTemplateIDForLessonLearn: ''
-        })
+          LastModified: "",
+          DefaultBtn: "",
+          LetterBtns: "",
+          MeetingBtns: "",
+          EnityTypeIDForLessonLearn: "",
+          EnityTypeIDForTaskCommnet: "",
+          EnityTypeIDForProcesure: "",
+          WFTemplateIDForLessonLearn: "",
+        });
       }
-    }, [selectedRow])
-
-    // مدیریت باز و بسته شدن مودال
-    const handleOpenModal = (
-      selector:
-        | 'DefaultBtn'
-        | 'LetterBtns'
-        | 'MeetingBtns'
-        | 'FirstIDProgramTemplate'
-        | 'SelMenuIDForMain'
-        | 'Lesson Learned Form'
-        | 'Lesson Learned Af Template'
-        | 'Comment Form Template'
-        | 'Procedure Form Template'
-    ) => {
-      setCurrentSelector(selector)
-      setModalOpen(true)
-    }
-
-    const handleCloseModal = () => {
-      setModalOpen(false)
-      setSelectedRowData(null)
-      setCurrentSelector(null)
-    }
-
-    const handleRowClick = (rowData: any) => {
-      setSelectedRowData(rowData)
-    }
-
-    // دریافت داده‌ها برای مودال بر اساس سلکتور
-    const getRowData = (selector: string | null) => {
-      if (!selector) return []
-      switch (selector) {
-        case 'FirstIDProgramTemplate':
-          return programTemplates
-        case 'SelMenuIDForMain':
-          return defaultRibbons
-        case 'Lesson Learned Form':
-        case 'Comment Form Template':
-        case 'Procedure Form Template':
-          return entityTypes
-        case 'Lesson Learned Af Template':
-          return wfTemplates
-        case 'DefaultBtn':
-        case 'LetterBtns':
-        case 'MeetingBtns':
-          return afButtons
-        default:
-          return []
-      }
-    }
-
-    // تابع کمکی برای پردازش مقادیر چند انتخابی
-    const parseIds = (ids: string): number[] => {
-      return ids
-        .split('|')
-        .map(id => parseInt(id))
-        .filter(id => !isNaN(id))
-    }
-
-    const defaultBtnIds = parseIds(configData.DefaultBtn)
-    const letterBtnIds = parseIds(configData.LetterBtns)
-    const meetingBtnIds = parseIds(configData.MeetingBtns)
+    }, [selectedRow]);
 
     return (
       <div>
         <TwoColumnLayout>
-          {/* نام */}
+          {/* فیلد Name */}
           <DynamicInput
             name="Name"
             type="text"
@@ -331,7 +334,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             loading={loading}
           />
 
-          {/* توضیحات */}
+          {/* فیلد Description */}
           <CustomTextarea
             name="Description"
             value={configData.Description}
@@ -340,17 +343,15 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             className={descriptionError ? "border-red-500" : "border-gray-300"}
           />
 
-          {/* Program Template -> تک مقداری */}
+          {/* Program Template (تک مقداری) */}
           <DynamicSelector
             name="FirstIDProgramTemplate"
             options={programTemplates.map((pt) => ({
               value: pt.ID.toString(),
-              label: pt.Name
+              label: pt.Name,
             }))}
             selectedValue={configData.FirstIDProgramTemplate}
-            onChange={(e) =>
-              handleChange("FirstIDProgramTemplate", e.target.value)
-            }
+            onChange={(e) => handleChange("FirstIDProgramTemplate", e.target.value)}
             label="Program Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}
@@ -358,12 +359,12 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             className="mt-1"
           />
 
-          {/* Default Ribbon -> تک مقداری */}
+          {/* Default Ribbon (تک مقداری) */}
           <DynamicSelector
             name="SelMenuIDForMain"
             options={defaultRibbons.map((dr) => ({
               value: dr.ID.toString(),
-              label: dr.Name
+              label: dr.Name,
             }))}
             selectedValue={configData.SelMenuIDForMain}
             onChange={(e) => handleChange("SelMenuIDForMain", e.target.value)}
@@ -374,12 +375,12 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             className="mt-1"
           />
 
-          {/* Lesson Learned Form -> تک مقداری */}
+          {/* Lesson Learned Form (تک مقداری) */}
           <DynamicSelector
             name="EnityTypeIDForLessonLearn"
             options={entityTypes.map((llf) => ({
               value: llf.ID.toString(),
-              label: llf.Name
+              label: llf.Name,
             }))}
             selectedValue={configData.EnityTypeIDForLessonLearn}
             onChange={(e) =>
@@ -392,12 +393,12 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             loading={loading}
           />
 
-          {/* Lesson Learned Af Template -> تک مقداری */}
+          {/* Lesson Learned Af Template (تک مقداری) */}
           <DynamicSelector
             name="WFTemplateIDForLessonLearn"
             options={wfTemplates.map((wf) => ({
               value: wf.ID.toString(),
-              label: wf.Name
+              label: wf.Name,
             }))}
             selectedValue={configData.WFTemplateIDForLessonLearn}
             onChange={(e) =>
@@ -410,12 +411,12 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             loading={loading}
           />
 
-          {/* Comment Form Template -> تک مقداری */}
+          {/* Comment Form Template (تک مقداری) */}
           <DynamicSelector
             name="EnityTypeIDForTaskCommnet"
             options={entityTypes.map((cft) => ({
               value: cft.ID.toString(),
-              label: cft.Name
+              label: cft.Name,
             }))}
             selectedValue={configData.EnityTypeIDForTaskCommnet}
             onChange={(e) =>
@@ -428,12 +429,12 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             loading={loading}
           />
 
-          {/* Procedure Form Template -> تک مقداری */}
+          {/* Procedure Form Template (تک مقداری) */}
           <DynamicSelector
             name="EnityTypeIDForProcesure"
             options={entityTypes.map((pft) => ({
               value: pft.ID.toString(),
-              label: pft.Name
+              label: pft.Name,
             }))}
             selectedValue={configData.EnityTypeIDForProcesure}
             onChange={(e) =>
@@ -446,13 +447,13 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             loading={loading}
           />
 
-          {/* Default Action Buttons -> چند مقداری */}
+          {/* Default Action Buttons (چند مقداری) */}
           <ListSelector
             title="Default Action Buttons"
             className="mt-1"
             columnDefs={[
               { headerName: "Name", field: "Name" },
-              { headerName: "Tooltip", field: "Tooltip" }
+              { headerName: "Tooltip", field: "Tooltip" },
             ]}
             rowData={afButtons}
             selectedIds={defaultBtnIds}
@@ -464,23 +465,23 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             modalContentProps={{
               columnDefs: [
                 { headerName: "Name", field: "Name" },
-                { headerName: "Tooltip", field: "Tooltip" }
+                { headerName: "Tooltip", field: "Tooltip" },
               ],
               rowData: afButtons,
               onClose: handleCloseModal,
               onRowSelect: handleSelectButtonClick,
-              onSelectFromButton: handleSelectButtonClick
+              onSelectFromButton: handleSelectButtonClick,
             }}
             loading={loading}
           />
 
-          {/* Letter Action Buttons -> چند مقداری */}
+          {/* Letter Action Buttons (چند مقداری) */}
           <ListSelector
             title="Letter Action Buttons"
             className="mt-1"
             columnDefs={[
               { headerName: "Name", field: "Name" },
-              { headerName: "Tooltip", field: "Tooltip" }
+              { headerName: "Tooltip", field: "Tooltip" },
             ]}
             rowData={afButtons}
             selectedIds={letterBtnIds}
@@ -492,25 +493,25 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             modalContentProps={{
               columnDefs: [
                 { headerName: "Name", field: "Name" },
-                { headerName: "Tooltip", field: "Tooltip" }
+                { headerName: "Tooltip", field: "Tooltip" },
               ],
               rowData: afButtons,
               selectedRow: selectedRowData,
               onClose: handleCloseModal,
               onRowSelect: handleSelectButtonClick,
               onSelectFromButton: handleSelectButtonClick,
-              isSelectDisabled: !selectedRowData
+              isSelectDisabled: !selectedRowData,
             }}
             loading={loading}
           />
 
-          {/* Meeting Action Buttons -> چند مقداری (مشابه بقیه دکمه‌ها) */}
+          {/* Meeting Action Buttons (چند مقداری) */}
           <ListSelector
             title="Meeting Action Buttons"
             className="mt-1"
             columnDefs={[
               { headerName: "Name", field: "Name" },
-              { headerName: "Tooltip", field: "Tooltip" }
+              { headerName: "Tooltip", field: "Tooltip" },
             ]}
             rowData={afButtons}
             selectedIds={meetingBtnIds}
@@ -522,25 +523,25 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             modalContentProps={{
               columnDefs: [
                 { headerName: "Name", field: "Name" },
-                { headerName: "Tooltip", field: "Tooltip" }
+                { headerName: "Tooltip", field: "Tooltip" },
               ],
               rowData: afButtons,
               selectedRow: selectedRowData,
               onClose: handleCloseModal,
               onRowSelect: handleSelectButtonClick,
               onSelectFromButton: handleSelectButtonClick,
-              isSelectDisabled: !selectedRowData
+              isSelectDisabled: !selectedRowData,
             }}
             loading={loading}
           />
         </TwoColumnLayout>
 
-        {/* مودال عمومی برای انتخاب از جدول */}
+        {/* مودال عمومی برای انتخاب از جدول (TableSelector) */}
         <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
           <TableSelector
             columnDefs={[
               { headerName: "نام", field: "Name" },
-              { headerName: "توضیحات", field: "EntityCateADescription" }
+              { headerName: "توضیحات", field: "EntityCateADescription" },
             ]}
             rowData={getRowData(currentSelector)}
             selectedRow={selectedRowData}
@@ -551,8 +552,8 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           />
         </DynamicModal>
       </div>
-    )
+    );
   }
-)
+);
 
-export default Configuration
+export default Configuration;

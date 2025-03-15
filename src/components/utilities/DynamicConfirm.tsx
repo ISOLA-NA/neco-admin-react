@@ -1,13 +1,13 @@
 // src/components/utilities/Confirm/DynamicConfirm.tsx
 
 import React from "react";
-import { FiAlertTriangle } from "react-icons/fi";
+import { FiAlertTriangle, FiCheck } from "react-icons/fi";
 
 /**
- * variant = 'delete' => رنگ قرمز / دکمه قرمز
- * variant = 'edit'   => رنگ زرد / دکمه زرد
+ * بسته به سلیقه می‌توانید Variantهای بیشتری اضافه کنید،
+ * اینجا پنج تا گذاشته‌ایم: add, edit, delete, notice, error
  */
-type VariantType = "delete" | "edit";
+type VariantType = "add" | "edit" | "delete" | "notice" | "error";
 
 interface DynamicConfirmProps {
   isOpen: boolean;
@@ -16,6 +16,11 @@ interface DynamicConfirmProps {
   onConfirm: () => void;
   onClose: () => void;
   variant: VariantType;
+  /**
+   * اگر بخواهیم کادر Cancel را مخفی کنیم (مثلاً در پیام‌های اطلاع‌رسانی)،
+   * می‌توانیم از این استفاده کنیم.
+   */
+  hideCancelButton?: boolean;
 }
 
 const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
@@ -25,23 +30,50 @@ const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
   onConfirm,
   onClose,
   variant,
+  hideCancelButton = false,
 }) => {
   if (!isOpen) return null;
 
-  // بر اساس variant تعیین رنگ‌ها
-  const headerColor =
-    variant === "delete"
-      ? "text-red-500"
-      : variant === "edit"
-      ? "text-yellow-500"
-      : "text-gray-700";
+  // تعیین رنگ‌ها بر اساس variant
+  let headerColor = "text-gray-700";
+  let confirmButtonColor = "bg-blue-500 hover:bg-blue-600";
+  let IconComponent = FiAlertTriangle;
+  let iconSize = 24;
 
-  const confirmButtonColor =
-    variant === "delete"
-      ? "bg-red-500 hover:bg-red-600"
-      : variant === "edit"
-      ? "bg-yellow-500 hover:bg-yellow-600"
-      : "bg-blue-500 hover:bg-blue-600";
+  switch (variant) {
+    case "delete":
+      headerColor = "text-red-500";
+      confirmButtonColor = "bg-red-500 hover:bg-red-600";
+      IconComponent = FiAlertTriangle;
+      iconSize = 24;
+      break;
+    case "edit":
+      headerColor = "text-yellow-500";
+      confirmButtonColor = "bg-yellow-500 hover:bg-yellow-600";
+      IconComponent = FiAlertTriangle;
+      iconSize = 24;
+      break;
+    case "add":
+      headerColor = "text-green-500";
+      confirmButtonColor = "bg-green-500 hover:bg-green-600";
+      IconComponent = FiCheck;
+      iconSize = 30;
+      break;
+    case "notice":
+      // پیام اطلاع‌رسانی (سبز کم‌رنگ) با دکمه OK
+      headerColor = "text-green-500";
+      confirmButtonColor = "bg-green-500 hover:bg-green-600";
+      IconComponent = FiCheck;
+      iconSize = 30;
+      break;
+    case "error":
+      // پیام خطا (قرمز)
+      headerColor = "text-red-500";
+      confirmButtonColor = "bg-red-500 hover:bg-red-600";
+      IconComponent = FiAlertTriangle;
+      iconSize = 24;
+      break;
+  }
 
   return (
     <div
@@ -55,26 +87,28 @@ const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
       <div className="bg-white rounded-lg shadow-lg p-6 w-80 relative flex flex-col items-center">
         {/* هدر و آیکون */}
         <div className={`mb-4 flex items-center justify-center ${headerColor}`}>
-          <FiAlertTriangle size={24} className="mr-2" />
+          <IconComponent size={iconSize} className="mr-2" />
           <h2 className="text-lg font-bold">{title}</h2>
         </div>
-
-        {/* توضیحات اصلی */}
-        <p className="text-gray-700 text-center mb-6">{message}</p>
-
-        {/* دکمه‌ها (وسط‌چین) */}
+        {/* متن پیام */}
+        <p className="text-gray-700 text-center mb-6 whitespace-pre-line">
+          {message}
+        </p>
+        {/* دکمه‌ها */}
         <div className="flex justify-center space-x-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700"
-          >
-            Cancel
-          </button>
+          {!hideCancelButton && (
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700"
+            >
+              Cancel
+            </button>
+          )}
           <button
             onClick={onConfirm}
             className={`px-4 py-2 rounded text-white ${confirmButtonColor}`}
           >
-            Confirm
+            {hideCancelButton ? "OK" : "Confirm"}
           </button>
         </div>
       </div>

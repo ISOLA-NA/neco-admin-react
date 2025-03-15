@@ -32,9 +32,9 @@ import ProjectAccess, {
 import { ApprovalFlowHandle } from "../../ApprovalFlows/MainApproval/ApprovalFlows";
 import { FormsHandle } from "../../Forms/Forms";
 import { CategoryHandle } from "../../Forms/Categories";
-import DynamicConfirm from "../../utilities/DynamicConfirm";
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
+import DynamicConfirm from "../../utilities/DynamicConfirm";
 
 interface TabContentProps {
   component: React.LazyExoticComponent<React.ComponentType<any>> | null;
@@ -62,7 +62,6 @@ const TabContent: FC<TabContentProps> = ({
   selectedRow,
   activeSubTab,
   onAdd,
-  onEdit,
   onDelete,
   onDuplicate,
   onRowClick,
@@ -78,6 +77,7 @@ const TabContent: FC<TabContentProps> = ({
   const [isRightMaximized, setIsRightMaximized] = useState(false);
   const isMaximized = panelWidth >= 97;
 
+  // رفرنس‌ها
   const configurationRef = useRef<ConfigurationHandle>(null);
   const commandRef = useRef<CommandHandle>(null);
   const userRef = useRef<UserHandle>(null);
@@ -94,34 +94,31 @@ const TabContent: FC<TabContentProps> = ({
   const approvalFlowRef = useRef<ApprovalFlowHandle>(null);
   const formsRef = useRef<FormsHandle>(null);
   const categoriesRef = useRef<CategoryHandle>(null);
-  const [selectedCategoryType, setSelectedCategoryType] = useState<
-    "cata" | "catb"
-  >("cata");
 
-  // State for DynamicConfirm
+  // انتخاب نوع Category در تب Categories
+  const [selectedCategoryType, setSelectedCategoryType] = useState<"cata" | "catb">("cata");
+
+  // وضعیت تایید (حذف یا ویرایش)
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">(
-    "delete"
-  );
+  const [confirmVariant, setConfirmVariant] = useState<"delete" | "edit">("delete");
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
 
-  // Panel State Management
+  // وضعیت نمایش پنل راست
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
-  const [showRightAccessPanel, setShowRightAccessPanel] = useState(false);
-  const [selectedSubItemForRight, setSelectedSubItemForRight] =
-    useState<any>(null);
+
+  // وضعیت Loading جدول
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchedRowData, setFetchedRowData] = useState<any[]>([]);
 
-  // Form inputs state for Ribbons
+  // ورودی‌های فرم برای تب Ribbons (فقط مثال)
   const [nameInput, setNameInput] = useState<string>("");
   const [descriptionInput, setDescriptionInput] = useState<string>("");
 
-  // Panel size management
+  // توابع تغییر اندازه‌ی پنل
   const togglePanelSize = () => {
     setIsRightMaximized(false);
     setPanelWidth((prevWidth) => (isMaximized ? 50 : 97));
@@ -137,7 +134,7 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
-  // Dragging functionality
+  // منطق درگ کردن دستگیره میانی
   const startDragging = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
@@ -152,8 +149,7 @@ const TabContent: FC<TabContentProps> = ({
       if (!isDragging || !containerRef.current) return;
       const containerRect = containerRef.current.getBoundingClientRect();
       let newWidth =
-        ((e.clientX - containerRect.left) / containerRef.current.clientWidth) *
-        100;
+        ((e.clientX - containerRect.left) / containerRef.current.clientWidth) * 100;
       newWidth = Math.max(2, Math.min(97, newWidth));
       setIsRightMaximized(false);
       setPanelWidth(newWidth);
@@ -175,7 +171,7 @@ const TabContent: FC<TabContentProps> = ({
     };
   }, [isDragging, handleMouseMove, stopDragging]);
 
-  // Data fetching
+  // واکشی داده‌ها
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -226,22 +222,20 @@ const TabContent: FC<TabContentProps> = ({
         case "ProjectsAccess":
           data = await api.getAllProjectsWithCalendar();
           break;
-        // In the fetchData function, add this case
         case "ApprovalFlows":
           data = await api.getAllWfTemplate();
           break;
         case "Forms":
           data = await api.getTableTransmittal();
           console.log("Data from getTableTransmittal: ", data);
-
           break;
         case "Categories":
           if (selectedCategoryType === "cata") {
             data = await api.getAllCatA();
-            console.log("Fetching CatA data:", data); // برای دیباگ
+            console.log("Fetching CatA data:", data);
           } else {
             data = await api.getAllCatB();
-            console.log("Fetching CatB data:", data); // برای دیباگ
+            console.log("Fetching CatB data:", data);
           }
           break;
         default:
@@ -256,54 +250,45 @@ const TabContent: FC<TabContentProps> = ({
     }
   }, [api, activeSubTab, rowData, selectedCategoryType]);
 
-  const handleCategoryTypeChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  // تغییر نوع Category
+  const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newType = e.target.value as "cata" | "catb";
     setSelectedCategoryType(newType);
-    // بعد از تغییر نوع، دیتا رو دوباره فچ میکنیم
     if (activeSubTab === "Categories") {
       fetchData();
     }
   };
 
+  // هر زمان که activeSubTab تغییر کند، دوباره داده‌ها را می‌گیریم
   useEffect(() => {
     if (activeSubTab) {
       fetchData();
     }
-  }, [activeSubTab]);
+  }, [activeSubTab, fetchData]);
 
-  // Save/Update handlers
+  // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
     try {
       switch (activeSubTab) {
         case "Configurations":
           if (configurationRef.current) {
-            await configurationRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Saved",
-              "Configuration added successfully."
-            );
-            await fetchData();
+            const result = await configurationRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Configuration added successfully.");
           }
           break;
         case "Commands":
           if (commandRef.current) {
-            await commandRef.current.save();
+            const result = await commandRef.current.save();
+            if (!result) return;
             showAlert("success", null, "Saved", "Command added successfully.");
-            await fetchData();
           }
           break;
         case "Users":
           if (userRef.current) {
             const result = await userRef.current.save();
-            if (result) {
-              // فقط اگر ذخیره موفقیت‌آمیز بود
-              showAlert("success", null, "Saved", "User added successfully.");
-              await fetchData();
-            }
+            if (!result) return;
+            showAlert("success", null, "Saved", "User added successfully.");
           }
           break;
         case "Ribbons":
@@ -313,159 +298,140 @@ const TabContent: FC<TabContentProps> = ({
             IsVisible: true,
           });
           showAlert("success", null, "Saved", "Ribbon added successfully.");
-          await fetchData();
           break;
-        case "Roles": // اضافه شده
+        case "Roles":
           if (roleRef.current) {
-            await roleRef.current.save();
+            const result = await roleRef.current.save();
+            if (!result) return;
             showAlert("success", null, "Saved", "Role added successfully.");
-            await fetchData();
           }
           break;
-        case "Enterprises": // Add this case
+        case "Enterprises":
           if (companyRef.current) {
-            await companyRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Saved",
-              "Enterprise added successfully."
-            );
-            await fetchData();
+            const result = await companyRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Enterprise added successfully.");
           }
           break;
         case "RoleGroups":
           if (roleGroupsRef.current) {
-            await roleGroupsRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Saved",
-              "Role Group added successfully."
-            );
-            await fetchData();
+            const result = await roleGroupsRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Role Group added successfully.");
           }
           break;
         case "Staffing":
           if (staffingRef.current) {
-            await staffingRef.current.save();
+            const result = await staffingRef.current.save();
+            if (!result) return;
             showAlert("success", null, "Saved", "Staffing added successfully.");
-            await fetchData();
           }
           break;
         case "ProgramTemplate":
           if (programTemplateRef.current) {
-            await programTemplateRef.current.save();
-            await fetchData();
+            const result = await programTemplateRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Program Template added successfully.");
           }
           break;
         case "ProgramTypes":
           if (programTypeRef.current) {
-            await programTypeRef.current.save();
-            await fetchData();
+            const result = await programTypeRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Program Type added successfully.");
           }
           break;
         case "Odp":
           if (odpRef.current) {
-            await odpRef.current.save();
-            await fetchData();
+            const result = await odpRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Odp added successfully.");
           }
           break;
         case "Procedures":
           if (procedureRef.current) {
-            await procedureRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Saved",
-              "Procedures added successfully."
-            );
-            await fetchData();
+            const result = await procedureRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Procedure added successfully.");
           }
           break;
         case "Calendars":
           if (calendarRef.current) {
-            await calendarRef.current.save();
+            const result = await calendarRef.current.save();
+            if (!result) return;
             showAlert("success", null, "Saved", "Calendar added successfully.");
-            await fetchData();
           }
           break;
         case "ProjectsAccess":
           if (projectAccessRef.current) {
-            await projectAccessRef.current.save();
-            await fetchData();
+            const result = await projectAccessRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Project Access added successfully.");
           }
           break;
-        // In the handleInsert function, add this case
         case "ApprovalFlows":
           if (approvalFlowRef.current) {
-            await approvalFlowRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Saved",
-              "Approval Flow added successfully."
-            );
-            await fetchData();
+            const result = await approvalFlowRef.current.save();
+            if (!result) return;
+            showAlert("success", null, "Saved", "Approval Flow added successfully.");
           }
           break;
         case "Forms":
           if (formsRef.current) {
-            await formsRef.current.save();
+            const result = await formsRef.current.save();
+            if (!result) return;
             showAlert("success", null, "Saved", "Form added successfully.");
-            await fetchData();
           }
           break;
         case "Categories":
           if (categoriesRef.current) {
-            const result =
-              selectedCategoryType === "cata"
-                ? await api.insertCatA({
-                    ...categoriesRef.current.getData(),
-                    categoryType: selectedCategoryType,
-                  })
-                : await api.insertCatB({
-                    ...categoriesRef.current.getData(),
-                    categoryType: selectedCategoryType,
-                  });
+            const categoryData = categoriesRef.current.getData();
+            let result;
+            if (selectedCategoryType === "cata") {
+              result = await api.insertCatA({
+                ...categoryData,
+                categoryType: selectedCategoryType,
+              });
+            } else {
+              result = await api.insertCatB({
+                ...categoryData,
+                categoryType: selectedCategoryType,
+              });
+            }
+            if (!result) return;
             showAlert("success", null, "Saved", "Category added successfully.");
-            await fetchData();
           }
           break;
+        default:
+          break;
       }
+      // پس از درج موفق، پنل بسته شود و ورودی‌ها ریست
       setIsPanelOpen(false);
       setIsAdding(false);
       resetInputs();
+      // در صورت نیاز، می‌توانیم fetchData() را دوباره صدا بزنیم
+      // await fetchData(); // بسته به منطق شما
     } catch (error) {
       console.error("Error saving:", error);
       showAlert("error", null, "Error", "Failed to save data.");
     }
   };
 
+  // متد آپدیت
   const handleUpdate = async () => {
     try {
       switch (activeSubTab) {
         case "Configurations":
           if (configurationRef.current) {
             await configurationRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Configuration updated successfully."
-            );
+            showAlert("success", null, "Updated", "Configuration updated successfully.");
             await fetchData();
           }
           break;
         case "Commands":
           if (commandRef.current) {
             await commandRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Command updated successfully."
-            );
+            showAlert("success", null, "Updated", "Command updated successfully.");
             await fetchData();
           }
           break;
@@ -473,7 +439,6 @@ const TabContent: FC<TabContentProps> = ({
           if (userRef.current) {
             const result = await userRef.current.save();
             if (result) {
-              // فقط اگر آپدیت موفقیت‌آمیز بود
               await fetchData();
             }
           }
@@ -486,12 +451,7 @@ const TabContent: FC<TabContentProps> = ({
               Description: descriptionInput,
               IsVisible: selectedRow.IsVisible,
             });
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Ribbon updated successfully."
-            );
+            showAlert("success", null, "Updated", "Ribbon updated successfully.");
             await fetchData();
           }
           break;
@@ -505,24 +465,14 @@ const TabContent: FC<TabContentProps> = ({
         case "Enterprises":
           if (selectedRow && companyRef.current) {
             await companyRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Enterprise updated successfully."
-            );
+            showAlert("success", null, "Updated", "Enterprise updated successfully.");
             await fetchData();
           }
           break;
         case "RoleGroups":
           if (selectedRow && roleGroupsRef.current) {
             await roleGroupsRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Role Group updated successfully."
-            );
+            showAlert("success", null, "Updated", "Role Group updated successfully.");
             await fetchData();
           }
           break;
@@ -536,14 +486,12 @@ const TabContent: FC<TabContentProps> = ({
         case "ProgramTemplate":
           if (programTemplateRef.current) {
             await programTemplateRef.current.save();
-            // showAlert('success', null, 'Updated', 'Program Template updated successfully.')
             await fetchData();
           }
           break;
         case "ProgramTypes":
           if (programTypeRef.current) {
             await programTypeRef.current.save();
-            // showAlert('success', null, 'Updated', 'Program Template updated successfully.')
             await fetchData();
           }
           break;
@@ -562,12 +510,7 @@ const TabContent: FC<TabContentProps> = ({
         case "Calendars":
           if (calendarRef.current) {
             await calendarRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Calendar updated successfully."
-            );
+            showAlert("success", null, "Updated", "Calendar updated successfully.");
             await fetchData();
           }
           break;
@@ -580,12 +523,7 @@ const TabContent: FC<TabContentProps> = ({
         case "ApprovalFlows":
           if (approvalFlowRef.current) {
             await approvalFlowRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Approval Flow updated successfully."
-            );
+            showAlert("success", null, "Updated", "Approval Flow updated successfully.");
             await fetchData();
           }
           break;
@@ -608,12 +546,7 @@ const TabContent: FC<TabContentProps> = ({
                     ...categoriesRef.current.getData(),
                     categoryType: selectedCategoryType,
                   });
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Category updated successfully."
-            );
+            showAlert("success", null, "Updated", "Category updated successfully.");
             await fetchData();
           }
           break;
@@ -626,27 +559,23 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
+  // بستن پنل راست
   const handleClose = () => {
     setIsPanelOpen(false);
     setIsAdding(false);
-    resetRightPanel();
     resetInputs();
   };
 
-  const resetRightPanel = () => {
-    setShowRightAccessPanel(false);
-    setSelectedSubItemForRight(null);
-  };
-
+  // ریست کردن مقادیر ورودی (برای تب Ribbons نمونه گذاشته شده)
   const resetInputs = () => {
     setNameInput("");
     setDescriptionInput("");
   };
 
-  // Row interaction handlers
+  // رویدادهای کلیک روی ردیف
   const handleDoubleClick = (data: any) => {
     onRowDoubleClick(data);
-    setIsAdding(false); // در اینجا isAdding را به false تنظیم می‌کنیم تا حالت Update فعال شود
+    setIsAdding(false);
     setIsPanelOpen(true);
     if (activeSubTab === "Ribbons") {
       setNameInput(data.Name);
@@ -663,12 +592,11 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
-  // CRUD operation handlers
+  // عملیات CRUD از دکمه‌های بالا یا داخل DataTable
   const handleAddClick = () => {
     setIsAdding(true);
     setIsPanelOpen(true);
     onAdd();
-    resetRightPanel();
     resetInputs();
   };
 
@@ -679,9 +607,7 @@ const TabContent: FC<TabContentProps> = ({
     }
     setConfirmVariant("delete");
     setConfirmTitle("Delete Confirmation");
-    setConfirmMessage(
-      `Are you sure you want to delete this ${activeSubTab.toLowerCase()}?`
-    );
+    setConfirmMessage(`Are you sure you want to delete this ${activeSubTab.toLowerCase()}?`);
     setConfirmAction(() => async () => {
       try {
         switch (activeSubTab) {
@@ -744,12 +670,7 @@ const TabContent: FC<TabContentProps> = ({
             }
             break;
         }
-        showAlert(
-          "success",
-          null,
-          "Deleted",
-          `${activeSubTab} deleted successfully.`
-        );
+        showAlert("success", null, "Deleted", `${activeSubTab} deleted successfully.`);
         await fetchData();
       } catch (error) {
         console.error("Error deleting:", error);
@@ -769,20 +690,23 @@ const TabContent: FC<TabContentProps> = ({
         setIsPanelOpen(true);
       }
     } else {
-      showAlert(
-        "warning",
-        null,
-        "Warning",
-        "Please select a row to duplicate."
-      );
+      showAlert("warning", null, "Warning", "Please select a row to duplicate.");
     }
   };
 
+  // تابع محلی برای Edit (بازکردن پنل راست در حالت ویرایش)
+  const handleEditFromLeft = () => {
+    setIsAdding(false);
+    setIsPanelOpen(true);
+  };
+
+  // برای Confirm حذف/ویرایش
   const handleConfirm = async () => {
     setConfirmOpen(false);
     await confirmAction();
   };
 
+  // برای فرم ساده‌ی تب Ribbons
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNameInput(e.target.value);
   };
@@ -791,19 +715,7 @@ const TabContent: FC<TabContentProps> = ({
     setDescriptionInput(e.target.value);
   };
 
-  // متد جدید برای حالت ویرایش
-  const handleEditFromLeft = () => {
-    setIsAdding(false); // حالت ویرایش
-    setIsPanelOpen(true);
-  };
-
-  // متد مربوط به افزودن از سمت چپ
-  const handleAddFromLeft = () => {
-    setIsAdding(true); // حالت افزودن
-    setIsPanelOpen(true);
-  };
-
-  // Determine which ref to use based on activeSubTab
+  // انتخاب مرجع (ref) فعال بر اساس activeSubTab
   const getActiveRef = () => {
     switch (activeSubTab) {
       case "Configurations":
@@ -843,12 +755,37 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
+  // ***************************
+  // *******  منطق جدید  *******
+  // ***************************
+  // چک‌کردن خالی نبودن Name در تب Configurations
+  const checkNameNonEmpty = () => {
+    if (activeSubTab === "Configurations") {
+      if (configurationRef.current) {
+        return configurationRef.current.checkNameFilled();
+      }
+    }
+    // برای تب‌های دیگر چک خاصی نداریم
+    return true;
+  };
+
+  // اگر نام خالی بود، هشدار انگلیسی نمایش بده
+  const showNameEmptyWarning = () => {
+    showAlert(
+      "warning",
+      null,
+      "Warning",
+      "Name cannot be empty. Please fill the name."
+    );
+  };
+
   return (
     <div
       ref={containerRef}
       className="flex-1 overflow-hidden mt-2 border border-gray-300 rounded-lg mb-6 flex relative"
       style={{ height: "100%" }}
     >
+      {/* Confirm برای حذف یا ویرایش */}
       <DynamicConfirm
         isOpen={confirmOpen}
         variant={confirmVariant}
@@ -858,7 +795,7 @@ const TabContent: FC<TabContentProps> = ({
         onClose={() => setConfirmOpen(false)}
       />
 
-      {/* Left Panel */}
+      {/* پنل چپ */}
       <div
         className="flex flex-col overflow-auto bg-gray-100 box-border"
         style={{
@@ -873,11 +810,7 @@ const TabContent: FC<TabContentProps> = ({
             onClick={togglePanelSize}
             className="text-gray-700 hover:text-gray-900 transition"
           >
-            {isMaximized ? (
-              <FiMinimize2 size={18} />
-            ) : (
-              <FiMaximize2 size={18} />
-            )}
+            {isMaximized ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
           </button>
         </div>
 
@@ -898,20 +831,20 @@ const TabContent: FC<TabContentProps> = ({
           <DataTable
             columnDefs={columnDefs}
             rowData={fetchedRowData}
-            onRowDoubleClick={handleDoubleClick} // استفاده از متد handleDoubleClick جدید
+            onRowDoubleClick={handleDoubleClick}
             setSelectedRowData={handleRowClickLocal}
             showDuplicateIcon={showDuplicateIcon}
             showEditIcon={showEditIcon}
             showAddIcon={showAddIcon}
             showDeleteIcon={showDeleteIcon}
+            onEdit={handleEditFromLeft}
             onAdd={handleAddClick}
-            onEdit={onEdit} // ارسال پراپ onEdit به DataTable
             onDelete={handleDeleteClick}
             onDuplicate={handleDuplicateClick}
             isLoading={isLoading}
           />
 
-          {/* Ribbons Form */}
+          {/* اگر تب Ribbons بود و پنل باز بود، فرم ساده‌اش در همین قسمت */}
           {activeSubTab === "Ribbons" && isPanelOpen && (
             <div className="-mt-32 w-full p-4 bg-white rounded-md shadow-md absolute">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
@@ -933,25 +866,20 @@ const TabContent: FC<TabContentProps> = ({
                 />
               </div>
               <div className="flex items-center gap-4 mt-4">
-                {/* Save Button - Only for Inserting */}
                 <button
                   onClick={handleInsert}
                   className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
                 >
                   <FaSave /> Save
                 </button>
-
-                {/* Update and Delete Buttons - Only for Editing */}
                 {!isAdding && selectedRow && (
                   <>
-                    {/* Update Button */}
                     <button
                       onClick={handleUpdate}
                       className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     >
                       <FaEdit /> Update
                     </button>
-                    {/* Delete Button */}
                     <button
                       onClick={handleDeleteClick}
                       className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
@@ -966,7 +894,7 @@ const TabContent: FC<TabContentProps> = ({
         </div>
       </div>
 
-      {/* Divider */}
+      {/* میله درگ کردن */}
       <div
         onMouseDown={startDragging}
         className="flex items-center justify-center cursor-ew-resize w-2"
@@ -975,7 +903,7 @@ const TabContent: FC<TabContentProps> = ({
         <div className="h-full w-1 bg-[#dd4bae] rounded"></div>
       </div>
 
-      {/* Right Panel */}
+      {/* پنل راست */}
       {isPanelOpen && (
         <div
           className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
@@ -1047,17 +975,21 @@ const TabContent: FC<TabContentProps> = ({
                 onClose={handleClose}
                 onTogglePanelSizeFromRight={togglePanelSizeFromRight}
                 isRightMaximized={isRightMaximized}
+                /** این سه پراپ جدید برای منطق خالی‌بودن Name در تب Configurations هستند **/
+                onCheckCanSave={() => checkNameNonEmpty()}
+                onCheckCanUpdate={() => checkNameNonEmpty()}
+                onShowEmptyNameWarning={showNameEmptyWarning}
               />
             )}
 
-            {/* محتوای Right Panel */}
+            {/* محتوای تب‌ها در پنل راست */}
             {activeSubTab === "ProjectsAccess" && (
               <Suspense fallback={<div>Loading Projects Access...</div>}>
                 <ProjectAccess
                   ref={projectAccessRef}
                   selectedProject={selectedRow}
-                  onAddFromLeft={handleAddFromLeft}
-                  onEditFromLeft={handleEditFromLeft} // ارسال متد جدید
+                  onAddFromLeft={handleAddClick}
+                  onEditFromLeft={handleEditFromLeft}
                 />
               </Suspense>
             )}
@@ -1067,16 +999,10 @@ const TabContent: FC<TabContentProps> = ({
                 <div style={{ minWidth: "600px" }}>
                   <Suspense fallback={<div>Loading...</div>}>
                     <Component
-                      key={
-                        isAdding
-                          ? "add-mode"
-                          : selectedRow
-                          ? selectedRow.ID
-                          : "no-selection"
-                      }
+                      key={isAdding ? "add-mode" : selectedRow ? selectedRow.ID : "no-selection"}
                       selectedRow={isAdding ? null : selectedRow}
                       ref={getActiveRef()}
-                      selectedCategoryType={selectedCategoryType} // Add this line
+                      selectedCategoryType={selectedCategoryType}
                     />
                   </Suspense>
                 </div>
