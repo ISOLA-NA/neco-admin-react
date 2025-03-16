@@ -405,12 +405,11 @@ const TabContent: FC<TabContentProps> = ({
         default:
           break;
       }
-      // پس از درج موفق، پنل بسته شود و ورودی‌ها ریست
+      // بلافاصله بعد از درج موفق، داده‌های جدید را واکشی می‌کنیم تا DataTable در پنل چپ به‌روز شود
+      await fetchData();
       setIsPanelOpen(false);
       setIsAdding(false);
       resetInputs();
-      // در صورت نیاز، می‌توانیم fetchData() را دوباره صدا بزنیم
-      // await fetchData(); // بسته به منطق شما
     } catch (error) {
       console.error("Error saving:", error);
       showAlert("error", null, "Error", "Failed to save data.");
@@ -566,7 +565,7 @@ const TabContent: FC<TabContentProps> = ({
     resetInputs();
   };
 
-  // ریست کردن مقادیر ورودی (برای تب Ribbons نمونه گذاشته شده)
+  // ریست کردن مقادیر ورودی (برای تب Ribbons نمونه)
   const resetInputs = () => {
     setNameInput("");
     setDescriptionInput("");
