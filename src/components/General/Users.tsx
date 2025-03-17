@@ -1,20 +1,16 @@
-import React, {
-  useState,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import TwoColumnLayout from '../layout/TwoColumnLayout';
 import DynamicInput from '../utilities/DynamicInput';
 import DynamicSelector from '../utilities/DynamicSelector';
 import FileUploadHandler from '../../services/FileUploadHandler';
 import { useAddEditDelete } from '../../context/AddEditDeleteContext';
 import type { GetEnumResponse, User as UserType } from '../../services/api.services';
-import { showAlert } from '../utilities/Alert/DynamicAlert';
 import AppServices from '../../services/api.services';
+import DynamicConfirm from '../utilities/DynamicConfirm';
 
 export interface UserHandle {
   save: () => Promise<UserType | null>;
+  checkNameFilled: () => boolean;
 }
 
 interface UserProps {
@@ -23,10 +19,32 @@ interface UserProps {
 
 const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   const { handleSaveUser } = useAddEditDelete();
+  
   const [userTypeOptions, setUserTypeOptions] = useState<{ value: string; label: string }[]>([]);
   const [resetCounter, setResetCounter] = useState<number>(0);
-  const [newPassword, setNewPassword] = useState(''); // Added state for new password
+  const [newPassword, setNewPassword] = useState('');
 
+  // وضعیت مدیریت نمایش مدال برای پیام‌های خطا/اطلاع رسانی
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalVariant, setModalVariant] = useState<"add" | "edit" | "delete" | "notice" | "error">("error");
+
+  // مدال تایید تغییر پسورد
+  const [passwordConfirmModalOpen, setPasswordConfirmModalOpen] = useState(false);
+
+  const showModal = (
+    message: string,
+    title: string = 'Error',
+    variant: "add" | "edit" | "delete" | "notice" | "error" = "error"
+  ) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalVariant(variant);
+    setModalOpen(true);
+  };
+
+  // مقدار userType به صورت عددی نگهداری می‌شود
   const [userData, setUserData] = useState({
     ID: selectedRow?.ID || null,
     Username: selectedRow?.Username || '',
@@ -51,19 +69,17 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   useEffect(() => {
     const fetchUserTypes = async () => {
       try {
-        const response: GetEnumResponse = await AppServices.getEnum({
-          str: 'UserType',
-        });
+        const response: GetEnumResponse = await AppServices.getEnum({ str: 'UserType' });
+        // تبدیل مقادیر به رشته برای نمایش در selector
         const options = Object.entries(response).map(([key, val]) => ({
           value: val.toString(),
           label: key,
         }));
         setUserTypeOptions(options);
-      } catch (error) {
-        console.error('Error fetching UserType enums:', error);
+      } catch (error: any) {
+        showModal('Error fetching UserType enums: ' + (error?.message || error), 'Error', 'error');
       }
     };
-
     fetchUserTypes();
   }, []);
 
@@ -89,7 +105,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         CreateDate: selectedRow.CreateDate || null,
         LastLoginTime: selectedRow.LastLoginTime || null,
       });
-      setNewPassword(''); // Reset new password when selected row changes
+      setNewPassword('');
     } else {
       setUserData({
         ID: null,
@@ -116,37 +132,26 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     }
   }, [selectedRow]);
 
-  // Added changePassword function
-  const changePassword = async () => {
+  // تابع واقعی تغییر پسورد
+  const doChangePassword = async () => {
+    try {
+      const payload = { UserId: selectedRow.ID, Password: newPassword };
+      await AppServices.changePasswordByAdmin(payload);
+      showModal('Password changed successfully', 'Success', 'notice');
+      setNewPassword('');
+    } catch (error: any) {
+      showModal('Failed to change password: ' + (error?.message || error), 'Error', 'error');
+    }
+  };
+
+  // تابع مربوط به دکمه change password
+  const handleChangePasswordClick = () => {
     if (!newPassword) {
-      showAlert(
-        'error',
-        null,
-        'Validation Error',
-        'New password cannot be empty'
-      );
+      showModal('New password cannot be empty', 'Validation Error', 'error');
       return;
     }
-
-    try {
-      const payload = {
-        UserId: selectedRow.ID,
-        Password: newPassword,
-      };
-
-      await AppServices.changePasswordByAdmin(payload);
-
-      showAlert('success', null, 'Success', 'Password changed successfully');
-      setNewPassword('');
-    } catch (error) {
-      console.error('Error changing password:', error);
-      showAlert(
-        'error',
-        null,
-        'Error',
-        'Failed to change password'
-      );
-    }
+    // باز کردن مدال تایید تغییر پسورد
+    setPasswordConfirmModalOpen(true);
   };
 
   const handleChange = (field: keyof typeof userData, value: any) => {
@@ -167,25 +172,21 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
 
   const validateForm = () => {
     if (!userData.Username) {
-      showAlert('error', null, 'Validation Error', 'Username is required');
+      showModal('Username is required', 'Validation Error', 'error');
       return false;
     }
-
     if (!userData.Name) {
-      showAlert('error', null, 'Validation Error', 'Name is required');
+      showModal('Name is required', 'Validation Error', 'error');
       return false;
     }
-
     if (!selectedRow && !userData.Password) {
-      showAlert('error', null, 'Validation Error', 'Password is required for new users');
+      showModal('Password is required for new users', 'Validation Error', 'error');
       return false;
     }
-
     if (userData.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.Email)) {
-      showAlert('error', null, 'Validation Error', 'Invalid email format');
+      showModal('Invalid email format', 'Validation Error', 'error');
       return false;
     }
-
     return true;
   };
 
@@ -193,7 +194,6 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     if (!validateForm()) {
       return null;
     }
-
     try {
       const dataToSave: UserType = {
         ...userData,
@@ -202,150 +202,148 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         LastLoginTime: userData.LastLoginTime ?? null,
         UserImageId: userData.UserImageId ?? null,
       };
-
       if (selectedRow) {
-        // If editing and no new password is entered, don't send password
         if (!userData.Password) {
           delete dataToSave.Password;
         }
       } else {
-        // Creating new user
         delete dataToSave.ID;
         dataToSave.ConfirmPassword = userData.ConfirmPassword;
       }
-
-      console.log('Data to Save:', dataToSave);
-
       const result = await handleSaveUser(dataToSave);
-
-      if (result) {
-        showAlert(
-          'success',
-          null,
-          'Success',
-          `User ${selectedRow ? 'updated' : 'created'} successfully`
-        );
-      }
-
       return result;
-    } catch (error) {
-      console.error('Error saving user:', error);
-      showAlert(
-        'error',
-        null,
-        'Error',
-        `Failed to ${selectedRow ? 'update' : 'create'} user`
-      );
+    } catch (error: any) {
+      showModal(`Failed to ${selectedRow ? 'update' : 'create'} user: ` + (error?.message || error), 'Error', 'error');
       return null;
     }
   };
 
   useImperativeHandle(ref, () => ({
     save,
+    checkNameFilled: () => {
+      if (!userData.Name.trim()) {
+        showModal('Name cannot be empty', 'Warning', 'error');
+        return false;
+      }
+      return true;
+    },
   }));
 
   return (
     <TwoColumnLayout>
-      <DynamicInput
-        name="Code"
-        type="number"
-        value={userData.Code}
-        onChange={e => handleChange('Code', e.target.value)}
-        disabled={!!selectedRow}
-      />
-
-      <DynamicInput
-        name="Username"
-        type="text"
-        value={userData.Username}
-        onChange={e => handleChange('Username', e.target.value)}
-        required
-        disabled={!!selectedRow}
-      />
-
-      <DynamicInput
-        name="Name"
-        type="text"
-        value={userData.Name}
-        onChange={e => handleChange('Name', e.target.value)}
-        required
-      />
-
-      <DynamicInput
-        name="Family"
-        type="text"
-        value={userData.Family}
-        onChange={e => handleChange('Family', e.target.value)}
-      />
-
+      <div >
+        <DynamicInput
+          name="Code"
+          type="number"
+          value={userData.Code}
+          onChange={e => handleChange('Code', e.target.value)}
+          disabled={!!selectedRow}
+        />
+      </div>
+      <div >
+        <DynamicInput
+          name="Username"
+          type="text"
+          value={userData.Username}
+          onChange={e => handleChange('Username', e.target.value)}
+          required
+          disabled={!!selectedRow}
+        />
+      </div>
+      <div >
+        <DynamicInput
+          name="Name"
+          type="text"
+          value={userData.Name}
+          onChange={e => handleChange('Name', e.target.value)}
+          required
+        />
+      </div>
+      <div >
+        <DynamicInput
+          name="Family"
+          type="text"
+          value={userData.Family}
+          onChange={e => handleChange('Family', e.target.value)}
+        />
+      </div>
       {!selectedRow && (
         <>
-          <DynamicInput
-            name="Password"
-            type="password"
-            value={userData.Password}
-            onChange={e => handleChange('Password', e.target.value)}
-            required
-          />
-
-          <DynamicInput
-            name="Confirm Password"
-            type="password"
-            value={userData.ConfirmPassword}
-            onChange={e => handleChange('ConfirmPassword', e.target.value)}
-            required
-          />
+          <div >
+            <DynamicInput
+              name="Password"
+              type="password"
+              value={userData.Password}
+              onChange={e => handleChange('Password', e.target.value)}
+              required
+            />
+          </div>
+          <div >
+            <DynamicInput
+              name="Confirm Password"
+              type="password"
+              value={userData.ConfirmPassword}
+              onChange={e => handleChange('ConfirmPassword', e.target.value)}
+              required
+            />
+          </div>
         </>
       )}
-
       {selectedRow && (
         <>
-          <DynamicInput
-            name="Password"
-            type="password"
-            value={newPassword}
-            onChange={e => setNewPassword(e.target.value)}
-            placeholder="Enter new password (optional)"
-          />
-          <button
-            onClick={changePassword}
-            className="mt-2 px-5 py-2.5 border-none rounded bg-gradient-to-r from-[#e14aa7] via-[#6761f0] to-[#b23ace] text-white cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-[#b23ace] hover:via-[#6761f0] hover:to-[#e14aa7]"
-          >
-            Change Password
-          </button>
+          <div >
+            <DynamicInput
+              name="Password"
+              type="password"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              placeholder="Enter new password (optional)"
+            />
+          </div>
+          <div >
+            <button
+              onClick={handleChangePasswordClick}
+              className="px-5 py-2.5 border rounded bg-gradient-to-r from-[#e14aa7] via-[#6761f0] to-[#b23ace] text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-[#b23ace] hover:via-[#6761f0] hover:to-[#e14aa7]"
+            >
+              Change Password
+            </button>
+          </div>
         </>
       )}
-
-      <DynamicInput
-        name="Email"
-        type="text"
-        value={userData.Email}
-        onChange={e => handleChange('Email', e.target.value)}
-      />
-
-      <DynamicInput
-        name="Mobile"
-        type="text"
-        value={userData.Mobile}
-        onChange={e => handleChange('Mobile', e.target.value)}
-      />
-
-      <DynamicInput
-        name="Website"
-        type="text"
-        value={userData.Website}
-        onChange={e => handleChange('Website', e.target.value)}
-      />
-
-      <DynamicSelector
-        name="User Type"
-        options={userTypeOptions}
-        selectedValue={userData.userType}
-        onChange={e => handleChange('userType', parseInt(e.target.value))}
-        label="User Type"
-      />
-
-      <div className="col-span-2 mt-4">
+      <div >
+        <DynamicInput
+          name="Email"
+          type="text"
+          value={userData.Email}
+          onChange={e => handleChange('Email', e.target.value)}
+        />
+      </div>
+      <div >
+        <DynamicInput
+          name="Mobile"
+          type="text"
+          value={userData.Mobile}
+          onChange={e => handleChange('Mobile', e.target.value)}
+        />
+      </div>
+      <div >
+        <DynamicInput
+          name="Website"
+          type="text"
+          value={userData.Website}
+          onChange={e => handleChange('Website', e.target.value)}
+        />
+      </div>
+      <div >
+        <DynamicSelector
+          name="User Type"
+          options={userTypeOptions}
+          selectedValue={userData.userType.toString()}
+          onChange={e => handleChange('userType', parseInt(e.target.value))}
+          label="User Type"
+        />
+      </div>
+      <div >
         <div className="border rounded-lg p-4 bg-gray-50">
           <h3 className="text-lg font-medium mb-4">User Profile Image</h3>
           <FileUploadHandler
@@ -356,6 +354,28 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           />
         </div>
       </div>
+      {/* مدال پیام (برای خطا یا اطلاع رسانی) */}
+      <DynamicConfirm
+        isOpen={modalOpen}
+        title={modalTitle}
+        message={modalMessage}
+        onConfirm={() => setModalOpen(false)}
+        onClose={() => setModalOpen(false)}
+        variant={modalVariant}
+        hideCancelButton={true}
+      />
+      {/* مدال تایید تغییر پسورد */}
+      <DynamicConfirm
+        isOpen={passwordConfirmModalOpen}
+        title="Confirm"
+        message="Are you sure you want to change password?"
+        onConfirm={async () => {
+          setPasswordConfirmModalOpen(false);
+          await doChangePassword();
+        }}
+        onClose={() => setPasswordConfirmModalOpen(false)}
+        variant="notice"
+      />
     </TwoColumnLayout>
   );
 });
