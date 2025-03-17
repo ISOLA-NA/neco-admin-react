@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicInput from "../../../utilities/DynamicInput";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaSave, FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 import AppServices, { MenuGroup } from "../../../../services/api.services";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
@@ -48,6 +48,9 @@ const Accordion2: React.FC<Accordion2Props> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
+  // Search state
+  const [searchText, setSearchText] = useState<string>("");
+
   // DynamicConfirm states for Insert, Update and Delete operations
   const [confirmInsertOpen, setConfirmInsertOpen] = useState<boolean>(false);
   const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
@@ -91,7 +94,18 @@ const Accordion2: React.FC<Accordion2Props> = ({
 
   useEffect(() => {
     loadRowData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedMenuTabId, fetchDataForSubTab]);
+
+  // Filter rows by search text (بر اساس نام، توضیحات یا ترتیب)
+  const filteredRowData = useMemo(() => {
+    if (!searchText) return rowData;
+    return rowData.filter((row) =>
+      row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
+      row.Description.toLowerCase().includes(searchText.toLowerCase()) ||
+      row.Order.toString().includes(searchText)
+    );
+  }, [searchText, rowData]);
 
   // Update form when a row is selected (suppress if needed)
   const handleSetSelectedRowData = (row: RowData2 | null) => {
@@ -269,20 +283,32 @@ const Accordion2: React.FC<Accordion2Props> = ({
         <div className="p-4 bg-white rounded-b-lg">
           {selectedMenuTabId !== null ? (
             <>
+              {/* Search bar مشابه Accordion3 */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="relative max-w-sm">
+                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                    style={{ fontFamily: "inherit" }}
+                  />
+                </div>
+              </div>
+
               {/* DataTable with fixed scroll container */}
-              <div
-                style={{ height: "300px", overflowY: "auto" }}
-                ref={tableContainerRef}
-              >
+              <div style={{ height: "300px", overflowY: "auto" ,marginTop:'-15px'}} ref={tableContainerRef}>
                 <DataTable
                   columnDefs={columnDefs}
-                  rowData={rowData}
+                  rowData={filteredRowData}
                   onRowDoubleClick={handleRowDoubleClick}
                   setSelectedRowData={handleSetSelectedRowData}
                   showDuplicateIcon={false}
-                  showEditIcon={true}
-                  showAddIcon={true}
-                  showDeleteIcon={true}
+                  showEditIcon={false}
+                  showAddIcon={false}
+                  showDeleteIcon={false}
                   showViewIcon={false}
                   onView={() => {}}
                   onAdd={handleNew}
@@ -295,7 +321,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                   onDelete={handleDeleteClick}
                   onDuplicate={() => {}}
                   isLoading={isLoading}
-                  showSearch={true}
+                  showSearch={false}
                   domLayout="normal"
                 />
               </div>
@@ -339,7 +365,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     className="mt-2"
                   />
                 </div>
-                {/* Buttons with the same style as Accordion1 */}
+                {/* Buttons */}
                 <div className="flex items-center gap-4 mt-4">
                   <button
                     onClick={handleInsert}

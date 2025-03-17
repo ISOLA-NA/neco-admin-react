@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import DynamicInput from "../../../utilities/DynamicInput";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaSave, FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
-import AppServices, { MenuTab } from "../../../../services/api.services"; // مسیر را متناسب با پروژه اصلاح کنید
-import DataTable from "../../../TableDynamic/DataTable"; // مسیر را متناسب با پروژه اصلاح کنید
+import AppServices, { MenuTab } from "../../../../services/api.services";
+import DataTable from "../../../TableDynamic/DataTable";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
 
 interface Accordion1Props {
@@ -56,6 +56,9 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
 
+  // حالت جستجو
+  const [searchText, setSearchText] = useState<string>("");
+
   const columnDefs = subTabDefinitions["MenuTab"]?.columnDefs || [];
 
   // مرجع برای container جدول جهت اسکرول
@@ -95,7 +98,17 @@ const Accordion1: React.FC<Accordion1Props> = ({
     loadRowData();
   }, [isOpen, selectedMenuId, fetchDataForSubTab]);
 
-  // وقتی ردیف انتخاب می‌شود، formData به‌روز می‌شود (بدون رفرش کردن جدول)
+  // فیلتر کردن داده‌های جدول بر اساس متن جستجو (نام، توضیحات و ترتیب)
+  const filteredRowData = useMemo(() => {
+    if (!searchText) return rowData;
+    return rowData.filter((row) =>
+      row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
+      row.Description.toLowerCase().includes(searchText.toLowerCase()) ||
+      row.Order.toString().includes(searchText)
+    );
+  }, [searchText, rowData]);
+
+  // وقتی ردیف انتخاب می‌شود، formData به‌روز می‌شود
   const handleSetSelectedRowData = (row: RowData1 | null) => {
     setSelectedRow(row);
     onRowClick(row);
@@ -112,14 +125,13 @@ const Accordion1: React.FC<Accordion1Props> = ({
 
   // دکمه New: پاک کردن فرم و آماده‌سازی حالت افزودن جدید
   const handleNew = () => {
-    // در اینجا به جای محاسبه مقدار جدید برای Order، فیلد Order پاک (خالی) می‌شود
     const newId = rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
     setSelectedRow(null);
     setFormData({
       ID: newId,
       Name: "",
       Description: "",
-      Order: "", // پاکسازی فیلد Order
+      Order: "",
     });
     onRowClick(null);
   };
@@ -133,17 +145,23 @@ const Accordion1: React.FC<Accordion1Props> = ({
     return true;
   };
 
-  // هنگام کلیک روی دکمه Save: ابتدا صحت فرم بررسی شده و سپس دیالوگ تایید نمایش داده می‌شود
+  // هنگام کلیک روی دکمه Save
   const handleInsert = () => {
     if (!validateForm()) return;
     setConfirmInsertOpen(true);
   };
 
-  // هنگام کلیک روی دکمه Update: ابتدا صحت فرم بررسی شده و سپس دیالوگ تایید نمایش داده می‌شود
+  // هنگام کلیک روی دکمه Update
   const handleUpdate = () => {
     if (!selectedRow) return;
     if (!validateForm()) return;
     setConfirmUpdateOpen(true);
+  };
+
+  // دکمه Delete: نمایش دیالوگ تایید حذف
+  const handleDeleteClick = () => {
+    if (!selectedRow) return;
+    setConfirmDeleteOpen(true);
   };
 
   // عملیات insert پس از تایید دیالوگ
@@ -153,7 +171,6 @@ const Accordion1: React.FC<Accordion1Props> = ({
         ID: formData.ID!,
         Name: formData.Name!,
         Description: formData.Description || "",
-        // در صورت خالی بودن Order، مقدار 0 به عنوان پیش‌فرض درنظر گرفته می‌شود
         Order: formData.Order === "" ? 0 : (formData.Order as number),
         nMenuId: selectedMenuId!,
         IsVisible: true,
@@ -163,12 +180,10 @@ const Accordion1: React.FC<Accordion1Props> = ({
       console.log("Inserting MenuTab:", newMenuTab);
       await AppServices.insertMenuTab(newMenuTab);
       await loadRowData();
-      // پس از بارگذاری مجدد داده‌ها، اسکرول به انتهای جدول
+      // اسکرول به انتهای جدول پس از بارگذاری مجدد
       if (tableContainerRef.current) {
-        tableContainerRef.current.scrollTop =
-          tableContainerRef.current.scrollHeight;
+        tableContainerRef.current.scrollTop = tableContainerRef.current.scrollHeight;
       }
-      // پاکسازی فرم پس از افزودن؛ در اینجا نیز فیلد Order پاک می‌شود
       const newId = rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
       setFormData({
         ID: newId,
@@ -210,12 +225,6 @@ const Accordion1: React.FC<Accordion1Props> = ({
     }
   };
 
-  // دکمه Delete: نمایش دیالوگ تایید حذف
-  const handleDeleteClick = () => {
-    if (!selectedRow) return;
-    setConfirmDeleteOpen(true);
-  };
-
   // عملیات delete پس از تایید دیالوگ
   const confirmDelete = async () => {
     try {
@@ -255,20 +264,32 @@ const Accordion1: React.FC<Accordion1Props> = ({
       {/* محتوای داخلی آکاردئون */}
       {isOpen && (
         <div className="p-4 bg-white rounded-b-lg">
+          {/* بخش جستجو */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="relative max-w-sm">
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                style={{ fontFamily: "inherit" }}
+              />
+            </div>
+          </div>
+
           {/* بخش جدول با ارتفاع ثابت و اسکرول */}
-          <div
-            style={{ height: "300px", overflowY: "auto" }}
-            ref={tableContainerRef}
-          >
+          <div style={{ height: "300px", overflowY: "auto"  ,marginTop:'-15px'}} ref={tableContainerRef}>
             <DataTable
               columnDefs={columnDefs}
-              rowData={rowData}
+              rowData={filteredRowData}
               onRowDoubleClick={handleRowDoubleClick}
               setSelectedRowData={handleSetSelectedRowData}
               showDuplicateIcon={false}
-              showEditIcon={true}
-              showAddIcon={true}
-              showDeleteIcon={true}
+              showEditIcon={false}
+              showAddIcon={false}
+              showDeleteIcon={false}
               showViewIcon={false}
               onView={() => {}}
               onAdd={handleNew}
@@ -276,36 +297,29 @@ const Accordion1: React.FC<Accordion1Props> = ({
               onDelete={handleDeleteClick}
               onDuplicate={() => {}}
               isLoading={isLoading}
-              showSearch={true}
+              showSearch={false}
               domLayout="normal"
             />
           </div>
 
           {/* فرم و دکمه‌ها (همواره نمایش داده می‌شود) */}
           <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
-            {/* ردیف اول: اینپوت‌های Name و Description در یک ردیف */}
             <div className="flex gap-4">
               <DynamicInput
                 name="Name"
                 type="text"
                 value={formData.Name}
-                onChange={(e) =>
-                  setFormData({ ...formData, Name: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
                 className="mt-2 flex-1"
               />
               <DynamicInput
                 name="Description"
                 type="text"
                 value={formData.Description}
-                onChange={(e) =>
-                  setFormData({ ...formData, Description: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
                 className="mt-2 flex-1"
               />
             </div>
-
-            {/* ردیف دوم: اینپوت Order */}
             <div className="mt-4">
               <DynamicInput
                 name="Order"
@@ -321,8 +335,6 @@ const Accordion1: React.FC<Accordion1Props> = ({
                 className="mt-2"
               />
             </div>
-
-            {/* دکمه‌ها */}
             <div className="flex items-center gap-4 mt-4">
               <button
                 onClick={handleInsert}
