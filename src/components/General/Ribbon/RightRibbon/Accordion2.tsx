@@ -1,21 +1,11 @@
-// src/components/Accordion2.tsx
-
-import React, { useState, useMemo, useEffect } from "react";
-import { AgGridReact } from "ag-grid-react";
-import { ColDef } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import React, { useState, useEffect, useRef } from "react";
+import DataTable from "../../../TableDynamic/DataTable";
 import DynamicInput from "../../../utilities/DynamicInput";
-import { FaSearch } from "react-icons/fa";
-import {
-  FiEdit,
-  FiTrash2,
-  FiPlus,
-  FiChevronDown,
-  FiChevronUp,
-} from "react-icons/fi";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
-import AppServices, { MenuGroup } from "../../../../services/api.services"; // اطمینان حاصل کنید که مسیر صحیح است
+import AppServices, { MenuGroup } from "../../../../services/api.services";
+import DynamicConfirm from "../../../utilities/DynamicConfirm";
 
 interface Accordion2Props {
   selectedMenuTabId: number | null;
@@ -44,51 +34,46 @@ const Accordion2: React.FC<Accordion2Props> = ({
   toggleAccordion,
 }) => {
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
-  const [selectedRow, setSelectedRow] = useState<RowData2 | null>(null);
-  const [searchText, setSearchText] = useState<string>("");
   const [rowData, setRowData] = useState<RowData2[]>([]);
+  const [selectedRow, setSelectedRow] = useState<RowData2 | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Form state
+  const [formData, setFormData] = useState<Partial<RowData2>>({
+    ID: 0,
+    Name: "",
+    Description: "",
+    Order: 0,
+  });
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [formData, setFormData] = useState<Partial<RowData2>>({});
 
-  // تعریف ستون‌ها و اضافه کردن ستون عملیات
-  const columnDefs: ColDef<RowData2>[] = [
-    ...(subTabDefinitions["MenuGroup"]?.columnDefs || []),
-    {
-      headerName: "عملیات",
-      field: "operations",
-      sortable: false,
-      filter: false,
-      width: 100,
-      cellRendererFramework: (params: any) => (
-        <div className="flex space-x-2">
-          <button
-            className="text-blue-600 hover:text-blue-800 transition"
-            onClick={() => handleEdit(params.data)}
-            title="ویرایش"
-          >
-            <FiEdit size={20} />
-          </button>
-          <button
-            className="text-red-600 hover:text-red-800 transition"
-            onClick={() => handleDelete(params.data)}
-            title="حذف"
-          >
-            <FiTrash2 size={20} />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  // DynamicConfirm states for Insert, Update and Delete operations
+  const [confirmInsertOpen, setConfirmInsertOpen] = useState<boolean>(false);
+  const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
 
-  // تابع برای بارگذاری داده‌ها
+  // Flag to temporarily suppress auto-selection of a row (after delete)
+  const [suppressSelection, setSuppressSelection] = useState<boolean>(false);
+
+  // Ref for table container scroll
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // Column definitions from subTabDefinitions (if exists)
+  const columnDefs = subTabDefinitions["MenuGroup"]?.columnDefs || [];
+
+  // Load data function
   const loadRowData = async () => {
     if (isOpen && selectedMenuTabId !== null) {
       setIsLoading(true);
       try {
-        const data: RowData2[] = await fetchDataForSubTab("MenuGroup", { ID: selectedMenuTabId });
+        const data: RowData2[] = await fetchDataForSubTab("MenuGroup", {
+          ID: selectedMenuTabId,
+        });
         setRowData(data);
+        // Clear any selection after loading data
+        setSelectedRow(null);
+        onRowClick(null);
       } catch (error) {
         console.error("Error fetching MenuGroups:", error);
       } finally {
@@ -100,169 +85,177 @@ const Accordion2: React.FC<Accordion2Props> = ({
       onRowClick(null);
       setIsEditing(false);
       setIsAdding(false);
-      setFormData({});
+      setFormData({ ID: 0, Name: "", Description: "", Order: 0 });
     }
   };
 
   useEffect(() => {
     loadRowData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, selectedMenuTabId]);
+  }, [isOpen, selectedMenuTabId, fetchDataForSubTab]);
 
-  const filteredRowData = useMemo(() => {
-    if (!searchText) return rowData;
-    return rowData.filter((row) =>
-      row.Name.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [searchText, rowData]);
-
-  const handleRowClick = (event: any) => {
-    const row = event.data as RowData2;
+  // Update form when a row is selected (suppress if needed)
+  const handleSetSelectedRowData = (row: RowData2 | null) => {
+    if (suppressSelection) return;
     setSelectedRow(row);
     onRowClick(row);
-    setFormData(row);
-  };
-
-  const handleRowDoubleClickEvent = () => {
-    if (selectedRow) {
-      onRowDoubleClick(selectedRow.ID);
+    if (row) {
+      setFormData({ ...row });
     }
   };
 
-  const handleEdit = (row: RowData2) => {
+  // Row double click event
+  const handleRowDoubleClick = (row: RowData2) => {
     setSelectedRow(row);
-    setFormData(row);
-    setIsEditing(true);
-    setIsAdding(false);
-    onRowClick(row);
+    onRowDoubleClick(row.ID);
   };
 
-  const handleDelete = async (row: RowData2) => {
-    const confirmDelete = window.confirm(
-      `آیا از حذف MenuGroup "${row.Name}" مطمئن هستید؟`
-    );
-    if (!confirmDelete) return;
-
-    try {
-      await AppServices.deleteMenuGroup(row.ID);
-      alert("حذف موفقیت‌آمیز بود.");
-      await loadRowData(); // بارگذاری مجدد داده‌ها بعد از حذف
-      setSelectedRow(null);
-      onRowClick(null);
-    } catch (error: any) {
-      console.error("Error deleting MenuGroup:", error);
-      alert("حذف با خطا مواجه شد.");
-    }
-  };
-
-  const handleAddNew = () => {
-    if (selectedMenuTabId === null) {
-      alert("لطفاً یک Menu Tab را انتخاب کنید.");
-      return;
-    }
-    const newRow: RowData2 = {
-      ID: 0, // فرض بر این است که ID=0 نشان‌دهنده یک ردیف جدید است
+  // "New" button: clear form (do not validate)
+  const handleNew = () => {
+    const newId =
+      rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
+    setSelectedRow(null);
+    setFormData({
+      ID: newId,
       Name: "",
       Description: "",
       Order: 0,
-      nMenuTabId: selectedMenuTabId,
-      IsVisible: true,
-      LastModified: null,
-      ModifiedById: null,
-    };
-    setSelectedRow(null);
-    setFormData(newRow);
+    });
     setIsAdding(true);
     setIsEditing(false);
     onRowClick(null);
   };
 
-  const handleInputChange = (name: string, value: string | number) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // Validate form: ensure Name is not empty
+  const validateForm = (): boolean => {
+    if (!formData.Name || formData.Name.trim() === "") {
+      return false;
+    }
+    return true;
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("handleFormSubmit called with formData:", formData);
-    if (!formData.Name) {
-      alert("لطفاً نام را وارد کنید.");
-      return;
-    }
+  // When user clicks "Save" in add mode
+  const handleInsert = () => {
+    if (!validateForm()) return;
+    setConfirmInsertOpen(true);
+  };
 
-    if (isAdding) {
-      // افزودن MenuGroup جدید
-      try {
-        const newMenuGroup: MenuGroup = {
-          ID: 0, // Backend باید ID واقعی را اختصاص دهد
-          Name: formData.Name,
-          Description: formData.Description || "",
-          Order: formData.Order || 0,
-          nMenuTabId: formData.nMenuTabId || selectedMenuTabId!,
-          IsVisible: formData.IsVisible ?? true,
-          ModifiedById: null, // جایگزین با شناسه کاربر واقعی
-          LastModified: null,
-        };
-        console.log("Inserting MenuGroup:", newMenuGroup);
-        await AppServices.insertMenuGroup(newMenuGroup);
-        alert("اضافه کردن با موفقیت انجام شد.");
-        setIsAdding(false);
-        setFormData({});
-        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از افزودن
-      } catch (error: any) {
-        console.error("Error inserting MenuGroup:", error);
-        alert("اضافه کردن با خطا مواجه شد.");
+  // When user clicks "Update"
+  const handleUpdate = () => {
+    if (!selectedRow) return;
+    if (!validateForm()) return;
+    setConfirmUpdateOpen(true);
+  };
+
+  // When user clicks "Delete"
+  const handleDeleteClick = () => {
+    if (!selectedRow) return;
+    setConfirmDeleteOpen(true);
+  };
+
+  // Confirm Insert operation
+  const confirmInsert = async () => {
+    try {
+      const newMenuGroup: MenuGroup = {
+        ID: formData.ID!,
+        Name: formData.Name!,
+        Description: formData.Description || "",
+        Order: formData.Order || 0,
+        nMenuTabId: selectedMenuTabId!,
+        IsVisible: true,
+        ModifiedById: null,
+        LastModified: null,
+      };
+      console.log("Inserting MenuGroup:", newMenuGroup);
+      await AppServices.insertMenuGroup(newMenuGroup);
+      await loadRowData();
+      if (tableContainerRef.current) {
+        tableContainerRef.current.scrollTop =
+          tableContainerRef.current.scrollHeight;
       }
-    } else if (isEditing) {
-      // ویرایش MenuGroup موجود
-      if (!formData.ID) {
-        alert("شناسه MenuGroup وجود ندارد.");
-        return;
-      }
-      try {
-        const updatedMenuGroup: MenuGroup = {
-          ID: formData.ID,
-          Name: formData.Name,
-          Description: formData.Description || "",
-          Order: formData.Order || 0,
-          nMenuTabId: formData.nMenuTabId || selectedMenuTabId!,
-          IsVisible: formData.IsVisible ?? true,
-          ModifiedById: null, // جایگزین با شناسه کاربر واقعی
-          LastModified: null,
-        };
-        console.log("Updating MenuGroup:", updatedMenuGroup);
-        await AppServices.updateMenuGroup(updatedMenuGroup);
-        alert("ویرایش با موفقیت انجام شد.");
-        setIsEditing(false);
-        setFormData({});
-        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از ویرایش
-      } catch (error: any) {
-        console.error("Error updating MenuGroup:", error);
-        alert("ویرایش با خطا مواجه شد.");
-      }
+      const newId =
+        rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
+      setFormData({
+        ID: newId,
+        Name: "",
+        Description: "",
+        Order: 0,
+      });
+      setSelectedRow(null);
+      onRowClick(null);
+      setIsAdding(false);
+    } catch (error) {
+      console.error("Error inserting MenuGroup:", error);
+    } finally {
+      setConfirmInsertOpen(false);
     }
   };
 
+  // Confirm Update operation
+  const confirmUpdate = async () => {
+    try {
+      const updatedMenuGroup: MenuGroup = {
+        ID: formData.ID!,
+        Name: formData.Name!,
+        Description: formData.Description || "",
+        Order: formData.Order || 0,
+        nMenuTabId: formData.nMenuTabId || selectedMenuTabId!,
+        IsVisible: true,
+        ModifiedById: null,
+        LastModified: null,
+      };
+      console.log("Updating MenuGroup:", updatedMenuGroup);
+      await AppServices.updateMenuGroup(updatedMenuGroup);
+      await loadRowData();
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating MenuGroup:", error);
+    } finally {
+      setConfirmUpdateOpen(false);
+    }
+  };
+
+  // Confirm Delete operation
+  const confirmDelete = async () => {
+    if (!selectedRow) return;
+    try {
+      await AppServices.deleteMenuGroup(selectedRow.ID);
+      // Suppress new selection immediately after deletion
+      setSuppressSelection(true);
+      await loadRowData();
+      setSelectedRow(null);
+      onRowClick(null);
+      setIsEditing(false);
+      setIsAdding(false);
+      setFormData({ ID: 0, Name: "", Description: "", Order: 0 });
+      // After a short delay, allow selection again
+      setTimeout(() => {
+        setSuppressSelection(false);
+      }, 500);
+    } catch (error) {
+      console.error("Error deleting MenuGroup:", error);
+    } finally {
+      setConfirmDeleteOpen(false);
+    }
+  };
+
+  // Cancel form operation and clear form
   const handleFormCancel = () => {
     setIsEditing(false);
     setIsAdding(false);
-    setFormData({});
+    setFormData({ ID: 0, Name: "", Description: "", Order: 0 });
     setSelectedRow(null);
     onRowClick(null);
   };
 
   return (
-    <div
-      className={`mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300`}
-    >
+    <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
+      {/* Accordion header */}
       <div
-        className={`flex justify-between items-center p-4 bg-white border-b border-gray-300 rounded-t-lg cursor-pointer`}
+        className="flex justify-between items-center p-4 bg-white border-b border-gray-300 rounded-t-lg cursor-pointer"
         onClick={toggleAccordion}
       >
-        <span className="text-xl font-medium">Menu Groups</span>
-        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full">
+        <span className="text-xl font-medium mt-5">Menu Groups</span>
+        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full mt-5">
           {isOpen ? (
             <FiChevronUp className="text-gray-700" size={20} />
           ) : (
@@ -270,149 +263,158 @@ const Accordion2: React.FC<Accordion2Props> = ({
           )}
         </div>
       </div>
+
+      {/* Accordion content */}
       {isOpen && (
         <div className="p-4 bg-white rounded-b-lg">
           {selectedMenuTabId !== null ? (
             <>
-              {/* نوار جستجو و دکمه‌های عملیات */}
-              <div className="flex items-center justify-between mb-4 bg-red-100 p-2 rounded-md">
-                <div className="relative max-w-sm">
-                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                  <input
-                    type="text"
-                    placeholder="جستجو..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                    style={{ fontFamily: "inherit" }}
-                  />
-                </div>
-
-                {/* دکمه‌های Add، Edit و Delete در یک خط */}
-                <div className="flex items-center space-x-4">
-                  <button
-                    className="text-green-600 hover:text-green-800 transition"
-                    title="افزودن"
-                    onClick={handleAddNew}
-                  >
-                    <FiPlus size={25} />
-                  </button>
-                  <button
-                    className="text-blue-600 hover:text-blue-800 transition"
-                    title="ویرایش"
-                    onClick={() => {
-                      if (selectedRow) {
-                        handleEdit(selectedRow);
-                      } else {
-                        alert("لطفاً یک ردیف را برای ویرایش انتخاب کنید.");
-                      }
-                    }}
-                    disabled={!selectedRow}
-                  >
-                    <FiEdit size={25} />
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-800 transition"
-                    title="حذف"
-                    onClick={() => {
-                      if (selectedRow) {
-                        handleDelete(selectedRow);
-                      } else {
-                        alert("لطفاً یک ردیف را برای حذف انتخاب کنید.");
-                      }
-                    }}
-                    disabled={!selectedRow}
-                  >
-                    <FiTrash2 size={25} />
-                  </button>
-                </div>
-              </div>
-
-              {/* جدول داده‌ها */}
+              {/* DataTable with fixed scroll container */}
               <div
-                className="ag-theme-quartz rounded-md border overflow-hidden -mt-5"
-                style={{ height: "300px", width: "100%" }}
+                style={{ height: "300px", overflowY: "auto" }}
+                ref={tableContainerRef}
               >
-                <AgGridReact<RowData2>
+                <DataTable
                   columnDefs={columnDefs}
-                  rowData={filteredRowData}
-                  onRowClicked={handleRowClick}
-                  onRowDoubleClicked={handleRowDoubleClickEvent}
-                  rowSelection="single"
-                  animateRows={true}
-                  overlayLoadingTemplate='<span class="ag-overlay-loading-center">در حال بارگذاری...</span>'
-                  loadingOverlayComponentParams={{
-                    loadingMessage: "در حال بارگذاری...",
+                  rowData={rowData}
+                  onRowDoubleClick={handleRowDoubleClick}
+                  setSelectedRowData={handleSetSelectedRowData}
+                  showDuplicateIcon={false}
+                  showEditIcon={true}
+                  showAddIcon={true}
+                  showDeleteIcon={true}
+                  showViewIcon={false}
+                  onView={() => {}}
+                  onAdd={handleNew}
+                  onEdit={() => {
+                    if (selectedRow) {
+                      setIsEditing(true);
+                      setIsAdding(false);
+                    }
                   }}
+                  onDelete={handleDeleteClick}
+                  onDuplicate={() => {}}
+                  isLoading={isLoading}
+                  showSearch={true}
+                  domLayout="normal"
                 />
               </div>
 
-              {/* فرم ویرایش یا افزودن */}
-              {(isEditing || isAdding) && formData && (
-                <form
-                  onSubmit={handleFormSubmit}
-                  className="mt-4 p-4 border rounded bg-gray-50 shadow-inner"
-                >
-                  <div className="grid grid-cols-1 gap-6">
-                    <DynamicInput
-                      name="Name"
-                      type="text"
-                      value={formData.Name || ""}
-                      placeholder="نام"
-                      onChange={(e) =>
-                        handleInputChange("Name", e.target.value)
-                      }
-                      className="mt-2"
-                    />
-                    <DynamicInput
-                      name="Description"
-                      type="text"
-                      value={formData.Description || ""}
-                      placeholder="توضیحات"
-                      onChange={(e) =>
-                        handleInputChange("Description", e.target.value)
-                      }
-                      className="mt-2"
-                    />
-                    <DynamicInput
-                      name="Order"
-                      type="number"
-                      value={formData.Order || 0}
-                      placeholder="ترتیب"
-                      onChange={(e) =>
-                        handleInputChange(
-                          "Order",
-                          parseInt(e.target.value, 10) || 0
-                        )
-                      }
-                      className="mt-2"
-                    />
-                  </div>
-                  <div className="flex justify-center space-x-4 mt-12">
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
-                      onClick={handleFormCancel}
-                    >
-                      لغو
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    >
-                      {isAdding ? "افزودن" : "ذخیره تغییرات"}
-                    </button>
-                  </div>
-                </form>
-              )}
+              {/* Form always visible */}
+              <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
+                <div className="flex gap-4">
+                  <DynamicInput
+                    name="Name"
+                    type="text"
+                    value={formData.Name || ""}
+                    placeholder="Name"
+                    onChange={(e) =>
+                      setFormData({ ...formData, Name: e.target.value })
+                    }
+                    className="mt-2 flex-1"
+                  />
+                  <DynamicInput
+                    name="Description"
+                    type="text"
+                    value={formData.Description || ""}
+                    placeholder="Description"
+                    onChange={(e) =>
+                      setFormData({ ...formData, Description: e.target.value })
+                    }
+                    className="mt-2 flex-1"
+                  />
+                </div>
+                <div className="mt-4">
+                  <DynamicInput
+                    name="Order"
+                    type="number"
+                    value={formData.Order || 0}
+                    placeholder="Order"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        Order: parseInt(e.target.value, 10) || 0,
+                      })
+                    }
+                    className="mt-2"
+                  />
+                </div>
+                {/* Buttons with the same style as Accordion1 */}
+                <div className="flex items-center gap-4 mt-4">
+                  <button
+                    onClick={handleInsert}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                  >
+                    <FaSave /> Save
+                  </button>
+                  <button
+                    onClick={handleUpdate}
+                    disabled={!selectedRow}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      selectedRow
+                        ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                        : "bg-blue-300 text-gray-200 cursor-not-allowed"
+                    }`}
+                  >
+                    <FaEdit /> Update
+                  </button>
+                  <button
+                    onClick={handleDeleteClick}
+                    disabled={!selectedRow}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      selectedRow
+                        ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                        : "bg-red-300 text-gray-200 cursor-not-allowed"
+                    }`}
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                  <button
+                    onClick={handleNew}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                  >
+                    <FaPlus /> New
+                  </button>
+                </div>
+              </div>
             </>
           ) : (
             <p className="text-gray-500">
-              لطفاً یک Menu Tab در Accordion1 انتخاب کنید تا Menu Groups نمایش داده شوند.
+              Please select a Menu Tab in Accordion1 to display Menu Groups.
             </p>
           )}
         </div>
       )}
+
+      {/* DynamicConfirm for Insert */}
+      <DynamicConfirm
+        isOpen={confirmInsertOpen}
+        title="Insert Confirmation"
+        message="Are you sure you want to add this Menu Group?"
+        onConfirm={confirmInsert}
+        onClose={() => setConfirmInsertOpen(false)}
+        variant="add"
+      />
+
+      {/* DynamicConfirm for Update */}
+      <DynamicConfirm
+        isOpen={confirmUpdateOpen}
+        title="Update Confirmation"
+        message="Are you sure you want to update this Menu Group?"
+        onConfirm={confirmUpdate}
+        onClose={() => setConfirmUpdateOpen(false)}
+        variant="edit"
+      />
+
+      {/* DynamicConfirm for Delete */}
+      <DynamicConfirm
+        isOpen={confirmDeleteOpen}
+        title="Delete Confirmation"
+        message={`Are you sure you want to delete the Menu Group "${selectedRow?.Name}"?`}
+        onConfirm={confirmDelete}
+        onClose={() => setConfirmDeleteOpen(false)}
+        variant="delete"
+      />
     </div>
   );
 };

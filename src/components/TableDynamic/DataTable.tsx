@@ -1,4 +1,3 @@
-// src/TableDynamic/DataTable.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FaSearch } from "react-icons/fa";
@@ -7,24 +6,31 @@ import { TailSpin } from "react-loader-spinner";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import "./DataTable.css"; // فایل CSS اختصاصی
+import "./DataTable.css"; // Your custom CSS file
 
 interface DataTableProps {
   columnDefs: any[];
   rowData: any[];
+
+  // Added these two so you can handle clicks in the parent:
   onRowDoubleClick: (data: any) => void;
-  setSelectedRowData: (data: any) => void;
+  onRowClick?: (data: any) => void;
+
+  // Make this optional if you don't always use it in the parent:
+  setSelectedRowData?: (data: any) => void;
+
   showDuplicateIcon?: boolean;
   showEditIcon?: boolean;
   showAddIcon?: boolean;
   showDeleteIcon?: boolean;
-  // prop های جدید برای آیکون view
+
   showViewIcon?: boolean;
   onView?: () => void;
-  onAdd: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onDuplicate: () => void;
+  onAdd?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
+
   onCellValueChanged?: (event: any) => void;
   domLayout?: "autoHeight" | "normal";
   showSearch?: boolean;
@@ -36,17 +42,18 @@ const DataTable: React.FC<DataTableProps> = ({
   columnDefs,
   rowData,
   onRowDoubleClick,
-  setSelectedRowData,
+  onRowClick, // new optional prop
+  setSelectedRowData, // now optional
   showDuplicateIcon = false,
   showEditIcon = true,
   showAddIcon = true,
   showDeleteIcon = true,
   showViewIcon = false,
   onView = () => {},
-  onAdd,
-  onEdit,
-  onDelete,
-  onDuplicate,
+  onAdd = () => {},
+  onEdit = () => {},
+  onDelete = () => {},
+  onDuplicate = () => {},
   onCellValueChanged,
   domLayout = "normal",
   showSearch = true,
@@ -64,7 +71,7 @@ const DataTable: React.FC<DataTableProps> = ({
     setFilteredRowData(rowData);
   }, [rowData]);
 
-  // تابع جستجو
+  // Search function
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
@@ -89,30 +96,28 @@ const DataTable: React.FC<DataTableProps> = ({
     }
   };
 
-  // وقتی گرید آماده شد
+  // When the grid is ready
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api;
-    // ستون‌ها را مطابق عرض جدول اندازه بزن
     params.api.sizeColumnsToFit();
-
     if (isLoading) {
       params.api.showLoadingOverlay();
     }
   };
 
-  // وقتی اندازه‌ی گرید تغییر کرد، دوباره ستون‌ها را فیت کن
+  // When grid size changes, fit columns again
   const onGridSizeChanged = (params: any) => {
     params.api.sizeColumnsToFit();
   };
 
-  // هر بار که ستون‌ها یا داده‌ها تغییر کرد، دوباره سایز را رفرش کن
+  // Fit columns when columnDefs or data changes
   useEffect(() => {
     if (gridApiRef.current) {
       gridApiRef.current.sizeColumnsToFit();
     }
   }, [columnDefs, filteredRowData]);
 
-  // نمایش یا مخفی کردن اسپینر لودینگ
+  // Show or hide spinner overlay
   useEffect(() => {
     if (gridApiRef.current) {
       if (isLoading) {
@@ -123,44 +128,49 @@ const DataTable: React.FC<DataTableProps> = ({
     }
   }, [isLoading]);
 
+  // Single-click row handler
   const handleRowClick = (event: any) => {
-    setSelectedRowData(event.data);
+    if (setSelectedRowData) {
+      setSelectedRowData(event.data);
+    }
     setIsRowSelected(true);
+
+    // Call parent's onRowClick if provided
+    if (onRowClick) {
+      onRowClick(event.data);
+    }
   };
 
+  // Double-click row handler
   const handleRowDoubleClickInternal = (event: any) => {
     onRowDoubleClick(event.data);
   };
 
-  // کلاس‌های دلخواه برای گرید
   const gridClasses = "ag-theme-quartz w-full h-full overflow-y-auto";
 
-  // برای ردیف انتخاب‌شده (مثلاً هایلایت)
+  // Row style for selected row (optional highlight or CSS class)
   const getRowClass = (params: any) => {
     return params.node.selected ? "ag-row-selected" : "";
   };
 
-  // آپشن‌های سفارشی گرید
   const gridOptions = {
     getRowClass: getRowClass,
   };
 
-  // استایل پایه دکمه‌های آیکون
-  // از کلاس‌های tailwind استفاده می‌کنیم: رنگ پس‌زمینه ملایم، بوردر گرد،
-  // افکت هاور، و غیرفعال‌سازی وقتی ردیفی انتخاب نشده
+  // Basic icon button style
   const baseIconButton =
     "rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none";
 
   return (
     <div className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2">
-      {/* نوار بالای جستجو و آیکون‌ها */}
-      <div className="flex items-center justify-between mb-4 bg-red-100 p-2 rounded-md shadow-sm">
+      {/* Top bar with search and icon buttons */}
+      <div className="flex items-center justify-between mb-4 bg-gray-100 p-2 rounded-md shadow-sm">
         {showSearch && (
           <div className="relative max-w-sm">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
-              placeholder="جستجو..."
+              placeholder="Search..."
               value={searchText}
               onChange={onSearchChange}
               className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition shadow-sm"
@@ -188,8 +198,8 @@ const DataTable: React.FC<DataTableProps> = ({
           {showEditIcon && (
             <button
               className={`
-                ${baseIconButton} 
-                bg-blue-50 hover:bg-blue-100 text-blue-600 
+                ${baseIconButton}
+                bg-blue-50 hover:bg-blue-100 text-blue-600
                 ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
               `}
               title="Edit"
@@ -244,7 +254,7 @@ const DataTable: React.FC<DataTableProps> = ({
         </div>
       </div>
 
-      {/* بخش جدول که تمام فضای باقیمانده را می‌گیرد */}
+      {/* Table area */}
       <div className="flex-grow" style={{ minHeight: 0 }}>
         <div className={gridClasses}>
           <AgGridReact
@@ -257,7 +267,7 @@ const DataTable: React.FC<DataTableProps> = ({
             animateRows={true}
             onRowClicked={handleRowClick}
             onRowDoubleClicked={handleRowDoubleClickInternal}
-            domLayout={domLayout} // normal یا autoHeight
+            domLayout={domLayout}
             suppressHorizontalScroll={false}
             rowSelection="single"
             gridOptions={gridOptions}
@@ -281,7 +291,7 @@ const DataTable: React.FC<DataTableProps> = ({
         </button>
       )}
 
-      {/* Overlay Spinner */}
+      {/* Loading overlay (if needed) */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-10">
           <TailSpin color="#7e3af2" height={80} width={80} />

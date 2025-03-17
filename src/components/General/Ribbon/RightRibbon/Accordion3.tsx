@@ -1,14 +1,4 @@
-// src/components/Accordion3.tsx
-
 import React, { useState, useMemo, useEffect } from "react";
-import { AgGridReact } from "ag-grid-react";
-import { ColDef } from "ag-grid-community";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-import DynamicInput from "../../../utilities/DynamicInput";
-import DynamicRadioGroup from "../../../utilities/DynamicRadiogroup"; // ایمپورت DynamicRadioGroup
-import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler"; // ایمپورت FileUploadHandler
-import { FaSearch } from "react-icons/fa";
 import {
   FiCopy,
   FiEdit,
@@ -17,8 +7,20 @@ import {
   FiChevronDown,
   FiChevronUp,
 } from "react-icons/fi";
+import {
+  FaSearch,
+  FaSave,
+  FaEdit,
+  FaTrash,
+  FaPlus,
+} from "react-icons/fa";
+import DynamicInput from "../../../utilities/DynamicInput";
+import DynamicRadioGroup from "../../../utilities/DynamicRadiogroup";
+import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler";
+import DataTable from "../../../TableDynamic/DataTable";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
-import AppServices, { MenuItem } from "../../../../services/api.services"; // اطمینان حاصل کنید که مسیر صحیح است
+import AppServices, { MenuItem } from "../../../../services/api.services";
+import DynamicConfirm from "../../../utilities/DynamicConfirm";
 
 interface Accordion3Props {
   selectedMenuGroupId: number | null;
@@ -36,8 +38,7 @@ interface RowData3 {
   IsVisible?: boolean;
   LastModified?: string | null;
   ModifiedById?: string | null;
-  IconImageId?: string | null; // اضافه کردن IconImageId
-  // می‌توانید سایر فیلدهای مورد نیاز را اضافه کنید
+  IconImageId?: string | null;
 }
 
 const Accordion3: React.FC<Accordion3Props> = ({
@@ -47,24 +48,39 @@ const Accordion3: React.FC<Accordion3Props> = ({
   toggleAccordion,
 }) => {
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
+  const [rowData, setRowData] = useState<RowData3[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData3 | null>(null);
   const [searchText, setSearchText] = useState<string>("");
-  const [rowData, setRowData] = useState<RowData3[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Whether user is in "edit" mode or "adding" mode. (Optional usage)
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [formData, setFormData] = useState<Partial<RowData3>>({});
 
-  // وضعیت برای سایز و آیدی تصویر
-  const [selectedSize, setSelectedSize] = useState<string>("0"); // پیش‌فرض "Large"
+  // Form data for the item
+  const [formData, setFormData] = useState<Partial<RowData3>>({
+    Name: "",
+    Command: "", // Now optional
+    Description: "",
+    Order: 0,
+  });
+
+  // For radio and file upload
+  const [selectedSize, setSelectedSize] = useState<string>("0");
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
 
-  // تعریف ستون‌ها و اضافه کردن ستون عملیات
-  const columnDefs: ColDef<RowData3>[] = [
+  // Confirm dialogs (DynamicConfirm) states
+  const [confirmInsertOpen, setConfirmInsertOpen] = useState<boolean>(false);
+  const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
+  const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
+
+  // Define columns for the DataTable
+  const columnDefs = [
     ...(subTabDefinitions["MenuItem"]?.columnDefs || []),
     {
-      headerName: "عملیات",
+      headerName: "Actions",
       field: "operations",
       sortable: false,
       filter: false,
@@ -74,21 +90,21 @@ const Accordion3: React.FC<Accordion3Props> = ({
           <button
             className="text-yellow-600 hover:text-yellow-800 transition"
             onClick={() => handleDuplicate(params.data)}
-            title="کپی"
+            title="Duplicate"
           >
             <FiCopy size={20} />
           </button>
           <button
             className="text-blue-600 hover:text-blue-800 transition"
             onClick={() => handleEdit(params.data)}
-            title="ویرایش"
+            title="Edit"
           >
             <FiEdit size={20} />
           </button>
           <button
             className="text-red-600 hover:text-red-800 transition"
             onClick={() => handleDelete(params.data)}
-            title="حذف"
+            title="Delete"
           >
             <FiTrash2 size={20} />
           </button>
@@ -97,13 +113,14 @@ const Accordion3: React.FC<Accordion3Props> = ({
     },
   ];
 
-  // تابع برای بارگذاری داده‌ها
+  // Load row data whenever accordion is open and selectedMenuGroupId is not null
   const loadRowData = async () => {
     if (isOpen && selectedMenuGroupId !== null) {
       setIsLoading(true);
       try {
-        const data: RowData3[] = await fetchDataForSubTab("MenuItem", { ID: selectedMenuGroupId });
-        // اطمینان حاصل کنید که ModifiedById و IconImageId به جای رشته خالی، null باشند
+        const data: RowData3[] = await fetchDataForSubTab("MenuItem", {
+          ID: selectedMenuGroupId,
+        });
         const sanitizedData = data.map((item) => ({
           ...item,
           ModifiedById: item.ModifiedById === "" ? null : item.ModifiedById,
@@ -111,19 +128,20 @@ const Accordion3: React.FC<Accordion3Props> = ({
         }));
         setRowData(sanitizedData);
       } catch (error) {
-        console.error("خطا در دریافت MenuItems:", error);
+        console.error("Error fetching MenuItems:", error);
       } finally {
         setIsLoading(false);
       }
     } else {
+      // If accordion is closed or no group selected, clear everything
       setRowData([]);
       setSelectedRow(null);
       setIsEditing(false);
       setIsAdding(false);
-      setFormData({});
+      setFormData({ Name: "", Command: "", Description: "", Order: 0 });
       setSelectedSize("0");
       setIconImageId(null);
-      setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
+      setResetCounter((prev) => prev + 1);
     }
   };
 
@@ -132,6 +150,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedMenuGroupId]);
 
+  // Filter rows by search text
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
     return rowData.filter(
@@ -142,9 +161,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
     );
   }, [searchText, rowData]);
 
-  const handleRowClick = (event: any) => {
-    const row = event.data as RowData3;
-    // اطمینان از اینکه ModifiedById و IconImageId خالی نیستند
+  // Single-click on row -> fill the form in the accordion
+  const handleRowClick = (row: RowData3) => {
     const sanitizedRow = {
       ...row,
       ModifiedById: row.ModifiedById === "" ? null : row.ModifiedById,
@@ -152,25 +170,25 @@ const Accordion3: React.FC<Accordion3Props> = ({
     };
     setSelectedRow(sanitizedRow);
     setFormData(sanitizedRow);
-    setSelectedSize(sanitizedRow.Order?.toString() || "0"); // فرض بر اینکه Order نماینده Size است
+    setSelectedSize(sanitizedRow.Order?.toString() || "0");
     setIconImageId(sanitizedRow.IconImageId || null);
     setIsEditing(false);
     setIsAdding(false);
   };
 
-  const handleRowDoubleClickEvent = (event: any) => {
-    const row = event.data as RowData3;
+  // Double-click on row
+  const handleRowDoubleClick = (row: RowData3) => {
     onRowDoubleClick(row.ID);
   };
 
-  // عملیات
+  // Duplicate action
   const handleDuplicate = (row: RowData3) => {
     const duplicatedRow: RowData3 = {
       ...row,
-      ID: 0, // فرض بر این است که ID=0 نشان‌دهنده یک ردیف جدید است و Backend ID جدید اختصاص می‌دهد
-      Name: `${row.Name} (کپی)`,
-      ModifiedById: null, // اطمینان از اینکه مقدار null است
-      IconImageId: null, // پاک کردن IconImageId برای کپی
+      ID: 0,
+      Name: `${row.Name} (Copy)`,
+      ModifiedById: null,
+      IconImageId: null,
     };
     setFormData(duplicatedRow);
     setSelectedSize("0");
@@ -178,43 +196,39 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setIsAdding(true);
     setIsEditing(false);
     setSelectedRow(null);
-    setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
+    setResetCounter((prev) => prev + 1);
   };
 
+  // Edit action (from actions column)
   const handleEdit = (row: RowData3) => {
     setSelectedRow(row);
     setFormData(row);
-    setSelectedSize(row.Order?.toString() || "0"); // فرض بر اینکه Order نماینده Size است
+    setSelectedSize(row.Order?.toString() || "0");
     setIconImageId(row.IconImageId || null);
     setIsEditing(true);
     setIsAdding(false);
   };
 
-  const handleDelete = async (row: RowData3) => {
-    const confirmDelete = window.confirm(
-      `آیا از حذف MenuItem "${row.Name}" مطمئن هستید؟`
-    );
-    if (!confirmDelete) return;
-
-    try {
-      await AppServices.deleteMenuItem(row.ID);
-      alert("حذف با موفقیت انجام شد.");
-      await loadRowData(); // بارگذاری مجدد داده‌ها بعد از حذف
-      setSelectedRow(null);
-      setFormData({});
-    } catch (error: any) {
-      console.error("خطا در حذف MenuItem:", error);
-      alert("حذف با خطا مواجه شد.");
-    }
+  // Delete action (from actions column)
+  const handleDelete = (row: RowData3) => {
+    setSelectedRow(row);
+    setConfirmDeleteOpen(true);
   };
 
-  const handleAddNew = () => {
+  // Delete button in the top area
+  const handleDeleteClick = () => {
+    if (!selectedRow) return;
+    setConfirmDeleteOpen(true);
+  };
+
+  // New button
+  const handleNew = () => {
     if (selectedMenuGroupId === null) {
-      alert("لطفاً یک Menu Group را انتخاب کنید.");
+      setErrorConfirmOpen(true);
       return;
     }
     const newRow: RowData3 = {
-      ID: 0, // Backend باید ID واقعی را اختصاص دهد
+      ID: 0,
       Name: "",
       Command: "",
       Description: "",
@@ -230,19 +244,40 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setIconImageId(null);
     setIsAdding(true);
     setIsEditing(false);
-    setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
+    setResetCounter((prev) => prev + 1);
   };
 
-  const handleInputChange = (
-    name: string,
-    value: string | number | boolean
-  ) => {
+  // Validate the form (only Name is required now)
+  const validateForm = (): boolean => {
+    if (!formData.Name) {
+      setErrorConfirmOpen(true);
+      return false;
+    }
+    return true;
+  };
+
+  // Insert button
+  const handleInsert = () => {
+    if (!validateForm()) return;
+    setConfirmInsertOpen(true);
+  };
+
+  // Update button
+  const handleUpdate = () => {
+    if (!selectedRow) return;
+    if (!validateForm()) return;
+    setConfirmUpdateOpen(true);
+  };
+
+  // Handle form inputs
+  const handleInputChange = (name: string, value: string | number | boolean) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
+  // Radio changes
   const handleRadioChange = (value: string) => {
     setSelectedSize(value);
     setFormData((prev) => ({
@@ -251,123 +286,112 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }));
   };
 
+  // File upload success
   const handleUploadSuccess = (insertModel: InsertModel) => {
     setIconImageId(insertModel.ID || null);
     setFormData((prev) => ({
       ...prev,
       IconImageId: insertModel.ID || null,
     }));
-    // حذف setJustUploaded(false); زیرا setJustUploaded در اینجا تعریف نشده است
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("handleFormSubmit با formData:", formData);
-    if (!formData.Name || !formData.Command) {
-      alert("لطفاً نام و دستور را وارد کنید.");
-      return;
-    }
-
-    const sanitizedFormData = {
-      ...formData,
-      ModifiedById:
-        formData.ModifiedById && formData.ModifiedById.trim() !== ""
-          ? formData.ModifiedById
-          : null,
-      IconImageId: iconImageId,
-    };
-
-    if (isAdding) {
-      // افزودن MenuItem جدید
-      try {
-        const newMenuItem: MenuItem = {
-          ID: 0, // Backend باید ID واقعی را اختصاص دهد
-          Name: sanitizedFormData.Name!,
-          Command: sanitizedFormData.Command!,
-          Description: sanitizedFormData.Description || "",
-          Order: sanitizedFormData.Order || 0,
-          nMenuGroupId: selectedMenuGroupId!,
-          IsVisible: sanitizedFormData.IsVisible ?? true,
-          LastModified: null,
-          ModifiedById: sanitizedFormData.ModifiedById,
-          IconImageId: sanitizedFormData.IconImageId || null,
-          CommandWeb: "", // در صورت نیاز مقداردهی کنید
-          CommandMobile: "", // در صورت نیاز مقداردهی کنید
-          HelpText: "", // در صورت نیاز مقداردهی کنید
-          KeyTip: "", // در صورت نیاز مقداردهی کنید
-          Size: sanitizedFormData.Order || 0,
-          // سایر فیلدهای مورد نیاز را اضافه کنید
-        };
-        console.log("درج MenuItem جدید:", newMenuItem);
-        const result = await AppServices.insertMenuItem(newMenuItem);
-        alert("افزودن با موفقیت انجام شد.");
-        setIsAdding(false);
-        setFormData({});
-        setSelectedSize("0");
-        setIconImageId(null);
-        setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
-        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از افزودن
-      } catch (error: any) {
-        console.error("خطا در افزودن MenuItem:", error);
-        alert("افزودن با خطا مواجه شد.");
-      }
-    } else if (isEditing) {
-      // ویرایش MenuItem موجود
-      if (sanitizedFormData.ID === undefined || sanitizedFormData.ID === null) {
-        alert("شناسه MenuItem وجود ندارد.");
-        return;
-      }
-      try {
-        const updatedMenuItem: MenuItem = {
-          ID: sanitizedFormData.ID,
-          Name: sanitizedFormData.Name!,
-          Command: sanitizedFormData.Command!,
-          Description: sanitizedFormData.Description || "",
-          Order: sanitizedFormData.Order || 0,
-          nMenuGroupId: selectedMenuGroupId!,
-          IsVisible: sanitizedFormData.IsVisible ?? true,
-          LastModified: sanitizedFormData.LastModified || null,
-          ModifiedById: sanitizedFormData.ModifiedById,
-          IconImageId: sanitizedFormData.IconImageId || null,
-          CommandWeb: "", // در صورت نیاز مقداردهی کنید
-          CommandMobile: "", // در صورت نیاز مقداردهی کنید
-          HelpText: "", // در صورت نیاز مقداردهی کنید
-          KeyTip: "", // در صورت نیاز مقداردهی کنید
-          Size: sanitizedFormData.Order || 0,
-          // سایر فیلدهای مورد نیاز را اضافه کنید
-        };
-        console.log("به‌روزرسانی MenuItem:", updatedMenuItem);
-        const result = await AppServices.updateMenuItem(updatedMenuItem);
-        alert("ویرایش با موفقیت انجام شد.");
-        setIsEditing(false);
-        setFormData({});
-        setSelectedSize("0");
-        setIconImageId(null);
-        setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
-        await loadRowData(); // بارگذاری مجدد داده‌ها بعد از ویرایش
-      } catch (error: any) {
-        console.error("خطا در ویرایش MenuItem:", error);
-        alert("ویرایش با خطا مواجه شد.");
-      }
+  // Confirm insert
+  const confirmInsert = async () => {
+    try {
+      const newMenuItem: MenuItem = {
+        ID: 0,
+        Name: formData.Name!,
+        Command: formData.Command || "",
+        Description: formData.Description || "",
+        Order: formData.Order || 0,
+        nMenuGroupId: selectedMenuGroupId!,
+        IsVisible: formData.IsVisible ?? true,
+        LastModified: null,
+        ModifiedById: formData.ModifiedById || null,
+        IconImageId: iconImageId || null,
+        CommandWeb: "",
+        CommandMobile: "",
+        HelpText: "",
+        KeyTip: "",
+        Size: formData.Order || 0,
+      };
+      console.log("Inserting MenuItem:", newMenuItem);
+      await AppServices.insertMenuItem(newMenuItem);
+      await loadRowData();
+      setFormData({ Name: "", Command: "", Description: "", Order: 0 });
+      setSelectedSize("0");
+      setIconImageId(null);
+      setIsAdding(false);
+      setResetCounter((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error inserting MenuItem:", error);
+    } finally {
+      setConfirmInsertOpen(false);
     }
   };
 
-  const handleFormCancel = () => {
-    setIsEditing(false);
-    setIsAdding(false);
-    setFormData({});
-    setSelectedRow(null);
-    setSelectedSize("0");
-    setIconImageId(null);
-    setResetCounter((prev) => prev + 1); // ریست کردن آپلودر
+  // Confirm update
+  const confirmUpdate = async () => {
+    if (!selectedRow) return;
+    try {
+      const updatedMenuItem: MenuItem = {
+        ID: formData.ID!,
+        Name: formData.Name!,
+        Command: formData.Command || "",
+        Description: formData.Description || "",
+        Order: formData.Order || 0,
+        nMenuGroupId: selectedMenuGroupId!,
+        IsVisible: formData.IsVisible ?? true,
+        LastModified: formData.LastModified || null,
+        ModifiedById: formData.ModifiedById || null,
+        IconImageId: formData.IconImageId || null,
+        CommandWeb: "",
+        CommandMobile: "",
+        HelpText: "",
+        KeyTip: "",
+        Size: formData.Order || 0,
+      };
+      console.log("Updating MenuItem:", updatedMenuItem);
+      await AppServices.updateMenuItem(updatedMenuItem);
+      await loadRowData();
+      setIsEditing(false);
+      setResetCounter((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error updating MenuItem:", error);
+    } finally {
+      setConfirmUpdateOpen(false);
+    }
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    if (!selectedRow) return;
+    try {
+      await AppServices.deleteMenuItem(selectedRow.ID);
+      await loadRowData();
+      setSelectedRow(null);
+      setFormData({ Name: "", Command: "", Description: "", Order: 0 });
+      setIsEditing(false);
+      setIsAdding(false);
+      setSelectedSize("0");
+      setIconImageId(null);
+      setResetCounter((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error deleting MenuItem:", error);
+    } finally {
+      setConfirmDeleteOpen(false);
+    }
+  };
+
+  const closeErrorConfirm = () => {
+    setErrorConfirmOpen(false);
   };
 
   return (
-    <div
-      className={`mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300`}
-    >
+    <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
+      {/* Accordion header */}
       <div
-        className={`flex justify-between items-center p-4 bg-white border-b border-gray-300 rounded-t-lg cursor-pointer`}
+        className="flex justify-between items-center p-4 bg-white border-b border-gray-300 rounded-t-lg cursor-pointer"
         onClick={toggleAccordion}
       >
         <span className="text-xl font-medium">Menu Items</span>
@@ -379,193 +403,188 @@ const Accordion3: React.FC<Accordion3Props> = ({
           )}
         </div>
       </div>
+
       {isOpen && (
         <div className="p-4 bg-white rounded-b-lg">
           {selectedMenuGroupId !== null ? (
             <>
-              {/* نوار جستجو و دکمه‌های عملیات */}
-              <div className="flex items-center justify-between mb-4 bg-red-100 p-2 rounded-md">
+              {/* Search bar */}
+              <div className="flex items-center justify-between mb-4">
                 <div className="relative max-w-sm">
                   <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                   <input
                     type="text"
-                    placeholder="جستجو..."
+                    placeholder="Search..."
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    className="search-input w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                     style={{ fontFamily: "inherit" }}
                   />
                 </div>
-
-                {/* دکمه‌های Add، Edit، Delete و Duplicate در یک خط */}
-                <div className="flex items-center space-x-4">
-                  <button
-                    className="text-green-600 hover:text-green-800 transition"
-                    title="افزودن"
-                    onClick={handleAddNew}
-                  >
-                    <FiPlus size={25} />
-                  </button>
-                  <button
-                    className="text-blue-600 hover:text-blue-800 transition"
-                    title="ویرایش"
-                    onClick={() => {
-                      if (selectedRow) {
-                        handleEdit(selectedRow);
-                      } else {
-                        alert("لطفاً یک ردیف را برای ویرایش انتخاب کنید.");
-                      }
-                    }}
-                    disabled={!selectedRow}
-                  >
-                    <FiEdit size={25} />
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-800 transition"
-                    title="حذف"
-                    onClick={() => {
-                      if (selectedRow) {
-                        handleDelete(selectedRow);
-                      } else {
-                        alert("لطفاً یک ردیف را برای حذف انتخاب کنید.");
-                      }
-                    }}
-                    disabled={!selectedRow}
-                  >
-                    <FiTrash2 size={25} />
-                  </button>
-                </div>
               </div>
 
-              {/* جدول داده‌ها */}
-              <div
-                className="ag-theme-quartz rounded-md border overflow-hidden -mt-5"
-                style={{ height: "300px", width: "100%" }}
-              >
-                <AgGridReact<RowData3>
+              {/* DataTable */}
+              <div style={{ height: "300px", overflowY: "auto" }}>
+                <DataTable
                   columnDefs={columnDefs}
                   rowData={filteredRowData}
-                  onRowClicked={handleRowClick}
-                  onRowDoubleClicked={handleRowDoubleClickEvent}
-                  rowSelection="single"
-                  animateRows={true}
-                  overlayLoadingTemplate='<span class="ag-overlay-loading-center">در حال بارگذاری...</span>'
-                  loadingOverlayComponentParams={{
-                    loadingMessage: "در حال بارگذاری...",
-                  }}
+                  onRowClick={handleRowClick}
+                  onRowDoubleClick={(data) => handleRowDoubleClick(data)}
+                  isLoading={isLoading}
+                  showSearch={false}
+                  domLayout="normal"
                 />
               </div>
 
-              {/* فرم ویرایش یا افزودن */}
-              {(isEditing || isAdding) && formData && (
-                <form
-                  onSubmit={handleFormSubmit}
-                  className="mt-4 p-4 border rounded bg-gray-50 shadow-inner"
-                >
-                  <h3 className="text-lg font-semibold mb-4">
-                    {isAdding
-                      ? "افزودن MenuItem جدید"
-                      : isEditing
-                      ? "ویرایش MenuItem"
-                      : ""}
-                  </h3>
-                  <div className="grid grid-cols-1 gap-6">
-                    <DynamicInput
-                      name="Name"
-                      type="text"
-                      value={formData.Name || ""}
-                      placeholder="نام"
-                      onChange={(e) => handleInputChange("Name", e.target.value)}
-                      className="mt-2"
+              {/* The form */}
+              <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
+                <div className="grid grid-cols-1 gap-6">
+                  <DynamicInput
+                    name="Name"
+                    type="text"
+                    value={formData.Name || ""}
+                    placeholder="Name"
+                    onChange={(e) => handleInputChange("Name", e.target.value)}
+                    className="mt-2"
+                  />
+                  <DynamicInput
+                    name="Command"
+                    type="text"
+                    value={formData.Command || ""}
+                    placeholder="Command (Optional)"
+                    onChange={(e) => handleInputChange("Command", e.target.value)}
+                    className="mt-2"
+                  />
+                  <DynamicInput
+                    name="Description"
+                    type="text"
+                    value={formData.Description || ""}
+                    placeholder="Description"
+                    onChange={(e) => handleInputChange("Description", e.target.value)}
+                    className="mt-2"
+                  />
+                  <DynamicInput
+                    name="Order"
+                    type="number"
+                    value={formData.Order || 0}
+                    placeholder="Order"
+                    onChange={(e) =>
+                      handleInputChange("Order", parseInt(e.target.value, 10) || 0)
+                    }
+                    className="mt-2"
+                  />
+                  <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                    <DynamicRadioGroup
+                      options={[
+                        { value: "0", label: "Large" },
+                        { value: "1", label: "Medium" },
+                        { value: "2", label: "Small" },
+                      ]}
+                      title="Size"
+                      name="size"
+                      selectedValue={selectedSize}
+                      onChange={handleRadioChange}
+                      className="w-full md:w-1/2"
+                      isRowClicked={true}
                     />
-                    <DynamicInput
-                      name="Command"
-                      type="text"
-                      value={formData.Command || ""}
-                      placeholder="Command"
-                      onChange={(e) =>
-                        handleInputChange("Command", e.target.value)
-                      }
-                      className="mt-2"
+                    <FileUploadHandler
+                      selectedFileId={iconImageId}
+                      onUploadSuccess={handleUploadSuccess}
+                      resetCounter={resetCounter}
+                      onReset={() => setResetCounter((prev) => prev + 1)}
                     />
-                    <DynamicInput
-                      name="Description"
-                      type="text"
-                      value={formData.Description || ""}
-                      placeholder="توضیحات"
-                      onChange={(e) =>
-                        handleInputChange("Description", e.target.value)
-                      }
-                      className="mt-2"
-                    />
-                    <DynamicInput
-                      name="Order"
-                      type="number"
-                      value={formData.Order || 0}
-                      placeholder="ترتیب"
-                      onChange={(e) =>
-                        handleInputChange(
-                          "Order",
-                          parseInt(e.target.value, 10) || 0
-                        )
-                      }
-                      className="mt-2"
-                    />
-
-                    {/* ردیف جدید شامل رادیو گروپ و آپلودر */}
-                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                      {/* رادیو گروپ سایز */}
-                      <DynamicRadioGroup
-                        options={[
-                          { value: "0", label: "Large" },
-                          { value: "1", label: "Medium" },
-                          { value: "2", label: "Small" },
-                        ]}
-                        title="Size"
-                        name="size"
-                        selectedValue={selectedSize}
-                        onChange={handleRadioChange}
-                        className="w-full md:w-1/2"
-                        isRowClicked={true}
-                      />
-
-                      {/* آپلودر تصویر */}
-                      <FileUploadHandler
-                        selectedFileId={iconImageId}
-                        onUploadSuccess={handleUploadSuccess}
-                        resetCounter={resetCounter}
-                        onReset={() => setResetCounter((prev) => prev + 1)}
-                      />
-                    </div>
                   </div>
-                  <div className="flex justify-center space-x-4 mt-12">
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition"
-                      onClick={handleFormCancel}
-                    >
-                      لغو
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    >
-                      {isAdding ? "افزودن" : "ذخیره تغییرات"}
-                    </button>
-                  </div>
-                </form>
-              )}
+                </div>
+                {/* Action buttons */}
+                <div className="flex items-center gap-4 mt-4">
+                  <button
+                    onClick={handleInsert}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                  >
+                    <FaSave /> Save
+                  </button>
+                  <button
+                    onClick={handleUpdate}
+                    disabled={!selectedRow}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      selectedRow
+                        ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                        : "bg-blue-300 text-gray-200 cursor-not-allowed"
+                    }`}
+                  >
+                    <FaEdit /> Update
+                  </button>
+                  <button
+                    onClick={handleDeleteClick}
+                    disabled={!selectedRow}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      selectedRow
+                        ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                        : "bg-red-300 text-gray-200 cursor-not-allowed"
+                    }`}
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                  <button
+                    onClick={handleNew}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                  >
+                    <FaPlus /> New
+                  </button>
+                </div>
+              </div>
             </>
           ) : (
+            // If no MenuGroup is selected
             isOpen && (
               <p className="text-gray-500">
-                لطفاً یک Menu Group را در Accordion2 انتخاب کنید تا Menu Items نمایش
-                داده شوند.
+                Please select a Menu Group in Accordion2 so the Menu Items will be displayed.
               </p>
             )
           )}
         </div>
       )}
+
+      {/* Confirm Insert */}
+      <DynamicConfirm
+        isOpen={confirmInsertOpen}
+        title="Insert Confirmation"
+        message="Are you sure you want to add this Menu Item?"
+        onConfirm={confirmInsert}
+        onClose={() => setConfirmInsertOpen(false)}
+        variant="add"
+      />
+
+      {/* Confirm Update */}
+      <DynamicConfirm
+        isOpen={confirmUpdateOpen}
+        title="Update Confirmation"
+        message="Are you sure you want to update this Menu Item?"
+        onConfirm={confirmUpdate}
+        onClose={() => setConfirmUpdateOpen(false)}
+        variant="edit"
+      />
+
+      {/* Confirm Delete */}
+      <DynamicConfirm
+        isOpen={confirmDeleteOpen}
+        title="Delete Confirmation"
+        message={`Are you sure you want to delete Menu Item "${selectedRow?.Name}"?`}
+        onConfirm={confirmDelete}
+        onClose={() => setConfirmDeleteOpen(false)}
+        variant="delete"
+      />
+
+      {/* Error message (only Name is required now) */}
+      <DynamicConfirm
+        isOpen={errorConfirmOpen}
+        title="Error"
+        message="Name is required."
+        onConfirm={closeErrorConfirm}
+        onClose={closeErrorConfirm}
+        variant="error"
+        hideCancelButton={true}
+      />
     </div>
   );
 };

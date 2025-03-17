@@ -1,0 +1,31 @@
+/* استایل‌دهی به هدر آکاردئون‌ها */
+.flex.justify-between.items-center.p-4.bg-white.border-b.border-gray-300.rounded-t-lg.cursor-pointer {
+    background-color: #9370eb !important; /* معادل Tailwind: bg-red-300 */
+    padding: 8px 12px !important; /* کاهش پدینگ برای ظرافت بیشتر */
+    border-radius: 10px !important; /* گوشه‌ها نرم‌تر شوند */
+    border-bottom: none !important; /* حذف border پایین */
+    margin-bottom: 4px !important; /* فاصله کوچک بین آکاردئون‌ها */
+  }
+  
+  /* متن هدر آکاردئون‌ها */
+  .flex.justify-between.items-center.p-4.bg-white.border-b.border-gray-300.rounded-t-lg.cursor-pointer span {
+    font-size: 14px !important; /* کوچک‌تر کردن متن */
+    font-weight: 500; /* متن لطیف‌تر */
+    color: white;
+  }
+  
+  /* حذف بوردر کلی و گرد کردن محتوای داخل اکاردئون */
+  .border.border-gray-300.rounded-lg {
+    border: none !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* سایه نرم */
+    border-radius: 12px !important;
+    overflow: hidden; /* مخفی کردن لبه‌های اضافی */
+  }
+  
+  /* تنظیمات محتوای آکاردئون‌ها */
+  .p-4.bg-white.rounded-b-lg {
+    padding: 10px !important; /* محتوا کوچکتر و جمع‌وجورتر */
+    background-color: #fff5fd !important; /* رنگ پس‌زمینه ملایم‌تر داخل آکاردئون */
+    font-size: 13px !important; /* سایز متن داخل کوچک‌تر شود */
+  }
+  

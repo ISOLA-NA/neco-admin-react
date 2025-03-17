@@ -67,7 +67,8 @@ const App: React.FC = () => {
                   )
                 }
               />
-              
+              {/* مسیر Login1 بدون شرط احراز هویت */}
+              <Route path="/login1" element={<Login1 />} />
             </Routes>
           </Router>
         </AddEditDeleteProvider>

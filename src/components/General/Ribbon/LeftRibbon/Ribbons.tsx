@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Accordion1 from "../RightRibbon/Accordion1";
 import Accordion2 from "../RightRibbon/Accordion2";
 import Accordion3 from "../RightRibbon/Accordion3";
+import "./style.css"
 
 // تعریف نوع برای داده‌های Ribbons
 interface RibbonRow {
