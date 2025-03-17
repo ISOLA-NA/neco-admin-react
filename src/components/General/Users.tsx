@@ -233,15 +233,6 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     <TwoColumnLayout>
       <div >
         <DynamicInput
-          name="Code"
-          type="number"
-          value={userData.Code}
-          onChange={e => handleChange('Code', e.target.value)}
-          disabled={!!selectedRow}
-        />
-      </div>
-      <div >
-        <DynamicInput
           name="Username"
           type="text"
           value={userData.Username}
@@ -252,10 +243,20 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       </div>
       <div >
         <DynamicInput
+          name="Code"
+          type="number"
+          value={userData.Code}
+          onChange={e => handleChange('Code', e.target.value)}
+          disabled={!!selectedRow}
+        />
+      </div>
+      <div >
+        <DynamicInput
           name="Name"
           type="text"
           value={userData.Name}
           onChange={e => handleChange('Name', e.target.value)}
+          className='-mt-5'
           required
         />
       </div>
@@ -265,6 +266,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           type="text"
           value={userData.Family}
           onChange={e => handleChange('Family', e.target.value)}
+          className='-mt-5'
         />
       </div>
       {!selectedRow && (
@@ -275,6 +277,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
               type="password"
               value={userData.Password}
               onChange={e => handleChange('Password', e.target.value)}
+              className='-mt-5'
               required
             />
           </div>
@@ -284,6 +287,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
               type="password"
               value={userData.ConfirmPassword}
               onChange={e => handleChange('ConfirmPassword', e.target.value)}
+              className='-mt-5'
               required
             />
           </div>
@@ -298,6 +302,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
               placeholder="Enter new password (optional)"
+              className='-mt-5'
             />
           </div>
           <div >
@@ -316,6 +321,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           type="text"
           value={userData.Email}
           onChange={e => handleChange('Email', e.target.value)}
+          className='-mt-5'
         />
       </div>
       <div >
@@ -324,6 +330,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           type="text"
           value={userData.Mobile}
           onChange={e => handleChange('Mobile', e.target.value)}
+          className='-mt-5'
         />
       </div>
       <div >
@@ -332,6 +339,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           type="text"
           value={userData.Website}
           onChange={e => handleChange('Website', e.target.value)}
+          className='-mt-5'
         />
       </div>
       <div >
@@ -341,6 +349,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           selectedValue={userData.userType.toString()}
           onChange={e => handleChange('userType', parseInt(e.target.value))}
           label="User Type"
+          className='-mt-6'
         />
       </div>
       <div >
