@@ -109,7 +109,7 @@ interface RoleData {
 interface CompanyData {
   ID?: number;
   Name: string;
-  Description?: string;
+  Describtion?: string;
   Type?: string | null;
   Information?: string | null;
   IsVisible: boolean;
@@ -516,7 +516,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const companyRequest: Partial<Company> = {
         Name: data.Name,
-        Description: data.Description,
+        Describtion: data.Describtion,
         Type: data.Type,
         Information: data.Information,
         IsVisible: data.IsVisible,

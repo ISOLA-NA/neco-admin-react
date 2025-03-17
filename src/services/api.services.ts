@@ -305,7 +305,7 @@ export interface PostType {
 export interface Company {
   ID: number;
   Name: string;
-  Description?: string; // افزودن Description به صورت اختیاری
+  Describtion?: string; // افزودن Description به صورت اختیاری
   Information?: string | null; // اطلاعات ممکن است خالی باشد
   IsVisible: boolean;
   LastModified: string;

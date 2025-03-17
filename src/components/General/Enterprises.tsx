@@ -10,10 +10,10 @@ import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { Company } from "../../services/api.services";
-import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 export interface CompanyHandle {
   save: () => Promise<boolean>;
+  checkNameFilled: () => boolean;
 }
 
 interface EnterpriseProps {
@@ -27,7 +27,7 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
     const [enterpriseData, setEnterpriseData] = useState<Company>({
       ID: 0,
       Name: "",
-      Description: "",
+      Describtion: "",
       Type: "",
       Information: "",
       IsVisible: true,
@@ -40,7 +40,7 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
         setEnterpriseData({
           ID: selectedRow.ID,
           Name: selectedRow.Name || "",
-          Description: selectedRow.Description || "",
+          Describtion: selectedRow.Describtion || "",
           Type: selectedRow.Type || "",
           Information: selectedRow.Information || "",
           IsVisible: selectedRow.IsVisible ?? true,
@@ -52,7 +52,7 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
         setEnterpriseData({
           ID: 0,
           Name: "",
-          Description: "",
+          Describtion: "",
           Type: "",
           Information: "",
           IsVisible: true,
@@ -67,12 +67,12 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
         try {
           // Validate required fields
           if (!enterpriseData.Name.trim()) {
-            showAlert(
-              "error",
-              null,
-              "Validation Error",
-              "Enterprise name is required"
-            );
+            // showAlert(
+            //   "error",
+            //   null,
+            //   "Validation Error",
+            //   "Enterprise name is required"
+            // );
             return false;
           }
 
@@ -86,20 +86,23 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
           const result = await handleSaveCompany(dataToSave);
 
           if (result) {
-            showAlert(
-              "success",
-              null,
-              "Success",
-              `Enterprise ${selectedRow ? "updated" : "created"} successfully`
-            );
+            // showAlert(
+            //   "success",
+            //   null,
+            //   "Success",
+            //   `Enterprise ${selectedRow ? "updated" : "created"} successfully`
+            // );
             return true;
           }
           return false;
         } catch (error) {
           console.error("Error saving enterprise:", error);
-          showAlert("error", null, "Error", "Failed to save enterprise data");
+          // showAlert("error", null, "Error", "Failed to save enterprise data");
           return false;
         }
+      },
+      checkNameFilled() {
+        return enterpriseData.Name.trim().length > 0;
       },
     }));
 
@@ -121,15 +124,13 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
           value={enterpriseData.Name}
           onChange={(e) => handleChange("Name", e.target.value)}
           required
-          className="mb-4"
         />
 
         <DynamicInput
-          name="Description"
+          name="Describtion"
           type="text"
-          value={enterpriseData.Description || ""}
-          onChange={(e) => handleChange("Description", e.target.value)}
-          className="mb-4"
+          value={enterpriseData.Describtion || ""}
+          onChange={(e) => handleChange("Describtion", e.target.value)}
         />
 
         <DynamicInput
@@ -137,7 +138,7 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
           type="text"
           value={enterpriseData.Type || ""}
           onChange={(e) => handleChange("Type", e.target.value)}
-          className="mb-4"
+          className="-mt-5"
         />
 
         <DynamicInput
@@ -145,7 +146,7 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
           type="text"
           value={enterpriseData.Information || ""}
           onChange={(e) => handleChange("Information", e.target.value)}
-          className="mb-4"
+          className="-mt-5"
         />
       </TwoColumnLayout>
     );
