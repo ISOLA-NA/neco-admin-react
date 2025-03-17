@@ -33,7 +33,7 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
   value,
   onChange,
   placeholder = "",
-  rows = 1,
+  rows = 3,
   leftIcon,
   rightIcon,
   required = false,

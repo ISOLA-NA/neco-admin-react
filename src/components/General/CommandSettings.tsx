@@ -8,6 +8,7 @@ import DynamicSelector from "../utilities/DynamicSelector";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { CommandItem, GetEnumResponse } from "../../services/api.services";
 import AppServices from "../../services/api.services";
+import DynamicSwitcher from "../utilities/DynamicSwitcher";
 
 export interface CommandHandle {
   save: () => Promise<CommandItem | null>;
@@ -30,7 +31,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       gridCmd: selectedRow?.gridCmd || "",
       tabCmd: selectedRow?.tabCmd || "",
       QR: selectedRow?.QR || "",
-      ViewMode: selectedRow?.ViewMode || "",
+      ViewMode: selectedRow?.ViewMode !== undefined ? selectedRow.ViewMode.toString() : "",
       DefaultColumns: selectedRow?.DefaultColumns || "",
       ReportParam: selectedRow?.ReportParam || "",
       ProjectIntensive:
@@ -41,16 +42,12 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       InvisibleColumns: selectedRow?.InvisibleColumns || "",
       ApiColumns: selectedRow?.ApiColumns || "",
       SpParam: selectedRow?.SpParam || "",
-      CmdType: selectedRow?.CmdType || "",
+      CmdType: selectedRow?.CmdType !== undefined ? selectedRow.CmdType.toString() : "",
     });
 
     // وضعیت برای ViewModes و ApiModes
-    const [viewModes, setViewModes] = useState<
-      { value: string; label: string }[]
-    >([]);
-    const [apiModes, setApiModes] = useState<
-      { value: string; label: string }[]
-    >([]);
+    const [viewModes, setViewModes] = useState<{ value: string; label: string }[]>([]);
+    const [apiModes, setApiModes] = useState<{ value: string; label: string }[]>([]);
 
     const [loadingViewModes, setLoadingViewModes] = useState<boolean>(false);
     const [loadingApiModes, setLoadingApiModes] = useState<boolean>(false);
@@ -69,7 +66,10 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
         gridCmd: selectedRow?.gridCmd || "",
         tabCmd: selectedRow?.tabCmd || "",
         QR: selectedRow?.QR || "",
-        ViewMode: selectedRow?.ViewMode || "",
+        ViewMode:
+          selectedRow?.ViewMode !== undefined
+            ? selectedRow.ViewMode.toString()
+            : "",
         DefaultColumns: selectedRow?.DefaultColumns || "",
         ReportParam: selectedRow?.ReportParam || "",
         ProjectIntensive:
@@ -80,7 +80,10 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
         InvisibleColumns: selectedRow?.InvisibleColumns || "",
         ApiColumns: selectedRow?.ApiColumns || "",
         SpParam: selectedRow?.SpParam || "",
-        CmdType: selectedRow?.CmdType || "",
+        CmdType:
+          selectedRow?.CmdType !== undefined
+            ? selectedRow.CmdType.toString()
+            : "",
       });
     }, [selectedRow]);
 
@@ -92,17 +95,16 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
         setErrorViewModes(null);
         try {
           const response: GetEnumResponse = await AppServices.getEnum({
-            str: "DeemCondition",
+            str: "ViewMode",
           });
-          // تبدیل مقادیر به فرمت مناسب برای سلکتور
           const viewModeOptions = Object.entries(response).map(
             ([key, val]) => ({
-              value: val, // اینجا مقدار عددی (یا استرینگ عددی) را می‌گذاریم
-              label: key, // اینجا کلید را به‌عنوان برچسب نشان می‌دهیم
+              value: val.toString(),
+              label: key,
             })
           );
-
           setViewModes(viewModeOptions);
+          console.log("viewModeOptions", viewModeOptions);
         } catch (error) {
           console.error("Error fetching ViewMode enums:", error);
           setErrorViewModes("خطا در دریافت ViewMode");
@@ -110,19 +112,19 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           setLoadingViewModes(false);
         }
 
-        // Fetch CmdType
+        // Fetch CmdType (Api Mode)
         setLoadingApiModes(true);
         setErrorApiModes(null);
         try {
           const response: GetEnumResponse = await AppServices.getEnum({
-            str: "DeemAction",
+            str: "CmdType",
           });
           const apiModeOptions = Object.entries(response).map(([key, val]) => ({
-            value: val,
+            value: val.toString(),
             label: key,
           }));
-
           setApiModes(apiModeOptions);
+          console.log("apiModeOptions", apiModeOptions);
         } catch (error) {
           console.error("Error fetching CmdType enums:", error);
           setErrorApiModes("خطا در دریافت CmdType");
@@ -134,23 +136,41 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       fetchEnums();
     }, []);
 
+    // در صورتی که CmdType خالی باشد، مقدار پیش‌فرض (اولین گزینه) را تنظیم می‌کنیم
+    useEffect(() => {
+      if (!commandData.CmdType && apiModes.length > 0) {
+        setCommandData((prev) => ({ ...prev, CmdType: apiModes[0].value }));
+      }
+    }, [apiModes, commandData.CmdType]);
+
     const handleChange = (
       field: keyof typeof commandData,
       value: string | boolean | number | null
     ) => {
-      setCommandData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
+      if (field === "ViewMode" || field === "CmdType") {
+        setCommandData((prev) => ({
+          ...prev,
+          [field]: value?.toString() || "",
+        }));
+      } else {
+        setCommandData((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+      }
     };
 
     // متد اصلی ذخیره (برای forwardRef)
     const save = async (): Promise<CommandItem | null> => {
-      const result = await handleSaveCommand(commandData);
+      const dataToSave = {
+        ...commandData,
+        ViewMode: commandData.ViewMode ? parseInt(commandData.ViewMode, 10) : 0,
+        CmdType: commandData.CmdType ? parseInt(commandData.CmdType, 10) : 0,
+      };
+      const result = await handleSaveCommand(dataToSave);
       return result;
     };
 
-    // Expose the `save` method to parent (TabContent) via ref
     useImperativeHandle(ref, () => ({
       save,
     }));
@@ -279,16 +299,15 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           onChange={(e) => handleChange("tabCmd", e.target.value)}
         />
 
-        {/* ProjectIntensive (checkbox به عنوان نمونه) */}
-        <div className="flex items-center mt-4 space-x-2">
-          <label htmlFor="ProjectIntensive" className="text-sm font-medium">
-            ProjectIntensive:
-          </label>
-          <input
-            id="ProjectIntensive"
-            type="checkbox"
-            checked={commandData.ProjectIntensive}
-            onChange={(e) => handleChange("ProjectIntensive", e.target.checked)}
+        {/* ProjectIntensive with DynamicSwitcher */}
+        <div className="mt-4">
+          <DynamicSwitcher
+            isChecked={!!commandData.ProjectIntensive}
+            onChange={() =>
+              handleChange("ProjectIntensive", !commandData.ProjectIntensive)
+            }
+            leftLabel=""
+            rightLabel="ProjectIntensive"
           />
         </div>
       </TwoColumnLayout>

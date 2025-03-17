@@ -78,7 +78,6 @@ const MainAccordion: React.FC<{ selectedRow?: RibbonRow }> = ({
 
   return (
     <div className="-mt-5">
-      <h1>aaaaaaaaa</h1>
       <Accordion1
         onRowClick={(row: RowData1 | null) => {
           setSelectedRow1(row);

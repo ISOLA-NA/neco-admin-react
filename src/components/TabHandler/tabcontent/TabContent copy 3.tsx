@@ -33,7 +33,7 @@ import { ApprovalFlowHandle } from "../../ApprovalFlows/MainApproval/ApprovalFlo
 import { FormsHandle } from "../../Forms/Forms";
 import { CategoryHandle } from "../../Forms/Categories";
 import DynamicInput from "../../utilities/DynamicInput";
-import { FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 
 interface TabContentProps {
@@ -227,12 +227,15 @@ const TabContent: FC<TabContentProps> = ({
           break;
         case "Forms":
           data = await api.getTableTransmittal();
+          console.log("Data from getTableTransmittal: ", data);
           break;
         case "Categories":
           if (selectedCategoryType === "cata") {
             data = await api.getAllCatA();
+            console.log("Fetching CatA data:", data);
           } else {
             data = await api.getAllCatB();
+            console.log("Fetching CatB data:", data);
           }
           break;
         default:
@@ -263,31 +266,9 @@ const TabContent: FC<TabContentProps> = ({
     }
   }, [activeSubTab, fetchData]);
 
-  // تابع بررسی مقدار خالی بودن نام
-  const checkNameNonEmpty = () => {
-    if (activeSubTab === "Ribbons") {
-      return nameInput.trim().length > 0;
-    }
-    const activeRef = getActiveRef();
-    if (activeRef && activeRef.current && typeof activeRef.current.checkNameFilled === "function") {
-      return activeRef.current.checkNameFilled();
-    }
-    return true;
-  };
-
-  // اگر نام خالی بود، هشدار انگلیسی نمایش بده
-  const showNameEmptyWarning = () => {
-    showAlert("warning", null, "Warning", "Name cannot be empty");
-  };
-
   // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
     try {
-      // اگر تب Ribbons است و نام خالی است، هشدار نمایش داده شود
-      if (activeSubTab === "Ribbons" && !checkNameNonEmpty()) {
-        showNameEmptyWarning();
-        return;
-      }
       switch (activeSubTab) {
         case "Configurations":
           if (configurationRef.current) {
@@ -424,7 +405,7 @@ const TabContent: FC<TabContentProps> = ({
         default:
           break;
       }
-      // بعد از درج موفق، داده‌های جدید را واکشی می‌کنیم
+      // بلافاصله بعد از درج موفق، داده‌های جدید را واکشی می‌کنیم تا DataTable به‌روز شود
       await fetchData();
       setIsPanelOpen(false);
       setIsAdding(false);
@@ -474,6 +455,7 @@ const TabContent: FC<TabContentProps> = ({
               Description: descriptionInput,
               IsVisible: selectedRow.IsVisible,
             });
+            // قبل از به‌روزرسانی، بررسی انجام شده است.
             showAlert("success", null, "Updated", "Ribbon updated successfully.");
             await fetchData();
           }
@@ -624,9 +606,7 @@ const TabContent: FC<TabContentProps> = ({
   };
 
   const handleDeleteClick = () => {
-    // اگر هیچ ردیفی انتخاب نشده باشد
-    const rowToDelete = pendingSelectedRow || selectedRow;
-    if (!rowToDelete) {
+    if (!pendingSelectedRow) {
       showAlert("warning", null, "Warning", "Please select a row to delete.");
       return;
     }
@@ -637,61 +617,61 @@ const TabContent: FC<TabContentProps> = ({
       try {
         switch (activeSubTab) {
           case "Users":
-            await api.deleteUser(rowToDelete.ID);
+            await api.deleteUser(pendingSelectedRow.ID);
             break;
           case "Ribbons":
-            await api.deleteMenu(rowToDelete.ID);
+            await api.deleteMenu(pendingSelectedRow.ID);
             break;
           case "Commands":
-            await api.deleteCommand(rowToDelete.ID);
+            await api.deleteCommand(pendingSelectedRow.ID);
             break;
           case "Configurations":
-            await api.deleteConfiguration(rowToDelete.ID);
+            await api.deleteConfiguration(pendingSelectedRow.ID);
             break;
           case "Roles":
-            await api.deleteRole(rowToDelete.ID);
+            await api.deleteRole(pendingSelectedRow.ID);
             break;
           case "Enterprises":
-            await api.deleteCompany(rowToDelete.ID);
+            await api.deleteCompany(pendingSelectedRow.ID);
             break;
           case "RoleGroups":
-            await api.deletePostCat(rowToDelete.ID);
+            await api.deletePostCat(pendingSelectedRow.ID);
             break;
           case "Staffing":
-            await api.deleteRole(rowToDelete.ID);
+            await api.deleteRole(pendingSelectedRow.ID);
             break;
           case "ProgramTemplate":
-            await api.deleteProgramTemplate(rowToDelete.ID);
+            await api.deleteProgramTemplate(pendingSelectedRow.ID);
             break;
           case "ProgramTypes":
-            await api.deleteProgramType(rowToDelete.ID);
+            await api.deleteProgramType(pendingSelectedRow.ID);
             break;
           case "Projects":
-            await api.deleteProject(rowToDelete.ID);
+            await api.deleteProject(pendingSelectedRow.ID);
             break;
           case "Odp":
-            await api.deleteOdp(rowToDelete.ID);
+            await api.deleteOdp(pendingSelectedRow.ID);
             break;
           case "Procedures":
-            await api.deleteEntityCollection(rowToDelete.ID);
+            await api.deleteEntityCollection(pendingSelectedRow.ID);
             break;
           case "Calendars":
-            await api.deleteCalendar(rowToDelete.ID);
+            await api.deleteCalendar(pendingSelectedRow.ID);
             break;
           case "ProjectsAccess":
-            await api.deleteAccessProject(rowToDelete.ID);
+            await api.deleteAccessProject(pendingSelectedRow.ID);
             break;
           case "ApprovalFlows":
-            await api.deleteApprovalFlow(rowToDelete.ID);
+            await api.deleteApprovalFlow(pendingSelectedRow.ID);
             break;
           case "Forms":
-            await api.deleteEntityType(rowToDelete.ID);
+            await api.deleteEntityType(pendingSelectedRow.ID);
             break;
           case "Categories":
             if (selectedCategoryType === "cata") {
-              await api.deleteCatA(rowToDelete.ID);
+              await api.deleteCatA(pendingSelectedRow.ID);
             } else {
-              await api.deleteCatB(rowToDelete.ID);
+              await api.deleteCatB(pendingSelectedRow.ID);
             }
             break;
         }
@@ -780,17 +760,25 @@ const TabContent: FC<TabContentProps> = ({
     }
   };
 
-  const handleNew = () => {
-    setNameInput("");
-    setDescriptionInput("");
-    // اگر از pendingSelectedRow استفاده می‌کنید آن را هم خالی کنید
-    setPendingSelectedRow(null);
-  
-    // اگر می‌خواهید selectedRow در والد نیز null شود (تا دکمه‌های Update/Delete غیرفعال شوند)
-    onRowClick(null); 
-    // یا اگر تابع دیگری دارید که selectedRow را null می‌کند، از همان استفاده کنید.
+  // ***************************
+  // *******  منطق جدید  *******
+  // ***************************
+  // تغییر در تابع checkNameNonEmpty: فقط در تب Ribbons مقدار nameInput چک شود، در تب‌های دیگر true برگردد
+  const checkNameNonEmpty = () => {
+    if (activeSubTab === "Ribbons") {
+      return nameInput.trim().length > 0;
+    }
+    const activeRef = getActiveRef();
+    if (activeRef && activeRef.current && typeof activeRef.current.checkNameFilled === "function") {
+      return activeRef.current.checkNameFilled();
+    }
+    return true;
   };
   
+  // اگر نام خالی بود، هشدار انگلیسی نمایش بده
+  const showNameEmptyWarning = () => {
+    showAlert("warning", null, "Warning", "Name cannot be empty");
+  };
 
   return (
     <div
@@ -841,104 +829,68 @@ const TabContent: FC<TabContentProps> = ({
         )}
 
         <div className="h-full p-4 overflow-auto relative">
-          {activeSubTab === "Ribbons" ? (
-            <>
-              <div style={{ height: "calc(100% - 180px)" }} className="overflow-auto">
-                <DataTable
-                  columnDefs={columnDefs}
-                  rowData={fetchedRowData}
-                  onRowDoubleClick={handleDoubleClick}
-                  setSelectedRowData={handleRowClickLocal}
-                  showDuplicateIcon={showDuplicateIcon}
-                  showEditIcon={showEditIcon}
-                  showAddIcon={showAddIcon}
-                  showDeleteIcon={showDeleteIcon}
-                  onEdit={handleEditFromLeft}
-                  onAdd={handleAddClick}
-                  onDelete={handleDeleteClick}
-                  onDuplicate={handleDuplicateClick}
-                  isLoading={isLoading}
+          <DataTable
+            columnDefs={columnDefs}
+            rowData={fetchedRowData}
+            onRowDoubleClick={handleDoubleClick}
+            setSelectedRowData={handleRowClickLocal}
+            showDuplicateIcon={showDuplicateIcon}
+            showEditIcon={showEditIcon}
+            showAddIcon={showAddIcon}
+            showDeleteIcon={showDeleteIcon}
+            onEdit={handleEditFromLeft}
+            onAdd={handleAddClick}
+            onDelete={handleDeleteClick}
+            onDuplicate={handleDuplicateClick}
+            isLoading={isLoading}
+          />
+
+          {/* اگر تب Ribbons بود و پنل باز بود، فرم ساده‌اش در همین قسمت */}
+          {activeSubTab === "Ribbons" && isPanelOpen && (
+            <div className="-mt-32 w-full p-4 bg-white rounded-md shadow-md absolute">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <DynamicInput
+                  name="Name"
+                  type="text"
+                  value={nameInput}
+                  placeholder="Enter name"
+                  onChange={handleNameChange}
+                  required
+                />
+                <DynamicInput
+                  name="Description"
+                  type="text"
+                  value={descriptionInput}
+                  placeholder="Enter description"
+                  onChange={handleDescriptionChange}
+                  required
                 />
               </div>
-
-              {/* بخش فرم و دکمه‌ها همیشه قابل مشاهده در تب Ribbons */}
-              <div className="mt-4 p-4 bg-white rounded-md shadow-md">
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <DynamicInput
-      name="Name"
-      type="text"
-      value={nameInput}
-      placeholder="Enter name"
-      onChange={handleNameChange}
-      required
-    />
-    <DynamicInput
-      name="Description"
-      type="text"
-      value={descriptionInput}
-      placeholder="Enter description"
-      onChange={handleDescriptionChange}
-    />
-  </div>
-  
-  <div className="flex items-center gap-4 mt-4">
-
-    <button
-      onClick={handleInsert}
-      className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-    >
-      <FaSave /> Save
-    </button>
-    
-    <button
-      onClick={handleUpdate}
-      disabled={!selectedRow}
-      className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-        selectedRow
-          ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-          : "bg-blue-300 text-gray-200 cursor-not-allowed"
-      }`}
-    >
-      <FaEdit /> Update
-    </button>
-
-    <button
-      onClick={handleDeleteClick}
-      disabled={!selectedRow}
-      className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-        selectedRow
-          ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-          : "bg-red-300 text-gray-200 cursor-not-allowed"
-      }`}
-    >
-      <FaTrash /> Delete
-    </button>
-    <button
-      onClick={handleNew}
-      className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-    >
-      <FaPlus /> New
-    </button>
-  </div>
-</div>
-
-            </>
-          ) : (
-            <DataTable
-              columnDefs={columnDefs}
-              rowData={fetchedRowData}
-              onRowDoubleClick={handleDoubleClick}
-              setSelectedRowData={handleRowClickLocal}
-              showDuplicateIcon={showDuplicateIcon}
-              showEditIcon={showEditIcon}
-              showAddIcon={showAddIcon}
-              showDeleteIcon={showDeleteIcon}
-              onEdit={handleEditFromLeft}
-              onAdd={handleAddClick}
-              onDelete={handleDeleteClick}
-              onDuplicate={handleDuplicateClick}
-              isLoading={isLoading}
-            />
+              <div className="flex items-center gap-4 mt-4">
+                <button
+                  onClick={handleInsert}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                >
+                  <FaSave /> Save
+                </button>
+                {!isAdding && selectedRow && (
+                  <>
+                    <button
+                      onClick={handleUpdate}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    >
+                      <FaEdit /> Update
+                    </button>
+                    <button
+                      onClick={handleDeleteClick}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    >
+                      <FaTrash /> Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -952,8 +904,8 @@ const TabContent: FC<TabContentProps> = ({
         <div className="h-full w-1 bg-[#dd4bae] rounded"></div>
       </div>
 
-      {/* پنل راست (سایر تب‌ها) */}
-      {isPanelOpen &&  (
+      {/* پنل راست */}
+      {isPanelOpen && (
         <div
           className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
             isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
@@ -973,26 +925,62 @@ const TabContent: FC<TabContentProps> = ({
               minWidth: panelWidth <= 30 ? "300px" : "auto",
             }}
           >
-            <PanelHeader
-              isExpanded={false}
-              toggleExpand={() => {}}
-              onSave={
-                isAdding
-                  ? handleInsert
-                  : undefined
-              }
-              onUpdate={
-                !isAdding
-                  ? handleUpdate
-                  : undefined
-              }
-              onClose={handleClose}
-              onTogglePanelSizeFromRight={togglePanelSizeFromRight}
-              isRightMaximized={isRightMaximized}
-              onCheckCanSave={() => checkNameNonEmpty()}
-              onCheckCanUpdate={() => checkNameNonEmpty()}
-              onShowEmptyNameWarning={showNameEmptyWarning}
-            />
+            {activeSubTab !== "Ribbons" && (
+              <PanelHeader
+                isExpanded={false}
+                toggleExpand={() => {}}
+                onSave={
+                  isAdding &&
+                  (activeSubTab === "Configurations" ||
+                    activeSubTab === "Commands" ||
+                    activeSubTab === "Users" ||
+                    activeSubTab === "Ribbons" ||
+                    activeSubTab === "Roles" ||
+                    activeSubTab === "RoleGroups" ||
+                    activeSubTab === "Enterprises" ||
+                    activeSubTab === "Staffing" ||
+                    activeSubTab === "ProgramTemplate" ||
+                    activeSubTab === "ProgramTypes" ||
+                    activeSubTab === "Odp" ||
+                    activeSubTab === "Procedures" ||
+                    activeSubTab === "Calendars" ||
+                    activeSubTab === "ProjectsAccess" ||
+                    activeSubTab === "ApprovalFlows" ||
+                    activeSubTab === "Forms" ||
+                    activeSubTab === "Categories")
+                    ? handleInsert
+                    : undefined
+                }
+                onUpdate={
+                  !isAdding &&
+                  (activeSubTab === "Configurations" ||
+                    activeSubTab === "Commands" ||
+                    activeSubTab === "Users" ||
+                    activeSubTab === "Ribbons" ||
+                    activeSubTab === "Roles" ||
+                    activeSubTab === "Enterprises" ||
+                    activeSubTab === "RoleGroups" ||
+                    activeSubTab === "Staffing" ||
+                    activeSubTab === "ProgramTemplate" ||
+                    activeSubTab === "ProgramTypes" ||
+                    activeSubTab === "Odp" ||
+                    activeSubTab === "Procedures" ||
+                    activeSubTab === "Calendars" ||
+                    activeSubTab === "ProjectsAccess" ||
+                    activeSubTab === "ApprovalFlows" ||
+                    activeSubTab === "Forms" ||
+                    activeSubTab === "Categories")
+                    ? handleUpdate
+                    : undefined
+                }
+                onClose={handleClose}
+                onTogglePanelSizeFromRight={togglePanelSizeFromRight}
+                isRightMaximized={isRightMaximized}
+                onCheckCanSave={() => checkNameNonEmpty()}
+                onCheckCanUpdate={() => checkNameNonEmpty()}
+                onShowEmptyNameWarning={showNameEmptyWarning}
+              />
+            )}
 
             {/* محتوای تب‌ها در پنل راست */}
             {activeSubTab === "ProjectsAccess" && (
