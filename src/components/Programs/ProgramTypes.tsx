@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
-import CustomTextarea from "../utilities/DynamicTextArea";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { useApi } from "../../context/ApiContext";
 import { ProgramType as IProgramType } from "../../services/api.services";
@@ -17,6 +16,7 @@ import { ProgramType as IProgramType } from "../../services/api.services";
 // Define handle interface for ref
 export interface ProgramTypeHandle {
   save: () => Promise<boolean>;
+  checkNameFilled: () => boolean;
 }
 
 // Define props interface
@@ -34,7 +34,7 @@ const ProgramType: ForwardRefRenderFunction<
   // State with complete ProgramType interface
   const [programTypeData, setProgramTypeData] = useState<IProgramType>({
     Name: "",
-    Describtion: "", // Note: This matches the API interface spelling
+    Describtion: "", // توجه: این نام فیلد با املا در API مطابقت دارد
     IsVisible: true,
     ModifiedById: null,
     LastModified: undefined,
@@ -70,17 +70,19 @@ const ProgramType: ForwardRefRenderFunction<
     }));
   };
 
+  // متد بررسی خالی نبودن نام
+  const checkNameFilled = () => {
+    if (!programTypeData.Name.trim()) {
+      return false;
+    }
+    return true;
+  };
+
   // Save method implementation
   const save = async (): Promise<boolean> => {
     try {
-      // Validation
-      if (!programTypeData.Name.trim()) {
-        showAlert(
-          "warning",
-          null,
-          "توجه",
-          "نام نوع برنامه نمی‌تواند خالی باشد."
-        );
+      // اعتبارسنجی نام با استفاده از checkNameFilled
+      if (!checkNameFilled()) {
         return false;
       }
 
@@ -91,7 +93,7 @@ const ProgramType: ForwardRefRenderFunction<
       };
 
       if (selectedRow?.ID) {
-        // Update existing program type
+        // بروزرسانی نوع برنامه موجود
         await api.updateProgramType({
           ...dataToSave,
           ID: selectedRow.ID,
@@ -100,12 +102,17 @@ const ProgramType: ForwardRefRenderFunction<
           "success",
           null,
           "موفقیت",
-          "نوع برنامه با موفقیت به‌روزرسانی شد."
+          " برنامه با موفقیت به‌روزرسانی شد."
         );
       } else {
-        // Create new program type
+        // ایجاد نوع برنامه جدید
         await api.insertProgramType(dataToSave);
-        showAlert("success", null, "موفقیت", "نوع برنامه با موفقیت اضافه شد.");
+        // showAlert(
+        //   "success",
+        //   null,
+        //   "موفقیت",
+        //   "نوع برنامه با موفقیت اضافه شد."
+        // );
       }
       return true;
     } catch (error) {
@@ -115,9 +122,10 @@ const ProgramType: ForwardRefRenderFunction<
     }
   };
 
-  // Expose save method via ref
+  // Expose save and checkNameFilled methods via ref
   useImperativeHandle(ref, () => ({
     save,
+    checkNameFilled,
   }));
 
   return (
@@ -125,10 +133,10 @@ const ProgramType: ForwardRefRenderFunction<
       {/* Name Input */}
       <DynamicInput
         name="Program Name"
-        type="text" // اصلاح نوع به "text"
+        type="text"
         value={programTypeData.Name}
         placeholder=""
-        onChange={(e) => handleChange("Name", e.target.value)} // اصلاح فیلد به "Name"
+        onChange={(e) => handleChange("Name", e.target.value)}
         required={true}
       />
       <DynamicInput
@@ -137,11 +145,9 @@ const ProgramType: ForwardRefRenderFunction<
         value={programTypeData.Describtion}
         placeholder=""
         onChange={(e) => handleChange("Describtion", e.target.value)}
-        required={true}
       />
     </TwoColumnLayout>
   );
 };
 
-// Export the component with forwardRef
 export default forwardRef(ProgramType);
