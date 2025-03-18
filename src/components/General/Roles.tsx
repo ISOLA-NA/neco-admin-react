@@ -1,11 +1,6 @@
 // src/components/General/Role.tsx
 
-import React, {
-  useState,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
@@ -13,9 +8,9 @@ import DynamicSwitcher from "../utilities/DynamicSwitcher";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 
-// تعریف اینترفیس RoleHandle
+// تعریف اینترفیس RoleHandle به طوری که متد save مقدار boolean برگرداند
 export interface RoleHandle {
-  save: () => Promise<void>;
+  save: () => Promise<boolean>;
   checkNameFilled: () => boolean;
 }
 
@@ -24,9 +19,9 @@ interface RoleProps {
 }
 
 const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
-  const { handleSaveRole } = useAddEditDelete(); // دسترسی به متد context
+  const { handleSaveRole } = useAddEditDelete();
   const [roleData, setRoleData] = useState({
-    ID: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    ID: "",
     Name: "",
     Description: "",
     IsVisible: false,
@@ -37,7 +32,6 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     Responsibility: "",
     PostCode: "",
     isStaticPost: false,
-    // افزودن فیلدهای اضافی
     isAccessCreateProject: false,
     isHaveAddressbar: false,
     LastModified: "",
@@ -51,11 +45,10 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     nPostTypeID: null,
     nProjectID: null,
     status: 0,
-    // فیلد ترتیب درج در سطح فرانت‌اند
     clientOrder: Date.now(),
   });
 
-  // هنگام تغییر selectedRow: اگر رکورد انتخاب شده وجود دارد، از مقدار clientOrder آن استفاده شود؛ در غیر این صورت مقدار جدید تخصیص یابد.
+  // به روزرسانی state بر اساس selectedRow؛ در حالت ویرایش اطلاعات قبلی و در حالت درج مقدارهای اولیه تنظیم می‌شود
   useEffect(() => {
     if (selectedRow) {
       setRoleData({
@@ -70,7 +63,6 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         Responsibility: selectedRow.Responsibility || "",
         PostCode: selectedRow.PostCode || "",
         isStaticPost: selectedRow.isStaticPost || false,
-        // افزودن فیلدهای اضافی
         isAccessCreateProject: selectedRow.isAccessCreateProject || false,
         isHaveAddressbar: selectedRow.isHaveAddressbar || false,
         LastModified: selectedRow.LastModified || "",
@@ -84,11 +76,9 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         nPostTypeID: selectedRow.nPostTypeID || null,
         nProjectID: selectedRow.nProjectID || null,
         status: selectedRow.status || 0,
-        // در حالت ویرایش، اگر clientOrder موجود است از آن استفاده شود؛ در غیر این صورت مقدار جدید اختصاص یابد
         clientOrder: selectedRow.clientOrder || Date.now(),
       });
     } else {
-      // در حالت درج، مقدار clientOrder به صورت جدید تنظیم می‌شود
       setRoleData({
         ID: "",
         Name: "",
@@ -119,10 +109,8 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     }
   }, [selectedRow]);
 
-  const handleChange = (
-    field: keyof typeof roleData,
-    value: string | boolean
-  ) => {
+  // تغییر مقدار فیلدهای roleData
+  const handleChange = (field: keyof typeof roleData, value: string | boolean) => {
     setRoleData((prev) => {
       const updated = { ...prev, [field]: value };
       console.log(`فیلد ${field} به مقدار ${value} تغییر کرد`);
@@ -130,27 +118,26 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     });
   };
 
-  const save = async () => {
+  // متد ذخیره‌سازی که پس از ذخیره موفق، مقدار true برمی‌گرداند
+  const save = async (): Promise<boolean> => {
     try {
-      console.log("داده‌های ذخیره‌شده نقش:", roleData); // برای دیباگ
-      // در اینجا roleData شامل فیلد clientOrder است
+      console.log("داده‌های ذخیره‌شده نقش:", roleData);
       await handleSaveRole(roleData);
       showAlert("success", null, "ذخیره شد", "نقش با موفقیت ذخیره شد.");
+      return true;
     } catch (error) {
       console.error("خطا در ذخیره‌سازی نقش:", error);
       showAlert("error", null, "خطا", "ذخیره نقش ناموفق بود.");
-    }
-  };
-
-  // متد اعتبارسنجی که بررسی می‌کند نام خالی نباشد
-  const checkNameFilled = () => {
-    if (roleData.Name.trim().length === 0) {
       return false;
     }
-    return true;
   };
 
-  // expose the save and checkNameFilled methods to parent via ref
+  // بررسی اینکه فیلد Name خالی نباشد
+  const checkNameFilled = () => {
+    return roleData.Name.trim().length > 0;
+  };
+
+  // متدهای save و checkNameFilled را از طریق ref در دسترس پدر قرار می‌دهیم
   useImperativeHandle(ref, () => ({
     save,
     checkNameFilled,
@@ -158,82 +145,68 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
 
   return (
     <TwoColumnLayout>
-      {/* Role */}
+      {/* ورودی نام نقش */}
       <DynamicInput
         name="Role"
         type="text"
         value={roleData.Name}
-        placeholder=""
+        placeholder="Enter role name"
         onChange={(e) => handleChange("Name", e.target.value)}
         required
       />
-
-      {/* Role Code */}
+      {/* ورودی کد نقش */}
       <DynamicInput
         name="Role Code"
         type="text"
         value={roleData.PostCode}
-        placeholder=""
+        placeholder="Enter role code"
         onChange={(e) => handleChange("PostCode", e.target.value)}
       />
-
-      {/* Job Description */}
+      {/* توضیحات شغلی */}
       <CustomTextarea
         name="Job Description"
         value={roleData.Description}
-        placeholder=""
+        placeholder="Enter job description"
         onChange={(e) => handleChange("Description", e.target.value)}
-        className="-mt-5"
       />
-
-      {/* Responsibilities */}
+      {/* مسئولیت‌ها */}
       <CustomTextarea
         name="Responsibilities"
         value={roleData.Responsibility}
-        placeholder=""
+        placeholder="Enter responsibilities"
         onChange={(e) => handleChange("Responsibility", e.target.value)}
-        className="-mt-5"
       />
-
-      {/* Authorities */}
+      {/* اختیارات */}
       <CustomTextarea
         name="Authorities"
         value={roleData.Authorization}
-        placeholder=""
+        placeholder="Enter authorities"
         onChange={(e) => handleChange("Authorization", e.target.value)}
-        className="-mt-5"
       />
-
-      {/* Competencies */}
+      {/* شایستگی‌ها */}
       <CustomTextarea
         name="Competencies"
         value={roleData.Competencies}
-        placeholder=""
+        placeholder="Enter competencies"
         onChange={(e) => handleChange("Competencies", e.target.value)}
-        className="-mt-5"
       />
-
-      {/* Grade */}
+      {/* سطح */}
       <DynamicInput
         name="Grade"
         type="text"
         value={roleData.Grade}
-        placeholder=""
+        placeholder="Enter grade"
         onChange={(e) => handleChange("Grade", e.target.value)}
-        className="-mt-5"
       />
-
-      {/* Type */}
+      {/* نوع */}
       <DynamicInput
         name="Type"
         type="text"
         value={roleData.Type}
-        placeholder="Type"
+        placeholder="Enter type"
         onChange={(e) => handleChange("Type", e.target.value)}
-        className="-mt-5"
       />
-
-      {/* Static Post */}
+      {/* سوئیچر مربوط به Static Post */}
       <div className="mb-4">
         <DynamicSwitcher
           isChecked={roleData.isStaticPost}
