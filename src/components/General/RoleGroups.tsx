@@ -17,6 +17,7 @@ import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 export interface RoleGroupsHandle {
   save: () => Promise<boolean>;
+  checkNameFilled: () => boolean;
 }
 
 interface RoleGroupsProps {
@@ -85,13 +86,13 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
 
     const [selectedIds, setSelectedIds] = useState({
       projects: [] as string[],
-      members: [] as string[]
+      members: [] as string[],
     });
 
     const [loading, setLoading] = useState({
       projects: true,
       groupMembers: true,
-      allData: true
+      allData: true,
     });
 
     // Column definitions
@@ -102,19 +103,19 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
         { field: "UserNameFromAllUser", headerName: "Name" },
         { field: "UserFamily", headerName: "Family" },
         { field: "Enterprise", headerName: "Enterprise" },
-        { field: "SuperIndent", headerName: "SuperIndent" }
-      ]
+        { field: "SuperIndent", headerName: "SuperIndent" },
+      ],
     };
 
     // Fetch data
     useEffect(() => {
       const fetchData = async () => {
         try {
-          setLoading(prev => ({
+          setLoading((prev) => ({
             ...prev,
             allData: true,
             projects: true,
-            groupMembers: true
+            groupMembers: true,
           }));
 
           let projects = dataCache.current.projects;
@@ -143,9 +144,8 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
             projects: projects || [],
             roles: roles || [],
             companies: companies || [],
-            users: users || []
+            users: users || [],
           });
-
         } catch (error) {
           console.error("Error fetching data:", error);
           showAlert("error", null, "Error", "Failed to fetch data");
@@ -153,7 +153,7 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           setLoading({
             allData: false,
             projects: false,
-            groupMembers: false
+            groupMembers: false,
           });
         }
       };
@@ -164,11 +164,15 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
     // Process data
     const processedData = useMemo(() => {
       const processedRoles: ProcessedRole[] = apiData.roles
-        .filter(role => role.ID)
-        .map(role => {
-          const user = apiData.users.find(user => user.ID === role.OwnerID);
-          const company = apiData.companies.find(company => String(company.ID) === String(role.nCompanyID));
-          const superIndent = apiData.roles.find(item => item.ID === role.ParrentId)?.Name;
+        .filter((role) => role.ID)
+        .map((role) => {
+          const user = apiData.users.find((user) => user.ID === role.OwnerID);
+          const company = apiData.companies.find(
+            (company) => String(company.ID) === String(role.nCompanyID)
+          );
+          const superIndent = apiData.roles.find(
+            (item) => item.ID === role.ParrentId
+          )?.Name;
 
           return {
             ID: role.ID!,
@@ -188,7 +192,7 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
 
       return {
         processedRoles,
-        projectsListData
+        projectsListData,
       };
     }, [apiData]);
 
@@ -209,7 +213,7 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
 
         setSelectedIds({
           projects: parseIds(selectedRow.ProjectsStr),
-          members: parseIds(selectedRow.PostsStr)
+          members: parseIds(selectedRow.PostsStr),
         });
       } else if (!selectedRow) {
         setFormData({
@@ -222,69 +226,76 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
         });
         setSelectedIds({
           projects: [],
-          members: []
+          members: [],
         });
       }
     }, [selectedRow, loading.allData]);
 
     // Event handlers
     const handleProjectsChange = (selectedIds: (string | number)[]) => {
-      setSelectedIds(prev => ({
+      setSelectedIds((prev) => ({
         ...prev,
-        projects: selectedIds.map(String)
+        projects: selectedIds.map(String),
       }));
     };
 
     const handleMembersChange = (selectedIds: (string | number)[]) => {
-      setSelectedIds(prev => ({
+      setSelectedIds((prev) => ({
         ...prev,
-        members: selectedIds.map(String)
+        members: selectedIds.map(String),
       }));
     };
 
     const handleGlobalChange = (isGlobal: boolean) => {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        IsGlobal: isGlobal
+        IsGlobal: isGlobal,
       }));
     };
 
     const handleChange = (field: keyof PostCat, value: any) => {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [field]: value,
       }));
     };
 
-    // Save functionality
-    useImperativeHandle(ref, () => ({
-      async save() {
-        try {
+    // Expose functions to parent via ref
+    useImperativeHandle(
+      ref,
+      () => ({
+        checkNameFilled: () => {
+          return formData.Name.trim().length > 0;
+        },
+        async save() {
           if (!formData.Name.trim()) {
             showAlert("error", null, "Validation Error", "Role group name is required");
             return false;
           }
-
           const dataToSave: PostCat = {
             ...formData,
             ProjectsStr: selectedIds.projects.join("|") + (selectedIds.projects.length > 0 ? "|" : ""),
             PostsStr: selectedIds.members.join("|") + (selectedIds.members.length > 0 ? "|" : ""),
             LastModified: new Date().toISOString(),
           };
-
-          if (selectedRow?.ID) {
-            await api.updatePostCat(dataToSave);
-          } else {
-            await api.insertPostCat(dataToSave);
+          try {
+            if (selectedRow?.ID) {
+              await api.updatePostCat(dataToSave);
+              showAlert("success", null, "Updated", "Role group updated successfully.");
+            } else {
+              await api.insertPostCat(dataToSave);
+              showAlert("success", null, "Saved", "Role group added successfully.");
+            }
+            return true;
+          } catch (error) {
+            console.error("Error saving role group:", error);
+            showAlert("error", null, "Error", "Failed to save role group data");
+            return false;
           }
-          return true;
-        } catch (error) {
-          console.error("Error saving role group:", error);
-          showAlert("error", null, "Error", "Failed to save role group data");
-          return false;
-        }
-      },
-    }), [api, formData, selectedIds, selectedRow?.ID]);
+        },
+      }),
+      [api, formData, selectedIds, selectedRow?.ID]
+    );
 
     return (
       <TwoColumnLayout>
@@ -322,7 +333,8 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
             columnDefs: columnDefs.projects,
             rowData: processedData.projectsListData,
             selectedRows: getAssociatedItems(formData.ProjectsStr, processedData.projectsListData),
-            onRowDoubleClick: (rows: any[]) => handleProjectsChange(rows.map(row => row.ID)),
+            onRowDoubleClick: (rows: any[]) =>
+              handleProjectsChange(rows.map((row) => row.ID)),
             selectionMode: "multiple",
           }}
         />
@@ -342,7 +354,8 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
             columnDefs: columnDefs.members,
             rowData: processedData.processedRoles,
             selectedRows: getAssociatedItems(formData.PostsStr, processedData.processedRoles),
-            onRowDoubleClick: (rows: any[]) => handleMembersChange(rows.map(row => row.ID)),
+            onRowDoubleClick: (rows: any[]) =>
+              handleMembersChange(rows.map((row) => row.ID)),
             selectionMode: "multiple",
           }}
         />
