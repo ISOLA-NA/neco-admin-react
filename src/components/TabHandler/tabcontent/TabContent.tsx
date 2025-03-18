@@ -32,6 +32,7 @@ import ProjectAccess, {
 import { ApprovalFlowHandle } from "../../ApprovalFlows/MainApproval/ApprovalFlows";
 import { FormsHandle } from "../../Forms/Forms";
 import { CategoryHandle } from "../../Forms/Categories";
+
 import DynamicInput from "../../utilities/DynamicInput";
 import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
@@ -48,7 +49,7 @@ interface TabContentProps {
   showAddIcon: boolean;
   showDeleteIcon: boolean;
   onAdd: () => void;
-  onEdit: () => void;
+  onEdit: () => void; // در صورت نیاز از این پراپ استفاده کنید
   onDelete: () => void;
   onDuplicate: () => void;
   onRowClick: (data: any) => void;
@@ -77,7 +78,7 @@ const TabContent: FC<TabContentProps> = ({
   const [isRightMaximized, setIsRightMaximized] = useState(false);
   const isMaximized = panelWidth >= 97;
 
-  // رفرنس‌ها
+  // ریفرنس‌ها
   const configurationRef = useRef<ConfigurationHandle>(null);
   const commandRef = useRef<CommandHandle>(null);
   const userRef = useRef<UserHandle>(null);
@@ -199,7 +200,8 @@ const TabContent: FC<TabContentProps> = ({
           data = await api.getAllPostCat();
           break;
         case "Staffing":
-          data = await api.getAllForPostAdmin();
+          // منطق مورد نظر برای لود Staffing
+          data = await api.getAllForPostAdmin(); 
           break;
         case "ProgramTemplate":
           data = await api.getAllProgramTemplates();
@@ -230,6 +232,7 @@ const TabContent: FC<TabContentProps> = ({
           console.log("Data from getTableTransmittal: ", data);
           break;
         case "Categories":
+          // مثال برای گرفتن دو نوع دیتای مختلف بر اساس selectedCategoryType
           if (selectedCategoryType === "cata") {
             data = await api.getAllCatA();
             console.log("Fetching CatA data:", data);
@@ -239,7 +242,7 @@ const TabContent: FC<TabContentProps> = ({
           }
           break;
         default:
-          data = rowData;
+          data = rowData; // اگر هیچکدام از موارد بالا نبود، داده‌ی پیش‌فرض rowData
       }
       setFetchedRowData(data);
     } catch (error) {
@@ -405,6 +408,7 @@ const TabContent: FC<TabContentProps> = ({
         default:
           break;
       }
+
       // بلافاصله بعد از درج موفق، داده‌های جدید را واکشی می‌کنیم تا DataTable به‌روز شود
       await fetchData();
       setIsPanelOpen(false);
@@ -455,7 +459,6 @@ const TabContent: FC<TabContentProps> = ({
               Description: descriptionInput,
               IsVisible: selectedRow.IsVisible,
             });
-            // قبل از به‌روزرسانی، بررسی انجام شده است.
             showAlert("success", null, "Updated", "Ribbon updated successfully.");
             await fetchData();
           }
@@ -763,7 +766,8 @@ const TabContent: FC<TabContentProps> = ({
   // ***************************
   // *******  منطق جدید  *******
   // ***************************
-  // تغییر در تابع checkNameNonEmpty: فقط در تب Ribbons مقدار nameInput چک شود، در تب‌های دیگر true برگردد
+  // اگر در تب Ribbons هستیم، چک می‌کنیم که مقدار nameInput خالی نباشد.
+  // در تب‌های دیگر، اگر تابعی با نام checkNameFilled وجود داشت، آن را چک می‌کنیم؛ در غیر اینصورت true می‌دهیم.
   const checkNameNonEmpty = () => {
     if (activeSubTab === "Ribbons") {
       return nameInput.trim().length > 0;
@@ -774,7 +778,7 @@ const TabContent: FC<TabContentProps> = ({
     }
     return true;
   };
-  
+
   // اگر نام خالی بود، هشدار انگلیسی نمایش بده
   const showNameEmptyWarning = () => {
     showAlert("warning", null, "Warning", "Name cannot be empty");
