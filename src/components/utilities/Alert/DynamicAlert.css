@@ -1,0 +1,16 @@
+/* DynamicAlert.css */
+
+/* ابتدا کلاسی که خودتان برای ToastContainer گذاشتید: */
+.custom-toast-container {
+    z-index: 2147483647 !important; /* بیشترین عدد 32 بیتی */
+  }
+  
+  /* بهتر است برای اطمینان، همهٔ کلاس‌های پیش‌فرض توست را هم override کنید: */
+  .Toastify__toast-container,
+  .Toastify__toast,
+  .Toastify__toast-body,
+  .Toastify__close-button,
+  .Toastify__progress-bar {
+    z-index: 2147483647 !important;
+  }
+  

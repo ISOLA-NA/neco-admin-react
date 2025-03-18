@@ -12,7 +12,6 @@ import ListSelector from "../../ListSelector/ListSelector";
 import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
 import AddSubApprovalFlowModal from "../AddApprovalDialog/AddSubApprovalFlowModal";
-import { FiEdit, FiTrash2, FiCopy } from "react-icons/fi";
 import { useApi } from "../../../context/ApiContext";
 import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
 import {
@@ -24,6 +23,7 @@ import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
 export interface ApprovalFlowHandle {
   save: () => Promise<boolean>;
+  checkNameFilled: () => boolean;
 }
 
 interface ApprovalFlowProps {
@@ -63,6 +63,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
+    // دریافت پروژه‌ها
     useEffect(() => {
       const fetchProjects = async () => {
         try {
@@ -81,6 +82,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       fetchProjects();
     }, [api]);
 
+    // به‌روزرسانی داده‌های ApprovalFlow بر اساس selectedRow
     useEffect(() => {
       if (selectedRow) {
         setApprovalFlowData({
@@ -92,13 +94,11 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           MaxDuration: selectedRow.MaxDuration || 0,
           PCost: selectedRow.PCost || 0,
           ProjectsStr: selectedRow.ProjectsStr || "",
-          LastModified: selectedRow.LastModified,
-          ModifiedById: selectedRow.ModifiedById,
           SubApprovalFlows: selectedRow.SubApprovalFlows || [],
         });
 
         if (selectedRow.ID) {
-          // دریافت لیست BoxTemplateها بعد از انتخاب ردیف
+          // دریافت لیست BoxTemplateها پس از انتخاب ردیف
           api
             .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
             .then((data) => {
@@ -134,13 +134,22 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       }
     }, [selectedRow, api]);
 
+    // صادر کردن متدها از طریق ref
     useImperativeHandle(ref, () => ({
+      checkNameFilled: () => {
+        return approvalFlowData.Name.trim().length > 0;
+      },
       save: async () => {
+        // اعتبارسنجی از طریق checkNameFilled
+        if (!ref.current?.checkNameFilled()) {
+          showAlert("warning", null, "Warning", "Name cannot be empty");
+          return false;
+        }
         try {
           const result = await handleSaveApprovalFlow(approvalFlowData);
-          if (result) {
-            showAlert("success", null, "Success", "Edited Successfully");
-          }
+          // if (result) {
+          //   showAlert("success", null, "Success", "Edited Successfully");
+          // }
           return result !== null;
         } catch (error) {
           console.error("Error saving approval flow:", error);
@@ -243,8 +252,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         flex: 1,
         valueGetter: (params: any) => {
           if (!params.data?.PredecessorStr) return "";
-          const predecessorIds =
-            params.data.PredecessorStr.split("|").filter(Boolean);
+          const predecessorIds = params.data.PredecessorStr.split("|").filter(Boolean);
           return predecessorIds
             .map((id: string) => {
               const found = boxTemplates.find(
@@ -255,47 +263,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             .join(" - ");
         },
       },
-      {
-        headerName: "MaxDuration",
-        field: "MaxDuration",
-        filter: "agNumberColumnFilter",
-        sortable: true,
-      },
-      {
-        headerName: "Actions",
-        field: "actions",
-        cellRendererFramework: (params: any) => (
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handleBoxTemplateEdit(params.data)}
-              className="text-blue-600 hover:text-blue-800"
-              title="Edit"
-            >
-              <FiEdit />
-            </button>
-            <button
-              onClick={() => handleBoxTemplateDelete(params.data)}
-              className="text-red-600 hover:text-red-800"
-              title="Delete"
-            >
-              <FiTrash2 />
-            </button>
-            <button
-              onClick={() => handleBoxTemplateDuplicate(params.data)}
-              className="text-yellow-600 hover:text-yellow-800"
-              title="Duplicate"
-            >
-              <FiCopy />
-            </button>
-          </div>
-        ),
-      },
     ];
 
     const handleBoxTemplateEdit = (box: BoxTemplate) => {
       setSelectedSubRowData(box);
       setIsModalOpen(true);
-      showAlert("info", null, "Info", "Edited Successfully");
+      // showAlert("info", null, "Info", "Edited Successfully");
     };
 
     const handleBoxTemplateDelete = (box: BoxTemplate) => {
@@ -322,7 +295,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           approvalFlowData.ID
         );
         setBoxTemplates(newList);
-        showAlert("success", null, "Success", "Edited Successfully");
+        // showAlert("success", null, "Success", "Edited Successfully");
       } catch (error) {
         console.error("Error reloading boxTemplates:", error);
         showAlert(

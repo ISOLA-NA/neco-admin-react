@@ -329,7 +329,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     try {
       if (isEdit) {
         await updateEntityField(payload);
-        showAlert("success", undefined, "Success", "Edited successfully");
+        // showAlert("success", undefined, "Success", "Edited successfully");
       } else {
         await insertEntityField(payload);
         showAlert("success", undefined, "Success", "Added successfully");

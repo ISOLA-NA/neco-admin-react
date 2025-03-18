@@ -1,4 +1,3 @@
-// AddSubApprovalFlowModal.tsx
 import React, { useState, useRef, useEffect } from "react";
 import DynamicModal from "../../utilities/DynamicModal";
 import ApprovalFlowsTab, {
@@ -9,6 +8,10 @@ import AlertTab from "./AlertTab";
 import { BoxTemplate } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
+
+// اگر از react-toastify استفاده می‌کنید و می‌خواهید فقط در همین مدال نمایش بدهید:
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AddSubApprovalFlowModalProps {
   isOpen: boolean;
@@ -30,7 +33,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
   const api = useApi();
 
-  // استفاده از modalKey برای ریست شدن کامل فرم در هر بار باز شدن مودال
+  // برای ریست شدن کامل فرم در هر بار باز شدن مودال
   const [modalKey, setModalKey] = useState<number>(Date.now());
   useEffect(() => {
     if (isOpen) {
@@ -43,24 +46,15 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
     approvalFlowsTabRef.current = instance;
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      // در صورت بسته شدن مودال، اگر نیاز به ریست کردن مقادیر داخلی باشد، می‌توانیم اینجا انجام دهیم
-    }
-  }, [isOpen]);
-
+  // این تابع وقتی روی Save یا Edit کلیک می‌شود
   const handleSaveOrUpdate = async () => {
     try {
       if (!approvalFlowsTabRef.current) {
         console.error("ApprovalFlowsTab ref is not attached!");
-        showAlert(
-          "error",
-          null,
-          "Error",
-          "An error occurred while adding the item"
-        );
+        showAlert("error", null, "Error", "Failed to add item");
         return;
       }
+      // بررسی حداقل مقادیر لازم
       if (!approvalFlowsTabRef.current.validateMinFields()) {
         return;
       }
@@ -69,26 +63,17 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
       if (!formData) {
         console.error("No data from ApprovalFlowsTab!");
-        showAlert(
-          "error",
-          null,
-          "Error",
-          "An error occurred while adding the item"
-        );
+        showAlert("error", null, "Error", "No data from form");
         return;
       }
 
+      // اگر Stage نبود و جدول خالی بود، هشدار
       if (formData.tableData.length === 0 && !formData.isStage) {
-        showAlert(
-          "warning",
-          null,
-          "Warning",
-          "No row in Approval Context table!"
-        );
+        showAlert("warning", null, "Warning", "No row in Approval Context table!");
         return;
       }
 
-      // نگاشت داده‌های جدول Approval Context به آرایه wfApprovals
+      // ساختن ساختار داده برای ارسال به سرور
       const wfApprovals = formData.tableData.map((row) => ({
         nPostTypeID: null,
         nPostID: row.nPostID,
@@ -97,8 +82,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         Weight: row.weight1 || 0,
         IsVeto: row.veto,
         IsRequired: row.required,
-        Code: row.code || null,
-        // اگر row.id یک رشته عددی نباشد (مثلاً uuid)، مقدار 0 برگردانده شود.
+        Code: row.code.toString(),
         ID: parseInt(row.id, 10) || 0,
         IsVisible: true,
         LastModified: new Date().toISOString(),
@@ -145,11 +129,14 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         WFAproval: wfApprovals,
       };
 
+      // اینجا مدال را نمی‌بندیم، صرفاً درخواست را می‌فرستیم
       if (editData) {
+        // حالت ویرایش
         const result = await api.updateBoxTemplate(payload);
         console.log("BoxTemplate updated:", result);
         showAlert("success", null, "Success", "Edited Successfully");
       } else {
+        // حالت درج
         const result = await api.insertBoxTemplate(payload);
         console.log("BoxTemplate inserted:", result);
         showAlert("success", null, "Success", "Added Successfully");
@@ -158,65 +145,80 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       if (onBoxTemplateInserted) {
         onBoxTemplateInserted();
       }
-      onClose();
     } catch (error) {
       console.error("Error in save/update BoxTemplate:", error);
-      showAlert(
-        "error",
-        null,
-        "Error",
-        "An error occurred while adding the item"
-      );
+      showAlert("error", null, "Error", "An error occurred while adding item");
     }
   };
 
   return (
     <DynamicModal isOpen={isOpen} onClose={onClose}>
-      <div
-        role="tablist"
-        className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"
-      >
-        <button
-          role="tab"
-          className={`tab ${activeTab === "approval" ? "tab-active" : ""}`}
-          onClick={() => setActiveTab("approval")}
+      {/* والد با position relative تا بتوانیم ToastContainer را اینجا با absolute پین کنیم */}
+      <div className="relative">
+        {/* فقط یک ToastContainer در این سطح قرار می‌دهیم */}
+        <div
+          className="absolute top-0 right-0 mt-2 mr-2"
+          style={{ zIndex: 9999 }}
         >
-          Approval Flows
-        </button>
-        <button
-          role="tab"
-          className={`tab ${activeTab === "alert" ? "tab-active" : ""}`}
-          onClick={() => setActiveTab("alert")}
-        >
-          Alerts
-        </button>
-      </div>
-
-      <div className="mt-4">
-        {activeTab === "approval" && (
-          <ApprovalFlowsTab
-            key={modalKey}
-            ref={handleApprovalFlowsTabRef}
-            editData={editData}
-            boxTemplates={boxTemplates}
+          <ToastContainer
+            position="top-right"
+            autoClose={4000}
+            hideProgressBar={false}
+            newestOnTop={true}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
           />
-        )}
-        {activeTab === "alert" && <AlertTab />}
-      </div>
+        </div>
 
-      <div className="flex justify-center mt-6 space-x-3">
-        <button
-          onClick={handleSaveOrUpdate}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+        <div
+          role="tablist"
+          className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"
         >
-          {editData ? "Edit" : "Save"}
-        </button>
-        <button
-          onClick={onClose}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-        >
-          Cancel
-        </button>
+          <button
+            role="tab"
+            className={`tab ${activeTab === "approval" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("approval")}
+          >
+            Approval Flows
+          </button>
+          <button
+            role="tab"
+            className={`tab ${activeTab === "alert" ? "tab-active" : ""}`}
+            onClick={() => setActiveTab("alert")}
+          >
+            Alerts
+          </button>
+        </div>
+
+        <div className="mt-4 p-4 overflow-auto" style={{ maxHeight: "70vh" }}>
+          {activeTab === "approval" && (
+            <ApprovalFlowsTab
+              key={modalKey}
+              ref={handleApprovalFlowsTabRef}
+              editData={editData}
+              boxTemplates={boxTemplates}
+            />
+          )}
+          {activeTab === "alert" && <AlertTab />}
+        </div>
+
+        <div className="flex justify-center mt-6 space-x-3 mb-4">
+          <button
+            onClick={handleSaveOrUpdate}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+          >
+            {editData ? "Edit" : "Save"}
+          </button>
+          <button
+            onClick={onClose}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </DynamicModal>
   );
