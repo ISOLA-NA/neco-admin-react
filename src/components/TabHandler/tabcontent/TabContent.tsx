@@ -334,13 +334,19 @@ const TabContent: FC<TabContentProps> = ({
           })
           showAlert('success', null, 'Saved', 'Ribbon added successfully.')
           break
+        // داخل handleInsert در TabContent
         case 'Roles':
           if (roleRef.current) {
-            const result = await roleRef.current.save()
-            if (!result) return
-            showAlert('success', null, 'Saved', 'Role added successfully.')
+            const newRole = await roleRef.current.save()
+            // اگر newRole شامل اطلاعات نقش جدید است:
+            if (newRole) {
+              // به روزرسانی selectedRow یا state مربوط به لیست نقش‌ها
+              onRowClick(newRole) // فرض کنید این تابع selectedRow را به روز می‌کند
+              showAlert('success', null, 'Saved', 'Role added successfully.')
+            }
           }
           break
+
         case 'Enterprises':
           if (companyRef.current) {
             const result = await companyRef.current.save()

@@ -16,6 +16,7 @@ import { showAlert } from "../utilities/Alert/DynamicAlert";
 // تعریف اینترفیس RoleHandle
 export interface RoleHandle {
   save: () => Promise<void>;
+  checkNameFilled: () => boolean;
 }
 
 interface RoleProps {
@@ -36,10 +37,9 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     Responsibility: "",
     PostCode: "",
     isStaticPost: false,
-    // Add these missing properties:
+    // افزودن فیلدهای اضافی
     isAccessCreateProject: false,
     isHaveAddressbar: false,
-    // Optional properties with default values:
     LastModified: "",
     ModifiedById: "",
     CreateById: null,
@@ -50,9 +50,12 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     nMenuID: null,
     nPostTypeID: null,
     nProjectID: null,
-    status: 0
+    status: 0,
+    // فیلد ترتیب درج در سطح فرانت‌اند
+    clientOrder: Date.now(),
   });
 
+  // هنگام تغییر selectedRow: اگر رکورد انتخاب شده وجود دارد، از مقدار clientOrder آن استفاده شود؛ در غیر این صورت مقدار جدید تخصیص یابد.
   useEffect(() => {
     if (selectedRow) {
       setRoleData({
@@ -67,7 +70,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         Responsibility: selectedRow.Responsibility || "",
         PostCode: selectedRow.PostCode || "",
         isStaticPost: selectedRow.isStaticPost || false,
-        // Add missing properties:
+        // افزودن فیلدهای اضافی
         isAccessCreateProject: selectedRow.isAccessCreateProject || false,
         isHaveAddressbar: selectedRow.isHaveAddressbar || false,
         LastModified: selectedRow.LastModified || "",
@@ -75,14 +78,17 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         CreateById: selectedRow.CreateById || null,
         CreateDate: selectedRow.CreateDate || "",
         OwnerID: selectedRow.OwnerID || null,
-        ParrentId: selectedRow.ParrentId || null,
+        ParrentId: selectedRow.ParrantId || null,
         nCompanyID: selectedRow.nCompanyID || null,
         nMenuID: selectedRow.nMenuID || null,
         nPostTypeID: selectedRow.nPostTypeID || null,
         nProjectID: selectedRow.nProjectID || null,
-        status: selectedRow.status || 0
+        status: selectedRow.status || 0,
+        // در حالت ویرایش، اگر clientOrder موجود است از آن استفاده شود؛ در غیر این صورت مقدار جدید اختصاص یابد
+        clientOrder: selectedRow.clientOrder || Date.now(),
       });
     } else {
+      // در حالت درج، مقدار clientOrder به صورت جدید تنظیم می‌شود
       setRoleData({
         ID: "",
         Name: "",
@@ -95,7 +101,6 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         Responsibility: "",
         PostCode: "",
         isStaticPost: false,
-        // Add missing properties with default values:
         isAccessCreateProject: false,
         isHaveAddressbar: false,
         LastModified: "",
@@ -108,7 +113,8 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         nMenuID: null,
         nPostTypeID: null,
         nProjectID: null,
-        status: 0
+        status: 0,
+        clientOrder: Date.now(),
       });
     }
   }, [selectedRow]);
@@ -127,6 +133,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
   const save = async () => {
     try {
       console.log("داده‌های ذخیره‌شده نقش:", roleData); // برای دیباگ
+      // در اینجا roleData شامل فیلد clientOrder است
       await handleSaveRole(roleData);
       showAlert("success", null, "ذخیره شد", "نقش با موفقیت ذخیره شد.");
     } catch (error) {
@@ -135,9 +142,18 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     }
   };
 
-  // expose the save method to parent via ref
+  // متد اعتبارسنجی که بررسی می‌کند نام خالی نباشد
+  const checkNameFilled = () => {
+    if (roleData.Name.trim().length === 0) {
+      return false;
+    }
+    return true;
+  };
+
+  // expose the save and checkNameFilled methods to parent via ref
   useImperativeHandle(ref, () => ({
     save,
+    checkNameFilled,
   }));
 
   return (
@@ -149,6 +165,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         value={roleData.Name}
         placeholder=""
         onChange={(e) => handleChange("Name", e.target.value)}
+        required
       />
 
       {/* Role Code */}
@@ -166,6 +183,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         value={roleData.Description}
         placeholder=""
         onChange={(e) => handleChange("Description", e.target.value)}
+        className="-mt-5"
       />
 
       {/* Responsibilities */}
@@ -174,6 +192,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         value={roleData.Responsibility}
         placeholder=""
         onChange={(e) => handleChange("Responsibility", e.target.value)}
+        className="-mt-5"
       />
 
       {/* Authorities */}
@@ -182,6 +201,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         value={roleData.Authorization}
         placeholder=""
         onChange={(e) => handleChange("Authorization", e.target.value)}
+        className="-mt-5"
       />
 
       {/* Competencies */}
@@ -190,6 +210,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         value={roleData.Competencies}
         placeholder=""
         onChange={(e) => handleChange("Competencies", e.target.value)}
+        className="-mt-5"
       />
 
       {/* Grade */}
@@ -199,6 +220,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         value={roleData.Grade}
         placeholder=""
         onChange={(e) => handleChange("Grade", e.target.value)}
+        className="-mt-5"
       />
 
       {/* Type */}
@@ -208,6 +230,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         value={roleData.Type}
         placeholder="Type"
         onChange={(e) => handleChange("Type", e.target.value)}
+        className="-mt-5"
       />
 
       {/* Static Post */}

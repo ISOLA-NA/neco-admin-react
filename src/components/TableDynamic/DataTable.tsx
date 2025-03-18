@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { FaSearch } from 'react-icons/fa'
 import { FiPlus, FiTrash2, FiEdit, FiCopy, FiEye } from 'react-icons/fi'
@@ -66,10 +66,23 @@ const DataTable: React.FC<DataTableProps> = ({
   const [filteredRowData, setFilteredRowData] = useState<any[]>([])
   const [isRowSelected, setIsRowSelected] = useState<boolean>(false)
 
+  // هنگام دریافت داده از والد، یک فیلد clientOrder اضافه می‌کنیم
   useEffect(() => {
-    setOriginalRowData(rowData)
-    setFilteredRowData(rowData)
+    const mappedData = rowData.map((item, index) => ({
+      ...item,
+      // اگر داده قبلاً clientOrder داشته باشد نگهش می‌داریم و در غیر اینصورت با ایندکس مقداردهی می‌کنیم
+      clientOrder: item.clientOrder !== undefined ? item.clientOrder : index
+    }))
+    setOriginalRowData(mappedData)
+    setFilteredRowData(mappedData)
   }, [rowData])
+
+  // useEffect برای اسکرول به آخرین ردیف هنگام تغییر داده‌ها (با توجه به clientOrder)
+  useEffect(() => {
+    if (gridApiRef.current && filteredRowData && filteredRowData.length > 0) {
+      gridApiRef.current.ensureIndexVisible(filteredRowData.length - 1, 'bottom')
+    }
+  }, [filteredRowData])
 
   // تابع جستجو: فیلتر کردن داده‌ها بر اساس تمام مقادیر هر سطر
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,6 +112,8 @@ const DataTable: React.FC<DataTableProps> = ({
   // وقتی grid آماده شد
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api
+    // ست کردن sort پیش‌فرض بر اساس clientOrder (که در داده‌های ما وجود دارد)
+    params.api.setSortModel([{ colId: 'clientOrder', sort: 'asc' }])
     params.api.sizeColumnsToFit()
     if (isLoading) {
       params.api.showLoadingOverlay()
@@ -153,12 +168,21 @@ const DataTable: React.FC<DataTableProps> = ({
   }
 
   const gridOptions = {
-    getRowClass: getRowClass
+    getRowClass: getRowClass,
+    // در صورت نیاز می‌توانید sortModel پیش‌فرض را در gridOptions هم تعریف کنید
+    defaultColDef: {
+      sortable: true
+    }
   }
 
   // استایل پایه دکمه‌های آیکونی
   const baseIconButton =
     'rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none'
+
+  // اگر بخواهیم همیشه داده‌ها به ترتیب clientOrder نمایش داده شوند، می‌توانیم از useMemo استفاده کنیم
+  const sortedFilteredRowData = useMemo(() => {
+    return [...filteredRowData].sort((a, b) => a.clientOrder - b.clientOrder)
+  }, [filteredRowData])
 
   return (
     <div className='data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2'>
@@ -267,7 +291,7 @@ const DataTable: React.FC<DataTableProps> = ({
             onGridReady={onGridReady}
             onGridSizeChanged={onGridSizeChanged}
             columnDefs={columnDefs}
-            rowData={filteredRowData}
+            rowData={sortedFilteredRowData}
             pagination={false}
             paginationPageSize={10}
             animateRows={true}
