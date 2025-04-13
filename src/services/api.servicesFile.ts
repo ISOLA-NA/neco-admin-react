@@ -6,6 +6,9 @@ import httpClientFile from "./api.configFile";
 import { AxiosResponse } from "axios";
 
 class FileService {
+  postUser() {
+      throw new Error('Method not implemented.');
+  }
   editProfileUser(updated: { 
     IsVisible: boolean; 
     LastModified: Date | null; 

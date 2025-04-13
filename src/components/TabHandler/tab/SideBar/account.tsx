@@ -2,12 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaLock } from 'react-icons/fa';
-import { IoIosRefresh } from "react-icons/io";
-import { HiOutlineSwitchHorizontal } from "react-icons/hi";
-import { RiLogoutCircleLine } from "react-icons/ri";
+import { IoIosRefresh } from 'react-icons/io';
+import { HiOutlineSwitchHorizontal } from 'react-icons/hi';
+import { RiLogoutCircleLine } from 'react-icons/ri';
 
-import projectService from '../../../../services/api.servicesFile';
+// استفاده از getIdByUserToken از api.servicesFile
+import projectServiceFile from '../../../../services/api.servicesFile';
+// استفاده از postUser از api.services
+import projectService from '../../../../services/api.services';
+
 import FileUploadHandler from '../../../../services/FileUploadHandler';
+
+interface PostUserResponse {
+  // فرض کنید که پاسخ آرایه‌ای از اشیاء کاربری است که هر کدام دارای فیلد Name هستند.
+  [key: string]: any;
+}
 
 const Account: React.FC = () => {
   // state های مربوط به ورودی‌های ستون چپ
@@ -21,13 +30,14 @@ const Account: React.FC = () => {
 
   // state برای بخش Right Side
   const [activeRibbon, setActiveRibbon] = useState('Home');
-
-  // گزینه‌های Select برای بخش Ribbon
   const ribbonOptions = ['Home', 'Dashboard', 'Profile'];
 
   // state مربوط به عکس کاربر
   const [userImageId, setUserImageId] = useState<string | null>('existing-user-image-id');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // state برای ذخیره نام‌های دریافتی از postUser
+  const [userNames, setUserNames] = useState<string[]>([]);
 
   // متدهای دکمه‌ها
   const handleChangePassword = () => {
@@ -46,13 +56,13 @@ const Account: React.FC = () => {
     alert('Sign Out clicked!');
   };
 
-  // استفاده از useEffect برای فراخوانی متد getIdByUserToken
+  // فراخوانی getIdByUserToken از projectServiceFile
   useEffect(() => {
     const fetchUserTokenId = async () => {
       try {
-        const res = await projectService.getIdByUserToken();
-        console.log("Response Data:", res.data);
-        // فرض بر این است که res.data شامل شناسه عکس کاربر به عنوان userImageId باشد
+        const res = await projectServiceFile.getIdByUserToken();
+        console.log("Response Data from getIdByUserToken:", res.data);
+        // فرض بر این است که res.data شامل فیلدی به نام UserImageId است
         if (res.data?.UserImageId) {
           setUserImageId(res.data.UserImageId);
         }
@@ -62,6 +72,28 @@ const Account: React.FC = () => {
     };
 
     fetchUserTokenId();
+  }, []);
+
+  // فراخوانی postUser از projectService
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      try {
+        // طبق تعریف تابع، postUser به طور مستقیم داده را برمی‌گرداند (نه داخل یک فیلد data)
+        const res: PostUserResponse = await projectService.postUser();
+        console.log("Response Data from postUser:", res);
+        // فرض می‌کنیم res یک آرایه از اشیاء با فیلد Name باشد
+        if (res && Array.isArray(res)) {
+          const names = res.map((user: any) => user.Name);
+          setUserNames(names);
+        } else {
+          console.warn("postUser did not return an array:", res);
+        }
+      } catch (error) {
+        console.error("Error fetching user names:", error);
+      }
+    };
+
+    fetchUserNames();
   }, []);
 
   return (
@@ -98,9 +130,20 @@ const Account: React.FC = () => {
               </div>
               <div>
                 <p className="text-lg font-medium">Sepehr Hasanzade</p>
-                <p className="text-sm text-gray-600">
-                  Test Controller repo : test Actor2, test actor3...
-                </p>
+                {/* نمایش نام‌های دریافتی از postUser؛ هر نام در یک باکس لطیف */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {userNames.filter((uname) => uname && uname.trim() !== '').length > 0 ? (
+                    userNames
+                      .filter((uname) => uname && uname.trim() !== '')
+                      .map((uname, index) => (
+                        <div key={index} className="bg-gray-50 border border-gray-200 p-2 rounded shadow">
+                          <p className="text-sm text-gray-700">{uname}</p>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="text-sm text-gray-600">Loading user names...</p>
+                  )}
+                </div>
               </div>
             </div>
 
