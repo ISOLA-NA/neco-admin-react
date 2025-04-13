@@ -103,7 +103,6 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
           type="text"
           value={projectData.calendarName}
           disabled={true}
-          className="bg-[#fbe5d6]"
         />
       </div>
 

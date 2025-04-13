@@ -1,10 +1,45 @@
 // api.servicesFile.ts
+
 import { apiConst } from "./api.constant";
 import httpClient from "./api.config";
 import httpClientFile from "./api.configFile";
 import { AxiosResponse } from "axios";
 
 class FileService {
+  editProfileUser(updated: { 
+    IsVisible: boolean; 
+    LastModified: Date | null; 
+    ID: string; 
+    ModifiedById: string; 
+    Username: string; 
+    Password: string; 
+    Status: number; 
+    MaxWrongPass: number; 
+    Name: string; 
+    Family: string; 
+    Email: string; 
+    Website: string; 
+    Mobile: string; 
+    CreateDate: string; 
+    LastLoginTime: string; 
+    UserImageId: string; 
+    TTKK: string; 
+    userType: number; 
+    Code: string; 
+  }): Promise<AxiosResponse<any>> {
+      // پیاده‌سازی متد مورد نظر
+      throw new Error("Method not implemented.");
+  }
+
+  // پیاده‌سازی متد getIdByUserToken که خروجی مناسبی برمی‌گرداند:
+  async getIdByUserToken(): Promise<AxiosResponse<any>> {
+      // در اینجا فرض می‌کنیم که URL مربوط به دریافت توکن کاربر در apiConst.getIdByUserToken قرار دارد.
+      // اگر از متد GET استفاده می‌کنید:
+      return await httpClient.post(apiConst.getIdByUserToken);
+      // در صورتی که API شما از POST استفاده می‌کند، ممکن است به شکل زیر باشد:
+      // return await httpClient.post(apiConst.getIdByUserToken, {});
+  }
+
   /**
    * آپلود فایل
    * @param file FormData شامل فایل

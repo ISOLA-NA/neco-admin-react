@@ -6,7 +6,7 @@ import { subTabComponents } from "./SubTabsImports";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { useNavigate } from "react-router-dom";
 import DrawerComponent from "../tab/Header";
-import SidebarDrawer from "../tab/SidebarDrawer";
+import SidebarDrawer from "./SideBar/SidebarDrawer";
 
 // کانتکست‌های جدید
 import { useSubTabDefinitions } from "../../../context/SubTabDefinitionsContext";
