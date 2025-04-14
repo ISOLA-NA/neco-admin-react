@@ -149,12 +149,12 @@ export interface UserToken {
   Name: string
 }
 
-export interface editProfileUser {
-  Name: string
-  Family: string
-  Mobile: number
-  Code: number
-}
+// export interface editProfileUser {
+//   Name: string
+//   Family: string
+//   Mobile: number
+//   Code: number
+// }
 
 // ================== CommandItem ==================
 export interface CommandItem {
@@ -596,6 +596,28 @@ export interface EntityField {
   LastModified: string
 }
 
+export interface EditProfileUserInterface {
+  IsVisible: boolean;
+  LastModified: string | null;
+  ID: string;
+  ModifiedById: null;
+  Username: string;
+  Password: string;
+  Status: number;
+  MaxWrongPass: number;
+  Name: string;
+  Family: string;
+  Email: string;
+  Website: string;
+  Mobile: string;
+  CreateDate:  null;
+  LastLoginTime: null;
+  UserImageId: string;
+  TTKK: string;
+  userType: number;
+  Code: string;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -733,13 +755,16 @@ class ApiService {
     return response.data
   }
 
-  async editProfileUser (updated: { IsVisible: boolean; LastModified: Date | null; ID: string; ModifiedById: string; Username: string; Password: string; Status: number; MaxWrongPass: number; Name: string; Family: string; Email: string; Website: string; Mobile: string; CreateDate: string; LastLoginTime: string; UserImageId: string; TTKK: string; userType: number; Code: string }): Promise<editProfileUser[]> {
-    const response = await httpClient.post<editProfileUser[]>(
-      apiConst.editProfileUser
-    )
-    return response.data
+  async editProfileUser(
+    data: EditProfileUserInterface
+  ): Promise<EditProfileUserInterface> {
+    const response = await httpClient.post<EditProfileUserInterface>(
+      apiConst.editProfileUser,
+      data
+    );
+    return response.data;
   }
-
+  
   // ------------------------------------
   // Command
   // ------------------------------------

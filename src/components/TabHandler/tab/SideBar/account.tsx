@@ -8,11 +8,37 @@ import { RiLogoutCircleLine } from "react-icons/ri";
 
 // استفاده از getIdByUserToken از api.servicesFile
 import projectServiceFile from "../../../../services/api.servicesFile";
-// استفاده از postUser از api.services (در صورت نیاز)
+// استفاده از postUser و editProfileUser از projectService
 import projectService from "../../../../services/api.services";
 
 // کامپوننت FileUploadHandler جهت دانلود و نمایش عکس کاربر
 import FileUploadHandler from "../../../../services/FileUploadHandler";
+
+// اگر اینترفیس در فایل دیگری تعریف شده است، آن را import کنید:
+// import { EditProfileUserInterface } from "../../../../types/UserTypes";
+
+// در اینجا اینترفیس EditProfileUserInterface را تعریف می‌کنیم (در صورت نیاز)
+export interface EditProfileUserInterface {
+  IsVisible: boolean;
+  LastModified: string | null;
+  ID: string;
+  ModifiedById: null;
+  Username: string;
+  Password: string;
+  Status: number;
+  MaxWrongPass: number;
+  Name: string;
+  Family: string;
+  Email: string;
+  Website: string;
+  Mobile: string;
+  CreateDate: null;
+  LastLoginTime: null;
+  UserImageId: string;
+  TTKK: string;
+  userType: number;
+  Code: string;
+}
 
 // اینترفیس نمونه برای UserToken
 interface UserToken {
@@ -27,31 +53,32 @@ interface UserToken {
   CreateDate: string;
   LastLoginTime: string;
   UserImageId: string;
-  // در صورت نیاز اطلاعات بیشتری مانند RepoInfo و غیره...
+  Code?: string;
+  // در صورت نیاز، اطلاعات بیشتری مانند RepoInfo و غیره...
 }
 
 const Account: React.FC = () => {
-  // state مربوط به فرم ورودی (از یک شیء واحد استفاده می‌کنیم)
+  // در ابتدا از یک مقدار پیش‌فرض خالی برای ID استفاده می‌کنیم تا بعد از دریافت از API مقداردهی شود.
   const [updated, setUpdated] = useState({
     IsVisible: true,
-    LastModified: null as Date | null,
-    ID: "",
-    ModifiedById: "",
+    LastModified: null, 
+    ID: "", // مقدار پیش‌فرض خالی، تا بعد از دریافت از API مقداردهی شود.
+    ModifiedById: null,
     Username: "",
     Password: "",
     Status: 0,
     MaxWrongPass: 6,
     Name: "",
-    Family: "", // برای نمایش Last Name
+    Family: "",
     Email: "",
     Website: "",
     Mobile: "",
-    CreateDate: "",
-    LastLoginTime: "",
+    CreateDate: null,
+    LastLoginTime: null,
     UserImageId: "",
     TTKK: "",
     userType: 0,
-    Code: "",
+    Code: "" // مقدار اولیه Code به عنوان رشته خالی
   });
 
   // state برای ذخیره اطلاعات کاربر دریافتی
@@ -60,7 +87,7 @@ const Account: React.FC = () => {
   // state برای URL عکس پروفایل
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // state مربوط به بخش Right Side
+  // state مربوط به بخش Right Side (برای تب‌بندی)
   const [activeRibbon, setActiveRibbon] = useState("Home");
   const ribbonOptions = ["Home", "Dashboard", "Profile"];
 
@@ -70,10 +97,6 @@ const Account: React.FC = () => {
   // متدهای دکمه‌ها
   const handleChangePassword = () => {
     alert("Change Password clicked!");
-  };
-
-  const handleUpdate = () => {
-    alert("Update clicked!");
   };
 
   const handleSwitchAccount = () => {
@@ -90,18 +113,21 @@ const Account: React.FC = () => {
       try {
         const res = await projectServiceFile.getIdByUserToken();
         console.log("Response Data from getIdByUserToken:", res.data);
-        // اگر res.data آرایه باشد، عنصر اول را در نظر بگیرید؛ در غیر این صورت مستقیماً از res.data استفاده کنید.
+        // اگر res.data آرایه باشد، عنصر اول را در نظر بگیرید؛ در غیر این صورت از res.data استفاده کنید.
         const data = Array.isArray(res.data) ? res.data[0] : res.data;
         if (data) {
+          // مقدار Code و همچنین ID به صورت مستقیم از داده دریافتی تنظیم می‌شود
           setUpdated((prev) => ({
             ...prev,
+            ID: data.ID, // به روزرسانی فیلد ID
             Username: data.Username,
             Name: data.Name,
             Mobile: data.Mobile,
-            Family: data.Family,    // Last Name
+            Family: data.Family,
             Website: data.Website,
             Email: data.Email,
             UserImageId: data.UserImageId,
+            Code: data.Code // مقدار Code از API دریافت می‌شود
           }));
           setUserInfo(data);
         }
@@ -133,7 +159,7 @@ const Account: React.FC = () => {
     fetchUserNames();
   }, []);
 
-  // تابع ویرایش حساب کاربری
+  // تابع ویرایش حساب کاربری با استفاده از API editProfileUser
   const editAccount = () => {
     const regexMobile = /^(?:09\d{9})?$/;
     const regexEmail = /^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -145,10 +171,22 @@ const Account: React.FC = () => {
       alert("ایمیل وارد شده صحیح نیست!");
       return;
     }
+    
+    // ساخت payload آپدیت به همراه منطق Code و ID از اطلاعات دریافتی (userInfo)
+    const updateUser: EditProfileUserInterface = {
+      ...updated,
+      // استفاده از مقدار Code و ID گرفته شده از API (در userInfo) در صورت موجود بودن.
+      ID: userInfo?.ID ?? updated.ID,
+      Code: userInfo?.Code ?? updated.Code ?? ""
+    };
+
+    console.log("Sending updated data:", updateUser);
+    
     projectService
-      .editProfileUser(updated)
+      .editProfileUser(updateUser)
       .then((res: any) => {
         alert("اطلاعات مورد نظر آپدیت شد");
+        console.log("Response after update:", res);
       })
       .catch((err: any) => {
         console.error(err);
@@ -199,9 +237,7 @@ const Account: React.FC = () => {
                   {userInfo ? userInfo.Name : "User Name"}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {userNames.filter(
-                    (uname) => uname && uname.trim() !== ""
-                  ).length > 0 ? (
+                  {userNames.filter((uname) => uname && uname.trim() !== "").length > 0 ? (
                     userNames
                       .filter((uname) => uname && uname.trim() !== "")
                       .map((uname, index) => (
@@ -232,7 +268,7 @@ const Account: React.FC = () => {
                     name="Username"
                     value={updated.Username}
                     disabled
-                    placeholder="userName"
+                    placeholder="Username"
                     className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
@@ -270,7 +306,7 @@ const Account: React.FC = () => {
                     <span className="ml-2">Change Password</span>
                   </button>
                   <button
-                    onClick={handleUpdate}
+                    onClick={editAccount}
                     className="flex items-center border rounded px-3 py-2 hover:bg-gray-100"
                   >
                     <IoIosRefresh size={16} />
