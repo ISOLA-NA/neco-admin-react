@@ -1,70 +1,109 @@
 // File: Account.tsx
 
-import React, { useState, useEffect } from 'react';
-import { FaLock } from 'react-icons/fa';
-import { IoIosRefresh } from 'react-icons/io';
-import { HiOutlineSwitchHorizontal } from 'react-icons/hi';
-import { RiLogoutCircleLine } from 'react-icons/ri';
+import React, { useState, useEffect } from "react";
+import { FaLock } from "react-icons/fa";
+import { IoIosRefresh } from "react-icons/io";
+import { HiOutlineSwitchHorizontal } from "react-icons/hi";
+import { RiLogoutCircleLine } from "react-icons/ri";
 
 // استفاده از getIdByUserToken از api.servicesFile
-import projectServiceFile from '../../../../services/api.servicesFile';
-// استفاده از postUser از api.services
-import projectService from '../../../../services/api.services';
+import projectServiceFile from "../../../../services/api.servicesFile";
+// استفاده از postUser از api.services (در صورت نیاز)
+import projectService from "../../../../services/api.services";
 
-import FileUploadHandler from '../../../../services/FileUploadHandler';
+// کامپوننت FileUploadHandler جهت دانلود و نمایش عکس کاربر
+import FileUploadHandler from "../../../../services/FileUploadHandler";
 
-interface PostUserResponse {
-  // فرض کنید که پاسخ آرایه‌ای از اشیاء کاربری است که هر کدام دارای فیلد Name هستند.
-  [key: string]: any;
+// اینترفیس نمونه برای UserToken
+interface UserToken {
+  ID: string;
+  Name: string;
+  Username: string;
+  Family: string;
+  Email: string;
+  Website: string;
+  Mobile: string;
+  ModifiedById: string;
+  CreateDate: string;
+  LastLoginTime: string;
+  UserImageId: string;
+  // در صورت نیاز اطلاعات بیشتری مانند RepoInfo و غیره...
 }
 
 const Account: React.FC = () => {
-  // state های مربوط به ورودی‌های ستون چپ
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  const [mobile, setMobile] = useState('');
+  // state مربوط به فرم ورودی (از یک شیء واحد استفاده می‌کنیم)
+  const [updated, setUpdated] = useState({
+    IsVisible: true,
+    LastModified: null as Date | null,
+    ID: "",
+    ModifiedById: "",
+    Username: "",
+    Password: "",
+    Status: 0,
+    MaxWrongPass: 6,
+    Name: "",
+    Family: "", // برای نمایش Last Name
+    Email: "",
+    Website: "",
+    Mobile: "",
+    CreateDate: "",
+    LastLoginTime: "",
+    UserImageId: "",
+    TTKK: "",
+    userType: 0,
+    Code: "",
+  });
 
-  const [lastName, setLastName] = useState('');
-  const [website, setWebsite] = useState('');
-  const [email, setEmail] = useState('');
+  // state برای ذخیره اطلاعات کاربر دریافتی
+  const [userInfo, setUserInfo] = useState<UserToken | null>(null);
 
-  // state برای بخش Right Side
-  const [activeRibbon, setActiveRibbon] = useState('Home');
-  const ribbonOptions = ['Home', 'Dashboard', 'Profile'];
-
-  // state مربوط به عکس کاربر
-  const [userImageId, setUserImageId] = useState<string | null>('existing-user-image-id');
+  // state برای URL عکس پروفایل
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // state مربوط به بخش Right Side
+  const [activeRibbon, setActiveRibbon] = useState("Home");
+  const ribbonOptions = ["Home", "Dashboard", "Profile"];
 
   // state برای ذخیره نام‌های دریافتی از postUser
   const [userNames, setUserNames] = useState<string[]>([]);
 
   // متدهای دکمه‌ها
   const handleChangePassword = () => {
-    alert('Change Password clicked!');
+    alert("Change Password clicked!");
   };
 
   const handleUpdate = () => {
-    alert('Update clicked!');
+    alert("Update clicked!");
   };
 
   const handleSwitchAccount = () => {
-    alert('Switch Account clicked!');
+    alert("Switch Account clicked!");
   };
 
   const handleSignOut = () => {
-    alert('Sign Out clicked!');
+    alert("Sign Out clicked!");
   };
 
-  // فراخوانی getIdByUserToken از projectServiceFile
+  // دریافت اطلاعات کاربر از API با استفاده از getIdByUserToken
   useEffect(() => {
     const fetchUserTokenId = async () => {
       try {
         const res = await projectServiceFile.getIdByUserToken();
         console.log("Response Data from getIdByUserToken:", res.data);
-        // فرض بر این است که res.data شامل فیلدی به نام UserImageId است
-        if (res.data?.UserImageId) {
-          setUserImageId(res.data.UserImageId);
+        // اگر res.data آرایه باشد، عنصر اول را در نظر بگیرید؛ در غیر این صورت مستقیماً از res.data استفاده کنید.
+        const data = Array.isArray(res.data) ? res.data[0] : res.data;
+        if (data) {
+          setUpdated((prev) => ({
+            ...prev,
+            Username: data.Username,
+            Name: data.Name,
+            Mobile: data.Mobile,
+            Family: data.Family,    // Last Name
+            Website: data.Website,
+            Email: data.Email,
+            UserImageId: data.UserImageId,
+          }));
+          setUserInfo(data);
         }
       } catch (error) {
         console.error("Error fetching user token ID:", error);
@@ -74,14 +113,12 @@ const Account: React.FC = () => {
     fetchUserTokenId();
   }, []);
 
-  // فراخوانی postUser از projectService
+  // دریافت نام‌های کاربری از API با استفاده از postUser (مثالی برای نمایش نام‌ها)
   useEffect(() => {
     const fetchUserNames = async () => {
       try {
-        // طبق تعریف تابع، postUser به طور مستقیم داده را برمی‌گرداند (نه داخل یک فیلد data)
-        const res: PostUserResponse = await projectService.postUser();
+        const res: any = await projectService.postUser();
         console.log("Response Data from postUser:", res);
-        // فرض می‌کنیم res یک آرایه از اشیاء با فیلد Name باشد
         if (res && Array.isArray(res)) {
           const names = res.map((user: any) => user.Name);
           setUserNames(names);
@@ -96,9 +133,48 @@ const Account: React.FC = () => {
     fetchUserNames();
   }, []);
 
+  // تابع ویرایش حساب کاربری
+  const editAccount = () => {
+    const regexMobile = /^(?:09\d{9})?$/;
+    const regexEmail = /^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!regexMobile.test(updated.Mobile)) {
+      alert("شماره تلفن وارد شده صحیح نیست!");
+      return;
+    }
+    if (!regexEmail.test(updated.Email)) {
+      alert("ایمیل وارد شده صحیح نیست!");
+      return;
+    }
+    projectService
+      .editProfileUser(updated)
+      .then((res: any) => {
+        alert("اطلاعات مورد نظر آپدیت شد");
+      })
+      .catch((err: any) => {
+        console.error(err);
+        alert("خطا در آپدیت اطلاعات");
+      });
+  };
+
+  // هندل تغییر ورودی‌های فرم
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUpdated((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
     <div className="container mx-auto mt-6 px-4">
       <h2 className="text-2xl font-bold mb-8">Account Information</h2>
+
+      {/* استفاده از FileUploadHandler جهت دانلود عکس پروفایل */}
+      <FileUploadHandler
+        selectedFileId={updated.UserImageId}
+        resetCounter={0}
+        onReset={() => {}}
+        onPreviewUrlChange={setPreviewUrl}
+        hideUploader={true}
+      />
+
       <div className="flex flex-col md:flex-row gap-6">
         {/* ستون سمت چپ: User Information */}
         <div className="w-full md:w-2/3">
@@ -107,36 +183,32 @@ const Account: React.FC = () => {
 
             {/* بخش آواتار و اطلاعات کاربر */}
             <div className="flex items-center gap-4 mb-4">
-              {/* استفاده از FileUploadHandler */}
-              <div className="w-16 h-16 rounded-full overflow-hidden">
-                <FileUploadHandler 
-                  selectedFileId={userImageId} 
-                  hideUploader={true}
-                  onPreviewUrlChange={setPreviewUrl}
-                  resetCounter={0}
-                  onReset={() => {}}
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="User Avatar"
+                  className="w-16 h-16 rounded-full object-cover"
                 />
-                {previewUrl ? (
-                  <img 
-                    src={previewUrl} 
-                    alt="User Avatar" 
-                    className="w-16 h-16 rounded-full object-cover" 
-                  />
-                ) : (
-                  <div className="w-16 h-16 flex items-center justify-center bg-gray-100">
-                    <p className="text-xs text-gray-500">Loading Image...</p>
-                  </div>
-                )}
-              </div>
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
+                  <p className="text-xs text-gray-500">Loading...</p>
+                </div>
+              )}
               <div>
-                <p className="text-lg font-medium">Sepehr Hasanzade</p>
-                {/* نمایش نام‌های دریافتی از postUser؛ هر نام در یک باکس لطیف */}
+                <p className="text-lg font-medium">
+                  {userInfo ? userInfo.Name : "User Name"}
+                </p>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {userNames.filter((uname) => uname && uname.trim() !== '').length > 0 ? (
+                  {userNames.filter(
+                    (uname) => uname && uname.trim() !== ""
+                  ).length > 0 ? (
                     userNames
-                      .filter((uname) => uname && uname.trim() !== '')
+                      .filter((uname) => uname && uname.trim() !== "")
                       .map((uname, index) => (
-                        <div key={index} className="bg-gray-50 border border-gray-200 p-2 rounded shadow">
+                        <div
+                          key={index}
+                          className="bg-gray-50 border border-gray-200 p-2 rounded shadow"
+                        >
                           <p className="text-sm text-gray-700">{uname}</p>
                         </div>
                       ))
@@ -151,36 +223,43 @@ const Account: React.FC = () => {
 
             {/* فرم به دو ستون */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              {/* ستون فرم سمت چپ */}
               <div className="space-y-4">
                 <div>
                   <label className="block mb-1">Username</label>
                   <input
                     type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="border p-2 w-full rounded"
+                    name="Username"
+                    value={updated.Username}
+                    disabled
+                    placeholder="userName"
+                    className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
                   <label className="block mb-1">Name</label>
                   <input
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="border p-2 w-full rounded"
+                    name="Name"
+                    value={updated.Name}
+                    onChange={handleChange}
+                    placeholder="Name"
+                    className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
                   <label className="block mb-1">Mobile</label>
                   <input
                     type="text"
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
-                    className="border p-2 w-full rounded"
+                    name="Mobile"
+                    value={updated.Mobile}
+                    onChange={handleChange}
+                    placeholder="Mobile"
+                    className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
               </div>
-
+              {/* ستون فرم سمت راست */}
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <button
@@ -202,32 +281,39 @@ const Account: React.FC = () => {
                   <label className="block mb-1">Last Name</label>
                   <input
                     type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="border p-2 w-full rounded"
+                    name="Family"
+                    value={updated.Family}
+                    onChange={handleChange}
+                    placeholder="Last Name"
+                    className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
                   <label className="block mb-1">WebSite</label>
                   <input
                     type="text"
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
-                    className="border p-2 w-full rounded"
+                    name="Website"
+                    value={updated.Website}
+                    onChange={handleChange}
+                    placeholder="Website"
+                    className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
                   <label className="block mb-1">Email</label>
                   <input
                     type="text"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="border p-2 w-full rounded"
+                    name="Email"
+                    value={updated.Email}
+                    onChange={handleChange}
+                    placeholder="Email"
+                    className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
               </div>
             </div>
 
+            {/* بخش باکس پایین با بردر آبی */}
             <div className="mt-6 border border-blue-500 rounded p-4">
               <div className="flex justify-end gap-4">
                 <button
@@ -268,7 +354,7 @@ const Account: React.FC = () => {
             <select
               value={activeRibbon}
               onChange={(e) => setActiveRibbon(e.target.value)}
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded text-sm"
             >
               {ribbonOptions.map((option) => (
                 <option key={option} value={option}>
