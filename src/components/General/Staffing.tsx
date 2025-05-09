@@ -228,7 +228,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
       const rolePostCode = selectedRole?.PostCode || "";
 
       console.log("🎯 Role selected:", selectedRole?.Name);
-      console.log("📬 Role PostCode:", rolePostCode);
+      console.log("📬 Role PostCode:", selectedRole?.PostCode);
 
       setStaffingData((prev) => ({
         ...prev,

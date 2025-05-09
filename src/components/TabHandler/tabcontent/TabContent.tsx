@@ -209,9 +209,11 @@ const TabContent: FC<TabContentProps> = ({
           data = await api.getAllPostCat();
           break;
         case "Staffing":
-          // دریافت داده فیلترشده از Context
-          data = await fetchDataForSubTab("Staffing");
+          // منطق مورد نظر برای لود Staffing
+          data = await api.getAllForPostAdmin();
           break;
+        // data = await fetchDataForSubTab("Staffing");
+        // break;
         case "ProgramTemplate":
           data = await api.getAllProgramTemplates();
           break;
