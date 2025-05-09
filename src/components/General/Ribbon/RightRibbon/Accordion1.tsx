@@ -6,6 +6,7 @@ import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsConte
 import AppServices, { MenuTab } from "../../../../services/api.services";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
+import { showAlert } from "../../../utilities/Alert/DynamicAlert";
 
 interface Accordion1Props {
   onRowClick: (row: any) => void;
@@ -101,10 +102,11 @@ const Accordion1: React.FC<Accordion1Props> = ({
   // فیلتر کردن داده‌های جدول بر اساس متن جستجو (نام، توضیحات و ترتیب)
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
-    return rowData.filter((row) =>
-      row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
-      row.Description.toLowerCase().includes(searchText.toLowerCase()) ||
-      row.Order.toString().includes(searchText)
+    return rowData.filter(
+      (row) =>
+        row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.Description.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.Order.toString().includes(searchText)
     );
   }, [searchText, rowData]);
 
@@ -125,7 +127,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
 
   // دکمه New: پاک کردن فرم و آماده‌سازی حالت افزودن جدید
   const handleNew = () => {
-    const newId = rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
+    const newId =
+      rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
     setSelectedRow(null);
     setFormData({
       ID: newId,
@@ -178,13 +181,16 @@ const Accordion1: React.FC<Accordion1Props> = ({
         LastModified: null,
       };
       console.log("Inserting MenuTab:", newMenuTab);
+      showAlert("success", null, "", "MenuTabs Added successfully.");
       await AppServices.insertMenuTab(newMenuTab);
       await loadRowData();
       // اسکرول به انتهای جدول پس از بارگذاری مجدد
       if (tableContainerRef.current) {
-        tableContainerRef.current.scrollTop = tableContainerRef.current.scrollHeight;
+        tableContainerRef.current.scrollTop =
+          tableContainerRef.current.scrollHeight;
       }
-      const newId = rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
+      const newId =
+        rowData.length > 0 ? Math.max(...rowData.map((r) => r.ID)) + 1 : 1;
       setFormData({
         ID: newId,
         Name: "",
@@ -193,8 +199,16 @@ const Accordion1: React.FC<Accordion1Props> = ({
       });
       setSelectedRow(null);
       onRowClick(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error inserting MenuTab:", error);
+      const data = error.response?.data;
+      const message =
+        typeof data === "string"
+          ? data
+          : data?.value?.message ||
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+      showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
     }
@@ -214,11 +228,21 @@ const Accordion1: React.FC<Accordion1Props> = ({
         LastModified: null,
       };
       console.log("Updating MenuTab:", updatedMenuTab);
+      showAlert("success", null, "", "MenuTab updated successfully.");
+
       await AppServices.updateMenuTab(updatedMenuTab);
       alert("ویرایش با موفقیت انجام شد.");
       await loadRowData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating MenuTab:", error);
+      const data = error.response?.data;
+      const message =
+        typeof data === "string"
+          ? data
+          : data?.value?.message ||
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+      showAlert("error", null, "Error", message);
       alert("ویرایش با خطا مواجه شد.");
     } finally {
       setConfirmUpdateOpen(false);
@@ -280,7 +304,10 @@ const Accordion1: React.FC<Accordion1Props> = ({
           </div>
 
           {/* بخش جدول با ارتفاع ثابت و اسکرول */}
-          <div style={{ height: "300px", overflowY: "auto"  ,marginTop:'-15px'}} ref={tableContainerRef}>
+          <div
+            style={{ height: "300px", overflowY: "auto", marginTop: "-15px" }}
+            ref={tableContainerRef}
+          >
             <DataTable
               columnDefs={columnDefs}
               rowData={filteredRowData}
@@ -309,14 +336,18 @@ const Accordion1: React.FC<Accordion1Props> = ({
                 name="Name"
                 type="text"
                 value={formData.Name}
-                onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, Name: e.target.value })
+                }
                 className="mt-2 flex-1"
               />
               <DynamicInput
                 name="Description"
                 type="text"
                 value={formData.Description}
-                onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, Description: e.target.value })
+                }
                 className="mt-2 flex-1"
               />
             </div>

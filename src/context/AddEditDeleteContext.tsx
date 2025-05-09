@@ -19,6 +19,7 @@ import {
   EntityType,
   WfTemplateItem,
 } from "../services/api.services";
+import { showAlert } from "../components/utilities/Alert/DynamicAlert";
 
 // Define CommandData if it's different from CommandItem
 interface CommandData {
@@ -81,7 +82,7 @@ export interface UserData {
   UserImageId?: string | null;
 }
 
-interface RoleData {
+export interface RoleData {
   ID?: string;
   Name: string;
   IsVisible: boolean;
@@ -104,6 +105,9 @@ interface RoleData {
   nPostTypeID?: string | null;
   nProjectID?: string | null;
   status?: number;
+  CreateById?: string | null;
+  CreateDate?: string | null;
+  LastModified?: string | null;
 }
 
 interface CompanyData {
@@ -237,7 +241,7 @@ interface FormData {
   Name: string;
   Code: string;
   IsDoc: boolean;
-  IsMegaForm:boolean;
+  IsMegaForm: boolean;
   IsGlobal: boolean;
   IsVisible: boolean;
   LastModified?: string;
@@ -348,7 +352,6 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       return result;
     } catch (error) {
-      console.error("Error saving configuration:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -393,7 +396,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
 
       return updatedCmd;
     } catch (error) {
-      console.error("Error saving command:", error);
+      // در صورتی که می‌خواهید این خطا به بالا پراپگیت شود:
       throw error;
     } finally {
       setIsLoading(false);
@@ -435,7 +438,8 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       if (userRequest.ID !== undefined && userRequest.ID !== null) {
         // Updating existing user
         result = await api.updateUser(userRequest);
-        console.log("User updated:", result);
+        // console.log("User updated:", result);
+        showAlert("success", null, "", "User updated successfully.");
       } else {
         // Creating new user
         result = await api.insertUser(userRequest);
@@ -457,6 +461,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       if (data.ID) {
         // آبجکت برای update
         const updateRoleRequest: Role = {
+          ID: data.ID, // ← ارسال شناسه رکورد
           Name: data.Name,
           IsVisible: data.IsVisible,
           Authorization: data.Authorization,
@@ -466,16 +471,20 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
           PostCode: data.PostCode,
           Responsibility: data.Responsibility,
           Type: data.Type,
-          OwnerID: data.OwnerID || null,
-          ParrentId: data.ParrentId || null,
-          isAccessCreateProject: data.isAccessCreateProject || false,
-          isHaveAddressbar: data.isHaveAddressbar || false,
           isStaticPost: data.isStaticPost,
-          nCompanyID: data.nCompanyID || null,
-          nMenuID: data.nMenuID || null,
-          nPostTypeID: data.nPostTypeID || null,
-          nProjectID: data.nProjectID || null,
-          status: data.status || 1,
+          isAccessCreateProject: data.isAccessCreateProject,
+          isHaveAddressbar: data.isHaveAddressbar,
+          nCompanyID: data.nCompanyID,
+          nMenuID: data.nMenuID,
+          nPostTypeID: data.nPostTypeID,
+          nProjectID: data.nProjectID,
+          status: data.status,
+          ModifiedById: data.ModifiedById, // ← کاربری که ویرایش کرده
+          LastModified: new Date().toISOString(), // ← زمان ویرایش
+          // در صورت نیاز فیلدهای CreateById و CreateDate و سایر موارد:
+          CreateById: data.CreateById,
+          OwnerID: data.OwnerID,
+          ParrentId: data.ParrentId,
         };
 
         const result = await api.updateRole(updateRoleRequest);
@@ -864,7 +873,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         Name: data.Name,
         Code: data.Code || "",
         IsDoc: data.IsDoc,
-        IsMegaForm:data.IsMegaForm,
+        IsMegaForm: data.IsMegaForm,
         IsGlobal: data.IsGlobal,
         IsVisible: data.IsVisible,
         ProjectsStr: data.ProjectsStr || "",

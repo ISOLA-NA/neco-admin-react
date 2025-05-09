@@ -382,8 +382,7 @@ const TabContent: FC<TabContentProps> = ({
             showAlert(
               "success",
               null,
-              "Updated",
-              "Configuration updated successfully."
+              "Configuration updated successfullysdasdas."
             );
             await fetchData();
           }

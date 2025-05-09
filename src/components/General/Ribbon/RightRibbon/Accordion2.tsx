@@ -6,6 +6,7 @@ import { FaSave, FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 import AppServices, { MenuGroup } from "../../../../services/api.services";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
+import { showAlert } from "../../../utilities/Alert/DynamicAlert";
 
 interface Accordion2Props {
   selectedMenuTabId: number | null;
@@ -100,10 +101,11 @@ const Accordion2: React.FC<Accordion2Props> = ({
   // Filter rows by search text (بر اساس نام، توضیحات یا ترتیب)
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
-    return rowData.filter((row) =>
-      row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
-      row.Description.toLowerCase().includes(searchText.toLowerCase()) ||
-      row.Order.toString().includes(searchText)
+    return rowData.filter(
+      (row) =>
+        row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.Description.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.Order.toString().includes(searchText)
     );
   }, [searchText, rowData]);
 
@@ -180,6 +182,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
         LastModified: null,
       };
       console.log("Inserting MenuGroup:", newMenuGroup);
+      showAlert("success", null, "", "MenuGroup updated successfully.");
       await AppServices.insertMenuGroup(newMenuGroup);
       await loadRowData();
       if (tableContainerRef.current) {
@@ -197,8 +200,16 @@ const Accordion2: React.FC<Accordion2Props> = ({
       setSelectedRow(null);
       onRowClick(null);
       setIsAdding(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error inserting MenuGroup:", error);
+      const data = error.response?.data;
+      const message =
+        typeof data === "string"
+          ? data
+          : data?.value?.message ||
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+      showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
     }
@@ -218,11 +229,20 @@ const Accordion2: React.FC<Accordion2Props> = ({
         LastModified: null,
       };
       console.log("Updating MenuGroup:", updatedMenuGroup);
+      showAlert("success", null, "", "MenuGroup updated successfully.");
       await AppServices.updateMenuGroup(updatedMenuGroup);
       await loadRowData();
       setIsEditing(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating MenuGroup:", error);
+      const data = error.response?.data;
+      const message =
+        typeof data === "string"
+          ? data
+          : data?.value?.message ||
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+      showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
     }
@@ -299,7 +319,14 @@ const Accordion2: React.FC<Accordion2Props> = ({
               </div>
 
               {/* DataTable with fixed scroll container */}
-              <div style={{ height: "300px", overflowY: "auto" ,marginTop:'-15px'}} ref={tableContainerRef}>
+              <div
+                style={{
+                  height: "300px",
+                  overflowY: "auto",
+                  marginTop: "-15px",
+                }}
+                ref={tableContainerRef}
+              >
                 <DataTable
                   columnDefs={columnDefs}
                   rowData={filteredRowData}

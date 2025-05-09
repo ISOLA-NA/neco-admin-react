@@ -12,7 +12,13 @@ import CustomTextarea from "../utilities/DynamicTextArea";
 import ListSelector from "../ListSelector/ListSelector";
 import TableSelector from "./Configuration/TableSelector";
 import { useApi } from "../../context/ApiContext";
-import { PostCat, Project, Role, Company, User } from "../../services/api.services";
+import {
+  PostCat,
+  Project,
+  Role,
+  Company,
+  User,
+} from "../../services/api.services";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 export interface RoleGroupsHandle {
@@ -185,10 +191,12 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           };
         });
 
-      const projectsListData: ProjectListItem[] = apiData.projects.map((proj) => ({
-        ID: String(proj.ID),
-        Name: proj.ProjectName,
-      }));
+      const projectsListData: ProjectListItem[] = apiData.projects.map(
+        (proj) => ({
+          ID: String(proj.ID),
+          Name: proj.ProjectName,
+        })
+      );
 
       return {
         processedRoles,
@@ -269,27 +277,46 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
         },
         async save() {
           if (!formData.Name.trim()) {
-            showAlert("error", null, "Validation Error", "Role group name is required");
+            showAlert(
+              "error",
+              null,
+              "Validation Error",
+              "Role group name is required"
+            );
             return false;
           }
           const dataToSave: PostCat = {
             ...formData,
-            ProjectsStr: selectedIds.projects.join("|") + (selectedIds.projects.length > 0 ? "|" : ""),
-            PostsStr: selectedIds.members.join("|") + (selectedIds.members.length > 0 ? "|" : ""),
+            ProjectsStr:
+              selectedIds.projects.join("|") +
+              (selectedIds.projects.length > 0 ? "|" : ""),
+            PostsStr:
+              selectedIds.members.join("|") +
+              (selectedIds.members.length > 0 ? "|" : ""),
             LastModified: new Date().toISOString(),
           };
           try {
             if (selectedRow?.ID) {
               await api.updatePostCat(dataToSave);
-              showAlert("success", null, "Updated", "Role group updated successfully.");
+              // showAlert("success", null, "Updated", "Role group updated successfully.");
             } else {
               await api.insertPostCat(dataToSave);
-              showAlert("success", null, "Saved", "Role group added successfully.");
+              // showAlert("success", null, "Saved", "Role group added successfully.");
             }
             return true;
-          } catch (error) {
+          } catch (error: any) {
             console.error("Error saving role group:", error);
-            showAlert("error", null, "Error", "Failed to save role group data");
+            // showAlert("error", null, "Error", "Failed to save role group data");
+            const data = error.response?.data;
+
+            // اگه خطاهای اعتبارسنجی داریم:
+            if (data?.errors) {
+              const key = Object.keys(data.errors)[0];
+              const msg = data.errors[key][0];
+              showAlert("error", null, "Error", msg);
+              return;
+            }
+
             return false;
           }
         },
@@ -332,7 +359,10 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           modalContentProps={{
             columnDefs: columnDefs.projects,
             rowData: processedData.projectsListData,
-            selectedRows: getAssociatedItems(formData.ProjectsStr, processedData.projectsListData),
+            selectedRows: getAssociatedItems(
+              formData.ProjectsStr,
+              processedData.projectsListData
+            ),
             onRowDoubleClick: (rows: any[]) =>
               handleProjectsChange(rows.map((row) => row.ID)),
             selectionMode: "multiple",
@@ -353,7 +383,10 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           modalContentProps={{
             columnDefs: columnDefs.members,
             rowData: processedData.processedRoles,
-            selectedRows: getAssociatedItems(formData.PostsStr, processedData.processedRoles),
+            selectedRows: getAssociatedItems(
+              formData.PostsStr,
+              processedData.processedRoles
+            ),
             onRowDoubleClick: (rows: any[]) =>
               handleMembersChange(rows.map((row) => row.ID)),
             selectionMode: "multiple",

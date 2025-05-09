@@ -264,8 +264,30 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
       Staffing: {
-        endpoint: api.getAllForPostAdmin,
+        endpoint: async () => {
+          const allRoles = await api.getAllRoles();
+
+          // (۱) لاگ کامل
+          console.table(allRoles, ["ID", "Name", "OwnerID", "OwnerName"]);
+
+          // (۲) فیلتر دقیق:
+          //  - OwnerID باید truthy باشد
+          //  - OwnerName هم باید مقدار متنی معتبر داشته باشد
+          const filtered = allRoles.filter(
+            (r: any) =>
+              r.OwnerID && // نه null/undefined/0/"" …
+              typeof r.OwnerName === "string" &&
+              r.OwnerName.trim() !== ""
+          );
+
+          // (۳) لاگ بعد از فیلتر
+          console.table(filtered, ["ID", "Name", "OwnerID", "OwnerName"]);
+
+          return filtered; // همین آرایه به جدول می‌رود
+        },
+
         columnDefs: [
+          { headerName: "Role", field: "Name", filter: "agTextColumnFilter" },
           {
             headerName: "Project Name",
             field: "nProjectName",
@@ -284,6 +306,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+
       ProgramTemplate: {
         endpoint: api.getAllProgramTemplates,
         columnDefs: [

@@ -10,6 +10,7 @@ import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { Company } from "../../services/api.services";
+import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 export interface CompanyHandle {
   save: () => Promise<boolean>;
@@ -95,9 +96,17 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
             return true;
           }
           return false;
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error saving enterprise:", error);
           // showAlert("error", null, "Error", "Failed to save enterprise data");
+          const data = error.response?.data;
+          const message =
+            typeof data === "string"
+              ? data
+              : data?.value?.message ||
+                data?.message ||
+                "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          showAlert("error", null, "Error", message);
           return false;
         }
       },

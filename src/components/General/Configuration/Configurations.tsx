@@ -18,6 +18,7 @@ import {
   AFBtnItem,
   ConfigurationItem,
 } from "../../../context/ApiContext";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
 interface ConfigurationProps {
   selectedRow: any;
@@ -76,8 +77,12 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     const [loading, setLoading] = useState<boolean>(false);
 
     // داده‌هایی که از API بارگیری می‌شوند
-    const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>([]);
-    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
+    const [programTemplates, setProgramTemplates] = useState<
+      ProgramTemplateItem[]
+    >([]);
+    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>(
+      []
+    );
     const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
     const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
     const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
@@ -92,7 +97,10 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     }));
 
     // تابع کمکی برای به‌روزرسانی state
-    const handleChange = (field: keyof typeof configData, value: string | number) => {
+    const handleChange = (
+      field: keyof typeof configData,
+      value: string | number
+    ) => {
       setConfigData((prev) => ({
         ...prev,
         [field]: value.toString(),
@@ -115,14 +123,19 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           DefaultBtn: configData.DefaultBtn,
           LetterBtns: configData.LetterBtns,
           MeetingBtns: configData.MeetingBtns,
-          FirstIDProgramTemplate: Number(configData.FirstIDProgramTemplate) || 0,
+          FirstIDProgramTemplate:
+            Number(configData.FirstIDProgramTemplate) || 0,
           SelMenuIDForMain: Number(configData.SelMenuIDForMain) || 0,
           IsVisible: configData.IsVisible,
           LastModified: new Date().toISOString(),
-          EnityTypeIDForLessonLearn: Number(configData.EnityTypeIDForLessonLearn) || 0,
-          EnityTypeIDForTaskCommnet: Number(configData.EnityTypeIDForTaskCommnet) || 0,
-          EnityTypeIDForProcesure: Number(configData.EnityTypeIDForProcesure) || 0,
-          WFTemplateIDForLessonLearn: Number(configData.WFTemplateIDForLessonLearn) || 0,
+          EnityTypeIDForLessonLearn:
+            Number(configData.EnityTypeIDForLessonLearn) || 0,
+          EnityTypeIDForTaskCommnet:
+            Number(configData.EnityTypeIDForTaskCommnet) || 0,
+          EnityTypeIDForProcesure:
+            Number(configData.EnityTypeIDForProcesure) || 0,
+          WFTemplateIDForLessonLearn:
+            Number(configData.WFTemplateIDForLessonLearn) || 0,
         };
 
         let updatedConfig: ConfigurationItem;
@@ -135,8 +148,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
         }
 
         return updatedConfig;
-      } catch (error) {
-        console.error("Error saving configuration:", error);
+      } catch (error: any) {
         throw error;
       } finally {
         setLoading(false);
@@ -287,16 +299,22 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           DefaultBtn: selectedRow?.DefaultBtn || "",
           LetterBtns: selectedRow?.LetterBtns || "",
           MeetingBtns: selectedRow?.MeetingBtns || "",
-          EnityTypeIDForLessonLearn: (selectedRow?.EnityTypeIDForLessonLearn || "")
+          EnityTypeIDForLessonLearn: (
+            selectedRow?.EnityTypeIDForLessonLearn || ""
+          )
             .toString()
             .replace(/\|+$/, ""),
-          EnityTypeIDForTaskCommnet: (selectedRow?.EnityTypeIDForTaskCommnet || "")
+          EnityTypeIDForTaskCommnet: (
+            selectedRow?.EnityTypeIDForTaskCommnet || ""
+          )
             .toString()
             .replace(/\|+$/, ""),
           EnityTypeIDForProcesure: (selectedRow?.EnityTypeIDForProcesure || "")
             .toString()
             .replace(/\|+$/, ""),
-          WFTemplateIDForLessonLearn: (selectedRow?.WFTemplateIDForLessonLearn || "")
+          WFTemplateIDForLessonLearn: (
+            selectedRow?.WFTemplateIDForLessonLearn || ""
+          )
             .toString()
             .replace(/\|+$/, ""),
         });
@@ -351,7 +369,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: pt.Name,
             }))}
             selectedValue={configData.FirstIDProgramTemplate}
-            onChange={(e) => handleChange("FirstIDProgramTemplate", e.target.value)}
+            onChange={(e) =>
+              handleChange("FirstIDProgramTemplate", e.target.value)
+            }
             label="Program Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}

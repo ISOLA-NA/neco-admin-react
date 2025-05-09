@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+// src/components/TabbedInterface.tsx
+
+import React, { useState, useRef, useEffect } from "react";
+import Header from "../tab/Header"; // ← مسیر هدر
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
 import { subTabComponents } from "./SubTabsImports";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { useNavigate } from "react-router-dom";
-import DrawerComponent from "../tab/Header";
 import SidebarDrawer from "./SideBar/SidebarDrawer";
 
 // کانتکست‌های جدید
@@ -20,23 +22,19 @@ interface IconVisibility {
   showDuplicate: boolean;
 }
 
-// تعریف اینترفیس Props برای TabbedInterface
+// Props برای TabbedInterface
 interface TabbedInterfaceProps {
   onLogout: () => void;
 }
 
-// تعریف اینترفیس برای گروه‌های هر تب
+// گروه‌ها و تعاریف تب‌ها
 interface TabGroup {
   label: string;
   subtabs: string[];
 }
-
-// تعریف اینترفیس برای هر تب اصلی
 interface MainTabDefinition {
   groups: TabGroup[];
 }
-
-// تعریف MainTabKey به عنوان یک Union از رشته‌ها
 type MainTabKey =
   | "General"
   | "Forms"
@@ -45,46 +43,27 @@ type MainTabKey =
   | "Projects"
   | "File";
 
-// تعریف mainTabsData با استفاده از MainTabKey
 const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
-  File: {
-    groups: [],
-  },
+  File: { groups: [] },
   General: {
     groups: [
       {
         label: "Setup",
         subtabs: ["Configurations", "Commands", "Ribbons", "Enterprises"],
       },
-      {
-        label: "User",
-        subtabs: ["Users", "Roles", "Staffing", "RoleGroups"],
-      },
+      { label: "User", subtabs: ["Users", "Roles", "Staffing", "RoleGroups"] },
     ],
   },
   Forms: {
-    groups: [
-      {
-        label: "Manage",
-        subtabs: ["Forms", "Categories"],
-      },
-    ],
+    groups: [{ label: "Manage", subtabs: ["Forms", "Categories"] }],
   },
   ApprovalFlows: {
     groups: [
-      {
-        label: "Flows",
-        subtabs: ["ApprovalFlows", "ApprovalChecklist"],
-      },
+      { label: "Flows", subtabs: ["ApprovalFlows", "ApprovalChecklist"] },
     ],
   },
   Programs: {
-    groups: [
-      {
-        label: "Setup",
-        subtabs: ["ProgramTemplate", "ProgramTypes"],
-      },
-    ],
+    groups: [{ label: "Setup", subtabs: ["ProgramTemplate", "ProgramTypes"] }],
   },
   Projects: {
     groups: [
@@ -103,18 +82,22 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
 };
 
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
-  // کانتکست‌هایی که ساخته‌ایم
+  // کانتکست‌ها
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const { handleAdd, handleEdit, handleDelete, handleDuplicate } =
     useAddEditDelete();
 
-  // حالت‌ها
+  // stateها
   const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
   const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  // داده‌های مربوط به جدول جاری
+  // collapse header
+  const [collapsed, setCollapsed] = useState<boolean>(false);
+  const toggleCollapse = () => setCollapsed((prev) => !prev);
+
+  // جدول
   const [currentColumnDefs, setCurrentColumnDefs] = useState<any[]>([]);
   const [currentRowData, setCurrentRowData] = useState<any[]>([]);
   const [currentIconVisibility, setCurrentIconVisibility] =
@@ -127,13 +110,9 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
-
   const navigate = useNavigate();
 
-  // تعیین کامپوننت ساب‌تب از فایل SubTabsImports
-  const ActiveSubTabComponent = subTabComponents[activeSubTab] || null;
-
-  // وقتی ساب‌تب عوض شود، داده‌ها را از کانتکست می‌خوانیم
+  // بارگذاری دیتا برای ساب‌تب
   const fetchSubTabData = async (subTabName: string) => {
     try {
       const def = subTabDefinitions[subTabName];
@@ -148,9 +127,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
         });
         return;
       }
-      // فراخوانی متد مخصوص واکشی داده در کانتکست
       const data = await fetchDataForSubTab(subTabName);
-
       setCurrentRowData(data);
       setCurrentColumnDefs(def.columnDefs);
       setCurrentIconVisibility(def.iconVisibility);
@@ -160,31 +137,22 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   };
 
   useEffect(() => {
-    // بار اول یا تغییر ساب‌تب
     fetchSubTabData(activeSubTab);
   }, [activeSubTab, subTabDefinitions]);
 
-  // هندل انتخاب تب اصلی
+  // هندل تب‌ها
   const handleMainTabChange = (tabName: string) => {
     if (tabName === "File") {
-      // باز کردن دراور
       setIsDrawerOpen(true);
       return;
     }
-
-    // اطمینان از اینکه tabName یکی از کلیدهای mainTabsData است
     if (tabName in mainTabsData) {
       setActiveMainTab(tabName as MainTabKey);
-
-      const mainTabConfig = mainTabsData[tabName as MainTabKey];
-      if (mainTabConfig && mainTabConfig.groups) {
-        const firstGroup = mainTabConfig.groups[0];
-        if (firstGroup && firstGroup.subtabs.length > 0) {
-          setActiveSubTab(firstGroup.subtabs[0]);
-        }
+      const cfg = mainTabsData[tabName as MainTabKey];
+      if (cfg.groups.length) {
+        setActiveSubTab(cfg.groups[0].subtabs[0]);
       }
       setSelectedRow(null);
-
       mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
       subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
     } else {
@@ -192,76 +160,38 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
   };
 
-  // هندل انتخاب ساب‌تب
   const handleSubTabChange = (subtab: string) => {
     setActiveSubTab(subtab);
     setSelectedRow(null);
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
-  // اسکرول تب‌های اصلی
-  const scrollMainTabs = (direction: "left" | "right") => {
-    if (mainTabsRef.current) {
-      const scrollAmount = 150;
-      mainTabsRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  // اسکرول ساب‌تب‌ها
-  const scrollSubTabs = (direction: "left" | "right") => {
-    if (subTabsRef.current) {
-      const scrollAmount = 150;
-      subTabsRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  // وقتی روی سطر دوبار کلیک شود
-  const handleRowDoubleClick = (rowData: any) => {
-    console.log("Row double-clicked:", rowData);
-    setSelectedRow(rowData);
-  };
-
-  // عملیات CRUD -- حالا از کانتکست گرفته می‌شود
+  // عملیات CRUD
   const handleAddClick = () => {
-    handleAdd(); // از کانتکست
-    console.log("Add clicked");
+    handleAdd();
     setSelectedRow(null);
   };
-
   const handleEditClick = () => {
-    handleEdit(); // از کانتکست
-    console.log("Edit action triggered");
+    handleEdit();
   };
-
   const handleDeleteClick = async () => {
-    if (!selectedRow || !selectedRow.ID) {
+    if (!selectedRow?.ID) {
       alert("No row is selected for deletion");
       return;
     }
     try {
-      await handleDelete(activeSubTab, selectedRow.ID); // از کانتکست
+      await handleDelete(activeSubTab, selectedRow.ID);
       showAlert("success", null, "Deleted", "Record deleted successfully.");
-      await fetchSubTabData(activeSubTab); // جدول را رفرش می‌کنیم
-    } catch (err) {
-      console.error(err);
+      await fetchSubTabData(activeSubTab);
+    } catch {
       showAlert("error", null, "Error", "Failed to delete record.");
     }
   };
-
   const handleDuplicateClick = () => {
-    handleDuplicate(); // از کانتکست
-    console.log("Duplicate action triggered");
+    handleDuplicate();
   };
-
-  const handleRowClick = (data: any) => {
-    setSelectedRow(data);
-  };
+  const handleRowClick = (data: any) => setSelectedRow(data);
+  const handleRowDoubleClick = (rowData: any) => setSelectedRow(rowData);
 
   const handleLogoutClick = () => {
     onLogout();
@@ -270,77 +200,89 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     setIsDrawerOpen(false);
   };
 
-  const handleCloseDrawer = () => {
-    setIsDrawerOpen(false);
-  };
+  const handleCloseDrawer = () => setIsDrawerOpen(false);
 
-  // جلوگیری از اسکرول صفحه زمانی که دراور باز است
+  // جلوگیری از اسکرول وقتی دراور باز است
   useEffect(() => {
-    if (isDrawerOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+    document.body.style.overflow = isDrawerOpen ? "hidden" : "auto";
   }, [isDrawerOpen]);
 
-  // لیست نام تب‌های اصلی جهت پاس دادن به <MainTabs />
-  const mainTabs: string[] = [...Object.keys(mainTabsData)];
+  const mainTabs = Object.keys(mainTabsData) as MainTabKey[];
 
   return (
     <>
-      {/* دراور منو (File) */}
+      {/* دراور File */}
       <SidebarDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         onLogout={handleLogoutClick}
       />
 
-      {/* محتوای اصلی */}
       <div
         className={`w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden transition-filter duration-300 ${
           isDrawerOpen ? "filter blur-sm" : ""
         }`}
       >
-        <DrawerComponent username="Hasanzade" />
-
-        {/* تب‌های اصلی */}
-        <MainTabs
-          tabs={mainTabs}
-          activeTab={activeMainTab}
-          onTabChange={handleMainTabChange}
-          scrollLeft={() => scrollMainTabs("left")}
-          scrollRight={() => scrollMainTabs("right")}
-          tabsRef={mainTabsRef}
+        {/* هدر با فلش collapse */}
+        <Header
+          username="Hasanzade"
+          collapsed={collapsed}
+          onToggleCollapse={toggleCollapse}
         />
 
-        {/* ساب‌تب‌ها */}
-        <SubTabs
-          groups={mainTabsData[activeMainTab]?.groups}
-          activeSubTab={activeSubTab}
-          onSubTabChange={handleSubTabChange}
-          scrollLeft={() => scrollSubTabs("left")}
-          scrollRight={() => scrollSubTabs("right")}
-          subTabsRef={subTabsRef}
-        />
+        {/* MainTabs و SubTabs داخل انیمیشن collapse */}
+        <div
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            collapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
+          }`}
+        >
+          <MainTabs
+            tabs={mainTabs}
+            activeTab={activeMainTab}
+            onTabChange={handleMainTabChange}
+            scrollLeft={() =>
+              mainTabsRef.current?.scrollBy({ left: -150, behavior: "smooth" })
+            }
+            scrollRight={() =>
+              mainTabsRef.current?.scrollBy({ left: 150, behavior: "smooth" })
+            }
+            tabsRef={mainTabsRef}
+          />
 
-        {/* محتوا */}
-        <TabContent
-          component={ActiveSubTabComponent}
-          columnDefs={currentColumnDefs}
-          rowData={currentRowData}
-          onRowDoubleClick={handleRowDoubleClick}
-          selectedRow={selectedRow}
-          activeSubTab={activeSubTab}
-          showDuplicateIcon={currentIconVisibility.showDuplicate}
-          showAddIcon={currentIconVisibility.showAdd}
-          showEditIcon={currentIconVisibility.showEdit}
-          showDeleteIcon={currentIconVisibility.showDelete}
-          onAdd={handleAddClick}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-          onDuplicate={handleDuplicateClick}
-          onRowClick={handleRowClick}
-        />
+          <SubTabs
+            groups={mainTabsData[activeMainTab].groups}
+            activeSubTab={activeSubTab}
+            onSubTabChange={handleSubTabChange}
+            scrollLeft={() =>
+              subTabsRef.current?.scrollBy({ left: -150, behavior: "smooth" })
+            }
+            scrollRight={() =>
+              subTabsRef.current?.scrollBy({ left: 150, behavior: "smooth" })
+            }
+            subTabsRef={subTabsRef}
+          />
+        </div>
+
+        {/* محتوای تب فعلی */}
+        <div className="flex-1 overflow-auto">
+          <TabContent
+            component={subTabComponents[activeSubTab] || null}
+            columnDefs={currentColumnDefs}
+            rowData={currentRowData}
+            selectedRow={selectedRow}
+            activeSubTab={activeSubTab}
+            showAddIcon={currentIconVisibility.showAdd}
+            showEditIcon={currentIconVisibility.showEdit}
+            showDeleteIcon={currentIconVisibility.showDelete}
+            showDuplicateIcon={currentIconVisibility.showDuplicate}
+            onAdd={handleAddClick}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+            onDuplicate={handleDuplicateClick}
+            onRowClick={handleRowClick}
+            onRowDoubleClick={handleRowDoubleClick}
+          />
+        </div>
       </div>
     </>
   );

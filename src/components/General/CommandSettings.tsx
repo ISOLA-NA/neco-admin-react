@@ -31,7 +31,10 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       gridCmd: selectedRow?.gridCmd || "",
       tabCmd: selectedRow?.tabCmd || "",
       QR: selectedRow?.QR || "",
-      ViewMode: selectedRow?.ViewMode !== undefined ? selectedRow.ViewMode.toString() : "",
+      ViewMode:
+        selectedRow?.ViewMode !== undefined
+          ? selectedRow.ViewMode.toString()
+          : "",
       DefaultColumns: selectedRow?.DefaultColumns || "",
       ReportParam: selectedRow?.ReportParam || "",
       ProjectIntensive:
@@ -42,12 +45,19 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       InvisibleColumns: selectedRow?.InvisibleColumns || "",
       ApiColumns: selectedRow?.ApiColumns || "",
       SpParam: selectedRow?.SpParam || "",
-      CmdType: selectedRow?.CmdType !== undefined ? selectedRow.CmdType.toString() : "",
+      CmdType:
+        selectedRow?.CmdType !== undefined
+          ? selectedRow.CmdType.toString()
+          : "",
     });
 
     // وضعیت برای ViewModes و ApiModes
-    const [viewModes, setViewModes] = useState<{ value: string; label: string }[]>([]);
-    const [apiModes, setApiModes] = useState<{ value: string; label: string }[]>([]);
+    const [viewModes, setViewModes] = useState<
+      { value: string; label: string }[]
+    >([]);
+    const [apiModes, setApiModes] = useState<
+      { value: string; label: string }[]
+    >([]);
 
     const [loadingViewModes, setLoadingViewModes] = useState<boolean>(false);
     const [loadingApiModes, setLoadingApiModes] = useState<boolean>(false);
@@ -106,7 +116,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           setViewModes(viewModeOptions);
           console.log("viewModeOptions", viewModeOptions);
         } catch (error) {
-          console.error("Error fetching ViewMode enums:", error);
+          // console.error("Error fetching ViewMode enums:", error);
           setErrorViewModes("خطا در دریافت ViewMode");
         } finally {
           setLoadingViewModes(false);

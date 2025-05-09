@@ -1,6 +1,11 @@
 // src/components/General/Role.tsx
 
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
@@ -45,7 +50,6 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     nPostTypeID: null,
     nProjectID: null,
     status: 0,
-    clientOrder: Date.now(),
   });
 
   // به روزرسانی state بر اساس selectedRow؛ در حالت ویرایش اطلاعات قبلی و در حالت درج مقدارهای اولیه تنظیم می‌شود
@@ -65,10 +69,10 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         isStaticPost: selectedRow.isStaticPost || false,
         isAccessCreateProject: selectedRow.isAccessCreateProject || false,
         isHaveAddressbar: selectedRow.isHaveAddressbar || false,
-        LastModified: selectedRow.LastModified || "",
-        ModifiedById: selectedRow.ModifiedById || "",
+        LastModified: selectedRow.LastModified || null,
+        ModifiedById: selectedRow.ModifiedById || null,
         CreateById: selectedRow.CreateById || null,
-        CreateDate: selectedRow.CreateDate || "",
+        CreateDate: selectedRow.CreateDate || null,
         OwnerID: selectedRow.OwnerID || null,
         ParrentId: selectedRow.ParrantId || null,
         nCompanyID: selectedRow.nCompanyID || null,
@@ -76,7 +80,6 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         nPostTypeID: selectedRow.nPostTypeID || null,
         nProjectID: selectedRow.nProjectID || null,
         status: selectedRow.status || 0,
-        clientOrder: selectedRow.clientOrder || Date.now(),
       });
     } else {
       setRoleData({
@@ -104,13 +107,15 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         nPostTypeID: null,
         nProjectID: null,
         status: 0,
-        clientOrder: Date.now(),
       });
     }
   }, [selectedRow]);
 
   // تغییر مقدار فیلدهای roleData
-  const handleChange = (field: keyof typeof roleData, value: string | boolean) => {
+  const handleChange = (
+    field: keyof typeof roleData,
+    value: string | boolean
+  ) => {
     setRoleData((prev) => {
       const updated = { ...prev, [field]: value };
       console.log(`فیلد ${field} به مقدار ${value} تغییر کرد`);
@@ -123,11 +128,18 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     try {
       console.log("داده‌های ذخیره‌شده نقش:", roleData);
       await handleSaveRole(roleData);
-      showAlert("success", null, "ذخیره شد", "نقش با موفقیت ذخیره شد.");
+      // showAlert("success", null, "", "Role Added successfully.");
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("خطا در ذخیره‌سازی نقش:", error);
-      showAlert("error", null, "خطا", "ذخیره نقش ناموفق بود.");
+      const data = error.response?.data;
+      const message =
+        typeof data === "string"
+          ? data
+          : data?.value?.message ||
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+      showAlert("error", null, "خطا", message);
       return false;
     }
   };
