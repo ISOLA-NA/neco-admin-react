@@ -1,10 +1,11 @@
+// src/components/Staffing.tsx
+
 import React, {
   useState,
   useEffect,
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { v4 as uuidv4 } from "uuid";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicSelector from "../utilities/DynamicSelector";
 import DynamicModal from "../utilities/DynamicModal";
@@ -16,8 +17,9 @@ import DynamicSwitcher from "../utilities/DynamicSwitcher";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 interface StaffingData {
-  id: string;
+  ID: string;
   Name: string;
+  PostCode: string;
   ProjectID: string;
   OwnerID: string;
   nPostTypeID: string;
@@ -27,8 +29,7 @@ interface StaffingData {
   isAccessCreateProject: boolean;
   isHaveAddressbar: boolean;
   isStaticPost: boolean;
-  PostCode: string;
-  CreateDate: string;
+  CreateDate: string; // Added CreateDate to the interface
 }
 
 export interface StaffingHandle {
@@ -48,11 +49,10 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
   const [companies, setCompanies] = useState<any[]>([]);
   const [menus, setMenus] = useState<any[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true);
-
   const [staffingData, setStaffingData] = useState<StaffingData>({
-    id: selectedRow?.ID || "",
+    ID: selectedRow?.ID || "",
     Name: selectedRow?.Name || "",
+    PostCode: selectedRow?.PostCode || "", // 👈 اضافه شد
     ProjectID: selectedRow?.nProjectID || "",
     OwnerID: selectedRow?.OwnerID || "",
     nPostTypeID: selectedRow?.nPostTypeID || "",
@@ -62,8 +62,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
     isAccessCreateProject: selectedRow?.isAccessCreateProject || false,
     isHaveAddressbar: selectedRow?.isHaveAddressbar || false,
     isStaticPost: selectedRow?.isStaticPost || false,
-    PostCode: selectedRow?.PostCode || "",
-    CreateDate: selectedRow?.CreateDate || new Date().toISOString(),
+    CreateDate: selectedRow?.CreateDate || new Date().toISOString(), // Initialize CreateDate
   });
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -91,8 +90,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
         setMenus(menusData);
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
+        showAlert("error", null, "خطا", "خطا در دریافت داده‌ها");
       }
     };
 
@@ -102,8 +100,9 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
   useEffect(() => {
     if (selectedRow) {
       setStaffingData({
-        id: selectedRow.ID || "",
+        ID: selectedRow.ID || "",
         Name: selectedRow.Name || "",
+        PostCode: selectedRow.PostCode || "", // 👈 اضافه شد
         ProjectID: selectedRow.nProjectID || "",
         OwnerID: selectedRow.OwnerID || "",
         nPostTypeID: selectedRow.nPostTypeID || "",
@@ -113,8 +112,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
         isAccessCreateProject: selectedRow.isAccessCreateProject || false,
         isHaveAddressbar: selectedRow.isHaveAddressbar || false,
         isStaticPost: selectedRow.isStaticPost || false,
-        PostCode: selectedRow.PostCode || "",
-        CreateDate: selectedRow.CreateDate || new Date().toISOString(),
+        CreateDate: selectedRow.CreateDate || new Date().toISOString(), // Update CreateDate
       });
 
       if (selectedRow.nPostTypeID) {
@@ -128,10 +126,25 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
   }, [selectedRow, roles]);
 
   const save = async (): Promise<void> => {
+    // const userId = await api
+    //   .getIdByUserToken()
+    //   .then((res) => res[0]?.ID?.toString());
+
+    // console.log("Save function called", userId);
+
+    const res = await api.getIdByUserToken(); // 👈 آبجکت برمی‌گرده
+    const userId = res?.ID ?? null;
+    console.log("🆔 userId:", userId);
+
+    console.log("useeeeer", userId);
+    console.log("✅ getIdByUserToken response:", res);
+
+    // بررسی اعتبارسنجی برای سمت داینامیک و پروژه
     if (staffingData.nPostTypeID) {
       const selectedRole = roles.find(
         (role) => role.ID === staffingData.nPostTypeID
       );
+      console.log("Selected Role:", selectedRole);
       if (
         selectedRole &&
         !selectedRole.isStaticPost &&
@@ -143,6 +156,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
           "هشدار",
           "سمت داینامیک انتخاب شده است، لطفا یک پروژه انتخاب کنید"
         );
+        console.log("Validation failed: Missing ProjectID for dynamic role");
         throw new Error(
           "Validation failed: Missing ProjectID for dynamic role"
         );
@@ -150,41 +164,50 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
     }
 
     try {
-      const currentUserId = localStorage.getItem("currentUserId");
-      const sd = staffingData;
-
+      console.log("Proceeding to save data");
       const roleData: Role = {
-        ID: sd.id || uuidv4(),
-        Name: sd.Name,
+        ID: "e8e2180b-2651-4589-99ce-0bc4dcd916e8",
+        Name: staffingData.Name || null,
         IsVisible: true,
         LastModified: new Date().toISOString(),
-        CreateDate: sd.CreateDate,
-        CreateById: null,
-        ModifiedById: currentUserId || undefined,
-        Authorization: "",
-        Competencies: "",
-        Description: "",
-        Grade: "",
-        PostCode: sd.PostCode,
-        Responsibility: "",
-        Type: "",
-        OwnerID: sd.OwnerID || null,
-        ParrentId: sd.ParentId || null,
-        isAccessCreateProject: sd.isAccessCreateProject,
-        isHaveAddressbar: sd.isHaveAddressbar,
-        isStaticPost: sd.isStaticPost,
-        nCompanyID: sd.nCompanyID || null,
-        nMenuID: sd.nMenuID || null,
-        nPostTypeID: null,
-        nProjectID: sd.ProjectID || null,
+        CreateDate: staffingData.CreateDate,
+        Authorization: null,
+        Competencies: null,
+        Description: null,
+        Grade: null,
+        PostCode: staffingData.PostCode || null,
+        Responsibility: null,
+        Type: null,
+        OwnerID: staffingData.OwnerID || null,
+        ParrentId: staffingData.ParentId || null,
+        isAccessCreateProject: staffingData.isAccessCreateProject,
+        isHaveAddressbar: staffingData.isHaveAddressbar,
+        isStaticPost: staffingData.isStaticPost,
+        nCompanyID: staffingData.nCompanyID || null,
+        nMenuID: staffingData.nMenuID || null,
+        nPostTypeID: staffingData.nPostTypeID || null,
+        nProjectID: staffingData.ProjectID || null,
         status: 1,
+        CreateById: staffingData.ID ? "" : userId, // 👈 حالا مقدار خواهد داشت
+        ModifiedById: userId,
       };
 
-      await api.updateRole(roleData);
+      console.log("Role Data to be sent:", roleData);
+
+      if (staffingData.ID) {
+        // به‌روزرسانی نقش
+        await api.updateRole(roleData);
+        console.log("Role updated successfully");
+      } else {
+        // درج نقش جدید
+        await api.updateRole(roleData);
+        console.log("Role inserted successfully");
+      }
+
       showAlert("success", null, "موفقیت", "اطلاعات با موفقیت ذخیره شد");
     } catch (error) {
-      console.error("Error in staffing save:", error);
-      showAlert("error", null, "خطا", "خطا در ذخیره سازی اطلاعات");
+      // console.error("Error in staffing save:", error);
+      // showAlert("error", null, "خطا", "خطا در ذخیره سازی اطلاعات");
       throw error;
     }
   };
@@ -202,18 +225,18 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
     if (field === "nPostTypeID") {
       const selectedRole = roles.find((role) => role.ID === value);
       const isStatic = selectedRole?.isStaticPost || false;
+      const rolePostCode = selectedRole?.PostCode || "";
 
-      setIsProjectNameDisabled(isStatic);
+      console.log("🎯 Role selected:", selectedRole?.Name);
+      console.log("📬 Role PostCode:", selectedRole?.PostCode);
 
       setStaffingData((prev) => ({
         ...prev,
-        id: value,
-        nPostTypeID: value,
-        PostCode: selectedRole?.PostCode || "",
-        Name: selectedRole?.Name || "",
         ProjectID: isStatic ? "" : prev.ProjectID,
+        PostCode: rolePostCode,
       }));
-      return;
+
+      setIsProjectNameDisabled(isStatic);
     }
   };
 
@@ -252,15 +275,26 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-48">Loading...</div>
-    );
-  }
-
   return (
     <div className="p-4">
       <TwoColumnLayout>
+        <DynamicSelector
+          options={[
+            { value: "", label: "انتخاب کنید..." },
+            ...roles.map((role) => ({
+              value: role.ID,
+              label: role.Name,
+            })),
+          ]}
+          selectedValue={staffingData.nPostTypeID}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            handleChange("nPostTypeID", e.target.value)
+          }
+          label="Roles Type"
+          showButton={true}
+          onButtonClick={() => handleOpenModal("nPostTypeID")}
+        />
+
         <DynamicSelector
           options={[
             { value: "", label: "انتخاب کنید..." },
@@ -284,7 +318,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
             { value: "", label: "انتخاب کنید..." },
             ...users.map((user) => ({
               value: user.ID,
-              label: user.Username,
+              label: user.Name,
             })),
           ]}
           selectedValue={staffingData.OwnerID}
@@ -294,23 +328,6 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
           label="User Name"
           showButton={true}
           onButtonClick={() => handleOpenModal("OwnerID")}
-        />
-
-        <DynamicSelector
-          options={[
-            { value: "", label: "انتخاب کنید..." },
-            ...roles.map((role) => ({
-              value: role.ID,
-              label: role.Name,
-            })),
-          ]}
-          selectedValue={staffingData.nPostTypeID}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            handleChange("nPostTypeID", e.target.value)
-          }
-          label="Roles Type"
-          showButton={true}
-          onButtonClick={() => handleOpenModal("nPostTypeID")}
         />
 
         <DynamicSelector
@@ -393,7 +410,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>((props, ref) => {
         )}
         {currentSelector === "OwnerID" && (
           <TableSelector
-            columnDefs={[{ headerName: "Username", field: "Username" }]}
+            columnDefs={[{ headerName: "User Name", field: "Name" }]}
             rowData={users}
             selectedRow={selectedRowData}
             onRowDoubleClick={handleSelectButtonClick}
