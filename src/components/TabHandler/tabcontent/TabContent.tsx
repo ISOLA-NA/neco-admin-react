@@ -210,10 +210,10 @@ const TabContent: FC<TabContentProps> = ({
           break;
         case "Staffing":
           // منطق مورد نظر برای لود Staffing
-          data = await api.getAllForPostAdmin();
+          // data = await api.getAllForPostAdmin();
+          // break;
+          data = await fetchDataForSubTab("Staffing");
           break;
-        // data = await fetchDataForSubTab("Staffing");
-        // break;
         case "ProgramTemplate":
           data = await api.getAllProgramTemplates();
           break;
@@ -338,11 +338,11 @@ const TabContent: FC<TabContentProps> = ({
           break;
         case "Staffing":
           if (staffingRef.current) {
-            const result = await staffingRef.current.save();
-            if (!result) return;
+            await staffingRef.current.save();
             showAlert("success", null, "", "Staffing added successfully.");
           }
           break;
+
         case "ProgramTemplate":
           if (programTemplateRef.current) {
             const result = await programTemplateRef.current.save();

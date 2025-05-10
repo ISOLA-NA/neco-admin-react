@@ -276,8 +276,8 @@ export const SubTabDefinitionsProvider: React.FC<{
           const filtered = allRoles.filter(
             (r: any) =>
               r.OwnerID && // نه null/undefined/0/"" …
-              typeof r.OwnerName === "string" &&
-              r.OwnerName.trim() !== ""
+              typeof r.OwnerID === "string" &&
+              r.OwnerID.trim() !== ""
           );
 
           // (۳) لاگ بعد از فیلتر
