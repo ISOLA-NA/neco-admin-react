@@ -320,7 +320,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             isChecked={staffingData.isAccessCreateProject}
             onChange={() => handleSwitcher("isAccessCreateProject")}
             leftLabel=""
-            rightLabel="Access To Projects"
+            rightLabel="Access To New Projects"
           />
 
           <DynamicSwitcher

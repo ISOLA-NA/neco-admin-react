@@ -189,9 +189,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     } catch (error: any) {
       console.error('Login/OTP Error:', error)
       const message =
-        error.response?.data?.message ||
-        error.message ||
-        'خطایی در فرآیند لاگین رخ داده است.'
+      typeof error.response?.data === 'string'
+        ? error.response.data
+        : error.response?.data?.value?.message ||
+          error.response?.data?.message ||
+          error.message ||
+          'خطایی در فرآیند لاگین رخ داده است.';
+    
       showAlert('error', null, 'خطا', message)
     } finally {
       setLoading(false)
@@ -274,7 +278,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <button
                     type='button'
                     onClick={handleTogglePasswordVisibility}
-                    className='text-indigo-500 hover:text-purple-500 transition-colors duration-300 focus:outline-none'
+                    className='text-indigo-500 hover:text-purple-500 transition-colors duration-300 focus:outline-none pointer-events-auto'
                   >
                     {showPassword ? (
                       <FaEyeSlash size={20} />
