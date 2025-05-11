@@ -34,7 +34,7 @@ const DynamicSwitcher: React.FC<DynamicSwitcherProps> = ({
         />
         <div
           className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
-            isChecked ? "bg-purple-400" : "bg-indigo-400"
+            isChecked ? "bg-[#ec4899]" : "bg-gray-400"
           } ${disabled ? "opacity-50" : ""}`}
         >
           <span

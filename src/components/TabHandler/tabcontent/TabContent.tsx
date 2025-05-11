@@ -278,9 +278,11 @@ const TabContent: FC<TabContentProps> = ({
   // هر زمان که activeSubTab تغییر کند، دوباره داده‌ها را می‌گیریم
   useEffect(() => {
     if (activeSubTab) {
+      setIsAdding(true); // ← این خط را اضافه کن
       fetchData();
     }
   }, [activeSubTab, fetchData]);
+  
 
   // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
