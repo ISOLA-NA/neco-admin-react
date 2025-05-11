@@ -13,6 +13,9 @@ import {
   ProgramTemplateItem,
   DefaultRibbonItem,
   Menu,
+  User,
+  Project,
+  Company,
   MenuTab,
   MenuGroup,
   MenuItem,
@@ -49,26 +52,69 @@ export const SubTabDefinitionsProvider: React.FC<{
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
 
+
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [allProjects, setAllProjects] = useState<any[]>([]);
+  const [allCompanies, setAllCompanies] = useState<any[]>([]);
+  const [allRoles, setAllRoles] = useState<any[]>([]);
+
   useEffect(() => {
     const token = Cookies.get("token");
     // Only fetch protected data if token exists
     if (!token) return;
 
+    // const fetchInitialData = async () => {
+    //   try {
+    //     const [templates, ribbons, menusData , usersData , projectsData , companiesData ] = await Promise.all([
+    //       api.getAllProgramTemplates(),
+    //       api.getAllDefaultRibbons(),
+    //       api.getAllMenu(),
+    //       api.getAllUsers(),
+    //       api.getAllProject(),
+    //       api.getAllCompanies(),
+
+    //     ]);
+    //     setProgramTemplates(templates);
+    //     setDefaultRibbons(ribbons);
+    //     setMenus(menusData);
+    //     setAllUsers(usersData);
+    //     setAllProjects(projectsData);
+    //     setAllCompanies(companiesData);
+    //   } catch (error) {
+    //     console.error("Error in SubTabDefinitionsProvider:", error);
+    //   }
+    // };
     const fetchInitialData = async () => {
       try {
-        const [templates, ribbons, menusData] = await Promise.all([
+        const [
+          templates,
+          ribbons,
+          menusData,
+          usersData,
+          projectsData,
+          companiesData,
+          rolesData // ✅ اضافه شده
+        ] = await Promise.all([
           api.getAllProgramTemplates(),
           api.getAllDefaultRibbons(),
           api.getAllMenu(),
+          api.getAllUsers(),
+          api.getAllProject(),
+          api.getAllCompanies(),
+          api.getAllRoles(), // ✅ نقش‌ها
         ]);
+    
         setProgramTemplates(templates);
         setDefaultRibbons(ribbons);
         setMenus(menusData);
+        setAllUsers(usersData);
+        setAllProjects(projectsData);
+        setAllCompanies(companiesData);
+        setAllRoles(rolesData); // ✅ ذخیره نقش‌ها
       } catch (error) {
         console.error("Error in SubTabDefinitionsProvider:", error);
       }
     };
-
     fetchInitialData();
   }, [api]);
 
@@ -266,38 +312,58 @@ export const SubTabDefinitionsProvider: React.FC<{
       Staffing: {
         endpoint: async () => {
           const allRoles = await api.getAllRoles();
-
-          // (۱) لاگ کامل
-          console.table(allRoles, ["ID", "Name", "OwnerID", "OwnerName"]);
-
-          // (۲) فیلتر دقیق:
-          //  - OwnerID باید truthy باشد
-          //  - OwnerName هم باید مقدار متنی معتبر داشته باشد
           const filtered = allRoles.filter(
             (r: any) =>
-              r.OwnerID && // نه null/undefined/0/"" …
+              r.OwnerID &&
               typeof r.OwnerID === "string" &&
               r.OwnerID.trim() !== ""
           );
-
-          // (۳) لاگ بعد از فیلتر
-          console.table(filtered, ["ID", "Name", "OwnerID", "OwnerName"]);
-
-          return filtered; // همین آرایه به جدول می‌رود
+          return filtered;
         },
 
         columnDefs: [
           { headerName: "Role", field: "Name", filter: "agTextColumnFilter" },
+
           {
             headerName: "Project Name",
-            field: "nProjectName",
+            // می‌تونیم field رو بذاریم nProjectID ولی ارزش نمایش valueGetter مهمه
+            field: "nProjectID",
             filter: "agTextColumnFilter",
+            valueGetter: (params: any) => {
+              const proj = allProjects.find(p => p.ID === params.data.nProjectID);
+              return proj ? proj.ProjectName : "";
+            }
           },
           {
-            headerName: "Owner Name",
-            field: "OwnerName",
+            headerName: "User",
+            field: "OwnerID",
             filter: "agTextColumnFilter",
+            valueGetter: (params: any) => {
+              const user = allUsers.find(u => u.ID === params.data.OwnerID);
+              return user ? user.Username : "";
+            }
           },
+          {
+            headerName: "Enterprise",
+            field: "nCompanyID",
+            filter: "agTextColumnFilter",
+            valueGetter: (params: any) => {
+              const comp = allCompanies.find(c => c.ID === params.data.nCompanyID);
+              return comp ? comp.Name : "";
+            }
+          },
+
+          {
+              headerName: "Superior",
+              field: "ParrentId",
+              filter: "agTextColumnFilter",
+              /** مقدار متن را از allRoles می‌گیرد */
+              valueGetter: (params: any) => {
+                const sup = allRoles.find((r: any) => r.ID === params.data.ParrentId);
+                return sup ? sup.Name : "";
+              }
+             }
+
         ],
         iconVisibility: {
           showAdd: true,
@@ -676,7 +742,7 @@ export const SubTabDefinitionsProvider: React.FC<{
 
       // Add other sub-tabs here
     } as Record<string, SubTabDefinition>;
-  }, [api, programTemplates, defaultRibbons, menus]);
+  }, [api, programTemplates, defaultRibbons, menus, allUsers, allProjects, allCompanies]);
 
   const fetchDataForSubTab = async (subTabName: string, params?: any) => {
     // If no token or endpoint not defined, return empty
