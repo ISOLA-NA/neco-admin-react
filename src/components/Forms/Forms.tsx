@@ -621,18 +621,34 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   /**
    * متد اصلی ذخیره فرم (برای فراخوانی از والد، چون این کامپوننت با forwardRef فرستاده شده)
    */
+  // useImperativeHandle(ref, () => ({
+  //   save: async () => {
+  //     try {
+  //       const payload = { ...formData }
+  //       await handleSaveForm(payload)
+  //       showAlert('success', undefined, 'Success', 'Form saved successfully!')
+  //     } catch (error) {
+  //       console.error('Error saving form:', error)
+  //       showAlert('error', undefined, 'Error', 'Failed to save form.')
+  //     }
+  //   }
+  // }))
+
   useImperativeHandle(ref, () => ({
     save: async () => {
       try {
         const payload = { ...formData }
         await handleSaveForm(payload)
-        showAlert('success', undefined, 'Success', 'Form saved successfully!')
+        // showAlert('success', undefined, 'Success', 'Form saved successfully!')
+        return true // ← اضافه کن
       } catch (error) {
         console.error('Error saving form:', error)
         showAlert('error', undefined, 'Error', 'Failed to save form.')
+        return false // ← اضافه کن
       }
     }
   }))
+  
 
   /**
    * ستون‌های DataTable برای نمایش فیلدهای انتیتی
@@ -903,7 +919,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'flex-end',
-              height: 'calc(100vh - 600px)'
             }}
           >
             <DataTable
