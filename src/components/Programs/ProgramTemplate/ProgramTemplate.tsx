@@ -15,6 +15,7 @@ import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
 import AddProgramTemplate from "./AddProgramTemplate";
 import { useApi } from "../../../context/ApiContext";
+import type { EntityField } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import {
   ProgramTemplateItem,
@@ -71,9 +72,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     // State برای انواع برنامه‌ها دریافت شده از API
     const [programTypes, setProgramTypes] = useState<ProgramType[]>([]);
-    const [loadingProgramTypes, setLoadingProgramTypes] = useState<boolean>(
-      false
-    );
+    const [loadingProgramTypes, setLoadingProgramTypes] =
+      useState<boolean>(false);
 
     // انتخاب ID‌های پروژه به صورت رشته
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>(
@@ -81,6 +81,29 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         ? selectedRow.ProjectsStr.split("|").filter(Boolean)
         : []
     );
+
+    const [entityFields, setEntityFields] = useState<EntityField[]>([]);
+    const [loadingFields, setLoadingFields] = useState<boolean>(false);
+
+    useEffect(() => {
+      const fetchEntityFields = async () => {
+        if (!selectedRow?.ID) return;
+
+        try {
+          setLoadingFields(true);
+          const result = await api.getEntityFieldByEntityTypeId(selectedRow.ID);
+          console.log("rrrrrr", result);
+          setEntityFields(result);
+        } catch (error: any) {
+          console.error("Failed to fetch entity fields:", error);
+          showAlert("error", null, "Error", "Could not load entity fields");
+        } finally {
+          setLoadingFields(false);
+        }
+      };
+
+      fetchEntityFields();
+    }, [selectedRow?.ID]);
 
     // انتخاب ID نوع برنامه به صورت رشته
     const [selectedProgramTypeId, setSelectedProgramTypeId] = useState<string>(
@@ -199,17 +222,14 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             "success",
             null,
             selectedRow ? "Updated" : "Saved",
-            `Program Template ${selectedRow ? "updated" : "added"} successfully.`
+            `Program Template ${
+              selectedRow ? "updated" : "added"
+            } successfully.`
           );
           return true;
         } catch (error) {
           console.error("Error saving program template:", error);
-          showAlert(
-            "error",
-            null,
-            "Error",
-            "Failed to save program template."
-          );
+          showAlert("error", null, "Error", "Failed to save program template.");
           return false;
         }
       },
@@ -464,7 +484,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           <div className="-mt-12">
             <DataTable
               columnDefs={detailColumnDefs}
-              rowData={relatedDetailData}
+              rowData={entityFields}
               onRowDoubleClick={() => {}}
               setSelectedRowData={() => {}}
               showDuplicateIcon={false}

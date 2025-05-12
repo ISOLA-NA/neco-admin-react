@@ -182,7 +182,6 @@ interface ApiContextType {
   getApprovalContextData: (id: number) => Promise<WFAproval[]>;
 
   getEnum: (data: { str: string }) => Promise<GetEnumResponse>;
-
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -329,8 +328,7 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
 
     getApprovalContextData:
       AppServices.getApprovalContextData.bind(AppServices),
-      getEnum: AppServices.getEnum.bind(AppServices),
-
+    getEnum: AppServices.getEnum.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -370,4 +368,5 @@ export type {
   ProgramType,
   ProjectWithCalendar,
   OdpWithExtra,
+  EntityField,
 };
