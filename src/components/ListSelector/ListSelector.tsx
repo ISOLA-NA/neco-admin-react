@@ -113,7 +113,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           </div>
         ) : selectedNames.length === 0 ? (
           <p className="text-gray-500 text-xs text-center">
-            هیچ آیتمی انتخاب نشده است
+            No item selected
           </p>
         ) : (
           <div className="space-y-2">
