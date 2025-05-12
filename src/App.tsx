@@ -1,3 +1,5 @@
+// src/App.tsx
+
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -5,13 +7,11 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import HomePage from "./components/TabHandler/tab/TabbedInterface"; // مسیر اصلاح شود
+import HomePage from "./components/TabHandler/tab/TabbedInterface";
 import Login from "./Views/Login";
 import Login1 from "./Views/Login1";
 import Alert from "./components/utilities/Alert/DynamicAlert";
 import { APIProvider } from "./context/ApiContext";
-
-// کانتکست‌های جدید
 import { SubTabDefinitionsProvider } from "./context/SubTabDefinitionsContext";
 import { AddEditDeleteProvider } from "./context/AddEditDeleteContext";
 
@@ -20,24 +20,38 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "./App.css";
 
-const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+// ✅ تابع کمکی برای چک کردن لاگین
+const isUserAuthenticated = () => {
+  return localStorage.getItem("isAuthenticated") === "true";
+};
 
+const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    isUserAuthenticated()
+  );
+
+  // ✅ همگام‌سازی با تغییرات localStorage (مثلاً وقتی در تب دیگر logout شود)
   useEffect(() => {
-    const auth = localStorage.getItem("isAuthenticated");
-    if (auth === "true") {
-      setIsAuthenticated(true);
-    }
+    const handleStorageChange = () => {
+      setIsAuthenticated(isUserAuthenticated());
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
+  // ✅ پس از login
   const handleLogin = () => {
-    setIsAuthenticated(true);
     localStorage.setItem("isAuthenticated", "true");
+    setIsAuthenticated(true);
   };
 
+  // ✅ پس از logout
   const handleLogout = () => {
-    setIsAuthenticated(false);
     localStorage.removeItem("isAuthenticated");
+    setIsAuthenticated(false);
   };
 
   return (
@@ -46,7 +60,9 @@ const App: React.FC = () => {
         <AddEditDeleteProvider>
           <Router>
             <Alert />
+
             <Routes>
+              {/* صفحه اصلی */}
               <Route
                 path="/"
                 element={
@@ -57,17 +73,14 @@ const App: React.FC = () => {
                   )
                 }
               />
+
+              {/* صفحه لاگین بدون لوپ */}
               <Route
                 path="/login"
-                element={
-                  isAuthenticated ? (
-                    <Navigate to="/" replace />
-                  ) : (
-                    <Login onLogin={handleLogin} />
-                  )
-                }
+                element={<Login onLogin={handleLogin} />}
               />
-              {/* مسیر Login1 بدون شرط احراز هویت */}
+
+              {/* تست یا نسخه دوم لاگین */}
               <Route path="/login1" element={<Login1 />} />
             </Routes>
           </Router>

@@ -1,5 +1,5 @@
 // src/components/Autentications/Login.tsx
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa'
 
@@ -37,7 +37,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const [loading, setLoading] = useState<boolean>(false)
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, []);
+  
 
   // گزینه‌های انتخاب زبان
   const languageOptions = [
@@ -152,7 +160,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           })
           onLogin() // اطلاع به والد که کاربر لاگین کرده
           showAlert('success', null, 'موفقیت', 'شما با موفقیت وارد شدید.')
-          navigate('/home')
+          navigate('/')
         } else {
           showAlert('error', null, 'خطا', 'کاربر معمولی نمی‌تواند لاگین کند.')
         }
