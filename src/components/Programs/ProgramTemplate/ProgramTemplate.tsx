@@ -69,11 +69,30 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         : []
     );
 
-    const [programTemplateField, setProgramTemplateField] = useState<ProgramTemplateField[]>([]);
+    const [programTemplateField, setProgramTemplateField] = useState<
+      ProgramTemplateField[]
+    >([]);
 
     const [roles, setRoles] = useState<{ ID: string; Name: string }[]>([]);
-    const [wfTemplates, setWfTemplates] = useState<{ ID: number; Name: string }[]>([]);
-    const [activityTypes, setActivityTypes] = useState<{ value: string; label: string }[]>([]);
+    const [wfTemplates, setWfTemplates] = useState<
+      { ID: number; Name: string }[]
+    >([]);
+    const [activityTypes, setActivityTypes] = useState<
+      { value: string; label: string }[]
+    >([]);
+    const [forms, setForms] = useState<{ ID: string; Name: string }[]>([]);
+
+    useEffect(() => {
+      const fetchForms = async () => {
+        try {
+          const result = await api.getTableTransmittal();
+          setForms(result);
+        } catch (error) {
+          console.error("Failed to fetch form names:", error);
+        }
+      };
+      fetchForms();
+    }, []);
 
     useEffect(() => {
       const fetchActivityTypes = async () => {
@@ -88,10 +107,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           console.error("خطا در گرفتن activity type:", error);
         }
       };
-    
+
       fetchActivityTypes();
     }, []);
-    
 
     useEffect(() => {
       const fetchWfTemplates = async () => {
@@ -104,7 +122,6 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       };
       fetchWfTemplates();
     }, []);
-    
 
     useEffect(() => {
       const fetchRoles = async () => {
@@ -117,7 +134,6 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       };
       fetchRoles();
     }, []);
-    
 
     useEffect(() => {
       const fetchEntityFields = async () => {
@@ -348,25 +364,25 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     const enhancedProgramTemplateField = programTemplateField.map((item) => {
       const role = roles.find((r) => r.ID === item.nPostId);
-    
-      const activityTypeValue = activityTypes.find(
-        (a) => Number(a.label) === Number(item.PFIType)
-      )?.value || item.PFIType;
-    
-      const approvalFlowLabel = wfTemplates.find(
-        (f) => String(f.ID) === String(item.nWFTemplateID)
-      )?.Name || item.nWFTemplateID;
-    
+      const activityTypeValue =
+        activityTypes.find((a) => Number(a.label) === Number(item.PFIType))
+          ?.value || item.PFIType;
+      const approvalFlowLabel =
+        wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))
+          ?.Name || item.nWFTemplateID;
+      const formLabel =
+        forms.find((f) => String(f.ID) === String(item.nEntityTypeID))?.Name ||
+        item.nEntityTypeID;
+
       return {
         ...item,
         nPostId: role?.Name || item.nPostId,
-        PFIType: activityTypeValue, // ✅ فقط value مثل "TPP"
+        PFIType: activityTypeValue,
         nWFTemplateID: approvalFlowLabel,
+        nEntityTypeID: formLabel, // ✅ برای ستون Form Name در جدول
       };
     });
-    
-    
-    
+
     // تعریف ستون‌ها برای جدول جزئیات
     const detailColumnDefs = [
       { headerName: "Order", field: "Order" },
@@ -378,7 +394,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       { headerName: "Job", field: "Code" },
       { headerName: "Approval Flow", field: "nWFTemplateID" },
       { headerName: "Activity Type", field: "PFIType" },
-      { headerName: "Form Name", field: "GPIC" },
+      { headerName: "Form Name", field: "nEntityTypeID" },
       { headerName: "Weight", field: "Weight1" },
       { headerName: "Activity Budget", field: "PCostAct" },
       { headerName: "Program Template", field: "nProgramTemplateID" },

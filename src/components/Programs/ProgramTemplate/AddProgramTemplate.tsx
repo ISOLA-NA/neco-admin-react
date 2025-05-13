@@ -1,17 +1,36 @@
 import React, { useEffect, useState } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
-import { useApi } from "../../../context/ApiContext"
+import { useApi } from "../../../context/ApiContext";
 
 const ResponsiveForm: React.FC = () => {
-
   const api = useApi();
 
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
 
-  const [activityTypes, setActivityTypes] = useState<{ value: string; label: string }[]>([]);
+  const [activityTypes, setActivityTypes] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   const [wfTemplates, setWfTemplates] = useState<any[]>([]);
+
+  const [forms, setForms] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    const fetchForms = async () => {
+      try {
+        const result = await api.getTableTransmittal();
+        const formatted = result.map((form: any) => ({
+          value: String(form.ID),
+          label: form.Name,
+        }));
+        setForms(formatted);
+      } catch (error) {
+        console.error("Failed to fetch forms", error);
+      }
+    };
+    fetchForms();
+  }, []);
 
   useEffect(() => {
     const fetchActivityTypes = async () => {
@@ -22,7 +41,7 @@ const ResponsiveForm: React.FC = () => {
           label: key,
         }));
         setActivityTypes(formatted);
-        console.log("formatted",formatted)
+        console.log("formatted", formatted);
       } catch (error) {
         console.error("Error fetching activity types:", error);
       }
@@ -32,18 +51,18 @@ const ResponsiveForm: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    api.getAllWfTemplate()
+    api
+      .getAllWfTemplate()
       .then((res) => setWfTemplates(res))
       .catch((err) => console.error("Failed to load Approval Flows:", err));
   }, []);
-  
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const result = await api.getAllRoles(); // فرض بر این که چنین تابعی وجود دارد
         const formattedRoles = result.map((role: any) => ({
-          value: role.ID,     // یا role.Name اگر فقط name داری
+          value: role.ID, // یا role.Name اگر فقط name داری
           label: role.Name,
         }));
         setRoles(formattedRoles);
@@ -108,9 +127,8 @@ const ResponsiveForm: React.FC = () => {
 
   const approvalFlowOptions = wfTemplates.map((item) => ({
     value: String(item.ID),
-    label: item.Name, 
+    label: item.Name,
   }));
-  
 
   const checkListOptions = [
     { value: "check1", label: "Check 1" },
@@ -134,12 +152,6 @@ const ResponsiveForm: React.FC = () => {
     { value: "template1", label: "Template 1" },
     { value: "template2", label: "Template 2" },
     { value: "template3", label: "Template 3" },
-  ];
-
-  const activitytypeOptions = [
-    { value: "type1", label: "Type 1" },
-    { value: "type2", label: "Type 2" },
-    { value: "type3", label: "Type 3" },
   ];
 
   const formnameOptions = [
@@ -173,7 +185,6 @@ const ResponsiveForm: React.FC = () => {
                 onChange={handleChange}
                 label="Responsible Post"
               />
-
             </div>
             <div className="flex-1">
               <DynamicSelector
@@ -243,7 +254,7 @@ const ResponsiveForm: React.FC = () => {
           <div className="mb-4 mt-10">
             <DynamicSelector
               name="formname"
-              options={formnameOptions}
+              options={forms}
               selectedValue={formData.formname}
               onChange={handleChange}
               label="Form name"
