@@ -1,8 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
+import { useApi } from "../../../context/ApiContext"
 
 const ResponsiveForm: React.FC = () => {
+
+  const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
+
+  const api = useApi();
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const result = await api.getAllRoles(); // فرض بر این که چنین تابعی وجود دارد
+        const formattedRoles = result.map((role: any) => ({
+          value: role.ID,     // یا role.Name اگر فقط name داری
+          label: role.Name,
+        }));
+        setRoles(formattedRoles);
+      } catch (error) {
+        console.error("خطا در دریافت نقش‌ها:", error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
   // State management for form fields
   const [formData, setFormData] = useState({
     activityname: "NoName",
@@ -123,11 +146,12 @@ const ResponsiveForm: React.FC = () => {
             <div className="flex-1 mt-4">
               <DynamicSelector
                 name="responsiblepost"
-                options={responsiblePostOptions}
+                options={roles}
                 selectedValue={formData.responsiblepost}
                 onChange={handleChange}
                 label="Responsible Post"
               />
+
             </div>
             <div className="flex-1">
               <DynamicSelector

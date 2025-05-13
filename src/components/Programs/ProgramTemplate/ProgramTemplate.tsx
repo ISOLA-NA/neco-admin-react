@@ -82,8 +82,24 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         : []
     );
 
+    const [roles, setRoles] = useState<{ ID: string; Name: string }[]>([]);
+    
+
     // const [programTemplateField, setProgramTemplateField] = useState<EntityField[]>([]);
     const [programTemplateField, setProgramTemplateField] = useState<ProgramTemplateField[]>([]);
+
+    useEffect(() => {
+      const fetchRoles = async () => {
+        try {
+          const response = await api.getAllRoles();
+          setRoles(response);
+        } catch (error) {
+          console.error("Failed to fetch roles", error);
+        }
+      };
+      fetchRoles();
+    }, []);
+    
 
     useEffect(() => {
       const fetchEntityFields = async () => {
@@ -312,61 +328,33 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       setIsAddModalOpen(false);
     };
 
+    const enhancedProgramTemplateField = programTemplateField.map((item) => {
+      const role = roles.find((r) => r.ID === item.nPostId);
+      return {
+        ...item,
+        nPostId: role ? role.Name : item.nPostId,
+      };
+    });
+    
+
     // تعریف ستون‌ها برای جدول جزئیات
     const detailColumnDefs = [
-      { headerName: "ID", field: "ID", sortable: true, filter: true },
-      { headerName: "Name", field: "Name", sortable: true, filter: true },
-      {
-        headerName: "Is Global",
-        field: "IsGlobal",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Duration",
-        field: "Duration",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Cost Act",
-        field: "PCostAct",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Cost Approved",
-        field: "PCostAprov",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Program Type ID",
-        field: "nProgramTypeID",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Last Modified",
-        field: "LastModified",
-        sortable: true,
-        filter: true,
-      },
-    ];
-
-    // داده‌های جزئیات مرتبط
-    const relatedDetailData = [
-      {
-        ID: programTemplateData.ID,
-        Name: programTemplateData.Name,
-        MetaColumnName: programTemplateData.MetaColumnName,
-        IsGlobal: programTemplateData.IsGlobal,
-        Duration: programTemplateData.Duration,
-        PCostAct: programTemplateData.PCostAct,
-        PCostAprov: programTemplateData.PCostAprov,
-        nProgramTypeID: programTemplateData.nProgramTypeID,
-        LastModified: programTemplateData.LastModified,
-      },
+      { headerName: "Order", field: "Order" },
+      { headerName: "Activity Name", field: "Name" },
+      { headerName: "Duration", field: "ActDuration" },
+      { headerName: "Start", field: "Top" },
+      { headerName: "End", field: "Left" },
+      { headerName: "Responsible Post", field: "nPostId" },
+      { headerName: "Job", field: "Code" },
+      { headerName: "Approval Flow", field: "nWFTemplateID" },
+      { headerName: "Activity Type", field: "PFIType" },
+      { headerName: "Form Name", field: "GPIC" },
+      { headerName: "Weight", field: "Weight1" },
+      { headerName: "Activity Budget", field: "PCostAct" },
+      { headerName: "Program Template", field: "nProgramTemplateID" },
+      { headerName: "Program Duration", field: "WFDuration" },
+      { headerName: "FProgram Execution Budget", field: "PCostAprov" },
+      { headerName: "Program to plan", field: "WeightWF" },
     ];
 
     return (
@@ -482,7 +470,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           <div className="-mt-12">
             <DataTable
               columnDefs={detailColumnDefs}
-              rowData={programTemplateField}
+              rowData={enhancedProgramTemplateField}
               onRowDoubleClick={() => {}}
               setSelectedRowData={() => {}}
               showDuplicateIcon={false}

@@ -619,6 +619,8 @@ export interface EditProfileUserInterface {
 }
 
 export interface ProgramTemplateField {
+  nWFTemplateID: number;
+  nPostId: string;
   ID?: number;
   DisplayName: string;
   ColumnType: number;
