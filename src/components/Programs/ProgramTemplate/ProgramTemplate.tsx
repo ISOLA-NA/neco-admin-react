@@ -82,6 +82,23 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     >([]);
     const [forms, setForms] = useState<{ ID: string; Name: string }[]>([]);
 
+    const [programTemplates, setProgramTemplates] = useState<
+      { ID: number; Name: string }[]
+    >([]);
+
+    useEffect(() => {
+      const fetchTemplates = async () => {
+        try {
+          const res = await api.getAllProgramTemplates();
+          setProgramTemplates(res);
+        } catch (error) {
+          console.error("خطا در دریافت Program Templates:", error);
+        }
+      };
+
+      fetchTemplates();
+    }, []);
+
     useEffect(() => {
       const fetchForms = async () => {
         try {
@@ -374,12 +391,18 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         forms.find((f) => String(f.ID) === String(item.nEntityTypeID))?.Name ||
         item.nEntityTypeID;
 
+      const programTemplateLabel =
+        programTemplates.find(
+          (p) => String(p.ID) === String(item.nProgramTemplateID)
+        )?.Name || item.nProgramTemplateID;
+
       return {
         ...item,
         nPostId: role?.Name || item.nPostId,
         PFIType: activityTypeValue,
         nWFTemplateID: approvalFlowLabel,
-        nEntityTypeID: formLabel, // ✅ برای ستون Form Name در جدول
+        nEntityTypeID: formLabel,
+        nProgramTemplateID: programTemplateLabel,
       };
     });
 

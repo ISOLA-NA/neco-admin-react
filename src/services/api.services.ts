@@ -619,6 +619,7 @@ export interface EditProfileUserInterface {
 }
 
 export interface ProgramTemplateField {
+  nProgramTemplateID?: number;
   PFIType: string;
   nWFTemplateID: number;
   nPostId: string;
@@ -653,7 +654,6 @@ export interface ProgramTemplateField {
   ShowInTab?: string;
   WFBOXName?: string;
 }
-
 
 // ساخت یک کلاس برای متدهای API
 class ApiService {
@@ -1492,40 +1492,39 @@ class ApiService {
 
   // ================== ProgramTemplateField ==================
 
-async getProgramTemplateField(
-  programTemplateId: number
-): Promise<ProgramTemplateField[]> {
-  const response = await httpClient.post<ProgramTemplateField[]>(
-    apiConst.getProgramTemplateField,
-    { ID: programTemplateId } // مقدار ID به صورت آبجکت ارسال می‌شود
-  );
-  return response.data;
-}
+  async getProgramTemplateField(
+    programTemplateId: number
+  ): Promise<ProgramTemplateField[]> {
+    const response = await httpClient.post<ProgramTemplateField[]>(
+      apiConst.getProgramTemplateField,
+      { ID: programTemplateId } // مقدار ID به صورت آبجکت ارسال می‌شود
+    );
+    return response.data;
+  }
 
-async insertProgramTemplateField(
-  data: ProgramTemplateField
-): Promise<ProgramTemplateField> {
-  const response = await httpClient.post<ProgramTemplateField>(
-    apiConst.insertProgramTemplateField,
-    data
-  );
-  return response.data;
-}
+  async insertProgramTemplateField(
+    data: ProgramTemplateField
+  ): Promise<ProgramTemplateField> {
+    const response = await httpClient.post<ProgramTemplateField>(
+      apiConst.insertProgramTemplateField,
+      data
+    );
+    return response.data;
+  }
 
-async updateProgramTemplateField(
-  data: ProgramTemplateField
-): Promise<ProgramTemplateField> {
-  const response = await httpClient.post<ProgramTemplateField>(
-    apiConst.editProgramTemplateField,
-    data
-  );
-  return response.data;
-}
+  async updateProgramTemplateField(
+    data: ProgramTemplateField
+  ): Promise<ProgramTemplateField> {
+    const response = await httpClient.post<ProgramTemplateField>(
+      apiConst.editProgramTemplateField,
+      data
+    );
+    return response.data;
+  }
 
-async deleteProgramTemplateField(id: number): Promise<void> {
-  await httpClient.post(apiConst.deleteProgramTemplateField, { ID: id });
-}
-
+  async deleteProgramTemplateField(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteProgramTemplateField, { ID: id });
+  }
 }
 
 // یک خروجی برای استفاده در Context

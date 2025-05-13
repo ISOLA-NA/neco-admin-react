@@ -16,6 +16,23 @@ const ResponsiveForm: React.FC = () => {
 
   const [forms, setForms] = useState<{ value: string; label: string }[]>([]);
 
+  const [programTemplates, setProgramTemplates] = useState<
+    { ID: number; Name: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchProgramTemplates = async () => {
+      try {
+        const result = await api.getAllProgramTemplates();
+        setProgramTemplates(result);
+      } catch (error) {
+        console.error("خطا در دریافت Program Templates:", error);
+      }
+    };
+
+    fetchProgramTemplates();
+  }, []);
+
   useEffect(() => {
     const fetchForms = async () => {
       try {
@@ -130,6 +147,11 @@ const ResponsiveForm: React.FC = () => {
     label: item.Name,
   }));
 
+  const programTemplateOptions = programTemplates.map((item) => ({
+    value: String(item.ID),
+    label: item.Name,
+  }));
+
   const checkListOptions = [
     { value: "check1", label: "Check 1" },
     { value: "check2", label: "Check 2" },
@@ -146,18 +168,6 @@ const ResponsiveForm: React.FC = () => {
     { value: "program1", label: "Program 1" },
     { value: "program2", label: "Program 2" },
     { value: "program3", label: "Program 3" },
-  ];
-
-  const programtemplateOptions = [
-    { value: "template1", label: "Template 1" },
-    { value: "template2", label: "Template 2" },
-    { value: "template3", label: "Template 3" },
-  ];
-
-  const formnameOptions = [
-    { value: "formA", label: "Form A" },
-    { value: "formB", label: "Form B" },
-    { value: "formC", label: "Form C" },
   ];
 
   return (
@@ -232,7 +242,7 @@ const ResponsiveForm: React.FC = () => {
           <div className="mb-4 mt-10">
             <DynamicSelector
               name="programtemplate"
-              options={programtemplateOptions}
+              options={programTemplateOptions}
               selectedValue={formData.programtemplate}
               onChange={handleChange}
               label="Program Template"
