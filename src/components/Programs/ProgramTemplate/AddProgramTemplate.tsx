@@ -26,14 +26,7 @@ const ResponsiveForm: React.FC = () => {
 
   const [checklists, setChecklists] = useState<ApprovalChecklist[]>([]);
 
-  const [programTypeOptions, setProgramTypeOptions] = useState<
-    {
-      Name: any;
-      ID(ID: any): string;
-      value: string;
-      label: string;
-    }[]
-  >([]);
+  const [programTypes, setProgramTypes] = useState<ProgramType[]>([]);
 
   const [procedures, setProcedures] = useState<
     { value: string; label: string }[]
@@ -62,17 +55,10 @@ const ResponsiveForm: React.FC = () => {
     const fetchProgramTypes = async () => {
       try {
         const result = await api.getAllProgramType();
-        console.log("📦 Received program types from API:", result);
-
-        const formatted = result.map((type) => ({
-          value: String(type.ID),
-          label: type.Name,
-        }));
-        console.log("🎯 Formatted options for selector:", formatted);
-
-        setProgramTypeOptions(formatted);
+        console.log("📦 Program types from API:", result);
+        setProgramTypes(result);
       } catch (error) {
-        console.error("خطا در دریافت Program Types:", error);
+        console.error("❌ Failed to fetch program types:", error);
       }
     };
 
@@ -229,14 +215,10 @@ const ResponsiveForm: React.FC = () => {
     label: item.Name,
   }));
 
-  console.log("✅ State of programTypeOptions before map:", programTypeOptions);
-
-  // const programtypeOptions = programTypeOptions.map((item) => ({
-  //   value: String(item.ID),
-  //   label: item.Name,
-  // }));
-
-  // console.log("🎯 programtypeOptions after map:", programtypeOptions);
+  const programtypeOptions = programTypes.map((item) => ({
+    value: String(item.ID),
+    label: item.Name,
+  }));
 
   const procedureOptions = procedures.map((item) => ({
     value: String(item.value),
@@ -304,7 +286,7 @@ const ResponsiveForm: React.FC = () => {
           <div className="mb-4">
             <DynamicSelector
               name="programtype"
-              options={programTypeOptions}
+              options={programtypeOptions}
               selectedValue={formData.programtype}
               onChange={handleChange}
               label="Program type"
