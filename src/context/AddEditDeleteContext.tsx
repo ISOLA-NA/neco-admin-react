@@ -18,6 +18,7 @@ import {
   EntityCollection,
   EntityType,
   WfTemplateItem,
+  ProgramTemplateField 
 } from "../services/api.services";
 import { showAlert } from "../components/utilities/Alert/DynamicAlert";
 
@@ -262,6 +263,39 @@ interface CategoryData {
   ModifiedById?: string;
 }
 
+interface ProgramTemplateFieldData {
+  ID?: number;
+  DisplayName: string;
+  ColumnType: number;
+  CountInReject: boolean;
+  CreatedTime?: string;
+  Description?: string;
+  IsEditableByReceiver: boolean;
+  IsEditableInWF: boolean;
+  IsForceReadOnly: boolean;
+  IsMainColumn: boolean;
+  IsRequire: boolean;
+  IsRequireInWF: boolean;
+  IsRTL: boolean;
+  IsShowGrid: boolean;
+  IsUnique: boolean;
+  IsVisible: boolean;
+  metaType1?: string | null;
+  metaType2?: string | null;
+  metaType3?: string | null;
+  metaType4?: string | null;
+  metaType5?: string | null;
+  metaTypeJson?: string | null;
+  ModifiedById?: string;
+  ModifiedTime?: string;
+  nEntityTypeID: number;
+  orderValue: number;
+  PrintCode?: string;
+  ShowInAlert: boolean;
+  ShowInTab?: string;
+  WFBOXName?: string;
+}
+
 interface AddEditDeleteContextType {
   handleAdd: () => void;
   handleEdit: () => void;
@@ -292,7 +326,13 @@ interface AddEditDeleteContextType {
   handleSaveForm: (data: FormData) => Promise<EntityType | null>;
   handleSaveCatA: (data: CategoryData) => Promise<CategoryData | null>;
   handleSaveCatB: (data: CategoryData) => Promise<CategoryData | null>;
+
+  handleSaveProgramTemplateField: (
+    data: ProgramTemplateFieldData
+  ) => Promise<ProgramTemplateField | null>;
+  
 }
+
 
 const AddEditDeleteContext = createContext<AddEditDeleteContextType>(
   {} as AddEditDeleteContextType
@@ -779,6 +819,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+
   const handleSaveProjectsAccess = async (
     data: ProjectsAccessData
   ): Promise<AccessProject | null> => {
@@ -964,6 +1005,38 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
     }
   };
+
+  const handleSaveProgramTemplateField = async (
+    data: ProgramTemplateFieldData
+  ): Promise<ProgramTemplateField | null> => {
+    setIsLoading(true);
+    try {
+      const field: ProgramTemplateField = {
+        ...data,
+        CreatedTime: data.CreatedTime ?? new Date().toISOString(),
+        ModifiedTime: new Date().toISOString(),
+      };
+  
+      let result: ProgramTemplateField;
+      if (field.ID) {
+        result = await api.updateProgramTemplateField(field);
+        console.log("ProgramTemplateField updated:", result);
+      } else {
+        result = await api.insertProgramTemplateField(field);
+        console.log("ProgramTemplateField inserted:", result);
+      }
+  
+      return result;
+    } catch (error) {
+      console.error("Error saving ProgramTemplateField:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
+
   return (
     <AddEditDeleteContext.Provider
       value={{
@@ -986,6 +1059,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         handleSaveForm,
         handleSaveCatA,
         handleSaveCatB,
+        handleSaveProgramTemplateField,
       }}
     >
       {children}

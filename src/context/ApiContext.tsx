@@ -40,6 +40,7 @@ import AppServices, {
   EntityField,
   PostType,
   GetEnumResponse,
+  ProgramTemplateField
 } from "../services/api.services";
 
 // اینترفیس اکشن‌ها
@@ -182,6 +183,12 @@ interface ApiContextType {
   getApprovalContextData: (id: number) => Promise<WFAproval[]>;
 
   getEnum: (data: { str: string }) => Promise<GetEnumResponse>;
+
+  getProgramTemplateField: (programTemplateId: number) => Promise<ProgramTemplateField[]>;
+  insertProgramTemplateField: (data: ProgramTemplateField) => Promise<ProgramTemplateField>;
+  updateProgramTemplateField: (data: ProgramTemplateField) => Promise<ProgramTemplateField>;
+  deleteProgramTemplateField: (id: number) => Promise<void>;
+
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -329,6 +336,12 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     getApprovalContextData:
       AppServices.getApprovalContextData.bind(AppServices),
     getEnum: AppServices.getEnum.bind(AppServices),
+
+    getProgramTemplateField: AppServices.getProgramTemplateField.bind(AppServices),
+    insertProgramTemplateField: AppServices.insertProgramTemplateField.bind(AppServices),
+    updateProgramTemplateField: AppServices.updateProgramTemplateField.bind(AppServices),
+    deleteProgramTemplateField: AppServices.deleteProgramTemplateField.bind(AppServices),
+
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

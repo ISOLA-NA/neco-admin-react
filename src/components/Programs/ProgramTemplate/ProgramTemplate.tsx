@@ -15,7 +15,7 @@ import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
 import AddProgramTemplate from "./AddProgramTemplate";
 import { useApi } from "../../../context/ApiContext";
-import type { EntityField } from "../../../context/ApiContext";
+import type { ProgramTemplateField } from "../../../services/api.services";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import {
   ProgramTemplateItem,
@@ -82,23 +82,21 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         : []
     );
 
-    const [entityFields, setEntityFields] = useState<EntityField[]>([]);
-    const [loadingFields, setLoadingFields] = useState<boolean>(false);
+    // const [programTemplateField, setProgramTemplateField] = useState<EntityField[]>([]);
+    const [programTemplateField, setProgramTemplateField] = useState<ProgramTemplateField[]>([]);
 
     useEffect(() => {
       const fetchEntityFields = async () => {
         if (!selectedRow?.ID) return;
 
         try {
-          setLoadingFields(true);
-          const result = await api.getEntityFieldByEntityTypeId(selectedRow.ID);
+          const result = await api.getProgramTemplateField(selectedRow.ID);
           console.log("rrrrrr", result);
-          setEntityFields(result);
+          setProgramTemplateField(result);
         } catch (error: any) {
           console.error("Failed to fetch entity fields:", error);
           showAlert("error", null, "Error", "Could not load entity fields");
         } finally {
-          setLoadingFields(false);
         }
       };
 
@@ -484,7 +482,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           <div className="-mt-12">
             <DataTable
               columnDefs={detailColumnDefs}
-              rowData={entityFields}
+              rowData={programTemplateField}
               onRowDoubleClick={() => {}}
               setSelectedRowData={() => {}}
               showDuplicateIcon={false}

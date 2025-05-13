@@ -618,6 +618,40 @@ export interface EditProfileUserInterface {
   Code: string;
 }
 
+export interface ProgramTemplateField {
+  ID?: number;
+  DisplayName: string;
+  ColumnType: number;
+  CountInReject: boolean;
+  CreatedTime?: string;
+  Description?: string;
+  IsEditableByReceiver: boolean;
+  IsEditableInWF: boolean;
+  IsForceReadOnly: boolean;
+  IsMainColumn: boolean;
+  IsRequire: boolean;
+  IsRequireInWF: boolean;
+  IsRTL: boolean;
+  IsShowGrid: boolean;
+  IsUnique: boolean;
+  IsVisible: boolean;
+  metaType1?: string | null;
+  metaType2?: string | null;
+  metaType3?: string | null;
+  metaType4?: string | null;
+  metaType5?: string | null;
+  metaTypeJson?: string | null;
+  ModifiedById?: string;
+  ModifiedTime?: string;
+  nEntityTypeID: number;
+  orderValue: number;
+  PrintCode?: string;
+  ShowInAlert: boolean;
+  ShowInTab?: string;
+  WFBOXName?: string;
+}
+
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -1452,6 +1486,43 @@ class ApiService {
     );
     return response.data;
   }
+
+  // ================== ProgramTemplateField ==================
+
+async getProgramTemplateField(
+  programTemplateId: number
+): Promise<ProgramTemplateField[]> {
+  const response = await httpClient.post<ProgramTemplateField[]>(
+    apiConst.getProgramTemplateField,
+    { ID: programTemplateId } // مقدار ID به صورت آبجکت ارسال می‌شود
+  );
+  return response.data;
+}
+
+async insertProgramTemplateField(
+  data: ProgramTemplateField
+): Promise<ProgramTemplateField> {
+  const response = await httpClient.post<ProgramTemplateField>(
+    apiConst.insertProgramTemplateField,
+    data
+  );
+  return response.data;
+}
+
+async updateProgramTemplateField(
+  data: ProgramTemplateField
+): Promise<ProgramTemplateField> {
+  const response = await httpClient.post<ProgramTemplateField>(
+    apiConst.editProgramTemplateField,
+    data
+  );
+  return response.data;
+}
+
+async deleteProgramTemplateField(id: number): Promise<void> {
+  await httpClient.post(apiConst.deleteProgramTemplateField, { ID: id });
+}
+
 }
 
 // یک خروجی برای استفاده در Context
