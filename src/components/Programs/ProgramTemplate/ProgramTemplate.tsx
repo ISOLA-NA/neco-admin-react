@@ -75,7 +75,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const [loadingProgramTypes, setLoadingProgramTypes] =
       useState<boolean>(false);
 
-    // انتخاب ID‌های پروژه به صورت رشته
+    // انتخاب ID‌های پروژه به صورت رشتffه
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>(
       selectedRow?.ProjectsStr
         ? selectedRow.ProjectsStr.split("|").filter(Boolean)
@@ -83,10 +83,24 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     );
 
     const [roles, setRoles] = useState<{ ID: string; Name: string }[]>([]);
+    const [wfTemplates, setWfTemplates] = useState<{ ID: number; Name: string }[]>([]);
     
 
     // const [programTemplateField, setProgramTemplateField] = useState<EntityField[]>([]);
     const [programTemplateField, setProgramTemplateField] = useState<ProgramTemplateField[]>([]);
+
+    useEffect(() => {
+      const fetchWfTemplates = async () => {
+        try {
+          const result = await api.getAllWfTemplate();
+          setWfTemplates(result);
+        } catch (error) {
+          console.error("Failed to fetch approval flows", error);
+        }
+      };
+      fetchWfTemplates();
+    }, []);
+    
 
     useEffect(() => {
       const fetchRoles = async () => {
@@ -330,9 +344,11 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     const enhancedProgramTemplateField = programTemplateField.map((item) => {
       const role = roles.find((r) => r.ID === item.nPostId);
+      const flow = wfTemplates.find((w) => w.ID === item.nWFTemplateID);
       return {
         ...item,
         nPostId: role ? role.Name : item.nPostId,
+        nWFTemplateID: flow ? flow.Name : item.nWFTemplateID,
       };
     });
     
