@@ -619,6 +619,7 @@ export interface EditProfileUserInterface {
 }
 
 export interface ProgramTemplateField {
+  PFIType: string;
   nWFTemplateID: number;
   nPostId: string;
   ID?: number;

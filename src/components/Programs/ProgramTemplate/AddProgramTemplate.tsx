@@ -5,9 +5,38 @@ import { useApi } from "../../../context/ApiContext"
 
 const ResponsiveForm: React.FC = () => {
 
+  const api = useApi();
+
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
 
-  const api = useApi();
+  const [activityTypes, setActivityTypes] = useState<{ value: string; label: string }[]>([]);
+
+  const [wfTemplates, setWfTemplates] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchActivityTypes = async () => {
+      try {
+        const response = await api.getEnum({ str: "PFIType" });
+        const formatted = Object.entries(response).map(([key, value]) => ({
+          value: key,
+          label: key,
+        }));
+        setActivityTypes(formatted);
+        console.log("formatted",formatted)
+      } catch (error) {
+        console.error("Error fetching activity types:", error);
+      }
+    };
+
+    fetchActivityTypes();
+  }, []);
+
+  useEffect(() => {
+    api.getAllWfTemplate()
+      .then((res) => setWfTemplates(res))
+      .catch((err) => console.error("Failed to load Approval Flows:", err));
+  }, []);
+  
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -77,18 +106,11 @@ const ResponsiveForm: React.FC = () => {
     }));
   };
 
-  // Sample options for selectors
-  const responsiblePostOptions = [
-    { value: "manager", label: "Manager" },
-    { value: "developer", label: "Developer" },
-    { value: "designer", label: "Designer" },
-  ];
-
-  const approvalFlowOptions = [
-    { value: "initial", label: "Initial Approval" },
-    { value: "secondary", label: "Secondary Approval" },
-    { value: "final", label: "Final Approval" },
-  ];
+  const approvalFlowOptions = wfTemplates.map((item) => ({
+    value: String(item.ID),
+    label: item.Name, 
+  }));
+  
 
   const checkListOptions = [
     { value: "check1", label: "Check 1" },
@@ -209,8 +231,8 @@ const ResponsiveForm: React.FC = () => {
           {/* Activity Type */}
           <div className="mb-4 mt-10">
             <DynamicSelector
-              name="activitytype"
-              options={activitytypeOptions}
+              name="activitytyxasxpe"
+              options={activityTypes}
               selectedValue={formData.activitytype}
               onChange={handleChange}
               label="Activity Type"

@@ -31,19 +31,6 @@ interface ProgramTemplateProps {
   selectedRow: ProgramTemplateItem | null;
 }
 
-// توابع کمکی برای پردازش رشته‌های جداشده با |
-function getAssociatedProjects(
-  projectsStr?: string,
-  projectsData?: { ID: string; Name: string }[]
-) {
-  const safeProjectsData = projectsData || [];
-  const safeProjectsStr = projectsStr || "";
-  const projectsArray = safeProjectsStr.split("|").filter(Boolean);
-  return safeProjectsData.filter((project) =>
-    projectsArray.includes(String(project.ID))
-  );
-}
-
 // Program type options به صورت پویا از API دریافت می‌شود
 const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
   ({ selectedRow }, ref) => {
@@ -82,12 +69,29 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         : []
     );
 
+    const [programTemplateField, setProgramTemplateField] = useState<ProgramTemplateField[]>([]);
+
     const [roles, setRoles] = useState<{ ID: string; Name: string }[]>([]);
     const [wfTemplates, setWfTemplates] = useState<{ ID: number; Name: string }[]>([]);
-    
+    const [activityTypes, setActivityTypes] = useState<{ value: string; label: string }[]>([]);
 
-    // const [programTemplateField, setProgramTemplateField] = useState<EntityField[]>([]);
-    const [programTemplateField, setProgramTemplateField] = useState<ProgramTemplateField[]>([]);
+    useEffect(() => {
+      const fetchActivityTypes = async () => {
+        try {
+          const result = await api.getEnum({ str: "PFIType" });
+          const formatted = Object.entries(result).map(([key, value]) => ({
+            value: key,
+            label: value,
+          }));
+          setActivityTypes(formatted);
+        } catch (error) {
+          console.error("خطا در گرفتن activity type:", error);
+        }
+      };
+    
+      fetchActivityTypes();
+    }, []);
+    
 
     useEffect(() => {
       const fetchWfTemplates = async () => {
@@ -344,15 +348,25 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     const enhancedProgramTemplateField = programTemplateField.map((item) => {
       const role = roles.find((r) => r.ID === item.nPostId);
-      const flow = wfTemplates.find((w) => w.ID === item.nWFTemplateID);
+    
+      const activityTypeValue = activityTypes.find(
+        (a) => Number(a.label) === Number(item.PFIType)
+      )?.value || item.PFIType;
+    
+      const approvalFlowLabel = wfTemplates.find(
+        (f) => String(f.ID) === String(item.nWFTemplateID)
+      )?.Name || item.nWFTemplateID;
+    
       return {
         ...item,
-        nPostId: role ? role.Name : item.nPostId,
-        nWFTemplateID: flow ? flow.Name : item.nWFTemplateID,
+        nPostId: role?.Name || item.nPostId,
+        PFIType: activityTypeValue, // ✅ فقط value مثل "TPP"
+        nWFTemplateID: approvalFlowLabel,
       };
     });
     
-
+    
+    
     // تعریف ستون‌ها برای جدول جزئیات
     const detailColumnDefs = [
       { headerName: "Order", field: "Order" },
