@@ -655,6 +655,17 @@ export interface ProgramTemplateField {
   WFBOXName?: string;
 }
 
+export interface ApprovalChecklist {
+  ID: number;
+  Name: string;
+  IsRequired: boolean;
+  IsVisible: boolean;
+  LastModified: string;
+  nQuestionSectionID: number | null;
+  nQuestionTemplateID: number;
+  OrderValue: number;
+}
+
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -1524,6 +1535,13 @@ class ApiService {
 
   async deleteProgramTemplateField(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteProgramTemplateField, { ID: id });
+  }
+
+  async getApprovalCheckList(): Promise<ApprovalChecklist[]> {
+    const response = await httpClient.post<ApprovalChecklist[]>(
+      apiConst.getApprovalCheckList
+    );
+    return response.data;
   }
 }
 

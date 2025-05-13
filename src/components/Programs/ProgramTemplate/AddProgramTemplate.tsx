@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
-import { useApi } from "../../../context/ApiContext";
+import {
+  useApi,
+  ApprovalChecklist,
+  ProgramType,
+} from "../../../context/ApiContext";
 
 const ResponsiveForm: React.FC = () => {
   const api = useApi();
@@ -19,6 +23,74 @@ const ResponsiveForm: React.FC = () => {
   const [programTemplates, setProgramTemplates] = useState<
     { ID: number; Name: string }[]
   >([]);
+
+  const [checklists, setChecklists] = useState<ApprovalChecklist[]>([]);
+
+  const [programTypeOptions, setProgramTypeOptions] = useState<
+    {
+      Name: any;
+      ID(ID: any): string;
+      value: string;
+      label: string;
+    }[]
+  >([]);
+
+  const [procedures, setProcedures] = useState<
+    { value: string; label: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchProcedures = async () => {
+      try {
+        const result = await api.getAllEntityCollection();
+        console.log("Fetched procedures:", result);
+        const formatted = result.map((item: any) => ({
+          value: String(item.ID),
+          label: item.Name,
+        }));
+        console.log("Formatted procedure options:", formatted);
+        setProcedures(formatted);
+      } catch (error) {
+        console.error("Failed to fetch procedures:", error);
+      }
+    };
+
+    fetchProcedures();
+  }, []);
+
+  useEffect(() => {
+    const fetchProgramTypes = async () => {
+      try {
+        const result = await api.getAllProgramType();
+        console.log("📦 Received program types from API:", result);
+
+        const formatted = result.map((type) => ({
+          value: String(type.ID),
+          label: type.Name,
+        }));
+        console.log("🎯 Formatted options for selector:", formatted);
+
+        setProgramTypeOptions(formatted);
+      } catch (error) {
+        console.error("خطا در دریافت Program Types:", error);
+      }
+    };
+
+    fetchProgramTypes();
+  }, []);
+
+  useEffect(() => {
+    const fetchChecklists = async () => {
+      try {
+        const result = await api.getApprovalCheckList();
+        setChecklists(result);
+      } catch (error) {
+        console.error("Failed to fetch checklists", error);
+      }
+    };
+
+    fetchChecklists();
+  }, []);
 
   useEffect(() => {
     const fetchProgramTemplates = async () => {
@@ -152,23 +224,24 @@ const ResponsiveForm: React.FC = () => {
     label: item.Name,
   }));
 
-  const checkListOptions = [
-    { value: "check1", label: "Check 1" },
-    { value: "check2", label: "Check 2" },
-    { value: "check3", label: "Check 3" },
-  ];
+  const checkListOptions = checklists.map((item) => ({
+    value: String(item.ID),
+    label: item.Name,
+  }));
 
-  const procedureOptions = [
-    { value: "procedure1", label: "Procedure 1" },
-    { value: "procedure2", label: "Procedure 2" },
-    { value: "procedure3", label: "Procedure 3" },
-  ];
+  console.log("✅ State of programTypeOptions before map:", programTypeOptions);
 
-  const programtypeOptions = [
-    { value: "program1", label: "Program 1" },
-    { value: "program2", label: "Program 2" },
-    { value: "program3", label: "Program 3" },
-  ];
+  // const programtypeOptions = programTypeOptions.map((item) => ({
+  //   value: String(item.ID),
+  //   label: item.Name,
+  // }));
+
+  // console.log("🎯 programtypeOptions after map:", programtypeOptions);
+
+  const procedureOptions = procedures.map((item) => ({
+    value: String(item.value),
+    label: item.label,
+  }));
 
   return (
     <div className="container mx-auto p-4">
@@ -231,7 +304,7 @@ const ResponsiveForm: React.FC = () => {
           <div className="mb-4">
             <DynamicSelector
               name="programtype"
-              options={programtypeOptions}
+              options={programTypeOptions}
               selectedValue={formData.programtype}
               onChange={handleChange}
               label="Program type"
@@ -301,6 +374,7 @@ const ResponsiveForm: React.FC = () => {
               options={checkListOptions}
               selectedValue={formData.checkList}
               onChange={handleChange}
+              label="checkList"
             />
           </div>
 
