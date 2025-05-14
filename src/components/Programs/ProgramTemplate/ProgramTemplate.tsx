@@ -87,7 +87,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const [programTemplates, setProgramTemplates] = useState<
       { ID: number; Name: string }[]
     >([]);
-    
+
+    const [loadingFields, setLoadingFields] = useState<boolean>(false);
 
     useEffect(() => {
       const fetchTemplates = async () => {
@@ -160,6 +161,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         if (!selectedRow?.ID) return;
 
         try {
+          setLoadingFields(true);
           const result = await api.getProgramTemplateField(selectedRow.ID);
           console.log("rrrrrr", result);
           setProgramTemplateField(result);
@@ -167,6 +169,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           console.error("Failed to fetch entity fields:", error);
           showAlert("error", null, "Error", "Could not load entity fields");
         } finally {
+          setLoadingFields(false);
         }
       };
 
@@ -377,10 +380,6 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       setIsAddModalOpen(true);
     };
 
-    const handleAddModalClose = () => {
-      setIsAddModalOpen(false);
-    };
-
     const enhancedProgramTemplateField = programTemplateField.map((item) => {
       const role = roles.find((r) => r.ID === item.nPostId);
       const activityTypeValue =
@@ -437,6 +436,17 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         console.error("Error refreshing table data:", error);
       }
     };
+
+    const handleAddModalClose = () => {
+      setIsAddModalOpen(false);
+    };
+
+    const handleSaved = async () => {
+      await refreshTable();           // جدول آپدیت بشه
+      setIsAddModalOpen(false);       // مودال بسته بشه
+    };
+
+
 
 
     return (
@@ -565,6 +575,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               onDuplicate={() => { }}
               domLayout="autoHeight"
               showSearch={true}
+              isLoading={loadingFields} // 
             />
           </div>
         </TwoColumnLayout.Item>
@@ -573,8 +584,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
           <AddProgramTemplate
             selectedRow={selectedRow}
-            onSaved={refreshTable} // ⬅️ فرستادن تابع
+            onSaved={handleSaved} // ⬅️ به جای فقط refreshTable
           />
+
         </DynamicModal>
 
       </TwoColumnLayout>
