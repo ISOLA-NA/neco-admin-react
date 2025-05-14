@@ -34,6 +34,8 @@ interface ProgramTemplateProps {
 // Program type options به صورت پویا از API دریافت می‌شود
 const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
   ({ selectedRow }, ref) => {
+
+    console.log("selectedrow", selectedRow)
     const api = useApi();
 
     // State برای داده‌های برنامه تمپلیت
@@ -85,6 +87,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const [programTemplates, setProgramTemplates] = useState<
       { ID: number; Name: string }[]
     >([]);
+    
 
     useEffect(() => {
       const fetchTemplates = async () => {
@@ -287,8 +290,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             "success",
             null,
             selectedRow ? "Updated" : "Saved",
-            `Program Template ${
-              selectedRow ? "updated" : "added"
+            `Program Template ${selectedRow ? "updated" : "added"
             } successfully.`
           );
           return true;
@@ -426,6 +428,17 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       { headerName: "Program to plan", field: "WeightWF" },
     ];
 
+    const refreshTable = async () => {
+      if (!selectedRow?.ID) return;
+      try {
+        const result = await api.getProgramTemplateField(selectedRow.ID);
+        setProgramTemplateField(result);
+      } catch (error) {
+        console.error("Error refreshing table data:", error);
+      }
+    };
+
+
     return (
       <TwoColumnLayout>
         <TwoColumnLayout.Item>
@@ -540,16 +553,16 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             <DataTable
               columnDefs={detailColumnDefs}
               rowData={enhancedProgramTemplateField}
-              onRowDoubleClick={() => {}}
-              setSelectedRowData={() => {}}
+              onRowDoubleClick={() => { }}
+              setSelectedRowData={() => { }}
               showDuplicateIcon={false}
               showEditIcon={true}
               showAddIcon={true}
               showDeleteIcon={true}
               onAdd={handleAddClick}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              onDuplicate={() => {}}
+              onEdit={() => { }}
+              onDelete={() => { }}
+              onDuplicate={() => { }}
               domLayout="autoHeight"
               showSearch={true}
             />
@@ -558,8 +571,12 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
         {/* Dynamic Modal برای افزودن برنامه جدید */}
         <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
-          <AddProgramTemplate />
+          <AddProgramTemplate
+            selectedRow={selectedRow}
+            onSaved={refreshTable} // ⬅️ فرستادن تابع
+          />
         </DynamicModal>
+
       </TwoColumnLayout>
     );
   }

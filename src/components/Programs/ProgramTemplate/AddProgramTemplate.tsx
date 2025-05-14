@@ -7,9 +7,15 @@ import {
   ProgramType,
 } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
-import { PFIType } from "../../../services/api.services";
+import { PFIType, ProgramTemplateItem } from "../../../services/api.services";
 
-const ResponsiveForm: React.FC = () => {
+interface AddProgramTemplateProps {
+  selectedRow: ProgramTemplateItem | null;
+  onSaved: () => void;
+}
+
+
+const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSaved }) => {
   const api = useApi();
 
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
@@ -113,14 +119,14 @@ const ResponsiveForm: React.FC = () => {
     const fetchActivityTypes = async () => {
       try {
         const response = await api.getEnum({ str: "PFIType" });
-        console.log("reeeeeeeeeeee",response)
+        console.log("reeeeeeeeeeee", response)
         const formatted = Object.entries(PFIType)
-  .filter(([key, value]) => !Number.isNaN(Number(value))) // فقط مقادیر عددی
-  .map(([key, value]) => ({
-    value: String(value),  // عدد به عنوان رشته ذخیره میشه
-    label: key             // "TPP", "FPP", ...
-  }));
-setActivityTypes(formatted);
+          .filter(([key, value]) => !Number.isNaN(Number(value))) // فقط مقادیر عددی
+          .map(([key, value]) => ({
+            value: String(value),  // عدد به عنوان رشته ذخیره میشه
+            label: key             // "TPP", "FPP", ...
+          }));
+        setActivityTypes(formatted);
 
         console.log("formatted", formatted);
       } catch (error) {
@@ -231,97 +237,36 @@ setActivityTypes(formatted);
     label: item.label,
   }));
 
-  // const handleSave = async () => {
-  //   try {
-  //     // if (!formData.responsiblepost || !formData.approvalFlow || !formData.formname) {
-  //     //   showAlert("warning", null, "Please fill required fields like Responsible Post, Approval Flow, and Form Name");
-  //     //   return;
-  //     // }
-  
-  //     const payload = {
-  //       MetaValues: [],
-  //       PFI: {
-  //         Name: formData.activityname,
-  //         ActDuration: Number(formData.duration) || 0,
-  //         Left: Number(formData.start) || 0,
-  //         Top: Number(formData.finish) || 0,
-  //         nProgramTemplateID: Number(formData.programtemplate),
-  //         // SubProgramMetaDataColumn: selectedMetaIds.join("|") + "|",
-  //         SubProgramMetaDataColumn: "",
-  //         PCostAct: Number(formData.activityBudget1) || "0",
-  //         PCostAprov: Number(formData.approvalBudget1) || 0,
-  //         PFIType: Number(formData.activitytype) || 0,
-  //         nPostId: formData.responsiblepost, // باید مقدار داشته باشه
-  //         nWFTemplateID: Number(formData.approvalFlow),
-  //         nEntityTypeID: Number(formData.formname),
-  //         IsVisible: true,
-  //         Order: 0,
-  //         Code: "",
-  //         DelayTime: 0,
-  //         SubDuration: 0,
-  //         Weight1: Number(formData.weight1) || 0,
-  //         Weight2: Number(formData.weight2) || 0,
-  //         Weight3: Number(formData.weight3) || 0,
-  //         WeightSubProg: Number(formData.w2SubProg) || 0,
-  //         WeightWF: Number(formData.programToPlanWeight) || 0,
-  //         WFDuration: Number(formData.programDuration) || 0,
-  //         PCostSubAct: Number(formData.subCost2Act) || 0,
-  //         PCostSubAprov: Number(formData.subCost2Apr) || 0,
-  //         // حذف ID یا undefined
-  //         ID: undefined,
-  //         WorkData: null,
-  //         GPIC: null,
-  //         nPostTypeId: null,
-  //         nProgramTypeID: null,
-  //         nQuestionTemplateID: null,
-  //         nEntityCollectionID: null,
-  //         subProgramID: null,
-  //         PredecessorForItemStr: "",
-  //         PredecessorForSubStr: "",
-  //         ParrentIC: null
-  //       }
-  //     };
-  
-  //     await api.insertProgramTemplateField(payload);
-  //     showAlert("success", null, "Saved", "Program field added successfully.");
-  //     // بعد از موفقیت: بستن Modal
-  //   } catch (error) {
-  //     console.error("Error saving:", error);
-  //     showAlert("error", null, "Error", "Failed to save field.");
-  //   }
-  // };
-  
+
   const handleSave = async () => {
     try {
       if (!formData.activityname) {
         showAlert("warning", null, "Validation", "Name is required");
         return;
       }
-  
+
       const payload = {
         MetaValues: [],
         PFI: {
-          ID: 0, // برای افزودن جدید، مقدار پیش‌فرض
+          ID: 0, 
           IsVisible: true,
           LastModified: null,
-  
+
           // الزامی
           Name: formData.activityname,
           ActDuration: Number(formData.duration) || 0,
           Left: Number(formData.start) || 0,
           Top: Number(formData.finish) || 0,
           Order: 0,
-  
+
           // انتخابی/nullable
           Code: "",
           GPIC: null,
           ParrentIC: null,
           PredecessorForItemStr: "",
           PredecessorForSubStr: "",
-  
-          nProgramTemplateID: formData.programtemplate
-            ? Number(formData.programtemplate)
-            : null,
+
+          nProgramTemplateID: selectedRow?.ID,
           nPostId: formData.responsiblepost || null,
           nPostTypeId: null,
           nWFTemplateID: formData.approvalFlow
@@ -332,47 +277,52 @@ setActivityTypes(formatted);
           nProgramTypeID: null,
           subProgramID: null,
           nEntityTypeID: formData.formname ? Number(formData.formname) : null,
-  
+
           // جدیدها
           IsInheritMetaColumns: null,
           IsInheritMetaValues: null,
-  
+
           // بودجه و هزینه
           PCostAct: Number(formData.activityBudget1) || 0,
           PCostAprov: Number(formData.approvalBudget1) || 0,
           PCostSubAct: Number(formData.subCost2Act) || 0,
           PCostSubAprov: Number(formData.subCost2Apr) || 0,
-  
+
           // وزن‌ها
           Weight1: Number(formData.weight1) || 0,
           Weight2: Number(formData.weight2) || 0,
           Weight3: Number(formData.weight3) || 0,
           WeightWF: Number(formData.programToPlanWeight) || 0,
           WeightSubProg: Number(formData.w2SubProg) || 0,
-  
+
           // زمان‌ها
           DelayTime: 0,
           WFDuration: Number(formData.programDuration) || 0,
           SubDuration: 0,
-  
+
           // نوع فعالیت (از enum یا رشته باید بیاد)
-          PFIType: Number(formData.activitytype) || 0,
-  
+          PFIType: formData.activitytype
+            ? Number(formData.activitytype)
+            : 3, // مقدار پیش‌فرض = Form
+
+
           WorkData: null,
-          SubProgramMetaDataColumn:""
-          
+          SubProgramMetaDataColumn: ""
+
         }
       };
-  
+
       await api.insertProgramTemplateField(payload);
       showAlert("success", null, "Saved", "Program field added successfully.");
+      onSaved(); 
       // بستن Modal یا ریست فرم
     } catch (error) {
       console.error("Error saving:", error);
       showAlert("error", null, "Error", "Failed to save field.");
     }
+    
   };
-  
+
 
   return (
     <div className="container mx-auto p-4">
@@ -736,21 +686,21 @@ setActivityTypes(formatted);
         </div>
       </div>
       <div className="flex justify-end mt-8 gap-4">
-  <button
-    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-    onClick={handleSave}
-  >
-    Save
-  </button>
-  <button
-    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
-    onClick={() => {
-      // این تابع باید Modal را ببنده (با استفاده از prop یا context)
-    }}
-  >
-    Cancel
-  </button>
-</div>
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          onClick={handleSave}
+        >
+          Save
+        </button>
+        <button
+          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
+          onClick={() => {
+            // این تابع باید Modal را ببنده (با استفاده از prop یا context)
+          }}
+        >
+          Cancel
+        </button>
+      </div>
 
     </div>
   );
