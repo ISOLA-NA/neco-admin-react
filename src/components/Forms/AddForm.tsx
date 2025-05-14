@@ -70,11 +70,11 @@ const columnTypeMapping: { [key: string]: number } = {
   component26: 36,
   component27: 7,
   component28: 8,
-  component29:11,
-  component30:12,
-  component31:13,
-  component32:18,
-  component33:23
+  component29: 11,
+  component30: 12,
+  component31: 13,
+  component32: 18,
+  component33: 23,
 };
 
 // Mapping of component keys to components
@@ -106,11 +106,11 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component26: Component26,
   component27: Component27,
   component28: Component28,
-  component29:Component29,
-  component30:Component30,
-  component31:Component31,
-  component32:Component32,
-  component33:Component33,
+  component29: Component29,
+  component30: Component30,
+  component31: Component31,
+  component32: Component32,
+  component33: Component33,
 };
 
 const typeOfInformationOptions = [
@@ -153,7 +153,8 @@ interface AddColumnFormProps {
   onSave?: () => void;
   isEdit?: boolean;
   existingData?: any;
-  entityTypeId?: string; // مقدار nEntityTypeID از selectedRow
+  entityTypeId?: string;
+  onSuccessAdd?: (newItem: { ID: number; Name: string }) => void;
 }
 
 const AddColumnForm: React.FC<AddColumnFormProps> = ({
@@ -161,7 +162,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   onSave,
   isEdit = false,
   existingData = null,
-  entityTypeId
+  entityTypeId,
+  onSuccessAdd,
 }) => {
   const { insertEntityField, updateEntityField } = useApi();
 
@@ -253,7 +255,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   // تغییر مقادیر فرم
   const handleChange = (field: keyof typeof formData, value: any) => {
     if (field === "command") {
-      const exists = commandOptions.find(opt => opt.value === value);
+      const exists = commandOptions.find((opt) => opt.value === value);
       if (exists) {
         setFormData((prev) => ({ ...prev, [field]: exists.value }));
         return;
@@ -290,7 +292,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       IsShowGrid: formData.showInListView,
       IsEditableInWF: formData.isEditableInWf,
       WFBOXName: formData.allowedWfBoxName,
-      nEntityTypeID: entityTypeId,
+      nEntityTypeID:
+        entityTypeId !== undefined &&
+        entityTypeId !== null &&
+        entityTypeId !== "" &&
+        !isNaN(Number(entityTypeId))
+          ? Number(entityTypeId)
+          : null,
+
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
@@ -309,13 +318,15 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       orderValue: parseFloat(formData.order) || 0,
       ShowInAlert: formData.showInAlert,
       ShowInTab: formData.showInTab,
-      CreatedTime: isEdit && existingData
-        ? existingData.CreatedTime
-        : new Date().toISOString(),
+      CreatedTime:
+        isEdit && existingData
+          ? existingData.CreatedTime
+          : new Date().toISOString(),
       ModifiedTime: currentTimestamp,
-      ModifiedById: isEdit && existingData
-        ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
-        : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+      ModifiedById:
+        isEdit && existingData
+          ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
+          : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
       LookupMode: lookupModeValue,
       BoolMeta1: dynamicMeta.oldLookup ? true : false,
       // اینجا مقدار چک‌باکس مربوط به CountInReject را هم می‌گذاریم:
@@ -327,16 +338,28 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     };
 
     try {
+      let result;
       if (isEdit) {
         await updateEntityField(payload);
-        // showAlert("success", undefined, "Success", "Edited successfully");
+        showAlert("success", undefined, "Success", "Updated successfully");
       } else {
-        await insertEntityField(payload);
+        result = await insertEntityField(payload);
         showAlert("success", undefined, "Success", "Added successfully");
-      }
-      setIsLoading(false);
 
-      // موفقیت
+        // 🛠 بررسی دقیق قبل از ارسال به والد
+        console.log("👁 result from insertEntityField:", result);
+
+        if (onSuccessAdd && result?.ID && result?.DisplayName) {
+          onSuccessAdd({
+            ID: result.ID,
+            Name: result.DisplayName, // 👈 باید `DisplayName` باشه نه `Name`
+          });
+        } else {
+          console.warn("⛔ result was invalid or undefined:", result);
+        }
+      }
+
+      setIsLoading(false);
       if (onSave) onSave();
       onClose();
     } catch (error: any) {
@@ -373,8 +396,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
   // تعیین نوع‌های اطلاعاتی که در آن‌ها فیلد Program Meta Column Name نشان داده نشود
   const hiddenTypesForProgramMeta = [
-    "component9",  // Lookup RealValue
-    "component7",  // Lookup
+    "component9", // Lookup RealValue
+    "component7", // Lookup
     "component26", // Advance Lookup AdvanceTable
     "component19", // Advance Table
     "component10", // Lookup AdvanceTable
@@ -393,7 +416,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         <h2 className="text-3xl font-bold mb-6 text-center">
           {isEdit ? "Edit Column" : "Add New Column"}
         </h2>
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+        <form
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          onSubmit={handleSubmit}
+        >
           {/* Column Name */}
           <DynamicInput
             name="formName"
@@ -446,7 +472,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label htmlFor="isRequiredInWf" className="ml-3 text-gray-700 font-medium">
+            <label
+              htmlFor="isRequiredInWf"
+              className="ml-3 text-gray-700 font-medium"
+            >
               Required in Workflow
             </label>
           </div>
@@ -474,7 +503,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label htmlFor="isEditableInWf" className="ml-3 text-gray-700 font-medium">
+                <label
+                  htmlFor="isEditableInWf"
+                  className="ml-3 text-gray-700 font-medium"
+                >
                   Editable in Workflow
                 </label>
               </div>
@@ -499,7 +531,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label htmlFor="showInAlert" className="ml-3 text-gray-700 font-medium">
+                <label
+                  htmlFor="showInAlert"
+                  className="ml-3 text-gray-700 font-medium"
+                >
                   Show in Alert
                 </label>
               </div>
@@ -527,7 +562,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("required", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="required" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="required"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Required
               </label>
             </div>
@@ -540,7 +578,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("mainColumns", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="mainColumns" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="mainColumns"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Main Columns
               </label>
             </div>
@@ -555,7 +596,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 }
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="showInListView" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="showInListView"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Show in List
               </label>
             </div>
@@ -568,7 +612,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("rightToLeft", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="rightToLeft" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="rightToLeft"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Right to Left
               </label>
             </div>
@@ -584,7 +631,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("countInReject", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label htmlFor="countInReject" className="ml-3 text-gray-700 font-medium">
+            <label
+              htmlFor="countInReject"
+              className="ml-3 text-gray-700 font-medium"
+            >
               Count In Reject
             </label>
           </div>
@@ -600,7 +650,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("readOnly", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="readOnly" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="readOnly"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 Read Only
               </label>
             </div>
@@ -613,7 +666,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               className="flex-1"
             />
             {/* در برخی نوع‌ها metaType4 پنهان می‌ماند */}
-            {!hiddenTypesForProgramMeta.includes(formData.typeOfInformation) && (
+            {!hiddenTypesForProgramMeta.includes(
+              formData.typeOfInformation
+            ) && (
               <DynamicInput
                 name="programMetaColumnName"
                 type="text"
@@ -622,7 +677,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) =>
                   setDynamicMeta((prev: any) => ({
                     ...prev,
-                    metaType4: e.target.value
+                    metaType4: e.target.value,
                   }))
                 }
                 className="flex-1"
@@ -631,9 +686,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           </div>
 
           {/* کنترلر داینامیک (مثلاً Lookup, SeqnialNumber, ...) */}
-          <div className="md:col-span-2">
-            {renderSelectedComponent()}
-          </div>
+          <div className="md:col-span-2">{renderSelectedComponent()}</div>
 
           {/* دکمه‌های Cancel و Submit */}
           <div className="md:col-span-2 flex justify-center space-x-6">

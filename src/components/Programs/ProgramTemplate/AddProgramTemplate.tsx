@@ -8,14 +8,19 @@ import {
 } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { PFIType, ProgramTemplateItem } from "../../../services/api.services";
+import AddColumnForm from "../../Forms/AddForm";
+import ListSelector from "../../ListSelector/ListSelector";
 
 interface AddProgramTemplateProps {
   selectedRow: ProgramTemplateItem | null;
   onSaved: () => void;
+  onSuccessAdd?: (newItem: { ID: number; Name: string }) => void;
 }
 
-
-const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSaved }) => {
+const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
+  selectedRow,
+  onSaved,
+}) => {
   const api = useApi();
 
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
@@ -39,6 +44,29 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSave
   const [procedures, setProcedures] = useState<
     { value: string; label: string }[]
   >([]);
+
+  const [metaValues, setMetaValues] = useState<any[]>([]);
+  const [metaNames, setMetaNames] = useState<{ ID: string; Name: string }[]>(
+    []
+  );
+
+  const [selectedMetaIds, setSelectedMetaIds] = useState<string[]>([]);
+  const [programTemplateField, setProgramTemplateField] = useState<any>({
+    SubProgramMetaDataColumn: "",
+  });
+
+  useEffect(() => {
+    const mapped = selectedMetaIds
+      .map((id) => {
+        const match = metaValues.find((item) => String(item.ID) === String(id));
+        return match
+          ? { ID: id, Name: match.DisplayName || match.Name || "" }
+          : null;
+      })
+      .filter(Boolean) as { ID: string; Name: string }[];
+
+    setMetaNames(mapped);
+  }, [selectedMetaIds, metaValues]);
 
   useEffect(() => {
     const fetchProcedures = async () => {
@@ -119,12 +147,12 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSave
     const fetchActivityTypes = async () => {
       try {
         const response = await api.getEnum({ str: "PFIType" });
-        console.log("reeeeeeeeeeee", response)
+        console.log("reeeeeeeeeeee", response);
         const formatted = Object.entries(PFIType)
           .filter(([key, value]) => !Number.isNaN(Number(value))) // فقط مقادیر عددی
           .map(([key, value]) => ({
-            value: String(value),  // عدد به عنوان رشته ذخیره میشه
-            label: key             // "TPP", "FPP", ...
+            value: String(value), // عدد به عنوان رشته ذخیره میشه
+            label: key, // "TPP", "FPP", ...
           }));
         setActivityTypes(formatted);
 
@@ -237,7 +265,6 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSave
     label: item.label,
   }));
 
-
   const handleSave = async () => {
     try {
       if (!formData.activityname) {
@@ -246,9 +273,9 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSave
       }
 
       const payload = {
-        MetaValues: [],
+        MetaValues: metaValues,
         PFI: {
-          ID: 0, 
+          ID: 0,
           IsVisible: true,
           LastModified: null,
 
@@ -301,29 +328,48 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSave
           SubDuration: 0,
 
           // نوع فعالیت (از enum یا رشته باید بیاد)
-          PFIType: formData.activitytype
-            ? Number(formData.activitytype)
-            : 3, // مقدار پیش‌فرض = Form
-
+          PFIType: formData.activitytype ? Number(formData.activitytype) : 3, // مقدار پیش‌فرض = Form
 
           WorkData: null,
-          SubProgramMetaDataColumn: ""
-
-        }
+          SubProgramMetaDataColumn:
+            programTemplateField.SubProgramMetaDataColumn || "",
+        },
       };
 
       await api.insertProgramTemplateField(payload);
       showAlert("success", null, "Saved", "Program field added successfully.");
-      onSaved(); 
+      onSaved();
       // بستن Modal یا ریست فرم
     } catch (error) {
       console.error("Error saving:", error);
       showAlert("error", null, "Error", "Failed to save field.");
     }
-    
   };
-  
 
+  const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
+    if (!newField || !newField.ID) return;
+
+    const newId = newField.ID.toString();
+
+    if (!selectedMetaIds.includes(newId)) {
+      setSelectedMetaIds((prev) => [...prev, newId]);
+    }
+
+    if (!metaValues.some((m) => m.ID === newField.ID)) {
+      setMetaValues((prev) => [...prev, newField]);
+    }
+
+    if (!metaNames.some((m) => m.ID === newId)) {
+      const updated = [...metaNames, { ID: newId, Name: newField.Name }];
+      console.log("✅ Updating metaNames to:", updated);
+      setMetaNames(updated);
+    }
+
+    setProgramTemplateField((prev: any) => ({
+      ...prev,
+      SubProgramMetaDataColumn: [...selectedMetaIds, newId].join("|") + "|",
+    }));
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -423,6 +469,27 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSave
               selectedValue={formData.formname}
               onChange={handleChange}
               label="Form name"
+            />
+          </div>
+          <div className="mt-10">
+            <ListSelector
+              title="MetaData"
+              columnDefs={[{ field: "Name", headerName: "Name" }]} // 👈 دقیقاً این فیلد
+              rowData={metaNames.map((m) => ({
+                ID: String(m.ID),
+                Name: m.Name,
+              }))} // 👈 این خط مهمه
+              selectedIds={selectedMetaIds}
+              onSelectionChange={(ids) => setSelectedMetaIds(ids.map(String))}
+              showSwitcher={false}
+              isGlobal={false}
+              ModalContentComponent={AddColumnForm}
+              modalContentProps={{
+                onSave: handleMetaFieldSave,
+                onSuccessAdd: handleMetaFieldSave,
+                onClose: () => {},
+                entityTypeId: formData.formname,
+              }}
             />
           </div>
         </div>
@@ -702,7 +769,6 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({ selectedRow, onSave
           Cancel
         </button>
       </div>
-
     </div>
   );
 };

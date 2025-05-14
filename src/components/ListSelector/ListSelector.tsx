@@ -14,7 +14,8 @@ interface ListSelectorProps {
   onGlobalChange?: (isGlobal: boolean) => void;
   ModalContentComponent: React.FC<any>;
   modalContentProps?: any;
-  loading?: boolean; // پروپ بارگذاری اضافه شده
+  loading?: boolean;
+  onCustomAdd?: (meta: { ID: string; Name: string }) => void;
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
@@ -29,8 +30,10 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   onGlobalChange,
   ModalContentComponent,
   modalContentProps = {},
-  loading = false, // پیش‌فرض بارگذاری false
+  loading = false,
 }) => {
+  console.log("🧪 ListSelector props:", { rowData, columnDefs, selectedIds });
+
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
 
@@ -72,18 +75,17 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         <div className="flex items-center gap-2">
           <h3 className="text-xs font-semibold text-white">{title}</h3>
           <button
-  className={classNames(
-    "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center",
-    "hover:bg-purple-500",
-    isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
-  )}
-  onClick={() => setIsDialogOpen(true)}
-  aria-label={`افزودن ${title}`}
-  disabled={isGlobal}
->
-  +
-</button>
-
+            className={classNames(
+              "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center",
+              "hover:bg-purple-500",
+              isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
+            )}
+            onClick={() => setIsDialogOpen(true)}
+            aria-label={`افزودن ${title}`}
+            disabled={isGlobal}
+          >
+            +
+          </button>
         </div>
       </div>
 
@@ -112,9 +114,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             </svg>
           </div>
         ) : selectedNames.length === 0 ? (
-          <p className="text-gray-500 text-xs text-center">
-            No item selected
-          </p>
+          <p className="text-gray-500 text-xs text-center">No item selected</p>
         ) : (
           <div className="space-y-2">
             {selectedNames.map((name, index) => (

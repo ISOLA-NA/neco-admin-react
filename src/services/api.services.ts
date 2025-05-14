@@ -333,11 +333,11 @@ export interface PostCat {
   ProjectsStr?: string;
 }
 export enum PFIType {
-  TPP= 1,
-  FPP= 2,
-  Form= 3,
-  InFPP= 4,
-  CPP= 5
+  TPP = 1,
+  FPP = 2,
+  Form = 3,
+  InFPP = 4,
+  CPP = 5,
 }
 // اینترفیس درخواست ChangePasswordByAdmin
 export interface ChangePasswordByAdminRequest {
@@ -624,42 +624,6 @@ export interface EditProfileUserInterface {
   Code: string;
 }
 
-// export interface ProgramTemplateField {
-//   nProgramTemplateID?: number;
-//   PFIType: string;
-//   nWFTemplateID: number;
-//   nPostId: string;
-//   ID?: number;
-//   DisplayName: string;
-//   ColumnType: number;
-//   CountInReject: boolean;
-//   CreatedTime?: string;
-//   Description?: string;
-//   IsEditableByReceiver: boolean;
-//   IsEditableInWF: boolean;
-//   IsForceReadOnly: boolean;
-//   IsMainColumn: boolean;
-//   IsRequire: boolean;
-//   IsRequireInWF: boolean;
-//   IsRTL: boolean;
-//   IsShowGrid: boolean;
-//   IsUnique: boolean;
-//   IsVisible: boolean;
-//   metaType1?: string | null;
-//   metaType2?: string | null;
-//   metaType3?: string | null;
-//   metaType4?: string | null;
-//   metaType5?: string | null;
-//   metaTypeJson?: string | null;
-//   ModifiedById?: string;
-//   ModifiedTime?: string;
-//   nEntityTypeID: number;
-//   orderValue: number;
-//   PrintCode?: string;
-//   ShowInAlert: boolean;
-//   ShowInTab?: string;
-//   WFBOXName?: string;
-// }
 export interface ProgramTemplateFieldDTO {
   IsVisible: boolean;
   LastModified: string | null;

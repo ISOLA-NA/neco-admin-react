@@ -34,8 +34,7 @@ interface ProgramTemplateProps {
 // Program type options به صورت پویا از API دریافت می‌شود
 const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
   ({ selectedRow }, ref) => {
-
-    console.log("selectedrow", selectedRow)
+    console.log("selectedrow", selectedRow);
     const api = useApi();
 
     // State برای داده‌های برنامه تمپلیت
@@ -293,7 +292,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             "success",
             null,
             selectedRow ? "Updated" : "Saved",
-            `Program Template ${selectedRow ? "updated" : "added"
+            `Program Template ${
+              selectedRow ? "updated" : "added"
             } successfully.`
           );
           return true;
@@ -442,12 +442,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     };
 
     const handleSaved = async () => {
-      await refreshTable();           // جدول آپدیت بشه
-      setIsAddModalOpen(false);       // مودال بسته بشه
+      await refreshTable(); // جدول آپدیت بشه
+      setIsAddModalOpen(false); // مودال بسته بشه
     };
-
-
-
 
     return (
       <TwoColumnLayout>
@@ -563,19 +560,19 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             <DataTable
               columnDefs={detailColumnDefs}
               rowData={enhancedProgramTemplateField}
-              onRowDoubleClick={() => { }}
-              setSelectedRowData={() => { }}
+              onRowDoubleClick={() => {}}
+              setSelectedRowData={() => {}}
               showDuplicateIcon={false}
               showEditIcon={true}
               showAddIcon={true}
               showDeleteIcon={true}
               onAdd={handleAddClick}
-              onEdit={() => { }}
-              onDelete={() => { }}
-              onDuplicate={() => { }}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onDuplicate={() => {}}
               domLayout="autoHeight"
               showSearch={true}
-              isLoading={loadingFields} // 
+              isLoading={loadingFields} //
             />
           </div>
         </TwoColumnLayout.Item>
@@ -586,9 +583,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             selectedRow={selectedRow}
             onSaved={handleSaved} // ⬅️ به جای فقط refreshTable
           />
-
         </DynamicModal>
-
       </TwoColumnLayout>
     );
   }
