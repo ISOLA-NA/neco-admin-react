@@ -332,7 +332,13 @@ export interface PostCat {
   PostsStr?: string;
   ProjectsStr?: string;
 }
-
+export enum PFIType {
+  TPP= 1,
+  FPP= 2,
+  Form= 3,
+  InFPP= 4,
+  CPP= 5
+}
 // اینترفیس درخواست ChangePasswordByAdmin
 export interface ChangePasswordByAdminRequest {
   UserId: string; // شناسه کاربری
@@ -618,41 +624,82 @@ export interface EditProfileUserInterface {
   Code: string;
 }
 
-export interface ProgramTemplateField {
-  nProgramTemplateID?: number;
-  PFIType: string;
-  nWFTemplateID: number;
-  nPostId: string;
-  ID?: number;
-  DisplayName: string;
-  ColumnType: number;
-  CountInReject: boolean;
-  CreatedTime?: string;
-  Description?: string;
-  IsEditableByReceiver: boolean;
-  IsEditableInWF: boolean;
-  IsForceReadOnly: boolean;
-  IsMainColumn: boolean;
-  IsRequire: boolean;
-  IsRequireInWF: boolean;
-  IsRTL: boolean;
-  IsShowGrid: boolean;
-  IsUnique: boolean;
+// export interface ProgramTemplateField {
+//   nProgramTemplateID?: number;
+//   PFIType: string;
+//   nWFTemplateID: number;
+//   nPostId: string;
+//   ID?: number;
+//   DisplayName: string;
+//   ColumnType: number;
+//   CountInReject: boolean;
+//   CreatedTime?: string;
+//   Description?: string;
+//   IsEditableByReceiver: boolean;
+//   IsEditableInWF: boolean;
+//   IsForceReadOnly: boolean;
+//   IsMainColumn: boolean;
+//   IsRequire: boolean;
+//   IsRequireInWF: boolean;
+//   IsRTL: boolean;
+//   IsShowGrid: boolean;
+//   IsUnique: boolean;
+//   IsVisible: boolean;
+//   metaType1?: string | null;
+//   metaType2?: string | null;
+//   metaType3?: string | null;
+//   metaType4?: string | null;
+//   metaType5?: string | null;
+//   metaTypeJson?: string | null;
+//   ModifiedById?: string;
+//   ModifiedTime?: string;
+//   nEntityTypeID: number;
+//   orderValue: number;
+//   PrintCode?: string;
+//   ShowInAlert: boolean;
+//   ShowInTab?: string;
+//   WFBOXName?: string;
+// }
+export interface ProgramTemplateFieldDTO {
   IsVisible: boolean;
-  metaType1?: string | null;
-  metaType2?: string | null;
-  metaType3?: string | null;
-  metaType4?: string | null;
-  metaType5?: string | null;
-  metaTypeJson?: string | null;
-  ModifiedById?: string;
-  ModifiedTime?: string;
-  nEntityTypeID: number;
-  orderValue: number;
-  PrintCode?: string;
-  ShowInAlert: boolean;
-  ShowInTab?: string;
-  WFBOXName?: string;
+  LastModified: string | null;
+  ID: number;
+  Name?: string | null;
+  GPIC?: string | null;
+  ParrentIC?: string | null;
+  Order: number;
+  Code?: string | null;
+  Weight1: number;
+  Weight2: number;
+  Weight3: number;
+  WeightWF: number;
+  WeightSubProg: number;
+  PCostAct: number;
+  PCostAprov: number;
+  PCostSubAct: number;
+  PCostSubAprov: number;
+  nProgramTemplateID?: number | null;
+  PredecessorForItemStr?: string | null;
+  PredecessorForSubStr?: string | null;
+  nPostTypeId?: string | null;
+  nPostId?: string | null;
+  Left: number;
+  Top: number;
+  DelayTime: number;
+  ActDuration: number;
+  WFDuration: number;
+  nWFTemplateID?: number | null;
+  nQuestionTemplateID?: number | null;
+  nEntityCollectionID?: number | null;
+  PFIType: PFIType;
+  WorkData?: string | null;
+  subProgramID?: number | null;
+  nProgramTypeID?: number | null;
+  SubProgramMetaDataColumn?: string | null;
+  SubDuration: number;
+  nEntityTypeID?: number | null;
+  IsInheritMetaColumns?: boolean | null;
+  IsInheritMetaValues?: boolean | null;
 }
 
 export interface ApprovalChecklist {
