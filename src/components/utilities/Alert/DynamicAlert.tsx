@@ -32,7 +32,7 @@ export const showAlert = (
     };
 
     toast(
-        <div className={`relative p-4 ${typeStyles[type]} bg-opacity-90 z-50`}>
+        <div className={`relative p-4 ${typeStyles[type]} bg-opacity-90`}>
             {customContent ? (
                 customContent
             ) : (

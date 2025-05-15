@@ -234,7 +234,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
         <TwoColumnLayout>
           <DynamicSelector
             options={[
-              { value: "", label: "Select an option ......" },
+              { value: "", label: "انتخاب کنید..." },
               ...roles.map((r) => ({ value: r.ID, label: r.Name })),
             ]}
             selectedValue={staffingData.Name}
@@ -246,7 +246,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           />
           <DynamicSelector
             options={[
-              { value: "", label: "Select an option ......" },
+              { value: "", label: "انتخاب کنید..." },
               ...projects.map((p) => ({
                 value: p.ID.toString(),
                 label: p.ProjectName,
@@ -262,7 +262,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "Select an option ......" },
+              { value: "", label: "انتخاب کنید..." },
               ...users.map((u) => ({ value: u.ID, label: u.Username })),
             ]}
             selectedValue={staffingData.OwnerID}
@@ -275,7 +275,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "Select an option ......" },
+              { value: "", label: "انتخاب کنید..." },
               ...roles.map((r) => ({ value: r.ID, label: r.Name })),
             ]}
             selectedValue={staffingData.ParrentId}
@@ -287,7 +287,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "Select an option ......" },
+              { value: "", label: "انتخاب کنید..." },
               ...companies.map((c) => ({
                 value: c.ID.toString(),
                 label: c.Name,
@@ -303,7 +303,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "Select an option ......" },
+              { value: "", label: "انتخاب کنید..." },
               ...menus.map((m) => ({
                 value: m.ID.toString(),
                 label: m.Name,

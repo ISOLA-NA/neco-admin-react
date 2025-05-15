@@ -150,11 +150,10 @@ const typeOfInformationOptions = [
 
 interface AddColumnFormProps {
   onClose: () => void;
-  onSave?: () => void;
+  onSave?: (newField: { ID: number; Name: string }) => void; // ✅ اینو اضافه کن
   isEdit?: boolean;
   existingData?: any;
-  entityTypeId?: string;
-  onSuccessAdd?: (newItem: { ID: number; Name: string }) => void;
+  entityTypeId?: string; // مقدار nEntityTypeID از selectedRow
 }
 
 const AddColumnForm: React.FC<AddColumnFormProps> = ({
@@ -163,7 +162,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   isEdit = false,
   existingData = null,
   entityTypeId,
-  onSuccessAdd,
 }) => {
   const { insertEntityField, updateEntityField } = useApi();
 
@@ -265,6 +263,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   };
 
   // ذخیره فرم (Submit)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -278,8 +277,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
     const currentTimestamp = new Date().toISOString();
 
-    // اگر از کنترلر فرزند هم چیزی می‌خواهید (مثلا lookupMode)، بگیرید
-    // ولی اینجا فعلا مهم نیست
     const lookupModeValue =
       dynamicMeta.LookupMode == null || dynamicMeta.LookupMode === ""
         ? null
@@ -293,13 +290,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       IsEditableInWF: formData.isEditableInWf,
       WFBOXName: formData.allowedWfBoxName,
       nEntityTypeID:
-        entityTypeId !== undefined &&
-        entityTypeId !== null &&
-        entityTypeId !== "" &&
-        !isNaN(Number(entityTypeId))
+        entityTypeId && !isNaN(Number(entityTypeId))
           ? Number(entityTypeId)
           : null,
-
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
@@ -329,7 +322,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
       LookupMode: lookupModeValue,
       BoolMeta1: dynamicMeta.oldLookup ? true : false,
-      // اینجا مقدار چک‌باکس مربوط به CountInReject را هم می‌گذاریم:
       CountInReject: formData.countInReject,
       metaType5: metaType5Value,
       ID: isEdit && existingData ? existingData.ID : 0,
@@ -338,30 +330,35 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     };
 
     try {
-      let result;
+      let newId = 0;
+
       if (isEdit) {
         await updateEntityField(payload);
-        showAlert("success", undefined, "Success", "Updated successfully");
+        showAlert("success", undefined, "Success", "Edited successfully");
+        newId = payload.ID;
       } else {
-        result = await insertEntityField(payload);
+        const response = await insertEntityField(payload);
         showAlert("success", undefined, "Success", "Added successfully");
 
-        // 🛠 بررسی دقیق قبل از ارسال به والد
-        console.log("👁 result from insertEntityField:", result);
-
-        if (onSuccessAdd && result?.ID && result?.DisplayName) {
-          onSuccessAdd({
-            ID: result.ID,
-            Name: result.DisplayName, // 👈 باید `DisplayName` باشه نه `Name`
-          });
+        // اگر API مقدار ID جدید را برگرداند
+        if (response && response.ID) {
+          newId = response.ID;
         } else {
-          console.warn("⛔ result was invalid or undefined:", result);
+          // در غیر اینصورت از خود payload استفاده می‌کنیم
+          newId = payload.ID;
         }
       }
 
       setIsLoading(false);
-      if (onSave) onSave();
-      onClose();
+
+      // ✨ اطلاعات لازم برای اضافه شدن در AddProgramTemplate
+      const newField = {
+        ID: newId,
+        Name: formData.formName,
+      };
+
+      if (onSave) onSave(newField); // 👈 به صورت کامل
+      onClose(); // بستن فرم
     } catch (error: any) {
       setIsLoading(false);
       setErrors({ form: "An error occurred." });

@@ -184,7 +184,7 @@ const TabContent: FC<TabContentProps> = ({
       setIsAdding(false);
       setIsPanelOpen(true);
     } else {
-      alert("لطفاً یک ردیف را قبل از ویرایش Select an option ....");
+      alert("لطفاً یک ردیف را قبل از ویرایش انتخاب کنید.");
     }
   };
 
@@ -199,7 +199,7 @@ const TabContent: FC<TabContentProps> = ({
     if (selectedRow) {
       onDelete();
     } else {
-      alert("لطفاً یک ردیف را برای حذف Select an option ....");
+      alert("لطفاً یک ردیف را برای حذف انتخاب کنید.");
     }
   };
 
@@ -207,7 +207,7 @@ const TabContent: FC<TabContentProps> = ({
     if (selectedRow) {
       onDuplicate();
     } else {
-      alert("لطفاً یک ردیف را برای تکرار Select an option ....");
+      alert("لطفاً یک ردیف را برای تکرار انتخاب کنید.");
     }
   };
 

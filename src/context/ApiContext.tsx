@@ -184,7 +184,6 @@ interface ApiContextType {
   getApprovalContextData: (id: number) => Promise<WFAproval[]>;
 
   getEnum: (data: { str: string }) => Promise<GetEnumResponse>;
-
   getProgramTemplateField: (
     programTemplateId: number
   ) => Promise<ProgramTemplateField[]>;
@@ -394,6 +393,6 @@ export type {
   ProgramType,
   ProjectWithCalendar,
   OdpWithExtra,
-  EntityField,
+  ProgramTemplateField,
   ApprovalChecklist,
 };

@@ -1,5 +1,3 @@
-// src/App.tsx
-
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -7,11 +5,13 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import HomePage from "./components/TabHandler/tab/TabbedInterface";
+import HomePage from "./components/TabHandler/tab/TabbedInterface"; // مسیر اصلاح شود
 import Login from "./Views/Login";
 import Login1 from "./Views/Login1";
 import Alert from "./components/utilities/Alert/DynamicAlert";
 import { APIProvider } from "./context/ApiContext";
+
+// کانتکست‌های جدید
 import { SubTabDefinitionsProvider } from "./context/SubTabDefinitionsContext";
 import { AddEditDeleteProvider } from "./context/AddEditDeleteContext";
 
@@ -20,38 +20,24 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "./App.css";
 
-// ✅ تابع کمکی برای چک کردن لاگین
-const isUserAuthenticated = () => {
-  return localStorage.getItem("isAuthenticated") === "true";
-};
-
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    isUserAuthenticated()
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  // ✅ همگام‌سازی با تغییرات localStorage (مثلاً وقتی در تب دیگر logout شود)
   useEffect(() => {
-    const handleStorageChange = () => {
-      setIsAuthenticated(isUserAuthenticated());
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
+    const auth = localStorage.getItem("isAuthenticated");
+    if (auth === "true") {
+      setIsAuthenticated(true);
+    }
   }, []);
 
-  // ✅ پس از login
   const handleLogin = () => {
-    localStorage.setItem("isAuthenticated", "true");
     setIsAuthenticated(true);
+    localStorage.setItem("isAuthenticated", "true");
   };
 
-  // ✅ پس از logout
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
     setIsAuthenticated(false);
+    localStorage.removeItem("isAuthenticated");
   };
 
   return (
@@ -60,9 +46,7 @@ const App: React.FC = () => {
         <AddEditDeleteProvider>
           <Router>
             <Alert />
-
             <Routes>
-              {/* صفحه اصلی */}
               <Route
                 path="/"
                 element={
@@ -73,14 +57,17 @@ const App: React.FC = () => {
                   )
                 }
               />
-
-              {/* صفحه لاگین بدون لوپ */}
               <Route
                 path="/login"
-                element={<Login onLogin={handleLogin} />}
+                element={
+                  isAuthenticated ? (
+                    <Navigate to="/" replace />
+                  ) : (
+                    <Login onLogin={handleLogin} />
+                  )
+                }
               />
-
-              {/* تست یا نسخه دوم لاگین */}
+              {/* مسیر Login1 بدون شرط احراز هویت */}
               <Route path="/login1" element={<Login1 />} />
             </Routes>
           </Router>

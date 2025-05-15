@@ -72,7 +72,7 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
               type="button"
               onClick={onDownloadWord}
               className="p-2 border border-gray-300 rounded"
-              title="Download Word File"
+              title="دانلود فایل ورد"
             >
               <FiDownload size={18} />
             </button>
@@ -90,14 +90,14 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
           {wordLoading ? (
             <FiLoader className="animate-spin mr-2" size={18} />
           ) : null}
-          {wordFileName ? "Change File" : "Template Word File"}
+          {wordFileName ? "تغییر فایل" : "آپلود فایل ورد"}
         </button>
         {wordFileName && (
           <button
             type="button"
             onClick={onDeleteWord}
             className="text-red-500 p-2"
-            title="Remove File"
+            title="حذف فایل"
           >
             <FiTrash2 size={18} />
           </button>
@@ -119,7 +119,7 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
               type="button"
               onClick={onDownloadExcel}
               className="p-2 border border-gray-300 rounded"
-              title="Download Excel File"
+              title="دانلود فایل اکسل"
             >
               <FiDownload size={18} />
             </button>
@@ -137,14 +137,14 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
           {excelLoading ? (
             <FiLoader className="animate-spin mr-2" size={18} />
           ) : null}
-          {excelFileName ? "Change File" : "Template Excel File"}
+          {excelFileName ? "تغییر فایل" : "آپلود فایل اکسل"}
         </button>
         {excelFileName && (
           <button
             type="button"
             onClick={onDeleteExcel}
             className="text-red-500 p-2"
-            title="Remove File"
+            title="حذف فایل"
           >
             <FiTrash2 size={18} />
           </button>

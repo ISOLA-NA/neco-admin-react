@@ -69,6 +69,13 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
   }, [selectedMetaIds, metaValues]);
 
   useEffect(() => {
+    setProgramTemplateField((prev: any) => ({
+      ...prev,
+      SubProgramMetaDataColumn: selectedMetaIds.join("|") + "|",
+    }));
+  }, [selectedMetaIds]);
+
+  useEffect(() => {
     const fetchProcedures = async () => {
       try {
         const result = await api.getAllEntityCollection();
@@ -148,11 +155,11 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
       try {
         const response = await api.getEnum({ str: "PFIType" });
         console.log("reeeeeeeeeeee", response);
-        const formatted = Object.entries(PFIType)
-          .filter(([key, value]) => !Number.isNaN(Number(value))) // فقط مقادیر عددی
+        const formatted = Object.entries(response)
+          .filter(([key, value]) => !Number.isNaN(Number(value)))
           .map(([key, value]) => ({
-            value: String(value), // عدد به عنوان رشته ذخیره میشه
-            label: key, // "TPP", "FPP", ...
+            value: String(value),
+            label: key,
           }));
         setActivityTypes(formatted);
 
@@ -273,7 +280,8 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
       }
 
       const payload = {
-        MetaValues: metaValues,
+        MetaValues: metaValues, // لیست کامل متافیلدها
+
         PFI: {
           ID: 0,
           IsVisible: true,
@@ -286,7 +294,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
           Top: Number(formData.finish) || 0,
           Order: 0,
 
-          // انتخابی/nullable
+          // انتخابی / nullable
           Code: "",
           GPIC: null,
           ParrentIC: null,
@@ -301,7 +309,9 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
             : null,
           nQuestionTemplateID: null,
           nEntityCollectionID: null,
-          nProgramTypeID: null,
+          nProgramTypeID: formData.programtype
+            ? Number(formData.programtype)
+            : null,
           subProgramID: null,
           nEntityTypeID: formData.formname ? Number(formData.formname) : null,
 
@@ -327,10 +337,10 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
           WFDuration: Number(formData.programDuration) || 0,
           SubDuration: 0,
 
-          // نوع فعالیت (از enum یا رشته باید بیاد)
-          PFIType: formData.activitytype ? Number(formData.activitytype) : 3, // مقدار پیش‌فرض = Form
+          // نوع فعالیت
+          PFIType: formData.activitytype ? Number(formData.activitytype) : 3,
 
-          WorkData: null,
+          // متادیتای انتخاب شده
           SubProgramMetaDataColumn:
             programTemplateField.SubProgramMetaDataColumn || "",
         },
@@ -339,7 +349,6 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
       await api.insertProgramTemplateField(payload);
       showAlert("success", null, "Saved", "Program field added successfully.");
       onSaved();
-      // بستن Modal یا ریست فرم
     } catch (error) {
       console.error("Error saving:", error);
       showAlert("error", null, "Error", "Failed to save field.");
@@ -347,28 +356,27 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
   };
 
   const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
-    if (!newField || !newField.ID) return;
+    if (!newField || !newField.ID || !newField.Name) return;
 
     const newId = newField.ID.toString();
 
-    if (!selectedMetaIds.includes(newId)) {
-      setSelectedMetaIds((prev) => [...prev, newId]);
-    }
+    // فقط وقتی اضافه نشده باشه
+    setSelectedMetaIds((prev) => {
+      const updated = prev.includes(newId) ? prev : [...prev, newId];
+      return updated;
+    });
 
-    if (!metaValues.some((m) => m.ID === newField.ID)) {
-      setMetaValues((prev) => [...prev, newField]);
-    }
+    // اضافه به metaValues
+    setMetaValues((prev) => {
+      const exists = prev.find((m) => m.ID === newField.ID);
+      return exists ? prev : [...prev, newField];
+    });
 
-    if (!metaNames.some((m) => m.ID === newId)) {
-      const updated = [...metaNames, { ID: newId, Name: newField.Name }];
-      console.log("✅ Updating metaNames to:", updated);
-      setMetaNames(updated);
-    }
-
-    setProgramTemplateField((prev: any) => ({
-      ...prev,
-      SubProgramMetaDataColumn: [...selectedMetaIds, newId].join("|") + "|",
-    }));
+    // اضافه به metaNames
+    setMetaNames((prev) => {
+      const exists = prev.find((m) => m.ID === newId);
+      return exists ? prev : [...prev, { ID: newId, Name: newField.Name }];
+    });
   };
 
   return (

@@ -332,13 +332,7 @@ export interface PostCat {
   PostsStr?: string;
   ProjectsStr?: string;
 }
-export enum PFIType {
-  TPP = 1,
-  FPP = 2,
-  Form = 3,
-  InFPP = 4,
-  CPP = 5,
-}
+
 // اینترفیس درخواست ChangePasswordByAdmin
 export interface ChangePasswordByAdminRequest {
   UserId: string; // شناسه کاربری
@@ -624,9 +618,27 @@ export interface EditProfileUserInterface {
   Code: string;
 }
 
-export interface ProgramTemplateFieldDTO {
+export interface ApprovalChecklist {
+  ID: number;
+  Name: string;
+  IsRequired: boolean;
   IsVisible: boolean;
-  LastModified: string | null;
+  LastModified: string;
+  nQuestionSectionID: number | null;
+  nQuestionTemplateID: number;
+  OrderValue: number;
+}
+
+export enum PFIType {
+  TPP = 1,
+  FPP = 2,
+  Form = 3,
+  InFPP = 4,
+  CPP = 5,
+}
+
+export interface ProgramTemplateField {
+  // ساختار دقیق بر اساس داده شما:
   ID: number;
   Name?: string | null;
   GPIC?: string | null;
@@ -664,17 +676,8 @@ export interface ProgramTemplateFieldDTO {
   nEntityTypeID?: number | null;
   IsInheritMetaColumns?: boolean | null;
   IsInheritMetaValues?: boolean | null;
-}
-
-export interface ApprovalChecklist {
-  ID: number;
-  Name: string;
-  IsRequired: boolean;
   IsVisible: boolean;
-  LastModified: string;
-  nQuestionSectionID: number | null;
-  nQuestionTemplateID: number;
-  OrderValue: number;
+  LastModified: string | null;
 }
 
 // ساخت یک کلاس برای متدهای API
@@ -1512,14 +1515,19 @@ class ApiService {
     return response.data;
   }
 
-  // ================== ProgramTemplateField ==================
+  async getApprovalCheckList(): Promise<ApprovalChecklist[]> {
+    const response = await httpClient.post<ApprovalChecklist[]>(
+      apiConst.getApprovalCheckList
+    );
+    return response.data;
+  }
 
   async getProgramTemplateField(
     programTemplateId: number
   ): Promise<ProgramTemplateField[]> {
     const response = await httpClient.post<ProgramTemplateField[]>(
       apiConst.getProgramTemplateField,
-      { ID: programTemplateId } // مقدار ID به صورت آبجکت ارسال می‌شود
+      { ID: programTemplateId }
     );
     return response.data;
   }
@@ -1546,13 +1554,6 @@ class ApiService {
 
   async deleteProgramTemplateField(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteProgramTemplateField, { ID: id });
-  }
-
-  async getApprovalCheckList(): Promise<ApprovalChecklist[]> {
-    const response = await httpClient.post<ApprovalChecklist[]>(
-      apiConst.getApprovalCheckList
-    );
-    return response.data;
   }
 }
 

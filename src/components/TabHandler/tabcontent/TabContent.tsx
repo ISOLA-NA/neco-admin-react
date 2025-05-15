@@ -282,7 +282,7 @@ const TabContent: FC<TabContentProps> = ({
       fetchData();
     }
   }, [activeSubTab, fetchData]);
-
+  
 
   // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
@@ -338,15 +338,15 @@ const TabContent: FC<TabContentProps> = ({
             showAlert("success", null, "", "Role Group added successfully.");
           }
           break;
-        case "Staffing":
-          if (staffingRef.current) {
-            const ok = await staffingRef.current.save();
-            console.log("📦 نتیجه save():", ok);
-            if (!ok) return;
-            showAlert("success", null, "", "Staffing added successfully.");
-            await fetchData();
-          }
-          break;
+          case "Staffing":
+            if (staffingRef.current) {
+              const ok = await staffingRef.current.save();
+              console.log("📦 نتیجه save():", ok);
+              if (!ok) return;
+              showAlert("success", null, "", "Staffing added successfully.");
+              await fetchData();
+            }
+            break;
 
         case "ProgramTemplate":
           if (programTemplateRef.current) {
@@ -407,22 +407,13 @@ const TabContent: FC<TabContentProps> = ({
             showAlert("success", null, "", "Approval Flow added successfully.");
           }
           break;
-        // case "Forms":
-        //   if (formsRef.current) {
-        //     const result = await formsRef.current.save();
-        //     if (!result) return;
-        //     showAlert("success", null, "", "Form added successfully.");
-        //   }
-        //   break;
         case "Forms":
           if (formsRef.current) {
             const result = await formsRef.current.save();
             if (!result) return;
             showAlert("success", null, "", "Form added successfully.");
-            await fetchData(); // ✅ خیلی مهم
           }
           break;
-
         case "Categories":
           if (categoriesRef.current) {
             const categoryData = categoriesRef.current.getData();

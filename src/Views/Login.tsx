@@ -1,5 +1,5 @@
 // src/components/Autentications/Login.tsx
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaUser, FaLock, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa'
 
@@ -37,15 +37,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const [loading, setLoading] = useState<boolean>(false)
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-    if (isAuthenticated) {
-      navigate("/", { replace: true });
-    }
-  }, []);
-  
+  const navigate = useNavigate()
 
   // گزینه‌های انتخاب زبان
   const languageOptions = [
@@ -66,7 +58,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLanguage(e.target.value)
     if (e.target.value === '') {
-      setLanguageError('لطفاً زبان را Select an option ....')
+      setLanguageError('لطفاً زبان را انتخاب کنید.')
     } else {
       setLanguageError('')
     }
@@ -105,7 +97,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     // بررسی اینکه زبان انتخاب شده باشد
     if (language === '') {
-      setLanguageError('لطفاً زبان را Select an option ....')
+      setLanguageError('لطفاً زبان را انتخاب کنید.')
       return
     }
 
@@ -160,7 +152,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           })
           onLogin() // اطلاع به والد که کاربر لاگین کرده
           showAlert('success', null, 'موفقیت', 'شما با موفقیت وارد شدید.')
-          navigate('/')
+          navigate('/home')
         } else {
           showAlert('error', null, 'خطا', 'کاربر معمولی نمی‌تواند لاگین کند.')
         }
@@ -329,7 +321,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     ></path>
                   </svg>
                 ) : null}
-               Login
+                ورود
               </button>
             </>
           ) : (

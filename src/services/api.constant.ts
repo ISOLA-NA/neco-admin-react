@@ -64,10 +64,6 @@ export const apiConst = Object.freeze({
   getAllProject: "api/Project/GetAll",
   deleteProject: "api/Project/Delete",
   getAllForPostAdmin: "/api/Post/GetAllForAdmin",
-  getProgramTemplateField: "api/ProgramTemplateField/GetAllByPrgTemplate",
-  insertProgramTemplateField: "api/ProgramTemplateField/Insert",
-  editProgramTemplateField: "api/ProgramTemplateField/Update",
-  deleteProgramTemplateField: "api/ProgramTemplateField/Delete",
   getAllProgramTemplate: "api/ProgramTemplate/GetAll",
   insertProgramTemplate: "api/ProgramTemplate/Insert",
   updateProgramTemplate: "api/ProgramTemplate/Update",
@@ -102,9 +98,7 @@ export const apiConst = Object.freeze({
   deleteApprovalFlow: "api/WFTemplate/Delete",
   editApprovalFlow: "api/WFTemplate/Update",
   getAllEntityType: "api/EntityType/GetAll",
-  // getEntityFieldByEntityTypeId: "api/EntityField/GetByEntityTypeId",
-  //Test
-  getEntityFieldByEntityTypeId: "api/ProgramTemplateField/GetAllByPrgTemplate",
+  getEntityFieldByEntityTypeId: "api/EntityField/GetByEntityTypeId",
   insertEntityField: "api/EntityField/Insert",
   updateEntityField: "api/EntityField/Update",
   deleteEntityField: "api/EntityField/Delete",
@@ -126,7 +120,9 @@ export const apiConst = Object.freeze({
   updateWFBoxTemplate: "api/WFBoxTemplate/Update",
   deleteWFBoxTemplate: "api/WFBoxTemplate/Delete",
   getApprovalContextData: "api/WFApprovTemplate/GetAllByTemplateBoxId",
-
-  //checkList
   getApprovalCheckList: "api/QuestionTemplate/GetAll",
+  getProgramTemplateField: "api/ProgramTemplateField/GetAllByPrgTemplate",
+  insertProgramTemplateField: "api/ProgramTemplateField/Insert",
+  editProgramTemplateField: "api/ProgramTemplateField/Update",
+  deleteProgramTemplateField: "api/ProgramTemplateField/Delete",
 });
