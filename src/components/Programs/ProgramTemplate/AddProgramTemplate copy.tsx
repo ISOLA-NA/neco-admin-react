@@ -308,10 +308,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
             ? Number(formData.approvalFlow)
             : null,
           nQuestionTemplateID: null,
-          nEntityCollectionID: formData.procedure
-            ? Number(formData.procedure)
-            : null,
-
+          nEntityCollectionID: null,
           nProgramTypeID: formData.programtype
             ? Number(formData.programtype)
             : null,
@@ -325,15 +322,15 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
           // بودجه و هزینه
           PCostAct: Number(formData.activityBudget1) || 0,
           PCostAprov: Number(formData.approvalBudget1) || 0,
-          PCostSubAct: Number(formData.programExecutionBudget) || 0,
-          PCostSubAprov: Number(formData.programApprovalBudget) || 0,
+          PCostSubAct: Number(formData.subCost2Act) || 0,
+          PCostSubAprov: Number(formData.subCost2Apr) || 0,
 
           // وزن‌ها
           Weight1: Number(formData.weight1) || 0,
           Weight2: Number(formData.weight2) || 0,
           Weight3: Number(formData.weight3) || 0,
-          WeightWF: Number(formData.approvalToExecutionWeight) || 0,
-          WeightSubProg: Number(formData.programToPlanWeight) || 0,
+          WeightWF: Number(formData.programToPlanWeight) || 0,
+          WeightSubProg: Number(formData.w2SubProg) || 0,
 
           // زمان‌ها
           DelayTime: 0,
