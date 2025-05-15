@@ -15,12 +15,58 @@ interface AddProgramTemplateProps {
   selectedRow: ProgramTemplateItem | null;
   onSaved: () => void;
   onSuccessAdd?: (newItem: { ID: number; Name: string }) => void;
+  editingRow?: any;
+  onCancel?: () => void;
 }
 
 const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
   selectedRow,
   onSaved,
+  editingRow,
+  onCancel,
 }) => {
+  // 👇 مقدار اولیه فرم را یکجا تعریف کن
+  const initialFormData = {
+    activityname: "",
+    responsiblepost: "",
+    approvalFlow: "",
+    checkList: "",
+    duration: "1",
+    lag: "0",
+    procedure: "",
+    programtype: "",
+    weight1: "0",
+    weight2: "",
+    weight3: "",
+    programtemplate: "",
+    approvalToExecutionWeight: "0.2",
+    wfW2: "",
+    wfW3: "",
+    activityBudget1: "0",
+    activityBudget2: "0",
+    activityBudget3: "0",
+    approvalBudget1: "0",
+    approvalBudget2: "0",
+    approvalBudget3: "0",
+    activitytype: "",
+    formname: "",
+    afDuration: "0",
+    programDuration: "0",
+    programExecutionBudget: "0",
+    programApprovalBudget: "0",
+    programToPlanWeight: "0",
+    subCost2Act: "",
+    subCost2Apr: "",
+    subCost3Act: "",
+    subCost3Apr: "",
+    w2SubProg: "",
+    w3SubProg: "",
+    start: "",
+    finish: "",
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+
   const api = useApi();
 
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
@@ -196,46 +242,6 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
     fetchRoles();
   }, []);
 
-  // State management for form fields
-  const [formData, setFormData] = useState({
-    activityname: "NoName",
-    responsiblepost: "",
-    approvalFlow: "",
-    checkList: "",
-    duration: "1",
-    lag: "0",
-    procedure: "",
-    programtype: "",
-    weight1: "0",
-    weight2: "",
-    weight3: "",
-    programtemplate: "",
-    approvalToExecutionWeight: "0.2",
-    wfW2: "",
-    wfW3: "",
-    activityBudget1: "0",
-    activityBudget2: "0",
-    activityBudget3: "0",
-    approvalBudget1: "0",
-    approvalBudget2: "0",
-    approvalBudget3: "0",
-    activitytype: "",
-    formname: "",
-    afDuration: "0",
-    programDuration: "0",
-    programExecutionBudget: "0",
-    programApprovalBudget: "0",
-    programToPlanWeight: "0",
-    subCost2Act: "",
-    subCost2Apr: "",
-    subCost3Act: "",
-    subCost3Apr: "",
-    w2SubProg: "",
-    w3SubProg: "",
-    start: "",
-    finish: "",
-  });
-
   // Handler for input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -349,9 +355,15 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
         },
       };
 
+      console.log("nPostId before send:", formData.responsiblepost);
+
       await api.insertProgramTemplateField(payload);
       showAlert("success", null, "Saved", "Program field added successfully.");
       onSaved();
+      setFormData(initialFormData); // ✅ پاکسازی فرم بعد از Save
+      setSelectedMetaIds([]); // ✅ پاکسازی انتخاب‌های متادیتا
+      setMetaValues([]);
+      setMetaNames([]);
     } catch (error) {
       console.error("Error saving:", error);
       showAlert("error", null, "Error", "Failed to save field.");
@@ -381,6 +393,180 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
       return exists ? prev : [...prev, { ID: newId, Name: newField.Name }];
     });
   };
+
+  const handleUpdate = async () => {
+    try {
+      if (!formData.activityname) {
+        showAlert("warning", null, "Validation", "Name is required");
+        return;
+      }
+
+      // ساخت payload مطابق نیاز API برای ویرایش
+      const payload = {
+        MetaValues: metaValues, // متافیلدها
+
+        PFI: {
+          ...editingRow, // شناسه و سایر اطلاعات
+          Name: formData.activityname,
+          ActDuration: Number(formData.duration) || 0,
+          Left: Number(formData.start) || 0,
+          Top: Number(formData.finish) || 0,
+          nProgramTemplateID: selectedRow?.ID,
+          nPostId: formData.responsiblepost || null,
+          nWFTemplateID: formData.approvalFlow
+            ? Number(formData.approvalFlow)
+            : null,
+          nEntityCollectionID: formData.procedure
+            ? Number(formData.procedure)
+            : null,
+          nProgramTypeID: formData.programtype
+            ? Number(formData.programtype)
+            : null,
+          nEntityTypeID: formData.formname ? Number(formData.formname) : null,
+          PCostAct: Number(formData.activityBudget1) || 0,
+          PCostAprov: Number(formData.approvalBudget1) || 0,
+          PCostSubAct: Number(formData.programExecutionBudget) || 0,
+          PCostSubAprov: Number(formData.programApprovalBudget) || 0,
+          Weight1: Number(formData.weight1) || 0,
+          Weight2: Number(formData.weight2) || 0,
+          Weight3: Number(formData.weight3) || 0,
+          WeightWF: Number(formData.approvalToExecutionWeight) || 0,
+          WeightSubProg: Number(formData.programToPlanWeight) || 0,
+          WFDuration: Number(formData.programDuration) || 0,
+          PFIType: Number(formData.activitytype) || 3, // همیشه عدد یا ۳
+          SubProgramMetaDataColumn:
+            programTemplateField.SubProgramMetaDataColumn || "",
+          // هر چیزی که نیاز باشد اضافه کن...
+        },
+      };
+
+      console.log("ppppp", payload.PFI);
+
+      console.log("nPostId before update:", formData.responsiblepost);
+
+      await api.updateProgramTemplateField(payload); // کال به API ویرایش
+
+      showAlert(
+        "success",
+        null,
+        "Updated",
+        "Program field updated successfully."
+      );
+
+      setFormData(initialFormData); // ✅ پاکسازی فرم بعد از Save
+      setSelectedMetaIds([]); // ✅ پاکسازی انتخاب‌های متادیتا
+      setMetaValues([]);
+      setMetaNames([]);
+      if (onSaved) onSaved();
+      if (onCancel) onCancel(); // مودال بسته شود
+    } catch (error) {
+      console.error("Error updating:", error);
+      showAlert("error", null, "Error", "Failed to update field.");
+    }
+  };
+
+  useEffect(() => {
+    if (editingRow) {
+      // اینجا باید مقادیر را با توجه به کلیدهای formData ست کنی
+      setFormData({
+        activityname: editingRow.Name || "",
+        responsiblepost: editingRow.nPostId ? String(editingRow.nPostId) : "",
+        approvalFlow: editingRow.nWFTemplateID
+          ? String(editingRow.nWFTemplateID)
+          : "",
+        checkList: editingRow.checkList || "",
+        duration: editingRow.ActDuration ? String(editingRow.ActDuration) : "1",
+        lag: editingRow.lag || "0",
+        procedure: editingRow.nEntityCollectionID
+          ? String(editingRow.nEntityCollectionID)
+          : "",
+        programtype: editingRow.nProgramTypeID
+          ? String(editingRow.nProgramTypeID)
+          : "",
+        weight1: editingRow.Weight1 ? String(editingRow.Weight1) : "0",
+        weight2: editingRow.Weight2 ? String(editingRow.Weight2) : "",
+        weight3: editingRow.Weight3 ? String(editingRow.Weight3) : "",
+        programtemplate: editingRow.nProgramTemplateID
+          ? String(editingRow.nProgramTemplateID)
+          : "",
+        approvalToExecutionWeight: editingRow.WeightWF
+          ? String(editingRow.WeightWF)
+          : "0.2",
+        wfW2: editingRow.wfW2 ? String(editingRow.wfW2) : "",
+        wfW3: editingRow.wfW3 ? String(editingRow.wfW3) : "",
+        activityBudget1: editingRow.PCostAct
+          ? String(editingRow.PCostAct)
+          : "0",
+        activityBudget2: editingRow.activityBudget2
+          ? String(editingRow.activityBudget2)
+          : "0",
+        activityBudget3: editingRow.activityBudget3
+          ? String(editingRow.activityBudget3)
+          : "0",
+        approvalBudget1: editingRow.PCostAprov
+          ? String(editingRow.PCostAprov)
+          : "0",
+        approvalBudget2: editingRow.approvalBudget2
+          ? String(editingRow.approvalBudget2)
+          : "0",
+        approvalBudget3: editingRow.approvalBudget3
+          ? String(editingRow.approvalBudget3)
+          : "0",
+        activitytype: editingRow.PFIType ? String(editingRow.PFIType) : "",
+        formname: editingRow.nEntityTypeID
+          ? String(editingRow.nEntityTypeID)
+          : "",
+        afDuration: editingRow.afDuration ? String(editingRow.afDuration) : "0",
+        programDuration: editingRow.WFDuration
+          ? String(editingRow.WFDuration)
+          : "0",
+        programExecutionBudget: editingRow.PCostSubAct
+          ? String(editingRow.PCostSubAct)
+          : "0",
+        programApprovalBudget: editingRow.PCostSubAprov
+          ? String(editingRow.PCostSubAprov)
+          : "0",
+        programToPlanWeight: editingRow.WeightSubProg
+          ? String(editingRow.WeightSubProg)
+          : "0",
+        subCost2Act: editingRow.subCost2Act
+          ? String(editingRow.subCost2Act)
+          : "",
+        subCost2Apr: editingRow.subCost2Apr
+          ? String(editingRow.subCost2Apr)
+          : "",
+        subCost3Act: editingRow.subCost3Act
+          ? String(editingRow.subCost3Act)
+          : "",
+        subCost3Apr: editingRow.subCost3Apr
+          ? String(editingRow.subCost3Apr)
+          : "",
+        w2SubProg: editingRow.w2SubProg ? String(editingRow.w2SubProg) : "",
+        w3SubProg: editingRow.w3SubProg ? String(editingRow.w3SubProg) : "",
+        start: editingRow.Top ? String(editingRow.Top) : "",
+        finish: editingRow.Left ? String(editingRow.Left) : "",
+      });
+
+      if (editingRow.SubProgramMetaDataColumn) {
+        const metaIds =
+          editingRow.SubProgramMetaDataColumn.split("|").filter(Boolean);
+        setSelectedMetaIds(metaIds);
+        // در صورت نیاز مقادیر زیر را نیز به درستی ست کنید
+        setMetaValues([]);
+        setMetaNames([]);
+      } else {
+        setSelectedMetaIds([]);
+        setMetaValues([]);
+        setMetaNames([]);
+      }
+    } else {
+      // 👇 حالت افزودن: فرم باید خالی باشد
+      setFormData(initialFormData);
+      setSelectedMetaIds([]);
+      setMetaValues([]);
+      setMetaNames([]);
+    }
+  }, [editingRow, selectedRow]);
 
   return (
     <div className="container mx-auto p-4">
@@ -765,16 +951,29 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
         </div>
       </div>
       <div className="flex justify-end mt-8 gap-4">
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-          onClick={handleSave}
-        >
-          Save
-        </button>
+        {editingRow ? (
+          <button
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            onClick={handleUpdate}
+          >
+            Update
+          </button>
+        ) : (
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            onClick={handleSave}
+          >
+            Save
+          </button>
+        )}
         <button
           className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
           onClick={() => {
-            // این تابع باید Modal را ببنده (با استفاده از prop یا context)
+            setFormData(initialFormData); // ✅ فرم پاک شود
+            setSelectedMetaIds([]);
+            setMetaValues([]);
+            setMetaNames([]);
+            if (onCancel) onCancel(); // بستن مودال
           }}
         >
           Cancel

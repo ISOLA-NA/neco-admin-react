@@ -89,6 +89,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     const [loadingFields, setLoadingFields] = useState<boolean>(false);
 
+    const [editingRow, setEditingRow] = useState<any | null>(null); // اطلاعات ردیفی که می‌خواهیم ویرایش کنیم
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
     useEffect(() => {
       const fetchTemplates = async () => {
         try {
@@ -373,11 +376,14 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       return [];
     };
 
-    // مدیریت وضعیت Modal برای افزودن برنامه جدید
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const handleEditRow = (rowData: any) => {
+      setEditingRow(rowData);
+      setIsAddModalOpen(true);
+    };
 
     const handleAddClick = () => {
       setIsAddModalOpen(true);
+      setEditingRow(null);
     };
 
     const enhancedProgramTemplateField = programTemplateField.map((item) => {
@@ -399,7 +405,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
       return {
         ...item,
-        nPostId: role?.Name || item.nPostId,
+        nPostId: item.nPostId, // 👈🏻 نگه داشتن مقدار ID اصلی
+        nPostIdDisplay: role?.Name || item.nPostId, // 👈🏻 فقط برای نمایش در جدول
         PFIType: activityTypeValue,
         nWFTemplateID: approvalFlowLabel,
         nEntityTypeID: formLabel,
@@ -414,7 +421,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       { headerName: "Duration", field: "ActDuration" },
       { headerName: "Start", field: "Top" },
       { headerName: "End", field: "Left" },
-      { headerName: "Responsible Post", field: "nPostId" },
+      { headerName: "Responsible Post", field: "nPostIdDisplay" }, // ✅ این درست است
       { headerName: "Job", field: "Code" },
       { headerName: "Approval Flow", field: "nWFTemplateID" },
       { headerName: "Activity Type", field: "PFIType" },
@@ -439,11 +446,13 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     const handleAddModalClose = () => {
       setIsAddModalOpen(false);
+      setEditingRow(null);
     };
 
     const handleSaved = async () => {
       await refreshTable(); // جدول آپدیت بشه
-      setIsAddModalOpen(false); // مودال بسته بشه
+      setIsAddModalOpen(false);
+      setEditingRow(null); // مودال بسته بشه
     };
 
     return (
@@ -560,7 +569,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             <DataTable
               columnDefs={detailColumnDefs}
               rowData={enhancedProgramTemplateField}
-              onRowDoubleClick={() => {}}
+              onRowClick={handleEditRow}
+              onRowDoubleClick={handleEditRow}
               setSelectedRowData={() => {}}
               showDuplicateIcon={false}
               showEditIcon={true}
@@ -581,7 +591,12 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
           <AddProgramTemplate
             selectedRow={selectedRow}
-            onSaved={handleSaved} // ⬅️ به جای فقط refreshTable
+            editingRow={editingRow}
+            onSaved={handleSaved}
+            onCancel={() => {
+              setIsAddModalOpen(false);
+              setEditingRow(null);
+            }}
           />
         </DynamicModal>
       </TwoColumnLayout>
