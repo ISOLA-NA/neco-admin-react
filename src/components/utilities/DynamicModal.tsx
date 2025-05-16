@@ -41,20 +41,20 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
       onClick={handleDialogClick}
     >
       <div
-        className={`modal-box bg-white rounded-xl p-8 relative overflow-y-auto max-h-[90vh] transition-transform duration-300 ease-in-out transform scale-95 sm:scale-100 shadow-xl ${
-          modalClassName ? modalClassName : "max-w-3xl sm:max-w-4xl md:max-w-5xl lg:max-w-6xl"
+        className={`modal-box bg-white rounded-lg p-6 relative overflow-y-auto max-h-[80vh] transition-transform duration-300 ease-in-out transform scale-95 sm:scale-100 shadow-lg ${
+          modalClassName ? modalClassName : "w-full max-w-2xl"
         }`}
       >
         <button
           type="button"
-          className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+          className="absolute top-3 right-4 text-gray-600 hover:text-gray-900 text-xl"
           onClick={handleClose}
-          aria-label="بستن"
+          aria-label="Close"
           style={{ zIndex: 10 }}
         >
           ✕
         </button>
-        <div className="mt-4">{children}</div>
+        <div className="mt-2">{children}</div>
       </div>
     </dialog>
   );

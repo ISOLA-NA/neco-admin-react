@@ -617,415 +617,370 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
   }, [editingRow, selectedRow]);
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-2 gap-8">
-        {/* Left Column */}
-        <div>
-          {/* Activity Name */}
-          <div className="mt-1">
-            <DynamicInput
-              type="text"
-              value={formData.activityname}
-              name="activityname"
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Responsible Post - Approval Flow */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1 mt-4">
+    <div className="flex flex-col h-full overflow-x-hidden">
+      {/* محتوا (اسکرول بالا/پایین) */}
+      <div className="flex-1 px-2 sm:px-4 py-6 overflow-auto">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-8">
+          {/* ستون چپ */}
+          <div className="space-y-6">
+            {/* ردیف‌ها */}
+            <div className="grid grid-cols-2 gap-6">
+              <DynamicInput
+                name="activityname"
+                type="text"
+                value={formData.activityname}
+                onChange={handleChange}
+                className="w-full h-12 rounded-md"
+              />
+              <DynamicInput
+                name="code"
+                type="text"
+                value={formData.code || ""}
+                onChange={handleChange}
+                className="w-full h-12 rounded-md"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-6">
               <DynamicSelector
                 name="responsiblepost"
+                label="Responsible Post"
                 options={roles}
                 selectedValue={formData.responsiblepost}
                 onChange={handleChange}
-                label="Responsible Post"
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicSelector
                 name="approvalFlow"
+                label="Approval flow"
                 options={approvalFlowOptions}
                 selectedValue={formData.approvalFlow}
                 onChange={handleChange}
-                label="Approval flow"
+                className="w-full h-12 rounded-md"
               />
             </div>
-          </div>
-
-          {/* Duration - Lag */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1 mt-4">
+            <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="duration"
                 type="number"
                 value={formData.duration}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="lag"
                 type="number"
                 value={formData.lag}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
+              />
+            </div>
+            <DynamicSelector
+              name="programtype"
+              label="Program type"
+              options={programtypeOptions}
+              selectedValue={formData.programtype}
+              onChange={handleChange}
+              className="w-full h-12 rounded-md"
+            />
+            <DynamicSelector
+              name="programtemplate"
+              label="Program Template"
+              options={programTemplateOptions}
+              selectedValue={formData.programtemplate}
+              onChange={handleChange}
+              className="w-full h-12 rounded-md"
+            />
+            <DynamicSelector
+              name="activitytype"
+              label="Activity Type"
+              options={activityTypes}
+              selectedValue={formData.activitytype}
+              onChange={handleChange}
+              className="w-full h-12 rounded-md"
+            />
+            <DynamicSelector
+              name="formname"
+              label="Form name"
+              options={forms}
+              selectedValue={formData.formname}
+              onChange={handleChange}
+              className="w-full h-12 rounded-md"
+            />
+
+            {/* Meta Data با فاصله بالاتر */}
+            <div className="mt-6 rounded-md">
+              <ListSelector
+                title="Meta Data"
+                columnDefs={[{ field: "Name", headerName: "Name" }]}
+                rowData={metaNames.map((m) => ({
+                  ID: String(m.ID),
+                  Name: m.Name,
+                }))}
+                selectedIds={selectedMetaIds}
+                onSelectionChange={(ids) => setSelectedMetaIds(ids.map(String))}
+                showSwitcher={false}
+                isGlobal={false}
+                ModalContentComponent={AddColumnForm}
+                modalContentProps={{
+                  onSave: handleMetaFieldSave,
+                  onSuccessAdd: handleMetaFieldSave,
+                  onClose: () => {},
+                  entityTypeId: formData.formname,
+                }}
               />
             </div>
           </div>
 
-          {/* Program type */}
-          <div className="mb-4">
-            <DynamicSelector
-              name="programtype"
-              options={programtypeOptions}
-              selectedValue={formData.programtype}
-              onChange={handleChange}
-              label="Program type"
-            />
-          </div>
-
-          {/* Program Template */}
-          <div className="mb-4 mt-10">
-            <DynamicSelector
-              name="programtemplate"
-              options={programTemplateOptions}
-              selectedValue={formData.programtemplate}
-              onChange={handleChange}
-              label="Program Template"
-            />
-          </div>
-
-          {/* Activity Type */}
-          <div className="mb-4 mt-10">
-            <DynamicSelector
-              name="activitytype"
-              options={activityTypes}
-              selectedValue={formData.activitytype}
-              onChange={handleChange}
-              label="Activity Type"
-            />
-          </div>
-
-          {/* Form name */}
-          <div className="mb-4 mt-10">
-            <DynamicSelector
-              name="formname"
-              options={forms}
-              selectedValue={formData.formname}
-              onChange={handleChange}
-              label="Form name"
-            />
-          </div>
-          <div className="mt-10">
-            <ListSelector
-              title="MetaData"
-              columnDefs={[{ field: "Name", headerName: "Name" }]} // 👈 دقیقاً این فیلد
-              rowData={metaNames.map((m) => ({
-                ID: String(m.ID),
-                Name: m.Name,
-              }))} // 👈 این خط مهمه
-              selectedIds={selectedMetaIds}
-              onSelectionChange={(ids) => setSelectedMetaIds(ids.map(String))}
-              showSwitcher={false}
-              isGlobal={false}
-              ModalContentComponent={AddColumnForm}
-              modalContentProps={{
-                onSave: handleMetaFieldSave,
-                onSuccessAdd: handleMetaFieldSave,
-                onClose: () => {},
-                entityTypeId: formData.formname,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Right Column */}
-        <div>
-          {/* Start - Finish */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1 mt-1">
+          {/* ستون راست */}
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="start"
                 type="text"
                 value={formData.start}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="finish"
                 type="text"
                 value={formData.finish}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-          </div>
-
-          {/* Check list */}
-          <div className="mb-4">
             <DynamicSelector
               name="checkList"
+              label="Check list"
               options={checkListOptions}
               selectedValue={formData.checkList}
               onChange={handleChange}
-              label="checkList"
+              className="w-full h-12 rounded-md"
             />
-          </div>
-
-          {/* Procedure */}
-          <div className="mb-4 mt-10">
             <DynamicSelector
               name="procedure"
+              label="Procedure"
               options={procedureOptions}
               selectedValue={formData.procedure}
               onChange={handleChange}
-              label="Procedure"
+              className="w-full h-12 rounded-md"
             />
-          </div>
 
-          {/* Weights */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1 mt-4">
+            <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="weight1"
                 type="number"
                 value={formData.weight1}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="weight2"
                 type="number"
                 value={formData.weight2}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="weight3"
                 type="number"
                 value={formData.weight3}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-          </div>
-
-          {/* Approval to Execution Weight, WF W2, WF W3 */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1 ">
+            <div className="grid grid-cols-3 gap-6">
               <DynamicInput
-                name="approvalToExecutionWeight"
+                name="Approval Execution"
                 type="number"
                 value={formData.approvalToExecutionWeight}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md "
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="wfW2"
                 type="number"
                 value={formData.wfW2}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="wfW3"
                 type="number"
                 value={formData.wfW3}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-          </div>
-
-          {/* Activity Budgets */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1">
+            <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="activityBudget1"
                 type="number"
                 value={formData.activityBudget1}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="activityBudget2"
                 type="number"
                 value={formData.activityBudget2}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="activityBudget3"
                 type="number"
                 value={formData.activityBudget3}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-          </div>
-
-          {/* Approval Budgets */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1">
+            <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="approvalBudget1"
                 type="number"
                 value={formData.approvalBudget1}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="approvalBudget2"
                 type="number"
                 value={formData.approvalBudget2}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="approvalBudget3"
                 type="number"
                 value={formData.approvalBudget3}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-          </div>
 
-          {/* AF Duration, Program Duration */}
-          <div className="mb-4 flex gap-4 items-end">
-            <div className="flex-1">
+            {/* ردیف afDuration/programDuration دو‌ستون */}
+            <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="afDuration"
                 type="number"
                 value={formData.afDuration}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1">
               <DynamicInput
                 name="programDuration"
                 type="number"
                 value={formData.programDuration}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-          </div>
 
-          {/* Program Execution Budget */}
-          <div className="mb-4">
-            <DynamicInput
-              name="programExecutionBudget"
-              type="number"
-              value={formData.programExecutionBudget}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Program Approval Budget */}
-          <div className="mb-4">
-            <DynamicInput
-              name="programApprovalBudget"
-              type="number"
-              value={formData.programApprovalBudget}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Program to plan weight */}
-          <div className="mb-4">
-            <DynamicInput
-              name="programToPlanWeight"
-              type="number"
-              value={formData.programToPlanWeight}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* SubCosts and W2, W3 SubProg */}
-          <div className="mb-4 flex flex-wrap gap-4 items-end">
-            <div className="flex-1 min-w-[150px]">
+            <div className="grid grid-cols-3 gap-6">
+              <DynamicInput
+                name="programExecutionBudget"
+                type="number"
+                value={formData.programExecutionBudget}
+                onChange={handleChange}
+                className="w-full h-12 rounded-md"
+              />
               <DynamicInput
                 name="subCost2Act"
                 type="number"
                 value={formData.subCost2Act}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1 min-w-[150px]">
-              <DynamicInput
-                name="subCost2Apr"
-                type="number"
-                value={formData.subCost2Apr}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex-1 min-w-[150px]">
               <DynamicInput
                 name="subCost3Act"
                 type="number"
                 value={formData.subCost3Act}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-            <div className="flex-1 min-w-[150px]">
+            <div className="grid grid-cols-3 gap-6">
+              <DynamicInput
+                name="programApprovalBudget"
+                type="number"
+                value={formData.programApprovalBudget}
+                onChange={handleChange}
+                className="w-full h-12 rounded-md"
+              />
+              <DynamicInput
+                name="subCost2Apr"
+                type="number"
+                value={formData.subCost2Apr}
+                onChange={handleChange}
+                className="w-full h-12 rounded-md"
+              />
               <DynamicInput
                 name="subCost3Apr"
                 type="number"
                 value={formData.subCost3Apr}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
-            <div className="flex-1 min-w-[150px]">
+            <div className="grid grid-cols-3 gap-6">
+              <DynamicInput
+                name="programToPlanWeight"
+                type="number"
+                value={formData.programToPlanWeight}
+                onChange={handleChange}
+                className="w-full h-12 rounded-md"
+              />
               <DynamicInput
                 name="w2SubProg"
                 type="number"
                 value={formData.w2SubProg}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
-            </div>
-            <div className="flex-1 min-w-[150px]">
               <DynamicInput
                 name="w3SubProg"
                 type="number"
                 value={formData.w3SubProg}
                 onChange={handleChange}
+                className="w-full h-12 rounded-md"
               />
             </div>
           </div>
         </div>
       </div>
-      <div className="flex justify-end mt-8 gap-4">
-        {editingRow ? (
+
+      {/* footer کاملاً چسبیده */}
+      <div className="sticky bottom-0 left-0 right-0 z-10 bg-white pt-4 pb-2">
+        <div className="flex justify-center gap-8">
+          {editingRow ? (
+            <button
+              onClick={handleUpdate}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+            >
+              Update
+            </button>
+          ) : (
+            <button
+              onClick={handleSave}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+            >
+              Save
+            </button>
+          )}
           <button
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            onClick={handleUpdate}
+            onClick={() => {
+              setFormData(initialFormData);
+              setSelectedMetaIds([]);
+              setMetaValues([]);
+              setMetaNames([]);
+              if (onCancel) onCancel();
+            }}
+            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
           >
-            Update
+            Cancel
           </button>
-        ) : (
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-        )}
-        <button
-          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
-          onClick={() => {
-            setFormData(initialFormData); // ✅ فرم پاک شود
-            setSelectedMetaIds([]);
-            setMetaValues([]);
-            setMetaNames([]);
-            if (onCancel) onCancel(); // بستن مودال
-          }}
-        >
-          Cancel
-        </button>
+        </div>
       </div>
     </div>
   );

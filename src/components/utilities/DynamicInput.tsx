@@ -43,7 +43,8 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
       {name && (
         <label
           htmlFor={name}
-          className="block text-xs text-gray-600 mb-1"
+          title={name}
+          className="block text-xs text-gray-600 mb-1 truncate whitespace-nowrap overflow-hidden"
         >
           {name}
           {required && <span className="text-red-500"> *</span>}

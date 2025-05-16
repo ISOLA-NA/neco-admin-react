@@ -50,7 +50,9 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   };
 
   const handleOptionClick = (value: string) => {
-    onChange({ target: { name, value } } as React.ChangeEvent<HTMLSelectElement>);
+    onChange({
+      target: { name, value },
+    } as React.ChangeEvent<HTMLSelectElement>);
     setOpen(false);
     setCustomInput("");
   };
@@ -59,7 +61,9 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   const handleAddCustomOption = () => {
     if (customInput.trim()) {
       // ابتدا ارسال رویداد با مقدار تایپ‌شده
-      onChange({ target: { name, value: customInput } } as React.ChangeEvent<HTMLSelectElement>);
+      onChange({
+        target: { name, value: customInput },
+      } as React.ChangeEvent<HTMLSelectElement>);
       setOpen(false);
       setCustomInput("");
     }
@@ -68,7 +72,10 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   // بستن منو هنگام کلیک بیرون از کامپوننت
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -91,13 +98,17 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
       )}
     >
       {label && (
-        <label htmlFor={name} className="block text-xs text-gray-600 mb-1" title={label}>
+        <label
+          htmlFor={name}
+          className="block text-xs text-gray-600 mb-1"
+          title={label}
+        >
           {label}
         </label>
       )}
 
       <div className="flex items-center gap-2">
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           {leftIcon && (
             <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
               {leftIcon}
@@ -113,11 +124,23 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
               disabled ? "bg-gray-300 text-gray-800" : "bg-white"
             )}
           >
-            <span className="truncate">
-              {options.find((o) => o.value === selectedValue)?.label || selectedValue || "انتخاب کنید"}
+            <span className="block w-full truncate whitespace-nowrap overflow-hidden">
+              {options.find((o) => o.value === selectedValue)?.label ||
+                selectedValue ||
+                ""}
             </span>
-            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-4 h-4 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
 
@@ -145,9 +168,11 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                   key={option.value}
                   onClick={() => handleOptionClick(option.value)}
                   style={optionStyle}
-                  className="cursor-pointer text-xs px-2 hover:bg-purple-100 whitespace-nowrap"
+                  className="cursor-pointer text-xs px-2 hover:bg-purple-100"
                 >
-                  {option.label}
+                  <span className="block w-full truncate whitespace-nowrap overflow-hidden">
+                    {option.label}
+                  </span>
                 </div>
               ))}
               {allowCustom && customInput.trim() !== "" && (
