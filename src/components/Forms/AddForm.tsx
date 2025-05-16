@@ -403,23 +403,23 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className=" flex items-center justify-center">
       {isLoading && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
         </div>
       )}
-      <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-8">
+      <div className="w-full max-w-3xl bg-white rounded-lg">
         <h2 className="text-3xl font-bold mb-6 text-center">
           {isEdit ? "Edit Column" : "Add New Column"}
         </h2>
         <form
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
           onSubmit={handleSubmit}
         >
           {/* Column Name */}
           <DynamicInput
-            name="formName"
+            name="Column Name"
             type="text"
             value={formData.formName}
             placeholder="Column Name"
@@ -432,7 +432,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
           {/* Order */}
           <DynamicInput
-            name="order"
+            name="Order"
             type="number"
             value={formData.order}
             placeholder="Order"
@@ -441,11 +441,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
           {/* Description */}
           <CustomTextarea
-            name="description"
+            name="Description"
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             placeholder="Description"
-            className="md:col-span-1"
+            className="md:col-span-1 -mt-3"
           />
 
           {/* Command selector با امکان تایپ دلخواه */}
@@ -456,11 +456,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             onChange={(e) => handleChange("command", e.target.value)}
             label="Command"
             allowCustom={true}
-            className="md:col-span-1"
+            className="md:col-span-1 -mt-3"
           />
 
           {/* Required in Workflow */}
-          <div className="flex items-center md:col-span-1">
+          <div className="flex items-center md:col-span-1 translate-y-[24px] -mt-12">
             <input
               type="checkbox"
               id="isRequiredInWf"
@@ -473,23 +473,23 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               htmlFor="isRequiredInWf"
               className="ml-3 text-gray-700 font-medium"
             >
-              Required in Workflow
+              Is Required In Wf
             </label>
           </div>
 
-          {/* PrintCode */}
           <DynamicInput
-            name="printCode"
+            name="Print Code"
             type="text"
             value={formData.printCode}
             placeholder="Print Code"
             onChange={(e) => handleChange("printCode", e.target.value)}
+            className="-mt-3"
           />
 
           {/* Editable in Workflow, Workflow Box, Show in Alert */}
           <div className="md:col-span-2 flex flex-col space-y-4">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center">
+              <div className="flex items-center  translate-y-[10px]">
                 <input
                   type="checkbox"
                   id="isEditableInWf"
@@ -504,20 +504,20 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   htmlFor="isEditableInWf"
                   className="ml-3 text-gray-700 font-medium"
                 >
-                  Editable in Workflow
+                  Is Editable in Workflow
                 </label>
               </div>
               <DynamicInput
-                name="allowedWfBoxName"
+                name="Allowed WfBox Name"
                 type="text"
                 value={formData.allowedWfBoxName}
-                placeholder="Workflow Box Name"
+                placeholder=""
                 onChange={(e) =>
                   handleChange("allowedWfBoxName", e.target.value)
                 }
                 className="flex-1"
               />
-              <div className="flex items-center">
+              <div className="flex items-center  translate-y-[10px]">
                 <input
                   type="checkbox"
                   id="showInAlert"
@@ -638,7 +638,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
           {/* ردیف Read Only, Show in Tab و Program Meta Column Name */}
           <div className="flex flex-wrap md:col-span-2 space-x-4 items-center">
-            <div className="flex items-center">
+            <div className="flex items-center  translate-y-[10px]">
               <input
                 type="checkbox"
                 id="readOnly"
@@ -655,11 +655,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               </label>
             </div>
             <DynamicInput
-              name="showInTab"
+              name="Show in Tab"
               type="text"
               value={formData.showInTab}
               onChange={(e) => handleChange("showInTab", e.target.value)}
-              placeholder="Show in Tab"
+              placeholder=""
               className="flex-1"
             />
             {/* در برخی نوع‌ها metaType4 پنهان می‌ماند */}
@@ -667,10 +667,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               formData.typeOfInformation
             ) && (
               <DynamicInput
-                name="programMetaColumnName"
+                name="Program Meta ColumnName"
                 type="text"
                 value={dynamicMeta.metaType4 || ""}
-                placeholder="Program Meta Column Name"
+                placeholder=""
                 onChange={(e) =>
                   setDynamicMeta((prev: any) => ({
                     ...prev,

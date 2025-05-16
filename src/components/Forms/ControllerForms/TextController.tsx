@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 
 interface TextControllerProps {
-
   onMetaChange: (meta: {
     metaType1: string;
     metaType2: string | null;
@@ -20,7 +19,11 @@ interface TextControllerProps {
   isDisable?: boolean;
 }
 
-const TextController: React.FC<TextControllerProps> = ({ onMetaChange, data, isDisable = false }) => {
+const TextController: React.FC<TextControllerProps> = ({
+  onMetaChange,
+  data,
+  isDisable = false,
+}) => {
   // مقداردهی اولیه state از prop data؛ در صورت عدم وجود مقدار، از "" استفاده می‌کنیم
   const [metaTypes, setMetaTypes] = useState({
     metaType1: data?.metaType1 || "",
@@ -29,17 +32,17 @@ const TextController: React.FC<TextControllerProps> = ({ onMetaChange, data, isD
     metaType4: data?.metaType4 || null,
   });
 
-  // در صورتی که prop data تغییر کند (مثلاً در حالت ادیت)، state به‌روز می‌شود.
   useEffect(() => {
-    if (data) {
-      setMetaTypes({
-        metaType1: data.metaType1 || "",
-        metaType2: data.metaType2 || null,
-        metaType3: data.metaType3 || null,
-        metaType4: data.metaType4 || null,
-      });
+    // فقط وقتی مقدارها واقعاً تغییر کردند، setDynamicMeta فراخوانی شود
+    if (
+      data?.metaType1 !== metaTypes.metaType1 ||
+      data?.metaType2 !== metaTypes.metaType2 ||
+      data?.metaType3 !== metaTypes.metaType3 ||
+      data?.metaType4 !== metaTypes.metaType4
+    ) {
+      onMetaChange(metaTypes);
     }
-  }, [data]);
+  }, [metaTypes]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -53,9 +56,7 @@ const TextController: React.FC<TextControllerProps> = ({ onMetaChange, data, isD
 
   return (
     <div className="mt-10 bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
-      <div className="mb-4">
-
-      </div>
+      <div className="mb-4"></div>
       <div>
         <DynamicInput
           name=" Default Value"
