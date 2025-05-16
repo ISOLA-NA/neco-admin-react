@@ -1555,6 +1555,14 @@ class ApiService {
   async deleteProgramTemplateField(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteProgramTemplateField, { ID: id });
   }
+
+  async getEntityFieldById(id: number): Promise<EntityField> {
+    const response = await httpClient.post<EntityField>(
+      apiConst.getEntityFieldById, // ✅ استفاده از constant
+      { ID: id }
+    );
+    return response.data;
+  }
 }
 
 // یک خروجی برای استفاده در Context

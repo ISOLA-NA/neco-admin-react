@@ -125,4 +125,5 @@ export const apiConst = Object.freeze({
   insertProgramTemplateField: "api/ProgramTemplateField/Insert",
   editProgramTemplateField: "api/ProgramTemplateField/Update",
   deleteProgramTemplateField: "api/ProgramTemplateField/Delete",
+  getEntityFieldById: "api/EntityField/GetById",
 });

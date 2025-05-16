@@ -196,6 +196,8 @@ interface ApiContextType {
   deleteProgramTemplateField: (id: number) => Promise<void>;
 
   getApprovalCheckList: () => Promise<ApprovalChecklist[]>;
+
+  getEntityFieldById: (id: number) => Promise<EntityField>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -354,6 +356,7 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
       AppServices.deleteProgramTemplateField.bind(AppServices),
 
     getApprovalCheckList: AppServices.getApprovalCheckList.bind(AppServices),
+    getEntityFieldById: AppServices.getEntityFieldById.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
@@ -395,4 +398,5 @@ export type {
   OdpWithExtra,
   ProgramTemplateField,
   ApprovalChecklist,
+  EntityField,
 };

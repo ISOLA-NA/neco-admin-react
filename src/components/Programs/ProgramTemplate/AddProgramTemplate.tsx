@@ -467,7 +467,9 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
 
   useEffect(() => {
     if (editingRow) {
-      // اینجا باید مقادیر را با توجه به کلیدهای formData ست کنی
+      console.log("🔧 editingRow دریافت شد:", editingRow);
+
+      // مقداردهی اولیه فرم
       setFormData({
         activityname: editingRow.Name || "",
         responsiblepost: editingRow.nPostId ? String(editingRow.nPostId) : "",
@@ -547,20 +549,66 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
         finish: editingRow.Left ? String(editingRow.Left) : "",
       });
 
+      // متادیتا
+      console.log(
+        "🟡 SubProgramMetaDataColumn →",
+        editingRow.SubProgramMetaDataColumn
+      );
+
       if (editingRow.SubProgramMetaDataColumn) {
         const metaIds =
           editingRow.SubProgramMetaDataColumn.split("|").filter(Boolean);
+
+        console.log("🟡 Extracted metaIds →", metaIds);
+
         setSelectedMetaIds(metaIds);
-        // در صورت نیاز مقادیر زیر را نیز به درستی ست کنید
-        setMetaValues([]);
-        setMetaNames([]);
+
+        const fetchMetaData = async () => {
+          try {
+            const fetched = await Promise.all(
+              metaIds.map(async (id) => {
+                console.log("📡 Fetching meta for ID:", id);
+                try {
+                  const res = await api.getEntityFieldById(Number(id));
+                  console.log("rrrrrrrrrrrrrrrrrrr", res);
+                  return {
+                    ID: String(res.ID),
+                    Name: res.DisplayName || "",
+                  };
+                } catch (err) {
+                  console.error("❌ Error fetching metadata for ID:", id, err);
+                  return null;
+                }
+              })
+            );
+
+            const validMeta = fetched.filter(Boolean) as {
+              ID: string;
+              Name: string;
+            }[];
+
+            console.log("🟢 metaNames →", validMeta);
+
+            setMetaValues(validMeta);
+            setMetaNames(validMeta);
+
+            console.log(
+              "🎯 rowData for ListSelector →",
+              validMeta.map((m) => ({ ID: String(m.ID), Name: m.Name }))
+            );
+          } catch (err) {
+            console.error("❌ خطای کلی در دریافت متادیتا:", err);
+          }
+        };
+
+        fetchMetaData();
       } else {
         setSelectedMetaIds([]);
         setMetaValues([]);
         setMetaNames([]);
       }
     } else {
-      // 👇 حالت افزودن: فرم باید خالی باشد
+      // حالت افزودن جدید
       setFormData(initialFormData);
       setSelectedMetaIds([]);
       setMetaValues([]);
