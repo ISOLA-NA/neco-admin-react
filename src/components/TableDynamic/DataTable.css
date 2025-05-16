@@ -82,3 +82,19 @@
 }
 
 /* سایر استایل‌های دلخواه ... */
+
+/* ✅ ردیف انتخاب شده (داخل DataTable خودش) */
+.ag-theme-quartz .ag-row.ag-row-selected {
+  background-color: #ffe1e9 !important;
+  color: #111 !important;
+  font-weight: 600;
+  border-left: 4px solid #f87171;
+  box-shadow: inset 0 0 0 9999px rgba(255, 71, 87, 0.05);
+  transition: all 0.1s ease-in-out;
+}
+
+/* ✅ جلوه Hover بدون تداخل با انتخاب */
+.ag-theme-quartz .ag-row:hover {
+  background-color: #fff0f3 !important;
+  cursor: pointer;
+}

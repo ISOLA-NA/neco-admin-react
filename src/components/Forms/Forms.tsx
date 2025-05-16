@@ -382,6 +382,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     if (formData.ID) {
       try {
         const fields = await api.getEntityFieldByEntityTypeId(formData.ID);
+        console.log("ffffff", fields);
         setEntityFields(fields);
       } catch (error) {
         console.error("Error fetching entity fields:", error);
@@ -919,9 +920,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               gridOptions={{
                 singleClickEdit: true,
               }}
-              onCellClicked={(params) => {
-                setSelectedRowData(params.data);
-              }}
+              // onCellClicked={(params) => {
+              //   setSelectedRowData(params.data);
+              // }}
               onCellValueChanged={handleCellValueChanged}
               onAdd={handleAddClick}
               onEdit={() => {

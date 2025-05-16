@@ -5,6 +5,7 @@ import React, {
   useEffect,
   forwardRef,
   useImperativeHandle,
+  useMemo,
 } from "react";
 import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import DynamicInput from "../../utilities/DynamicInput";
@@ -22,6 +23,7 @@ import {
   Project,
   ProgramType,
 } from "../../../services/api.services";
+import DynamicConfirm from "../../utilities/DynamicConfirm";
 
 export interface ProgramTemplateHandle {
   save: () => Promise<boolean>;
@@ -89,8 +91,13 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     const [loadingFields, setLoadingFields] = useState<boolean>(false);
 
-    const [editingRow, setEditingRow] = useState<any | null>(null); // اطلاعات ردیفی که می‌خواهیم ویرایش کنیم
+    const [editingRow, setEditingRow] = useState<any | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [selectedDetailRow, setSelectedDetailRow] = useState<any | null>(
+      null
+    );
+
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
       const fetchTemplates = async () => {
@@ -376,8 +383,40 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       return [];
     };
 
-    const handleEditRow = (rowData: any) => {
-      setEditingRow(rowData);
+    const handleDeleteRow = () => {
+      if (!selectedDetailRow) {
+        showAlert("warning", null, "Warning", "Please select a row to delete.");
+        return;
+      }
+
+      setShowDeleteConfirm(true); // 👈 نمایش پنجره تأیید
+    };
+
+    const confirmDeleteRow = async () => {
+      try {
+        await api.deleteProgramTemplateField(selectedDetailRow.ID);
+
+        // حذف از جدول
+        setProgramTemplateField((prev) =>
+          prev.filter((item) => item.ID !== selectedDetailRow.ID)
+        );
+
+        setSelectedDetailRow(null); // پاک‌سازی انتخاب
+        setShowDeleteConfirm(false); // بستن مودال
+        showAlert("success", null, "Deleted", "Row deleted successfully.");
+      } catch (error) {
+        console.error("❌ Error deleting row:", error);
+        showAlert("error", null, "Error", "Failed to delete the row.");
+        setShowDeleteConfirm(false);
+      }
+    };
+
+    const handleSelectRow = (row: any) => {
+      setSelectedDetailRow(row);
+    };
+
+    const handleEditRow = (row: any) => {
+      setEditingRow(row);
       setIsAddModalOpen(true);
     };
 
@@ -386,33 +425,68 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       setEditingRow(null);
     };
 
-    const enhancedProgramTemplateField = programTemplateField.map((item) => {
-      const role = roles.find((r) => r.ID === item.nPostId);
-      const activityTypeValue =
-        activityTypes.find((a) => Number(a.label) === Number(item.PFIType))
-          ?.value || item.PFIType;
-      const approvalFlowLabel =
-        wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))
-          ?.Name || item.nWFTemplateID;
-      const formLabel =
-        forms.find((f) => String(f.ID) === String(item.nEntityTypeID))?.Name ||
-        item.nEntityTypeID;
+    // const enhancedProgramTemplateField = programTemplateField.map((item) => {
+    //   const role = roles.find((r) => r.ID === item.nPostId);
+    //   const activityTypeValue =
+    //     activityTypes.find((a) => Number(a.label) === Number(item.PFIType))
+    //       ?.value || item.PFIType;
+    //   const approvalFlowLabel =
+    //     wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))
+    //       ?.Name || item.nWFTemplateID;
+    //   const formLabel =
+    //     forms.find((f) => String(f.ID) === String(item.nEntityTypeID))?.Name ||
+    //     item.nEntityTypeID;
 
-      const programTemplateLabel =
-        programTemplates.find(
-          (p) => String(p.ID) === String(item.nProgramTemplateID)
-        )?.Name || item.nProgramTemplateID;
+    //   const programTemplateLabel =
+    //     programTemplates.find(
+    //       (p) => String(p.ID) === String(item.nProgramTemplateID)
+    //     )?.Name || item.nProgramTemplateID;
 
-      return {
-        ...item,
-        nPostId: item.nPostId, // 👈🏻 نگه داشتن مقدار ID اصلی
-        nPostIdDisplay: role?.Name || item.nPostId, // 👈🏻 فقط برای نمایش در جدول
-        PFIType: activityTypeValue,
-        nWFTemplateID: approvalFlowLabel,
-        nEntityTypeID: formLabel,
-        nProgramTemplateID: programTemplateLabel,
-      };
-    });
+    //   return {
+    //     ...item,
+    //     nPostId: item.nPostId, // 👈🏻 نگه داشتن مقدار ID اصلی
+    //     nPostIdDisplay: role?.Name || item.nPostId, // 👈🏻 فقط برای نمایش در جدول
+    //     PFIType: activityTypeValue,
+    //     nWFTemplateID: approvalFlowLabel,
+    //     nEntityTypeID: formLabel,
+    //     nProgramTemplateID: programTemplateLabel,
+    //   };
+    // });
+    const enhancedProgramTemplateField = useMemo(() => {
+      return programTemplateField.map((item) => {
+        const role = roles.find((r) => r.ID === item.nPostId);
+        const activityTypeValue =
+          activityTypes.find((a) => Number(a.label) === Number(item.PFIType))
+            ?.value || item.PFIType;
+        const approvalFlowLabel =
+          wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))
+            ?.Name || item.nWFTemplateID;
+        const formLabel =
+          forms.find((f) => String(f.ID) === String(item.nEntityTypeID))
+            ?.Name || item.nEntityTypeID;
+        const programTemplateLabel =
+          programTemplates.find(
+            (p) => String(p.ID) === String(item.nProgramTemplateID)
+          )?.Name || item.nProgramTemplateID;
+
+        return {
+          ...item,
+          nPostId: item.nPostId,
+          nPostIdDisplay: role?.Name || item.nPostId,
+          PFIType: activityTypeValue,
+          nWFTemplateID: approvalFlowLabel,
+          nEntityTypeID: formLabel,
+          nProgramTemplateID: programTemplateLabel,
+        };
+      });
+    }, [
+      programTemplateField,
+      roles,
+      activityTypes,
+      wfTemplates,
+      forms,
+      programTemplates,
+    ]);
 
     // تعریف ستون‌ها برای جدول جزئیات
     const detailColumnDefs = [
@@ -456,150 +530,174 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     };
 
     return (
-      <TwoColumnLayout>
-        <TwoColumnLayout.Item>
-          <DynamicInput
-            name="Program Name"
-            type="text"
-            value={programTemplateData.Name}
-            placeholder="Enter program name"
-            onChange={(e) => handleChange("Name", e.target.value)}
-            required={true}
-          />
-        </TwoColumnLayout.Item>
-
-        <TwoColumnLayout.Item>
-          <DynamicInput
-            name="Duration"
-            type="number"
-            value={programTemplateData.Duration}
-            placeholder="Enter duration"
-            onChange={(e) => handleChange("Duration", Number(e.target.value))}
-            required={true}
-          />
-        </TwoColumnLayout.Item>
-
-        <TwoColumnLayout.Item>
-          <DynamicInput
-            name="Cost Approved"
-            type="number"
-            value={programTemplateData.PCostAprov}
-            placeholder="Enter approved cost"
-            onChange={(e) => handleChange("PCostAprov", Number(e.target.value))}
-          />
-        </TwoColumnLayout.Item>
-
-        {/* Updated ListSelector for Related Projects */}
-        <TwoColumnLayout.Item>
-          <ListSelector
-            title="Related Projects"
-            columnDefs={projectColumnDefs}
-            rowData={projectsListData}
-            selectedIds={selectedProjectIds}
-            onSelectionChange={handleProjectsChange}
-            showSwitcher={true}
-            isGlobal={programTemplateData.IsGlobal}
-            onGlobalChange={handleGlobalChange}
-            loading={loadingProjects}
-            ModalContentComponent={TableSelector}
-            modalContentProps={{
-              columnDefs: projectColumnDefs,
-              rowData: projectsListData,
-              selectedRow: selectedRowData,
-              onRowDoubleClick: () => {
-                if (selectedRowData) {
-                  const newSelection = [
-                    ...selectedProjectIds,
-                    String(selectedRowData.ID),
-                  ];
-                  handleProjectsChange(newSelection);
-                }
-              },
-              onRowClick: (row: any) => setSelectedRowData(row),
-              onSelectButtonClick: () => {
-                if (selectedRowData) {
-                  const newSelection = [
-                    ...selectedProjectIds,
-                    String(selectedRowData.ID),
-                  ];
-                  handleProjectsChange(newSelection);
-                }
-              },
-              isSelectDisabled: !selectedRowData,
-            }}
-          />
-        </TwoColumnLayout.Item>
-
-        {/* DynamicSelector برای انتخاب نوع برنامه به صورت پویا */}
-        <TwoColumnLayout.Item>
-          <DynamicSelector
-            options={programTypeOptions}
-            selectedValue={selectedProgramTypeId}
-            onChange={(e) => {
-              handleChange(
-                "nProgramTypeID",
-                e.target.value ? parseInt(e.target.value) : null
-              );
-              setSelectedProgramTypeId(e.target.value);
-            }}
-            label="Type"
-            showButton={true}
-            onButtonClick={handleOpenModal}
-            className="-mt-24"
-            loading={loadingProgramTypes} // افزودن وضعیت بارگذاری
-          />
-        </TwoColumnLayout.Item>
-
-        {/* Dynamic Modal برای انتخاب نوع برنامه */}
-        <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
-          <TableSelector
-            columnDefs={[{ headerName: "Name", field: "label" }]}
-            rowData={getRowData(currentSelector)}
-            selectedRow={selectedRowData}
-            onRowDoubleClick={handleSelectButtonClick}
-            onRowClick={handleRowClick}
-            onSelectButtonClick={handleSelectButtonClick}
-            isSelectDisabled={!selectedRowData}
-          />
-        </DynamicModal>
-
-        {/* بخش جزئیات با DataTable */}
-        <TwoColumnLayout.Item span={2}>
-          <div className="-mt-12">
-            <DataTable
-              columnDefs={detailColumnDefs}
-              rowData={enhancedProgramTemplateField}
-              onRowClick={handleEditRow}
-              onRowDoubleClick={handleEditRow}
-              setSelectedRowData={() => {}}
-              showDuplicateIcon={false}
-              showEditIcon={true}
-              showAddIcon={true}
-              showDeleteIcon={true}
-              onAdd={handleAddClick}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              onDuplicate={() => {}}
-              domLayout="autoHeight"
-              showSearch={true}
-              isLoading={loadingFields} //
+      <>
+        <TwoColumnLayout>
+          <TwoColumnLayout.Item>
+            <DynamicInput
+              name="Program Name"
+              type="text"
+              value={programTemplateData.Name}
+              placeholder="Enter program name"
+              onChange={(e) => handleChange("Name", e.target.value)}
+              required={true}
             />
-          </div>
-        </TwoColumnLayout.Item>
+          </TwoColumnLayout.Item>
 
-        {/* Dynamic Modal برای افزودن برنامه جدید */}
-        <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
-          <AddProgramTemplate
-            selectedRow={selectedRow}
-            editingRow={editingRow}
-            onSaved={handleSaved}
-            onCancel={() => {
-              setIsAddModalOpen(false);
-              setEditingRow(null);
-            }}
-          />
-        </DynamicModal>
-      </TwoColumnLayout>
+          <TwoColumnLayout.Item>
+            <DynamicInput
+              name="Duration"
+              type="number"
+              value={programTemplateData.Duration}
+              placeholder="Enter duration"
+              onChange={(e) => handleChange("Duration", Number(e.target.value))}
+              required={true}
+            />
+          </TwoColumnLayout.Item>
+
+          <TwoColumnLayout.Item>
+            <DynamicInput
+              name="Cost Approved"
+              type="number"
+              value={programTemplateData.PCostAprov}
+              placeholder="Enter approved cost"
+              onChange={(e) =>
+                handleChange("PCostAprov", Number(e.target.value))
+              }
+            />
+          </TwoColumnLayout.Item>
+
+          {/* Updated ListSelector for Related Projects */}
+          <TwoColumnLayout.Item>
+            <ListSelector
+              title="Related Projects"
+              columnDefs={projectColumnDefs}
+              rowData={projectsListData}
+              selectedIds={selectedProjectIds}
+              onSelectionChange={handleProjectsChange}
+              showSwitcher={true}
+              isGlobal={programTemplateData.IsGlobal}
+              onGlobalChange={handleGlobalChange}
+              loading={loadingProjects}
+              ModalContentComponent={TableSelector}
+              modalContentProps={{
+                columnDefs: projectColumnDefs,
+                rowData: projectsListData,
+                selectedRow: selectedRowData,
+                onRowDoubleClick: () => {
+                  if (selectedRowData) {
+                    const newSelection = [
+                      ...selectedProjectIds,
+                      String(selectedRowData.ID),
+                    ];
+                    handleProjectsChange(newSelection);
+                  }
+                },
+                onRowClick: (row: any) => setSelectedRowData(row),
+                onSelectButtonClick: () => {
+                  if (selectedRowData) {
+                    const newSelection = [
+                      ...selectedProjectIds,
+                      String(selectedRowData.ID),
+                    ];
+                    handleProjectsChange(newSelection);
+                  }
+                },
+                isSelectDisabled: !selectedRowData,
+              }}
+            />
+          </TwoColumnLayout.Item>
+
+          {/* DynamicSelector برای انتخاب نوع برنامه به صورت پویا */}
+          <TwoColumnLayout.Item>
+            <DynamicSelector
+              options={programTypeOptions}
+              selectedValue={selectedProgramTypeId}
+              onChange={(e) => {
+                handleChange(
+                  "nProgramTypeID",
+                  e.target.value ? parseInt(e.target.value) : null
+                );
+                setSelectedProgramTypeId(e.target.value);
+              }}
+              label="Type"
+              showButton={true}
+              onButtonClick={handleOpenModal}
+              className="-mt-24"
+              loading={loadingProgramTypes} // افزودن وضعیت بارگذاری
+            />
+          </TwoColumnLayout.Item>
+
+          {/* Dynamic Modal برای انتخاب نوع برنامه */}
+          <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
+            <TableSelector
+              columnDefs={[{ headerName: "Name", field: "label" }]}
+              rowData={getRowData(currentSelector)}
+              selectedRow={selectedRowData}
+              onRowDoubleClick={handleSelectButtonClick}
+              onRowClick={handleRowClick}
+              onSelectButtonClick={handleSelectButtonClick}
+              isSelectDisabled={!selectedRowData}
+            />
+          </DynamicModal>
+
+          {/* بخش جزئیات با DataTable */}
+          <TwoColumnLayout.Item span={2}>
+            <div className="-mt-12">
+              <DataTable
+                columnDefs={detailColumnDefs}
+                rowData={enhancedProgramTemplateField}
+                onRowClick={handleSelectRow} // فقط انتخاب
+                onRowDoubleClick={handleEditRow}
+                showDuplicateIcon={false}
+                setSelectedRowData={setSelectedDetailRow}
+                showEditIcon={true}
+                showAddIcon={true}
+                showDeleteIcon={true}
+                onAdd={handleAddClick}
+                onEdit={() => {
+                  if (selectedDetailRow) {
+                    handleEditRow(selectedDetailRow); // آیکون ادیت → اجرا
+                  } else {
+                    showAlert(
+                      "warning",
+                      null,
+                      "No selection",
+                      "Please select a row to edit."
+                    );
+                  }
+                }}
+                onDelete={handleDeleteRow}
+                onDuplicate={() => {}}
+                domLayout="autoHeight"
+                showSearch={true}
+                isLoading={loadingFields} //
+                gridOptions={{ rowSelection: "single" }}
+              />
+            </div>
+          </TwoColumnLayout.Item>
+
+          {/* Dynamic Modal برای افزودن برنامه جدید */}
+          <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
+            <AddProgramTemplate
+              selectedRow={selectedRow}
+              editingRow={editingRow}
+              onSaved={handleSaved}
+              onCancel={() => {
+                setIsAddModalOpen(false);
+                setEditingRow(null);
+              }}
+            />
+          </DynamicModal>
+        </TwoColumnLayout>
+        <DynamicConfirm
+          isOpen={showDeleteConfirm}
+          onConfirm={confirmDeleteRow}
+          onClose={() => setShowDeleteConfirm(false)}
+          variant="delete"
+          title="Delete Confirmation"
+          message="Are you sure you want to delete this program field?"
+        />
+      </>
     );
   }
 );
