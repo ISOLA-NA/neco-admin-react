@@ -8,25 +8,30 @@ import DynamicModal from "../../utilities/DynamicModal";
 
 interface DateTimeSelectorProps {
   onMetaChange: (meta: {
-    metaType1: string;    // "dateonly" یا "datetime"
-    metaType2: string;    // "none"، "today"، "selected" یا "dynamic"
-    metaType3: string;    // تاریخ و زمان به صورت رشته
+    metaType1: string; // "dateonly" یا "datetime"
+    metaType2: string; // "none"، "today"، "selected" یا "dynamic"
+    metaType3: string; // تاریخ و زمان به صورت رشته
     metaType4?: string;
   }) => void;
   data?: {
-    metaType1?: string;   // "dateonly" یا "datetime"
-    metaType2?: string;   // "none"، "today"، "selected" یا "dynamic"
-    metaType3?: string;   // تاریخ و زمان به صورت رشته (یا "dynamic")
+    metaType1?: string; // "dateonly" یا "datetime"
+    metaType2?: string; // "none"، "today"، "selected" یا "dynamic"
+    metaType3?: string; // تاریخ و زمان به صورت رشته (یا "dynamic")
     metaType4?: string;
   };
 }
 
-const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data }) => {
+const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
+  onMetaChange,
+  data,
+}) => {
   // تعیین فرمت: فقط تاریخ یا تاریخ و زمان
   const [format, setFormat] = useState<"dateOnly" | "dateTime">("dateOnly");
 
   // تعیین مقدار پیش‌فرض: "none" | "today" | "selected"
-  const [defaultValue, setDefaultValue] = useState<"none" | "today" | "selected">("none");
+  const [defaultValue, setDefaultValue] = useState<
+    "none" | "today" | "selected"
+  >("none");
 
   // آیا مقدار به‌صورت داینامیک تغییر می‌کند؟
   const [isDynamic, setIsDynamic] = useState(false);
@@ -36,12 +41,20 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
 
   // زمان انتخاب شده
-  const [selectedTime, setSelectedTime] = useState<{ hours: string; minutes: string; seconds: string }>({
+  const [selectedTime, setSelectedTime] = useState<{
+    hours: string;
+    minutes: string;
+    seconds: string;
+  }>({
     hours: "",
     minutes: "",
     seconds: "",
   });
-  const [tempSelectedTime, setTempSelectedTime] = useState<{ hours: string; minutes: string; seconds: string }>({
+  const [tempSelectedTime, setTempSelectedTime] = useState<{
+    hours: string;
+    minutes: string;
+    seconds: string;
+  }>({
     hours: "",
     minutes: "",
     seconds: "",
@@ -52,8 +65,12 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
 
   // برای DatePicker (غیرفعال اگر نمی‌خواهید)
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth()
+  );
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
 
   // رفرنس‌های اینپوت زمان
   const hourRef = useRef<HTMLInputElement>(null);
@@ -69,7 +86,11 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
   };
 
   // --- تابع قالب‌بندی زمان ---
-  const formatTime = (time: { hours: string; minutes: string; seconds: string }) => {
+  const formatTime = (time: {
+    hours: string;
+    minutes: string;
+    seconds: string;
+  }) => {
     const h = time.hours ? time.hours.padStart(2, "0") : "00";
     const m = time.minutes ? time.minutes.padStart(2, "0") : "00";
     const s = time.seconds ? time.seconds.padStart(2, "0") : "00";
@@ -82,13 +103,15 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
 
     // metaType1 => تعیین فرمت
     if (data.metaType1) {
-      setFormat(data.metaType1.toLowerCase() === "datetime" ? "dateTime" : "dateOnly");
+      setFormat(
+        data.metaType1.toLowerCase() === "datetime" ? "dateTime" : "dateOnly"
+      );
     }
 
     // metaType2 => تعیین مقدار پیش‌فرض یا داینامیک
     if (data.metaType2 === "dynamic") {
       setIsDynamic(true);
-      setDefaultValue("today"); 
+      setDefaultValue("today");
     } else if (data.metaType2 === "selected") {
       setDefaultValue("selected");
     } else if (data.metaType2 === "today") {
@@ -115,21 +138,27 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
           seconds: sc || "00",
         });
       }
-    } else if (data.metaType3 && data.metaType3.trim().toLowerCase() === "dynamic") {
+    } else if (
+      data.metaType3 &&
+      data.metaType3.trim().toLowerCase() === "dynamic"
+    ) {
       // اگر explicitly نوشته شده بود "dynamic"
       setIsDynamic(true);
       setDefaultValue("today");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // فقط یک بار در mount
 
   // هر بار که state داخلی تغییر کرد، آن را به والد بفرست
   useEffect(() => {
-    const metaType1 = (format === "dateTime") ? "datetime" : "dateonly";
+    const metaType1 = format === "dateTime" ? "datetime" : "dateonly";
     const metaType2 = isDynamic ? "dynamic" : defaultValue;
 
-    let metaType3 = "dynamic";
-    if (selectedDate) {
+    let metaType3 = "";
+
+    if (isDynamic) {
+      metaType3 = "dynamic";
+    } else if (defaultValue === "selected" && selectedDate) {
       const dateStr = formatDate(selectedDate);
       const timeStr = formatTime(selectedTime);
       metaType3 = `${dateStr} ${timeStr}`;
@@ -149,31 +178,19 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
     isDynamic,
     // از قرار دادن data یا onMetaChange در این dependency خودداری کنید
     // چرا که ممکن است loop ایجاد شود اگر پدر در پاسخ این data را تغییر دهد
-  ]); 
+  ]);
 
-  // تابع تغییر مقدار پیش‌فرض 
   const handleDefaultValueChange = (val: "none" | "today" | "selected") => {
     setDefaultValue(val);
 
     if (val === "none") {
-      setIsDynamic(false);
+      setIsDynamic(false); // تیک برداشته بشه
       setSelectedDate(null);
       setSelectedTime({ hours: "", minutes: "", seconds: "" });
     } else if (val === "today") {
-      setIsDynamic(true);
-      const now = new Date();
-      setSelectedDate(now);
-      setTempSelectedDate(now);
-      setSelectedTime({
-        hours: String(now.getHours()),
-        minutes: String(now.getMinutes()),
-        seconds: String(now.getSeconds()),
-      });
-      setTempSelectedTime({
-        hours: String(now.getHours()),
-        minutes: String(now.getMinutes()),
-        seconds: String(now.getSeconds()),
-      });
+      setIsDynamic(false); // ❗ تیک نزن، فقط اجازه بده کاربر بزنه
+      setSelectedDate(null);
+      setSelectedTime({ hours: "", minutes: "", seconds: "" });
     } else if (val === "selected") {
       setIsDynamic(false);
       setSelectedDate(null);
@@ -222,8 +239,9 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
     if (/^\d*$/.test(value)) {
       let val = value;
       if (name === "hours" && parseInt(val, 10) > 23) val = "23";
-      if ((name === "minutes" || name === "seconds") && parseInt(val, 10) > 59) val = "59";
-      setTempSelectedTime(prev => ({
+      if ((name === "minutes" || name === "seconds") && parseInt(val, 10) > 59)
+        val = "59";
+      setTempSelectedTime((prev) => ({
         ...prev,
         [name]: val.slice(0, 2),
       }));
@@ -296,7 +314,6 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
           Default Value:
         </label>
         <div className="space-y-4">
-
           <label className="flex items-center space-x-2">
             <input
               type="radio"
@@ -329,7 +346,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
                 name="isDynamic"
                 checked={isDynamic}
                 onChange={handleDynamicChange}
-                disabled={data ? false : (defaultValue !== "today")}
+                disabled={defaultValue !== "today"}
                 className="form-checkbox text-blue-600 h-4 w-4"
               />
               <span className="text-gray-700">Is Dynamic</span>
@@ -346,12 +363,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
             name="dateOption"
             value="dateOption1"
             className="form-radio text-blue-600 h-4 w-4"
-            checked={selectedDate !== null}
+            checked={defaultValue === "selected"}
             onChange={() => {
               setIsDateModalOpen(true);
               setDefaultValue("selected");
             }}
           />
+
           <div className="relative w-64">
             <input
               type="button"
@@ -381,7 +399,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
             type="text"
             value={
               selectedTime.hours || selectedTime.minutes || selectedTime.seconds
-                ? `${selectedTime.hours.padStart(2, "0")}:${selectedTime.minutes.padStart(2, "0")}:${selectedTime.seconds.padStart(2, "0")}`
+                ? `${selectedTime.hours.padStart(
+                    2,
+                    "0"
+                  )}:${selectedTime.minutes.padStart(
+                    2,
+                    "0"
+                  )}:${selectedTime.seconds.padStart(2, "0")}`
                 : ""
             }
             onClick={() => setIsTimeModalOpen(true)}
@@ -400,7 +424,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
       {/* مودال DatePicker */}
       <DynamicModal
         isOpen={isDateModalOpen}
-        onClose={() => setIsDateModalOpen(false)}
+        onClose={() => {
+          if (tempSelectedDate) {
+            setSelectedDate(tempSelectedDate);
+            setDefaultValue("selected");
+          }
+          setIsDateModalOpen(false);
+        }}
       >
         <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
           <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
@@ -440,14 +470,21 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({ onMetaChange, data 
       {/* مودال انتخاب زمان */}
       <DynamicModal
         isOpen={isTimeModalOpen}
-        onClose={() => setIsTimeModalOpen(false)}
+        onClose={() => {
+          if (tempSelectedTime) {
+            setSelectedTime(tempSelectedTime);
+          }
+          setIsTimeModalOpen(false);
+        }}
       >
         <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
           <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
             Select a Time
           </h2>
 
-          {tempSelectedTime.hours || tempSelectedTime.minutes || tempSelectedTime.seconds ? (
+          {tempSelectedTime.hours ||
+          tempSelectedTime.minutes ||
+          tempSelectedTime.seconds ? (
             <div className="mb-4 text-center">
               <span className="text-lg font-medium text-pink-600">
                 {formatTime(tempSelectedTime)}

@@ -156,6 +156,16 @@ interface AddColumnFormProps {
   entityTypeId?: string; // مقدار nEntityTypeID از selectedRow
 }
 
+interface MetaCore {
+  metaType1: string;
+  metaType2: string | null;
+  metaType3: string | null;
+  LookupMode: string | null;
+  oldLookup: boolean;
+  metaType5: string | null;
+  metaTypeJson: string | null;
+}
+
 const AddColumnForm: React.FC<AddColumnFormProps> = ({
   onClose,
   onSave,
@@ -218,12 +228,42 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // در حالت ویرایش فرم را مقداردهی اولیه می‌کنیم
+  const [metaCore, setMetaCore] = useState<MetaCore>({
+    metaType1: "",
+    metaType2: null,
+    metaType3: null,
+    LookupMode: null,
+    oldLookup: false,
+    metaType5: null,
+    metaTypeJson: null,
+  });
+
+  const [metaExtra, setMetaExtra] = useState({
+    metaType4: "",
+  });
+
   useEffect(() => {
-    if (isEdit) {
+    if (isEdit && existingData) {
       setFormData(getInitialFormData());
+
+      // مقداردهی اولیه metaCore
+      setMetaCore({
+        metaType1: existingData.metaType1 || "",
+        metaType2: existingData.metaType2 || null,
+        metaType3: existingData.metaType3 || null,
+        LookupMode: existingData.LookupMode || null,
+        oldLookup: existingData.BoolMeta1 || false,
+        metaType5: existingData.metaType5 || null,
+        metaTypeJson: existingData.metaTypeJson || null,
+      });
+
+      // مقداردهی اولیه metaExtra
+      setMetaExtra({
+        metaType4: existingData.metaType4 || "",
+      });
+
+      setErrors({});
     } else {
-      // اگر حالت جدید است
       setFormData({
         formName: "",
         order: "",
@@ -244,10 +284,23 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         showInTab: "",
         countInReject: false,
       });
-      setDynamicMeta({});
+
+      setMetaCore({
+        metaType1: "",
+        metaType2: null,
+        metaType3: null,
+        LookupMode: null,
+        oldLookup: false,
+        metaType5: null,
+        metaTypeJson: null,
+      });
+
+      setMetaExtra({
+        metaType4: "",
+      });
+
       setErrors({});
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, existingData]);
 
   // تغییر مقادیر فرم
@@ -278,13 +331,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     const currentTimestamp = new Date().toISOString();
 
     const lookupModeValue =
-      dynamicMeta.LookupMode == null || dynamicMeta.LookupMode === ""
+      metaCore.LookupMode == null || metaCore.LookupMode === ""
         ? null
-        : Number(dynamicMeta.LookupMode);
+        : Number(metaCore.LookupMode);
 
-    const metaType5Value = dynamicMeta.metaType5 || null;
+    const metaType5Value = metaCore.metaType5 || null;
 
     const payload: any = {
+      // 🧾 اطلاعات فرم پایه
       DisplayName: formData.formName,
       IsShowGrid: formData.showInListView,
       IsEditableInWF: formData.isEditableInWf,
@@ -296,11 +350,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
-      metaType1: dynamicMeta.metaType1 || "",
-      metaType2: dynamicMeta.metaType2 || "",
-      metaType3: dynamicMeta.metaType3 || "",
-      metaType4: dynamicMeta.metaType4 || "",
-      metaTypeJson: dynamicMeta.metaTypeJson || null,
+
+      // ✅ metaCore (شامل metaType1, 2, 3, و سایر فیلدهای دینامیک)
+      ...metaCore,
+
+      // ✅ metaExtra (فقط Program Meta ColumnName یعنی metaType4)
+      metaType4: metaExtra.metaType4,
+
       PrintCode: formData.printCode,
       IsForceReadOnly: formData.readOnly,
       IsUnique: false,
@@ -312,16 +368,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ShowInAlert: formData.showInAlert,
       ShowInTab: formData.showInTab,
       CreatedTime:
-        isEdit && existingData
-          ? existingData.CreatedTime
-          : new Date().toISOString(),
+        isEdit && existingData ? existingData.CreatedTime : currentTimestamp,
       ModifiedTime: currentTimestamp,
       ModifiedById:
         isEdit && existingData
           ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
           : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
       LookupMode: lookupModeValue,
-      BoolMeta1: dynamicMeta.oldLookup ? true : false,
+      BoolMeta1: metaCore.oldLookup ? true : false,
       CountInReject: formData.countInReject,
       metaType5: metaType5Value,
       ID: isEdit && existingData ? existingData.ID : 0,
@@ -340,25 +394,18 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         const response = await insertEntityField(payload);
         showAlert("success", undefined, "Success", "Added successfully");
 
-        // اگر API مقدار ID جدید را برگرداند
-        if (response && response.ID) {
-          newId = response.ID;
-        } else {
-          // در غیر اینصورت از خود payload استفاده می‌کنیم
-          newId = payload.ID;
-        }
+        newId = response?.ID ?? payload.ID;
       }
 
       setIsLoading(false);
 
-      // ✨ اطلاعات لازم برای اضافه شدن در AddProgramTemplate
       const newField = {
         ID: newId,
         Name: formData.formName,
       };
 
-      if (onSave) onSave(newField); // 👈 به صورت کامل
-      onClose(); // بستن فرم
+      if (onSave) onSave(newField);
+      onClose();
     } catch (error: any) {
       setIsLoading(false);
       setErrors({ form: "An error occurred." });
@@ -371,27 +418,20 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
-    const dataForChild = {
-      metaType1: existingData?.metaType1 || "",
-      metaType2: existingData?.metaType2 || "",
-      metaType3: existingData?.metaType3 || "",
-      metaType4: existingData?.metaType4 || "",
-      LookupMode: existingData?.LookupMode || "",
-      CountInReject: existingData?.CountInReject || false,
-      BoolMeta1: existingData?.BoolMeta1 || false,
-      metaType5: existingData?.metaType5 || "",
-      removeSameName: existingData?.CountInReject || false,
-      metaTypeJson: existingData?.metaTypeJson || "",
-    };
     return (
       <SelectedComponent
-        onMetaChange={setDynamicMeta}
-        data={isEdit ? dataForChild : undefined}
+        onMetaChange={(updater: MetaCore | ((prev: MetaCore) => MetaCore)) => {
+          if (typeof updater === "function") {
+            setMetaCore((prev) => updater(prev));
+          } else {
+            setMetaCore(updater);
+          }
+        }}
+        data={metaCore}
       />
     );
   };
 
-  // تعیین نوع‌های اطلاعاتی که در آن‌ها فیلد Program Meta Column Name نشان داده نشود
   const hiddenTypesForProgramMeta = [
     "component9", // Lookup RealValue
     "component7", // Lookup
@@ -669,10 +709,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               <DynamicInput
                 name="Program Meta ColumnName"
                 type="text"
-                value={dynamicMeta.metaType4 || ""}
-                placeholder=""
+                value={metaExtra.metaType4}
                 onChange={(e) =>
-                  setDynamicMeta((prev: any) => ({
+                  setMetaExtra((prev) => ({
                     ...prev,
                     metaType4: e.target.value,
                   }))
