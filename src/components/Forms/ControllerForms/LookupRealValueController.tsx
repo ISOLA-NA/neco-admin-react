@@ -5,7 +5,11 @@ import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
-import AppServices, { EntityField, EntityType, GetEnumResponse } from "../../../services/api.services";
+import AppServices, {
+  EntityField,
+  EntityType,
+  GetEnumResponse,
+} from "../../../services/api.services";
 
 /**
  * ساختار پراپ‌های کامپوننت
@@ -14,10 +18,10 @@ interface LookuprealvalueProps {
   data?: {
     metaType1?: string | number | null;
     metaType2?: string | number | null;
-    metaType4?: string;             // در این فیلد JSON جدول فیلتر ذخیره می‌شود
-    metaType5?: string;             // مقادیر پیش‌فرض پروژه‌ها به صورت "4|5|6"
+    metaType4?: string; // در این فیلد JSON جدول فیلتر ذخیره می‌شود
+    metaType5?: string; // مقادیر پیش‌فرض پروژه‌ها به صورت "4|5|6"
     LookupMode?: string | number | null;
-    BoolMeta1?: boolean;            // برای oldLookup
+    BoolMeta1?: boolean; // برای oldLookup
   };
   onMetaChange?: (updatedMeta: any) => void;
 }
@@ -36,7 +40,10 @@ interface TableRow {
 /**
  * کامپوننت اصلی: Lookuprealvalue
  */
-const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange }) => {
+const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({
+  data,
+  onMetaChange,
+}) => {
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
   /**
@@ -51,8 +58,8 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
   }>({
     metaType1: data?.metaType1 != null ? String(data.metaType1) : "",
     metaType2: data?.metaType2 != null ? String(data.metaType2) : "",
-    metaType4: data?.metaType4 ?? "",   // حاوی JSON جدول فیلترها
-    metaType5: data?.metaType5 ?? "",   // حاوی آیدی‌های پروژه‌ها به شکل "4|5|6"
+    metaType4: data?.metaType4 ?? "", // حاوی JSON جدول فیلترها
+    metaType5: data?.metaType5 ?? "", // حاوی آیدی‌های پروژه‌ها به شکل "4|5|6"
     LookupMode: data?.LookupMode != null ? String(data.LookupMode) : "",
   });
 
@@ -77,7 +84,9 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
           const normalized = parsed.map((item: any) => ({
             ID: item.ID ?? crypto.randomUUID(),
             SrcFieldID: item.SrcFieldID ? String(item.SrcFieldID) : "",
-            FilterOpration: item.FilterOpration ? String(item.FilterOpration) : "",
+            FilterOpration: item.FilterOpration
+              ? String(item.FilterOpration)
+              : "",
             FilterText: item.FilterText ?? "",
             DesFieldID: item.DesFieldID ? String(item.DesFieldID) : "",
           }));
@@ -102,16 +111,23 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
   useEffect(() => {
     try {
       const asString = JSON.stringify(tableData);
-      updateMeta({ metaType4: asString });
+      /* فقط اگر مقدار جدید با قبلی فرق کند، setState بزن */
+      if (asString !== metaTypesLookUp.metaType4) {
+        updateMeta({ metaType4: asString });
+      }
     } catch (error) {
       console.error("Error serializing table data:", error);
     }
+    // عمداً metaTypesLookUp.metaType4 را در deps نمی‌گذاریم
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableData]);
 
   /**
    * لیست موجودیت‌ها (EntityType)
    */
-  const [getInformationFromList, setGetInformationFromList] = useState<EntityType[]>([]);
+  const [getInformationFromList, setGetInformationFromList] = useState<
+    EntityType[]
+  >([]);
   useEffect(() => {
     (async () => {
       try {
@@ -156,14 +172,20 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
   /**
    * گرفتن مقادیر enum برای LookMode و FilterOpration
    */
-  const [modesList, setModesList] = useState<{ value: string; label: string }[]>([]);
-  const [operationList, setOperationList] = useState<{ value: string; label: string }[]>([]);
+  const [modesList, setModesList] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [operationList, setOperationList] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   useEffect(() => {
     (async () => {
       try {
         // برای LookupMode
-        const lookModeResponse: GetEnumResponse = await AppServices.getEnum({ str: "lookMode" });
+        const lookModeResponse: GetEnumResponse = await AppServices.getEnum({
+          str: "lookMode",
+        });
         const modes = Object.entries(lookModeResponse).map(([key, val]) => ({
           value: String(val),
           label: key,
@@ -171,7 +193,10 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
         setModesList(modes);
 
         // اگر مقدار LookupMode فعلی در لیست نبود، یکی را پیش‌فرض کن
-        if (metaTypesLookUp.LookupMode && !modes.some((m) => m.value === metaTypesLookUp.LookupMode)) {
+        if (
+          metaTypesLookUp.LookupMode &&
+          !modes.some((m) => m.value === metaTypesLookUp.LookupMode)
+        ) {
           updateMeta({ LookupMode: modes[0]?.value || "" });
         }
       } catch (error) {
@@ -180,13 +205,16 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
 
       try {
         // برای FilterOperation
-        const filterOperationResponse: GetEnumResponse = await AppServices.getEnum({
-          str: "FilterOpration",
-        });
-        const ops = Object.entries(filterOperationResponse).map(([key, val]) => ({
-          value: String(val),
-          label: key,
-        }));
+        const filterOperationResponse: GetEnumResponse =
+          await AppServices.getEnum({
+            str: "FilterOpration",
+          });
+        const ops = Object.entries(filterOperationResponse).map(
+          ([key, val]) => ({
+            value: String(val),
+            label: key,
+          })
+        );
         setOperationList(ops);
       } catch (error) {
         console.error("Error fetching FilterOpration:", error);
@@ -200,15 +228,22 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
   const updateMeta = useCallback(
     (updatedFields: Partial<typeof metaTypesLookUp>) => {
       setMetaTypesLookUp((prev) => {
-        const newState = { ...prev, ...updatedFields };
-        if (onMetaChange) {
-          // مقدار نهایی را به والد می‌فرستیم و oldLookup را هم اضافه می‌کنیم
-          onMetaChange({
-            ...newState,
-            BoolMeta1: oldLookup,
-          });
+        /* ➊ بررسی کنیم واقعاً چیزی عوض شده باشد */
+        let changed = false;
+        const next = { ...prev };
+
+        for (const key in updatedFields) {
+          const k = key as keyof typeof metaTypesLookUp;
+          if (updatedFields[k] !== undefined && updatedFields[k] !== prev[k]) {
+            next[k] = updatedFields[k] as any;
+            changed = true;
+          }
         }
-        return newState;
+        if (!changed) return prev; // ⏹ هیچ تغییری نیست؛ از حلقه خارج شو
+
+        /* ➋ به والد خبر بدهیم (BoolMeta1 = oldLookup) */
+        onMetaChange?.({ ...next, BoolMeta1: oldLookup });
+        return next;
       });
     },
     [oldLookup, onMetaChange]
@@ -217,11 +252,15 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
   /**
    * هندلرهایی برای selectهای بالا
    */
-  const handleSelectInformationFrom = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectInformationFrom = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     updateMeta({ metaType1: e.target.value });
   };
 
-  const handleSelectColumnDisplay = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectColumnDisplay = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     updateMeta({ metaType2: e.target.value });
   };
 
@@ -258,7 +297,9 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
    */
   const handleCellValueChanged = (event: any) => {
     const updatedRow = event.data as TableRow;
-    setTableData((prev) => prev.map((row) => (row.ID === updatedRow.ID ? updatedRow : row)));
+    setTableData((prev) =>
+      prev.map((row) => (row.ID === updatedRow.ID ? updatedRow : row))
+    );
   };
 
   return (
@@ -383,20 +424,22 @@ const Lookuprealvalue: React.FC<LookuprealvalueProps> = ({ data, onMetaChange })
             },
           ]}
           rowData={tableData}
-          setSelectedRowData={() => { } }
+          setSelectedRowData={() => {}}
           onCellValueChanged={handleCellValueChanged}
           showDuplicateIcon={false}
           showEditIcon={false}
           showAddIcon
           onAdd={onAddNewRow}
           showDeleteIcon={false}
-          onDelete={() => { } }
-          onEdit={() => { } }
-          onDuplicate={() => { } }
+          onDelete={() => {}}
+          onEdit={() => {}}
+          onDuplicate={() => {}}
           domLayout="normal"
-          showSearch={false} onRowDoubleClick={function (data: any): void {
+          showSearch={false}
+          onRowDoubleClick={function (data: any): void {
             throw new Error("Function not implemented.");
-          } }        />
+          }}
+        />
       </div>
     </div>
   );

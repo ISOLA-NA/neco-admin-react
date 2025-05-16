@@ -5,18 +5,22 @@ import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
-import AppServices, { EntityField, EntityType, GetEnumResponse } from "../../../services/api.services";
+import AppServices, {
+  EntityField,
+  EntityType,
+  GetEnumResponse,
+} from "../../../services/api.services";
 
 /**
  * پراپ‌های کامپوننت
  */
 interface LookupAdvanceTableProps {
   data?: {
-    metaType1?: string | number | null;  // ID مربوط به EntityType
-    metaType2?: string | number | null;  // ID مربوط به فیلد نمایش
-    metaType4?: string;                  // اطلاعات جدول به‌صورت JSON
+    metaType1?: string | number | null; // ID مربوط به EntityType
+    metaType2?: string | number | null; // ID مربوط به فیلد نمایش
+    metaType4?: string; // اطلاعات جدول به‌صورت JSON
     LookupMode?: string | number | null; // در صورت نیاز، حالت Lookup
-    metaType5?: string;                  // برای نگهداری مقادیر پیش‌فرض به‌صورت Pipe-Separated
+    metaType5?: string; // برای نگهداری مقادیر پیش‌فرض به‌صورت Pipe-Separated
   };
   onMetaChange?: (updatedMeta: any) => void;
 }
@@ -35,7 +39,10 @@ interface TableRow {
 /**
  * کامپوننت LookupAdvanceTable
  */
-const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaChange }) => {
+const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({
+  data,
+  onMetaChange,
+}) => {
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
   // استیت اصلی جهت نگهداری مقادیر متا
@@ -67,7 +74,8 @@ const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaCha
           const normalized = parsed.map((item: any) => ({
             ID: item.ID ?? crypto.randomUUID(),
             SrcFieldID: item.SrcFieldID != null ? String(item.SrcFieldID) : "",
-            FilterOpration: item.FilterOpration != null ? String(item.FilterOpration) : "",
+            FilterOpration:
+              item.FilterOpration != null ? String(item.FilterOpration) : "",
             FilterText: item.FilterText ?? "",
             DesFieldID: item.DesFieldID != null ? String(item.DesFieldID) : "",
           }));
@@ -91,17 +99,24 @@ const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaCha
    */
   useEffect(() => {
     try {
-      const asString = JSON.stringify(tableData);
-      updateMeta({ metaType4: asString });
-    } catch (error) {
-      console.error("Error serializing table data:", error);
+      const str = JSON.stringify(tableData);
+      /* ⚠️ فقط زمانی که محتوای جدید با قبلی فرق دارد، updateMeta فراخوانی شود */
+      if (str !== metaTypesLookUp.metaType4) {
+        updateMeta({ metaType4: str });
+      }
+    } catch (e) {
+      console.error("Error serializing table data:", e);
     }
+    // عمداً metaTypesLookUp.metaType4 را در Dependecies نمی‌گذاریم
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableData]);
 
   /**
    * لیست موجودیت‌ها (برای سلکت "Get information from")
    */
-  const [getInformationFromList, setGetInformationFromList] = useState<EntityType[]>([]);
+  const [getInformationFromList, setGetInformationFromList] = useState<
+    EntityType[]
+  >([]);
 
   useEffect(() => {
     (async () => {
@@ -148,17 +163,22 @@ const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaCha
    * دریافت Enum برای عملگرهای فیلتر (FilterOperation)
    * (در اینجا lookupMode را اگر خواستید می‌توانید اضافه کنید)
    */
-  const [operationList, setOperationList] = useState<{ value: string; label: string }[]>([]);
+  const [operationList, setOperationList] = useState<
+    { value: string; label: string }[]
+  >([]);
   useEffect(() => {
     (async () => {
       try {
-        const filterOperationResponse: GetEnumResponse = await AppServices.getEnum({
-          str: "FilterOpration",
-        });
-        const ops = Object.entries(filterOperationResponse).map(([key, val]) => ({
-          value: String(val),
-          label: key,
-        }));
+        const filterOperationResponse: GetEnumResponse =
+          await AppServices.getEnum({
+            str: "FilterOpration",
+          });
+        const ops = Object.entries(filterOperationResponse).map(
+          ([key, val]) => ({
+            value: String(val),
+            label: key,
+          })
+        );
         setOperationList(ops);
       } catch (error) {
         console.error("Error fetching FilterOpration:", error);
@@ -172,13 +192,22 @@ const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaCha
   const updateMeta = useCallback(
     (updatedFields: Partial<typeof metaTypesLookUp>) => {
       setMetaTypesLookUp((prev) => {
-        const newState = { ...prev, ...updatedFields };
-        if (onMetaChange) {
-          onMetaChange({
-            ...newState,
-          });
+        /* ❶ فقط زمانی setState بزن که واقعاً تغییری وجود داشته باشد */
+        let changed = false;
+        const next = { ...prev };
+
+        for (const key in updatedFields) {
+          const k = key as keyof typeof metaTypesLookUp;
+          if (updatedFields[k] !== undefined && updatedFields[k] !== prev[k]) {
+            next[k] = updatedFields[k] as any;
+            changed = true;
+          }
         }
-        return newState;
+        if (!changed) return prev; // ⏹ هیچ تغییری نبود → از حلقه خارج شو
+
+        /* ❷ به والد اطلاع بده */
+        onMetaChange?.({ ...next });
+        return next;
       });
     },
     [onMetaChange]
@@ -187,11 +216,15 @@ const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaCha
   /**
    * مدیریت انتخاب‌ها در بالای فرم
    */
-  const handleSelectInformationFrom = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectInformationFrom = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     updateMeta({ metaType1: e.target.value });
   };
 
-  const handleSelectColumnDisplay = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectColumnDisplay = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     updateMeta({ metaType2: e.target.value });
   };
 
@@ -219,7 +252,9 @@ const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaCha
    */
   const handleCellValueChanged = (event: any) => {
     const updatedRow = event.data as TableRow;
-    setTableData((prev) => prev.map((row) => (row.ID === updatedRow.ID ? updatedRow : row)));
+    setTableData((prev) =>
+      prev.map((row) => (row.ID === updatedRow.ID ? updatedRow : row))
+    );
   };
 
   return (
@@ -335,20 +370,22 @@ const LookupAdvanceTable: React.FC<LookupAdvanceTableProps> = ({ data, onMetaCha
             },
           ]}
           rowData={tableData}
-          setSelectedRowData={() => { } }
+          setSelectedRowData={() => {}}
           showDuplicateIcon={false}
           showEditIcon={false}
           showAddIcon={true}
           onAdd={onAddNew}
           showDeleteIcon={false}
-          onDelete={() => { } }
-          onEdit={() => { } }
-          onDuplicate={() => { } }
+          onDelete={() => {}}
+          onEdit={() => {}}
+          onDuplicate={() => {}}
           onCellValueChanged={handleCellValueChanged}
           domLayout="autoHeight"
-          showSearch={false} onRowDoubleClick={function (data: any): void {
+          showSearch={false}
+          onRowDoubleClick={function (data: any): void {
             throw new Error("Function not implemented.");
-          } }        />
+          }}
+        />
       </div>
     </div>
   );

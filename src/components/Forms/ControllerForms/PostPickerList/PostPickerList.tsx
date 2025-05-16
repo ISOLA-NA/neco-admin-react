@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import DynamicModal from "../../../utilities/DynamicModal";
-import RolePickerTabs from "./RolePickerTabs"; 
+import RolePickerTabs from "./RolePickerTabs";
 import TableSelector from "../../../General/Configuration/TableSelector";
 import { useApi } from "../../../../context/ApiContext";
 
@@ -173,12 +173,15 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
    * هر بار که آرایه‌ی selectedItems تغییر کند، اگر onMetaChange باشد، آن را فراخوانی می‌کنیم.
    * استرینگ را با "|" می‌سازیم.
    */
+  // ⬇️ تنها جای لازم برای اصلاح در PostPickerList
   useEffect(() => {
     if (onMetaChange) {
       const joined = selectedItems.map((item) => item.id).join("|");
       onMetaChange({ [metaFieldKey]: joined });
     }
-  }, [selectedItems, onMetaChange, metaFieldKey]);
+    // onMetaChange عمداً در وابستگی‌ها نیست تا از حلقهٔ بی‌نهایت جلوگیری شود
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItems, metaFieldKey]);
 
   /**
    * کلیک روی دکمهٔ بازکردن مودال
@@ -253,7 +256,9 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
       return (
         <div className="p-4 min-h-[400px] min-w-[600px]">
           <RolePickerTabs
-            onSelect={(selected: SelectedItem[]) => handleAddSelectedItems(selected)}
+            onSelect={(selected: SelectedItem[]) =>
+              handleAddSelectedItems(selected)
+            }
             onClose={() => setIsModalOpen(false)}
           />
         </div>
@@ -267,9 +272,7 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
       style={{ minHeight: "120px", width: fullWidth ? "100%" : "auto" }}
     >
       <div className="flex items-center justify-between mb-2">
-        <label className="text-gray-700 text-sm font-semibold">
-          {label}
-        </label>
+        <label className="text-gray-700 text-sm font-semibold">{label}</label>
         <button
           type="button"
           onClick={handleOpenModal}
