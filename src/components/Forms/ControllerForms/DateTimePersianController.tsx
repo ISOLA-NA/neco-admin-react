@@ -27,25 +27,40 @@ interface PersianCalendarPickerProps {
 const convertToEnglishDigits = (str: string): string =>
   str.replace(/[۰-۹]/g, (w) => String.fromCharCode(w.charCodeAt(0) - 1728));
 
-const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onMetaChange }) => {
+const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
+  data,
+  onMetaChange,
+}) => {
   // انتخاب فرمت: "فقط تاریخ" یا "تاریخ و زمان"
   const [format, setFormat] = useState<"dateOnly" | "dateTime">("dateOnly");
   // انتخاب مقدار پیش‌فرض: "none"، "today" یا "selected"
-  const [defaultValue, setDefaultValue] = useState<"none" | "today" | "selected">("none");
+  const [defaultValue, setDefaultValue] = useState<
+    "none" | "today" | "selected"
+  >("none");
   // حالت داینامیک (چک‌باکس)
   const [dynamicEnabled, setDynamicEnabled] = useState<boolean>(false);
 
   // مدیریت تاریخ انتخاب‌شده
   const [selectedDate, setSelectedDate] = useState<DateObject | null>(null);
-  const [tempSelectedDate, setTempSelectedDate] = useState<DateObject | null>(null);
+  const [tempSelectedDate, setTempSelectedDate] = useState<DateObject | null>(
+    null
+  );
 
   // مدیریت زمان انتخاب‌شده
-  const [selectedTime, setSelectedTime] = useState<{ hours: string; minutes: string; seconds: string }>({
+  const [selectedTime, setSelectedTime] = useState<{
+    hours: string;
+    minutes: string;
+    seconds: string;
+  }>({
     hours: "",
     minutes: "",
     seconds: "",
   });
-  const [tempSelectedTime, setTempSelectedTime] = useState<{ hours: string; minutes: string; seconds: string }>({
+  const [tempSelectedTime, setTempSelectedTime] = useState<{
+    hours: string;
+    minutes: string;
+    seconds: string;
+  }>({
     hours: "",
     minutes: "",
     seconds: "",
@@ -77,8 +92,14 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
         setSelectedDate(now);
         const pad = (n: number) => n.toString().padStart(2, "0");
         setSelectedTime({
-          hours: pad(typeof now.hour === "number" ? now.hour : new Date().getHours()),
-          minutes: pad(typeof now.minute === "number" ? now.minute : new Date().getMinutes()),
+          hours: pad(
+            typeof now.hour === "number" ? now.hour : new Date().getHours()
+          ),
+          minutes: pad(
+            typeof now.minute === "number"
+              ? now.minute
+              : new Date().getMinutes()
+          ),
           seconds: "00",
         });
       }, 30000); // به‌روز رسانی هر 30 ثانیه
@@ -89,6 +110,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
   }, [dynamicEnabled]);
 
   // دریافت داده اولیه از prop.data (فقط یکبار در mount)
+  // ✅ فقط یکبار در mount مقدار اولیه را از data بردار
   useEffect(() => {
     if (data) {
       if (data.metaType1) {
@@ -97,7 +119,11 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
       if (data.metaType2) {
         setDefaultValue(data.metaType2 as "none" | "today" | "selected");
       }
-      if (data.metaType3) {
+      if (
+        data.metaType3 &&
+        data.metaType2 !== "today" &&
+        data.metaType2 !== "none"
+      ) {
         const parts = data.metaType3.split(" ");
         if (parts[0]) {
           const gregDate = new DateObject({
@@ -108,7 +134,11 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
           const persianDate = gregDate.convert(persian);
           setSelectedDate(persianDate);
           setTempSelectedDate(persianDate);
-          setSelectedYear(typeof persianDate.year === "number" ? persianDate.year.toString() : "");
+          setSelectedYear(
+            typeof persianDate.year === "number"
+              ? persianDate.year.toString()
+              : ""
+          );
           setSelectedMonth(
             persianDate.month && typeof persianDate.month.number === "number"
               ? (persianDate.month.number - 1).toString()
@@ -129,6 +159,11 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
           });
         }
       }
+
+      // داینامیک بودن را فقط در صورتی فعال کن که صراحتاً dynamic باشد
+      if (data.metaType2 === "dynamic") {
+        setDynamicEnabled(true);
+      }
     }
   }, []);
 
@@ -146,15 +181,21 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
       const today = new DateObject({ calendar: persian, locale: persian_fa });
       setSelectedDate(today);
       setTempSelectedDate(today);
-      setSelectedYear(typeof today.year === "number" ? today.year.toString() : "");
+      setSelectedYear(
+        typeof today.year === "number" ? today.year.toString() : ""
+      );
       setSelectedMonth(
         today.month && typeof today.month.number === "number"
           ? (today.month.number - 1).toString()
           : ""
       );
       const pad = (n: number) => n.toString().padStart(2, "0");
-      const currentHour = typeof today.hour === "number" ? today.hour : new Date().getHours();
-      const currentMinute = typeof today.minute === "number" ? today.minute : new Date().getMinutes();
+      const currentHour =
+        typeof today.hour === "number" ? today.hour : new Date().getHours();
+      const currentMinute =
+        typeof today.minute === "number"
+          ? today.minute
+          : new Date().getMinutes();
       setSelectedTime({
         hours: pad(currentHour),
         minutes: pad(currentMinute),
@@ -171,10 +212,18 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
   // مقداردهی اولیه تاریخ موقت هنگام باز شدن مودال انتخاب تاریخ
   useEffect(() => {
     if (isDateModalOpen) {
-      if (selectedDate && selectedDate.month && typeof selectedDate.month.number === "number") {
+      if (
+        selectedDate &&
+        selectedDate.month &&
+        typeof selectedDate.month.number === "number"
+      ) {
         setTempSelectedDate(selectedDate);
         setSelectedMonth((selectedDate.month.number - 1).toString());
-        setSelectedYear(typeof selectedDate.year === "number" ? selectedDate.year.toString() : "");
+        setSelectedYear(
+          typeof selectedDate.year === "number"
+            ? selectedDate.year.toString()
+            : ""
+        );
       } else {
         const today = new DateObject({ calendar: persian, locale: persian_fa });
         setTempSelectedDate(today);
@@ -183,7 +232,9 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
             ? (today.month.number - 1).toString()
             : ""
         );
-        setSelectedYear(typeof today.year === "number" ? today.year.toString() : "");
+        setSelectedYear(
+          typeof today.year === "number" ? today.year.toString() : ""
+        );
       }
     }
   }, [isDateModalOpen, selectedDate]);
@@ -195,39 +246,32 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
     }
   }, [isTimeModalOpen, selectedTime]);
 
-  // هندل تغییر مقدار پیش‌فرض
   const handleDefaultValueChange = (value: "none" | "today" | "selected") => {
     setDefaultValue(value);
-    if (value === "today") {
-      const today = new DateObject({ calendar: persian, locale: persian_fa });
-      setSelectedDate(today);
-      setTempSelectedDate(today);
-      setSelectedYear(typeof today.year === "number" ? today.year.toString() : "");
-      setSelectedMonth(
-        today.month && typeof today.month.number === "number"
-          ? (today.month.number - 1).toString()
-          : ""
-      );
-      const pad = (n: number) => n.toString().padStart(2, "0");
-      const currentHour = typeof today.hour === "number" ? today.hour : new Date().getHours();
-      const currentMinute = typeof today.minute === "number" ? today.minute : new Date().getMinutes();
-      setSelectedTime({
-        hours: pad(currentHour),
-        minutes: pad(currentMinute),
-        seconds: "00",
-      });
-      setTempSelectedTime({
-        hours: pad(currentHour),
-        minutes: pad(currentMinute),
-        seconds: "00",
-      });
-    } else if (value === "none") {
+
+    if (value === "none") {
       setSelectedDate(null);
       setTempSelectedDate(null);
-      setSelectedYear("");
-      setSelectedMonth("");
       setSelectedTime({ hours: "", minutes: "", seconds: "" });
       setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setSelectedMonth("");
+      setSelectedYear("");
+      setDynamicEnabled(false); // داینامیک خاموش شود
+    } else if (value === "today") {
+      setSelectedDate(null);
+      setTempSelectedDate(null);
+      setSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setSelectedMonth("");
+      setSelectedYear("");
+      setDynamicEnabled(false); // ❗ کاربر خودش اگر خواست تیک داینامیک را بزند
+    } else if (value === "selected") {
+      setSelectedDate(null);
+      setTempSelectedDate(null);
+      setSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setTempSelectedTime({ hours: "", minutes: "", seconds: "" });
+      setSelectedMonth("");
+      setSelectedYear("");
       setDynamicEnabled(false);
     }
   };
@@ -239,10 +283,18 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
 
   // انتخاب تاریخ از مودال
   const handleSelectDate = () => {
-    if (tempSelectedDate && tempSelectedDate.month && typeof tempSelectedDate.month.number === "number") {
+    if (
+      tempSelectedDate &&
+      tempSelectedDate.month &&
+      typeof tempSelectedDate.month.number === "number"
+    ) {
       setSelectedDate(tempSelectedDate);
       setSelectedMonth((tempSelectedDate.month.number - 1).toString());
-      setSelectedYear(typeof tempSelectedDate.year === "number" ? tempSelectedDate.year.toString() : "");
+      setSelectedYear(
+        typeof tempSelectedDate.year === "number"
+          ? tempSelectedDate.year.toString()
+          : ""
+      );
       setDefaultValue("selected");
     }
     setIsDateModalOpen(false);
@@ -291,22 +343,35 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
       }
       let timeStr = "";
       if (selectedTime.hours || selectedTime.minutes || selectedTime.seconds) {
-        timeStr = `${selectedTime.hours.padStart(2, "0")}:${selectedTime.minutes.padStart(2, "0")}:${selectedTime.seconds.padStart(2, "0")}`;
+        timeStr = `${selectedTime.hours.padStart(
+          2,
+          "0"
+        )}:${selectedTime.minutes.padStart(
+          2,
+          "0"
+        )}:${selectedTime.seconds.padStart(2, "0")}`;
       } else {
         timeStr = "00:00:00";
       }
+
       const combined = dateStr ? `${dateStr} ${timeStr}` : "";
       const englishCombined = convertToEnglishDigits(combined);
       const metaType2Value = dynamicEnabled ? "dynamic" : defaultValue;
-      const meta = {
+
+      onMetaChange({
         metaType1: format === "dateOnly" ? "dateonly" : "datetime",
         metaType2: metaType2Value,
         metaType3: englishCombined,
-        metaType4: data && data.metaType4 ? data.metaType4 : "",
-      };
-      onMetaChange(meta);
+        metaType4: data?.metaType4 || "",
+      });
     }
-  }, [format, defaultValue, selectedDate, selectedTime, data, onMetaChange, dynamicEnabled]);
+  }, [
+    format,
+    defaultValue,
+    selectedDate,
+    selectedTime,
+    dynamicEnabled, // فقط این‌ها کافی‌اند
+  ]);
 
   return (
     <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
@@ -393,12 +458,13 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
             name="dateOption"
             value="dateOption1"
             className="form-radio text-blue-600 h-4 w-4"
-            checked={selectedDate !== null}
+            checked={defaultValue === "selected"}
             onChange={() => {
               setIsDateModalOpen(true);
               setDefaultValue("selected");
             }}
           />
+
           <div className="relative w-64">
             <input
               type="button"
@@ -425,10 +491,14 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
           <input
             type="text"
             value={
-              selectedTime.hours ||
-              selectedTime.minutes ||
-              selectedTime.seconds
-                ? `${selectedTime.hours.padStart(2, "0")}:${selectedTime.minutes.padStart(2, "0")}:${selectedTime.seconds.padStart(2, "0")}`
+              selectedTime.hours || selectedTime.minutes || selectedTime.seconds
+                ? `${selectedTime.hours.padStart(
+                    2,
+                    "0"
+                  )}:${selectedTime.minutes.padStart(
+                    2,
+                    "0"
+                  )}:${selectedTime.seconds.padStart(2, "0")}`
                 : ""
             }
             onClick={() => setIsTimeModalOpen(true)}
@@ -444,7 +514,10 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
       </div>
 
       {/* مودال انتخاب تاریخ */}
-      <DynamicModal isOpen={isDateModalOpen} onClose={() => setIsDateModalOpen(false)}>
+      <DynamicModal
+        isOpen={isDateModalOpen}
+        onClose={() => setIsDateModalOpen(false)}
+      >
         <PersianDatePicker
           selectedDate={tempSelectedDate}
           onDateChange={setTempSelectedDate}
@@ -465,23 +538,40 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
       </DynamicModal>
 
       {/* مودال انتخاب زمان */}
-      <DynamicModal isOpen={isTimeModalOpen} onClose={() => setIsTimeModalOpen(false)}>
+      <DynamicModal
+        isOpen={isTimeModalOpen}
+        onClose={() => setIsTimeModalOpen(false)}
+      >
         <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
-          <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">انتخاب زمان</h2>
-          {tempSelectedTime.hours || tempSelectedTime.minutes || tempSelectedTime.seconds ? (
+          <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
+            انتخاب زمان
+          </h2>
+          {tempSelectedTime.hours ||
+          tempSelectedTime.minutes ||
+          tempSelectedTime.seconds ? (
             <div className="mb-4 text-center">
               <span className="text-lg font-medium text-pink-600">
-                {`${tempSelectedTime.hours.padStart(2, "0")}:${tempSelectedTime.minutes.padStart(2, "0")}:${tempSelectedTime.seconds.padStart(2, "0")}`}
+                {`${tempSelectedTime.hours.padStart(
+                  2,
+                  "0"
+                )}:${tempSelectedTime.minutes.padStart(
+                  2,
+                  "0"
+                )}:${tempSelectedTime.seconds.padStart(2, "0")}`}
               </span>
             </div>
           ) : (
             <div className="mb-4 text-center">
-              <span className="text-lg font-medium text-gray-500">زمان انتخاب نشده</span>
+              <span className="text-lg font-medium text-gray-500">
+                زمان انتخاب نشده
+              </span>
             </div>
           )}
           <div className="flex justify-center space-x-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">ساعت</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+                ساعت
+              </label>
               <input
                 type="text"
                 name="hours"
@@ -495,7 +585,9 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">دقیقه</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+                دقیقه
+              </label>
               <input
                 type="text"
                 name="minutes"
@@ -509,7 +601,9 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({ data, onM
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">ثانیه</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+                ثانیه
+              </label>
               <input
                 type="text"
                 name="seconds"

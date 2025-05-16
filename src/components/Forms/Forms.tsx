@@ -46,6 +46,7 @@ interface IFormData {
   TemplateExcelID: string | null;
   nEntityCateAID: number | null;
   nEntityCateBID: number | null;
+  IsGlobal: boolean;
 }
 
 interface CategoryOption {
@@ -177,6 +178,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     TemplateExcelID: null,
     nEntityCateAID: null,
     nEntityCateBID: null,
+    IsGlobal: false,
   });
 
   // نام فایل‌های ورد و اکسل (جهت نمایش و دانلود)
@@ -304,6 +306,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           TemplateExcelID: selectedRow.TemplateExcelID || null,
           nEntityCateAID: selectedRow.nEntityCateAID || null,
           nEntityCateBID: selectedRow.nEntityCateBID || null,
+          IsGlobal: !!selectedRow.IsGlobal,
         });
 
         // واکشی نام فایل ورد
@@ -337,6 +340,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           TemplateExcelID: null,
           nEntityCateAID: null,
           nEntityCateBID: null,
+          IsGlobal: false,
         });
         setWordFileName("");
         setExcelFileName("");
@@ -379,15 +383,19 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
    * در صورت وجود ID فرم، فیلدهای انتیتی را واکشی می‌کند
    */
   const refreshEntityFields = useCallback(async () => {
-    if (formData.ID) {
-      try {
-        const fields = await api.getEntityFieldByEntityTypeId(formData.ID);
-        console.log("ffffff", fields);
-        setEntityFields(fields);
-      } catch (error) {
-        console.error("Error fetching entity fields:", error);
-      }
-    } else {
+    const parsedId = Number(formData.ID);
+
+    if (!parsedId || isNaN(parsedId)) {
+      setEntityFields([]);
+      return;
+    }
+
+    try {
+      const fields = await api.getEntityFieldByEntityTypeId(parsedId);
+      console.log("🎯 Entity fields fetched:", fields);
+      setEntityFields(fields);
+    } catch (error) {
+      console.error("❌ Error fetching entity fields:", error);
       setEntityFields([]);
     }
   }, [api, formData.ID]);
@@ -632,7 +640,14 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   useImperativeHandle(ref, () => ({
     save: async () => {
       try {
-        const payload = { ...formData };
+        const payload = {
+          ...formData,
+          ID: formData.ID ? Number(formData.ID) : 0,
+          ModifiedById: formData.ModifiedById
+            ? formData.ModifiedById.toString()
+            : null,
+        };
+
         await handleSaveForm(payload);
         showAlert("success", undefined, "Success", "Form saved successfully!");
       } catch (error) {
@@ -990,7 +1005,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 }))
               : []
           }
-          selectedRow={selectedRowData}
           onRowClick={handleRowClick}
           onRowDoubleClick={handleSelectButtonClick}
           onSelectButtonClick={handleSelectButtonClick}
