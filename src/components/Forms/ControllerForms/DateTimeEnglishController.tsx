@@ -152,13 +152,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   // هر بار که state داخلی تغییر کرد، آن را به والد بفرست
   useEffect(() => {
     const metaType1 = format === "dateTime" ? "datetime" : "dateonly";
-    const metaType2 = isDynamic ? "dynamic" : defaultValue;
-
+    const metaType2 = defaultValue;              // ← همیشه defaultValue
     let metaType3 = "";
 
     if (isDynamic) {
-      metaType3 = "dynamic";
+      metaType3 = "dynamic";                     // ← وقتی دینامیکه
     } else if (defaultValue === "selected" && selectedDate) {
+      // تاریخ/زمان انتخاب‌شده
       const dateStr = formatDate(selectedDate);
       const timeStr = formatTime(selectedTime);
       metaType3 = `${dateStr} ${timeStr}`;
@@ -170,15 +170,8 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
       metaType3,
       metaType4: data?.metaType4 || "",
     });
-  }, [
-    format,
-    defaultValue,
-    selectedDate,
-    selectedTime,
-    isDynamic,
-    // از قرار دادن data یا onMetaChange در این dependency خودداری کنید
-    // چرا که ممکن است loop ایجاد شود اگر پدر در پاسخ این data را تغییر دهد
-  ]);
+    // ⚠️ دقت: فقط stateهای داخلی در وابستگی
+  }, [format, defaultValue, selectedDate, selectedTime, isDynamic]);
 
   const handleDefaultValueChange = (val: "none" | "today" | "selected") => {
     setDefaultValue(val);
@@ -382,6 +375,11 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
               className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
                          cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               readOnly
+              onBlur={() => {
+                if (defaultValue === "selected" && tempSelectedDate) {
+                  setSelectedDate(tempSelectedDate);
+                }
+              }}
             />
             <FaCalendarAlt
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
@@ -400,12 +398,12 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
             value={
               selectedTime.hours || selectedTime.minutes || selectedTime.seconds
                 ? `${selectedTime.hours.padStart(
-                    2,
-                    "0"
-                  )}:${selectedTime.minutes.padStart(
-                    2,
-                    "0"
-                  )}:${selectedTime.seconds.padStart(2, "0")}`
+                  2,
+                  "0"
+                )}:${selectedTime.minutes.padStart(
+                  2,
+                  "0"
+                )}:${selectedTime.seconds.padStart(2, "0")}`
                 : ""
             }
             onClick={() => setIsTimeModalOpen(true)}
@@ -483,8 +481,8 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
           </h2>
 
           {tempSelectedTime.hours ||
-          tempSelectedTime.minutes ||
-          tempSelectedTime.seconds ? (
+            tempSelectedTime.minutes ||
+            tempSelectedTime.seconds ? (
             <div className="mb-4 text-center">
               <span className="text-lg font-medium text-pink-600">
                 {formatTime(tempSelectedTime)}
@@ -514,6 +512,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 maxLength={2}
                 className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+                onBlur={() => setSelectedTime(tempSelectedTime)}
               />
             </div>
 
@@ -532,6 +531,11 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 maxLength={2}
                 className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+                onBlur={() => {
+                  if (defaultValue === "selected") {
+                    setSelectedTime(tempSelectedTime);
+                  }
+                }}
               />
             </div>
 
@@ -550,6 +554,11 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 maxLength={2}
                 className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+                onBlur={() => {
+                  if (defaultValue === "selected") {
+                    setSelectedTime(tempSelectedTime);
+                  }
+                }}
               />
             </div>
           </div>
