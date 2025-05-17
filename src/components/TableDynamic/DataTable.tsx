@@ -118,7 +118,7 @@ const DataTable: React.FC<DataTableProps> = ({
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api;
     // ست کردن sort پیش‌فرض بر اساس clientOrder (که در داده‌های ما وجود دارد)
-    params.api.setSortModel([{ colId: "clientOrder", sort: "asc" }]);
+    // params.api.setSortModel([{ colId: "clientOrder", sort: "asc" }]);
     params.api.sizeColumnsToFit();
     if (isLoading) {
       params.api.showLoadingOverlay();

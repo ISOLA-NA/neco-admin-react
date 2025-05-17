@@ -331,9 +331,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     const currentTimestamp = new Date().toISOString();
 
     const lookupModeValue =
-      metaCore.LookupMode == null || metaCore.LookupMode === ""
-        ? null
-        : Number(metaCore.LookupMode);
+    metaCore.LookupMode === undefined || metaCore.LookupMode === null || metaCore.LookupMode === ""
+      ? null
+      : Number(metaCore.LookupMode);
+  
 
     const metaType5Value = metaCore.metaType5 || null;
 

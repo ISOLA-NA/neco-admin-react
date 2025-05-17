@@ -36,12 +36,25 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
   const [meta, setMeta] = useState({
-    metaType1: data?.metaType1 ? String(data.metaType1) : "",
-    metaType2: data?.metaType2 ? String(data.metaType2) : "",
+    metaType1:
+  data?.metaType1 !== undefined && data?.metaType1 !== null
+    ? String(data.metaType1)
+    : "",
+
+metaType2:
+  data?.metaType2 !== undefined && data?.metaType2 !== null
+    ? String(data.metaType2)
+    : "",
+
     metaType3: data?.metaType3 || "drop",
     metaType4: data?.metaType4 || "[]",
     metaType5: data?.metaType5 || "",
-    LookupMode: data?.LookupMode ? String(data.LookupMode) : "",
+    LookupMode:
+  data?.LookupMode !== undefined &&
+  data?.LookupMode !== null
+    ? String(data.LookupMode)
+    : "",
+
   });
   const [removeSameName, setRemoveSameName] = useState(!!data?.CountInReject);
   const [oldLookup, setOldLookup] = useState(!!data?.BoolMeta1);
@@ -108,13 +121,18 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
   }, []);
 
   useEffect(() => {
+    console.log("🔍 STEP 1 - LookupMode in EDIT:", data?.LookupMode);
+  
     if (
       initialModeRef.current &&
       modesList.length > 0 &&
-      data?.LookupMode != null
+      data?.LookupMode != null // ✅ فقط این کافیه
     ) {
       const modeValue = String(data.LookupMode);
-      if (modesList.some((m) => m.value === modeValue)) {
+      const found = modesList.some((m) => m.value === modeValue);
+      console.log("✅ STEP 1.1 - Matched Mode:", modeValue, found);
+  
+      if (found) {
         setMeta((prev) => ({ ...prev, LookupMode: modeValue }));
         onMetaChange?.({
           ...data,
@@ -124,6 +142,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
           BoolMeta1: oldLookup,
         });
       }
+  
       initialModeRef.current = false;
     }
   }, [
@@ -135,7 +154,8 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     removeSameName,
     oldLookup,
   ]);
-
+  
+  
   useEffect(() => {
     const id = Number(meta.metaType1);
     if (!isNaN(id) && id) {
