@@ -414,20 +414,50 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   };
 
+  // ✅ ✅ اینو همینجا اضافه کن:
+  const handleMetaExtraChange = (updated: { metaType4: string }) => {
+    setMetaExtra((prev) => ({
+      ...prev,
+      ...updated,
+    }));
+  };
+
   // رندر کنترلر داینامیک (مثلاً Lookup, SeqnialNumber, ...)
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
+
     return (
       <SelectedComponent
-        onMetaChange={(updater: MetaCore | ((prev: MetaCore) => MetaCore)) => {
-          if (typeof updater === "function") {
-            setMetaCore((prev) => updater(prev));
-          } else {
-            setMetaCore(updater);
-          }
+        // ۱) همان onMetaChange که قبلاً داشتی
+        onMetaChange={(updated: any) => {
+          setMetaCore((prev) => ({
+            ...prev,
+            metaType1: updated.metaType1 ?? prev.metaType1,
+            metaType2: updated.metaType2 ?? prev.metaType2,
+            metaType3: updated.metaType3 ?? prev.metaType3,
+            LookupMode: updated.LookupMode ?? prev.LookupMode,
+            metaType5: updated.metaType5 ?? prev.metaType5,
+            metaTypeJson: updated.metaTypeJson ?? prev.metaTypeJson,
+            oldLookup: updated.BoolMeta1 ?? prev.oldLookup,
+          }));
+          setFormData((prev) => ({
+            ...prev,
+            countInReject:
+              typeof updated.CountInReject === "boolean"
+                ? updated.CountInReject
+                : prev.countInReject,
+          }));
         }}
-        data={metaCore}
+        // ۲) اینجا تمام فیلدهای metaCore + metaExtra رو پاس می‌دیم
+        data={{
+          ...metaCore,
+          // metaCore شامل: metaType1, metaType2, metaType3, LookupMode, metaType5, metaTypeJson, oldLookup
+          metaType4: metaExtra.metaType4, // اضافه می‌کنیم
+          BoolMeta1: metaCore.oldLookup, // برای تیک اولیه‌ی Old Lookup
+          CountInReject: formData.countInReject, // برای تیک اولیه‌ی CountInReject
+        }}
+        onMetaExtraChange={handleMetaExtraChange}
       />
     );
   };

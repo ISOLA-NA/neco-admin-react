@@ -226,7 +226,7 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
       return (
         <div className="p-4 min-h-[400px] min-w-[600px]">
           <TableSelector
-            columnDefs={[{ headerName: "Project Name", field: "ProjectName" }]}
+            columnDefs={[{ headerName: "Role List", field: "ProjectName" }]}
             rowData={projectsData}
             onRowClick={() => {}}
             onRowDoubleClick={(row: any) => {
