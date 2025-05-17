@@ -35,7 +35,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
 }) => {
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
-  // ------ local state ------
   const [meta, setMeta] = useState({
     metaType1: data?.metaType1 ? String(data.metaType1) : "",
     metaType2: data?.metaType2 ? String(data.metaType2) : "",
@@ -57,10 +56,9 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
   >([]);
 
   const isFirstLoad = useRef(true);
+  const initialModeRef = useRef(true);
 
-  // ------ initialize once on mount ------
   useEffect(() => {
-    // 1. بارگذاری جدول اولیه از prop.data.metaType4
     try {
       const parsed = JSON.parse(data?.metaType4 || "[]");
       if (Array.isArray(parsed)) {
@@ -78,12 +76,10 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
       setTableData([]);
     }
 
-    // 2. fetch entity types
     getAllEntityType()
       .then((res) => Array.isArray(res) && setEntities(res))
       .catch(console.error);
 
-    // 3. fetch enums
     AppServices.getEnum({ str: "lookMode" })
       .then((resp) =>
         setModesList(
@@ -91,6 +87,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
         )
       )
       .catch(console.error);
+
     AppServices.getEnum({ str: "FilterOpration" })
       .then((resp) =>
         setOperationList(
@@ -99,7 +96,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
       )
       .catch(console.error);
 
-    // اعلام اولیه‌ی meta
     onMetaChange?.({
       ...data,
       ...meta,
@@ -111,9 +107,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const initialModeRef = useRef(true);
-
-  // فقط یک‌بار که modesList اومد و data.LookupMode وجود داشت، مقدار اولیه رو ست کن
   useEffect(() => {
     if (
       initialModeRef.current &&
@@ -121,10 +114,8 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
       data?.LookupMode != null
     ) {
       const modeValue = String(data.LookupMode);
-      // مطمئن شو این گزینه توی لیست هست
       if (modesList.some((m) => m.value === modeValue)) {
         setMeta((prev) => ({ ...prev, LookupMode: modeValue }));
-        // اگر می‌خواهی والد رو هم فوراً مطلع کنی:
         onMetaChange?.({
           ...data,
           ...meta,
@@ -145,7 +136,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     oldLookup,
   ]);
 
-  // ------ sync fields when metaType1 changes ------
   useEffect(() => {
     const id = Number(meta.metaType1);
     if (!isNaN(id) && id) {
@@ -157,7 +147,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     }
   }, [meta.metaType1, getEntityFieldByEntityTypeId]);
 
-  // ------ handlers ------
   const handleMetaChange = (partial: Partial<typeof meta>) => {
     const next = { ...meta, ...partial };
     setMeta(next);
@@ -202,7 +191,10 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     };
     const next = [...tableData, newRow];
     setTableData(next);
-    onMetaExtraChange?.({ metaType4: JSON.stringify(next) });
+
+    const newMeta4 = JSON.stringify(next);
+    setMeta((prev) => ({ ...prev, metaType4: newMeta4 }));
+    onMetaExtraChange?.({ metaType4: newMeta4 });
   };
 
   const handleCellValueChanged = (event: any) => {
@@ -211,10 +203,12 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
       r.ID === updatedRow.ID ? updatedRow : r
     );
     setTableData(next);
-    onMetaExtraChange?.({ metaType4: JSON.stringify(next) });
+
+    const newMeta4 = JSON.stringify(next);
+    setMeta((prev) => ({ ...prev, metaType4: newMeta4 }));
+    onMetaExtraChange?.({ metaType4: newMeta4 });
   };
 
-  // ------ table column defs ------
   const columnDefs = useMemo(
     () => [
       {
@@ -338,21 +332,21 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
       </div>
 
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
-        {fields.length > 0 && (
-          <DataTable
-            columnDefs={columnDefs}
-            rowData={tableData}
-            showAddIcon
-            onAdd={handleAddRow}
-            onCellValueChanged={handleCellValueChanged}
-            domLayout="normal"
-            showSearch={false}
-            showEditIcon={false}
-            showDeleteIcon={false}
-            showDuplicateIcon={false}
-            onRowDoubleClick={() => {}}
-          />
-        )}
+        {/* {fields.length > 0 && ( */}
+        <DataTable
+          columnDefs={columnDefs}
+          rowData={tableData}
+          showAddIcon
+          onAdd={handleAddRow}
+          onCellValueChanged={handleCellValueChanged}
+          domLayout="normal"
+          showSearch={false}
+          showEditIcon={false}
+          showDeleteIcon={false}
+          showDuplicateIcon={false}
+          onRowDoubleClick={() => {}}
+        />
+        {/* )} */}
       </div>
     </div>
   );
