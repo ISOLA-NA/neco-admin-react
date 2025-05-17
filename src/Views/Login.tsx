@@ -152,7 +152,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           })
           onLogin() // اطلاع به والد که کاربر لاگین کرده
           showAlert('success', null, 'موفقیت', 'شما با موفقیت وارد شدید.')
-          navigate('/home')
+          navigate('/')
         } else {
           showAlert('error', null, 'خطا', 'کاربر معمولی نمی‌تواند لاگین کند.')
         }
