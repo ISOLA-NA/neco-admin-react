@@ -23,9 +23,6 @@ interface PersianCalendarPickerProps {
   }) => void;
 }
 
-// تابع کمکی برای تبدیل ارقام فارسی به انگلیسی (در صورت نیاز)
-const convertToEnglishDigits = (str: string): string =>
-  str.replace(/[۰-۹]/g, (w) => String.fromCharCode(w.charCodeAt(0) - 1728));
 
 const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
   data,
@@ -74,15 +71,78 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
   const [selectedMonth, setSelectedMonth] = useState<string>("");
   const [selectedYear, setSelectedYear] = useState<string>("");
 
+  const [isDynamic, setIsDynamic] = useState(false);
+
+
   // رفرنس‌های ورودی زمان (برای انتقال فوکوس)
   const hourRef = useRef<HTMLInputElement>(null);
   const minuteRef = useRef<HTMLInputElement>(null);
   const secondRef = useRef<HTMLInputElement>(null);
 
+  // 1) افزودن helper formatTime در بالای فایل:
+  const formatTime = (time: { hours: string; minutes: string; seconds: string }) =>
+    `${time.hours.padStart(2, "0")}:${time.minutes.padStart(2, "0")}:${time.seconds.padStart(2, "0")}`;
+
   // تابع کمکی برای قالب‌بندی تاریخ شمسی بدون پیشوند "j"
   const formatPersian = (date: DateObject) =>
     date.convert(persian).format("jYYYY/jMM/jDD").replace(/j/g, "");
 
+  const hasInitEdit = useRef(false);
+
+useEffect(() => {
+  // حالت Add
+  if (!data) {
+    setDefaultValue("today");
+    setIsDynamic(true);
+    return;
+  }
+
+  // فقط یک‌بار در Edit
+  if (hasInitEdit.current) return;
+  hasInitEdit.current = true;
+
+  // 1) فرمت
+  setFormat(data.metaType1 === "datetime" ? "dateTime" : "dateOnly");
+
+  // 2) defaultValue و isDynamic
+  if (data.metaType2 === "dynamic" || data.metaType3 === "dynamic") {
+    setDefaultValue("today");
+    setIsDynamic(true);
+  } else {
+    setDefaultValue(data.metaType2 as "none" | "today" | "selected");
+    setIsDynamic(false);
+  }
+
+  // 3) اگر در Edit حالت "selected" بود، یک DateObject بساز
+  if (
+    data.metaType2 === "selected" &&
+    data.metaType3 &&
+    data.metaType3.trim().toLowerCase() !== "dynamic"
+  ) {
+    const [datePart, timePart] = data.metaType3.split(" ");
+    if (datePart) {
+      // ساخت DateObject بر اساس رشته YYYY-MM-DD
+      const greg = new DateObject({
+        date: datePart,
+        calendar: gregorian,
+        format: "YYYY-MM-DD",
+      });
+      // تبدیل به تقویم شمسی
+      const pers = greg.convert(persian);
+      setSelectedDate(pers);
+      setTempSelectedDate(pers);
+    }
+    if (timePart) {
+      const [hh, mm, ss] = timePart.split(":");
+      setSelectedTime({ hours: hh, minutes: mm, seconds: ss });
+      setTempSelectedTime({ hours: hh, minutes: mm, seconds: ss });
+    }
+  }
+}, [data]);
+  
+    
+  
+  
   // در حالت داینامیک، به صورت دوره‌ای (هر 30 ثانیه) تاریخ و زمان به‌روز شود
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -334,44 +394,22 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
     }
   };
 
-  // انتشار مقادیر meta به والد (در صورت وجود onMetaChange)
+  // 3) اصلاح useEffect فرستادن متاها:
   useEffect(() => {
-    if (onMetaChange) {
-      let dateStr = "";
-      if (selectedDate) {
-        dateStr = selectedDate.convert(gregorian).format("YYYY-MM-DD");
-      }
-      let timeStr = "";
-      if (selectedTime.hours || selectedTime.minutes || selectedTime.seconds) {
-        timeStr = `${selectedTime.hours.padStart(
-          2,
-          "0"
-        )}:${selectedTime.minutes.padStart(
-          2,
-          "0"
-        )}:${selectedTime.seconds.padStart(2, "0")}`;
-      } else {
-        timeStr = "00:00:00";
-      }
-
-      const combined = dateStr ? `${dateStr} ${timeStr}` : "";
-      const englishCombined = convertToEnglishDigits(combined);
-      const metaType2Value = dynamicEnabled ? "dynamic" : defaultValue;
-
-      onMetaChange({
-        metaType1: format === "dateOnly" ? "dateonly" : "datetime",
-        metaType2: metaType2Value,
-        metaType3: englishCombined,
-        metaType4: data?.metaType4 || "",
-      });
+    if (!onMetaChange) return;
+    const metaType1 = format === "dateTime" ? "datetime" : "dateonly";
+    const metaType2 = defaultValue;               // همیشه defaultValue
+    let metaType3 = "";
+    if (dynamicEnabled) {
+      metaType3 = "dynamic";
+    } else if (defaultValue === "selected" && selectedDate) {
+      const dateStr = formatPersian(selectedDate);
+      const timeStr = formatTime(selectedTime);
+      metaType3 = `${dateStr} ${timeStr}`;
     }
-  }, [
-    format,
-    defaultValue,
-    selectedDate,
-    selectedTime,
-    dynamicEnabled, // فقط این‌ها کافی‌اند
-  ]);
+    onMetaChange({ metaType1, metaType2, metaType3, metaType4: data?.metaType4 || "" });
+  }, [format, defaultValue, selectedDate, selectedTime, dynamicEnabled]);
+
 
   return (
     <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
@@ -437,14 +475,18 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
             </label>
             {/* چک‌باکس داینامیک تنها زمانی فعال است که defaultValue برابر "today" باشد */}
             <label className="flex items-center space-x-1">
-              <input
-                type="checkbox"
-                checked={dynamicEnabled}
-                onChange={handleDynamicChange}
-                disabled={defaultValue !== "today"}
-                className="form-checkbox text-blue-600 h-4 w-4"
-              />
-              <span className="text-gray-700">داینامیک</span>
+              {/* 4) چک‌باکس isDynamic در JSX */}
+              <label className="flex items-center space-x-1">
+                <input
+                  type="checkbox"
+                  checked={isDynamic}
+                  onChange={(e) => setDynamicEnabled(e.target.checked)}
+                  disabled={defaultValue !== "today"}
+                  className="form-checkbox text-blue-600 h-4 w-4"
+                />
+                <span className="text-gray-700">داینامیک</span>
+              </label>
+
             </label>
           </div>
         </div>
@@ -493,12 +535,12 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
             value={
               selectedTime.hours || selectedTime.minutes || selectedTime.seconds
                 ? `${selectedTime.hours.padStart(
-                    2,
-                    "0"
-                  )}:${selectedTime.minutes.padStart(
-                    2,
-                    "0"
-                  )}:${selectedTime.seconds.padStart(2, "0")}`
+                  2,
+                  "0"
+                )}:${selectedTime.minutes.padStart(
+                  2,
+                  "0"
+                )}:${selectedTime.seconds.padStart(2, "0")}`
                 : ""
             }
             onClick={() => setIsTimeModalOpen(true)}
@@ -547,8 +589,8 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
             انتخاب زمان
           </h2>
           {tempSelectedTime.hours ||
-          tempSelectedTime.minutes ||
-          tempSelectedTime.seconds ? (
+            tempSelectedTime.minutes ||
+            tempSelectedTime.seconds ? (
             <div className="mb-4 text-center">
               <span className="text-lg font-medium text-pink-600">
                 {`${tempSelectedTime.hours.padStart(
