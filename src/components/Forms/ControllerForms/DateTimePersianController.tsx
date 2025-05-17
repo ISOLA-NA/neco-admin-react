@@ -89,59 +89,59 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
 
   const hasInitEdit = useRef(false);
 
-useEffect(() => {
-  // حالت Add
-  if (!data) {
-    setDefaultValue("today");
-    setIsDynamic(true);
-    return;
-  }
-
-  // فقط یک‌بار در Edit
-  if (hasInitEdit.current) return;
-  hasInitEdit.current = true;
-
-  // 1) فرمت
-  setFormat(data.metaType1 === "datetime" ? "dateTime" : "dateOnly");
-
-  // 2) defaultValue و isDynamic
-  if (data.metaType2 === "dynamic" || data.metaType3 === "dynamic") {
-    setDefaultValue("today");
-    setIsDynamic(true);
-  } else {
-    setDefaultValue(data.metaType2 as "none" | "today" | "selected");
-    setIsDynamic(false);
-  }
-
-  // 3) اگر در Edit حالت "selected" بود، یک DateObject بساز
-  if (
-    data.metaType2 === "selected" &&
-    data.metaType3 &&
-    data.metaType3.trim().toLowerCase() !== "dynamic"
-  ) {
-    const [datePart, timePart] = data.metaType3.split(" ");
-    if (datePart) {
-      // ساخت DateObject بر اساس رشته YYYY-MM-DD
-      const greg = new DateObject({
-        date: datePart,
-        calendar: gregorian,
-        format: "YYYY-MM-DD",
-      });
-      // تبدیل به تقویم شمسی
-      const pers = greg.convert(persian);
-      setSelectedDate(pers);
-      setTempSelectedDate(pers);
+  // useEffect واحد برای Init هم در Add و هم در Edit
+  useEffect(() => {
+    // اگر data نیامده، حالت Add را با today+dynamic=true مقداردهی کن
+    if (!data) {
+      setDefaultValue("today");
+      setIsDynamic(true);
+      return;
     }
-    if (timePart) {
-      const [hh, mm, ss] = timePart.split(":");
-      setSelectedTime({ hours: hh, minutes: mm, seconds: ss });
-      setTempSelectedTime({ hours: hh, minutes: mm, seconds: ss });
+  
+    // اگر قبلاً init شده، دوباره انجام نده
+    if (hasInitEdit.current) return;
+    hasInitEdit.current = true;
+  
+    // 1) فرمت
+    setFormat(
+      data.metaType1 === "datetime" ? "dateTime" : "dateOnly"
+    );
+  
+    // 2) defaultValue و isDynamic
+    if (data.metaType2 === "dynamic" || data.metaType3 === "dynamic") {
+      // اگر سرور explicit دینامیک فرستاده
+      setDefaultValue("today");
+      setIsDynamic(true);
+    } else {
+      // در غیر این صورت، از metaType2 استفاده کن
+      setDefaultValue(
+        data.metaType2 as "none" | "today" | "selected"
+      );
+      setIsDynamic(false);
     }
-  }
-}, [data]);
   
-    
-  
+    // 3) مقداردهی selectedDate/Time وقتی metaType2==="selected"
+    if (
+      data.metaType2 === "selected" &&
+      data.metaType3 &&
+      data.metaType3.trim().toLowerCase() !== "dynamic"
+    ) {
+      const [datePart, timePart] = data.metaType3.split(" ");
+      if (datePart) {
+        const [yy, mm, dd] = datePart.split("-");
+        const d = new Date(+yy, +mm - 1, +dd);
+        if (!isNaN(d.getTime())) {
+          setSelectedDate(d);
+          setTempSelectedDate(d);
+        }
+      }
+      if (timePart) {
+        const [hh, mn, ss] = timePart.split(":");
+        setSelectedTime({ hours: hh, minutes: mn, seconds: ss });
+        setTempSelectedTime({ hours: hh, minutes: mn, seconds: ss });
+      }
+    }
+  }, [data]);
   
   // در حالت داینامیک، به صورت دوره‌ای (هر 30 ثانیه) تاریخ و زمان به‌روز شود
   useEffect(() => {
