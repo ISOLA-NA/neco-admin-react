@@ -490,22 +490,22 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     // تعریف ستون‌ها برای جدول جزئیات
     const detailColumnDefs = [
-      { headerName: "Order", field: "Order" },
-      { headerName: "Activity Name", field: "Name" },
-      { headerName: "Duration", field: "ActDuration" },
-      { headerName: "Start", field: "Top" },
-      { headerName: "End", field: "Left" },
-      { headerName: "Responsible Post", field: "nPostIdDisplay" }, // ✅ این درست است
-      { headerName: "Job", field: "Code" },
-      { headerName: "Approval Flow", field: "nWFTemplateID" },
-      { headerName: "Activity Type", field: "PFIType" },
-      { headerName: "Form Name", field: "nEntityTypeID" },
-      { headerName: "Weight", field: "Weight1" },
+      { headerName: "Order", field: "Order"},
+      { headerName: "Activity Name", field: "Name",width:300 },
+      { headerName: "Duration", field: "ActDuration"},
+      { headerName: "Start", field: "Top"},
+      { headerName: "End", field: "Left"},
+      { headerName: "Responsible Post", field: "nPostIdDisplay" ,width:300}, // ✅ این درست است
+      { headerName: "Job", field: "Code"},
+      { headerName: "Approval Flow", field: "nWFTemplateID" ,width:300},
+      { headerName: "Activity Type", field: "PFIType" ,width:300},
+      { headerName: "Form Name", field: "nEntityTypeID" ,width:300},
+      { headerName: "Weight", field: "Weight1"},
       { headerName: "Activity Budget", field: "PCostAct" },
-      { headerName: "Program Template", field: "nProgramTemplateID" },
-      { headerName: "Program Duration", field: "WFDuration" },
+      { headerName: "Program Template", field: "nProgramTemplateID",width:300 },
+      { headerName: "Program Duration", field: "WFDuration"},
       { headerName: "FProgram Execution Budget", field: "PCostAprov" },
-      { headerName: "Program to plan", field: "WeightWF" },
+      { headerName: "Program to plan", field: "WeightWF"},
     ];
 
     const refreshTable = async () => {
@@ -642,7 +642,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
           {/* بخش جزئیات با DataTable */}
           <TwoColumnLayout.Item span={2}>
-            <div className="-mt-12">
+            <div className="w-full overflow-x-auto" style={{ maxHeight: "400px", overflowY: "auto" }}>
+
+            <div className="min-w-[2200px]">
               <DataTable
                 columnDefs={detailColumnDefs}
                 rowData={enhancedProgramTemplateField}
@@ -673,6 +675,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                 isLoading={loadingFields} //
                 gridOptions={{ rowSelection: "single" }}
               />
+            </div>
             </div>
           </TwoColumnLayout.Item>
 
