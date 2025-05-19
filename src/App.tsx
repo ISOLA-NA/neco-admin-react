@@ -1,5 +1,4 @@
 // src/App.tsx
-
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -20,35 +19,29 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "./App.css";
 
-// ✅ تابع کمکی برای چک کردن لاگین
-const isUserAuthenticated = () => {
-  return localStorage.getItem("isAuthenticated") === "true";
-};
+// تابع کمکی برای چک کردن لاگین
+const isUserAuthenticated = () =>
+  localStorage.getItem("isAuthenticated") === "true";
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
     isUserAuthenticated()
   );
 
-  // ✅ همگام‌سازی با تغییرات localStorage (مثلاً وقتی در تب دیگر logout شود)
+  // همگام‌سازی با تغییرات localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       setIsAuthenticated(isUserAuthenticated());
     };
-
     window.addEventListener("storage", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // ✅ پس از login
   const handleLogin = () => {
     localStorage.setItem("isAuthenticated", "true");
     setIsAuthenticated(true);
   };
 
-  // ✅ پس از logout
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     setIsAuthenticated(false);
@@ -59,10 +52,10 @@ const App: React.FC = () => {
       <SubTabDefinitionsProvider>
         <AddEditDeleteProvider>
           <Router>
+            {/* اینجا فقط یک بار کانتینر Toast */}
             <Alert />
 
             <Routes>
-              {/* صفحه اصلی */}
               <Route
                 path="/"
                 element={
@@ -73,11 +66,7 @@ const App: React.FC = () => {
                   )
                 }
               />
-
-              {/* صفحه لاگین بدون لوپ */}
               <Route path="/login" element={<Login onLogin={handleLogin} />} />
-
-              {/* تست یا نسخه دوم لاگین */}
               <Route path="/login1" element={<Login1 />} />
             </Routes>
           </Router>

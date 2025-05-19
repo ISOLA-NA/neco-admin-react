@@ -13,4 +13,11 @@
   .Toastify__progress-bar {
     z-index: 2147483647 !important;
   }
+
+  .custom-toast-container {
+    z-index: 99999 !important;
+    position: fixed !important;
+    top: 1rem !important;
+    right: 1rem !important;
+  }
   

@@ -10,7 +10,6 @@ import { useApi } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
 // اگر از react-toastify استفاده می‌کنید و می‌خواهید فقط در همین مدال نمایش بدهید:
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface AddSubApprovalFlowModalProps {
@@ -140,11 +139,17 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         const result = await api.updateBoxTemplate(payload);
         console.log("BoxTemplate updated:", result);
         showAlert("success", null, "Success", "Edited Successfully");
+        // setTimeout(() => {
+        onClose();
+        // }, 500);
       } else {
         // حالت درج
         const result = await api.insertBoxTemplate(payload);
         console.log("BoxTemplate inserted:", result);
         showAlert("success", null, "Success", "Added Successfully");
+        // setTimeout(() => {
+        onClose();
+        // }, 500);/
       }
 
       if (onBoxTemplateInserted) {
@@ -161,22 +166,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       {/* والد با position relative تا بتوانیم ToastContainer را اینجا با absolute پین کنیم */}
       <div className="relative">
         {/* فقط یک ToastContainer در این سطح قرار می‌دهیم */}
-        <div
-          className="absolute top-0 right-0 mt-2 mr-2"
-          style={{ zIndex: 9999 }}
-        >
-          <ToastContainer
-            position="top-right"
-            autoClose={4000}
-            hideProgressBar={false}
-            newestOnTop={true}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
-        </div>
 
         <div
           role="tablist"

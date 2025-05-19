@@ -1,53 +1,54 @@
-// Alert.tsx
-import React from 'react';
-import { toast, ToastContainer, ToastOptions } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './Alert.css'; // استایل سفارشی خود را اضافه کنید
-import CloseButton from '../CloseButton'; // اطمینان حاصل کنید مسیر درست است
+// src/components/utilities/Alert/DynamicAlert.tsx
+import React from "react";
+import { ToastContainer, toast, type ToastOptions } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./Alert.css"; // 👈 فایل استایل سفارشی ما
 
-type AlertType = 'success' | 'error' | 'warning' | 'info';
+type AlertType = "success" | "error" | "warning" | "info";
 
-const typeStyles: Record<AlertType, string> = {
-    success: 'bg-green-500 text-white rounded-md shadow-md',
-    error: 'bg-red-500 text-white rounded-md shadow-md',
-    warning: 'bg-yellow-500 text-white rounded-md shadow-md',
-    info: 'bg-blue-500 text-white rounded-md shadow-md',
+const toastStyles: Record<AlertType, string> = {
+  success: "toast-success",
+  error: "toast-error",
+  warning: "toast-warning",
+  info: "toast-info",
 };
 
 export const showAlert = (
-    type: AlertType,
-    customContent?: React.ReactNode,
-    title?: string,
-    description?: string
+  type: AlertType,
+  customContent?: React.ReactNode,
+  title?: string,
+  description?: string
 ) => {
-    const options: ToastOptions = {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        rtl: true,
-        closeButton: <CloseButton />, // استفاده از کامپوننت CloseButton
-    };
+  const opts: ToastOptions = {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    rtl: true,
+    className: toastStyles[type], // ⬅ تعیین رنگ پس‌زمینه
+  };
 
-    toast(
-        <div className={`relative p-4 ${typeStyles[type]} bg-opacity-90`}>
-            {customContent ? (
-                customContent
-            ) : (
-                <>
-                    {title && <div className="font-bold">{title}</div>}
-                    {description && <div>{description}</div>}
-                </>
-            )}
-        </div>,
-        options
-    );
+  toast(
+    <div className="toast-content">
+      {title && <div className="toast-title">{title}</div>}
+      {description && <div className="toast-description">{description}</div>}
+      {customContent && <div className="toast-custom">{customContent}</div>}
+    </div>,
+    opts
+  );
 };
 
-const Alert: React.FC = () => {
-    return <ToastContainer className="custom-toast-container" />;
-};
+const DynamicAlert: React.FC = () => (
+  <ToastContainer
+    className="custom-toast-container"
+    newestOnTop
+    closeOnClick
+    draggable
+    pauseOnHover
+    bodyClassName="toast-body"
+  />
+);
 
-export default Alert;
+export default DynamicAlert;

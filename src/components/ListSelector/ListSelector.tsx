@@ -15,6 +15,7 @@ interface ListSelectorProps {
   ModalContentComponent: React.FC<any>;
   modalContentProps?: any;
   loading?: boolean; // پروپ بارگذاری اضافه شده
+  onClose?: () => void;
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
@@ -60,11 +61,15 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             <>
               <input
                 type="checkbox"
-                className="toggle toggle-info"
+                className={classNames(
+                  "toggle",
+                  isGlobal ? "bg-gray-400 border-gray-400" : "toggle-info"
+                )}
                 checked={isGlobal}
                 onChange={() => onGlobalChange && onGlobalChange(!isGlobal)}
                 aria-label="Global Switch"
               />
+
               <span className="text-white text-xs">Global</span>
             </>
           )}
@@ -72,18 +77,17 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         <div className="flex items-center gap-2">
           <h3 className="text-xs font-semibold text-white">{title}</h3>
           <button
-  className={classNames(
-    "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center",
-    "hover:bg-purple-500",
-    isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
-  )}
-  onClick={() => setIsDialogOpen(true)}
-  aria-label={`افزودن ${title}`}
-  disabled={isGlobal}
->
-  +
-</button>
-
+            className={classNames(
+              "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center",
+              "hover:bg-purple-500",
+              isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
+            )}
+            onClick={() => setIsDialogOpen(true)}
+            aria-label={`افزودن ${title}`}
+            disabled={isGlobal}
+          >
+            +
+          </button>
         </div>
       </div>
 
@@ -113,7 +117,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           </div>
         ) : selectedNames.length === 0 ? (
           <p className="text-gray-500 text-xs text-center">
-           No item is selected
+            No item is selected
           </p>
         ) : (
           <div className="space-y-2">
@@ -169,6 +173,10 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             if (selectedRow) handleRowSelect(selectedRow);
           }}
           isSelectDisabled={!selectedRow}
+          onClose={() => {
+            setIsDialogOpen(false); // مودال بسته شود
+            if (modalContentProps?.onClose) modalContentProps.onClose(); // هر چی parent گفت، اجرا شود
+          }}
         />
       </DynamicModal>
     </div>
