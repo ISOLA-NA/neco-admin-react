@@ -1,75 +1,57 @@
-/* src/components/utilities/Alert/Alert.css */
-
-/* کانتینر کلی Toast */
-.custom-toast-container {
-  z-index: 10000 !important;
-  top: 1rem !important;
-  right: 1rem !important;
-  position: fixed !important;
+.custom-toast-container .Toastify__toast-container {
+    background-color: transparent !important;
+    box-shadow: none !important;
 }
 
-/* بدنه‌ی Toast */
-.toast-body {
-  padding: 0 !important;
-  margin: 0.5rem 0;
-  background-color: transparent !important; /* حذف باکس سفید پشت Toast */
-  box-shadow: none !important;
-  border-radius: 0.375rem;
+.custom-toast-container .Toastify__toast {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0px !important;
+    box-sizing: border-box;
+    position: relative;
 }
 
-/* محتوای داخلی Toast */
-.toast-content {
-  display: flex;
-  flex-direction: column;
-  padding: 0.75rem 1rem;
-  background-color: transparent !important;
+.custom-toast-container .Toastify__toast-body {
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.toast-title {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-  color: inherit;
-  font-size: 1rem;
+.custom-toast-container .Toastify__progress-bar {
+    height: 2px;
+    width: calc(100% - 16px); /* عرض نوار پیشرفت با توجه به padding کانتینر */
+    background-color: white !important;
+    border-radius: 0px !important;
+    box-sizing: border-box;
+    margin: 0 auto; /* برای تنظیم نوار در وسط کانتینر */
+    display: block;
 }
 
-.toast-description {
-  margin: 0;
-  color: inherit;
-  font-size: 0.95rem;
+.custom-toast-container .Toastify__close-button {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    color: white !important;
+    opacity: 0.8;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor:
+     pointer;
 }
 
-.toast-custom {
-  margin-top: 0.25rem;
-}
-
-/* رنگ‌بندی انواع Toast */
-.toast-success {
-  background-color: #16a34a !important;
-  color: white !important;
-}
-
-.toast-error {
-  background-color: #dc2626 !important;
-  color: white !important;
-}
-
-.toast-warning {
-  background-color: #d97706 !important;
-  color: white !important;
-}
-
-.toast-info {
-  background-color: #2563eb !important;
-  color: white !important;
-}
-
-/* دکمه بستن (×) در Toast */
-.Toastify__close-button {
-  color: white !important;
-  opacity: 1 !important;
-}
-
-.Toastify__close-button:hover {
-  color: #f3f4f6 !important; /* خاکستری خیلی روشن هنگام هاور */
+.custom-toast-container .Toastify__close-button {
+    position: absolute;
+    top: 0; /* فاصله از بالا صفر */
+    left: 0; /* فاصله از چپ صفر */
+    color: white !important;
+    opacity: 0.8;
+    background: transparent;
+    border: none;
+    font-size: 16px; /* اندازه دکمه */
+    padding: 8px; /* تنظیم پدینگ برای فاصله مناسب از لبه کانتینر */
+    cursor: pointer;
 }
 

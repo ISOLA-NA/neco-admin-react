@@ -331,11 +331,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     const currentTimestamp = new Date().toISOString();
 
     const lookupModeValue =
-      metaCore.LookupMode === undefined ||
-      metaCore.LookupMode === null ||
-      metaCore.LookupMode === ""
-        ? null
-        : Number(metaCore.LookupMode);
+    metaCore.LookupMode === undefined || metaCore.LookupMode === null || metaCore.LookupMode === ""
+      ? null
+      : Number(metaCore.LookupMode);
+  
 
     const metaType5Value = metaCore.metaType5 || null;
 
@@ -392,17 +391,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         await updateEntityField(payload);
         showAlert("success", undefined, "Success", "Edited successfully");
         newId = payload.ID;
-        setTimeout(() => {
-          onClose();
-        }, 500);
       } else {
         const response = await insertEntityField(payload);
         showAlert("success", undefined, "Success", "Added successfully");
 
         newId = response?.ID ?? payload.ID;
-        setTimeout(() => {
-          onClose();
-        }, 500);
       }
 
       setIsLoading(false);
@@ -413,6 +406,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       };
 
       if (onSave) onSave(newField);
+      onClose();
     } catch (error: any) {
       setIsLoading(false);
       setErrors({ form: "An error occurred." });
