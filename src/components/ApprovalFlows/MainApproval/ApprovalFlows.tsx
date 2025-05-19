@@ -20,6 +20,7 @@ import {
   BoxTemplate,
 } from "../../../services/api.services";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
+import DynamicConfirm from "../../utilities/DynamicConfirm";
 
 export interface ApprovalFlowHandle {
   save: () => Promise<boolean>;
@@ -62,6 +63,10 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       useState<BoxTemplate | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+    // id ساب‌آیتمی که قصد حذفش رو داریم
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
     // دریافت پروژه‌ها
     useEffect(() => {
@@ -272,10 +277,17 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       // showAlert("info", null, "Info", "Edited Successfully");
     };
 
-    const handleBoxTemplateDelete = (box: BoxTemplate) => {
-      console.log("Delete BoxTemplate:", box);
-      // فراخوانی متد حذف در صورت وجود
-      showAlert("success", null, "Success", "Deleted Successfully");
+    const handleBoxTemplateDelete = async (id: number) => {
+      try {
+        await api.deleteBoxTemplate(id);
+        // ۱. بارگذاری مجدد لیست
+        await handleBoxTemplatesChanged();
+        // ۲. حالا پیام موفقیت
+        showAlert("success", null, "موفقیت", "زیرجریان با موفقیت حذف شد");
+      } catch (err) {
+        console.error("Error deleting BoxTemplate:", err);
+        showAlert("error", null, "خطا", "حذف با شکست مواجه شد");
+      }
     };
 
     const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
@@ -390,7 +402,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                   }}
                   onDelete={() => {
                     if (selectedSubRowData) {
-                      handleBoxTemplateDelete(selectedSubRowData);
+                      setPendingDeleteId(selectedSubRowData.ID);
+                      setIsDeleteConfirmOpen(true);
                     }
                   }}
                   onDuplicate={() => {
@@ -401,13 +414,28 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                   showDuplicateIcon={false}
                   showEditIcon={true}
                   showAddIcon={true}
-                  showDeleteIcon={false}
+                  showDeleteIcon={true}
                   domLayout="autoHeight"
                 />
               </>
             )}
           </TwoColumnLayout.Item>
         </TwoColumnLayout>
+
+        <DynamicConfirm
+          isOpen={isDeleteConfirmOpen}
+          variant="delete"
+          title="حذف جریان تأیید"
+          message="آیا مطمئن هستید که می‌خواهید این جریان تأیید را حذف کنید؟"
+          onClose={() => setIsDeleteConfirmOpen(false)}
+          onConfirm={() => {
+            if (pendingDeleteId !== null) {
+              handleBoxTemplateDelete(pendingDeleteId);
+            }
+            setIsDeleteConfirmOpen(false);
+            setPendingDeleteId(null);
+          }}
+        />
 
         <AddSubApprovalFlowModal
           isOpen={isModalOpen}

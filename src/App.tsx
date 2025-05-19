@@ -75,10 +75,7 @@ const App: React.FC = () => {
               />
 
               {/* صفحه لاگین بدون لوپ */}
-              <Route
-                path="/login"
-                element={<Login onLogin={handleLogin} />}
-              />
+              <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
               {/* تست یا نسخه دوم لاگین */}
               <Route path="/login1" element={<Login1 />} />

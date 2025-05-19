@@ -3,6 +3,7 @@ import { classNames } from "primereact/utils";
 
 interface DynamicInputProps {
   name: string;
+  label?: string; // ← اضافه شد
   type: "text" | "number" | "password" | "date" | "time";
   value?: string | number | null;
   placeholder?: string;
@@ -22,6 +23,7 @@ interface DynamicInputProps {
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
   name,
+  label, // ← دریافت label
   type,
   value,
   placeholder = "",
@@ -38,15 +40,18 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   max,
   step,
 }) => {
+  // برچسبی که نمایش داده می‌شود: اگر label باشد، آن را نمایش بده، وگرنه از name استفاده کن
+  const labelText = label ?? name;
+
   return (
     <div className={classNames("w-full", className)}>
-      {name && (
+      {labelText && (
         <label
           htmlFor={name}
-          title={name}
+          title={labelText}
           className="block text-xs text-gray-600 mb-1 truncate whitespace-nowrap overflow-hidden"
         >
-          {name}
+          {labelText}
           {required && <span className="text-red-500"> *</span>}
         </label>
       )}
@@ -67,7 +72,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           placeholder={placeholder}
           required={required}
           disabled={disabled || loading}
-          aria-label={name}
+          aria-label={labelText}
           min={min}
           max={max}
           step={step}

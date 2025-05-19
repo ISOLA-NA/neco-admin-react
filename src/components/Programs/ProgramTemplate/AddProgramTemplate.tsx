@@ -7,7 +7,7 @@ import {
   ProgramType,
 } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
-import { PFIType, ProgramTemplateItem } from "../../../services/api.services";
+import { ProgramTemplateItem } from "../../../services/api.services";
 import AddColumnForm from "../../Forms/AddForm";
 import ListSelector from "../../ListSelector/ListSelector";
 
@@ -630,7 +630,8 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
             {/* ردیف‌ها */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
-                name="ََActivity Name"
+                name="activityname"
+                label="Activity Name"
                 type="text"
                 value={formData.activityname}
                 onChange={handleChange}
