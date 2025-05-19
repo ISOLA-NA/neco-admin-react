@@ -69,7 +69,12 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
       // اگر Stage نبود و جدول خالی بود، هشدار
       if (formData.tableData.length === 0 && !formData.isStage) {
-        showAlert("warning", null, "Warning", "No row in Approval Context table!");
+        showAlert(
+          "warning",
+          null,
+          "Warning",
+          "No row in Approval Context table!"
+        );
         return;
       }
 
@@ -152,7 +157,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   };
 
   return (
-    <DynamicModal isOpen={isOpen} onClose={onClose}>
+    <DynamicModal isOpen={isOpen} onClose={onClose} size="large">
       {/* والد با position relative تا بتوانیم ToastContainer را اینجا با absolute پین کنیم */}
       <div className="relative">
         {/* فقط یک ToastContainer در این سطح قرار می‌دهیم */}

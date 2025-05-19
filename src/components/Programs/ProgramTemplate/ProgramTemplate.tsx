@@ -490,22 +490,103 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     // تعریف ستون‌ها برای جدول جزئیات
     const detailColumnDefs = [
-      { headerName: "Order", field: "Order"},
-      { headerName: "Activity Name", field: "Name",width:300 },
-      { headerName: "Duration", field: "ActDuration"},
-      { headerName: "Start", field: "Top"},
-      { headerName: "End", field: "Left"},
-      { headerName: "Responsible Post", field: "nPostIdDisplay" ,width:300}, // ✅ این درست است
-      { headerName: "Job", field: "Code"},
-      { headerName: "Approval Flow", field: "nWFTemplateID" ,width:300},
-      { headerName: "Activity Type", field: "PFIType" ,width:300},
-      { headerName: "Form Name", field: "nEntityTypeID" ,width:300},
-      { headerName: "Weight", field: "Weight1"},
-      { headerName: "Activity Budget", field: "PCostAct" },
-      { headerName: "Program Template", field: "nProgramTemplateID",width:300 },
-      { headerName: "Program Duration", field: "WFDuration"},
-      { headerName: "FProgram Execution Budget", field: "PCostAprov" },
-      { headerName: "Program to plan", field: "WeightWF"},
+      {
+        headerName: "Order",
+        field: "Order",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Activity Name",
+        field: "Name",
+        flex: 3,
+        minWidth: 150,
+      },
+      {
+        headerName: "Code",
+        field: "Code",
+        flex: 1,
+        minWidth: 100,
+      },
+      {
+        headerName: "Duration",
+        field: "ActDuration",
+        flex: 1,
+        minWidth: 100,
+      },
+      {
+        headerName: "Start",
+        field: "Top",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "End",
+        field: "Left",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Responsible Post",
+        field: "nPostIdDisplay",
+        flex: 3,
+        minWidth: 150,
+      },
+
+      {
+        headerName: "Approval Flow",
+        field: "nWFTemplateID",
+        flex: 3,
+        minWidth: 150,
+      },
+      {
+        headerName: "Activity Type",
+        field: "PFIType",
+        flex: 2,
+        minWidth: 150,
+      },
+      {
+        headerName: "Form Name",
+        field: "nEntityTypeID",
+        flex: 3,
+        minWidth: 150,
+      },
+      {
+        headerName: "Weight",
+        field: "Weight1",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Activity Budget",
+        field: "PCostAct",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Program Template",
+        field: "nProgramTemplateID",
+        flex: 3,
+        minWidth: 150,
+      },
+      {
+        headerName: "Program Duration",
+        field: "WFDuration",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "FProgram Execution Budget",
+        field: "PCostAprov",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Program to plan",
+        field: "WeightWF",
+        flex: 1,
+        minWidth: 80,
+      },
     ];
 
     const refreshTable = async () => {
@@ -642,40 +723,42 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
           {/* بخش جزئیات با DataTable */}
           <TwoColumnLayout.Item span={2}>
-            <div className="w-full overflow-x-auto" style={{ maxHeight: "400px", overflowY: "auto" }}>
-
-            <div className="min-w-[2200px]">
-              <DataTable
-                columnDefs={detailColumnDefs}
-                rowData={enhancedProgramTemplateField}
-                onRowClick={handleSelectRow} // فقط انتخاب
-                onRowDoubleClick={handleEditRow}
-                showDuplicateIcon={false}
-                setSelectedRowData={setSelectedDetailRow}
-                showEditIcon={true}
-                showAddIcon={true}
-                showDeleteIcon={true}
-                onAdd={handleAddClick}
-                onEdit={() => {
-                  if (selectedDetailRow) {
-                    handleEditRow(selectedDetailRow); // آیکون ادیت → اجرا
-                  } else {
-                    showAlert(
-                      "warning",
-                      null,
-                      "No selection",
-                      "Please select a row to edit."
-                    );
-                  }
-                }}
-                onDelete={handleDeleteRow}
-                onDuplicate={() => {}}
-                domLayout="autoHeight"
-                showSearch={true}
-                isLoading={loadingFields} //
-                gridOptions={{ rowSelection: "single" }}
-              />
-            </div>
+            <div
+              className="w-full overflow-x-auto"
+              style={{ maxHeight: "400px", overflowY: "auto" }}
+            >
+              <div className="w-full" style={{ height: 400 }}>
+                <DataTable
+                  columnDefs={detailColumnDefs}
+                  rowData={enhancedProgramTemplateField}
+                  onRowClick={handleSelectRow}
+                  onRowDoubleClick={handleEditRow}
+                  showDuplicateIcon={false}
+                  setSelectedRowData={setSelectedDetailRow}
+                  showEditIcon={true}
+                  showAddIcon={true}
+                  showDeleteIcon={true}
+                  onAdd={handleAddClick}
+                  onEdit={() => {
+                    if (selectedDetailRow) {
+                      handleEditRow(selectedDetailRow);
+                    } else {
+                      showAlert(
+                        "warning",
+                        null,
+                        "No selection",
+                        "Please select a row to edit."
+                      );
+                    }
+                  }}
+                  onDelete={handleDeleteRow}
+                  onDuplicate={() => {}}
+                  domLayout="autoHeight"
+                  showSearch={true}
+                  isLoading={loadingFields} //
+                  gridOptions={{ rowSelection: "single" }}
+                />
+              </div>
             </div>
           </TwoColumnLayout.Item>
 

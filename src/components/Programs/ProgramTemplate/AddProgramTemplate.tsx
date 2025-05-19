@@ -63,6 +63,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
     w3SubProg: "",
     start: "",
     finish: "",
+    Code: "",
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -247,6 +248,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    console.log("handleChange:", name, value);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -301,7 +303,8 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
           Order: 0,
 
           // انتخابی / nullable
-          Code: "",
+          // داخل payload.PFI برای ویرایش
+          Code: formData.Code || "",
           GPIC: null,
           ParrentIC: null,
           PredecessorForItemStr: "",
@@ -547,6 +550,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
         w3SubProg: editingRow.w3SubProg ? String(editingRow.w3SubProg) : "",
         start: editingRow.Top ? String(editingRow.Top) : "",
         finish: editingRow.Left ? String(editingRow.Left) : "",
+        Code: editingRow.Code || "",
       });
 
       // متادیتا
@@ -626,16 +630,16 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
             {/* ردیف‌ها */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
-                name="activityname"
+                name="ََActivity Name"
                 type="text"
                 value={formData.activityname}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
               <DynamicInput
-                name="code"
+                name="Code"
                 type="text"
-                value={formData.code || ""}
+                value={formData.Code || ""}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />

@@ -18,7 +18,6 @@ import {
   AFBtnItem,
   ConfigurationItem,
 } from "../../../context/ApiContext";
-import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
 interface ConfigurationProps {
   selectedRow: any;

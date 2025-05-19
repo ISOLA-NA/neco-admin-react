@@ -52,7 +52,6 @@ export const SubTabDefinitionsProvider: React.FC<{
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
 
-
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [allProjects, setAllProjects] = useState<any[]>([]);
   const [allCompanies, setAllCompanies] = useState<any[]>([]);
@@ -93,7 +92,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           usersData,
           projectsData,
           companiesData,
-          rolesData // ✅ اضافه شده
+          rolesData, // ✅ اضافه شده
         ] = await Promise.all([
           api.getAllProgramTemplates(),
           api.getAllDefaultRibbons(),
@@ -103,7 +102,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           api.getAllCompanies(),
           api.getAllRoles(), // ✅ نقش‌ها
         ]);
-    
+
         setProgramTemplates(templates);
         setDefaultRibbons(ribbons);
         setMenus(menusData);
@@ -132,9 +131,13 @@ export const SubTabDefinitionsProvider: React.FC<{
             field: "FirstIDProgramTemplate",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
+              const templateId = (params.data.FirstIDProgramTemplate || "")
+                .toString()
+                .replace(/\|+$/, "");
               const template = programTemplates.find(
-                (pt) => pt.ID === params.data.FirstIDProgramTemplate
+                (pt) => pt && pt.ID && pt.ID.toString() === templateId
               );
+
               return template ? template.Name : "";
             },
           },
@@ -143,8 +146,11 @@ export const SubTabDefinitionsProvider: React.FC<{
             field: "SelMenuIDForMain",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
+              const ribbonId = (params.data.SelMenuIDForMain || "")
+                .toString()
+                .replace(/\|+$/, "");
               const ribbon = defaultRibbons.find(
-                (dr) => dr.ID === params.data.SelMenuIDForMain
+                (dr) => dr.ID.toString() === ribbonId
               );
               return ribbon ? ribbon.Name : "";
             },
@@ -330,40 +336,45 @@ export const SubTabDefinitionsProvider: React.FC<{
             field: "nProjectID",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
-              const proj = allProjects.find(p => p.ID === params.data.nProjectID);
+              const proj = allProjects.find(
+                (p) => p.ID === params.data.nProjectID
+              );
               return proj ? proj.ProjectName : "";
-            }
+            },
           },
           {
             headerName: "User",
             field: "OwnerID",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
-              const user = allUsers.find(u => u.ID === params.data.OwnerID);
+              const user = allUsers.find((u) => u.ID === params.data.OwnerID);
               return user ? user.Username : "";
-            }
+            },
           },
           {
             headerName: "Enterprise",
             field: "nCompanyID",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
-              const comp = allCompanies.find(c => c.ID === params.data.nCompanyID);
+              const comp = allCompanies.find(
+                (c) => c.ID === params.data.nCompanyID
+              );
               return comp ? comp.Name : "";
-            }
+            },
           },
 
           {
-              headerName: "Superior",
-              field: "ParrentId",
-              filter: "agTextColumnFilter",
-              /** مقدار متن را از allRoles می‌گیرد */
-              valueGetter: (params: any) => {
-                const sup = allRoles.find((r: any) => r.ID === params.data.ParrentId);
-                return sup ? sup.Name : "";
-              }
-             }
-
+            headerName: "Superior",
+            field: "ParrentId",
+            filter: "agTextColumnFilter",
+            /** مقدار متن را از allRoles می‌گیرد */
+            valueGetter: (params: any) => {
+              const sup = allRoles.find(
+                (r: any) => r.ID === params.data.ParrentId
+              );
+              return sup ? sup.Name : "";
+            },
+          },
         ],
         iconVisibility: {
           showAdd: true,
@@ -742,7 +753,15 @@ export const SubTabDefinitionsProvider: React.FC<{
 
       // Add other sub-tabs here
     } as Record<string, SubTabDefinition>;
-  }, [api, programTemplates, defaultRibbons, menus, allUsers, allProjects, allCompanies]);
+  }, [
+    api,
+    programTemplates,
+    defaultRibbons,
+    menus,
+    allUsers,
+    allProjects,
+    allCompanies,
+  ]);
 
   const fetchDataForSubTab = async (subTabName: string, params?: any) => {
     // If no token or endpoint not defined, return empty

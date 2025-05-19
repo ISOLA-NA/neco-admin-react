@@ -252,7 +252,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         flex: 1,
         valueGetter: (params: any) => {
           if (!params.data?.PredecessorStr) return "";
-          const predecessorIds = params.data.PredecessorStr.split("|").filter(Boolean);
+          const predecessorIds =
+            params.data.PredecessorStr.split("|").filter(Boolean);
           return predecessorIds
             .map((id: string) => {
               const found = boxTemplates.find(
@@ -373,11 +374,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           <TwoColumnLayout.Item span={2}>
             {selectedRow && (
               <>
-                <div className="mb-2">
-                  <p className="text-center text-sm text-gray-600">
-                    Loading Approval Context...
-                  </p>
-                </div>
                 <DataTable
                   columnDefs={boxTemplateColumnDefs}
                   rowData={boxTemplates}

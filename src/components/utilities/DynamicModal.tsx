@@ -5,6 +5,7 @@ interface DynamicModalProps {
   onClose: () => void;
   children: React.ReactNode;
   modalClassName?: string;
+  size?: "normal" | "large"; // ← اضافه شد
 }
 
 const DynamicModal: React.FC<DynamicModalProps> = ({
@@ -12,6 +13,7 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
   onClose,
   children,
   modalClassName,
+  size = "normal", // مقدار پیش‌فرض
 }) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
@@ -34,6 +36,12 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
     }
   };
 
+  // کلاس عرض بر اساس سایز
+  const widthClass =
+    size === "large"
+      ? "w-full max-w-5xl" // عرض زیاد (دو برابر معمولی)
+      : "w-full max-w-2xl"; // عرض معمولی
+
   return (
     <dialog
       ref={dialogRef}
@@ -41,9 +49,9 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
       onClick={handleDialogClick}
     >
       <div
-        className={`modal-box bg-white rounded-lg p-6 relative overflow-y-auto max-h-[80vh] transition-transform duration-300 ease-in-out transform scale-95 sm:scale-100 shadow-lg ${
-          modalClassName ? modalClassName : "w-full max-w-2xl"
-        }`}
+        className={`modal-box bg-white rounded-lg p-6 relative overflow-y-auto max-h-[80vh] transition-transform duration-300 ease-in-out transform scale-95 sm:scale-100 shadow-lg
+        ${modalClassName ? modalClassName : widthClass}
+        `}
       >
         <button
           type="button"
