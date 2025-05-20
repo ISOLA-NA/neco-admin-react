@@ -1,3 +1,5 @@
+// src/components/ControllerForms/LookUpForms.tsx
+
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
@@ -36,26 +38,14 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
   const [meta, setMeta] = useState({
-    metaType1:
-  data?.metaType1 !== undefined && data?.metaType1 !== null
-    ? String(data.metaType1)
-    : "",
-
-metaType2:
-  data?.metaType2 !== undefined && data?.metaType2 !== null
-    ? String(data.metaType2)
-    : "",
-
+    metaType1: data?.metaType1 ? String(data.metaType1) : "",
+    metaType2: data?.metaType2 ? String(data.metaType2) : "",
     metaType3: data?.metaType3 || "drop",
     metaType4: data?.metaType4 || "[]",
     metaType5: data?.metaType5 || "",
-    LookupMode:
-  data?.LookupMode !== undefined &&
-  data?.LookupMode !== null
-    ? String(data.LookupMode)
-    : "",
-
+    LookupMode: data?.LookupMode != null ? String(data.LookupMode) : "",
   });
+
   const [removeSameName, setRemoveSameName] = useState(!!data?.CountInReject);
   const [oldLookup, setOldLookup] = useState(!!data?.BoolMeta1);
   const [tableData, setTableData] = useState<TableRow[]>([]);
@@ -68,10 +58,10 @@ metaType2:
     { value: string; label: string }[]
   >([]);
 
-  const isFirstLoad = useRef(true);
   const initialModeRef = useRef(true);
 
   useEffect(() => {
+    // metaType4 → جدول پیش‌فرض
     try {
       const parsed = JSON.parse(data?.metaType4 || "[]");
       if (Array.isArray(parsed)) {
@@ -96,7 +86,10 @@ metaType2:
     AppServices.getEnum({ str: "lookMode" })
       .then((resp) =>
         setModesList(
-          Object.entries(resp).map(([k, v]) => ({ value: String(v), label: k }))
+          Object.entries(resp).map(([k, v]) => ({
+            value: String(v),
+            label: k,
+          }))
         )
       )
       .catch(console.error);
@@ -104,58 +97,41 @@ metaType2:
     AppServices.getEnum({ str: "FilterOpration" })
       .then((resp) =>
         setOperationList(
-          Object.entries(resp).map(([k, v]) => ({ value: String(v), label: k }))
+          Object.entries(resp).map(([k, v]) => ({
+            value: String(v),
+            label: k,
+          }))
         )
       )
       .catch(console.error);
+  }, []);
 
+  // ست کردن مقدار LookupMode در حالت ادیت
+  useEffect(() => {
+    if (
+      initialModeRef.current &&
+      modesList.length > 0 &&
+      data?.LookupMode !== undefined &&
+      data?.LookupMode !== null
+    ) {
+      const lookupStr = String(data.LookupMode);
+      const exists = modesList.some((m) => m.value === lookupStr);
+      if (exists) {
+        setMeta((prev) => ({ ...prev, LookupMode: lookupStr }));
+      }
+      initialModeRef.current = false;
+    }
+  }, [modesList, data?.LookupMode]);
+
+  useEffect(() => {
     onMetaChange?.({
       ...data,
       ...meta,
       CountInReject: removeSameName,
       BoolMeta1: oldLookup,
     });
+  }, [meta, removeSameName, oldLookup]);
 
-    isFirstLoad.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    console.log("🔍 STEP 1 - LookupMode in EDIT:", data?.LookupMode);
-  
-    if (
-      initialModeRef.current &&
-      modesList.length > 0 &&
-      data?.LookupMode != null // ✅ فقط این کافیه
-    ) {
-      const modeValue = String(data.LookupMode);
-      const found = modesList.some((m) => m.value === modeValue);
-      console.log("✅ STEP 1.1 - Matched Mode:", modeValue, found);
-  
-      if (found) {
-        setMeta((prev) => ({ ...prev, LookupMode: modeValue }));
-        onMetaChange?.({
-          ...data,
-          ...meta,
-          LookupMode: modeValue,
-          CountInReject: removeSameName,
-          BoolMeta1: oldLookup,
-        });
-      }
-  
-      initialModeRef.current = false;
-    }
-  }, [
-    modesList,
-    data?.LookupMode,
-    onMetaChange,
-    data,
-    meta,
-    removeSameName,
-    oldLookup,
-  ]);
-  
-  
   useEffect(() => {
     const id = Number(meta.metaType1);
     if (!isNaN(id) && id) {
@@ -165,7 +141,7 @@ metaType2:
     } else {
       setFields([]);
     }
-  }, [meta.metaType1, getEntityFieldByEntityTypeId]);
+  }, [meta.metaType1]);
 
   const handleMetaChange = (partial: Partial<typeof meta>) => {
     const next = { ...meta, ...partial };
@@ -184,20 +160,8 @@ metaType2:
   ) => {
     if (name === "removeSameName") {
       setRemoveSameName(value);
-      onMetaChange?.({
-        ...data,
-        ...meta,
-        CountInReject: value,
-        BoolMeta1: oldLookup,
-      });
     } else {
       setOldLookup(value);
-      onMetaChange?.({
-        ...data,
-        ...meta,
-        CountInReject: removeSameName,
-        BoolMeta1: value,
-      });
     }
   };
 
@@ -211,10 +175,9 @@ metaType2:
     };
     const next = [...tableData, newRow];
     setTableData(next);
-
-    const newMeta4 = JSON.stringify(next);
-    setMeta((prev) => ({ ...prev, metaType4: newMeta4 }));
-    onMetaExtraChange?.({ metaType4: newMeta4 });
+    const meta4 = JSON.stringify(next);
+    setMeta((prev) => ({ ...prev, metaType4: meta4 }));
+    onMetaExtraChange?.({ metaType4: meta4 });
   };
 
   const handleCellValueChanged = (event: any) => {
@@ -223,10 +186,9 @@ metaType2:
       r.ID === updatedRow.ID ? updatedRow : r
     );
     setTableData(next);
-
-    const newMeta4 = JSON.stringify(next);
-    setMeta((prev) => ({ ...prev, metaType4: newMeta4 }));
-    onMetaExtraChange?.({ metaType4: newMeta4 });
+    const meta4 = JSON.stringify(next);
+    setMeta((prev) => ({ ...prev, metaType4: meta4 }));
+    onMetaExtraChange?.({ metaType4: meta4 });
   };
 
   const columnDefs = useMemo(
@@ -281,7 +243,7 @@ metaType2:
           <DynamicSelector
             name="displayColumn"
             label="What Column To Display"
-            options={fields.map((f: any) => ({
+            options={fields.map((f) => ({
               value: String(f.ID),
               label: f.DisplayName,
             }))}
@@ -352,7 +314,6 @@ metaType2:
       </div>
 
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
-        {/* {fields.length > 0 && ( */}
         <DataTable
           columnDefs={columnDefs}
           rowData={tableData}
@@ -366,7 +327,6 @@ metaType2:
           showDuplicateIcon={false}
           onRowDoubleClick={() => {}}
         />
-        {/* )} */}
       </div>
     </div>
   );

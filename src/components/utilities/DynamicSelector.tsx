@@ -20,7 +20,7 @@ interface DynamicSelectorProps {
   className?: string;
   disabled?: boolean;
   loading?: boolean;
-  allowCustom?: boolean; // prop جدید جهت تایپ مقدار دلخواه
+  allowCustom?: boolean;
 }
 
 const DynamicSelector: React.FC<DynamicSelectorProps> = ({
@@ -57,10 +57,8 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
     setCustomInput("");
   };
 
-  // اضافه کردن گزینه دلخواه
   const handleAddCustomOption = () => {
     if (customInput.trim()) {
-      // ابتدا ارسال رویداد با مقدار تایپ‌شده
       onChange({
         target: { name, value: customInput },
       } as React.ChangeEvent<HTMLSelectElement>);
@@ -69,7 +67,6 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
     }
   };
 
-  // بستن منو هنگام کلیک بیرون از کامپوننت
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -87,6 +84,8 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
     height: "2.25rem",
     lineHeight: "2.25rem",
   };
+
+  const selectedOption = options.find((o) => o.value === selectedValue);
 
   return (
     <div
@@ -124,11 +123,10 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
               disabled ? "bg-gray-300 text-gray-800" : "bg-white"
             )}
           >
-            <span className="block w-full truncate whitespace-nowrap overflow-hidden">
-              {options.find((o) => o.value === selectedValue)?.label ||
-                selectedValue ||
-                ""}
+            <span className="block w-full truncate whitespace-nowrap overflow-hidden text-left">
+              {selectedOption ? selectedOption.label : selectedValue}
             </span>
+
             <svg
               className="w-4 h-4 text-gray-500"
               fill="none"

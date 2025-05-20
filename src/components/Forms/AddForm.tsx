@@ -250,7 +250,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         metaType1: existingData.metaType1 || "",
         metaType2: existingData.metaType2 || null,
         metaType3: existingData.metaType3 || null,
-        LookupMode: existingData.LookupMode || null,
+        LookupMode:
+          existingData.LookupMode !== undefined &&
+          existingData.LookupMode !== null
+            ? String(existingData.LookupMode)
+            : "",
+
         oldLookup: existingData.BoolMeta1 || false,
         metaType5: existingData.metaType5 || null,
         metaTypeJson: existingData.metaTypeJson || null,
@@ -375,7 +380,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         isEdit && existingData
           ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
           : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
-      LookupMode: lookupModeValue,
+      LookupMode:
+        metaCore.LookupMode !== undefined &&
+        metaCore.LookupMode !== null &&
+        metaCore.LookupMode !== ""
+          ? Number(metaCore.LookupMode)
+          : null,
+
       BoolMeta1: metaCore.oldLookup ? true : false,
       CountInReject: formData.countInReject,
       metaType5: metaType5Value,
