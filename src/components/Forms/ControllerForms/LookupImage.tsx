@@ -1,6 +1,4 @@
-// src/components/ControllerForms/LookupUmage.tsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useApi } from "../../../context/ApiContext";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import DataTable from "../../TableDynamic/DataTable";
@@ -12,15 +10,15 @@ import AppServices, {
 
 interface LookupUmageProps {
   data?: {
-    metaType1?: string | null; // ID مربوط به EntityType
-    metaType2?: string | null; // ID مربوط به فیلد نمایش
-    metaType4?: string; // اطلاعات جدول به‌صورت JSON (در حالت ویرایش)
-    removeSameName?: boolean; // حالا اینجا همان چیزی است که والد پاس می‌دهد
+    metaType1?: string | null;
+    metaType2?: string | null;
+    metaType4?: string;
+    removeSameName?: boolean;
   };
   onMetaChange?: (updatedMeta: any) => void;
+  onMetaExtraChange?: (updated: { metaType4: string }) => void;
 }
 
-// شکل هر ردیف جدول
 interface TableRow {
   ID: string;
   SrcFieldID: string | null;
@@ -29,84 +27,78 @@ interface TableRow {
   DesFieldID: string | null;
 }
 
-const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
+const LookupUmage: React.FC<LookupUmageProps> = ({
+  data,
+  onMetaChange,
+  onMetaExtraChange,
+}) => {
   const { getAllEntityType, getEntityFieldByEntityTypeId, getEnum } = useApi();
 
-  // اطلاعات انتخابی برای metaTypesLookUp
-  const [metaTypesLookUp, setMetaTypesLookUp] = useState({
-    metaType1: data?.metaType1 ?? null,
-    metaType2: data?.metaType2 ?? null,
-    metaType4: data?.metaType4 ?? "",
+  // state
+  const [meta, setMeta] = useState({
+    metaType1: data?.metaType1 ? String(data.metaType1) : "",
+    metaType2: data?.metaType2 ? String(data.metaType2) : "",
   });
-
-  // چک‌باکس Remove Same Name
-  const [removeSameName, setRemoveSameName] = useState<boolean>(
-    data?.removeSameName ?? false
-  );
-
-  // داده‌های جدول
+  const [removeSameName, setRemoveSameName] = useState(!!data?.removeSameName);
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
-  // برای جلو‌گیری از چندبار مقداردهی اولیه
-  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  // اولین بار فقط مقداردهی اولیه جدول را انجام بده!
+  const firstLoad = useRef(true);
 
-  // مقداردهی اولیه از data (در حالت ویرایش)
   useEffect(() => {
-    if (data && !initialDataLoaded) {
-      setMetaTypesLookUp({
-        metaType1: data.metaType1 ?? null,
-        metaType2: data.metaType2 ?? null,
-        metaType4: data.metaType4 ?? "",
-      });
-      // مقدار چک‌باکس
-      setRemoveSameName(data.removeSameName ?? false);
-      setInitialDataLoaded(true);
-    }
-  }, [data, initialDataLoaded]);
-
-  // اگر metaType4 مقداری داشت، آن را به شکل JSON پارس کرده و در جدول قرار می‌دهیم
-  useEffect(() => {
-    if (
-      data &&
-      data.metaType4 &&
-      data.metaType4.trim() !== "" &&
-      tableData.length === 0
-    ) {
+    if (firstLoad.current) {
       try {
-        const parsed = JSON.parse(data.metaType4);
-        const normalized = Array.isArray(parsed)
-          ? parsed.map((item: any) => ({
-              ...item,
-              SrcFieldID:
-                item.SrcFieldID != null ? String(item.SrcFieldID) : "",
-              FilterOpration:
-                item.FilterOpration != null ? String(item.FilterOpration) : "",
-              DesFieldID:
-                item.DesFieldID != null ? String(item.DesFieldID) : "",
+        const parsed = JSON.parse(data?.metaType4 || "[]");
+        if (Array.isArray(parsed)) {
+          setTableData(
+            parsed.map((item: any) => ({
+              ID: String(item.ID ?? crypto.randomUUID()),
+              SrcFieldID: item.SrcFieldID || "",
+              FilterOpration: item.FilterOpration || "",
               FilterText: item.FilterText || "",
+              DesFieldID: item.DesFieldID || "",
             }))
-          : [];
-        setTableData(normalized);
-      } catch (err) {
-        console.error("Error parsing data.metaType4 JSON:", err);
+          );
+        }
+      } catch {
         setTableData([]);
       }
+      firstLoad.current = false;
     }
-  }, [data, tableData.length]);
+  }, [data?.metaType4]);
 
-  // همگام‌سازی tableData => metaType4
+  // سینک تغییرات جدول به metaType4
   useEffect(() => {
-    try {
-      const asString = JSON.stringify(tableData);
-      if (asString !== metaTypesLookUp.metaType4) {
-        setMetaTypesLookUp((prev) => ({ ...prev, metaType4: asString }));
-      }
-    } catch (error) {
-      console.error("Error serializing table data:", error);
+    const meta4String = JSON.stringify(tableData);
+    if (onMetaChange) {
+      onMetaChange({
+        ...meta,
+        metaType4: meta4String,
+        CountInReject: removeSameName,
+      });
     }
-  }, [tableData, metaTypesLookUp.metaType4]);
+    if (onMetaExtraChange) {
+      onMetaExtraChange({ metaType4: meta4String });
+    }
+    // اینجا مقداردهی مجدد meta یا tableData انجام نده، فقط به بالا پاس بده!
+    // وگرنه چرخه بی‌نهایت رخ میده
+    // eslint-disable-next-line
+  }, [tableData, removeSameName]);
 
-  // لیست‌ها برای EntityType و فیلدها و ...
+  // سینک مقادیر سلکتورها (فقط روی تغییر کاربر)
+  const handleMetaChange = (partial: Partial<typeof meta>) => {
+    const next = { ...meta, ...partial };
+    setMeta(next);
+    if (onMetaChange) {
+      onMetaChange({
+        ...next,
+        metaType4: JSON.stringify(tableData),
+        CountInReject: removeSameName,
+      });
+    }
+  };
+
+  // بقیه stateها و لیست‌ها مثل قبل
   const [getInformationFromList, setGetInformationFromList] = useState<
     EntityType[]
   >([]);
@@ -117,7 +109,6 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
     { value: string; label: string }[]
   >([]);
 
-  // دریافت همه موجودیت‌ها
   useEffect(() => {
     (async () => {
       try {
@@ -129,10 +120,9 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
     })();
   }, [getAllEntityType]);
 
-  // دریافت فیلدهای یک موجودیت خاص
   useEffect(() => {
     (async () => {
-      const { metaType1 } = metaTypesLookUp;
+      const { metaType1 } = meta;
       if (metaType1) {
         try {
           const idAsNumber = Number(metaType1);
@@ -151,9 +141,8 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
         setDesFieldList([]);
       }
     })();
-  }, [metaTypesLookUp.metaType1, getEntityFieldByEntityTypeId]);
+  }, [meta.metaType1, getEntityFieldByEntityTypeId]);
 
-  // دریافت enum مربوط به FilterOpration برای جدول
   useEffect(() => {
     (async () => {
       try {
@@ -172,40 +161,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
     })();
   }, [getEnum]);
 
-  // ارسال تغییرات به والد
-  useEffect(() => {
-    if (onMetaChange) {
-      onMetaChange({
-        metaType1: metaTypesLookUp.metaType1,
-        metaType2: metaTypesLookUp.metaType2,
-        metaType4: metaTypesLookUp.metaType4,
-        // این همان فیلدی است که والد باید بگیرد
-        removeSameName: removeSameName,
-      });
-    }
-  }, [metaTypesLookUp, removeSameName, onMetaChange]);
-
-  // هندل تغییر select برای موجودیت
-  const handleSelectInformationFrom = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      metaType1: e.target.value || null,
-    }));
-  };
-
-  // هندل تغییر select برای انتخاب ستون نمایشی
-  const handleSelectColumnDisplay = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setMetaTypesLookUp((prev) => ({
-      ...prev,
-      metaType2: e.target.value || null,
-    }));
-  };
-
-  // افزودن ردیف به جدول
+  // افزودن ردیف
   const onAddNew = () => {
     const newRow: TableRow = {
       ID: crypto.randomUUID(),
@@ -217,7 +173,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
     setTableData((prev) => [...prev, newRow]);
   };
 
-  // موقع تغییر مقدار یک سلول در جدول
+  // تغییر سلول
   const handleCellValueChanged = (event: any) => {
     const updatedRow = event.data;
     setTableData((prev) =>
@@ -225,6 +181,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
     );
   };
 
+  // ---- Render ----
   return (
     <div className="flex flex-col gap-8 p-2 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
       {/* بخش تنظیمات بالا */}
@@ -237,8 +194,8 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
               value: String(ent.ID),
               label: ent.Name,
             }))}
-            selectedValue={metaTypesLookUp.metaType1 || ""}
-            onChange={handleSelectInformationFrom}
+            selectedValue={meta.metaType1}
+            onChange={(e) => handleMetaChange({ metaType1: e.target.value })}
           />
           <DynamicSelector
             name="displayColumn"
@@ -247,8 +204,8 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data, onMetaChange }) => {
               value: String(field.ID),
               label: field.DisplayName,
             }))}
-            selectedValue={metaTypesLookUp.metaType2 || ""}
-            onChange={handleSelectColumnDisplay}
+            selectedValue={meta.metaType2}
+            onChange={(e) => handleMetaChange({ metaType2: e.target.value })}
           />
         </div>
         <div className="flex flex-col justify-center w-1/2">
