@@ -110,6 +110,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
   const navigate = useNavigate();
 
   // بارگذاری دیتا برای ساب‌تب
@@ -144,6 +146,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const handleMainTabChange = (tabName: string) => {
     if (tabName === "File") {
       setIsDrawerOpen(true);
+      setIsPanelOpen(false);
       return;
     }
     if (tabName in mainTabsData) {
@@ -163,6 +166,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const handleSubTabChange = (subtab: string) => {
     setActiveSubTab(subtab);
     setSelectedRow(null);
+    setIsPanelOpen(false);
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
@@ -281,6 +285,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
             onDuplicate={handleDuplicateClick}
             onRowClick={handleRowClick}
             onRowDoubleClick={handleRowDoubleClick}
+            isPanelOpen={isPanelOpen}
+            setIsPanelOpen={setIsPanelOpen}
           />
         </div>
       </div>

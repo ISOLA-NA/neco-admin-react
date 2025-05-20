@@ -52,6 +52,8 @@ interface TabContentProps {
   onDelete: () => void;
   onDuplicate: () => void;
   onRowClick: (data: any) => void;
+  isPanelOpen: boolean; // این رو اضافه کن
+  setIsPanelOpen: React.Dispatch<React.SetStateAction<boolean>>; // این رو هم اضافه کن
 }
 
 const TabContent: FC<TabContentProps> = ({
@@ -69,6 +71,8 @@ const TabContent: FC<TabContentProps> = ({
   showEditIcon,
   showAddIcon,
   showDeleteIcon,
+  isPanelOpen,
+  setIsPanelOpen,
 }) => {
   const api = useApi();
   const { fetchDataForSubTab } = useSubTabDefinitions();
@@ -113,7 +117,7 @@ const TabContent: FC<TabContentProps> = ({
   const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
 
   // وضعیت نمایش پنل راست
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  // const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
 
