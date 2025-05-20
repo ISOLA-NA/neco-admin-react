@@ -7,7 +7,6 @@ interface TextControllerProps {
     metaType1?: string;
     metaType2?: string;
     metaType3?: string;
-    metaType4?: string;
   };
   isDisable?: boolean;
 }
@@ -21,37 +20,30 @@ const TextController: React.FC<TextControllerProps> = ({
     metaType1: "",
     metaType2: null as string | null,
     metaType3: null as string | null,
-    metaType4: null as string | null,
   });
 
-  // این ref برای رد کردن اولین اجرای افکت زیره
-  const isFirstUpdate = useRef(true);
+  const prevMetaRef = useRef<string | undefined>();
 
-  // مقداردهی اولیه از props
+  // فقط وقتی مقدار اولیه واقعاً تغییر کنه، مقداردهی مجدد کنیم
   useEffect(() => {
-    if (data) {
+    if (data?.metaType1 !== prevMetaRef.current) {
+      prevMetaRef.current = data?.metaType1;
       setMetaTypes({
-        metaType1: data.metaType1 || "",
-        metaType2: data.metaType2 || null,
-        metaType3: data.metaType3 || null,
-        metaType4: data.metaType4 || null,
+        metaType1: data?.metaType1 || "",
+        metaType2: data?.metaType2 || null,
+        metaType3: data?.metaType3 || null,
       });
     }
-  }, [data]);
+  }, [data?.metaType1, data?.metaType2, data?.metaType3]);
 
-  // فقط بعد از mount اولیه اجرا بشه
+  // فقط metaTypes رو ارسال کنیم نه data دوباره
   useEffect(() => {
-    if (isFirstUpdate.current) {
-      isFirstUpdate.current = false;
-      return;
-    }
-    // وقتی کاربر تایپ می‌کنه یا داده تغییر واقعی داره
     onMetaChange({
       metaType1: metaTypes.metaType1,
       metaType2: metaTypes.metaType2,
       metaType3: metaTypes.metaType3,
     });
-  }, [metaTypes.metaType1, metaTypes.metaType2, metaTypes.metaType3]);
+  }, [metaTypes]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMetaTypes((prev) => ({
@@ -67,7 +59,7 @@ const TextController: React.FC<TextControllerProps> = ({
         type="text"
         value={metaTypes.metaType1}
         onChange={handleChange}
-        placeholder=" "
+        placeholder="Default Value"
         disabled={isDisable}
         className="w-full p-2 border rounded"
       />
