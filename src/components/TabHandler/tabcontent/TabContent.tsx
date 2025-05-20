@@ -1,5 +1,3 @@
-// src/components/TabContent.tsx
-
 import React, {
   useState,
   useEffect,
@@ -112,7 +110,7 @@ const TabContent: FC<TabContentProps> = ({
   );
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState<() => void>(() => { });
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
 
   // وضعیت نمایش پنل راست
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -262,7 +260,7 @@ const TabContent: FC<TabContentProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [api, activeSubTab, rowData, selectedCategoryType]);
+  }, [activeSubTab]);
 
   // تغییر نوع Category
   const handleCategoryTypeChange = (
@@ -282,7 +280,6 @@ const TabContent: FC<TabContentProps> = ({
       fetchData();
     }
   }, [activeSubTab, fetchData]);
-  
 
   // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
@@ -338,15 +335,15 @@ const TabContent: FC<TabContentProps> = ({
             showAlert("success", null, "", "Role Group added successfully.");
           }
           break;
-          case "Staffing":
-            if (staffingRef.current) {
-              const ok = await staffingRef.current.save();
-              console.log("📦 نتیجه save():", ok);
-              if (!ok) return;
-              showAlert("success", null, "", "Staffing added successfully.");
-              await fetchData();
-            }
-            break;
+        case "Staffing":
+          if (staffingRef.current) {
+            const ok = await staffingRef.current.save();
+            console.log("📦 نتیجه save():", ok);
+            if (!ok) return;
+            showAlert("success", null, "", "Staffing added successfully.");
+            await fetchData();
+          }
+          break;
 
         case "ProgramTemplate":
           if (programTemplateRef.current) {
@@ -447,9 +444,9 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          // "خطایی در فرآیند ذخیره دستور رخ داده است.";
-          ""
+            data?.message ||
+            // "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            "";
       showAlert("error", null, "Error", message);
     }
   };
@@ -594,13 +591,13 @@ const TabContent: FC<TabContentProps> = ({
             const result =
               selectedCategoryType === "cata"
                 ? await api.updateCatA({
-                  ...categoriesRef.current.getData(),
-                  categoryType: selectedCategoryType,
-                })
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  })
                 : await api.updateCatB({
-                  ...categoriesRef.current.getData(),
-                  categoryType: selectedCategoryType,
-                });
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  });
             showAlert("success", null, "", "Category updated successfully.");
             await fetchData();
           }
@@ -616,8 +613,8 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     }
   };
@@ -986,10 +983,11 @@ const TabContent: FC<TabContentProps> = ({
                   onClick={handleInsert}
                   disabled={!canSave}
                   className={`flex items-center gap-2 px-4 py-2 rounded transition
-          ${canSave
-                      ? "bg-green-500 hover:bg-green-600 text-white"
-                      : "bg-green-200 text-green-700 cursor-not-allowed"
-                    }`}
+          ${
+            canSave
+              ? "bg-green-500 hover:bg-green-600 text-white"
+              : "bg-green-200 text-green-700 cursor-not-allowed"
+          }`}
                 >
                   <FaSave /> Save
                 </button>
@@ -999,10 +997,11 @@ const TabContent: FC<TabContentProps> = ({
                   onClick={handleUpdate}
                   disabled={!canUpdate}
                   className={`flex items-center gap-2 px-4 py-2 rounded transition
-          ${canUpdate
-                      ? "bg-blue-500 hover:bg-blue-600 text-white"
-                      : "bg-blue-200 text-blue-700 cursor-not-allowed"
-                    }`}
+          ${
+            canUpdate
+              ? "bg-blue-500 hover:bg-blue-600 text-white"
+              : "bg-blue-200 text-blue-700 cursor-not-allowed"
+          }`}
                 >
                   <FaEdit /> Update
                 </button>
@@ -1040,8 +1039,9 @@ const TabContent: FC<TabContentProps> = ({
       {/* پنل راست */}
       {isPanelOpen && (
         <div
-          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
-            }`}
+          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
+            isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
+          }`}
           style={{
             transition: "opacity 0.1s ease-out",
             backgroundColor: "#f3f4f6",
@@ -1060,48 +1060,48 @@ const TabContent: FC<TabContentProps> = ({
             {activeSubTab !== "Ribbons" && (
               <PanelHeader
                 isExpanded={false}
-                toggleExpand={() => { }}
+                toggleExpand={() => {}}
                 onSave={
                   isAdding &&
-                    (activeSubTab === "Configurations" ||
-                      activeSubTab === "Commands" ||
-                      activeSubTab === "Users" ||
-                      activeSubTab === "Ribbons" ||
-                      activeSubTab === "Roles" ||
-                      activeSubTab === "RoleGroups" ||
-                      activeSubTab === "Enterprises" ||
-                      activeSubTab === "Staffing" ||
-                      activeSubTab === "ProgramTemplate" ||
-                      activeSubTab === "ProgramTypes" ||
-                      activeSubTab === "Odp" ||
-                      activeSubTab === "Procedures" ||
-                      activeSubTab === "Calendars" ||
-                      activeSubTab === "ProjectsAccess" ||
-                      activeSubTab === "ApprovalFlows" ||
-                      activeSubTab === "Forms" ||
-                      activeSubTab === "Categories")
+                  (activeSubTab === "Configurations" ||
+                    activeSubTab === "Commands" ||
+                    activeSubTab === "Users" ||
+                    activeSubTab === "Ribbons" ||
+                    activeSubTab === "Roles" ||
+                    activeSubTab === "RoleGroups" ||
+                    activeSubTab === "Enterprises" ||
+                    activeSubTab === "Staffing" ||
+                    activeSubTab === "ProgramTemplate" ||
+                    activeSubTab === "ProgramTypes" ||
+                    activeSubTab === "Odp" ||
+                    activeSubTab === "Procedures" ||
+                    activeSubTab === "Calendars" ||
+                    activeSubTab === "ProjectsAccess" ||
+                    activeSubTab === "ApprovalFlows" ||
+                    activeSubTab === "Forms" ||
+                    activeSubTab === "Categories")
                     ? handleInsert
                     : undefined
                 }
                 onUpdate={
                   !isAdding &&
-                    (activeSubTab === "Configurations" ||
-                      activeSubTab === "Commands" ||
-                      activeSubTab === "Users" ||
-                      activeSubTab === "Ribbons" ||
-                      activeSubTab === "Roles" ||
-                      activeSubTab === "Enterprises" ||
-                      activeSubTab === "RoleGroups" ||
-                      activeSubTab === "Staffing" ||
-                      activeSubTab === "ProgramTemplate" ||
-                      activeSubTab === "ProgramTypes" ||
-                      activeSubTab === "Odp" ||
-                      activeSubTab === "Procedures" ||
-                      activeSubTab === "Calendars" ||
-                      activeSubTab === "ProjectsAccess" ||
-                      activeSubTab === "ApprovalFlows" ||
-                      activeSubTab === "Forms" ||
-                      activeSubTab === "Categories")
+                  (activeSubTab === "Configurations" ||
+                    activeSubTab === "Commands" ||
+                    activeSubTab === "Users" ||
+                    activeSubTab === "Ribbons" ||
+                    activeSubTab === "Roles" ||
+                    activeSubTab === "Enterprises" ||
+                    activeSubTab === "RoleGroups" ||
+                    activeSubTab === "Staffing" ||
+                    activeSubTab === "ProgramTemplate" ||
+                    activeSubTab === "ProgramTypes" ||
+                    activeSubTab === "Odp" ||
+                    activeSubTab === "Procedures" ||
+                    activeSubTab === "Calendars" ||
+                    activeSubTab === "ProjectsAccess" ||
+                    activeSubTab === "ApprovalFlows" ||
+                    activeSubTab === "Forms" ||
+                    activeSubTab === "Categories")
                     ? handleUpdate
                     : undefined
                 }
@@ -1135,8 +1135,8 @@ const TabContent: FC<TabContentProps> = ({
                         isAdding
                           ? "add-mode"
                           : selectedRow
-                            ? selectedRow.ID
-                            : "no-selection"
+                          ? selectedRow.ID
+                          : "no-selection"
                       }
                       selectedRow={isAdding ? null : selectedRow}
                       ref={getActiveRef()}
