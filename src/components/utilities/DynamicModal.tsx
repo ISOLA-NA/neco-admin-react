@@ -45,7 +45,7 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
   return (
     <dialog
       ref={dialogRef}
-      className="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm transition-opacity duration-300"
+      className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm transition-opacity duration-300"
       onClick={handleDialogClick}
     >
       <div

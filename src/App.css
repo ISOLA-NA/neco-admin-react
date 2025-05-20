@@ -45,3 +45,18 @@ body {
     #1e90ff
   ); /* تغییر رنگ در هاور */
 }
+
+.Toastify__toast-container {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 9999 !important;   /* بالاتر از z-index مودال DaisyUI */
+}
+
+/* اگر از کلاس custom-toast-container استفاده می‌کنی: */
+.custom-toast-container {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 9999 !important;
+}

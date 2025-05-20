@@ -3,7 +3,9 @@ import DataTable from "../../TableDynamic/DataTable";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicRadioGroup from "../../utilities/DynamicRadiogroup";
 import DynamicButton from "../../utilities/DynamicButtons";
-import FileUploadHandler, { InsertModel } from "../../../services/FileUploadHandler";
+import FileUploadHandler, {
+  InsertModel,
+} from "../../../services/FileUploadHandler";
 import { useApi } from "../../../context/ApiContext";
 import { AFBtnItem } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm"; // اضافه کردن ایمپورت
@@ -391,7 +393,10 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       />
 
       {/* بخش جدول */}
-      <div className="mb-4 w-full overflow-hidden" style={{ height: "400px", overflowY: "auto" }}>
+      <div
+        className="mb-4 w-full overflow-hidden"
+        style={{ height: "400px", overflowY: "auto" }}
+      >
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
@@ -493,16 +498,28 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       {/* دکمه‌های عملیات */}
       <div className="mt-6 flex justify-start space-x-4">
         {/* دکمه Add: وقتی روی یک ردیف کلیک شده، دکمه Add غیرفعال می‌شود */}
-        <DynamicButton text="Add" onClick={handleAddClick} isDisabled={isRowClicked} />
+        <DynamicButton
+          text="Add"
+          onClick={handleAddClick}
+          isDisabled={isRowClicked}
+        />
 
         {/* دکمه Edit: تنها در صورتی فعال است که ردیفی انتخاب شده باشد */}
-        <DynamicButton text="Edit" onClick={handleEditClick} isDisabled={!selectedRow} />
+        <DynamicButton
+          text="Edit"
+          onClick={handleEditClick}
+          isDisabled={!selectedRow}
+        />
 
         {/* دکمه New: همیشه فعال و فرم را ریست می‌کند */}
         <DynamicButton text="New" onClick={handleNewClick} isDisabled={false} />
 
         {/* دکمه Delete: تنها درصورتی فعال که ردیفی انتخاب شده باشد */}
-        <DynamicButton text="Delete" onClick={handleDeleteClick} isDisabled={isDeleteDisabled} />
+        <DynamicButton
+          text="Delete"
+          onClick={handleDeleteClick}
+          isDisabled={isDeleteDisabled}
+        />
       </div>
     </div>
   );

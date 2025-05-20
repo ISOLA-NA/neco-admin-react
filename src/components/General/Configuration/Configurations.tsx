@@ -556,7 +556,11 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
         </TwoColumnLayout>
 
         {/* مودال عمومی برای انتخاب از جدول (TableSelector) */}
-        <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
+        <DynamicModal
+          isOpen={modalOpen}
+          onClose={handleCloseModal}
+          size="small"
+        >
           <TableSelector
             columnDefs={[
               { headerName: "نام", field: "Name" },

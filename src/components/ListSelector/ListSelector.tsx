@@ -72,18 +72,17 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         <div className="flex items-center gap-2">
           <h3 className="text-xs font-semibold text-white">{title}</h3>
           <button
-  className={classNames(
-    "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center",
-    "hover:bg-purple-500",
-    isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
-  )}
-  onClick={() => setIsDialogOpen(true)}
-  aria-label={`افزودن ${title}`}
-  disabled={isGlobal}
->
-  +
-</button>
-
+            className={classNames(
+              "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center",
+              "hover:bg-purple-500",
+              isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
+            )}
+            onClick={() => setIsDialogOpen(true)}
+            aria-label={`افزودن ${title}`}
+            disabled={isGlobal}
+          >
+            +
+          </button>
         </div>
       </div>
 
@@ -113,7 +112,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           </div>
         ) : selectedNames.length === 0 ? (
           <p className="text-gray-500 text-xs text-center">
-           No item is selected
+            No item is selected
           </p>
         ) : (
           <div className="space-y-2">
@@ -153,6 +152,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
       <DynamicModal
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
+        size="large"
       >
         <ModalContentComponent
           {...modalContentProps}
@@ -169,6 +169,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             if (selectedRow) handleRowSelect(selectedRow);
           }}
           isSelectDisabled={!selectedRow}
+          onClose={() => setIsDialogOpen(false)}
         />
       </DynamicModal>
     </div>

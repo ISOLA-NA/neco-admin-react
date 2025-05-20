@@ -9,10 +9,6 @@ import { BoxTemplate } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
-// اگر از react-toastify استفاده می‌کنید و می‌خواهید فقط در همین مدال نمایش بدهید:
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
 interface AddSubApprovalFlowModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -160,24 +156,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
     <DynamicModal isOpen={isOpen} onClose={onClose} size="large">
       {/* والد با position relative تا بتوانیم ToastContainer را اینجا با absolute پین کنیم */}
       <div className="relative">
-        {/* فقط یک ToastContainer در این سطح قرار می‌دهیم */}
-        <div
-          className="absolute top-0 right-0 mt-2 mr-2"
-          style={{ zIndex: 9999 }}
-        >
-          <ToastContainer
-            position="top-right"
-            autoClose={4000}
-            hideProgressBar={false}
-            newestOnTop={true}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
-        </div>
-
         <div
           role="tablist"
           className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"

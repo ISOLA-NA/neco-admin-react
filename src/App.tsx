@@ -60,7 +60,6 @@ const App: React.FC = () => {
         <AddEditDeleteProvider>
           <Router>
             <Alert />
-
             <Routes>
               {/* صفحه اصلی */}
               <Route

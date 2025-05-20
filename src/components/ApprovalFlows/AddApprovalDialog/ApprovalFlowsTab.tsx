@@ -21,8 +21,6 @@ import { useApi } from "../../../context/ApiContext";
 import DeemedSection from "./BoxDeemed";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 
-import "react-toastify/dist/ReactToastify.css"; // فقط درصورت نیاز برای استایل
-
 export interface Role {
   ID: string | number;
   Name: string;

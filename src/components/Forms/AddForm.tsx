@@ -5,8 +5,7 @@ import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSelector from "../utilities/DynamicSelector";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
-
-// Import dynamic controllers
+// Import dynamic controller
 import Component1 from "./ControllerForms/TextController";
 import Component2 from "./ControllerForms/RichTextController";
 import Component3 from "./ControllerForms/ChoiceController";
@@ -331,10 +330,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     const currentTimestamp = new Date().toISOString();
 
     const lookupModeValue =
-    metaCore.LookupMode === undefined || metaCore.LookupMode === null || metaCore.LookupMode === ""
-      ? null
-      : Number(metaCore.LookupMode);
-  
+      metaCore.LookupMode === undefined ||
+      metaCore.LookupMode === null ||
+      metaCore.LookupMode === ""
+        ? null
+        : Number(metaCore.LookupMode);
 
     const metaType5Value = metaCore.metaType5 || null;
 
@@ -389,13 +389,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
       if (isEdit) {
         await updateEntityField(payload);
-        showAlert("success", undefined, "Success", "Edited successfully");
+        // showAlert("success", undefined, "Success", "Edited successfully");
         newId = payload.ID;
+        onClose();
       } else {
         const response = await insertEntityField(payload);
-        showAlert("success", undefined, "Success", "Added successfully");
-
+        // showAlert("success", undefined, "Success", "Added successfully");
         newId = response?.ID ?? payload.ID;
+        onClose();
       }
 
       setIsLoading(false);
@@ -411,7 +412,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       setIsLoading(false);
       setErrors({ form: "An error occurred." });
       console.error(error);
-      showAlert("error", undefined, "Error", "Something went wrong");
+      // showAlert("error", undefined, "Error", "Something went wrong");
+      window.alert("خطا: " + (error?.message || "مشکلی پیش آمد."));
     }
   };
 

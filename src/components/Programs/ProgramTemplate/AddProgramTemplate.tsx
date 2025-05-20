@@ -729,7 +729,6 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
                 modalContentProps={{
                   onSave: handleMetaFieldSave,
                   onSuccessAdd: handleMetaFieldSave,
-                  onClose: () => {},
                   entityTypeId: formData.formname,
                 }}
               />
