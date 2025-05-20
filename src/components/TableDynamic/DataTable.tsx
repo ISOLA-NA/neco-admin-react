@@ -82,10 +82,8 @@ const DataTable: React.FC<DataTableProps> = ({
   // useEffect برای اسکرول به آخرین ردیف هنگام تغییر داده‌ها (با توجه به clientOrder)
   useEffect(() => {
     if (gridApiRef.current && filteredRowData && filteredRowData.length > 0) {
-      gridApiRef.current.ensureIndexVisible(
-        filteredRowData.length - 1,
-        "bottom"
-      );
+      // اسکرول به بالای جدول (ردیف اول)
+      gridApiRef.current.ensureIndexVisible(0, "top");
     }
   }, [filteredRowData]);
 
