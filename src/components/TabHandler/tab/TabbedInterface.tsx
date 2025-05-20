@@ -111,12 +111,14 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isSubTabLoading, setIsSubTabLoading] = useState(false);
 
   const navigate = useNavigate();
 
   // بارگذاری دیتا برای ساب‌تب
   const fetchSubTabData = async (subTabName: string) => {
     try {
+      setIsSubTabLoading(true);
       const def = subTabDefinitions[subTabName];
       if (!def) {
         setCurrentRowData([]);
@@ -127,6 +129,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           showDelete: false,
           showDuplicate: false,
         });
+        setIsSubTabLoading(false);
         return;
       }
       const data = await fetchDataForSubTab(subTabName);
@@ -135,6 +138,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       setCurrentIconVisibility(def.iconVisibility);
     } catch (error) {
       console.error("Error fetching data for subTab:", subTabName, error);
+    } finally {
+      setIsSubTabLoading(false); // 👈 وقتی لود تموم شد
     }
   };
 
@@ -264,6 +269,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
               subTabsRef.current?.scrollBy({ left: 150, behavior: "smooth" })
             }
             subTabsRef={subTabsRef}
+            isLoading={isSubTabLoading}
           />
         </div>
 

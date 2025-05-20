@@ -14,6 +14,7 @@ interface SubTabsProps {
   scrollLeft: () => void;
   scrollRight: () => void;
   subTabsRef: React.RefObject<HTMLDivElement>;
+  isLoading?: boolean; // 👈 اضافه کن!
 }
 
 const subtabIcons: { [key: string]: string } = {
@@ -46,6 +47,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
   scrollLeft,
   scrollRight,
   subTabsRef,
+  isLoading,
 }) => {
   return (
     <div className="relative mt-1 mx-4">
@@ -72,6 +74,7 @@ const SubTabs: React.FC<SubTabsProps> = ({
                       key={subtab}
                       className="flex flex-col items-center space-y-0.5 p-1.5 text-xs rounded-full relative focus:outline-none"
                       onClick={() => onSubTabChange(subtab)}
+                      disabled={isLoading}
                     >
                       <img
                         src={subtabIcons[subtab]}
