@@ -319,8 +319,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // ذخیره فرم (Submit)
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -356,11 +354,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
-
-      // ✅ metaCore (شامل metaType1, 2, 3, و سایر فیلدهای دینامیک)
       ...metaCore,
-
-      // ✅ metaExtra (فقط Program Meta ColumnName یعنی metaType4)
       metaType4: metaExtra.metaType4,
 
       PrintCode: formData.printCode,
