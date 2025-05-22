@@ -396,6 +396,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
             onUploadSuccess={handleImageUploadSuccess}
             resetCounter={resetCounter}
             onReset={handleResetUpload}
+            isEditMode={!!selectedRow}
           />
         </div>
       </div>

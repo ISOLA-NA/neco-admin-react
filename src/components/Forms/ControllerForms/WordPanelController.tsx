@@ -1,192 +1,222 @@
-import React, { useState, useEffect } from 'react'
-import DynamicInput from '../../utilities/DynamicInput'
-import { FaTrash, FaEye } from 'react-icons/fa'
-
-// سرویس مربوط به فایل‌ها (گرفتن اطلاعات و دانلود)
-import fileService from '../../../services/api.servicesFile'
-// فایل آپلود هندلر
-import FileUploadHandler, {
-  InsertModel
-} from '../../../services/FileUploadHandler'
+import React, { useState, useEffect } from "react";
+import DynamicInput from "../../utilities/DynamicInput";
+import { FaTrash, FaDownload, FaUpload, FaSync } from "react-icons/fa";
+import fileService from "../../../services/api.servicesFile";
+import { v4 as uuidv4 } from "uuid";
+import type { InsertModel } from "../../../services/FileUploadHandler";
 
 interface WordPanelProps {
-  /**
-   * تابعی برای ارسال تغییرات به فرم پدر
-   * اگر در حالت ویرایش باشیم، مقدار قبلی را می‌خواند
-   */
-  onMetaChange?: (data: any) => void
-  /**
-   * اگر در حالت ادیت باشیم، این آبجکت داده‌های قبلی را شامل می‌شود
-   * که در آن ممکن است metaType4 موجود باشد
-   */
-  data?: any
+  onMetaChange?: (data: any) => void;
+  data?: any;
 }
 
 const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
-  // فایل انتخاب‌شده یا آپلودشده را بر اساس metaType4 نگه می‌داریم
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(
-    data?.metaType4 || null
-  )
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(data?.metaType1 || null);
+  const [fileName, setFileName] = useState<string>(data?.fileName || "");
+  const [resetCounter, setResetCounter] = useState<number>(0);
+  const [isNewUpload, setIsNewUpload] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // نمایش نام فایل در فیلد
-  const [fileName, setFileName] = useState<string>(data?.fileName || '')
+  const isEditMode = !!data?.metaType1;
 
-  // شمارنده برای ریست کردن FileUploadHandler
-  const [resetCounter, setResetCounter] = useState<number>(0)
-
-  // وقتی کامپوننت لود شد یا selectedFileId تغییر کرد، اطلاعات فایل را از سرور می‌گیریم
   useEffect(() => {
-    if (selectedFileId) {
-      fileService
-        .getFile(selectedFileId)
-        .then(res => {
-          // فرض می‌کنیم سرور FileName را برمی‌گرداند
-          setFileName(res.data.FileName)
-        })
-        .catch(err => {
-          console.error('Error fetching file info:', err)
-        })
-    } else {
-      setFileName('')
-    }
-  }, [selectedFileId])
+    if (!selectedFileId || isNewUpload) return;
 
-  /**
-   * وقتی آپلود فایل با موفقیت انجام شد
-   * سرویس FileUploadHandler یک مدل InsertModel را برمی‌گرداند
-   * که حاوی اطلاعات فایل آپلودشده در دیتابیس است
-   */
+    fileService
+      .getFile(selectedFileId)
+      .then((res) => {
+        setFileName(res.data.FileName);
+        const path = {
+          FileName: res.data.FileIQ + res.data.FileType,
+          FolderName: res.data.FolderName,
+          cacheBust: Date.now(),
+        };
+        return fileService.download(path);
+      })
+      .then((downloadRes) => {
+        const blob = new Blob([new Uint8Array(downloadRes.data)], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+        setPreviewUrl(URL.createObjectURL(blob));
+      })
+      .catch((err) => {
+        console.error("Error fetching file info:", err);
+      });
+  }, [selectedFileId, isNewUpload]);
+
   const handleUploadSuccess = (insertedModel: InsertModel) => {
-    setSelectedFileId(insertedModel.ID || null)
-    setFileName(insertedModel.FileName)
-
-    // به والد اعلام کنیم metaType4 به این آیدی تغییر کرد
+    setSelectedFileId(insertedModel.ID || null);
+    setFileName(insertedModel.FileName);
+    setIsNewUpload(true);
     if (onMetaChange) {
-      onMetaChange({ metaType4: insertedModel.ID || null })
+      onMetaChange({ metaType1: insertedModel.ID || null });
     }
-  }
+  };
 
-  /**
-   * وقتی کاربر روی دکمهٔ Reset (زباله‌دان) کلیک می‌کند
-   * فایل موجود را پاک کرده و فایل جدید جایگزین نمی‌کنیم
-   */
   const handleReset = () => {
-    setSelectedFileId(null)
-    setFileName('')
-    setResetCounter(prev => prev + 1)
-
+    setSelectedFileId(null);
+    setFileName("");
+    setResetCounter((prev) => prev + 1);
+    setIsNewUpload(false);
+    setPreviewUrl(null);
     if (onMetaChange) {
-      onMetaChange({ metaType4: null })
+      onMetaChange({ metaType1: null });
     }
-  }
+  };
 
-  /**
-   * وقتی روی دکمهٔ Show کلیک می‌شود، فایل موجود را دانلود کنیم
-   */
   const handleDownloadFile = async () => {
-    if (!selectedFileId) {
-      alert('No file to download.')
-      return
-    }
+    if (!selectedFileId) return alert("No file to download.");
 
     try {
-      // ابتدا اطلاعات متادیتای فایل را از سرور می‌گیریم
-      const infoRes = await fileService.getFile(selectedFileId)
-      const { FileIQ, FileType, FolderName, FileName } = infoRes.data
+      const infoRes = await fileService.getFile(selectedFileId);
+      const { FileIQ, FileType, FolderName, FileName } = infoRes.data;
 
-      // برای دانلود لازم است در خواست دانلود بسازیم
-      const downloadingFileObject = {
-        FileName: FileIQ + FileType, // مثلاً 123e4567.doc
+      const path = {
+        FileName: FileIQ + FileType,
         FolderName: FolderName,
-        cacheBust: Date.now()
-      }
+        cacheBust: Date.now(),
+      };
 
-      const downloadRes = await fileService.download(downloadingFileObject)
-      const uint8Array = new Uint8Array(downloadRes.data)
+      const res = await fileService.download(path);
+      const mimeType = FileType === ".doc"
+        ? "application/msword"
+        : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-      // نوع MIME مناسب برای ورد
-      let mimeType = 'application/octet-stream'
-      if (FileType === '.doc') {
-        mimeType = 'application/msword'
-      } else if (FileType === '.docx') {
-        mimeType =
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      }
+      const blob = new Blob([new Uint8Array(res.data)], { type: mimeType });
+      const url = URL.createObjectURL(blob);
 
-      // ساخت یک آبجکت Blob و ایجاد URL موقت
-      const blob = new Blob([uint8Array], { type: mimeType })
-      const blobUrl = (window.URL || window.webkitURL).createObjectURL(blob)
-
-      // شبیه‌سازی کلیک روی لینک دانلود
-      const link = document.createElement('a')
-      link.href = blobUrl
-      // می‌توانید از FileName اصلی یا هر نام دلخواه استفاده کنید
-      link.download = FileName
-      link.click()
-
-      // بعد از دانلود می‌توانید URL blob را آزاد کنید
-      ;(window.URL || window.webkitURL).revokeObjectURL(blobUrl)
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = FileName;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error downloading file:', err)
-      alert('Failed to download file.')
+      console.error("Error downloading file:", err);
+      alert("Download failed.");
     }
-  }
+  };
 
   return (
-    <div className='flex flex-col items-center w-full mt-10'>
-      {/* ردیف بالایی: آیکن حذف فایل، ورودی نام فایل، و دکمه Show */}
-      <div className='flex items-center gap-2 w-full'>
-        {/* دکمه حذف فایل در صورتی که فایل انتخاب شده باشد */}
-        {selectedFileId && (
-          <button
-            type='button'
-            onClick={handleReset}
-            title='Reset file'
-            className='bg-red-500 text-white p-1 rounded hover:bg-red-700 transition duration-300'
-          >
-            <FaTrash size={16} />
-          </button>
+    <div className="flex flex-col items-center w-full mt-10">
+      <div className="flex items-center gap-3 w-full">
+        {isLoading ? (
+          <div className="w-8 h-8 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
+        ) : (
+          <>
+            {selectedFileId && isEditMode && (
+              <button
+                type="button"
+                title="Upload new Word file"
+                onClick={() => document.getElementById("hidden-upload-word")?.click()}
+                className="text-white p-2 rounded transition duration-300 bg-blue-500 hover:bg-blue-700"
+              >
+                <FaSync size={16} />
+              </button>
+            )}
+            {!isEditMode && !selectedFileId && (
+              <button
+                type="button"
+                title="Upload Word file"
+                onClick={() => document.getElementById("hidden-upload-word")?.click()}
+                className="text-white p-2 rounded transition duration-300 bg-green-600 hover:bg-green-700"
+              >
+                <FaUpload size={16} />
+              </button>
+            )}
+            {selectedFileId && !isEditMode && (
+              <button
+                type="button"
+                title="Remove file"
+                onClick={handleReset}
+                className="text-white p-2 rounded transition duration-300 bg-red-500 hover:bg-red-700"
+              >
+                <FaTrash size={16} />
+              </button>
+            )}
+          </>
         )}
 
-        {/* نمایش نام فایل به صورت فقط خواندنی */}
         <DynamicInput
-          name='fileName'
-          type='text'
-          value={fileName || ''}
-          placeholder='No file selected'
-          className='flex-grow -mt-6'
+          name="fileName"
+          type="text"
+          value={fileName || ""}
+          placeholder="No file selected"
+          className="flex-grow -mt-6"
+          disabled
         />
 
-        {/* دکمه Show برای دانلود فایل */}
         <button
-          type='button'
+          type="button"
           onClick={handleDownloadFile}
-          className={`flex items-center px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 ${
-            selectedFileId
-              ? 'hover:bg-purple-700'
-              : 'bg-gray-400 cursor-not-allowed'
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-purple-600 text-white rounded-md transition ${
+            previewUrl ? "hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"
           }`}
-          disabled={!selectedFileId}
+          disabled={!previewUrl || isLoading}
         >
-          {/* <FaEye size={16} className='mr-1' /> */}
+          <FaDownload />
           Download
         </button>
       </div>
 
-      {/* بخش آپلود فایل ورد (doc, docx)
-          این بخش تنها در حالت افزودن (عدم وجود داده‌های قبلی) نمایش داده می‌شود */}
-        <div className='w-full mt-4'>
-          <FileUploadHandler
-            selectedFileId={selectedFileId}
-            resetCounter={resetCounter}
-            onReset={() => {}}
-            onUploadSuccess={handleUploadSuccess}
-            // در اینجا فرمت‌های مجاز را فقط doc و docx تعیین می‌کنیم:
-            allowedExtensions={['doc', 'docx']}
-          />
-        </div>
-    </div>
-  )
-}
+      <input
+        id="hidden-upload-word"
+        type="file"
+        accept=".doc,.docx"
+        style={{ display: "none" }}
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
 
-export default WordPanel
+          try {
+            setIsLoading(true);
+            const ext = file.name.split(".").pop()?.toLowerCase();
+            if (!["doc", "docx"].includes(ext || "")) {
+              alert("Only .doc or .docx files are allowed.");
+              return;
+            }
+
+            const ID = uuidv4();
+            const FileIQ = uuidv4();
+            const folderName = new Date().toISOString().split("T")[0];
+            const generatedFileName = `${FileIQ}.${ext}`;
+
+            const formData = new FormData();
+            formData.append("FileName", generatedFileName);
+            formData.append("FolderName", folderName);
+            formData.append("file", file);
+
+            const uploadRes = await fileService.uploadFile(formData);
+            if (!uploadRes?.status) throw new Error("Upload failed");
+
+            const insertModel: InsertModel = {
+              ID,
+              FileIQ,
+              FileName: generatedFileName,
+              FileSize: uploadRes.data.FileSize || file.size,
+              FolderName: folderName,
+              IsVisible: true,
+              LastModified: null,
+              SenderID: null,
+              FileType: `.${ext}`,
+            };
+
+            const insertRes = await fileService.insert(insertModel);
+            if (!insertRes?.status) throw new Error("Insert failed");
+
+            handleUploadSuccess(insertRes.data);
+            setFileName(file.name);
+            setIsNewUpload(true);
+            setPreviewUrl(URL.createObjectURL(file));
+          } catch (err: any) {
+            alert("Upload error: " + (err.message || err));
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+      />
+    </div>
+  );
+};
+
+export default WordPanel;

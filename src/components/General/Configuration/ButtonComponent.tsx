@@ -473,6 +473,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
             onUploadSuccess={handleUploadSuccess}
             resetCounter={resetCounter}
             onReset={handleReset}
+            isEditMode={selectedRow !== null} 
           />
         </div>
       </div>

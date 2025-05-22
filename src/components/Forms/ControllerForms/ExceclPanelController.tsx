@@ -1,121 +1,195 @@
 // ExcelPanel.tsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
-import { FaTrash, FaEye } from "react-icons/fa";
+import { FaTrash, FaDownload, FaSync, FaUpload } from "react-icons/fa";
 import fileService from "../../../services/api.servicesFile";
-import FileUploadHandler, { InsertModel } from "../../../services/FileUploadHandler";
+import { v4 as uuidv4 } from "uuid";
+
+interface InsertModel {
+  ID?: string;
+  FileIQ?: string;
+  FileName: string;
+  FileSize: number;
+  FolderName: string;
+  IsVisible: boolean;
+  LastModified: Date | null;
+  SenderID: string | null;
+  FileType: string | null;
+}
 
 interface ExcelPanelProps {
-  /**
-   * تابعی برای ارسال تغییرات به فرم پدر
-   * اگر در حالت ویرایش باشیم، مقدار قبلی را برمی‌گرداند.
-   */
   onMetaChange?: (data: any) => void;
-  /**
-   * داده‌های قبلی در حالت ادیت
-   */
   data?: any;
 }
 
 const ExcelPanel: React.FC<ExcelPanelProps> = ({ data, onMetaChange }) => {
-  // نگهداری شناسه فایل انتخاب یا آپلود شده
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(
-    data?.metaType4 || null
-  );
-  // نگهداری نام فایل جهت نمایش
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(data?.metaType1 || null);
   const [fileName, setFileName] = useState<string>(data?.fileName || "");
-  // شمارنده برای ریست کردن FileUploadHandler
   const [resetCounter, setResetCounter] = useState<number>(0);
+  const [isNewUpload, setIsNewUpload] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // دریافت اطلاعات فایل از سرور در صورت وجود شناسه فایل
+  const isEditMode = !!data?.metaType1;
+
   useEffect(() => {
-    if (selectedFileId) {
-      fileService
-        .getFile(selectedFileId)
-        .then((res) => {
-          setFileName(res.data.FileName);
-        })
-        .catch((err) => {
-          console.error("Error fetching file info:", err);
-        });
-    } else {
-      setFileName("");
-    }
-  }, [selectedFileId]);
+    if (!selectedFileId || isNewUpload) return;
 
-  // زمانی که آپلود فایل موفقیت‌آمیز انجام شود
+    fileService
+      .getFile(selectedFileId)
+      .then((res) => {
+        setFileName(res.data.FileName);
+      })
+      .catch((err) => {
+        console.error("Error fetching file info:", err);
+      });
+  }, [selectedFileId, isNewUpload]);
+
   const handleUploadSuccess = (insertedModel: InsertModel) => {
     setSelectedFileId(insertedModel.ID || null);
     setFileName(insertedModel.FileName);
     if (onMetaChange) {
-      onMetaChange({ metaType4: insertedModel.ID || null });
+      onMetaChange({ metaType1: insertedModel.ID || null });
     }
   };
 
-  // ریست کردن فایل انتخاب شده
   const handleReset = () => {
     setSelectedFileId(null);
     setFileName("");
     setResetCounter((prev) => prev + 1);
+    setIsNewUpload(false);
     if (onMetaChange) {
-      onMetaChange({ metaType4: null });
+      onMetaChange({ metaType1: null });
     }
   };
 
-  // دانلود فایل از سرور
   const handleDownloadFile = async () => {
     if (!selectedFileId) {
       alert("No file to download.");
       return;
     }
+
     try {
       const infoRes = await fileService.getFile(selectedFileId);
       const { FileIQ, FileType, FolderName, FileName } = infoRes.data;
 
-      const downloadingFileObject = {
+      const downloadRes = await fileService.download({
         FileName: FileIQ + FileType,
-        FolderName: FolderName,
+        FolderName,
         cacheBust: Date.now(),
-      };
+      });
 
-      const downloadRes = await fileService.download(downloadingFileObject);
       const uint8Array = new Uint8Array(downloadRes.data);
       let mimeType = "application/octet-stream";
-      // تعیین MIME برای فایل‌های اکسل
-      if (FileType === ".xls") {
-        mimeType = "application/vnd.ms-excel";
-      } else if (FileType === ".xlsx") {
-        mimeType =
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-      }
+      if (FileType === ".xls") mimeType = "application/vnd.ms-excel";
+      else if (FileType === ".xlsx") mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
       const blob = new Blob([uint8Array], { type: mimeType });
-      const blobUrl = (window.URL || window.webkitURL).createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = FileName;
       link.click();
-      (window.URL || window.webkitURL).revokeObjectURL(blobUrl);
+      URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error("Error downloading file:", err);
       alert("Failed to download file.");
     }
   };
 
+  const handleTriggerUpload = () => {
+    const hiddenInput = document.getElementById("hidden-upload-trigger") as HTMLInputElement;
+    hiddenInput?.click();
+  };
+
+  const uploadFile = async (file: File) => {
+    try {
+      setIsLoading(true);
+
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (!["xls", "xlsx"].includes(ext || "")) {
+        alert("Only .xls and .xlsx files are allowed.");
+        setIsLoading(false);
+        return;
+      }
+
+      const ID = uuidv4();
+      const FileIQ = uuidv4();
+      const folderName = new Date().toISOString().split("T")[0];
+      const generatedFileName = `${FileIQ}.${ext}`;
+
+      const formData = new FormData();
+      formData.append("FileName", generatedFileName);
+      formData.append("FolderName", folderName);
+      formData.append("file", file);
+
+      const uploadRes = await fileService.uploadFile(formData);
+      if (!uploadRes?.status) throw new Error("Upload failed");
+
+      const insertModel: InsertModel = {
+        ID,
+        FileIQ,
+        FileName: generatedFileName,
+        FileSize: uploadRes.data.FileSize || file.size,
+        FolderName: folderName,
+        IsVisible: true,
+        LastModified: null,
+        SenderID: null,
+        FileType: `.${ext}`,
+      };
+
+      const insertRes = await fileService.insert(insertModel);
+      if (!insertRes?.status) throw new Error("Insert failed");
+
+      handleUploadSuccess(insertRes.data);
+      setFileName(file.name);
+      setIsNewUpload(true);
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      alert("Upload failed: " + (err.message || err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center w-full mt-10">
-      {/* ردیف بالایی: دکمه حذف فایل، ورودی نام فایل و دکمه دانلود */}
       <div className="flex items-center gap-2 w-full">
-        {selectedFileId && (
-          <button
-            type="button"
-            onClick={handleReset}
-            title="Reset file"
-            className="bg-red-500 text-white p-1 rounded hover:bg-red-700 transition duration-300"
-          >
-            <FaTrash size={16} />
-          </button>
+        {isLoading ? (
+          <div className="w-[32px] h-[32px] rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
+        ) : (
+          <>
+            {selectedFileId && isEditMode && (
+              <button
+                type="button"
+                title="Upload new file"
+                onClick={handleTriggerUpload}
+                className="text-white p-1 rounded transition duration-300 bg-blue-500 hover:bg-blue-700"
+              >
+                <FaSync size={16} />
+              </button>
+            )}
+            {!isEditMode && !selectedFileId && (
+              <button
+                type="button"
+                title="Upload file"
+                onClick={handleTriggerUpload}
+                className="text-white p-1 rounded transition duration-300 bg-green-600 hover:bg-green-700"
+              >
+                <FaUpload size={16} />
+              </button>
+            )}
+            {selectedFileId && !isEditMode && (
+              <button
+                type="button"
+                title="Remove file"
+                onClick={handleReset}
+                className="text-white p-1 rounded transition duration-300 bg-red-500 hover:bg-red-700"
+              >
+                <FaTrash size={16} />
+              </button>
+            )}
+          </>
         )}
 
         <DynamicInput
@@ -124,34 +198,34 @@ const ExcelPanel: React.FC<ExcelPanelProps> = ({ data, onMetaChange }) => {
           value={fileName || ""}
           placeholder="No file selected"
           className="flex-grow -mt-6"
+          disabled
         />
 
         <button
           type="button"
           onClick={handleDownloadFile}
-          className={`flex items-center px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 ${
-            selectedFileId
+          className={`flex items-center px-3 py-2 bg-purple-500 text-white font-semibold text-sm rounded transition duration-300 ${
+            selectedFileId && !isLoading
               ? "hover:bg-purple-700"
               : "bg-gray-400 cursor-not-allowed"
           }`}
-          disabled={!selectedFileId}
+          disabled={!selectedFileId || isLoading}
         >
-          <FaEye size={16} className="mr-1" />
+          <FaDownload size={16} className="mr-2" />
           Download
         </button>
       </div>
 
-      {/* بخش آپلود فایل اکسل (فقط در حالت افزودن نمایش داده می‌شود) */}
-        <div className="w-full mt-4">
-          <FileUploadHandler
-            selectedFileId={selectedFileId}
-            resetCounter={resetCounter}
-            onReset={() => {}}
-            onUploadSuccess={handleUploadSuccess}
-            // تنها فایل‌های اکسل با پسوندهای .xls و .xlsx مجاز باشند
-            allowedExtensions={["xls", "xlsx"]}
-          />
-        </div>
+      <input
+        id="hidden-upload-trigger"
+        type="file"
+        accept=".xls,.xlsx"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) uploadFile(file);
+        }}
+      />
     </div>
   );
 };

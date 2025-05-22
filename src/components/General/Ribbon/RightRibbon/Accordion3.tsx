@@ -10,9 +10,7 @@ import {
 import { FaSearch, FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import DynamicInput from "../../../utilities/DynamicInput";
 import DynamicRadioGroup from "../../../utilities/DynamicRadiogroup";
-import FileUploadHandler, {
-  InsertModel,
-} from "../../../../services/FileUploadHandler";
+import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler";
 import DataTable from "../../../TableDynamic/DataTable";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 import AppServices, { MenuItem } from "../../../../services/api.services";
@@ -50,30 +48,30 @@ const Accordion3: React.FC<Accordion3Props> = ({
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Whether user is in "edit" mode or "adding" mode. (Optional usage)
+  // حالت های ادیت و ادد
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
-  // Form data for the item
+  // state فرم
   const [formData, setFormData] = useState<Partial<RowData3>>({
     Name: "",
-    Command: "", // Now optional
+    Command: "",
     Description: "",
     Order: 0,
   });
 
-  // For radio and file upload
-  const [selectedSize, setSelectedSize] = useState<string>("0");
+  // کنترل عکس و preview
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
 
-  // Confirm dialogs (DynamicConfirm) states
+  // سایر stateها
+  const [selectedSize, setSelectedSize] = useState<string>("0");
   const [confirmInsertOpen, setConfirmInsertOpen] = useState<boolean>(false);
   const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
 
-  // Define columns for the DataTable
+  // ستون‌های جدول
   const columnDefs = [
     ...(subTabDefinitions["MenuItem"]?.columnDefs || []),
     {
@@ -110,7 +108,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     },
   ];
 
-  // Load row data whenever accordion is open and selectedMenuGroupId is not null
+  // گرفتن داده‌ها
   const loadRowData = async () => {
     if (isOpen && selectedMenuGroupId !== null) {
       setIsLoading(true);
@@ -130,7 +128,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
         setIsLoading(false);
       }
     } else {
-      // If accordion is closed or no group selected, clear everything
       setRowData([]);
       setSelectedRow(null);
       setIsEditing(false);
@@ -147,7 +144,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedMenuGroupId]);
 
-  // Filter rows by search text
+  // سرچ
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
     return rowData.filter(
@@ -158,7 +155,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     );
   }, [searchText, rowData]);
 
-  // Single-click on row -> fill the form in the accordion
+  // پر کردن فرم موقع کلیک روی ردیف
   const handleRowClick = (row: RowData3) => {
     const sanitizedRow = {
       ...row,
@@ -169,16 +166,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setFormData(sanitizedRow);
     setSelectedSize(sanitizedRow.Order?.toString() || "0");
     setIconImageId(sanitizedRow.IconImageId || null);
-    setIsEditing(false);
+    setIsEditing(true);
     setIsAdding(false);
   };
 
-  // Double-click on row
   const handleRowDoubleClick = (row: RowData3) => {
     onRowDoubleClick(row.ID);
   };
 
-  // Duplicate action
+  // دابلیکیت
   const handleDuplicate = (row: RowData3) => {
     const duplicatedRow: RowData3 = {
       ...row,
@@ -196,7 +192,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setResetCounter((prev) => prev + 1);
   };
 
-  // Edit action (from actions column)
+  // ادیت
   const handleEdit = (row: RowData3) => {
     setSelectedRow(row);
     setFormData(row);
@@ -206,19 +202,19 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setIsAdding(false);
   };
 
-  // Delete action (from actions column)
+  // حذف از اکشن جدول
   const handleDelete = (row: RowData3) => {
     setSelectedRow(row);
     setConfirmDeleteOpen(true);
   };
 
-  // Delete button in the top area
+  // حذف از دکمه بالا
   const handleDeleteClick = () => {
     if (!selectedRow) return;
     setConfirmDeleteOpen(true);
   };
 
-  // New button
+  // ریست کامل فرم (New)
   const handleNew = () => {
     if (selectedMenuGroupId === null) {
       setErrorConfirmOpen(true);
@@ -244,29 +240,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setResetCounter((prev) => prev + 1);
   };
 
-  // Validate the form (only Name is required now)
-  const validateForm = (): boolean => {
-    if (!formData.Name) {
-      setErrorConfirmOpen(true);
-      return false;
-    }
-    return true;
-  };
-
-  // Insert button
-  const handleInsert = () => {
-    if (!validateForm()) return;
-    setConfirmInsertOpen(true);
-  };
-
-  // Update button
-  const handleUpdate = () => {
-    if (!selectedRow) return;
-    if (!validateForm()) return;
-    setConfirmUpdateOpen(true);
-  };
-
-  // Handle form inputs
+  // ورودی‌های فرم
   const handleInputChange = (
     name: string,
     value: string | number | boolean
@@ -277,7 +251,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }));
   };
 
-  // Radio changes
+  // تغییر رادیو
   const handleRadioChange = (value: string) => {
     setSelectedSize(value);
     setFormData((prev) => ({
@@ -286,7 +260,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }));
   };
 
-  // File upload success
+  // آپلود عکس موفق
   const handleUploadSuccess = (insertModel: InsertModel) => {
     setIconImageId(insertModel.ID || null);
     setFormData((prev) => ({
@@ -295,7 +269,29 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }));
   };
 
-  // Confirm insert
+  // ذخیره (Insert)
+  const handleInsert = () => {
+    if (!validateForm()) return;
+    setConfirmInsertOpen(true);
+  };
+
+  // آپدیت
+  const handleUpdate = () => {
+    if (!selectedRow) return;
+    if (!validateForm()) return;
+    setConfirmUpdateOpen(true);
+  };
+
+  // اعتبارسنجی فرم
+  const validateForm = (): boolean => {
+    if (!formData.Name) {
+      setErrorConfirmOpen(true);
+      return false;
+    }
+    return true;
+  };
+
+  // تأیید نهایی Insert
   const confirmInsert = async () => {
     try {
       const newMenuItem: MenuItem = {
@@ -315,7 +311,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
         KeyTip: "",
         Size: formData.Order || 0,
       };
-      console.log("Inserting MenuItem:", newMenuItem);
       showAlert("success", null, "", "MenuItem updated successfully.");
       await AppServices.insertMenuItem(newMenuItem);
       await loadRowData();
@@ -339,7 +334,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }
   };
 
-  // Confirm update
+  // تأیید نهایی Update
   const confirmUpdate = async () => {
     if (!selectedRow) return;
     try {
@@ -360,7 +355,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
         KeyTip: "",
         Size: formData.Order || 0,
       };
-      console.log("Updating MenuItem:", updatedMenuItem);
       showAlert("success", null, "", "MenuItem updated successfully.");
       await AppServices.updateMenuItem(updatedMenuItem);
       await loadRowData();
@@ -381,7 +375,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }
   };
 
-  // Confirm delete
+  // تأیید نهایی حذف
   const confirmDelete = async () => {
     if (!selectedRow) return;
     try {
@@ -401,6 +395,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }
   };
 
+  // خطای اعتبارسنجی
   const closeErrorConfirm = () => {
     setErrorConfirmOpen(false);
   };
@@ -527,17 +522,24 @@ const Accordion3: React.FC<Accordion3Props> = ({
                       onUploadSuccess={handleUploadSuccess}
                       resetCounter={resetCounter}
                       onReset={() => setResetCounter((prev) => prev + 1)}
+                      isEditMode={isEditing}
                     />
                   </div>
                 </div>
                 {/* Action buttons */}
                 <div className="flex items-center gap-4 mt-4">
-                  <button
-                    onClick={handleInsert}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                  >
-                    <FaSave /> Save
-                  </button>
+                <button
+  onClick={handleInsert}
+  disabled={isEditing} // یا حتی: disabled={!!selectedRow}
+  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+    isEditing
+      ? "bg-green-300 text-gray-200 cursor-not-allowed"
+      : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+  }`}
+>
+  <FaSave /> Save
+</button>
+
                   <button
                     onClick={handleUpdate}
                     disabled={!selectedRow}
@@ -561,11 +563,16 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     <FaTrash /> Delete
                   </button>
                   <button
-                    onClick={handleNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-                  >
-                    <FaPlus /> New
-                  </button>
+  onClick={handleNew}
+  disabled={!selectedRow}
+  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+    !selectedRow
+      ? "bg-gray-300 text-gray-200 cursor-not-allowed"
+      : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+  }`}
+>
+  <FaPlus /> New
+</button>
                 </div>
               </div>
             </>

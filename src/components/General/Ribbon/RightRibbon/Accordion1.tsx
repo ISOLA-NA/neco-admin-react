@@ -367,12 +367,18 @@ const Accordion1: React.FC<Accordion1Props> = ({
               />
             </div>
             <div className="flex items-center gap-4 mt-4">
-              <button
-                onClick={handleInsert}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-              >
-                <FaSave /> Save
-              </button>
+            <button
+  onClick={handleInsert}
+  disabled={!!selectedRow}
+  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+    !!selectedRow
+      ? "bg-green-300 text-gray-200 cursor-not-allowed"
+      : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+  }`}
+>
+  <FaSave /> Save
+</button>
+
               <button
                 onClick={handleUpdate}
                 disabled={!selectedRow}
@@ -396,11 +402,17 @@ const Accordion1: React.FC<Accordion1Props> = ({
                 <FaTrash /> Delete
               </button>
               <button
-                onClick={handleNew}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-              >
-                <FaPlus /> New
-              </button>
+  onClick={handleNew}
+  disabled={!selectedRow}
+  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+    !selectedRow
+      ? "bg-gray-300 text-gray-200 cursor-not-allowed"
+      : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+  }`}
+>
+  <FaPlus /> New
+</button>
+
             </div>
           </div>
         </div>
