@@ -136,7 +136,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
         );
         return false;
       }
-      
+
 
       const currentUserId = localStorage.getItem("currentUserId") || undefined;
       const sd = staffingData;
@@ -234,7 +234,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
         <TwoColumnLayout>
           <DynamicSelector
             options={[
-              { value: "", label: "انتخاب کنید..." },
+              { value: "", label: "" },
               ...roles.map((r) => ({ value: r.ID, label: r.Name })),
             ]}
             selectedValue={staffingData.Name}
@@ -246,7 +246,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           />
           <DynamicSelector
             options={[
-              { value: "", label: "انتخاب کنید..." },
+              { value: "", label: "" },
               ...projects.map((p) => ({
                 value: p.ID.toString(),
                 label: p.ProjectName,
@@ -262,7 +262,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "انتخاب کنید..." },
+              { value: "", label: "" },
               ...users.map((u) => ({ value: u.ID, label: u.Username })),
             ]}
             selectedValue={staffingData.OwnerID}
@@ -275,7 +275,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "انتخاب کنید..." },
+              { value: "", label: "" },
               ...roles.map((r) => ({ value: r.ID, label: r.Name })),
             ]}
             selectedValue={staffingData.ParrentId}
@@ -287,7 +287,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "انتخاب کنید..." },
+              { value: "", label: "" },
               ...companies.map((c) => ({
                 value: c.ID.toString(),
                 label: c.Name,
@@ -303,7 +303,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           <DynamicSelector
             options={[
-              { value: "", label: "انتخاب کنید..." },
+              { value: "", label: "" },
               ...menus.map((m) => ({
                 value: m.ID.toString(),
                 label: m.Name,
@@ -388,6 +388,18 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
               isSelectDisabled={!selectedRowData}
             />
           )}
+
+          {currentSelector === "ParrentId" && (
+            <TableSelector
+              columnDefs={[{ headerName: "Role Name", field: "Name" }]}
+              rowData={roles}
+              onRowClick={onRowClick}
+              onRowDoubleClick={onSelect}
+              onSelectButtonClick={onSelect}
+              isSelectDisabled={!selectedRowData}
+            />
+          )}
+
         </DynamicModal>
       </div>
     );

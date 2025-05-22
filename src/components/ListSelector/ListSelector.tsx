@@ -14,7 +14,7 @@ interface ListSelectorProps {
   onGlobalChange?: (isGlobal: boolean) => void;
   ModalContentComponent: React.FC<any>;
   modalContentProps?: any;
-  loading?: boolean; // پروپ بارگذاری اضافه شده
+  loading?: boolean;
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
@@ -29,7 +29,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   onGlobalChange,
   ModalContentComponent,
   modalContentProps = {},
-  loading = false, // پیش‌فرض بارگذاری false
+  loading = false,
 }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
@@ -47,7 +47,6 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     onSelectionChange(selectedIds.filter((selectedId) => selectedId !== id));
   };
 
-  // دریافت اسامی انتخاب شده
   const selectedNames = rowData
     .filter((row) => selectedIds.includes(row.ID))
     .map((row) => row.Name);
@@ -56,17 +55,32 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     <div className={classNames("w-full", className)}>
       <div className="flex justify-between items-center p-2 rounded-t-md bg-gradient-to-r from-purple-600 to-indigo-500 h-10">
         <div className="flex items-center gap-2">
+          {/* سوئیچر جدید */}
           {showSwitcher && (
-            <>
-              <input
-                type="checkbox"
-                className="toggle toggle-info"
-                checked={isGlobal}
-                onChange={() => onGlobalChange && onGlobalChange(!isGlobal)}
-                aria-label="Global Switch"
-              />
-              <span className="text-white text-xs">Global</span>
-            </>
+            <div className="flex items-center gap-2">
+              {/* سوئیچر سمت چپ، متن سمت راست */}
+              <label className="flex items-center cursor-pointer">
+                {/* سوئیچر سفارشی */}
+                <div
+                  className={classNames(
+                    "w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300",
+                    isGlobal ? "bg-pink-500" : "bg-gray-400"
+                  )}
+                  onClick={() => onGlobalChange && onGlobalChange(!isGlobal)}
+                  style={{ minWidth: 36 }}
+                >
+                  <div
+                    className={classNames(
+                      "bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300",
+                      isGlobal
+                        ? "translate-x-4" // وقتی فعال است، به سمت متن (راست فارسی)
+                        : "translate-x-0"
+                    )}
+                  />
+                </div>
+                <span className="text-white text-xs ml-2 select-none">Global</span>
+              </label>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-2">

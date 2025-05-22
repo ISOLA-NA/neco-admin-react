@@ -84,12 +84,14 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   // کانتکست‌ها
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
-  const { handleAdd, handleEdit, handleDelete, handleDuplicate } =
-    useAddEditDelete();
+  const { handleAdd, handleEdit, handleDelete, handleDuplicate } = useAddEditDelete();
 
   // stateها
   const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
-  const [activeSubTab, setActiveSubTab] = useState<string>("Configurations");
+
+  // مقدار اولیه ساب تب هیچ چیز نباشد (یعنی نه null و نه مقدار خاصی)
+  const [activeSubTab, setActiveSubTab] = useState<string>("");
+
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
@@ -115,7 +117,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   const navigate = useNavigate();
 
-  // بارگذاری دیتا برای ساب‌تب
+  // بارگذاری دیتا برای ساب‌تب (فقط اگر ساب‌تب انتخاب باشد)
   const fetchSubTabData = async (subTabName: string) => {
     try {
       setIsSubTabLoading(true);
@@ -139,12 +141,23 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     } catch (error) {
       console.error("Error fetching data for subTab:", subTabName, error);
     } finally {
-      setIsSubTabLoading(false); // 👈 وقتی لود تموم شد
+      setIsSubTabLoading(false); // وقتی لود تموم شد
     }
   };
 
   useEffect(() => {
-    fetchSubTabData(activeSubTab);
+    if (activeSubTab) {
+      fetchSubTabData(activeSubTab);
+    } else {
+      setCurrentRowData([]);
+      setCurrentColumnDefs([]);
+      setCurrentIconVisibility({
+        showAdd: false,
+        showEdit: false,
+        showDelete: false,
+        showDuplicate: false,
+      });
+    }
   }, [activeSubTab, subTabDefinitions]);
 
   // هندل تب‌ها
@@ -156,10 +169,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
     if (tabName in mainTabsData) {
       setActiveMainTab(tabName as MainTabKey);
-      const cfg = mainTabsData[tabName as MainTabKey];
-      if (cfg.groups.length) {
-        setActiveSubTab(cfg.groups[0].subtabs[0]);
-      }
+      setActiveSubTab(""); // هیچ ساب‌تبی انتخاب نشود
       setSelectedRow(null);
       mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
       subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
@@ -192,7 +202,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       await handleDelete(activeSubTab, selectedRow.ID);
       setIsPanelOpen(false);
       setSelectedRow(null);
-  
+
       showAlert("success", null, "Deleted", "Record deleted successfully.");
       await fetchSubTabData(activeSubTab);
     } catch {
@@ -278,25 +288,31 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
         {/* محتوای تب فعلی */}
         <div className="flex-1 overflow-auto">
-          <TabContent
-            component={subTabComponents[activeSubTab] || null}
-            columnDefs={currentColumnDefs}
-            rowData={currentRowData}
-            selectedRow={selectedRow}
-            activeSubTab={activeSubTab}
-            showAddIcon={currentIconVisibility.showAdd}
-            showEditIcon={currentIconVisibility.showEdit}
-            showDeleteIcon={currentIconVisibility.showDelete}
-            showDuplicateIcon={currentIconVisibility.showDuplicate}
-            onAdd={handleAddClick}
-            onEdit={handleEditClick}
-            onDelete={handleDeleteClick}
-            onDuplicate={handleDuplicateClick}
-            onRowClick={handleRowClick}
-            onRowDoubleClick={handleRowDoubleClick}
-            isPanelOpen={isPanelOpen}
-            setIsPanelOpen={setIsPanelOpen}
-          />
+          {activeSubTab ? (
+            <TabContent
+              component={subTabComponents[activeSubTab] || null}
+              columnDefs={currentColumnDefs}
+              rowData={currentRowData}
+              selectedRow={selectedRow}
+              activeSubTab={activeSubTab}
+              showAddIcon={currentIconVisibility.showAdd}
+              showEditIcon={currentIconVisibility.showEdit}
+              showDeleteIcon={currentIconVisibility.showDelete}
+              showDuplicateIcon={currentIconVisibility.showDuplicate}
+              onAdd={handleAddClick}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+              onDuplicate={handleDuplicateClick}
+              onRowClick={handleRowClick}
+              onRowDoubleClick={handleRowDoubleClick}
+              isPanelOpen={isPanelOpen}
+              setIsPanelOpen={setIsPanelOpen}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-500 text-lg">
+             
+            </div>
+          )}
         </div>
       </div>
     </>

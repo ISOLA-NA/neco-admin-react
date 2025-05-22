@@ -205,11 +205,6 @@ export const SubTabDefinitionsProvider: React.FC<{
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "ID",
-            field: "ID",
-            filter: "agTextColumnFilter",
-          },
-          {
             headerName: "Name",
             field: "Name",
             filter: "agTextColumnFilter",
@@ -473,7 +468,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         iconVisibility: {
           showAdd: false,
           showEdit: false,
-          showDelete: true,
+          showDelete: false,
           showDuplicate: false,
         },
       },

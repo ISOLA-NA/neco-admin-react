@@ -321,8 +321,7 @@ const TabContent: FC<TabContentProps> = ({
                   <div className="h-full p-2 overflow-auto">
                     <LeftProjectAccess
                       selectedRow={selectedRow}
-                      onDoubleClickSubItem={handleLeftProjectDoubleClick}
-                    />
+                      onDoubleClickSubItem={handleLeftProjectDoubleClick} refreshTrigger={0}                    />
                   </div>
                 </div>
                 {/* Right Access Panel */}
