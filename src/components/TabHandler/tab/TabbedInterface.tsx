@@ -190,6 +190,9 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
     try {
       await handleDelete(activeSubTab, selectedRow.ID);
+      setIsPanelOpen(false);
+      setSelectedRow(null);
+  
       showAlert("success", null, "Deleted", "Record deleted successfully.");
       await fetchSubTabData(activeSubTab);
     } catch {

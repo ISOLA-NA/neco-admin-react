@@ -777,6 +777,7 @@ const TabContent: FC<TabContentProps> = ({
           "Deleted",
           `${activeSubTab} deleted successfully.`
         );
+        setIsPanelOpen(false);    
         await fetchData();
       } catch (error) {
         console.error("Error deleting:", error);
