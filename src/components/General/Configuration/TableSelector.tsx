@@ -63,6 +63,9 @@ const TableSelector: React.FC<TableSelectorProps> = ({
           onDuplicate={() => {}}
           // استفاده از domLayout "normal" برای پرکردن ارتفاع والد
           domLayout="normal"
+          showAddIcon={false}
+          showEditIcon={false}
+          showDeleteIcon={false}
         />
       </div>
 
