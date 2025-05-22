@@ -563,8 +563,8 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
         >
           <TableSelector
             columnDefs={[
-              { headerName: "نام", field: "Name" },
-              { headerName: "توضیحات", field: "EntityCateADescription" },
+              { headerName: "Name", field: "Name" },
+              { headerName: "Description", field: "EntityCateADescription" },
             ]}
             rowData={getRowData(currentSelector)}
             selectedRow={selectedRowData}

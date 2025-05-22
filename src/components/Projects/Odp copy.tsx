@@ -96,6 +96,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       try {
         setLoadingFormTemplates(true);
         const res = await api.getTableTransmittal();
+        // فرض بر این است که هر آیتم فیلد ID و Name دارد
         setFormTemplates(res.map((item: any) => ({
           ID: item.ID,
           Name: item.Name,
@@ -132,6 +133,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     fetchApprovalFlows();
   }, [api, isEditMode]);
 
+  // Program Templates (for Program Template select)
   const [programTemplates, setProgramTemplates] = useState<ItemType[]>([]);
   const [loadingProgramTemplates, setLoadingProgramTemplates] = useState(false);
 
@@ -153,9 +155,10 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     fetchProgramTemplates();
   }, [api]);
 
-  // Modal state for Program Template TableSelector
-  const [isProgramTemplateModalOpen, setIsProgramTemplateModalOpen] = useState(false);
-  const [selectedProgramTemplateRow, setSelectedProgramTemplateRow] = useState<ItemType | null>(null);
+  const programTemplateOptions: Option[] = programTemplates.map((item) => ({
+    value: item.ID.toString(),
+    label: item.Name,
+  }));
 
   // Projects for Relate Project
   const [projectsData, setProjectsData] = useState<ItemType[]>([]);
@@ -241,24 +244,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     setIsGlobalProjects(isGlobal);
   };
 
-  // --- Program Template Modal handlers
-  const handleOpenProgramTemplateModal = () => setIsProgramTemplateModalOpen(true);
-  const handleCloseProgramTemplateModal = () => {
-    setSelectedProgramTemplateRow(null);
-    setIsProgramTemplateModalOpen(false);
-  };
-  const handleProgramTemplateRowClick = (data: ItemType) => setSelectedProgramTemplateRow(data);
-  const handleProgramTemplateRowDoubleClick = (data: ItemType) => {
-    handleChange("nProgramTemplateID", data.ID);
-    handleCloseProgramTemplateModal();
-  };
-  const handleSelectProgramTemplateFromModal = () => {
-    if (selectedProgramTemplateRow) {
-      handleChange("nProgramTemplateID", selectedProgramTemplateRow.ID);
-    }
-    handleCloseProgramTemplateModal();
-  };
-
   // --- Save Function (with correct type for API) ---
   const save = async (): Promise<boolean> => {
     try {
@@ -313,24 +298,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     save,
   }));
 
-  // --- Program Template Modal render
-  const renderProgramTemplateModal = () => (
-    <DynamicModal
-      isOpen={isProgramTemplateModalOpen}
-      onClose={handleCloseProgramTemplateModal}
-    >
-      <TableSelector
-        columnDefs={[{ headerName: "Name", field: "Name" }]}
-        rowData={programTemplates}
-        onRowDoubleClick={handleProgramTemplateRowDoubleClick}
-        onRowClick={handleProgramTemplateRowClick}
-        onSelectButtonClick={handleSelectProgramTemplateFromModal}
-        isSelectDisabled={selectedProgramTemplateRow == null}
-      />
-    </DynamicModal>
-  );
-
-  // Form Template & Approval Flow Selectors
   const formTemplateSelector = isEditMode ? (
     <DynamicSelector
       options={formTemplates.map((item) => ({
@@ -345,7 +312,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       className="mb-4"
     />
   ) : <></>;
-
+  
   const approvalFlowSelector = isEditMode ? (
     <DynamicSelector
       options={approvalFlows.map((item) => ({
@@ -360,6 +327,8 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       className="mb-4"
     />
   ) : <></>;
+  
+  
 
   // --- UI ---
   return (
@@ -376,7 +345,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           required={true}
           className="mb-4"
         />
-
+  
         <CustomTextarea
           name="Description"
           value={OdpData.Description}
@@ -386,7 +355,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           }
           className="mb-4"
         />
-
+  
         <DynamicInput
           name="Address"
           type="text"
@@ -398,7 +367,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           required={true}
           className="mb-4"
         />
-
+  
         <DynamicSelector
           options={programTemplates.map((item) => ({
             value: item.ID.toString(),
@@ -412,15 +381,15 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           }}
           label="Program Template"
           showButton={true}
-          onButtonClick={handleOpenProgramTemplateModal} // اینجا مودال باز می‌شود!
+          onButtonClick={() => {}}
           disabled={false}
           className="mb-4"
         />
-
+  
         {/* فقط همین دوتا متغیر 👇 */}
         {formTemplateSelector}
         {approvalFlowSelector}
-
+  
         <ListSelector
           title="Related Projects"
           className="mt-4"
@@ -445,12 +414,11 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
             selectionMode: "multiple",
           }}
         />
+        
       </TwoColumnLayout>
-
-      {/* Modal Program Template */}
-      {renderProgramTemplateModal()}
     </>
   );
+   
 };
 
 export default forwardRef(OdpComp);

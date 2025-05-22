@@ -422,6 +422,7 @@ export interface OdpWithExtra {
   nEntityTypeID: number | null;
   nProgramTemplateID: number | null;
   nWFTemplateID: number | null;
+  ProjectsStr: string;
 }
 
 export interface EntityCollection {
