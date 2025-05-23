@@ -1070,7 +1070,7 @@ const TabContent: FC<TabContentProps> = ({
               minWidth: panelWidth <= 30 ? "300px" : "auto",
             }}
           >
-            {activeSubTab !== "Ribbons" && (
+            {activeSubTab !== "Ribbons" && activeSubTab !== "ProjectsAccess" && (
               <PanelHeader
                 isExpanded={false}
                 toggleExpand={() => {}}
