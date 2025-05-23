@@ -33,7 +33,7 @@
         nProjectID: selectedProject?.ID,
         nPostID: "",
         PostName: "",
-        AccessMode: 2,
+        AccessMode:1,
         CreateLetter: false,
         CreateMeeting: false,
         CreateIssue: false,
