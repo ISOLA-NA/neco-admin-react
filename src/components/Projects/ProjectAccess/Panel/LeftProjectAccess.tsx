@@ -123,7 +123,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       showAlert("warning", null, "Warning", "Please select a post first.");
       return;
     }
-
+  
     const selectedPost = postSmallData.find(
       (post) => post.ID === selectedPostId
     );
@@ -131,7 +131,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       showAlert("warning", null, "Warning", "Selected post not found.");
       return;
     }
-
+  
     const newRow: Omit<AccessProject, "ID" | "LastModified"> = {
       nPostID: selectedPostId,
       nProjectID: selectedRow?.ID || "",
@@ -156,12 +156,14 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
       Show_Procedure: false,
       Show_Related: false,
     };
-
-    onDoubleClickSubItem(newRow as AccessProject);
+  
+    handleSubItemDoubleClick(newRow as AccessProject); // ⬅️ emoji حذف شد
+  
     if (onAddFromLeft) {
       onAddFromLeft();
     }
   };
+  
 
   const handleEdit = () => {
     if (selectedSubItemRow) {

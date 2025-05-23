@@ -645,6 +645,13 @@ const TabContent: FC<TabContentProps> = ({
       setNameInput(data.Name);
       setDescriptionInput(data.Description);
     }
+    if (activeSubTab === "ProjectsAccess") {
+      setIsAdding(true); // فقط این تب
+    } else {
+      setIsAdding(false);
+    }
+
+    
   };
 
   // const handleRowClickLocal = (data: any) => {
@@ -657,27 +664,28 @@ const TabContent: FC<TabContentProps> = ({
   // };
 
   const handleRowClickLocal = (data: any) => {
-    // ۱) نگه‌داشتن ردیف انتخاب‌شده
-    setPendingSelectedRow(data);
+  setPendingSelectedRow(data);
+  onRowClick(data);
 
-    // ۲) اطلاع دادن به والد (بر اساس prop)
-    onRowClick(data);
+  if (activeSubTab === "Ribbons") {
+    setNameInput(data.Name);
+    setDescriptionInput(data.Description);
+  }
 
-    // ۳) اگر تب Ribbons است، مقدار فیلدها را پر کن
-    if (activeSubTab === "Ribbons") {
-      setNameInput(data.Name);
-      setDescriptionInput(data.Description);
-    }
-
-    // ۴) فرم در حالت ویرایش باشد، نه افزودن جدید
-    setIsAdding(false);
-    setIsPanelOpen(true);
-
-    // ۵) دکمه‌ها را تنظیم کن:
-    // Save غیرفعال، Update فعال
+  // تفاوت برای ProjectsAccess:
+  if (activeSubTab === "ProjectsAccess") {
+    setIsAdding(true);         // Save فعال، Update غیرفعال
+    setCanSave(true);
+    setCanUpdate(false);
+  } else {
+    setIsAdding(false);        // Save غیرفعال، Update فعال
     setCanSave(false);
     setCanUpdate(true);
-  };
+  }
+
+  setIsPanelOpen(true);
+};
+
 
   // یک تابع برای New
   const handleNewClick = () => {
