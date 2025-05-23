@@ -242,7 +242,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     ];
 
     const rolesColumnDefs = [
-      { headerName: "ID", field: "ID", sortable: true, filter: true },
       { headerName: "Name", field: "Name", sortable: true, filter: true },
     ];
 
