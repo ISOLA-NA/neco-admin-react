@@ -257,7 +257,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             label="Project Name"
             showButton
             onButtonClick={() => openModal("ProjectID")}
-            disabled={isProjectNameDisabled}
+            disabled={staffingData.isStaticPost}
           />
 
           <DynamicSelector
