@@ -195,51 +195,135 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       fetchConfigurations();
     }, [api]);
 
+    // اضافه‌شده در داخل کامپوننت
+    const handleCellValueChanged = (params: any) => {
+      const updatedRow: TableRow = {
+        ...params.data,
+        // حواسمون باشه فیلدها درست ترینسفرم شده باشن
+        cost1: Number(params.data.cost1),
+        cost2: Number(params.data.cost2),
+        cost3: Number(params.data.cost3),
+        weight1: Number(params.data.weight1),
+        weight2: Number(params.data.weight2),
+        weight3: Number(params.data.weight3),
+        code: Number(params.data.code),
+      };
+      setTableData((rows) =>
+        rows.map((r) => (r.id === updatedRow.id ? updatedRow : r))
+      );
+    };
+
+    const handleCheckboxChange = (params: any, field: "required" | "veto") => {
+      const newValue = !params.value;
+      setTableData((rows) =>
+        rows.map((r) =>
+          r.id === params.data.id
+            ? {
+              ...r,
+              [field]: newValue,
+            }
+            : r
+        )
+      );
+    };
+
+
     const columnDefs = [
       {
         headerName: "Post",
         field: "nPostID",
         sortable: true,
         filter: true,
+        editable: false, // غیرفعال برای Static Post
         valueGetter: (params: any) => {
           const role = allRoles.find(
             (r) => r.ID.toString() === params.data.nPostID
           );
-          return role && role.Name ? role.Name : params.data.nPostID || "";
+          return role?.Name || "";
         },
       },
-      { headerName: "Cost1", field: "cost1", sortable: true, filter: true },
-      { headerName: "Cost2", field: "cost2", sortable: true, filter: true },
-      { headerName: "Cost3", field: "cost3", sortable: true, filter: true },
-      { headerName: "Weight1", field: "weight1", sortable: true, filter: true },
-      { headerName: "Weight2", field: "weight2", sortable: true, filter: true },
-      { headerName: "Weight3", field: "weight3", sortable: true, filter: true },
+      {
+        headerName: "Cost1",
+        field: "cost1",
+        sortable: true,
+        filter: true,
+        editable: true,
+        cellEditor: "agTextCellEditor",
+      },
+      {
+        headerName: "Cost2",
+        field: "cost2",
+        sortable: true,
+        filter: true,
+        editable: true,
+        cellEditor: "agTextCellEditor",
+      },
+      {
+        headerName: "Cost3",
+        field: "cost3",
+        sortable: true,
+        filter: true,
+        editable: true,
+        cellEditor: "agTextCellEditor",
+      },
+      {
+        headerName: "Weight1",
+        field: "weight1",
+        sortable: true,
+        filter: true,
+        editable: true,
+        cellEditor: "agTextCellEditor",
+      },
+      {
+        headerName: "Weight2",
+        field: "weight2",
+        sortable: true,
+        filter: true,
+        editable: true,
+        cellEditor: "agTextCellEditor",
+      },
+      {
+        headerName: "Weight3",
+        field: "weight3",
+        sortable: true,
+        filter: true,
+        editable: true,
+        cellEditor: "agTextCellEditor",
+      },
       {
         headerName: "Required",
         field: "required",
+        editable: true,
         cellRendererFramework: (params: any) => (
           <input
             type="checkbox"
             checked={params.value}
-            readOnly
-            className="h-4 w-4"
+            onChange={() => handleCheckboxChange(params, "required")}
           />
         ),
       },
       {
         headerName: "Veto",
         field: "veto",
+        editable: true,
         cellRendererFramework: (params: any) => (
           <input
             type="checkbox"
             checked={params.value}
-            readOnly
-            className="h-4 w-4"
+            onChange={() => handleCheckboxChange(params, "veto")}
           />
         ),
       },
-      { headerName: "Code", field: "code", sortable: true, filter: true },
+      {
+        headerName: "Code",
+        field: "code",
+        sortable: true,
+        filter: true,
+        editable: true,
+        cellEditor: "agTextCellEditor",
+      },
     ];
+
 
     const rolesColumnDefs = [
       { headerName: "Name", field: "Name", sortable: true, filter: true },
@@ -423,20 +507,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
-                ...r,
-                nPostID: selectedStaticPost
-                  ? selectedStaticPost.ID.toString()
-                  : "",
-                cost1: Number(cost1) || 0,
-                cost2: Number(cost2) || 0,
-                cost3: Number(cost3) || 0,
-                weight1: Number(weight1) || 0,
-                weight2: Number(weight2) || 0,
-                weight3: Number(weight3) || 0,
-                required: requiredChecked,
-                veto: vetoChecked,
-                code: Number(codeValue) || 0,
-              }
+              ...r,
+              nPostID: selectedStaticPost
+                ? selectedStaticPost.ID.toString()
+                : "",
+              cost1: Number(cost1) || 0,
+              cost2: Number(cost2) || 0,
+              cost3: Number(cost3) || 0,
+              weight1: Number(weight1) || 0,
+              weight2: Number(weight2) || 0,
+              weight3: Number(weight3) || 0,
+              required: requiredChecked,
+              veto: vetoChecked,
+              code: Number(codeValue) || 0,
+            }
             : r
         );
         setTableData(updated);
@@ -648,34 +732,13 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               <span className="text-lg font-semibold text-gray-700">
                 Approval Context:
               </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleAddOrUpdateRow}
-                  className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
-                >
-                  {selectedRow ? (
-                    <>
-                      <FaEdit className="mr-2" /> Edit
-                    </>
-                  ) : (
-                    <>
-                      <FaPlus className="mr-2" /> Add
-                    </>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleDeleteRow}
-                  disabled={!selectedRow}
-                  className={`flex items-center bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 transition-colors ${
-                    !selectedRow && "opacity-50 cursor-not-allowed"
-                  }`}
-                >
-                  <FaTimes />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleAddOrUpdateRow}
+                className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+              >
+                <FaPlus className="mr-2" /> Add
+              </button>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -795,20 +858,22 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                   </p>
                 ) : (
                   <DataTable
-                    columnDefs={columnDefs}
-                    rowData={tableData}
-                    onRowDoubleClick={handleSelectRow}
-                    setSelectedRowData={handleSelectRow}
-                    showDuplicateIcon={false}
-                    showEditIcon={false}
-                    showAddIcon={false}
-                    showDeleteIcon={false}
-                    onAdd={() => {}}
-                    onEdit={() => {}}
-                    onDelete={handleDeleteRow}
-                    onDuplicate={handleDuplicateRow}
-                    domLayout="normal"
-                  />
+                  columnDefs={columnDefs}
+                  rowData={tableData}
+                  onCellValueChanged={handleCellValueChanged}
+                  onRowDoubleClick={() => {}}
+                  setSelectedRowData={() => {}}
+                  showDuplicateIcon={false}
+                  showEditIcon={false}
+                  showAddIcon={false}
+                  showDeleteIcon={false}
+                  onAdd={() => {}}
+                  onEdit={() => {}}
+                  onDelete={() => {}}
+                  onDuplicate={() => {}}
+                  domLayout="normal"
+                />
+                
                 )}
               </div>
             )}
@@ -874,12 +939,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 { headerName: "Tooltip", field: "Tooltip" },
               ],
               rowData: btnList,
-              onRowDoubleClick: () => {},
-              onRowClick: () => {},
-              onSelectButtonClick: () => {},
+              onRowDoubleClick: () => { },
+              onRowClick: () => { },
+              onSelectButtonClick: () => { },
               isSelectDisabled: false,
-              onClose: () => {},
-              onSelectFromButton: () => {},
+              onClose: () => { },
+              onSelectFromButton: () => { },
             }}
           />
         </aside>
