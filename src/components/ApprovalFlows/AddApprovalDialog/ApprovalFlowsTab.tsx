@@ -858,22 +858,22 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                   </p>
                 ) : (
                   <DataTable
-                  columnDefs={columnDefs}
-                  rowData={tableData}
-                  onCellValueChanged={handleCellValueChanged}
-                  onRowDoubleClick={() => {}}
-                  setSelectedRowData={() => {}}
-                  showDuplicateIcon={false}
-                  showEditIcon={false}
-                  showAddIcon={false}
-                  showDeleteIcon={false}
-                  onAdd={() => {}}
-                  onEdit={() => {}}
-                  onDelete={() => {}}
-                  onDuplicate={() => {}}
-                  domLayout="normal"
-                />
-                
+                    columnDefs={columnDefs}
+                    rowData={tableData}
+                    onCellValueChanged={handleCellValueChanged}
+                    onRowDoubleClick={() => { }}
+                    setSelectedRowData={() => { }}
+                    showDuplicateIcon={false}
+                    showEditIcon={false}
+                    showAddIcon={false}
+                    showDeleteIcon={false}
+                    onAdd={() => { }}
+                    onEdit={() => { }}
+                    onDelete={() => { }}
+                    onDuplicate={() => { }}
+                    domLayout="normal"
+                  />
+
                 )}
               </div>
             )}
