@@ -29,7 +29,7 @@ const subtabIcons: { [key: string]: string } = {
   Forms: "/images/forms/forms.png",
   Categories: "/images/forms/cata.png",
   ApprovalFlows: "/images/approval/appflow.png",
-  ApprovalChecklist: "/images/approval/check.png",
+  // ApprovalChecklist: "/images/approval/check.png",
   ProgramTemplate: "/images/approval/check.png",
   ProgramTypes: "/images/approval/check.png",
   Projects: "/images/project/projects.png",

@@ -59,7 +59,7 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
   },
   ApprovalFlows: {
     groups: [
-      { label: "Flows", subtabs: ["ApprovalFlows", "ApprovalChecklist"] },
+      { label: "Flows", subtabs: ["ApprovalFlows"] },
     ],
   },
   Programs: {

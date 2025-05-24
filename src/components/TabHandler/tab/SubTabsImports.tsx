@@ -31,9 +31,9 @@ export const subTabComponents: {
   ApprovalFlows: React.lazy(
     () => import("../../ApprovalFlows/MainApproval/ApprovalFlows")
   ),
-  ApprovalChecklist: React.lazy(
-    () => import("../../../components/ApprovalFlows/ApprovalChecklist")
-  ),
+  // ApprovalChecklist: React.lazy(
+  //   () => import("../../../components/ApprovalFlows/ApprovalChecklist")
+  // ),
 
   // Programs
   ProgramTemplate: React.lazy(
