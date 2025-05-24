@@ -342,7 +342,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               onChange={(e) => handleChange("Describtion", e.target.value)}
             />
           </TwoColumnLayout.Item>
-
+{/* 
           <TwoColumnLayout.Item span={1}>
             <DynamicInput
               name="Max Duration (Days)"
@@ -353,9 +353,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                 handleChange("MaxDuration", parseInt(e.target.value) || 0)
               }
             />
-          </TwoColumnLayout.Item>
+          </TwoColumnLayout.Item> */}
 
-          <TwoColumnLayout.Item span={1}>
+          {/* <TwoColumnLayout.Item span={1}>
             <DynamicInput
               name="Project Cost"
               type="number"
@@ -365,9 +365,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                 handleChange("PCost", parseInt(e.target.value) || 0)
               }
             />
-          </TwoColumnLayout.Item>
+          </TwoColumnLayout.Item> */}
 
-          <TwoColumnLayout.Item span={2} className="mt-10">
+          <TwoColumnLayout.Item span={1} className="mt-10">
             <ListSelector
               title="Related Projects"
               columnDefs={projectColumnDefs}
