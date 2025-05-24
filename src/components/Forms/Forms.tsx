@@ -62,7 +62,7 @@ interface FormsCommand1Props {
  * نگاشت typeOfInformation (ستون‌های فرم) برای تبدیل شناسه عددی به نام مرتبط
  */
 const columnTypeMapping: { [key: string]: number } = {
-  // component1: 15,
+  component1: 15,
   component2: 1,
   component3: 2,
   component4: 3,
