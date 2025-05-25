@@ -58,9 +58,7 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
     groups: [{ label: "Manage", subtabs: ["Forms", "Categories"] }],
   },
   ApprovalFlows: {
-    groups: [
-      { label: "Flows", subtabs: ["ApprovalFlows"] },
-    ],
+    groups: [{ label: "Flows", subtabs: ["ApprovalFlows"] }],
   },
   Programs: {
     groups: [{ label: "Setup", subtabs: ["ProgramTemplate", "ProgramTypes"] }],
@@ -84,7 +82,8 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   // کانتکست‌ها
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
-  const { handleAdd, handleEdit, handleDelete, handleDuplicate } = useAddEditDelete();
+  const { handleAdd, handleEdit, handleDelete, handleDuplicate } =
+    useAddEditDelete();
 
   // stateها
   const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
@@ -241,7 +240,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       />
 
       <div
-        className={`w-full h-screen flex flex-col bg-gray-100 overflow-x-hidden transition-filter duration-300 ${
+        className={`w-full h-screen flex flex-col bg-gray-100 overflow-hidden transition-filter duration-300 ${
           isDrawerOpen ? "filter blur-sm" : ""
         }`}
       >
@@ -287,7 +286,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
         </div>
 
         {/* محتوای تب فعلی */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-hidden">
           {activeSubTab ? (
             <TabContent
               component={subTabComponents[activeSubTab] || null}
@@ -309,9 +308,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
               setIsPanelOpen={setIsPanelOpen}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500 text-lg">
-             
-            </div>
+            <div className="flex items-center justify-center h-full text-gray-500 text-lg"></div>
           )}
         </div>
       </div>

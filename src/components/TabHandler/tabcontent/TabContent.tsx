@@ -650,8 +650,6 @@ const TabContent: FC<TabContentProps> = ({
     } else {
       setIsAdding(false);
     }
-
-    
   };
 
   // const handleRowClickLocal = (data: any) => {
@@ -664,28 +662,27 @@ const TabContent: FC<TabContentProps> = ({
   // };
 
   const handleRowClickLocal = (data: any) => {
-  setPendingSelectedRow(data);
-  onRowClick(data);
+    setPendingSelectedRow(data);
+    onRowClick(data);
 
-  if (activeSubTab === "Ribbons") {
-    setNameInput(data.Name);
-    setDescriptionInput(data.Description);
-  }
+    if (activeSubTab === "Ribbons") {
+      setNameInput(data.Name);
+      setDescriptionInput(data.Description);
+    }
 
-  // تفاوت برای ProjectsAccess:
-  if (activeSubTab === "ProjectsAccess") {
-    setIsAdding(true);         // Save فعال، Update غیرفعال
-    setCanSave(true);
-    setCanUpdate(false);
-  } else {
-    setIsAdding(false);        // Save غیرفعال، Update فعال
-    setCanSave(false);
-    setCanUpdate(true);
-  }
+    // تفاوت برای ProjectsAccess:
+    if (activeSubTab === "ProjectsAccess") {
+      setIsAdding(true); // Save فعال، Update غیرفعال
+      setCanSave(true);
+      setCanUpdate(false);
+    } else {
+      setIsAdding(false); // Save غیرفعال، Update فعال
+      setCanSave(false);
+      setCanUpdate(true);
+    }
 
-  setIsPanelOpen(true);
-};
-
+    setIsPanelOpen(true);
+  };
 
   // یک تابع برای New
   const handleNewClick = () => {
@@ -785,7 +782,7 @@ const TabContent: FC<TabContentProps> = ({
           "Deleted",
           `${activeSubTab} deleted successfully.`
         );
-        setIsPanelOpen(false);    
+        setIsPanelOpen(false);
         await fetchData();
       } catch (error) {
         console.error("Error deleting:", error);
@@ -1070,62 +1067,63 @@ const TabContent: FC<TabContentProps> = ({
               minWidth: panelWidth <= 30 ? "300px" : "auto",
             }}
           >
-            {activeSubTab !== "Ribbons" && activeSubTab !== "ProjectsAccess" && (
-              <PanelHeader
-                isExpanded={false}
-                toggleExpand={() => {}}
-                onSave={
-                  isAdding &&
-                  (activeSubTab === "Configurations" ||
-                    activeSubTab === "Commands" ||
-                    activeSubTab === "Users" ||
-                    activeSubTab === "Ribbons" ||
-                    activeSubTab === "Roles" ||
-                    activeSubTab === "RoleGroups" ||
-                    activeSubTab === "Enterprises" ||
-                    activeSubTab === "Staffing" ||
-                    activeSubTab === "ProgramTemplate" ||
-                    activeSubTab === "ProgramTypes" ||
-                    activeSubTab === "Odp" ||
-                    activeSubTab === "Procedures" ||
-                    activeSubTab === "Calendars" ||
-                    activeSubTab === "ProjectsAccess" ||
-                    activeSubTab === "ApprovalFlows" ||
-                    activeSubTab === "Forms" ||
-                    activeSubTab === "Categories")
-                    ? handleInsert
-                    : undefined
-                }
-                onUpdate={
-                  !isAdding &&
-                  (activeSubTab === "Configurations" ||
-                    activeSubTab === "Commands" ||
-                    activeSubTab === "Users" ||
-                    activeSubTab === "Ribbons" ||
-                    activeSubTab === "Roles" ||
-                    activeSubTab === "Enterprises" ||
-                    activeSubTab === "RoleGroups" ||
-                    activeSubTab === "Staffing" ||
-                    activeSubTab === "ProgramTemplate" ||
-                    activeSubTab === "ProgramTypes" ||
-                    activeSubTab === "Odp" ||
-                    activeSubTab === "Procedures" ||
-                    activeSubTab === "Calendars" ||
-                    activeSubTab === "ProjectsAccess" ||
-                    activeSubTab === "ApprovalFlows" ||
-                    activeSubTab === "Forms" ||
-                    activeSubTab === "Categories")
-                    ? handleUpdate
-                    : undefined
-                }
-                onClose={handleClose}
-                onTogglePanelSizeFromRight={togglePanelSizeFromRight}
-                isRightMaximized={isRightMaximized}
-                onCheckCanSave={() => checkNameNonEmpty()}
-                onCheckCanUpdate={() => checkNameNonEmpty()}
-                onShowEmptyNameWarning={showNameEmptyWarning}
-              />
-            )}
+            {activeSubTab !== "Ribbons" &&
+              activeSubTab !== "ProjectsAccess" && (
+                <PanelHeader
+                  isExpanded={false}
+                  toggleExpand={() => {}}
+                  onSave={
+                    isAdding &&
+                    (activeSubTab === "Configurations" ||
+                      activeSubTab === "Commands" ||
+                      activeSubTab === "Users" ||
+                      activeSubTab === "Ribbons" ||
+                      activeSubTab === "Roles" ||
+                      activeSubTab === "RoleGroups" ||
+                      activeSubTab === "Enterprises" ||
+                      activeSubTab === "Staffing" ||
+                      activeSubTab === "ProgramTemplate" ||
+                      activeSubTab === "ProgramTypes" ||
+                      activeSubTab === "Odp" ||
+                      activeSubTab === "Procedures" ||
+                      activeSubTab === "Calendars" ||
+                      activeSubTab === "ProjectsAccess" ||
+                      activeSubTab === "ApprovalFlows" ||
+                      activeSubTab === "Forms" ||
+                      activeSubTab === "Categories")
+                      ? handleInsert
+                      : undefined
+                  }
+                  onUpdate={
+                    !isAdding &&
+                    (activeSubTab === "Configurations" ||
+                      activeSubTab === "Commands" ||
+                      activeSubTab === "Users" ||
+                      activeSubTab === "Ribbons" ||
+                      activeSubTab === "Roles" ||
+                      activeSubTab === "Enterprises" ||
+                      activeSubTab === "RoleGroups" ||
+                      activeSubTab === "Staffing" ||
+                      activeSubTab === "ProgramTemplate" ||
+                      activeSubTab === "ProgramTypes" ||
+                      activeSubTab === "Odp" ||
+                      activeSubTab === "Procedures" ||
+                      activeSubTab === "Calendars" ||
+                      activeSubTab === "ProjectsAccess" ||
+                      activeSubTab === "ApprovalFlows" ||
+                      activeSubTab === "Forms" ||
+                      activeSubTab === "Categories")
+                      ? handleUpdate
+                      : undefined
+                  }
+                  onClose={handleClose}
+                  onTogglePanelSizeFromRight={togglePanelSizeFromRight}
+                  isRightMaximized={isRightMaximized}
+                  onCheckCanSave={() => checkNameNonEmpty()}
+                  onCheckCanUpdate={() => checkNameNonEmpty()}
+                  onShowEmptyNameWarning={showNameEmptyWarning}
+                />
+              )}
 
             {/* محتوای تب‌ها در پنل راست */}
             {activeSubTab === "ProjectsAccess" && (
