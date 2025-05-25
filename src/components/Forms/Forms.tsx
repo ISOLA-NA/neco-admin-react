@@ -607,6 +607,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const handleAddModalClose = () => {
     setIsAddModalOpen(false);
     setEditingData(null);
+    setSelectedRowData(null);
   };
 
   /**
@@ -928,6 +929,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 /* --------- سایر تنظیمات --------- */
                 domLayout="normal" /* اسکرول عمودی داخلی ag-Grid */
                 showSearch={true}
+                isEditMode={isEditMode}
               />
             </div>
           </div>
@@ -961,6 +963,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       {/* مدال افزودن/ویرایش فیلد */}
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
         <AddColumnForm
+          key={editingData?.ID || "new"}
           existingData={editingData}
           isEdit={!!editingData}
           entityTypeId={formData.ID}

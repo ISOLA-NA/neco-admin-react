@@ -98,6 +98,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     );
 
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const isEditMode = Boolean(selectedRow);
 
     useEffect(() => {
       const fetchTemplates = async () => {
@@ -768,6 +769,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                       );
                     },
                   }}
+                  isEditMode={isEditMode}
                 />
               </div>
             </div>

@@ -38,6 +38,8 @@ interface DataTableProps {
   showSearch?: boolean;
   showAddNew?: boolean;
   isLoading?: boolean;
+
+  isEditMode?: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -61,6 +63,7 @@ const DataTable: React.FC<DataTableProps> = ({
   showSearch = true,
   showAddNew = false,
   isLoading = false,
+  isEditMode = true,
 }) => {
   const [searchText, setSearchText] = useState("");
   const gridApiRef = useRef<any>(null);
@@ -226,7 +229,7 @@ const DataTable: React.FC<DataTableProps> = ({
                 `}
                 title="Duplicate"
                 onClick={onDuplicate}
-                disabled={!isRowSelected}
+                disabled={!isRowSelected || !isEditMode}
               >
                 <FiCopy size={20} />
               </button>
@@ -241,7 +244,7 @@ const DataTable: React.FC<DataTableProps> = ({
                 `}
                 title="Edit"
                 onClick={onEdit}
-                disabled={!isRowSelected}
+                disabled={!isRowSelected || !isEditMode}
               >
                 <FiEdit size={20} />
               </button>
@@ -256,7 +259,7 @@ const DataTable: React.FC<DataTableProps> = ({
                 `}
                 title="Delete"
                 onClick={onDelete}
-                disabled={!isRowSelected}
+                disabled={!isRowSelected || !isEditMode}
               >
                 <FiTrash2 size={20} />
               </button>
@@ -268,9 +271,12 @@ const DataTable: React.FC<DataTableProps> = ({
                 className={`
                   ${baseIconButton} 
                   bg-green-50 hover:bg-green-100 text-green-600
+                  ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
+
                 `}
                 title="Add"
                 onClick={onAdd}
+                disabled={!isEditMode}
               >
                 <FiPlus size={20} />
               </button>
@@ -281,9 +287,11 @@ const DataTable: React.FC<DataTableProps> = ({
                 className={`
                   ${baseIconButton}
                   bg-gray-50 hover:bg-gray-100 text-gray-600
+                  ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
                 `}
                 title="View"
                 onClick={onView}
+                disabled={!isEditMode}
               >
                 <FiEye size={20} />
               </button>
