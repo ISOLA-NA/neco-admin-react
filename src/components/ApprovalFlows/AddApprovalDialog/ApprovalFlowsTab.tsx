@@ -182,14 +182,15 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             label: conf.Name,
           }));
           setActionBtnOptions(options);
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error fetching configurations:", error);
-          showAlert(
-            "error",
-            null,
-            "Error",
-            "An error occurred while fetching Action Button configurations"
-          );
+
+          const detailedMessage =
+            error?.response?.data ||
+            error?.message ||
+            "An error occurred while fetching Action Button configurations";
+
+          showAlert("error", null, "Error", detailedMessage);
         }
       };
       fetchConfigurations();
@@ -219,14 +220,13 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         rows.map((r) =>
           r.id === params.data.id
             ? {
-              ...r,
-              [field]: newValue,
-            }
+                ...r,
+                [field]: newValue,
+              }
             : r
         )
       );
     };
-
 
     const columnDefs = [
       {
@@ -241,6 +241,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           );
           return role?.Name || "";
         },
+        width: 700,
       },
       {
         headerName: "Cost1",
@@ -249,6 +250,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         filter: true,
         editable: true,
         cellEditor: "agTextCellEditor",
+        width: 500,
       },
       {
         headerName: "Cost2",
@@ -257,6 +259,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         filter: true,
         editable: true,
         cellEditor: "agTextCellEditor",
+        width: 500,
       },
       {
         headerName: "Cost3",
@@ -265,6 +268,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         filter: true,
         editable: true,
         cellEditor: "agTextCellEditor",
+        width: 500,
       },
       {
         headerName: "Weight1",
@@ -273,6 +277,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         filter: true,
         editable: true,
         cellEditor: "agTextCellEditor",
+        width: 500,
       },
       {
         headerName: "Weight2",
@@ -281,6 +286,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         filter: true,
         editable: true,
         cellEditor: "agTextCellEditor",
+        width: 500,
       },
       {
         headerName: "Weight3",
@@ -289,6 +295,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         filter: true,
         editable: true,
         cellEditor: "agTextCellEditor",
+        width: 500,
       },
       {
         headerName: "Required",
@@ -301,6 +308,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             onChange={() => handleCheckboxChange(params, "required")}
           />
         ),
+        width: 500,
       },
       {
         headerName: "Veto",
@@ -323,7 +331,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         cellEditor: "agTextCellEditor",
       },
     ];
-
 
     const rolesColumnDefs = [
       { headerName: "Name", field: "Name", sortable: true, filter: true },
@@ -507,20 +514,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
-              ...r,
-              nPostID: selectedStaticPost
-                ? selectedStaticPost.ID.toString()
-                : "",
-              cost1: Number(cost1) || 0,
-              cost2: Number(cost2) || 0,
-              cost3: Number(cost3) || 0,
-              weight1: Number(weight1) || 0,
-              weight2: Number(weight2) || 0,
-              weight3: Number(weight3) || 0,
-              required: requiredChecked,
-              veto: vetoChecked,
-              code: Number(codeValue) || 0,
-            }
+                ...r,
+                nPostID: selectedStaticPost
+                  ? selectedStaticPost.ID.toString()
+                  : "",
+                cost1: Number(cost1) || 0,
+                cost2: Number(cost2) || 0,
+                cost3: Number(cost3) || 0,
+                weight1: Number(weight1) || 0,
+                weight2: Number(weight2) || 0,
+                weight3: Number(weight3) || 0,
+                required: requiredChecked,
+                veto: vetoChecked,
+                code: Number(codeValue) || 0,
+              }
             : r
         );
         setTableData(updated);
@@ -732,13 +739,28 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               <span className="text-lg font-semibold text-gray-700">
                 Approval Context:
               </span>
-              <button
-                type="button"
-                onClick={handleAddOrUpdateRow}
-                className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
-              >
-                <FaPlus className="mr-2" /> Add
-              </button>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={handleAddOrUpdateRow}
+                  className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+                >
+                  <FaPlus className="mr-2" /> Add
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDeleteRow}
+                  className={`flex items-center px-3 py-2 rounded transition-colors ${
+                    selectedRow
+                      ? "bg-red-500 hover:bg-red-600 text-white"
+                      : "bg-red-300 text-white cursor-not-allowed"
+                  }`}
+                  disabled={!selectedRow}
+                >
+                  <FaTimes className="mr-2 text-white" /> Delete
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -851,7 +873,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
             {/* جدول نمایش داده‌ها (فقط اگر Stage نباشد) */}
             {!isStage && (
-              <div className="mt-4 h-[33vh]">
+              <div className="mt-4 h-[33vh] overflow-x-auto">
                 {approvalContextLoading ? (
                   <p className="text-center text-sm text-gray-600">
                     Loading Approval Context...
@@ -861,19 +883,18 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                     columnDefs={columnDefs}
                     rowData={tableData}
                     onCellValueChanged={handleCellValueChanged}
-                    onRowDoubleClick={() => { }}
-                    setSelectedRowData={() => { }}
+                    setSelectedRowData={handleSelectRow}
+                    onRowDoubleClick={() => {}}
                     showDuplicateIcon={false}
                     showEditIcon={false}
                     showAddIcon={false}
                     showDeleteIcon={false}
-                    onAdd={() => { }}
-                    onEdit={() => { }}
-                    onDelete={() => { }}
-                    onDuplicate={() => { }}
-                    domLayout="normal"
+                    onAdd={() => {}}
+                    onEdit={() => {}}
+                    onDelete={() => {}}
+                    onDuplicate={() => {}}
+                    domLayout="autoHeight"
                   />
-
                 )}
               </div>
             )}
@@ -939,12 +960,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 { headerName: "Tooltip", field: "Tooltip" },
               ],
               rowData: btnList,
-              onRowDoubleClick: () => { },
-              onRowClick: () => { },
-              onSelectButtonClick: () => { },
+              onRowDoubleClick: () => {},
+              onRowClick: () => {},
+              onSelectButtonClick: () => {},
               isSelectDisabled: false,
-              onClose: () => { },
-              onSelectFromButton: () => { },
+              onClose: () => {},
+              onSelectFromButton: () => {},
             }}
           />
         </aside>

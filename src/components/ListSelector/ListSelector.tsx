@@ -78,7 +78,9 @@ const ListSelector: React.FC<ListSelectorProps> = ({
                     )}
                   />
                 </div>
-                <span className="text-white text-xs ml-2 select-none">Global</span>
+                <span className="text-white text-xs ml-2 select-none">
+                  Global
+                </span>
               </label>
             </div>
           )}

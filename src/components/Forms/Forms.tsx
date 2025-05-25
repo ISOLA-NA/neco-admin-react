@@ -647,9 +647,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             ? formData.ModifiedById.toString()
             : null,
         };
-  
+
         await handleSaveForm(payload);
-  
+
         // showAlert("success", undefined, "Success", "Form saved successfully!");
         return true; // ✅ فرم با موفقیت ذخیره شد
       } catch (error) {
@@ -657,9 +657,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         // showAlert("error", undefined, "Error", "Failed to save form.");
         return false; // ❌ ذخیره با خطا مواجه شد
       }
-    }
+    },
   }));
-  
 
   /**
    * ستون‌های DataTable برای نمایش فیلدهای انتیتی

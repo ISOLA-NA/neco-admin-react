@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import DynamicModal from "../../utilities/DynamicModal";
+import DynamicModal from "../MainApproval/ModalApprovalFlow";
 import ApprovalFlowsTab, {
   ApprovalFlowsTabRef,
   ApprovalFlowsTabData,

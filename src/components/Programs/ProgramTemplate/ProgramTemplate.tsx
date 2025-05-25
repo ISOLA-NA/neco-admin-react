@@ -11,7 +11,7 @@ import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import DynamicInput from "../../utilities/DynamicInput";
 import ListSelector from "../../ListSelector/ListSelector";
 import DynamicSelector from "../../utilities/DynamicSelector";
-import DynamicModal from "../../utilities/DynamicModal";
+import DynamicModal from "../../ApprovalFlows/MainApproval/ModalApprovalFlow";
 import TableSelector from "../../General/Configuration/TableSelector";
 import DataTable from "../../TableDynamic/DataTable";
 import AddProgramTemplate from "./AddProgramTemplate";

@@ -124,7 +124,11 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
             )}
           >
             <span className="block w-full truncate whitespace-nowrap overflow-hidden text-left">
-              {selectedOption ? selectedOption.label : selectedValue}
+              {loading
+                ? "Loading..."
+                : selectedOption
+                ? selectedOption.label
+                : selectedValue}
             </span>
 
             <svg

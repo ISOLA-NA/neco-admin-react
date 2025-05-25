@@ -102,6 +102,9 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
     SubProgramMetaDataColumn: "",
   });
 
+  const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+  const [loadingMeta, setLoadingMeta] = useState(false);
+
   useEffect(() => {
     const mapped = selectedMetaIds
       .map((id) => {
@@ -229,14 +232,17 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const result = await api.getAllRoles(); // فرض بر این که چنین تابعی وجود دارد
+        setIsLoadingRoles(true);
+        const result = await api.getAllRoles();
         const formattedRoles = result.map((role: any) => ({
-          value: role.ID, // یا role.Name اگر فقط name داری
+          value: role.ID,
           label: role.Name,
         }));
         setRoles(formattedRoles);
       } catch (error) {
         console.error("خطا در دریافت نقش‌ها:", error);
+      } finally {
+        setIsLoadingRoles(false);
       }
     };
 
@@ -367,9 +373,15 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
       setSelectedMetaIds([]); // ✅ پاکسازی انتخاب‌های متادیتا
       setMetaValues([]);
       setMetaNames([]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving:", error);
-      showAlert("error", null, "Error", "Failed to save field.");
+
+      const detailedMessage =
+        error?.response?.data ||
+        error?.message ||
+        "Failed to save field due to unknown error.";
+
+      showAlert("error", null, "Save Failed", detailedMessage);
     }
   };
 
@@ -462,9 +474,15 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
       setMetaNames([]);
       if (onSaved) onSaved();
       if (onCancel) onCancel(); // مودال بسته شود
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating:", error);
-      showAlert("error", null, "Error", "Failed to update field.");
+
+      const detailedMessage =
+        error?.response?.data ||
+        error?.message ||
+        "Failed to update field due to unknown error.";
+
+      showAlert("error", null, "Update Failed", detailedMessage);
     }
   };
 
@@ -569,18 +587,20 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
 
         const fetchMetaData = async () => {
           try {
+            setLoadingMeta(true); // 👈 شروع لودینگ
+
             const fetched = await Promise.all(
               metaIds.map(async (id) => {
                 console.log("📡 Fetching meta for ID:", id);
                 try {
                   const res = await api.getEntityFieldById(Number(id));
-                  console.log("rrrrrrrrrrrrrrrrrrr", res);
+                  console.log("📥 دریافت شد:", res);
                   return {
                     ID: String(res.ID),
-                    Name: res.DisplayName || "",
+                    Name: res.DisplayName || res.Name || "", // اگر DisplayName نبود، از Name استفاده کن
                   };
                 } catch (err) {
-                  console.error("❌ Error fetching metadata for ID:", id, err);
+                  console.error("❌ خطا در دریافت متا برای ID:", id, err);
                   return null;
                 }
               })
@@ -591,17 +611,19 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               Name: string;
             }[];
 
-            console.log("🟢 metaNames →", validMeta);
+            console.log("🟢 متادیتا نهایی →", validMeta);
 
             setMetaValues(validMeta);
             setMetaNames(validMeta);
 
             console.log(
-              "🎯 rowData for ListSelector →",
+              "🎯 آماده برای ListSelector →",
               validMeta.map((m) => ({ ID: String(m.ID), Name: m.Name }))
             );
           } catch (err) {
             console.error("❌ خطای کلی در دریافت متادیتا:", err);
+          } finally {
+            setLoadingMeta(false); // 👈 پایان لودینگ (چه موفق چه با خطا)
           }
         };
 
@@ -653,6 +675,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
                 selectedValue={formData.responsiblepost}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
+                loading={isLoadingRoles}
               />
               <DynamicSelector
                 name="approvalFlow"
@@ -661,6 +684,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
                 selectedValue={formData.approvalFlow}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
+                loading={isLoadingRoles}
               />
             </div>
             <div className="grid grid-cols-2 gap-6">
@@ -686,6 +710,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               selectedValue={formData.programtype}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
+              loading={isLoadingRoles}
             />
             <DynamicSelector
               name="programtemplate"
@@ -694,6 +719,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               selectedValue={formData.programtemplate}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
+              loading={isLoadingRoles}
             />
             <DynamicSelector
               name="activitytype"
@@ -702,6 +728,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               selectedValue={formData.activitytype}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
+              loading={isLoadingRoles}
             />
             <DynamicSelector
               name="formname"
@@ -710,6 +737,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               selectedValue={formData.formname}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
+              loading={isLoadingRoles}
             />
 
             {/* Meta Data با فاصله بالاتر */}
@@ -731,6 +759,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
                   onSuccessAdd: handleMetaFieldSave,
                   entityTypeId: formData.formname,
                 }}
+                loading={loadingMeta}
               />
             </div>
           </div>
@@ -760,6 +789,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               selectedValue={formData.checkList}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
+              loading={isLoadingRoles}
             />
             <DynamicSelector
               name="procedure"
@@ -768,6 +798,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               selectedValue={formData.procedure}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
+              loading={isLoadingRoles}
             />
 
             <div className="grid grid-cols-3 gap-6">
@@ -795,12 +826,14 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
             </div>
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
-                name="Approval Execution"
+                name="approvalToExecutionWeight"
+                label="Approval Execution"
                 type="number"
-                value={formData.approvalToExecutionWeight}
+                value={formData.approvalToExecutionWeight ?? ""}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md "
               />
+
               <DynamicInput
                 name="wfW2"
                 type="number"
