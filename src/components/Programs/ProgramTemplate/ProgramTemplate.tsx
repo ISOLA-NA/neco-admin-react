@@ -722,41 +722,52 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           </DynamicModal>
 
           {/* بخش جزئیات با DataTable */}
+          {/* ───────── Two-Column Detail Table ───────── */}
           <TwoColumnLayout.Item span={2}>
-            <div
-              className="w-full overflow-x-auto"
-              style={{ maxHeight: "400px", overflowY: "auto" }}
-            >
-              <div className="w-full" style={{ height: 400 }}>
+            {/* ظرف بیرونی: فقط اسکرول افقی */}
+            <div className="overflow-x-auto pb-2">
+              {/* ظرف درونی: اسکرول عمودی با ارتفاع ثابت */}
+              <div className="h-[400px] min-w-full">
                 <DataTable
+                  /* --------- داده‌ها و ستون‌ها --------- */
                   columnDefs={detailColumnDefs}
                   rowData={enhancedProgramTemplateField}
+                  /* --------- رویدادهای انتخاب --------- */
                   onRowClick={handleSelectRow}
                   onRowDoubleClick={handleEditRow}
-                  showDuplicateIcon={false}
                   setSelectedRowData={setSelectedDetailRow}
-                  showEditIcon={true}
+                  /* --------- آیکن‌های CRUD --------- */
                   showAddIcon={true}
+                  showEditIcon={true}
                   showDeleteIcon={true}
+                  showDuplicateIcon={false}
                   onAdd={handleAddClick}
-                  onEdit={() => {
-                    if (selectedDetailRow) {
-                      handleEditRow(selectedDetailRow);
-                    } else {
-                      showAlert(
-                        "warning",
-                        null,
-                        "No selection",
-                        "Please select a row to edit."
-                      );
-                    }
-                  }}
+                  onEdit={() =>
+                    selectedDetailRow
+                      ? handleEditRow(selectedDetailRow)
+                      : showAlert(
+                          "warning",
+                          null,
+                          "No selection",
+                          "Please select a row to edit."
+                        )
+                  }
                   onDelete={handleDeleteRow}
                   onDuplicate={() => {}}
-                  domLayout="autoHeight"
+                  /* --------- قابلیت جستجو و لودینگ --------- */
                   showSearch={true}
-                  isLoading={loadingFields} //
-                  gridOptions={{ rowSelection: "single" }}
+                  isLoading={loadingFields}
+                  /* --------- تنظیمات طرح‌بندی ag-Grid --------- */
+                  domLayout="normal" // اسکرول عمودی داخلی
+                  gridOptions={{
+                    rowSelection: "single",
+                    onGridReady: (params) => {
+                      params.api.sizeColumnsToFit(); // ستون‌ها فیت
+                      window.addEventListener("resize", () =>
+                        params.api.sizeColumnsToFit()
+                      );
+                    },
+                  }}
                 />
               </div>
             </div>

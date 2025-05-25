@@ -228,107 +228,92 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       );
     };
 
+    // داخل فایل ApprovalFlowsTab.tsx
+
+    // ۱) ستون‌ها
     const columnDefs = [
       {
         headerName: "Post",
         field: "nPostID",
-        sortable: true,
-        filter: true,
-        editable: false, // غیرفعال برای Static Post
-        valueGetter: (params: any) => {
-          const role = allRoles.find(
-            (r) => r.ID.toString() === params.data.nPostID
-          );
-          return role?.Name || "";
-        },
-        width: 700,
+        flex: 3,
+        minWidth: 180,
+        valueGetter: (p: any) =>
+          allRoles.find((r) => r.ID + "" === p.data.nPostID)?.Name || "",
       },
       {
         headerName: "Cost1",
         field: "cost1",
-        sortable: true,
-        filter: true,
+        flex: 1,
+        minWidth: 110,
         editable: true,
-        cellEditor: "agTextCellEditor",
-        width: 500,
       },
       {
         headerName: "Cost2",
         field: "cost2",
-        sortable: true,
-        filter: true,
+        flex: 1,
+        minWidth: 110,
         editable: true,
-        cellEditor: "agTextCellEditor",
-        width: 500,
       },
       {
         headerName: "Cost3",
         field: "cost3",
-        sortable: true,
-        filter: true,
+        flex: 1,
+        minWidth: 110,
         editable: true,
-        cellEditor: "agTextCellEditor",
-        width: 500,
       },
       {
         headerName: "Weight1",
         field: "weight1",
-        sortable: true,
-        filter: true,
+        flex: 1,
+        minWidth: 110,
         editable: true,
-        cellEditor: "agTextCellEditor",
-        width: 500,
       },
       {
         headerName: "Weight2",
         field: "weight2",
-        sortable: true,
-        filter: true,
+        flex: 1,
+        minWidth: 110,
         editable: true,
-        cellEditor: "agTextCellEditor",
-        width: 500,
       },
       {
         headerName: "Weight3",
         field: "weight3",
-        sortable: true,
-        filter: true,
+        flex: 1,
+        minWidth: 110,
         editable: true,
-        cellEditor: "agTextCellEditor",
-        width: 500,
       },
       {
         headerName: "Required",
         field: "required",
-        editable: true,
-        cellRendererFramework: (params: any) => (
+        flex: 0.8,
+        minWidth: 90,
+        cellRenderer: (p) => (
           <input
             type="checkbox"
-            checked={params.value}
-            onChange={() => handleCheckboxChange(params, "required")}
+            checked={p.value}
+            onChange={() => handleCheckboxChange(p, "required")}
           />
         ),
-        width: 500,
       },
       {
         headerName: "Veto",
         field: "veto",
-        editable: true,
-        cellRendererFramework: (params: any) => (
+        flex: 0.8,
+        minWidth: 90,
+        cellRenderer: (p) => (
           <input
             type="checkbox"
-            checked={params.value}
-            onChange={() => handleCheckboxChange(params, "veto")}
+            checked={p.value}
+            onChange={() => handleCheckboxChange(p, "veto")}
           />
         ),
       },
       {
         headerName: "Code",
         field: "code",
-        sortable: true,
-        filter: true,
+        flex: 1,
+        minWidth: 110,
         editable: true,
-        cellEditor: "agTextCellEditor",
       },
     ];
 
@@ -871,31 +856,35 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               </div>
             </div>
 
-            {/* جدول نمایش داده‌ها (فقط اگر Stage نباشد) */}
             {!isStage && (
-              <div className="mt-4 h-[33vh] overflow-x-auto">
-                {approvalContextLoading ? (
-                  <p className="text-center text-sm text-gray-600">
-                    Loading Approval Context...
-                  </p>
-                ) : (
-                  <DataTable
-                    columnDefs={columnDefs}
-                    rowData={tableData}
-                    onCellValueChanged={handleCellValueChanged}
-                    setSelectedRowData={handleSelectRow}
-                    onRowDoubleClick={() => {}}
-                    showDuplicateIcon={false}
-                    showEditIcon={false}
-                    showAddIcon={false}
-                    showDeleteIcon={false}
-                    onAdd={() => {}}
-                    onEdit={() => {}}
-                    onDelete={() => {}}
-                    onDuplicate={() => {}}
-                    domLayout="autoHeight"
-                  />
-                )}
+              <div className="mt-4">
+                {/* ░░ ظرف بیرونی: فقط اسکرول افقی ░░ */}
+                <div className="overflow-x-auto pb-2">
+                  {/* ارتفاع ثابت؛ در صورت نیاز vh را کم/زیاد کن */}
+                  <div className="h-[33vh] min-w-full">
+                    <DataTable
+                      columnDefs={columnDefs}
+                      rowData={tableData}
+                      onCellValueChanged={handleCellValueChanged}
+                      setSelectedRowData={handleSelectRow}
+                      /* CRUD-Icon ها غیرفعال */
+                      showDuplicateIcon={false}
+                      showEditIcon={false}
+                      showAddIcon={false}
+                      showDeleteIcon={false}
+                      domLayout="normal" /* ← اسکرول عمودی ag-Grid */
+                      gridOptions={{
+                        rowSelection: "single",
+                        onGridReady: (p) => {
+                          p.api.sizeColumnsToFit(); // ستون‌ها تا جای ممکن فیت می‌شوند
+                          window.addEventListener("resize", () =>
+                            p.api.sizeColumnsToFit()
+                          );
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>

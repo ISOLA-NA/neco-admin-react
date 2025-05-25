@@ -242,28 +242,29 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       isSelectDisabled: !selectedRowData,
     };
 
+    /* ───────── ستون‌های BoxTemplate با flex/minWidth ───────── */
     const boxTemplateColumnDefs = [
       {
         headerName: "Name",
         field: "Name",
         filter: "agTextColumnFilter",
         sortable: true,
+        flex: 1.2,
+        minWidth: 160,
       },
       {
         headerName: "Predecessor",
         field: "PredecessorStr",
         filter: "agTextColumnFilter",
         sortable: true,
-        flex: 1,
+        flex: 2,
+        minWidth: 220,
         valueGetter: (params: any) => {
           if (!params.data?.PredecessorStr) return "";
-          const predecessorIds =
-            params.data.PredecessorStr.split("|").filter(Boolean);
-          return predecessorIds
+          return params.data.PredecessorStr.split("|")
+            .filter(Boolean)
             .map((id: string) => {
-              const found = boxTemplates.find(
-                (box) => box.ID.toString() === id
-              );
+              const found = boxTemplates.find((b) => b.ID.toString() === id);
               return found ? found.Name : id;
             })
             .join(" - ");
@@ -342,7 +343,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               onChange={(e) => handleChange("Describtion", e.target.value)}
             />
           </TwoColumnLayout.Item>
-{/* 
+          {/* 
           <TwoColumnLayout.Item span={1}>
             <DynamicInput
               name="Max Duration (Days)"
@@ -383,41 +384,56 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             />
           </TwoColumnLayout.Item>
 
+          {/* ───────── TwoColumnLayout.Item: BoxTemplate DataTable ───────── */}
           <TwoColumnLayout.Item span={2}>
             {selectedRow && (
-              <>
-                <DataTable
-                  columnDefs={boxTemplateColumnDefs}
-                  rowData={boxTemplates}
-                  onRowDoubleClick={handleSubRowDoubleClick}
-                  setSelectedRowData={setSelectedSubRowData}
-                  onAdd={() => {
-                    setSelectedSubRowData(null);
-                    setIsModalOpen(true);
-                  }}
-                  onEdit={() => {
-                    if (selectedSubRowData) {
-                      handleBoxTemplateEdit(selectedSubRowData);
+              /* ظرف بیرونی: اسکرول افقی */
+              <div className="overflow-x-auto pb-2">
+                {/* ظرف درونی: اسکرول عمودی (ارتفاع ثابت) */}
+                <div className="h-[300px] min-w-full">
+                  <DataTable
+                    columnDefs={boxTemplateColumnDefs}
+                    rowData={boxTemplates}
+                    /* ـــ رویدادهای انتخاب و دوبل‌کلیک ـــ */
+                    onRowDoubleClick={handleSubRowDoubleClick}
+                    setSelectedRowData={setSelectedSubRowData}
+                    /* ـــ آیکن‌های CRUD ـــ */
+                    showAddIcon={true}
+                    showEditIcon={true}
+                    showDeleteIcon={true}
+                    showDuplicateIcon={false}
+                    onAdd={() => {
+                      setSelectedSubRowData(null);
+                      setIsModalOpen(true);
+                    }}
+                    onEdit={() =>
+                      selectedSubRowData &&
+                      handleBoxTemplateEdit(selectedSubRowData)
                     }
-                  }}
-                  onDelete={() => {
-                    if (selectedSubRowData) {
-                      setPendingDeleteId(selectedSubRowData.ID);
-                      setIsDeleteConfirmOpen(true);
+                    onDelete={() => {
+                      if (selectedSubRowData) {
+                        setPendingDeleteId(selectedSubRowData.ID);
+                        setIsDeleteConfirmOpen(true);
+                      }
+                    }}
+                    onDuplicate={() =>
+                      selectedSubRowData &&
+                      handleBoxTemplateDuplicate(selectedSubRowData)
                     }
-                  }}
-                  onDuplicate={() => {
-                    if (selectedSubRowData) {
-                      handleBoxTemplateDuplicate(selectedSubRowData);
-                    }
-                  }}
-                  showDuplicateIcon={false}
-                  showEditIcon={true}
-                  showAddIcon={true}
-                  showDeleteIcon={true}
-                  domLayout="autoHeight"
-                />
-              </>
+                    /* ـــ طرح‌بندی ag-Grid ـــ */
+                    domLayout="normal" // اسکرول عمودی ag-Grid
+                    gridOptions={{
+                      rowSelection: "single",
+                      onGridReady: (p) => {
+                        p.api.sizeColumnsToFit();
+                        window.addEventListener("resize", () =>
+                          p.api.sizeColumnsToFit()
+                        );
+                      },
+                    }}
+                  />
+                </div>
+              </div>
             )}
           </TwoColumnLayout.Item>
         </TwoColumnLayout>

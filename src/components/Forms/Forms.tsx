@@ -663,6 +663,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   /**
    * ستون‌های DataTable برای نمایش فیلدهای انتیتی
    */
+  /* ───────── ستون‌ها: newColumnDefs با flex/minWidth ───────── */
   const newColumnDefs = [
     {
       headerName: "Order",
@@ -670,6 +671,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       editable: true,
       sortable: true,
       filter: true,
+      flex: 0.6,
+      minWidth: 90,
     },
     {
       headerName: "Column Name",
@@ -677,6 +680,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       editable: true,
       sortable: true,
       filter: true,
+      flex: 2,
+      minWidth: 180,
     },
     {
       headerName: "Type",
@@ -684,11 +689,13 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       editable: false,
       sortable: true,
       filter: true,
+      flex: 1.3,
+      minWidth: 150,
       valueGetter: (params: any) => {
-        const option = typeOfInformationOptions.find(
-          (opt) => columnTypeMapping[opt.value] === params.data.ColumnType
+        const opt = typeOfInformationOptions.find(
+          (o) => columnTypeMapping[o.value] === params.data.ColumnType
         );
-        return option ? option.label : params.data.ColumnType;
+        return opt ? opt.label : params.data.ColumnType;
       },
     },
     {
@@ -697,17 +704,27 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       editable: true,
       sortable: true,
       filter: true,
+      flex: 1,
+      minWidth: 130,
     },
-    {
-      headerName: "Show In List",
-      field: "IsShowGrid",
+    /* ---------- ستون‌های Boolean مشابه ---------- */
+    ...[
+      { headerName: "Show In List", field: "IsShowGrid" },
+      { headerName: "Required", field: "IsRequire" },
+      { headerName: "Main Column", field: "IsMainColumn" },
+      { headerName: "Is Rtl", field: "IsRTL" },
+      { headerName: "Count In Reject", field: "CountInReject" },
+    ].map((c) => ({
+      ...c,
       editable: true,
       sortable: true,
       filter: true,
-      cellRendererFramework: (params: any) => (
+      flex: 0.9,
+      minWidth: 110,
+      cellRendererFramework: (p: any) => (
         <input
           type="checkbox"
-          checked={!!params.value}
+          checked={!!p.value}
           readOnly
           style={{ margin: 0 }}
         />
@@ -717,87 +734,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         checkboxTrueValue: true,
         checkboxFalseValue: false,
       },
-    },
-    {
-      headerName: "Required",
-      field: "IsRequire",
-      editable: true,
-      sortable: true,
-      filter: true,
-      cellRendererFramework: (params: any) => (
-        <input
-          type="checkbox"
-          checked={!!params.value}
-          readOnly
-          style={{ margin: 0 }}
-        />
-      ),
-      cellEditor: "agCheckboxCellEditor",
-      cellEditorParams: {
-        checkboxTrueValue: true,
-        checkboxFalseValue: false,
-      },
-    },
-    {
-      headerName: "Main Column",
-      field: "IsMainColumn",
-      editable: true,
-      sortable: true,
-      filter: true,
-      cellRendererFramework: (params: any) => (
-        <input
-          type="checkbox"
-          checked={!!params.value}
-          readOnly
-          style={{ margin: 0 }}
-        />
-      ),
-      cellEditor: "agCheckboxCellEditor",
-      cellEditorParams: {
-        checkboxTrueValue: true,
-        checkboxFalseValue: false,
-      },
-    },
-    {
-      headerName: "Is Rtl",
-      field: "IsRTL",
-      editable: true,
-      sortable: true,
-      filter: true,
-      cellRendererFramework: (params: any) => (
-        <input
-          type="checkbox"
-          checked={!!params.value}
-          readOnly
-          style={{ margin: 0 }}
-        />
-      ),
-      cellEditor: "agCheckboxCellEditor",
-      cellEditorParams: {
-        checkboxTrueValue: true,
-        checkboxFalseValue: false,
-      },
-    },
-    {
-      headerName: "Count In Reject",
-      field: "CountInReject",
-      editable: true,
-      sortable: true,
-      filter: true,
-      cellRendererFramework: (params: any) => (
-        <input
-          type="checkbox"
-          checked={!!params.value}
-          readOnly
-          style={{ margin: 0 }}
-        />
-      ),
-      cellEditor: "agCheckboxCellEditor",
-      cellEditorParams: {
-        checkboxTrueValue: true,
-        checkboxFalseValue: false,
-      },
-    },
+    })),
   ];
 
   return (
@@ -923,70 +860,76 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           />
         </TwoColumnLayout.Item>
 
+        {/* ───────── Two-ColumnLayout.Item: DataTable ───────── */}
         <TwoColumnLayout.Item span={2}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-            }}
-          >
-            <DataTable
-              columnDefs={newColumnDefs}
-              rowData={entityFields}
-              setSelectedRowData={setSelectedRowData}
-              gridOptions={{
-                singleClickEdit: true,
-              }}
-              // onCellClicked={(params) => {
-              //   setSelectedRowData(params.data);
-              // }}
-              onCellValueChanged={handleCellValueChanged}
-              onAdd={handleAddClick}
-              onEdit={() => {
-                if (selectedRowData) {
-                  handleEditClick(selectedRowData);
-                } else {
-                  showAlert("error", undefined, "Error", "No row is selected!");
+          {/* ظرف بیرونی: اسکرول افقی */}
+          <div className="overflow-x-auto pb-2">
+            {/* ظرف درونی: اسکرول عمودی با ارتفاع ثابت */}
+            <div className="h-[400px] min-w-full flex flex-col justify-end">
+              <DataTable
+                columnDefs={newColumnDefs}
+                rowData={entityFields}
+                setSelectedRowData={setSelectedRowData}
+                /* --------- ویرایش با یک کلیک --------- */
+                gridOptions={{
+                  singleClickEdit: true,
+                  rowSelection: "single",
+                  onGridReady: (p) => {
+                    p.api.sizeColumnsToFit();
+                    window.addEventListener("resize", () =>
+                      p.api.sizeColumnsToFit()
+                    );
+                  },
+                }}
+                onCellValueChanged={handleCellValueChanged}
+                /* --------- CRUD --------- */
+                showAddIcon={true}
+                showEditIcon={true}
+                showDeleteIcon={true}
+                showViewIcon={true}
+                showDuplicateIcon={false}
+                onAdd={handleAddClick}
+                onEdit={() =>
+                  selectedRowData
+                    ? handleEditClick(selectedRowData)
+                    : showAlert(
+                        "error",
+                        undefined,
+                        "Error",
+                        "No row is selected!"
+                      )
                 }
-              }}
-              onDelete={async () => {
-                if (!selectedRowData) {
-                  showAlert(
-                    "error",
-                    undefined,
-                    "Error",
-                    "No row selected for deletion"
-                  );
-                  return;
-                }
-                try {
-                  await api.deleteEntityField(selectedRowData.ID);
-                  showAlert(
-                    "success",
-                    undefined,
-                    "Success",
-                    "Deleted successfully"
-                  );
-                  setSelectedRowData(null);
-                  refreshEntityFields();
-                } catch (error) {
-                  showAlert("error", undefined, "Error", "Delete failed!");
-                }
-              }}
-              showDuplicateIcon={false}
-              showEditIcon={true}
-              showAddIcon={true}
-              showDeleteIcon={true}
-              showViewIcon={true}
-              onView={() => setViewModalOpen(true)}
-              domLayout="autoHeight"
-              showSearch={true}
-              onRowDoubleClick={(rowData) => handleEditClick(rowData)}
-              onDuplicate={() => {
-                // فقط در صورت نیاز
-              }}
-            />
+                onDelete={async () => {
+                  if (!selectedRowData) {
+                    showAlert(
+                      "error",
+                      undefined,
+                      "Error",
+                      "No row selected for deletion"
+                    );
+                    return;
+                  }
+                  try {
+                    await api.deleteEntityField(selectedRowData.ID);
+                    showAlert(
+                      "success",
+                      undefined,
+                      "Success",
+                      "Deleted successfully"
+                    );
+                    setSelectedRowData(null);
+                    refreshEntityFields();
+                  } catch {
+                    showAlert("error", undefined, "Error", "Delete failed!");
+                  }
+                }}
+                onView={() => setViewModalOpen(true)}
+                onRowDoubleClick={(row) => handleEditClick(row)}
+                /* --------- سایر تنظیمات --------- */
+                domLayout="normal" /* اسکرول عمودی داخلی ag-Grid */
+                showSearch={true}
+              />
+            </div>
           </div>
         </TwoColumnLayout.Item>
       </TwoColumnLayout>
