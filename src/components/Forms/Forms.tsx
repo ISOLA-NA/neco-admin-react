@@ -24,7 +24,7 @@ import DynamicSwitcher from "../utilities/DynamicSwitcher";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { useApi } from "../../context/ApiContext";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
-
+import { TailSpin } from "react-loader-spinner"; // ← اضافه شد
 import apiService from "../../services/api.services";
 import fileService from "../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
@@ -211,6 +211,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const [catAOptions, setCatAOptions] = useState<CategoryOption[]>([]);
   const [catBOptions, setCatBOptions] = useState<CategoryOption[]>([]);
 
+  const [isLoadingFields, setIsLoadingFields] = useState<boolean>(false); // ← استیت جدید
+
+
   /**
    * واکشی شناسه کاربر
    */
@@ -390,6 +393,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       return;
     }
 
+    setIsLoadingFields(true);
+
     try {
       const fields = await api.getEntityFieldByEntityTypeId(parsedId);
       console.log("🎯 Entity fields fetched:", fields);
@@ -397,6 +402,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     } catch (error) {
       console.error("❌ Error fetching entity fields:", error);
       setEntityFields([]);
+    } finally {
+      setIsLoadingFields(false); // ← بارگذاری پایان
     }
   }, [api, formData.ID]);
 
@@ -930,6 +937,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 domLayout="normal" /* اسکرول عمودی داخلی ag-Grid */
                 showSearch={true}
                 isEditMode={isEditMode}
+                isLoading={isLoadingFields}
+
               />
             </div>
           </div>

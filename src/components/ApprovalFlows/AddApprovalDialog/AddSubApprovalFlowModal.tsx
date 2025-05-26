@@ -176,7 +176,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           </button>
         </div>
 
-        <div className="mt-4 p-4 overflow-auto" style={{ maxHeight: "70vh" }}>
+        <div className="mt-4 p-4 overflow-auto">
           {activeTab === "approval" && (
             <ApprovalFlowsTab
               key={modalKey}

@@ -31,25 +31,39 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
 
   return ReactDOM.createPortal(
     <div
-      className="fixed inset-0 z-[9998] flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className={`relative bg-white rounded-lg p-6 overflow-y-auto max-h-[80vh] shadow-lg transform transition-all duration-300 ${
-          modalClassName ?? widthClass
-        }`}
-        onClick={(e) => e.stopPropagation()}
+  className="fixed inset-0 z-[9998] flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
+  onClick={onClose}
+>
+  <div
+    className={`relative bg-white rounded-lg shadow-lg transform transition-all duration-300 ${
+      modalClassName ?? widthClass
+    }`}
+    onClick={(e) => e.stopPropagation()}
+  >
+    {/* هدر استیکی با ضربدر بزرگ‌تر و بالاتر */}
+    <div className="sticky top-0 z-[9999] flex justify-end -mt-2 pr-4 pt-2 bg-white">
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close modal"
+        className="
+          p-1
+          text-red-600 hover:text-gray-900
+          font-bold
+          text-3xl     /* اندازه بزرگ‌تر */
+        "
       >
-        <button
-          type="button"
-          className="absolute top-3 right-4 text-gray-600 hover:text-gray-900 text-xl z-[9999]"
-          onClick={onClose}
-        >
-          ✕
-        </button>
-        <div className="mt-2">{children}</div>
-      </div>
-    </div>,
+        ×
+      </button>
+    </div>
+
+    {/* محتوای اسکرول‌شونده */}
+    <div className="overflow-y-auto max-h-[calc(80vh-2.5rem)] px-6 pb-6">
+      {children}
+    </div>
+  </div>
+</div>
+,
     document.body
   );
 };

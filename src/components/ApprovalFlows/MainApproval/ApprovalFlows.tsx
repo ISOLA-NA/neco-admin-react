@@ -64,6 +64,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [isLoadingBoxTemplates, setIsLoadingBoxTemplates] = useState<boolean>(false);
+
 
     // id ساب‌آیتمی که قصد حذفش رو داریم
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
@@ -87,9 +89,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       fetchProjects();
     }, [api]);
 
-    // به‌روزرسانی داده‌های ApprovalFlow بر اساس selectedRow
     useEffect(() => {
       if (selectedRow) {
+        // مقداردهی اولیه داده‌های فرم
         setApprovalFlowData({
           ID: selectedRow.ID,
           Name: selectedRow.Name || "",
@@ -101,9 +103,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           ProjectsStr: selectedRow.ProjectsStr || "",
           SubApprovalFlows: selectedRow.SubApprovalFlows || [],
         });
-
+    
         if (selectedRow.ID) {
-          // دریافت لیست BoxTemplateها پس از انتخاب ردیف
+          // قبل از فراخوانی API، لودینگ را فعال کن
+          setIsLoadingBoxTemplates(true);
+    
+          // دریافت لیست BoxTemplateها
           api
             .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
             .then((data) => {
@@ -118,12 +123,17 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                 "An error occurred while fetching BoxTemplates"
               );
               setBoxTemplates([]);
+            })
+            .finally(() => {
+              // در هر صورت (موفق یا خطا)، لودینگ را غیرفعال کن
+              setIsLoadingBoxTemplates(false);
             });
         } else {
+          // اگر ID نداشتیم، آرایه را خالی کن
           setBoxTemplates([]);
         }
       } else {
-        // حالت جدید یا عدم انتخاب ردیف
+        // حالت جدید یا عدم انتخاب ردیف: بازنشانی فرم و جدول
         setApprovalFlowData({
           ID: 0,
           Name: "",
@@ -138,6 +148,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         setBoxTemplates([]);
       }
     }, [selectedRow, api]);
+    
 
     // صادر کردن متدها از طریق ref
     useImperativeHandle(ref, () => ({
@@ -387,28 +398,23 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           {/* ───────── TwoColumnLayout.Item: BoxTemplate DataTable ───────── */}
           <TwoColumnLayout.Item span={2}>
             {selectedRow && (
-              /* ظرف بیرونی: اسکرول افقی */
               <div className="overflow-x-auto pb-2">
-                {/* ظرف درونی: اسکرول عمودی (ارتفاع ثابت) */}
-                <div className="h-[300px] min-w-full">
+                <div className="h-[300px] min-w-full relative">
                   <DataTable
                     columnDefs={boxTemplateColumnDefs}
                     rowData={boxTemplates}
-                    /* ـــ رویدادهای انتخاب و دوبل‌کلیک ـــ */
                     onRowDoubleClick={handleSubRowDoubleClick}
                     setSelectedRowData={setSelectedSubRowData}
-                    /* ـــ آیکن‌های CRUD ـــ */
-                    showAddIcon={true}
-                    showEditIcon={true}
-                    showDeleteIcon={true}
+                    showAddIcon
+                    showEditIcon
+                    showDeleteIcon
                     showDuplicateIcon={false}
                     onAdd={() => {
                       setSelectedSubRowData(null);
                       setIsModalOpen(true);
                     }}
                     onEdit={() =>
-                      selectedSubRowData &&
-                      handleBoxTemplateEdit(selectedSubRowData)
+                      selectedSubRowData && handleBoxTemplateEdit(selectedSubRowData)
                     }
                     onDelete={() => {
                       if (selectedSubRowData) {
@@ -417,11 +423,9 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                       }
                     }}
                     onDuplicate={() =>
-                      selectedSubRowData &&
-                      handleBoxTemplateDuplicate(selectedSubRowData)
+                      selectedSubRowData && handleBoxTemplateDuplicate(selectedSubRowData)
                     }
-                    /* ـــ طرح‌بندی ag-Grid ـــ */
-                    domLayout="normal" // اسکرول عمودی ag-Grid
+                    domLayout="normal"
                     gridOptions={{
                       rowSelection: "single",
                       onGridReady: (p) => {
@@ -431,11 +435,14 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                         );
                       },
                     }}
+                    /** ← این خط رو اضافه کن **/
+                    isLoading={isLoadingBoxTemplates}
                   />
                 </div>
               </div>
             )}
           </TwoColumnLayout.Item>
+
         </TwoColumnLayout>
 
         <DynamicConfirm
