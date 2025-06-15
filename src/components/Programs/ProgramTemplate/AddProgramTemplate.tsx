@@ -92,7 +92,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
     { value: string; label: string }[]
   >([]);
 
-  const [metaValues, setMetaValues] = useState<any[]>([]);
+  const [metaValues, setMetaValues] = useState<{ ID: string; Name: string }[]>([]);
   const [metaNames, setMetaNames] = useState<{ ID: string; Name: string }[]>(
     []
   );
@@ -254,22 +254,50 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    console.log("handleChange:", name, value);
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  
+    setFormData((prev) => {
+      // 👇 به TypeScript بگو name یکی از کلیدهای formData هست
+      const key = name as keyof typeof prev;
+  
+      return {
+        ...prev,
+        [key]: value,
+        ...(key === "formname" && !value ? { approvalFlow: prev.approvalFlow } : {}),
+        ...(key === "responsiblepost" && !value
+          ? {
+              formname: prev.formname,
+              approvalFlow: prev.approvalFlow,
+            }
+          : {}),
+        ...(key === "approvalFlow" && !value
+          ? {
+              formname: prev.formname,
+              responsiblepost: prev.responsiblepost,
+            }
+          : {}),
+      };
+    });
   };
+  
 
-  const approvalFlowOptions = wfTemplates.map((item) => ({
-    value: String(item.ID),
-    label: item.Name,
-  }));
+  const approvalFlowOptions = React.useMemo(
+    () =>
+      wfTemplates.map((item) => ({
+        value: String(item.ID),
+        label: item.Name,
+      })),
+    [wfTemplates]                // ⇠ تغییر واقعی فقط وقتی wfTemplates عوض شود
+  );
 
-  const programTemplateOptions = programTemplates.map((item) => ({
-    value: String(item.ID),
-    label: item.Name,
-  }));
+  const roleOptions = React.useMemo(
+    () => roles.map((r) => ({ value: String(r.value), label: r.label })),
+    [roles]
+  );
+
+  const programTemplateOptions = React.useMemo(
+    () => programTemplates.map((p) => ({ value: String(p.ID), label: p.Name })),
+    [programTemplates]
+  );
 
   const checkListOptions = checklists.map((item) => ({
     value: String(item.ID),
@@ -294,7 +322,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
       }
 
       const payload = {
-        MetaValues: metaValues, // لیست کامل متافیلدها
+        MetaValues: [],
 
         PFI: {
           ID: 0,
@@ -385,29 +413,34 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
     }
   };
 
-  const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
-    if (!newField || !newField.ID || !newField.Name) return;
+  // -----------------------------
+// جایگزینِ کل تابع قبلی
+// -----------------------------
+const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
+  if (!newField) return;                       // ورودی نامعتبر
 
-    const newId = newField.ID.toString();
+  // ⚡️ فقط همین‌جا به رشته تبدیل می‌کنیم
+  const stringId = String(newField.ID);
+  const stringField = { ID: stringId, Name: newField.Name };
 
-    // فقط وقتی اضافه نشده باشه
-    setSelectedMetaIds((prev) => {
-      const updated = prev.includes(newId) ? prev : [...prev, newId];
-      return updated;
-    });
+  // ---------- selectedMetaIds ----------
+  setSelectedMetaIds((prev) =>
+    prev.includes(stringId) ? prev : [...prev, stringId]
+  );
 
-    // اضافه به metaValues
-    setMetaValues((prev) => {
-      const exists = prev.find((m) => m.ID === newField.ID);
-      return exists ? prev : [...prev, newField];
-    });
+  // ---------- metaValues ----------
+  setMetaValues((prev) => {
+    const exists = prev.find((m) => m.ID === stringId);   // حالا مقایسه ساده است
+    return exists ? prev : [...prev, stringField];
+  });
 
-    // اضافه به metaNames
-    setMetaNames((prev) => {
-      const exists = prev.find((m) => m.ID === newId);
-      return exists ? prev : [...prev, { ID: newId, Name: newField.Name }];
-    });
-  };
+  // ---------- metaNames ----------
+  setMetaNames((prev) => {
+    const exists = prev.find((m) => m.ID === stringId);
+    return exists ? prev : [...prev, stringField];
+  });
+};
+
 
   const handleUpdate = async () => {
     try {
@@ -418,8 +451,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
 
       // ساخت payload مطابق نیاز API برای ویرایش
       const payload = {
-        MetaValues: metaValues, // متافیلدها
-
+        MetaValues: [], // متافیلدها
         PFI: {
           ...editingRow, // شناسه و سایر اطلاعات
           Name: formData.activityname,
@@ -455,7 +487,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
         },
       };
 
-      console.log("ppppp", payload.PFI);
+      console.log("ppppp", payload);
 
       console.log("nPostId before update:", formData.responsiblepost);
 
@@ -671,7 +703,7 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
               <DynamicSelector
                 name="responsiblepost"
                 label="Responsible Post"
-                options={roles}
+                options={roleOptions}
                 selectedValue={formData.responsiblepost}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"

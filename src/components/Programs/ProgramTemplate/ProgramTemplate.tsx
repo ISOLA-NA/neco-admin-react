@@ -426,55 +426,19 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       setEditingRow(null);
     };
 
-    // const enhancedProgramTemplateField = programTemplateField.map((item) => {
-    //   const role = roles.find((r) => r.ID === item.nPostId);
-    //   const activityTypeValue =
-    //     activityTypes.find((a) => Number(a.label) === Number(item.PFIType))
-    //       ?.value || item.PFIType;
-    //   const approvalFlowLabel =
-    //     wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))
-    //       ?.Name || item.nWFTemplateID;
-    //   const formLabel =
-    //     forms.find((f) => String(f.ID) === String(item.nEntityTypeID))?.Name ||
-    //     item.nEntityTypeID;
-
-    //   const programTemplateLabel =
-    //     programTemplates.find(
-    //       (p) => String(p.ID) === String(item.nProgramTemplateID)
-    //     )?.Name || item.nProgramTemplateID;
-
-    //   return {
-    //     ...item,
-    //     nPostId: item.nPostId, // 👈🏻 نگه داشتن مقدار ID اصلی
-    //     nPostIdDisplay: role?.Name || item.nPostId, // 👈🏻 فقط برای نمایش در جدول
-    //     PFIType: activityTypeValue,
-    //     nWFTemplateID: approvalFlowLabel,
-    //     nEntityTypeID: formLabel,
-    //     nProgramTemplateID: programTemplateLabel,
-    //   };
-    // });
     const enhancedProgramTemplateField = useMemo(() => {
       return programTemplateField.map((item) => {
         const role = roles.find((r) => r.ID === item.nPostId);
-        const activityTypeValue =
-          activityTypes.find((a) => Number(a.label) === Number(item.PFIType))
-            ?.value || item.PFIType;
         const approvalFlowLabel =
-          wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))
-            ?.Name || item.nWFTemplateID;
+          wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))?.Name || item.nWFTemplateID;
         const formLabel =
-          forms.find((f) => String(f.ID) === String(item.nEntityTypeID))
-            ?.Name || item.nEntityTypeID;
+          forms.find((f) => String(f.ID) === String(item.nEntityTypeID))?.Name || item.nEntityTypeID;
         const programTemplateLabel =
-          programTemplates.find(
-            (p) => String(p.ID) === String(item.nProgramTemplateID)
-          )?.Name || item.nProgramTemplateID;
-
+          programTemplates.find((p) => String(p.ID) === String(item.nProgramTemplateID))?.Name || item.nProgramTemplateID;
+    
         return {
           ...item,
-          nPostId: item.nPostId,
           nPostIdDisplay: role?.Name || item.nPostId,
-          PFIType: activityTypeValue,
           nWFTemplateID: approvalFlowLabel,
           nEntityTypeID: formLabel,
           nProgramTemplateID: programTemplateLabel,
@@ -483,11 +447,12 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     }, [
       programTemplateField,
       roles,
-      activityTypes,
       wfTemplates,
       forms,
       programTemplates,
     ]);
+    
+  
 
     // تعریف ستون‌ها برای جدول جزئیات
     const detailColumnDefs = [
