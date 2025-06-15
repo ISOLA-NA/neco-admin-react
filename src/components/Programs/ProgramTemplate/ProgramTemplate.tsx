@@ -33,7 +33,6 @@ interface ProgramTemplateProps {
   selectedRow: ProgramTemplateItem | null;
 }
 
-// Program type options به صورت پویا از API دریافت می‌شود
 const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
   ({ selectedRow }, ref) => {
     console.log("selectedrow", selectedRow);
@@ -65,7 +64,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const [loadingProgramTypes, setLoadingProgramTypes] =
       useState<boolean>(false);
 
-    // انتخاب ID‌های پروژه به صورت رشتffه
+    // انتخاب ID‌های پروژه به صورت رشته
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>(
       selectedRow?.ProjectsStr
         ? selectedRow.ProjectsStr.split("|").filter(Boolean)
@@ -84,7 +83,6 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       { value: string; label: string }[]
     >([]);
     const [forms, setForms] = useState<{ ID: string; Name: string }[]>([]);
-
     const [programTemplates, setProgramTemplates] = useState<
       { ID: number; Name: string }[]
     >([]);
@@ -100,6 +98,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const isEditMode = Boolean(selectedRow);
 
+    // دریافت فهرست Program Templates
     useEffect(() => {
       const fetchTemplates = async () => {
         try {
@@ -111,8 +110,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       };
 
       fetchTemplates();
-    }, []);
+    }, [api]);
 
+    // دریافت فرم‌ها
     useEffect(() => {
       const fetchForms = async () => {
         try {
@@ -123,8 +123,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         }
       };
       fetchForms();
-    }, []);
+    }, [api]);
 
+    // دریافت Activity Types
     useEffect(() => {
       const fetchActivityTypes = async () => {
         try {
@@ -140,8 +141,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       };
 
       fetchActivityTypes();
-    }, []);
+    }, [api]);
 
+    // دریافت Approval Flows
     useEffect(() => {
       const fetchWfTemplates = async () => {
         try {
@@ -152,8 +154,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         }
       };
       fetchWfTemplates();
-    }, []);
+    }, [api]);
 
+    // دریافت Roles
     useEffect(() => {
       const fetchRoles = async () => {
         try {
@@ -164,8 +167,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         }
       };
       fetchRoles();
-    }, []);
+    }, [api]);
 
+    // دریافت فیلدهای Program Template Field برای جدول جزئیات
     useEffect(() => {
       const fetchEntityFields = async () => {
         if (!selectedRow?.ID) return;
@@ -173,7 +177,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         try {
           setLoadingFields(true);
           const result = await api.getProgramTemplateField(selectedRow.ID);
-          console.log("rrrrrr", result);
+          console.log("Fetched entity fields:", result);
           setProgramTemplateField(result);
         } catch (error: any) {
           console.error("Failed to fetch entity fields:", error);
@@ -184,14 +188,14 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       };
 
       fetchEntityFields();
-    }, [selectedRow?.ID]);
+    }, [selectedRow?.ID, api]);
 
     // انتخاب ID نوع برنامه به صورت رشته
     const [selectedProgramTypeId, setSelectedProgramTypeId] = useState<string>(
       selectedRow?.nProgramTypeID ? String(selectedRow.nProgramTypeID) : ""
     );
 
-    // دریافت پروژه‌ها از API هنگام بارگذاری کامپوننت
+    // دریافت پروژه‌ها
     useEffect(() => {
       const fetchProjects = async () => {
         try {
@@ -208,7 +212,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       fetchProjects();
     }, [api]);
 
-    // دریافت انواع برنامه‌ها از API هنگام بارگذاری کامپوننت
+    // دریافت انواع برنامه‌ها
     useEffect(() => {
       const fetchProgramTypes = async () => {
         try {
@@ -225,7 +229,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       fetchProgramTypes();
     }, [api]);
 
-    // به‌روزرسانی داده‌های برنامه تمپلیت زمانی که `selectedRow` تغییر می‌کند
+    // وقتی selectedRow تغییر کند، داده‌های فرم اصلی بازنشانی شود
     useEffect(() => {
       if (selectedRow) {
         setProgramTemplateData({
@@ -316,7 +320,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       },
     }));
 
-    // هندل تغییرات در فیلدهای ورودی
+    // هندل تغییرات در فیلدهای ورودی اصلی
     const handleChange = (field: keyof ProgramTemplateItem, value: any) => {
       setProgramTemplateData((prev) => ({
         ...prev,
@@ -324,10 +328,10 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       }));
     };
 
-    // تعریف ستون‌ها برای جدول انتخاب پروژه‌ها
+    // ستون‌ها برای انتخاب پروژه‌ها
     const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
 
-    // هندل تغییرات انتخاب پروژه‌ها
+    // هندل تغییر انتخاب پروژه‌ها
     const handleProjectsChange = (selectedIds: (string | number)[]) => {
       const stringIds = selectedIds.map((id) => String(id));
       setSelectedProjectIds(stringIds);
@@ -341,7 +345,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     // آماده‌سازی داده‌ها برای ListSelector
     const projectsListData = projectsData.map((proj) => ({
       ID: proj.ID,
-      Name: proj.ProjectName, // تغییر فیلد به Name برای سازگاری با ListSelector
+      Name: proj.ProjectName,
     }));
 
     // آماده‌سازی داده‌ها برای DynamicSelector از انواع برنامه‌ها
@@ -350,7 +354,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       label: type.Name,
     }));
 
-    // مدیریت وضعیت Modal برای انتخاب نوع برنامه
+    // مدیریت Modal برای انتخاب نوع برنامه
     const [modalOpen, setModalOpen] = useState(false);
     const [currentSelector] = useState<string>("ProgramType");
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
@@ -384,64 +388,29 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       return [];
     };
 
-    const handleDeleteRow = () => {
-      if (!selectedDetailRow) {
-        showAlert("warning", null, "Warning", "Please select a row to delete.");
-        return;
-      }
-
-      setShowDeleteConfirm(true); // 👈 نمایش پنجره تأیید
-    };
-
-    const confirmDeleteRow = async () => {
-      try {
-        await api.deleteProgramTemplateField(selectedDetailRow.ID);
-
-        // حذف از جدول
-        setProgramTemplateField((prev) =>
-          prev.filter((item) => item.ID !== selectedDetailRow.ID)
-        );
-
-        setSelectedDetailRow(null); // پاک‌سازی انتخاب
-        setShowDeleteConfirm(false); // بستن مودال
-        showAlert("success", null, "Deleted", "Row deleted successfully.");
-      } catch (error) {
-        console.error("❌ Error deleting row:", error);
-        showAlert("error", null, "Error", "Failed to delete the row.");
-        setShowDeleteConfirm(false);
-      }
-    };
-
-    const handleSelectRow = (row: any) => {
-      setSelectedDetailRow(row);
-    };
-
-    const handleEditRow = (row: any) => {
-      setEditingRow(row);
-      setIsAddModalOpen(true);
-    };
-
-    const handleAddClick = () => {
-      setIsAddModalOpen(true);
-      setEditingRow(null);
-    };
-
+    // مرحله‌ی مهم: enhanced mapping با فیلدهای جدید نمایش
     const enhancedProgramTemplateField = useMemo(() => {
       return programTemplateField.map((item) => {
-        const role = roles.find((r) => r.ID === item.nPostId);
-        const approvalFlowLabel =
-          wfTemplates.find((f) => String(f.ID) === String(item.nWFTemplateID))?.Name || item.nWFTemplateID;
-        const formLabel =
-          forms.find((f) => String(f.ID) === String(item.nEntityTypeID))?.Name || item.nEntityTypeID;
-        const programTemplateLabel =
-          programTemplates.find((p) => String(p.ID) === String(item.nProgramTemplateID))?.Name || item.nProgramTemplateID;
-    
+        // پیدا کردن نام نقش
+        const role = roles.find((r) => String(r.ID) === String(item.nPostId));
+        const approvalFlowLabel = wfTemplates.find(
+          (f) => String(f.ID) === String(item.nWFTemplateID)
+        )?.Name;
+        const formLabel = forms.find(
+          (f) => String(f.ID) === String(item.nEntityTypeID)
+        )?.Name;
+        const programTemplateLabel = programTemplates.find(
+          (p) => String(p.ID) === String(item.nProgramTemplateID)
+        )?.Name;
+
         return {
           ...item,
-          nPostIdDisplay: role?.Name || item.nPostId,
-          nWFTemplateID: approvalFlowLabel,
-          nEntityTypeID: formLabel,
-          nProgramTemplateID: programTemplateLabel,
+          // فیلدهای نمایش
+          nPostName: role?.Name || "",
+          nWFTemplateName: approvalFlowLabel || "",
+          nEntityTypeName: formLabel || "",
+          nProgramTemplateName: programTemplateLabel || "",
+          // سایر فیلدهای اصلی (مثل nWFTemplateID) بدون تغییر باقی می‌مانند
         };
       });
     }, [
@@ -451,10 +420,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       forms,
       programTemplates,
     ]);
-    
-  
 
-    // تعریف ستون‌ها برای جدول جزئیات
+    // ستون‌های جدول جزئیات: اشاره به فیلدهای نمایش برای ستون‌های مربوطه
     const detailColumnDefs = [
       {
         headerName: "Order",
@@ -494,14 +461,13 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       },
       {
         headerName: "Responsible Post",
-        field: "nPostIdDisplay",
+        field: "nPostName", // قبلا nPostIdDisplay بود، حالا فیلد نمایش جدید
         flex: 3,
         minWidth: 150,
       },
-
       {
         headerName: "Approval Flow",
-        field: "nWFTemplateID",
+        field: "nWFTemplateName", // به فیلد نمایش جدید ارجاع می‌دهیم
         flex: 3,
         minWidth: 150,
       },
@@ -513,7 +479,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       },
       {
         headerName: "Form Name",
-        field: "nEntityTypeID",
+        field: "nEntityTypeName", // فیلد نمایش جدید
         flex: 3,
         minWidth: 150,
       },
@@ -531,7 +497,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       },
       {
         headerName: "Program Template",
-        field: "nProgramTemplateID",
+        field: "nProgramTemplateName", // نمایش نام قالب برنامه
         flex: 3,
         minWidth: 150,
       },
@@ -542,7 +508,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         minWidth: 80,
       },
       {
-        headerName: "FProgram Execution Budget",
+        headerName: "Program Execution Budget",
         field: "PCostAprov",
         flex: 1,
         minWidth: 80,
@@ -555,6 +521,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       },
     ];
 
+    // تابع به‌روزرسانی جدول جزئیات پس از افزودن/ویرایش/حذف
     const refreshTable = async () => {
       if (!selectedRow?.ID) return;
       try {
@@ -565,15 +532,57 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       }
     };
 
+    // کنترل Modal افزودن/ویرایش
     const handleAddModalClose = () => {
       setIsAddModalOpen(false);
       setEditingRow(null);
     };
 
     const handleSaved = async () => {
-      await refreshTable(); // جدول آپدیت بشه
+      await refreshTable();
       setIsAddModalOpen(false);
-      setEditingRow(null); // مودال بسته بشه
+      setEditingRow(null);
+    };
+
+    // رویداد حذف ردیف
+    const handleDeleteRow = () => {
+      if (!selectedDetailRow) {
+        showAlert("warning", null, "Warning", "Please select a row to delete.");
+        return;
+      }
+      setShowDeleteConfirm(true);
+    };
+
+    const confirmDeleteRow = async () => {
+      try {
+        await api.deleteProgramTemplateField(selectedDetailRow.ID);
+        setProgramTemplateField((prev) =>
+          prev.filter((item) => item.ID !== selectedDetailRow.ID)
+        );
+        setSelectedDetailRow(null);
+        setShowDeleteConfirm(false);
+        showAlert("success", null, "Deleted", "Row deleted successfully.");
+      } catch (error) {
+        console.error("❌ Error deleting row:", error);
+        showAlert("error", null, "Error", "Failed to delete the row.");
+        setShowDeleteConfirm(false);
+      }
+    };
+
+    const handleSelectRow = (row: any) => {
+      // row شامل داده اصلی و همچنین فیلدهای نمایش است؛ اما فیلدهای اصلی حفظ شده‌اند
+      setSelectedDetailRow(row);
+    };
+
+    const handleEditRow = (row: any) => {
+      // در ویرایش، داده اصلی با IDهای عددی موجود است
+      setEditingRow(row);
+      setIsAddModalOpen(true);
+    };
+
+    const handleAddClick = () => {
+      setIsAddModalOpen(true);
+      setEditingRow(null);
     };
 
     return (
@@ -613,7 +622,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             />
           </TwoColumnLayout.Item>
 
-          {/* Updated ListSelector for Related Projects */}
+          {/* ListSelector برای پروژه‌های مرتبط */}
           <TwoColumnLayout.Item>
             <ListSelector
               title="Related Projects"
@@ -654,7 +663,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             />
           </TwoColumnLayout.Item>
 
-          {/* DynamicSelector برای انتخاب نوع برنامه به صورت پویا */}
+          {/* DynamicSelector برای نوع برنامه */}
           <TwoColumnLayout.Item>
             <DynamicSelector
               options={programTypeOptions}
@@ -670,11 +679,11 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               showButton={true}
               onButtonClick={handleOpenModal}
               className="-mt-24"
-              loading={loadingProgramTypes} // افزودن وضعیت بارگذاری
+              loading={loadingProgramTypes}
             />
           </TwoColumnLayout.Item>
 
-          {/* Dynamic Modal برای انتخاب نوع برنامه */}
+          {/* Modal برای انتخاب نوع برنامه */}
           <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
             <TableSelector
               columnDefs={[{ headerName: "Name", field: "label" }]}
@@ -687,22 +696,16 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             />
           </DynamicModal>
 
-          {/* بخش جزئیات با DataTable */}
-          {/* ───────── Two-Column Detail Table ───────── */}
+          {/* جدول جزئیات */}
           <TwoColumnLayout.Item span={2}>
-            {/* ظرف بیرونی: فقط اسکرول افقی */}
             <div className="overflow-x-auto pb-2">
-              {/* ظرف درونی: اسکرول عمودی با ارتفاع ثابت */}
               <div className="h-[400px] min-w-full">
                 <DataTable
-                  /* --------- داده‌ها و ستون‌ها --------- */
                   columnDefs={detailColumnDefs}
                   rowData={enhancedProgramTemplateField}
-                  /* --------- رویدادهای انتخاب --------- */
                   onRowClick={handleSelectRow}
                   onRowDoubleClick={handleEditRow}
                   setSelectedRowData={setSelectedDetailRow}
-                  /* --------- آیکن‌های CRUD --------- */
                   showAddIcon={true}
                   showEditIcon={true}
                   showDeleteIcon={true}
@@ -720,15 +723,13 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                   }
                   onDelete={handleDeleteRow}
                   onDuplicate={() => {}}
-                  /* --------- قابلیت جستجو و لودینگ --------- */
                   showSearch={true}
                   isLoading={loadingFields}
-                  /* --------- تنظیمات طرح‌بندی ag-Grid --------- */
-                  domLayout="normal" // اسکرول عمودی داخلی
+                  domLayout="normal"
                   gridOptions={{
                     rowSelection: "single",
                     onGridReady: (params) => {
-                      params.api.sizeColumnsToFit(); // ستون‌ها فیت
+                      params.api.sizeColumnsToFit();
                       window.addEventListener("resize", () =>
                         params.api.sizeColumnsToFit()
                       );
@@ -740,7 +741,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             </div>
           </TwoColumnLayout.Item>
 
-          {/* Dynamic Modal برای افزودن برنامه جدید */}
+          {/* Modal افزودن/ویرایش فیلد برنامه */}
           <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
             <AddProgramTemplate
               selectedRow={selectedRow}
@@ -753,6 +754,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             />
           </DynamicModal>
         </TwoColumnLayout>
+        {/* پنجره تأیید حذف */}
         <DynamicConfirm
           isOpen={showDeleteConfirm}
           onConfirm={confirmDeleteRow}
