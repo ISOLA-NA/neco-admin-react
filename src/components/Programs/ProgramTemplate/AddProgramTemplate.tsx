@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+// src/components/ProgramTemplate/AddProgramTemplate.tsx
+
+import React, { useEffect, useState, ChangeEvent } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import {
@@ -19,13 +21,13 @@ interface AddProgramTemplateProps {
   onCancel?: () => void;
 }
 
-const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
+const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
   selectedRow,
   onSaved,
   editingRow,
   onCancel,
 }) => {
-  // 👇 مقدار اولیه فرم را یکجا تعریف کن
+  // مقدار اولیه فرم با همه فیلدها
   const initialFormData = {
     activityname: "",
     responsiblepost: "",
@@ -67,36 +69,31 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
   };
 
   const [formData, setFormData] = useState(initialFormData);
-
   const api = useApi();
 
+  // داده‌های انتخابی برای selector ها
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
-
   const [activityTypes, setActivityTypes] = useState<
     { value: string; label: string }[]
   >([]);
-
   const [wfTemplates, setWfTemplates] = useState<any[]>([]);
-
   const [forms, setForms] = useState<{ value: string; label: string }[]>([]);
-
   const [programTemplates, setProgramTemplates] = useState<
     { ID: number; Name: string }[]
   >([]);
-
   const [checklists, setChecklists] = useState<ApprovalChecklist[]>([]);
-
   const [programTypes, setProgramTypes] = useState<ProgramType[]>([]);
-
   const [procedures, setProcedures] = useState<
     { value: string; label: string }[]
   >([]);
 
-  const [metaValues, setMetaValues] = useState<{ ID: string; Name: string }[]>([]);
+  // متادیتا
+  const [metaValues, setMetaValues] = useState<{ ID: string; Name: string }[]>(
+    []
+  );
   const [metaNames, setMetaNames] = useState<{ ID: string; Name: string }[]>(
     []
   );
-
   const [selectedMetaIds, setSelectedMetaIds] = useState<string[]>([]);
   const [programTemplateField, setProgramTemplateField] = useState<any>({
     SubProgramMetaDataColumn: "",
@@ -105,247 +102,190 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const [loadingMeta, setLoadingMeta] = useState(false);
 
+  // همگام‌سازی selectedMetaIds با metaNames و SubProgramMetaDataColumn
   useEffect(() => {
     const mapped = selectedMetaIds
       .map((id) => {
         const match = metaValues.find((item) => String(item.ID) === String(id));
-        return match
-          ? { ID: id, Name: match.DisplayName || match.Name || "" }
-          : null;
+        return match ? { ID: id, Name: match.Name || "" } : null;
       })
       .filter(Boolean) as { ID: string; Name: string }[];
 
     setMetaNames(mapped);
-  }, [selectedMetaIds, metaValues]);
-
-  useEffect(() => {
     setProgramTemplateField((prev: any) => ({
       ...prev,
-      SubProgramMetaDataColumn: selectedMetaIds.join("|") + "|",
+      SubProgramMetaDataColumn:
+        mapped.length > 0 ? mapped.map((m) => m.ID).join("|") + "|" : "",
     }));
-  }, [selectedMetaIds]);
+  }, [selectedMetaIds, metaValues]);
 
+  // دریافت لیست Roles
   useEffect(() => {
-    const fetchProcedures = async () => {
-      try {
-        const result = await api.getAllEntityCollection();
-        console.log("Fetched procedures:", result);
-        const formatted = result.map((item: any) => ({
-          value: String(item.ID),
-          label: item.Name,
+    setIsLoadingRoles(true);
+    api
+      .getAllRoles()
+      .then((res) => {
+        // فرض: res آرایه‌ای از { ID: something, Name: string }
+        setRoles(res.map((r) => ({ value: String(r.ID), label: r.Name })));
+      })
+      .catch((err) => {
+        console.error("Failed to fetch roles:", err);
+      })
+      .finally(() => {
+        setIsLoadingRoles(false);
+      });
+  }, [api]);
+
+  // دریافت Activity Types از enum
+  useEffect(() => {
+    api
+      .getEnum({ str: "PFIType" })
+      .then((r) => {
+        // فرض: r یک شی است با کلید:نام، مقدار:عدد یا مقدار مناسب
+        const arr = Object.entries(r).map(([key, value]) => ({
+          value: String(value),
+          label: key,
         }));
-        console.log("Formatted procedure options:", formatted);
-        setProcedures(formatted);
-      } catch (error) {
-        console.error("Failed to fetch procedures:", error);
-      }
-    };
+        setActivityTypes(arr);
+      })
+      .catch((err) => {
+        console.error("Error fetching activity types:", err);
+      });
+  }, [api]);
 
-    fetchProcedures();
-  }, []);
-
-  useEffect(() => {
-    const fetchProgramTypes = async () => {
-      try {
-        const result = await api.getAllProgramType();
-        console.log("📦 Program types from API:", result);
-        setProgramTypes(result);
-      } catch (error) {
-        console.error("❌ Failed to fetch program types:", error);
-      }
-    };
-
-    fetchProgramTypes();
-  }, []);
-
-  useEffect(() => {
-    const fetchChecklists = async () => {
-      try {
-        const result = await api.getApprovalCheckList();
-        setChecklists(result);
-      } catch (error) {
-        console.error("Failed to fetch checklists", error);
-      }
-    };
-
-    fetchChecklists();
-  }, []);
-
-  useEffect(() => {
-    const fetchProgramTemplates = async () => {
-      try {
-        const result = await api.getAllProgramTemplates();
-        setProgramTemplates(result);
-      } catch (error) {
-        console.error("خطا در دریافت Program Templates:", error);
-      }
-    };
-
-    fetchProgramTemplates();
-  }, []);
-
-  useEffect(() => {
-    const fetchForms = async () => {
-      try {
-        const result = await api.getTableTransmittal();
-        const formatted = result.map((form: any) => ({
-          value: String(form.ID),
-          label: form.Name,
-        }));
-        setForms(formatted);
-      } catch (error) {
-        console.error("Failed to fetch forms", error);
-      }
-    };
-    fetchForms();
-  }, []);
-
-  useEffect(() => {
-    const fetchActivityTypes = async () => {
-      try {
-        const response = await api.getEnum({ str: "PFIType" });
-        console.log("reeeeeeeeeeee", response);
-        const formatted = Object.entries(response)
-          .filter(([key, value]) => !Number.isNaN(Number(value)))
-          .map(([key, value]) => ({
-            value: String(value),
-            label: key,
-          }));
-        setActivityTypes(formatted);
-
-        console.log("formatted", formatted);
-      } catch (error) {
-        console.error("Error fetching activity types:", error);
-      }
-    };
-
-    fetchActivityTypes();
-  }, []);
-
+  // دریافت Approval Flows
   useEffect(() => {
     api
       .getAllWfTemplate()
-      .then((res) => setWfTemplates(res))
-      .catch((err) => console.error("Failed to load Approval Flows:", err));
-  }, []);
+      .then((res) => {
+        setWfTemplates(res);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch approval flows:", err);
+      });
+  }, [api]);
 
+  // دریافت Forms
   useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        setIsLoadingRoles(true);
-        const result = await api.getAllRoles();
-        const formattedRoles = result.map((role: any) => ({
-          value: role.ID,
-          label: role.Name,
-        }));
-        setRoles(formattedRoles);
-      } catch (error) {
-        console.error("خطا در دریافت نقش‌ها:", error);
-      } finally {
-        setIsLoadingRoles(false);
-      }
-    };
+    api
+      .getTableTransmittal()
+      .then((res) => {
+        setForms(res.map((f) => ({ value: String(f.ID), label: f.Name })));
+      })
+      .catch((err) => {
+        console.error("Failed to fetch forms:", err);
+      });
+  }, [api]);
 
-    fetchRoles();
-  }, []);
+  // دریافت Program Templates
+  useEffect(() => {
+    api
+      .getAllProgramTemplates()
+      .then((res) => {
+        setProgramTemplates(res);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch program templates:", err);
+      });
+  }, [api]);
 
-  // Handler for input changes
+  // دریافت Checklists
+  useEffect(() => {
+    api
+      .getApprovalCheckList()
+      .then((res) => {
+        setChecklists(res);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch checklists:", err);
+      });
+  }, [api]);
+
+  // دریافت Program Types
+  useEffect(() => {
+    api
+      .getAllProgramType()
+      .then((res) => {
+        setProgramTypes(res);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch program types:", err);
+      });
+  }, [api]);
+
+  // دریافت Procedures
+  useEffect(() => {
+    api
+      .getAllEntityCollection()
+      .then((res) => {
+        setProcedures(
+          res.map((p: any) => ({
+            value: String(p.ID),
+            label: p.Name,
+          }))
+        );
+      })
+      .catch((err) => {
+        console.error("Failed to fetch procedures:", err);
+      });
+  }, [api]);
+
+  // تابع ساده handleChange برای همه input/selectorهای مبتنی بر event
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-  
-    setFormData((prev) => {
-      // 👇 به TypeScript بگو name یکی از کلیدهای formData هست
-      const key = name as keyof typeof prev;
-  
-      return {
-        ...prev,
-        [key]: value,
-        ...(key === "formname" && !value ? { approvalFlow: prev.approvalFlow } : {}),
-        ...(key === "responsiblepost" && !value
-          ? {
-              formname: prev.formname,
-              approvalFlow: prev.approvalFlow,
-            }
-          : {}),
-        ...(key === "approvalFlow" && !value
-          ? {
-              formname: prev.formname,
-              responsiblepost: prev.responsiblepost,
-            }
-          : {}),
-      };
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
 
-  const approvalFlowOptions = React.useMemo(
-    () =>
-      wfTemplates.map((item) => ({
-        value: String(item.ID),
-        label: item.Name,
-      })),
-    [wfTemplates]                // ⇠ تغییر واقعی فقط وقتی wfTemplates عوض شود
-  );
-
-  const roleOptions = React.useMemo(
-    () => roles.map((r) => ({ value: String(r.value), label: r.label })),
-    [roles]
-  );
-
-  const programTemplateOptions = React.useMemo(
-    () => programTemplates.map((p) => ({ value: String(p.ID), label: p.Name })),
-    [programTemplates]
-  );
-
-  const checkListOptions = checklists.map((item) => ({
-    value: String(item.ID),
-    label: item.Name,
+  // آماده‌سازی گزینه‌ها برای JSX
+  const roleOptions = roles;
+  const approvalFlowOptions = wfTemplates.map((w) => ({
+    value: String(w.ID),
+    label: w.Name,
   }));
-
-  const programtypeOptions = programTypes.map((item) => ({
-    value: String(item.ID),
-    label: item.Name,
+  const checkListOptions = checklists.map((c) => ({
+    value: String(c.ID),
+    label: c.Name,
   }));
-
-  const procedureOptions = procedures.map((item) => ({
-    value: String(item.value),
-    label: item.label,
+  const activityTypeOptions = activityTypes;
+  const formOptions = forms;
+  const programTypeOptions = programTypes.map((p) => ({
+    value: String(p.ID),
+    label: p.Name,
   }));
+  const programTemplateOptions = programTemplates.map((pt) => ({
+    value: String(pt.ID),
+    label: pt.Name,
+  }));
+  const procedureOptions = procedures;
 
+  // هنگام Save (اضافه جدید)
   const handleSave = async () => {
     try {
       if (!formData.activityname) {
         showAlert("warning", null, "Validation", "Name is required");
         return;
       }
-
       const payload = {
         MetaValues: [],
-
         PFI: {
           ID: 0,
           IsVisible: true,
           LastModified: null,
-
-          // الزامی
           Name: formData.activityname,
           ActDuration: Number(formData.duration) || 0,
           Left: Number(formData.start) || 0,
           Top: Number(formData.finish) || 0,
           Order: 0,
-
-          // انتخابی / nullable
-          // داخل payload.PFI برای ویرایش
           Code: formData.Code || "",
           GPIC: null,
           ParrentIC: null,
           PredecessorForItemStr: "",
           PredecessorForSubStr: "",
-
           nProgramTemplateID: selectedRow?.ID,
-          nPostId: formData.responsiblepost || null,
+          // ارسال رشته GUID یا null به جای Number(...)
+          nPostId: formData.responsiblepost ? formData.responsiblepost : null,
           nPostTypeId: null,
           nWFTemplateID: formData.approvalFlow
             ? Number(formData.approvalFlow)
@@ -354,112 +294,64 @@ const ResponsiveForm: React.FC<AddProgramTemplateProps> = ({
           nEntityCollectionID: formData.procedure
             ? Number(formData.procedure)
             : null,
-
           nProgramTypeID: formData.programtype
             ? Number(formData.programtype)
             : null,
           subProgramID: null,
           nEntityTypeID: formData.formname ? Number(formData.formname) : null,
-
-          // جدیدها
           IsInheritMetaColumns: null,
           IsInheritMetaValues: null,
-
-          // بودجه و هزینه
           PCostAct: Number(formData.activityBudget1) || 0,
           PCostAprov: Number(formData.approvalBudget1) || 0,
           PCostSubAct: Number(formData.programExecutionBudget) || 0,
           PCostSubAprov: Number(formData.programApprovalBudget) || 0,
-
-          // وزن‌ها
           Weight1: Number(formData.weight1) || 0,
           Weight2: Number(formData.weight2) || 0,
           Weight3: Number(formData.weight3) || 0,
           WeightWF: Number(formData.approvalToExecutionWeight) || 0,
           WeightSubProg: Number(formData.programToPlanWeight) || 0,
-
-          // زمان‌ها
           DelayTime: 0,
           WFDuration: Number(formData.programDuration) || 0,
           SubDuration: 0,
-
-          // نوع فعالیت
           PFIType: formData.activitytype ? Number(formData.activitytype) : 3,
-
-          // متادیتای انتخاب شده
           SubProgramMetaDataColumn:
             programTemplateField.SubProgramMetaDataColumn || "",
         },
       };
-
-      console.log("nPostId before send:", formData.responsiblepost);
-
+      console.log("Saving payload:", payload);
       await api.insertProgramTemplateField(payload);
       showAlert("success", null, "Saved", "Program field added successfully.");
       onSaved();
-      setFormData(initialFormData); // ✅ پاکسازی فرم بعد از Save
-      setSelectedMetaIds([]); // ✅ پاکسازی انتخاب‌های متادیتا
+      // ریست فرم بعد از ذخیره
+      setFormData(initialFormData);
+      setSelectedMetaIds([]);
       setMetaValues([]);
       setMetaNames([]);
     } catch (error: any) {
       console.error("Error saving:", error);
-
-      const detailedMessage =
-        error?.response?.data ||
-        error?.message ||
-        "Failed to save field due to unknown error.";
-
-      showAlert("error", null, "Save Failed", detailedMessage);
+      const msg =
+        error?.response?.data || error?.message || "Failed to save field.";
+      showAlert("error", null, "Save Failed", msg);
     }
   };
 
-  // -----------------------------
-// جایگزینِ کل تابع قبلی
-// -----------------------------
-const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
-  if (!newField) return;                       // ورودی نامعتبر
-
-  // ⚡️ فقط همین‌جا به رشته تبدیل می‌کنیم
-  const stringId = String(newField.ID);
-  const stringField = { ID: stringId, Name: newField.Name };
-
-  // ---------- selectedMetaIds ----------
-  setSelectedMetaIds((prev) =>
-    prev.includes(stringId) ? prev : [...prev, stringId]
-  );
-
-  // ---------- metaValues ----------
-  setMetaValues((prev) => {
-    const exists = prev.find((m) => m.ID === stringId);   // حالا مقایسه ساده است
-    return exists ? prev : [...prev, stringField];
-  });
-
-  // ---------- metaNames ----------
-  setMetaNames((prev) => {
-    const exists = prev.find((m) => m.ID === stringId);
-    return exists ? prev : [...prev, stringField];
-  });
-};
-
-
+  // هنگام Update (ویرایش)
   const handleUpdate = async () => {
     try {
       if (!formData.activityname) {
         showAlert("warning", null, "Validation", "Name is required");
         return;
       }
-
-      // ساخت payload مطابق نیاز API برای ویرایش
       const payload = {
-        MetaValues: [], // متافیلدها
+        MetaValues: [],
         PFI: {
-          ...editingRow, // شناسه و سایر اطلاعات
+          ...editingRow,
           Name: formData.activityname,
           ActDuration: Number(formData.duration) || 0,
           Left: Number(formData.start) || 0,
           Top: Number(formData.finish) || 0,
           nProgramTemplateID: selectedRow?.ID,
-          nPostId: formData.responsiblepost || null,
+          nPostId: formData.responsiblepost ? formData.responsiblepost : null,
           nWFTemplateID: formData.approvalFlow
             ? Number(formData.approvalFlow)
             : null,
@@ -480,49 +372,39 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
           WeightWF: Number(formData.approvalToExecutionWeight) || 0,
           WeightSubProg: Number(formData.programToPlanWeight) || 0,
           WFDuration: Number(formData.programDuration) || 0,
-          PFIType: Number(formData.activitytype) || 3, // همیشه عدد یا ۳
+          PFIType: formData.activitytype ? Number(formData.activitytype) : 3,
           SubProgramMetaDataColumn:
             programTemplateField.SubProgramMetaDataColumn || "",
-          // هر چیزی که نیاز باشد اضافه کن...
+          Code: formData.Code || "",
         },
       };
-
-      console.log("ppppp", payload);
-
-      console.log("nPostId before update:", formData.responsiblepost);
-
-      await api.updateProgramTemplateField(payload); // کال به API ویرایش
-
+      console.log("Updating payload:", payload);
+      await api.updateProgramTemplateField(payload);
       showAlert(
         "success",
         null,
         "Updated",
         "Program field updated successfully."
       );
-
-      setFormData(initialFormData); // ✅ پاکسازی فرم بعد از Save
-      setSelectedMetaIds([]); // ✅ پاکسازی انتخاب‌های متادیتا
+      // ریست فرم بعد از ویرایش
+      setFormData(initialFormData);
+      setSelectedMetaIds([]);
       setMetaValues([]);
       setMetaNames([]);
       if (onSaved) onSaved();
-      if (onCancel) onCancel(); // مودال بسته شود
+      if (onCancel) onCancel();
     } catch (error: any) {
       console.error("Error updating:", error);
-
-      const detailedMessage =
-        error?.response?.data ||
-        error?.message ||
-        "Failed to update field due to unknown error.";
-
-      showAlert("error", null, "Update Failed", detailedMessage);
+      const msg =
+        error?.response?.data || error?.message || "Failed to update field.";
+      showAlert("error", null, "Update Failed", msg);
     }
   };
 
+  // مقداردهی اولیه فرم وقتی editingRow تغییر کند
   useEffect(() => {
     if (editingRow) {
-      console.log("🔧 editingRow دریافت شد:", editingRow);
-
-      // مقداردهی اولیه فرم
+      // تنظیم فرم بر اساس داده ویرایشی
       setFormData({
         activityname: editingRow.Name || "",
         responsiblepost: editingRow.nPostId ? String(editingRow.nPostId) : "",
@@ -531,7 +413,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
           : "",
         checkList: editingRow.checkList || "",
         duration: editingRow.ActDuration ? String(editingRow.ActDuration) : "1",
-        lag: editingRow.lag || "0",
+        lag: editingRow.lag ? String(editingRow.lag) : "0",
         procedure: editingRow.nEntityCollectionID
           ? String(editingRow.nEntityCollectionID)
           : "",
@@ -603,85 +485,62 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
         Code: editingRow.Code || "",
       });
 
-      // متادیتا
-      console.log(
-        "🟡 SubProgramMetaDataColumn →",
-        editingRow.SubProgramMetaDataColumn
-      );
-
+      // متادیتا: اگر SubProgramMetaDataColumn وجود داشت، لیست GUIDها را بگیریم و نام‌ها را fetch کنیم
       if (editingRow.SubProgramMetaDataColumn) {
         const metaIds =
           editingRow.SubProgramMetaDataColumn.split("|").filter(Boolean);
-
-        console.log("🟡 Extracted metaIds →", metaIds);
-
         setSelectedMetaIds(metaIds);
-
-        const fetchMetaData = async () => {
-          try {
-            setLoadingMeta(true); // 👈 شروع لودینگ
-
-            const fetched = await Promise.all(
-              metaIds.map(async (id) => {
-                console.log("📡 Fetching meta for ID:", id);
-                try {
-                  const res = await api.getEntityFieldById(Number(id));
-                  console.log("📥 دریافت شد:", res);
-                  return {
-                    ID: String(res.ID),
-                    Name: res.DisplayName || res.Name || "", // اگر DisplayName نبود، از Name استفاده کن
-                  };
-                } catch (err) {
-                  console.error("❌ خطا در دریافت متا برای ID:", id, err);
-                  return null;
-                }
+        setLoadingMeta(true);
+        Promise.all(
+          metaIds.map((id) =>
+            api
+              .getEntityFieldById(Number(id))
+              .then((res) => ({
+                ID: String(res.ID),
+                Name: res.DisplayName || res.Name || "",
+              }))
+              .catch((err) => {
+                console.error("Error fetching meta for ID:", id, err);
+                return null;
               })
-            );
-
-            const validMeta = fetched.filter(Boolean) as {
+          )
+        )
+          .then((vals) => {
+            const valid = vals.filter(Boolean) as {
               ID: string;
               Name: string;
             }[];
-
-            console.log("🟢 متادیتا نهایی →", validMeta);
-
-            setMetaValues(validMeta);
-            setMetaNames(validMeta);
-
-            console.log(
-              "🎯 آماده برای ListSelector →",
-              validMeta.map((m) => ({ ID: String(m.ID), Name: m.Name }))
-            );
-          } catch (err) {
-            console.error("❌ خطای کلی در دریافت متادیتا:", err);
-          } finally {
-            setLoadingMeta(false); // 👈 پایان لودینگ (چه موفق چه با خطا)
-          }
-        };
-
-        fetchMetaData();
+            setMetaValues(valid);
+            setMetaNames(valid);
+          })
+          .catch((err) => {
+            console.error("Error in fetching metadata:", err);
+          })
+          .finally(() => {
+            setLoadingMeta(false);
+          });
       } else {
         setSelectedMetaIds([]);
         setMetaValues([]);
         setMetaNames([]);
       }
     } else {
-      // حالت افزودن جدید
+      // حالت اضافه جدید
       setFormData(initialFormData);
       setSelectedMetaIds([]);
       setMetaValues([]);
       setMetaNames([]);
     }
-  }, [editingRow, selectedRow]);
+  }, [editingRow, selectedRow, api]);
 
   return (
     <div className="flex flex-col h-full overflow-x-hidden">
-      {/* محتوا (اسکرول بالا/پایین) */}
+      {/* بخش اصلی فرم */}
       <div className="flex-1 px-2 sm:px-4 py-6 overflow-auto">
         <div className="grid grid-cols-2 gap-x-8 gap-y-8">
           {/* ستون چپ */}
           <div className="space-y-6">
-            {/* ردیف‌ها */}
+            {/* ردیف اول: Activity Name و Code */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="activityname"
@@ -693,12 +552,14 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="Code"
+                label="Code"
                 type="text"
-                value={formData.Code || ""}
+                value={formData.Code}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
+            {/* ردیف دوم: Responsible Post و Approval Flow */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicSelector
                 name="responsiblepost"
@@ -711,7 +572,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicSelector
                 name="approvalFlow"
-                label="Approval flow"
+                label="Approval Flow"
                 options={approvalFlowOptions}
                 selectedValue={formData.approvalFlow}
                 onChange={handleChange}
@@ -719,9 +580,11 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
                 loading={isLoadingRoles}
               />
             </div>
+            {/* ردیف سوم: Duration و Lag */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="duration"
+                label="Duration"
                 type="number"
                 value={formData.duration}
                 onChange={handleChange}
@@ -729,21 +592,23 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="lag"
+                label="Lag"
                 type="number"
                 value={formData.lag}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
+            {/* Program Type */}
             <DynamicSelector
               name="programtype"
-              label="Program type"
-              options={programtypeOptions}
+              label="Program Type"
+              options={programTypeOptions}
               selectedValue={formData.programtype}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
-              loading={isLoadingRoles}
             />
+            {/* Program Template */}
             <DynamicSelector
               name="programtemplate"
               label="Program Template"
@@ -751,28 +616,26 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               selectedValue={formData.programtemplate}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
-              loading={isLoadingRoles}
             />
+            {/* Activity Type */}
             <DynamicSelector
               name="activitytype"
               label="Activity Type"
-              options={activityTypes}
+              options={activityTypeOptions}
               selectedValue={formData.activitytype}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
-              loading={isLoadingRoles}
             />
+            {/* Form Name */}
             <DynamicSelector
               name="formname"
-              label="Form name"
-              options={forms}
+              label="Form Name"
+              options={formOptions}
               selectedValue={formData.formname}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
-              loading={isLoadingRoles}
             />
-
-            {/* Meta Data با فاصله بالاتر */}
+            {/* Meta Data Selector */}
             <div className="mt-6 rounded-md">
               <ListSelector
                 title="Meta Data"
@@ -787,8 +650,38 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
                 isGlobal={false}
                 ModalContentComponent={AddColumnForm}
                 modalContentProps={{
-                  onSave: handleMetaFieldSave,
-                  onSuccessAdd: handleMetaFieldSave,
+                  onSave: (newField) => {
+                    if (!newField) return;
+                    const stringId = String(newField.ID);
+                    const obj = { ID: stringId, Name: newField.Name };
+                    setSelectedMetaIds((prev) =>
+                      prev.includes(stringId) ? prev : [...prev, stringId]
+                    );
+                    setMetaValues((prev) => {
+                      const exists = prev.find((m) => m.ID === stringId);
+                      return exists ? prev : [...prev, obj];
+                    });
+                    setMetaNames((prev) => {
+                      const exists = prev.find((m) => m.ID === stringId);
+                      return exists ? prev : [...prev, obj];
+                    });
+                  },
+                  onSuccessAdd: (newField) => {
+                    if (!newField) return;
+                    const stringId = String(newField.ID);
+                    const obj = { ID: stringId, Name: newField.Name };
+                    setSelectedMetaIds((prev) =>
+                      prev.includes(stringId) ? prev : [...prev, stringId]
+                    );
+                    setMetaValues((prev) => {
+                      const exists = prev.find((m) => m.ID === stringId);
+                      return exists ? prev : [...prev, obj];
+                    });
+                    setMetaNames((prev) => {
+                      const exists = prev.find((m) => m.ID === stringId);
+                      return exists ? prev : [...prev, obj];
+                    });
+                  },
                   entityTypeId: formData.formname,
                 }}
                 loading={loadingMeta}
@@ -798,9 +691,11 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
 
           {/* ستون راست */}
           <div className="space-y-6">
+            {/* Start و Finish */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="start"
+                label="Start"
                 type="text"
                 value={formData.start}
                 onChange={handleChange}
@@ -808,21 +703,23 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="finish"
+                label="Finish"
                 type="text"
                 value={formData.finish}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
+            {/* Check List */}
             <DynamicSelector
               name="checkList"
-              label="Check list"
+              label="Check List"
               options={checkListOptions}
               selectedValue={formData.checkList}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
-              loading={isLoadingRoles}
             />
+            {/* Procedure */}
             <DynamicSelector
               name="procedure"
               label="Procedure"
@@ -830,12 +727,12 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               selectedValue={formData.procedure}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
-              loading={isLoadingRoles}
             />
-
+            {/* وزن‌ها */}
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="weight1"
+                label="Weight1"
                 type="number"
                 value={formData.weight1}
                 onChange={handleChange}
@@ -843,6 +740,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="weight2"
+                label="Weight2"
                 type="number"
                 value={formData.weight2}
                 onChange={handleChange}
@@ -850,24 +748,26 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="weight3"
+                label="Weight3"
                 type="number"
                 value={formData.weight3}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
+            {/* Approval Execution Weight و WF W2 و WF W3 */}
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="approvalToExecutionWeight"
                 label="Approval Execution"
                 type="number"
-                value={formData.approvalToExecutionWeight ?? ""}
+                value={formData.approvalToExecutionWeight}
                 onChange={handleChange}
-                className="w-full h-12 rounded-md "
+                className="w-full h-12 rounded-md"
               />
-
               <DynamicInput
                 name="wfW2"
+                label="WF W2"
                 type="number"
                 value={formData.wfW2}
                 onChange={handleChange}
@@ -875,15 +775,18 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="wfW3"
+                label="WF W3"
                 type="number"
                 value={formData.wfW3}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
+            {/* بودجه فعالیت */}
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="activityBudget1"
+                label="Activity Budget1"
                 type="number"
                 value={formData.activityBudget1}
                 onChange={handleChange}
@@ -891,6 +794,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="activityBudget2"
+                label="Activity Budget2"
                 type="number"
                 value={formData.activityBudget2}
                 onChange={handleChange}
@@ -898,15 +802,18 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="activityBudget3"
+                label="Activity Budget3"
                 type="number"
                 value={formData.activityBudget3}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
+            {/* بودجه تأیید */}
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="approvalBudget1"
+                label="Approval Budget1"
                 type="number"
                 value={formData.approvalBudget1}
                 onChange={handleChange}
@@ -914,6 +821,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="approvalBudget2"
+                label="Approval Budget2"
                 type="number"
                 value={formData.approvalBudget2}
                 onChange={handleChange}
@@ -921,17 +829,18 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="approvalBudget3"
+                label="Approval Budget3"
                 type="number"
                 value={formData.approvalBudget3}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
-
-            {/* ردیف afDuration/programDuration دو‌ستون */}
+            {/* AF Duration و Program Duration */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="afDuration"
+                label="AF Duration"
                 type="number"
                 value={formData.afDuration}
                 onChange={handleChange}
@@ -939,16 +848,18 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="programDuration"
+                label="Program Duration"
                 type="number"
                 value={formData.programDuration}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
-
+            {/* بودجه زیرمجموعه و هزینه‌های بعد */}
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="programExecutionBudget"
+                label="Program Exec Budget"
                 type="number"
                 value={formData.programExecutionBudget}
                 onChange={handleChange}
@@ -956,6 +867,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="subCost2Act"
+                label="SubCost2Act"
                 type="number"
                 value={formData.subCost2Act}
                 onChange={handleChange}
@@ -963,6 +875,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="subCost3Act"
+                label="SubCost3Act"
                 type="number"
                 value={formData.subCost3Act}
                 onChange={handleChange}
@@ -972,6 +885,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="programApprovalBudget"
+                label="Program Approval Budget"
                 type="number"
                 value={formData.programApprovalBudget}
                 onChange={handleChange}
@@ -979,6 +893,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="subCost2Apr"
+                label="SubCost2Apr"
                 type="number"
                 value={formData.subCost2Apr}
                 onChange={handleChange}
@@ -986,15 +901,18 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="subCost3Apr"
+                label="SubCost3Apr"
                 type="number"
                 value={formData.subCost3Apr}
                 onChange={handleChange}
                 className="w-full h-12 rounded-md"
               />
             </div>
+            {/* Program To Plan Weight و W2SubProg و W3SubProg */}
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="programToPlanWeight"
+                label="Program To Plan Weight"
                 type="number"
                 value={formData.programToPlanWeight}
                 onChange={handleChange}
@@ -1002,6 +920,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="w2SubProg"
+                label="W2 SubProg"
                 type="number"
                 value={formData.w2SubProg}
                 onChange={handleChange}
@@ -1009,6 +928,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
               />
               <DynamicInput
                 name="w3SubProg"
+                label="W3 SubProg"
                 type="number"
                 value={formData.w3SubProg}
                 onChange={handleChange}
@@ -1019,7 +939,7 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
         </div>
       </div>
 
-      {/* footer کاملاً چسبیده */}
+      {/* footer با دکمه‌های Save/Update و Cancel */}
       <div className="sticky bottom-0 left-0 right-0 z-10 bg-white pt-4 pb-2">
         <div className="flex justify-center gap-8">
           {editingRow ? (
@@ -1055,4 +975,4 @@ const handleMetaFieldSave = (newField?: { ID: number; Name: string }) => {
   );
 };
 
-export default ResponsiveForm;
+export default AddProgramTemplate;
