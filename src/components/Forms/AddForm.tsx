@@ -38,6 +38,7 @@ import Component30 from "./ControllerForms/SectionController";
 import Component31 from "./ControllerForms/SubSectionController";
 import Component32 from "./ControllerForms/MePostSelectorController";
 import Component33 from "./ControllerForms/AdvanceWf";
+import apiService from "../../services/api.services";
 
 // Mapping of column types
 const columnTypeMapping: { [key: string]: number } = {
@@ -195,6 +196,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   ];
   const [commandOptions] = useState(initialCommandOptions);
 
+  
+
   // استخراج اطلاعات اصلی فرم
   const getInitialFormData = () => ({
     formName: existingData ? existingData.DisplayName : "",
@@ -323,26 +326,54 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
-
+  
     if (!formData.formName.trim()) {
       setErrors({ formName: "Column Name is required." });
       setIsLoading(false);
       return;
     }
-
+  
     const currentTimestamp = new Date().toISOString();
-
+  
     const lookupModeValue =
       metaCore.LookupMode === undefined ||
       metaCore.LookupMode === null ||
       metaCore.LookupMode === ""
         ? null
         : Number(metaCore.LookupMode);
-
+  
     const metaType5Value = metaCore.metaType5 || null;
-
+  
+    if (
+      formData.typeOfInformation === "component26" && 
+      metaCore.metaType1 &&
+      metaCore.metaType2 &&
+      !isEdit 
+    ) {
+      const combinedEntityType = {
+        IsVisible: false,
+        IsGlobal: true,
+        Name: "EntityType For AdvanceLookupAdvanceTable",
+        OriginEntityTypes: `${metaCore.metaType1}|${metaCore.metaType2}|`,
+      };
+  
+      try {
+        const res = await apiService.insertEntityType(combinedEntityType);
+        if (res?.ID) {
+          metaCore.metaTypeJson = JSON.stringify({
+            CombinedEntityType: res.ID,
+          });
+        }
+      } catch (error) {
+        console.error("❌ خطا در ایجاد EntityType ترکیبی:", error);
+        setIsLoading(false);
+        setErrors({ form: "خطا در ایجاد EntityType ترکیبی" });
+        return;
+      }
+    }
+  
+    // ✅ ساخت payload بعد از set کردن metaTypeJson
     const payload: any = {
-      // 🧾 اطلاعات فرم پایه
       DisplayName: formData.formName,
       IsShowGrid: formData.showInListView,
       IsEditableInWF: formData.isEditableInWf,
@@ -356,7 +387,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       Description: formData.description,
       ...metaCore,
       metaType4: metaExtra.metaType4,
-
+      metaType5: metaType5Value,
       PrintCode: formData.printCode,
       IsForceReadOnly: formData.readOnly,
       IsUnique: false,
@@ -374,53 +405,42 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         isEdit && existingData
           ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
           : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
-      LookupMode:
-        metaCore.LookupMode !== undefined &&
-        metaCore.LookupMode !== null &&
-        metaCore.LookupMode !== ""
-          ? Number(metaCore.LookupMode)
-          : null,
-
+      LookupMode: lookupModeValue,
       BoolMeta1: metaCore.oldLookup ? true : false,
       CountInReject: formData.countInReject,
-      metaType5: metaType5Value,
       ID: isEdit && existingData ? existingData.ID : 0,
       IsVisible: true,
       LastModified: currentTimestamp,
     };
-
+  
     try {
       let newId = 0;
-
+  
       if (isEdit) {
         await updateEntityField(payload);
-        // showAlert("success", undefined, "Success", "Edited successfully");
         newId = payload.ID;
-        onClose();
       } else {
         const response = await insertEntityField(payload);
-        // showAlert("success", undefined, "Success", "Added successfully");
         newId = response?.ID ?? payload.ID;
-        onClose();
       }
-
+  
       setIsLoading(false);
-
+  
       const newField = {
         ID: newId,
         Name: formData.formName,
       };
-
+  
       if (onSave) onSave(newField);
       onClose();
     } catch (error: any) {
-      setIsLoading(false);
-      setErrors({ form: "An error occurred." });
       console.error(error);
-      // showAlert("error", undefined, "Error", "Something went wrong");
+      setIsLoading(false);
+      setErrors({ form: "خطا در ذخیره اطلاعات." });
       window.alert("خطا: " + (error?.message || "مشکلی پیش آمد."));
     }
   };
+  
 
   // ✅ ✅ اینو همینجا اضافه کن:
   const handleMetaExtraChange = (updated: { metaType4: string }) => {
