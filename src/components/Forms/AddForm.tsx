@@ -483,7 +483,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           // metaCore شامل: metaType1, metaType2, metaType3, LookupMode, metaType5, metaTypeJson, oldLookup
           metaType4: metaExtra.metaType4, // اضافه می‌کنیم
           BoolMeta1: metaCore.oldLookup, // برای تیک اولیه‌ی Old Lookup
-          CountInReject: formData.countInReject, // برای تیک اولیه‌ی CountInReject
+          CountInReject: formData.countInReject, 
+          isEdit: isEdit,// برای تیک اولیه‌ی CountInReject
         }}
         onMetaExtraChange={handleMetaExtraChange}
       />

@@ -17,6 +17,7 @@ interface LookUpFormsProps {
     LookupMode?: string | number | null;
     CountInReject?: boolean;
     BoolMeta1?: boolean;
+    isEdit?: boolean;
   };
   onMetaChange?: (updated: any) => void;
   onMetaExtraChange?: (updated: { metaType4: string }) => void;
@@ -28,6 +29,8 @@ interface TableRow {
   FilterOpration: string | null;
   FilterText: string;
   DesFieldID: string | null;
+  isEdit?: boolean;
+
 }
 
 const AdvanceLookupAdvanceTable: React.FC<LookUpFormsProps> = ({
@@ -199,6 +202,8 @@ const AdvanceLookupAdvanceTable: React.FC<LookUpFormsProps> = ({
     },
   ], [fields, operationList]);
 
+  const isEdit = !!data?.isEdit;
+
   return (
     <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
       <div className="flex gap-8">
@@ -206,27 +211,26 @@ const AdvanceLookupAdvanceTable: React.FC<LookUpFormsProps> = ({
           <DynamicSelector
             name="metaType1"
             label="For first form, Get information from"
-            placeholder="Select an option..."
             options={entities.map((e) => ({
               value: String(e.ID),
               label: e.Name,
             }))}
             selectedValue={meta.metaType1}
             onChange={(e) => handleMetaChange({ metaType1: e.target.value })}
+            disabled={!!data?.isEdit}
           />
 
           <DynamicSelector
             name="metaType2"
             label="For second form, Get information from"
-            placeholder="Select an option..."
             options={entities.map((e) => ({
               value: String(e.ID),
               label: e.Name,
             }))}
             selectedValue={meta.metaType2}
             onChange={(e) => handleMetaChange({ metaType2: e.target.value })}
+            disabled={!!data?.isEdit}
           />
-
           <PostPickerList
             sourceType="projects"
             initialMetaType={meta.metaType5}
@@ -250,7 +254,7 @@ const AdvanceLookupAdvanceTable: React.FC<LookUpFormsProps> = ({
           showEditIcon={false}
           showDeleteIcon={false}
           showDuplicateIcon={false}
-          onRowDoubleClick={() => {}}
+          onRowDoubleClick={() => { }}
         />
       </div>
     </div>
