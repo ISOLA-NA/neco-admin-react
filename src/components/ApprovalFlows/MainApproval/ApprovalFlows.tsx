@@ -49,7 +49,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       ID: 0,
       Name: "",
       Describtion: "",
-      IsGlobal: false,
+      IsGlobal: true,
       IsVisible: true,
       MaxDuration: 0,
       PCost: 0,
@@ -96,18 +96,22 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           ID: selectedRow.ID,
           Name: selectedRow.Name || "",
           Describtion: selectedRow.Describtion || "",
-          IsGlobal: selectedRow.IsGlobal || false,
+          IsGlobal:
+            typeof selectedRow.IsGlobal === "boolean"
+              ? selectedRow.IsGlobal
+              : true,
+
           IsVisible: selectedRow.IsVisible || true,
           MaxDuration: selectedRow.MaxDuration || 0,
           PCost: selectedRow.PCost || 0,
           ProjectsStr: selectedRow.ProjectsStr || "",
           SubApprovalFlows: selectedRow.SubApprovalFlows || [],
         });
-    
+
         if (selectedRow.ID) {
           // قبل از فراخوانی API، لودینگ را فعال کن
           setIsLoadingBoxTemplates(true);
-    
+
           // دریافت لیست BoxTemplateها
           api
             .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
@@ -138,7 +142,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           ID: 0,
           Name: "",
           Describtion: "",
-          IsGlobal: false,
+          IsGlobal: true,
           IsVisible: true,
           MaxDuration: 0,
           PCost: 0,
@@ -148,7 +152,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         setBoxTemplates([]);
       }
     }, [selectedRow, api]);
-    
+
 
     // صادر کردن متدها از طریق ref
     useImperativeHandle(ref, () => ({

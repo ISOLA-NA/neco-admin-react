@@ -178,7 +178,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     TemplateExcelID: null,
     nEntityCateAID: null,
     nEntityCateBID: null,
-    IsGlobal: false,
+    IsGlobal: true,
   });
 
   // نام فایل‌های ورد و اکسل (جهت نمایش و دانلود)
@@ -309,8 +309,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           TemplateExcelID: selectedRow.TemplateExcelID || null,
           nEntityCateAID: selectedRow.nEntityCateAID || null,
           nEntityCateBID: selectedRow.nEntityCateBID || null,
-          IsGlobal: !!selectedRow.IsGlobal,
+          IsGlobal: selectedRow.IsGlobal !== undefined ? selectedRow.IsGlobal : true,
         });
+
+        console.log("rrrrrr",selectedRow.IsGlobal);
 
         // واکشی نام فایل ورد
         if (selectedRow.TemplateDocID) {
@@ -343,7 +345,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           TemplateExcelID: null,
           nEntityCateAID: null,
           nEntityCateBID: null,
-          IsGlobal: false,
+          IsGlobal: true,
         });
         setWordFileName("");
         setExcelFileName("");
@@ -852,8 +854,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               handleChange("ProjectsStr", str);
             }}
             showSwitcher={true}
-            isGlobal={formData.IsVisible}
-            onGlobalChange={(val) => handleChange("IsVisible", val)}
+            isGlobal={formData.IsGlobal}
+            onGlobalChange={(val) => handleChange("IsGlobal", val)}
             className="-mt-5"
             ModalContentComponent={TableSelector}
             modalContentProps={{

@@ -1373,6 +1373,7 @@ class ApiService {
   }
 
   async insertEntityField(data: EntityField): Promise<EntityField> {
+    console.log("📤 insertEntityField sent data:", data); // ✅ اینجا
     const response = await httpClient.post<EntityField>(
       apiConst.insertEntityField,
       data

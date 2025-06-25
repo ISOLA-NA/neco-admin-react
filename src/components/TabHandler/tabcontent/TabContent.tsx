@@ -353,12 +353,12 @@ const TabContent: FC<TabContentProps> = ({
           if (programTemplateRef.current) {
             const result = await programTemplateRef.current.save();
             if (!result) return;
-            showAlert(
-              "success",
-              null,
-              "",
-              "Program Template added successfully."
-            );
+            // showAlert(
+            //   "success",
+            //   null,
+            //   "",
+            //   "Program Template added successfully."
+            // );
           }
           break;
         case "ProgramTypes":

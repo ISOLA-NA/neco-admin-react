@@ -196,7 +196,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   ];
   const [commandOptions] = useState(initialCommandOptions);
 
-  
+
 
   // استخراج اطلاعات اصلی فرم
   const getInitialFormData = () => ({
@@ -211,8 +211,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInAlert: existingData ? existingData.ShowInAlert : false,
     typeOfInformation: existingData
       ? Object.keys(columnTypeMapping).find(
-          (key) => columnTypeMapping[key] === existingData.ColumnType
-        ) || "component1"
+        (key) => columnTypeMapping[key] === existingData.ColumnType
+      ) || "component1"
       : "component1",
     required: existingData ? existingData.IsRequire : false,
     mainColumns: existingData ? existingData.IsMainColumn : false,
@@ -255,7 +255,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         metaType3: existingData.metaType3 || null,
         LookupMode:
           existingData.LookupMode !== undefined &&
-          existingData.LookupMode !== null
+            existingData.LookupMode !== null
             ? String(existingData.LookupMode)
             : "",
 
@@ -326,29 +326,29 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
-  
+
     if (!formData.formName.trim()) {
       setErrors({ formName: "Column Name is required." });
       setIsLoading(false);
       return;
     }
-  
+
     const currentTimestamp = new Date().toISOString();
-  
+
     const lookupModeValue =
       metaCore.LookupMode === undefined ||
-      metaCore.LookupMode === null ||
-      metaCore.LookupMode === ""
+        metaCore.LookupMode === null ||
+        metaCore.LookupMode === ""
         ? null
         : Number(metaCore.LookupMode);
-  
+
     const metaType5Value = metaCore.metaType5 || null;
-  
+
     if (
-      formData.typeOfInformation === "component26" && 
+      formData.typeOfInformation === "component26" &&
       metaCore.metaType1 &&
       metaCore.metaType2 &&
-      !isEdit 
+      !isEdit
     ) {
       const combinedEntityType = {
         IsVisible: false,
@@ -356,7 +356,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         Name: "EntityType For AdvanceLookupAdvanceTable",
         OriginEntityTypes: `${metaCore.metaType1}|${metaCore.metaType2}|`,
       };
-  
+
       try {
         const res = await apiService.insertEntityType(combinedEntityType);
         if (res?.ID) {
@@ -371,7 +371,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         return;
       }
     }
-  
+
+    console.log("✅ شروع handleSubmit");
+
     // ✅ ساخت payload بعد از set کردن metaTypeJson
     const payload: any = {
       DisplayName: formData.formName,
@@ -411,11 +413,16 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ID: isEdit && existingData ? existingData.ID : 0,
       IsVisible: true,
       LastModified: currentTimestamp,
+      IsGlobal: true,
     };
-  
+
+    console.log("🧾 مقدار IsGlobal:", payload.IsGlobal);
+    console.log("✅ ارسال به API");
+
+
     try {
       let newId = 0;
-  
+
       if (isEdit) {
         await updateEntityField(payload);
         newId = payload.ID;
@@ -423,14 +430,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         const response = await insertEntityField(payload);
         newId = response?.ID ?? payload.ID;
       }
-  
+
       setIsLoading(false);
-  
+
       const newField = {
         ID: newId,
         Name: formData.formName,
       };
-  
+
       if (onSave) onSave(newField);
       onClose();
     } catch (error: any) {
@@ -440,7 +447,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       window.alert("خطا: " + (error?.message || "مشکلی پیش آمد."));
     }
   };
-  
+
 
   // ✅ ✅ اینو همینجا اضافه کن:
   const handleMetaExtraChange = (updated: { metaType4: string }) => {
@@ -483,7 +490,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           // metaCore شامل: metaType1, metaType2, metaType3, LookupMode, metaType5, metaTypeJson, oldLookup
           metaType4: metaExtra.metaType4, // اضافه می‌کنیم
           BoolMeta1: metaCore.oldLookup, // برای تیک اولیه‌ی Old Lookup
-          CountInReject: formData.countInReject, 
+          CountInReject: formData.countInReject,
           isEdit: isEdit,// برای تیک اولیه‌ی CountInReject
         }}
         onMetaExtraChange={handleMetaExtraChange}
@@ -765,19 +772,19 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             {!hiddenTypesForProgramMeta.includes(
               formData.typeOfInformation
             ) && (
-              <DynamicInput
-                name="Program Meta ColumnName"
-                type="text"
-                value={metaExtra.metaType4}
-                onChange={(e) =>
-                  setMetaExtra((prev) => ({
-                    ...prev,
-                    metaType4: e.target.value,
-                  }))
-                }
-                className="flex-1"
-              />
-            )}
+                <DynamicInput
+                  name="Program Meta ColumnName"
+                  type="text"
+                  value={metaExtra.metaType4}
+                  onChange={(e) =>
+                    setMetaExtra((prev) => ({
+                      ...prev,
+                      metaType4: e.target.value,
+                    }))
+                  }
+                  className="flex-1"
+                />
+              )}
           </div>
 
           {/* کنترلر داینامیک (مثلاً Lookup, SeqnialNumber, ...) */}
@@ -818,9 +825,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             </button>
             <button
               type="submit"
-              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               disabled={isLoading}
             >
               {isLoading
@@ -828,8 +834,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   ? "Updating..."
                   : "Adding..."
                 : isEdit
-                ? "Update Column"
-                : "Add Column"}
+                  ? "Update Column"
+                  : "Add Column"}
             </button>
           </div>
         </form>
