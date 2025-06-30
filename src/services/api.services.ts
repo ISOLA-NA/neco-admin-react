@@ -3,6 +3,7 @@
 import httpClient from "./api.config";
 import { apiConst } from "./api.constant";
 
+
 // ================== اینترفیس‌ها ==================
 
 // نمونه از AppSetting
@@ -218,6 +219,7 @@ export interface MenuGroup {
   nMenuTabId: number;
   IsVisible: boolean;
   LastModified: string | null;
+  IconImageId?: string | null;
 }
 
 // Add this interface with the other interfaces in api.services.ts
@@ -680,6 +682,15 @@ export interface ProgramTemplateField {
   IsVisible: boolean;
   LastModified: string | null;
 }
+
+export interface ProjectNode {
+  ID: number;
+  Name: string;
+  // این فیلد دقیقاً همان subProgramID است که در JSON payload می‌آید:
+  subProgramID: number;
+  // هر فیلد دیگری که بخواهید اینجا اضافه کنید...
+}
+
 
 // ساخت یک کلاس برای متدهای API
 class ApiService {
@@ -1565,6 +1576,35 @@ class ApiService {
     );
     return response.data;
   }
+
+  async getPrjRoot(gid: number): Promise<ProjectNode[]> {
+    const res = await httpClient.post<any[]>(apiConst.getPrjRoot, { gid });
+    return res.data.map(d => ({
+      ID: d.ID,
+      Name: d.Name,
+      // فرض می‌کنیم سرور این فیلد را دقیقاً با همین نام می‌فرستد:
+      subProgramID: d.subProgramID,
+    }));
+  }
+
+  /**
+   * لود کودکان هر گره
+   * POST /api/ProgramField/GetAllByPrgId
+   * body: { subProgramID }
+   */
+  async getPrjChildren(id: number): Promise<ProjectNode[]> {
+    const res = await httpClient.post<any[]>(
+      apiConst.getPrjChildren,
+      { id }
+    );
+    return res.data.map(d => ({
+      ID: d.ID,
+      Name: d.Name,
+      // سرور در payload لول‌های بعدی هم subProgramID می‌فرستد:
+      subProgramID: d.subProgramID,
+    }));
+  }
+
 }
 
 // یک خروجی برای استفاده در Context

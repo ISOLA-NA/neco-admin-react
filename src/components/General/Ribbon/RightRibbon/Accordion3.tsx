@@ -16,6 +16,7 @@ import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsConte
 import AppServices, { MenuItem } from "../../../../services/api.services";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
+import WindowsCommandSelectorModal from "./WindowsCommandSelectorModal";
 
 interface Accordion3Props {
   selectedMenuGroupId: number | null;
@@ -51,6 +52,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
   // حالت های ادیت و ادد
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [commandModalOpen, setCommandModalOpen] = useState(false);
+  const [windowsAppCommand, setWindowsAppCommand] = useState<string>("");
 
   // state فرم
   const [formData, setFormData] = useState<Partial<RowData3>>({
@@ -326,8 +329,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -367,8 +370,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
@@ -400,6 +403,13 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setErrorConfirmOpen(false);
   };
 
+  const handleSelectCommand = (cmd: string) => {             // ⭐ NEW
+    console.log("🎯 Windows Cmd selected:", cmd);            // ⭐ NEW
+    setWindowsAppCommand(cmd);                               // ⭐ NEW
+    setFormData((prev) => ({ ...prev, Command: cmd }));      // ⭐ NEW  ← اگر می‌خواهید همراه رکورد ذخیره شود
+    setCommandModalOpen(false);                              // ⭐ NEW  ← بستن مودال
+  };
+
   return (
     <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
       {/* Accordion header */}
@@ -416,7 +426,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
           )}
         </div>
       </div>
-
+  
       {isOpen && (
         <div className="p-4 bg-white rounded-b-lg">
           {selectedMenuGroupId !== null ? (
@@ -435,7 +445,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   />
                 </div>
               </div>
-
+  
               {/* DataTable */}
               <div
                 style={{
@@ -458,7 +468,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   showDuplicateIcon={false}
                 />
               </div>
-
+  
               {/* The form */}
               <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
                 <div className="grid grid-cols-1 gap-6">
@@ -470,6 +480,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     onChange={(e) => handleInputChange("Name", e.target.value)}
                     className="mt-2"
                   />
+  
                   <DynamicInput
                     name="Command"
                     type="text"
@@ -480,6 +491,27 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     }
                     className="mt-2"
                   />
+  
+                  {/* 🟢 Windows App Command input + modal button */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <DynamicInput
+                      name="WindowsAppCommand"
+                      type="text"
+                      value={windowsAppCommand}
+                      placeholder="Windows App Command"
+                      onChange={(e) => setWindowsAppCommand(e.target.value)}
+                      className="flex-1"
+                    />
+                    <button
+                      type="button"
+                      className="bg-purple-600 hover:bg-purple-800 text-white px-3 py-2 rounded text-lg font-bold"
+                      onClick={() => setCommandModalOpen(true)}
+                      title="انتخاب Command"
+                    >
+                      ...
+                    </button>
+                  </div>
+  
                   <DynamicInput
                     name="Description"
                     type="text"
@@ -490,6 +522,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     }
                     className="mt-2"
                   />
+  
                   <DynamicInput
                     name="Order"
                     type="number"
@@ -503,6 +536,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     }
                     className="mt-2"
                   />
+  
                   <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                     <DynamicRadioGroup
                       options={[
@@ -528,18 +562,18 @@ const Accordion3: React.FC<Accordion3Props> = ({
                 </div>
                 {/* Action buttons */}
                 <div className="flex items-center gap-4 mt-4">
-                <button
-  onClick={handleInsert}
-  disabled={isEditing} // یا حتی: disabled={!!selectedRow}
-  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-    isEditing
-      ? "bg-green-300 text-gray-200 cursor-not-allowed"
-      : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-  }`}
->
-  <FaSave /> Save
-</button>
-
+                  <button
+                    onClick={handleInsert}
+                    disabled={isEditing}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      isEditing
+                        ? "bg-green-300 text-gray-200 cursor-not-allowed"
+                        : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+                    }`}
+                  >
+                    <FaSave /> Save
+                  </button>
+  
                   <button
                     onClick={handleUpdate}
                     disabled={!selectedRow}
@@ -563,16 +597,16 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     <FaTrash /> Delete
                   </button>
                   <button
-  onClick={handleNew}
-  disabled={!selectedRow}
-  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-    !selectedRow
-      ? "bg-gray-300 text-gray-200 cursor-not-allowed"
-      : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-  }`}
->
-  <FaPlus /> New
-</button>
+                    onClick={handleNew}
+                    disabled={!selectedRow}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      !selectedRow
+                        ? "bg-gray-300 text-gray-200 cursor-not-allowed"
+                        : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+                    }`}
+                  >
+                    <FaPlus /> New
+                  </button>
                 </div>
               </div>
             </>
@@ -587,7 +621,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
           )}
         </div>
       )}
-
+  
       {/* Confirm Insert */}
       <DynamicConfirm
         isOpen={confirmInsertOpen}
@@ -597,7 +631,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         onClose={() => setConfirmInsertOpen(false)}
         variant="add"
       />
-
+  
       {/* Confirm Update */}
       <DynamicConfirm
         isOpen={confirmUpdateOpen}
@@ -607,7 +641,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         onClose={() => setConfirmUpdateOpen(false)}
         variant="edit"
       />
-
+  
       {/* Confirm Delete */}
       <DynamicConfirm
         isOpen={confirmDeleteOpen}
@@ -617,7 +651,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         onClose={() => setConfirmDeleteOpen(false)}
         variant="delete"
       />
-
+  
       {/* Error message (only Name is required now) */}
       <DynamicConfirm
         isOpen={errorConfirmOpen}
@@ -628,8 +662,16 @@ const Accordion3: React.FC<Accordion3Props> = ({
         variant="error"
         hideCancelButton={true}
       />
+  
+      {/* ---- Windows App Command Modal ---- */}
+      <WindowsCommandSelectorModal
+        isOpen={commandModalOpen}
+        onClose={() => setCommandModalOpen(false)}
+        onSelect={handleSelectCommand}
+      />
     </div>
   );
+  
 };
 
 export default Accordion3;

@@ -7,6 +7,7 @@ import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsConte
 import AppServices, { MenuGroup } from "../../../../services/api.services";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
+import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler";
 
 interface Accordion2Props {
   selectedMenuTabId: number | null;
@@ -25,6 +26,7 @@ interface RowData2 {
   IsVisible: boolean;
   LastModified: string | null;
   ModifiedById: string | null;
+  IconImageId?: string | null;
 }
 
 const Accordion2: React.FC<Accordion2Props> = ({
@@ -38,6 +40,9 @@ const Accordion2: React.FC<Accordion2Props> = ({
   const [rowData, setRowData] = useState<RowData2[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData2 | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [iconImageId, setIconImageId] = useState<string | null>(null);
+  const [resetCounter, setResetCounter] = useState<number>(0);
+
 
   // Form state
   const [formData, setFormData] = useState<Partial<RowData2>>({
@@ -45,6 +50,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
     Name: "",
     Description: "",
     Order: 0,
+    IconImageId: null,
   });
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
@@ -116,6 +122,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
     onRowClick(row);
     if (row) {
       setFormData({ ...row });
+      setIconImageId(row.IconImageId || null);
     }
   };
 
@@ -135,9 +142,11 @@ const Accordion2: React.FC<Accordion2Props> = ({
       Name: "",
       Description: "",
       Order: 0,
+      IconImageId: null,
     });
     setIsAdding(true);
     setIsEditing(false);
+    setIconImageId(null);
     onRowClick(null);
   };
 
@@ -180,6 +189,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
         IsVisible: true,
         ModifiedById: null,
         LastModified: null,
+        IconImageId: iconImageId || null,
       };
       console.log("Inserting MenuGroup:", newMenuGroup);
       showAlert("success", null, "", "MenuGroup updated successfully.");
@@ -200,6 +210,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
       setSelectedRow(null);
       onRowClick(null);
       setIsAdding(false);
+      setIconImageId(null);
+      setResetCounter(prev => prev + 1);
     } catch (error: any) {
       console.error("Error inserting MenuGroup:", error);
       const data = error.response?.data;
@@ -207,8 +219,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -227,6 +239,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
         IsVisible: true,
         ModifiedById: null,
         LastModified: null,
+        IconImageId: iconImageId || null,
       };
       console.log("Updating MenuGroup:", updatedMenuGroup);
       showAlert("success", null, "", "MenuGroup updated successfully.");
@@ -240,8 +253,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
@@ -280,6 +293,15 @@ const Accordion2: React.FC<Accordion2Props> = ({
     setSelectedRow(null);
     onRowClick(null);
   };
+
+  const handleUploadSuccess = (insertModel: InsertModel) => {
+    setIconImageId(insertModel.ID || null);
+    setFormData(prev => ({
+      ...prev,
+      IconImageId: insertModel.ID || null,
+    }));
+  };
+  
 
   return (
     <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
@@ -337,7 +359,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                   showAddIcon={false}
                   showDeleteIcon={false}
                   showViewIcon={false}
-                  onView={() => {}}
+                  onView={() => { }}
                   onAdd={handleNew}
                   onEdit={() => {
                     if (selectedRow) {
@@ -346,7 +368,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     }
                   }}
                   onDelete={handleDeleteClick}
-                  onDuplicate={() => {}}
+                  onDuplicate={() => { }}
                   isLoading={isLoading}
                   showSearch={false}
                   domLayout="normal"
@@ -392,53 +414,59 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     className="mt-2"
                   />
                 </div>
+                <div className="mt-4">
+                  <FileUploadHandler
+                    selectedFileId={iconImageId}
+                    onUploadSuccess={handleUploadSuccess}
+                    resetCounter={resetCounter}
+                    onReset={() => setResetCounter(prev => prev + 1)}
+                    isEditMode={isEditing}
+                  />
+                </div>
+
                 {/* Buttons */}
                 <div className="flex items-center gap-4 mt-4">
-                <button
-  onClick={handleInsert}
-  disabled={!!selectedRow}   // یعنی اگر selectedRow وجود داشت، Save غیرفعال است
-  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-    !!selectedRow
-      ? "bg-green-300 text-gray-200 cursor-not-allowed"
-      : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-  }`}
->
-  <FaSave /> Save
-</button>
+                  <button
+                    onClick={handleInsert}
+                    disabled={!!selectedRow}   // یعنی اگر selectedRow وجود داشت، Save غیرفعال است
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${!!selectedRow
+                      ? "bg-green-300 text-gray-200 cursor-not-allowed"
+                      : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+                      }`}
+                  >
+                    <FaSave /> Save
+                  </button>
 
                   <button
                     onClick={handleUpdate}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                      selectedRow
-                        ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                        : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
+                      ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                      : "bg-blue-300 text-gray-200 cursor-not-allowed"
+                      }`}
                   >
                     <FaEdit /> Update
                   </button>
                   <button
                     onClick={handleDeleteClick}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                      selectedRow
-                        ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                        : "bg-red-300 text-gray-200 cursor-not-allowed"
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
+                      ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                      : "bg-red-300 text-gray-200 cursor-not-allowed"
+                      }`}
                   >
                     <FaTrash /> Delete
                   </button>
                   <button
-  onClick={handleNew}
-  disabled={!selectedRow}
-  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-    !selectedRow
-      ? "bg-gray-300 text-gray-200 cursor-not-allowed"
-      : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-  }`}
->
-  <FaPlus /> New
-</button>
+                    onClick={handleNew}
+                    disabled={!selectedRow}
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
+                      ? "bg-gray-300 text-gray-200 cursor-not-allowed"
+                      : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+                      }`}
+                  >
+                    <FaPlus /> New
+                  </button>
                 </div>
               </div>
             </>
