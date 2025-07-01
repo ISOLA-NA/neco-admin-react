@@ -29,6 +29,7 @@ interface RowData3 {
   ID: number;
   Name: string;
   Command: string;
+  CommandWeb: string;
   Description: string;
   Order: number;
   IsVisible?: boolean;
@@ -61,6 +62,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     Command: "",
     Description: "",
     Order: 0,
+    CommandWeb: "",
   });
 
   // کنترل عکس و preview
@@ -160,18 +162,21 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   // پر کردن فرم موقع کلیک روی ردیف
   const handleRowClick = (row: RowData3) => {
-    const sanitizedRow = {
+    const sanitizedRow: RowData3 = {
       ...row,
       ModifiedById: row.ModifiedById === "" ? null : row.ModifiedById,
       IconImageId: row.IconImageId === "" ? null : row.IconImageId,
     };
-    setSelectedRow(sanitizedRow);
-    setFormData(sanitizedRow);
-    setSelectedSize(sanitizedRow.Order?.toString() || "0");
-    setIconImageId(sanitizedRow.IconImageId || null);
+  
+    setSelectedRow(sanitizedRow);               // انتخاب ردیف
+    setFormData(sanitizedRow);                  // پر کردن فرم (Command و CommandWeb هر دو داخلش هستند)
+    setWindowsAppCommand(sanitizedRow.Command || "");  // مقدار ورودی WindowsAppCommand
+    setSelectedSize(String(sanitizedRow.Order ?? 0));  // رادیو سایز
+    setIconImageId(sanitizedRow.IconImageId ?? null);  // عکس آیکن
     setIsEditing(true);
     setIsAdding(false);
   };
+  
 
   const handleRowDoubleClick = (row: RowData3) => {
     onRowDoubleClick(row.ID);
@@ -196,14 +201,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
   };
 
   // ادیت
-  const handleEdit = (row: RowData3) => {
-    setSelectedRow(row);
-    setFormData(row);
-    setSelectedSize(row.Order?.toString() || "0");
-    setIconImageId(row.IconImageId || null);
-    setIsEditing(true);
-    setIsAdding(false);
-  };
+const handleEdit = (row: RowData3) => {
+  setSelectedRow(row);                         // همان ردیف
+  setFormData(row);                            // داده‌های فرم
+  setWindowsAppCommand(row.Command || "");     // هم‌زمان ورودی WindowsAppCommand
+  setSelectedSize(String(row.Order ?? 0));     // سایز
+  setIconImageId(row.IconImageId ?? null);     // آیکن
+  setIsEditing(true);
+  setIsAdding(false);
+};
 
   // حذف از اکشن جدول
   const handleDelete = (row: RowData3) => {
@@ -241,6 +247,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setIsAdding(true);
     setIsEditing(false);
     setResetCounter((prev) => prev + 1);
+    setWindowsAppCommand("");
   };
 
   // ورودی‌های فرم
@@ -301,6 +308,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         ID: 0,
         Name: formData.Name!,
         Command: formData.Command || "",
+        CommandWeb: formData.CommandWeb || "", 
         Description: formData.Description || "",
         Order: formData.Order || 0,
         nMenuGroupId: selectedMenuGroupId!,
@@ -308,16 +316,17 @@ const Accordion3: React.FC<Accordion3Props> = ({
         LastModified: null,
         ModifiedById: formData.ModifiedById || null,
         IconImageId: iconImageId || null,
-        CommandWeb: "",
         CommandMobile: "",
         HelpText: "",
         KeyTip: "",
         Size: formData.Order || 0,
+        
       };
       showAlert("success", null, "", "MenuItem updated successfully.");
       await AppServices.insertMenuItem(newMenuItem);
       await loadRowData();
       setFormData({ Name: "", Command: "", Description: "", Order: 0 });
+      setWindowsAppCommand(""); 
       setSelectedSize("0");
       setIconImageId(null);
       setIsAdding(false);
@@ -345,6 +354,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         ID: formData.ID!,
         Name: formData.Name!,
         Command: formData.Command || "",
+        CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
         Order: formData.Order || 0,
         nMenuGroupId: selectedMenuGroupId!,
@@ -352,7 +362,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
         LastModified: formData.LastModified || null,
         ModifiedById: formData.ModifiedById || null,
         IconImageId: formData.IconImageId || null,
-        CommandWeb: "",
         CommandMobile: "",
         HelpText: "",
         KeyTip: "",
@@ -426,7 +435,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
           )}
         </div>
       </div>
-  
+
       {isOpen && (
         <div className="p-4 bg-white rounded-b-lg">
           {selectedMenuGroupId !== null ? (
@@ -445,7 +454,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   />
                 </div>
               </div>
-  
+
               {/* DataTable */}
               <div
                 style={{
@@ -468,7 +477,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   showDuplicateIcon={false}
                 />
               </div>
-  
+
               {/* The form */}
               <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
                 <div className="grid grid-cols-1 gap-6">
@@ -480,38 +489,45 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     onChange={(e) => handleInputChange("Name", e.target.value)}
                     className="mt-2"
                   />
-  
+
                   <DynamicInput
-                    name="Command"
+                    name="Windows web Command"
                     type="text"
-                    value={formData.Command || ""}
-                    placeholder="Command (Optional)"
+                    value={formData.CommandWeb || ""}
+                    placeholder=""
                     onChange={(e) =>
-                      handleInputChange("Command", e.target.value)
+                      handleInputChange("CommandWeb", e.target.value)
                     }
                     className="mt-2"
                   />
-  
+
                   {/* 🟢 Windows App Command input + modal button */}
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2">
                     <DynamicInput
-                      name="WindowsAppCommand"
+                      name="Windows App Command"
                       type="text"
                       value={windowsAppCommand}
-                      placeholder="Windows App Command"
-                      onChange={(e) => setWindowsAppCommand(e.target.value)}
-                      className="flex-1"
+                      placeholder=""
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWindowsAppCommand(val);                          
+                        setFormData((prev) => ({ ...prev, Command: val }));  
+                      }}
+                      className="flex-1"                               
                     />
+
                     <button
                       type="button"
-                      className="bg-purple-600 hover:bg-purple-800 text-white px-3 py-2 rounded text-lg font-bold"
-                      onClick={() => setCommandModalOpen(true)}
                       title="انتخاب Command"
+                      onClick={() => setCommandModalOpen(true)}
+                      className="h-9 px-3 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold
+               flex items-center justify-center mt-4"
                     >
-                      ...
+                      cmd
                     </button>
                   </div>
-  
+
+
                   <DynamicInput
                     name="Description"
                     type="text"
@@ -522,7 +538,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     }
                     className="mt-2"
                   />
-  
+
                   <DynamicInput
                     name="Order"
                     type="number"
@@ -536,7 +552,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     }
                     className="mt-2"
                   />
-  
+
                   <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                     <DynamicRadioGroup
                       options={[
@@ -565,45 +581,41 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   <button
                     onClick={handleInsert}
                     disabled={isEditing}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                      isEditing
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${isEditing
                         ? "bg-green-300 text-gray-200 cursor-not-allowed"
                         : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-                    }`}
+                      }`}
                   >
                     <FaSave /> Save
                   </button>
-  
+
                   <button
                     onClick={handleUpdate}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                      selectedRow
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
                         ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
                         : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                    }`}
+                      }`}
                   >
                     <FaEdit /> Update
                   </button>
                   <button
                     onClick={handleDeleteClick}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                      selectedRow
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
                         ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
                         : "bg-red-300 text-gray-200 cursor-not-allowed"
-                    }`}
+                      }`}
                   >
                     <FaTrash /> Delete
                   </button>
                   <button
                     onClick={handleNew}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                      !selectedRow
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
                         ? "bg-gray-300 text-gray-200 cursor-not-allowed"
                         : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-                    }`}
+                      }`}
                   >
                     <FaPlus /> New
                   </button>
@@ -621,7 +633,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
           )}
         </div>
       )}
-  
+
       {/* Confirm Insert */}
       <DynamicConfirm
         isOpen={confirmInsertOpen}
@@ -631,7 +643,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         onClose={() => setConfirmInsertOpen(false)}
         variant="add"
       />
-  
+
       {/* Confirm Update */}
       <DynamicConfirm
         isOpen={confirmUpdateOpen}
@@ -641,7 +653,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         onClose={() => setConfirmUpdateOpen(false)}
         variant="edit"
       />
-  
+
       {/* Confirm Delete */}
       <DynamicConfirm
         isOpen={confirmDeleteOpen}
@@ -651,7 +663,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         onClose={() => setConfirmDeleteOpen(false)}
         variant="delete"
       />
-  
+
       {/* Error message (only Name is required now) */}
       <DynamicConfirm
         isOpen={errorConfirmOpen}
@@ -662,7 +674,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         variant="error"
         hideCancelButton={true}
       />
-  
+
       {/* ---- Windows App Command Modal ---- */}
       <WindowsCommandSelectorModal
         isOpen={commandModalOpen}
@@ -671,7 +683,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       />
     </div>
   );
-  
+
 };
 
 export default Accordion3;

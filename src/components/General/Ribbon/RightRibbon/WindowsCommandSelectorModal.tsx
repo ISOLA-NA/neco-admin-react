@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicSelector from "../../../utilities/DynamicSelector";
-import HelpBox from "./HelpBox";
 import ProjectTreeTable from "./ProjectTreeGrid";
 import AppServices, {
   EntityTypeComplete,
@@ -83,8 +82,6 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-lg h-[80vh] w-[850px] flex flex-col p-4">
-        <HelpBox />
-
         {/* تب‌ها */}
         <div className="flex gap-2 mb-3 border-b pb-2">
           {["cmd form command", "cmd prj command", "cmd prg command"].map(
