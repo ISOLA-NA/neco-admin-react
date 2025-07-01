@@ -6,10 +6,7 @@ import React, {
   useCallback,
 } from "react";
 
-// کامپوننت چیدمان دو ستونی واکنش‌گرا
 import TwoColumnLayout from "../layout/TwoColumnLayout";
-
-// سایر کامپوننت‌ها و کتابخانه‌ها
 import DynamicInput from "../utilities/DynamicInput";
 import DynamicSelector from "../utilities/DynamicSelector";
 import ListSelector from "../ListSelector/ListSelector";
@@ -24,14 +21,10 @@ import DynamicSwitcher from "../utilities/DynamicSwitcher";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { useApi } from "../../context/ApiContext";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
-import { TailSpin } from "react-loader-spinner"; // ← اضافه شد
 import apiService from "../../services/api.services";
 import fileService from "../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
 
-/**
- * نوع (interface) فیلدهای فرم
- */
 interface IFormData {
   ID: string;
   Name: string;
@@ -58,9 +51,6 @@ interface FormsCommand1Props {
   selectedRow: any;
 }
 
-/**
- * نگاشت typeOfInformation (ستون‌های فرم) برای تبدیل شناسه عددی به نام مرتبط
- */
 const columnTypeMapping: { [key: string]: number } = {
   component1: 15,
   component2: 1,
@@ -213,10 +203,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
 
   const [isLoadingFields, setIsLoadingFields] = useState<boolean>(false); // ← استیت جدید
 
+  const [addModalKey, setAddModalKey] = useState(0);
 
-  /**
-   * واکشی شناسه کاربر
-   */
+
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -312,7 +301,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           IsGlobal: selectedRow.IsGlobal !== undefined ? selectedRow.IsGlobal : true,
         });
 
-        console.log("rrrrrr",selectedRow.IsGlobal);
+        console.log("rrrrrr", selectedRow.IsGlobal);
 
         // واکشی نام فایل ورد
         if (selectedRow.TemplateDocID) {
@@ -604,12 +593,14 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
    */
   const handleAddClick = () => {
     setEditingData(null);
+    setAddModalKey(k => k + 1);
     setIsAddModalOpen(true);
   };
 
   const handleEditClick = (rowData: any) => {
     const dataToEdit = selectedRowData || rowData;
     setEditingData(dataToEdit);
+    setAddModalKey(k => k + 1);
     setIsAddModalOpen(true);
   };
 
@@ -903,11 +894,11 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                   selectedRowData
                     ? handleEditClick(selectedRowData)
                     : showAlert(
-                        "error",
-                        undefined,
-                        "Error",
-                        "No row is selected!"
-                      )
+                      "error",
+                      undefined,
+                      "Error",
+                      "No row is selected!"
+                    )
                 }
                 onDelete={async () => {
                   if (!selectedRowData) {
@@ -954,15 +945,15 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           rowData={
             currentSelector === "A"
               ? catAOptions.map((opt) => ({
-                  value: opt.value,
-                  label: opt.label,
-                }))
+                value: opt.value,
+                label: opt.label,
+              }))
               : currentSelector === "B"
-              ? catBOptions.map((opt) => ({
+                ? catBOptions.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))
-              : []
+                : []
           }
           onRowClick={handleRowClick}
           onRowDoubleClick={handleSelectButtonClick}
@@ -974,6 +965,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       {/* مدال افزودن/ویرایش فیلد */}
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
         <AddColumnForm
+          key={addModalKey}
           existingData={editingData}
           isEdit={!!editingData}
           entityTypeId={formData.ID}

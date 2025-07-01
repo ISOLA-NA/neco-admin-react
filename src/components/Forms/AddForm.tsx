@@ -1,11 +1,8 @@
-// src/components/AddColumnForm.tsx
 import React, { useState, useEffect } from "react";
 import { useApi } from "../../context/ApiContext";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSelector from "../utilities/DynamicSelector";
-import { showAlert } from "../utilities/Alert/DynamicAlert";
-// Import dynamic controller
 import Component1 from "./ControllerForms/TextController";
 import Component2 from "./ControllerForms/RichTextController";
 import Component3 from "./ControllerForms/ChoiceController";
