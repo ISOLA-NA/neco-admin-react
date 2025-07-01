@@ -1,5 +1,4 @@
 // src/components/ProgramTemplate/ProgramTemplate.tsx
-
 import React, {
   useState,
   useEffect,
@@ -7,7 +6,6 @@ import React, {
   useImperativeHandle,
   useMemo,
 } from "react";
-import TwoColumnLayout from "../../layout/TwoColumnLayout";
 import DynamicInput from "../../utilities/DynamicInput";
 import ListSelector from "../../ListSelector/ListSelector";
 import DynamicSelector from "../../utilities/DynamicSelector";
@@ -24,57 +22,62 @@ import {
   ProgramType,
 } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
+import AddColumnForm from "../../Forms/AddForm"; // برای انتخاب متادیتا
 
+/* ---------- types ---------- */
 export interface ProgramTemplateHandle {
   save: () => Promise<boolean>;
 }
-
 interface ProgramTemplateProps {
   selectedRow: ProgramTemplateItem | null;
 }
 
+/* ===================================================================== */
+/*                              COMPONENT                                */
+/* ===================================================================== */
 const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
   ({ selectedRow }, ref) => {
-    console.log("selectedrow", selectedRow);
     const api = useApi();
 
-    // State برای داده‌های برنامه تمپلیت
+    /* ---------------- state اصلی ---------------- */
     const [programTemplateData, setProgramTemplateData] =
       useState<ProgramTemplateItem>({
-        ID: selectedRow?.ID || undefined,
-        ModifiedById: selectedRow?.ModifiedById || undefined,
+        ID: selectedRow?.ID,
+        ModifiedById: selectedRow?.ModifiedById,
         Name: selectedRow?.Name || "",
         MetaColumnName: selectedRow?.MetaColumnName || "",
         Duration: selectedRow?.Duration || "",
         nProgramTypeID: selectedRow?.nProgramTypeID || null,
-        PCostAct: selectedRow?.PCostAct || 0,
-        PCostAprov: selectedRow?.PCostAprov || 0,
-        IsGlobal: selectedRow?.IsGlobal || true,
+        PCostAct: selectedRow?.PCostAct || 0, // Activity Budget
+        PCostAprov: selectedRow?.PCostAprov || 0, // Af Budget
+        IsGlobal: selectedRow?.IsGlobal ?? true,
         ProjectsStr: selectedRow?.ProjectsStr || "",
         IsVisible: selectedRow?.IsVisible ?? true,
-        LastModified: selectedRow?.LastModified || undefined,
+        LastModified: selectedRow?.LastModified,
       });
 
-    // State برای پروژه‌های دریافت شده از API
+    /* ---------------- state کمکی ---------------- */
     const [projectsData, setProjectsData] = useState<Project[]>([]);
-    const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
+    const [loadingProjects, setLoadingProjects] = useState(false);
 
-    // State برای انواع برنامه‌ها دریافت شده از API
     const [programTypes, setProgramTypes] = useState<ProgramType[]>([]);
-    const [loadingProgramTypes, setLoadingProgramTypes] =
-      useState<boolean>(false);
+    const [loadingProgramTypes, setLoadingProgramTypes] = useState(false);
 
-    // انتخاب ID‌های پروژه به صورت رشته
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>(
-      selectedRow?.ProjectsStr
-        ? selectedRow.ProjectsStr.split("|").filter(Boolean)
+      programTemplateData.ProjectsStr
+        ? programTemplateData.ProjectsStr.split("|").filter(Boolean)
         : []
     );
+    const [selectedProgramTypeId, setSelectedProgramTypeId] = useState<string>(
+      programTemplateData.nProgramTypeID
+        ? String(programTemplateData.nProgramTypeID)
+        : ""
+    );
 
+    /* ------------ جدول جزئیات ------------ */
     const [programTemplateField, setProgramTemplateField] = useState<
       ProgramTemplateField[]
     >([]);
-
     const [roles, setRoles] = useState<{ ID: string; Name: string }[]>([]);
     const [wfTemplates, setWfTemplates] = useState<
       { ID: number; Name: string }[]
@@ -86,678 +89,438 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const [programTemplates, setProgramTemplates] = useState<
       { ID: number; Name: string }[]
     >([]);
-
-    const [loadingFields, setLoadingFields] = useState<boolean>(false);
+    const [loadingFields, setLoadingFields] = useState(false);
 
     const [editingRow, setEditingRow] = useState<any | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedDetailRow, setSelectedDetailRow] = useState<any | null>(
       null
     );
-
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const isEditMode = Boolean(selectedRow);
 
-    // دریافت فهرست Program Templates
-    useEffect(() => {
-      const fetchTemplates = async () => {
-        try {
-          const res = await api.getAllProgramTemplates();
-          setProgramTemplates(res);
-        } catch (error) {
-          console.error("خطا در دریافت Program Templates:", error);
-        }
-      };
+    /* ------------ متادیتا (لیست سلکتور) ------------ */
+    const [metaValues, setMetaValues] = useState<{ ID: string; Name: string }[]>(
+      []
+    );
+    const [metaNames, setMetaNames] = useState<{ ID: string; Name: string }[]>(
+      []
+    );
+    const [selectedMetaIds, setSelectedMetaIds] = useState<string[]>(
+      programTemplateData.MetaColumnName
+        ? programTemplateData.MetaColumnName.split("|").filter(Boolean)
+        : []
+    );
+    const [loadingMeta, setLoadingMeta] = useState(false);
 
-      fetchTemplates();
+    /* ================================================================= */
+    /*                             FETCHES                               */
+    /* ================================================================= */
+    /* --- projects --- */
+    useEffect(() => {
+      setLoadingProjects(true);
+      api
+        .getAllProject()
+        .then(setProjectsData)
+        .catch(() =>
+          showAlert("error", null, "Error", "Failed to fetch projects.")
+        )
+        .finally(() => setLoadingProjects(false));
     }, [api]);
 
-    // دریافت فرم‌ها
+    /* --- program types --- */
     useEffect(() => {
-      const fetchForms = async () => {
-        try {
-          const result = await api.getTableTransmittal();
-          setForms(result);
-        } catch (error) {
-          console.error("Failed to fetch form names:", error);
-        }
-      };
-      fetchForms();
+      setLoadingProgramTypes(true);
+      api
+        .getAllProgramType()
+        .then(setProgramTypes)
+        .catch(() =>
+          showAlert("error", null, "Error", "Failed to fetch program types.")
+        )
+        .finally(() => setLoadingProgramTypes(false));
     }, [api]);
 
-    // دریافت Activity Types
+    /* --- template list for grid mapping --- */
     useEffect(() => {
-      const fetchActivityTypes = async () => {
-        try {
-          const result = await api.getEnum({ str: "PFIType" });
-          const formatted = Object.entries(result).map(([key, value]) => ({
-            value: key,
-            label: value,
-          }));
-          setActivityTypes(formatted);
-        } catch (error) {
-          console.error("خطا در گرفتن activity type:", error);
-        }
-      };
-
-      fetchActivityTypes();
+      api.getAllProgramTemplates().then(setProgramTemplates).catch(console.error);
     }, [api]);
 
-    // دریافت Approval Flows
+    /* --- forms, roles, wf templates, enum --- */
     useEffect(() => {
-      const fetchWfTemplates = async () => {
-        try {
-          const result = await api.getAllWfTemplate();
-          setWfTemplates(result);
-        } catch (error) {
-          console.error("Failed to fetch approval flows", error);
-        }
-      };
-      fetchWfTemplates();
+      api.getTableTransmittal().then(setForms).catch(console.error);
+      api.getAllRoles().then(setRoles).catch(console.error);
+      api.getAllWfTemplate().then(setWfTemplates).catch(console.error);
+      api
+        .getEnum({ str: "PFIType" })
+        .then((r) =>
+          setActivityTypes(
+            Object.entries(r).map(([k, v]) => ({ value: k, label: v }))
+          )
+        )
+        .catch(console.error);
     }, [api]);
 
-    // دریافت Roles
+    /* --- detail grid data --- */
     useEffect(() => {
-      const fetchRoles = async () => {
-        try {
-          const response = await api.getAllRoles();
-          setRoles(response);
-        } catch (error) {
-          console.error("Failed to fetch roles", error);
-        }
-      };
-      fetchRoles();
-    }, [api]);
-
-    // دریافت فیلدهای Program Template Field برای جدول جزئیات
-    useEffect(() => {
-      const fetchEntityFields = async () => {
-        if (!selectedRow?.ID) return;
-
-        try {
-          setLoadingFields(true);
-          const result = await api.getProgramTemplateField(selectedRow.ID);
-          console.log("Fetched entity fields:", result);
-          setProgramTemplateField(result);
-        } catch (error: any) {
-          console.error("Failed to fetch entity fields:", error);
-          showAlert("error", null, "Error", "Could not load entity fields");
-        } finally {
-          setLoadingFields(false);
-        }
-      };
-
-      fetchEntityFields();
+      if (!selectedRow?.ID) return;
+      setLoadingFields(true);
+      api
+        .getProgramTemplateField(selectedRow.ID)
+        .then(setProgramTemplateField)
+        .catch(() =>
+          showAlert("error", null, "Error", "Could not load entity fields")
+        )
+        .finally(() => setLoadingFields(false));
     }, [selectedRow?.ID, api]);
 
-    // انتخاب ID نوع برنامه به صورت رشته
-    const [selectedProgramTypeId, setSelectedProgramTypeId] = useState<string>(
-      selectedRow?.nProgramTypeID ? String(selectedRow.nProgramTypeID) : ""
-    );
-
-    // دریافت پروژه‌ها
+    /* --- initialise meta selector --- */
     useEffect(() => {
-      const fetchProjects = async () => {
-        try {
-          setLoadingProjects(true);
-          const projects = await api.getAllProject();
-          setProjectsData(projects);
-        } catch (error) {
-          console.error("Error fetching projects:", error);
-          showAlert("error", null, "Error", "Failed to fetch projects.");
-        } finally {
-          setLoadingProjects(false);
-        }
-      };
-      fetchProjects();
-    }, [api]);
-
-    // دریافت انواع برنامه‌ها
-    useEffect(() => {
-      const fetchProgramTypes = async () => {
-        try {
-          setLoadingProgramTypes(true);
-          const types = await api.getAllProgramType();
-          setProgramTypes(types);
-        } catch (error) {
-          console.error("Error fetching program types:", error);
-          showAlert("error", null, "Error", "Failed to fetch program types.");
-        } finally {
-          setLoadingProgramTypes(false);
-        }
-      };
-      fetchProgramTypes();
-    }, [api]);
-
-    // وقتی selectedRow تغییر کند، داده‌های فرم اصلی بازنشانی شود
-    useEffect(() => {
-      if (selectedRow) {
-        setProgramTemplateData({
-          ID: selectedRow.ID,
-          ModifiedById: selectedRow.ModifiedById,
-          Name: selectedRow.Name,
-          MetaColumnName: selectedRow.MetaColumnName || "",
-          Duration: selectedRow.Duration,
-          nProgramTypeID: selectedRow.nProgramTypeID,
-          PCostAct: selectedRow.PCostAct,
-          PCostAprov: selectedRow.PCostAprov,
-          ProjectsStr: selectedRow.ProjectsStr || "",
-          IsGlobal: selectedRow.IsGlobal,
-          IsVisible: selectedRow.IsVisible,
-          LastModified: selectedRow.LastModified,
-        });
-        setSelectedProjectIds(
-          selectedRow.ProjectsStr
-            ? selectedRow.ProjectsStr.split("|").filter(Boolean)
-            : []
-        );
-        setSelectedProgramTypeId(
-          selectedRow.nProgramTypeID ? String(selectedRow.nProgramTypeID) : ""
-        );
-      } else {
-        setProgramTemplateData({
-          Name: "",
-          Duration: "0",
-          PCostAct: 0,
-          PCostAprov: 0,
-          ProjectsStr: "",
-          IsGlobal: true,
-          IsVisible: true,
-          nProgramTypeID: null,
-          MetaColumnName: "",
-          LastModified: null,
-          ModifiedById: null,
-          ID: 0,
-        });
-        setSelectedProjectIds([]);
-        setSelectedProgramTypeId("");
+      if (!programTemplateData.MetaColumnName) {
+        setSelectedMetaIds([]);
+        setMetaNames([]);
+        return;
       }
-    }, [selectedRow]);
+      const ids = programTemplateData.MetaColumnName.split("|").filter(Boolean);
+      setSelectedMetaIds(ids);
+      setLoadingMeta(true);
+      Promise.all(
+        ids.map((id) =>
+          api
+            .getEntityFieldById(Number(id))
+            .then((res) => ({
+              ID: String(res.ID),
+              Name: res.DisplayName || res.Name || "",
+            }))
+            .catch(() => null)
+        )
+      )
+        .then((arr) => {
+          const ok = (arr.filter(Boolean) || []) as { ID: string; Name: string }[];
+          setMetaValues(ok);
+          setMetaNames(ok);
+        })
+        .finally(() => setLoadingMeta(false));
+    }, [programTemplateData.MetaColumnName, api]);
 
-    // متد save قابل دسترسی از والدین
+    /* --- sync MetaColumnName on selection change --- */
+    useEffect(() => {
+      handleChange(
+        "MetaColumnName",
+        selectedMetaIds.length ? selectedMetaIds.join("|") + "|" : ""
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedMetaIds]);
+
+    /* ================================================================= */
+    /*                           HELPERS / MAPPINGS                      */
+    /* ================================================================= */
+    const handleChange = (field: keyof ProgramTemplateItem, value: any) =>
+      setProgramTemplateData((p) => ({ ...p, [field]: value }));
+
+    const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
+    const projectsListData = projectsData.map((p) => ({
+      ID: p.ID,
+      Name: p.ProjectName,
+    }));
+    const programTypeOptions = programTypes.map((t) => ({
+      value: String(t.ID),
+      label: t.Name,
+    }));
+
+    /* ---- grid-friendly data ---- */
+    const enhancedTemplateField = useMemo(() => {
+      return programTemplateField.map((item) => ({
+        ...item,
+        nPostName: roles.find((r) => String(r.ID) === String(item.nPostId))
+          ?.Name,
+        nWFTemplateName: wfTemplates.find(
+          (w) => String(w.ID) === String(item.nWFTemplateID)
+        )?.Name,
+        nEntityTypeName: forms.find(
+          (f) => String(f.ID) === String(item.nEntityTypeID)
+        )?.Name,
+        nProgramTemplateName: programTemplates.find(
+          (p) => String(p.ID) === String(item.nProgramTemplateID)
+        )?.Name,
+      }));
+    }, [programTemplateField, roles, wfTemplates, forms, programTemplates]);
+
+    const detailColumnDefs = [
+      { headerName: "Order", field: "Order", flex: 1, minWidth: 80 },
+      { headerName: "Activity Name", field: "Name", flex: 3, minWidth: 150 },
+      { headerName: "Code", field: "Code", flex: 1, minWidth: 100 },
+      { headerName: "Duration", field: "ActDuration", flex: 1, minWidth: 100 },
+      { headerName: "Start", field: "Top", flex: 1, minWidth: 80 },
+      { headerName: "End", field: "Left", flex: 1, minWidth: 80 },
+      { headerName: "Responsible Post", field: "nPostName", flex: 3, minWidth: 150 },
+      { headerName: "Approval Flow", field: "nWFTemplateName", flex: 3, minWidth: 150 },
+      { headerName: "Activity Type", field: "PFIType", flex: 2, minWidth: 150 },
+      { headerName: "Form Name", field: "nEntityTypeName", flex: 3, minWidth: 150 },
+      { headerName: "Weight", field: "Weight1", flex: 1, minWidth: 80 },
+      { headerName: "Activity Budget", field: "PCostAct", flex: 1, minWidth: 80 },
+      { headerName: "Program Template", field: "nProgramTemplateName", flex: 3, minWidth: 150 },
+      { headerName: "Program Duration", field: "WFDuration", flex: 1, minWidth: 80 },
+      { headerName: "Program Execution Budget", field: "PCostAprov", flex: 1, minWidth: 80 },
+      { headerName: "Program to plan", field: "WeightWF", flex: 1, minWidth: 80 },
+    ];
+
+    /* ================================================================= */
+    /*                          SAVE (forwardRef)                        */
+    /* ================================================================= */
     useImperativeHandle(ref, () => ({
       save: async () => {
         try {
-          const templateData: ProgramTemplateItem = {
+          const body: ProgramTemplateItem = {
             ...programTemplateData,
             nProgramTypeID: selectedProgramTypeId
               ? parseInt(selectedProgramTypeId)
               : null,
-            PCostAct: programTemplateData.PCostAct || 0,
-            PCostAprov: programTemplateData.PCostAprov || 0,
-            IsVisible: programTemplateData.IsVisible,
-            ProjectsStr:
-              selectedProjectIds.length > 0
-                ? selectedProjectIds.join("|") + "|"
-                : "",
-            ModifiedById: programTemplateData.ModifiedById,
-            LastModified: programTemplateData.LastModified,
-            ID: programTemplateData.ID,
+            ProjectsStr: selectedProjectIds.length
+              ? selectedProjectIds.join("|") + "|"
+              : "",
           };
-
-          if (selectedRow) {
-            // ویرایش
-            await api.updateProgramTemplate(templateData);
-          } else {
-            // درج جدید
-            await api.insertProgramTemplate(templateData);
-          }
+          if (selectedRow) await api.updateProgramTemplate(body);
+          else await api.insertProgramTemplate(body);
 
           showAlert(
             "success",
             null,
             selectedRow ? "Updated" : "Saved",
-            `Program Template ${
-              selectedRow ? "updated" : "added"
-            } successfully.`
+            `Program Template ${selectedRow ? "updated" : "added"} successfully.`
           );
           return true;
-        } catch (error) {
-          console.error("Error saving program template:", error);
+        } catch (err) {
+          console.error(err);
           showAlert("error", null, "Error", "Failed to save program template.");
           return false;
         }
       },
     }));
 
-    // هندل تغییرات در فیلدهای ورودی اصلی
-    const handleChange = (field: keyof ProgramTemplateItem, value: any) => {
-      setProgramTemplateData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    };
-
-    // ستون‌ها برای انتخاب پروژه‌ها
-    const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
-
-    // هندل تغییر انتخاب پروژه‌ها
-    const handleProjectsChange = (selectedIds: (string | number)[]) => {
-      const stringIds = selectedIds.map((id) => String(id));
-      setSelectedProjectIds(stringIds);
-    };
-
-    // هندل تغییر وضعیت Global
-    const handleGlobalChange = (isGlobal: boolean) => {
-      handleChange("IsGlobal", isGlobal);
-    };
-
-    // آماده‌سازی داده‌ها برای ListSelector
-    const projectsListData = projectsData.map((proj) => ({
-      ID: proj.ID,
-      Name: proj.ProjectName,
-    }));
-
-    // آماده‌سازی داده‌ها برای DynamicSelector از انواع برنامه‌ها
-    const programTypeOptions = programTypes.map((type) => ({
-      value: String(type.ID),
-      label: type.Name,
-    }));
-
-    // مدیریت Modal برای انتخاب نوع برنامه
-    const [modalOpen, setModalOpen] = useState(false);
-    const [currentSelector] = useState<string>("ProgramType");
-    const [selectedRowData, setSelectedRowData] = useState<any>(null);
-
-    const handleOpenModal = () => {
-      setSelectedRowData(null);
-      setModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-      setModalOpen(false);
-      setSelectedRowData(null);
-    };
-
-    const handleRowClick = (rowData: any) => {
-      setSelectedRowData(rowData);
-    };
-
-    const handleSelectButtonClick = () => {
-      if (selectedRowData) {
-        handleChange("nProgramTypeID", parseInt(selectedRowData.value));
-        setSelectedProgramTypeId(selectedRowData.value);
-        handleCloseModal();
-      }
-    };
-
-    const getRowData = (selector: string) => {
-      if (selector === "ProgramType") {
-        return programTypeOptions;
-      }
-      return [];
-    };
-
-    // مرحله‌ی مهم: enhanced mapping با فیلدهای جدید نمایش
-    const enhancedProgramTemplateField = useMemo(() => {
-      return programTemplateField.map((item) => {
-        // پیدا کردن نام نقش
-        const role = roles.find((r) => String(r.ID) === String(item.nPostId));
-        const approvalFlowLabel = wfTemplates.find(
-          (f) => String(f.ID) === String(item.nWFTemplateID)
-        )?.Name;
-        const formLabel = forms.find(
-          (f) => String(f.ID) === String(item.nEntityTypeID)
-        )?.Name;
-        const programTemplateLabel = programTemplates.find(
-          (p) => String(p.ID) === String(item.nProgramTemplateID)
-        )?.Name;
-
-        return {
-          ...item,
-          // فیلدهای نمایش
-          nPostName: role?.Name || "",
-          nWFTemplateName: approvalFlowLabel || "",
-          nEntityTypeName: formLabel || "",
-          nProgramTemplateName: programTemplateLabel || "",
-          // سایر فیلدهای اصلی (مثل nWFTemplateID) بدون تغییر باقی می‌مانند
-        };
-      });
-    }, [
-      programTemplateField,
-      roles,
-      wfTemplates,
-      forms,
-      programTemplates,
-    ]);
-
-    // ستون‌های جدول جزئیات: اشاره به فیلدهای نمایش برای ستون‌های مربوطه
-    const detailColumnDefs = [
-      {
-        headerName: "Order",
-        field: "Order",
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        headerName: "Activity Name",
-        field: "Name",
-        flex: 3,
-        minWidth: 150,
-      },
-      {
-        headerName: "Code",
-        field: "Code",
-        flex: 1,
-        minWidth: 100,
-      },
-      {
-        headerName: "Duration",
-        field: "ActDuration",
-        flex: 1,
-        minWidth: 100,
-      },
-      {
-        headerName: "Start",
-        field: "Top",
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        headerName: "End",
-        field: "Left",
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        headerName: "Responsible Post",
-        field: "nPostName", // قبلا nPostIdDisplay بود، حالا فیلد نمایش جدید
-        flex: 3,
-        minWidth: 150,
-      },
-      {
-        headerName: "Approval Flow",
-        field: "nWFTemplateName", // به فیلد نمایش جدید ارجاع می‌دهیم
-        flex: 3,
-        minWidth: 150,
-      },
-      {
-        headerName: "Activity Type",
-        field: "PFIType",
-        flex: 2,
-        minWidth: 150,
-      },
-      {
-        headerName: "Form Name",
-        field: "nEntityTypeName", // فیلد نمایش جدید
-        flex: 3,
-        minWidth: 150,
-      },
-      {
-        headerName: "Weight",
-        field: "Weight1",
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        headerName: "Activity Budget",
-        field: "PCostAct",
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        headerName: "Program Template",
-        field: "nProgramTemplateName", // نمایش نام قالب برنامه
-        flex: 3,
-        minWidth: 150,
-      },
-      {
-        headerName: "Program Duration",
-        field: "WFDuration",
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        headerName: "Program Execution Budget",
-        field: "PCostAprov",
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        headerName: "Program to plan",
-        field: "WeightWF",
-        flex: 1,
-        minWidth: 80,
-      },
-    ];
-
-    // تابع به‌روزرسانی جدول جزئیات پس از افزودن/ویرایش/حذف
-    const refreshTable = async () => {
-      if (!selectedRow?.ID) return;
-      try {
-        const result = await api.getProgramTemplateField(selectedRow.ID);
-        setProgramTemplateField(result);
-      } catch (error) {
-        console.error("Error refreshing table data:", error);
-      }
-    };
-
-    // کنترل Modal افزودن/ویرایش
-    const handleAddModalClose = () => {
-      setIsAddModalOpen(false);
-      setEditingRow(null);
-    };
-
-    const handleSaved = async () => {
-      await refreshTable();
-      setIsAddModalOpen(false);
-      setEditingRow(null);
-    };
-
-    // رویداد حذف ردیف
-    const handleDeleteRow = () => {
-      if (!selectedDetailRow) {
-        showAlert("warning", null, "Warning", "Please select a row to delete.");
-        return;
-      }
-      setShowDeleteConfirm(true);
-    };
-
-    const confirmDeleteRow = async () => {
-      try {
-        await api.deleteProgramTemplateField(selectedDetailRow.ID);
-        setProgramTemplateField((prev) =>
-          prev.filter((item) => item.ID !== selectedDetailRow.ID)
-        );
-        setSelectedDetailRow(null);
-        setShowDeleteConfirm(false);
-        showAlert("success", null, "Deleted", "Row deleted successfully.");
-      } catch (error) {
-        console.error("❌ Error deleting row:", error);
-        showAlert("error", null, "Error", "Failed to delete the row.");
-        setShowDeleteConfirm(false);
-      }
-    };
-
-    const handleSelectRow = (row: any) => {
-      // row شامل داده اصلی و همچنین فیلدهای نمایش است؛ اما فیلدهای اصلی حفظ شده‌اند
-      setSelectedDetailRow(row);
-    };
-
-    const handleEditRow = (row: any) => {
-      // در ویرایش، داده اصلی با IDهای عددی موجود است
-      setEditingRow(row);
-      setIsAddModalOpen(true);
-    };
-
-    const handleAddClick = () => {
-      setIsAddModalOpen(true);
-      setEditingRow(null);
-    };
-
+    /* ================================================================= */
+    /*                               UI                                  */
+    /* ================================================================= */
     return (
       <>
-        <TwoColumnLayout>
-          <TwoColumnLayout.Item>
+        {/* ============================= فرم اصلی ============================= */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10">
+          {/* ---------------- ستون چپ (ورودی‌ها) ---------------- */}
+          <div className="flex flex-col gap-10">
             <DynamicInput
               name="Program Name"
               type="text"
               value={programTemplateData.Name}
               placeholder="Enter program name"
               onChange={(e) => handleChange("Name", e.target.value)}
-              required={true}
+              required
             />
-          </TwoColumnLayout.Item>
 
-          <TwoColumnLayout.Item>
             <DynamicInput
               name="Duration"
               type="number"
               value={programTemplateData.Duration}
               placeholder="Enter duration"
               onChange={(e) => handleChange("Duration", Number(e.target.value))}
-              required={true}
+              required
             />
-          </TwoColumnLayout.Item>
 
-          <TwoColumnLayout.Item>
-            <DynamicInput
-              name="Cost Approved"
-              type="number"
-              value={programTemplateData.PCostAprov}
-              placeholder="Enter approved cost"
-              onChange={(e) =>
-                handleChange("PCostAprov", Number(e.target.value))
-              }
+            {/* Activity & Af budgets در یک ردیف */}
+            <div className="grid grid-cols-2 gap-6">
+              <DynamicInput
+                name="Activity Budget"
+                type="number"
+                value={programTemplateData.PCostAct}
+                placeholder="Activity budget"
+                onChange={(e) =>
+                  handleChange("PCostAct", Number(e.target.value))
+                }
+              />
+              <DynamicInput
+                name="Af Budget"
+                type="number"
+                value={programTemplateData.PCostAprov}
+                placeholder="Af budget"
+                onChange={(e) =>
+                  handleChange("PCostAprov", Number(e.target.value))
+                }
+              />
+            </div>
+
+            {/* نوع برنامه (در تصویر پایین ستون چپ) */}
+            <DynamicSelector
+              label="Type"
+              options={programTypeOptions}
+              selectedValue={selectedProgramTypeId}
+              onChange={(e) => {
+                setSelectedProgramTypeId(e.target.value);
+                handleChange(
+                  "nProgramTypeID",
+                  e.target.value ? parseInt(e.target.value) : null
+                );
+              }}
+              loading={loadingProgramTypes}
+              showButton={false}
             />
-          </TwoColumnLayout.Item>
+          </div>
 
-          {/* ListSelector برای پروژه‌های مرتبط */}
-          <TwoColumnLayout.Item>
+          {/* ---------------- ستون راست (لیست سلکتورها) ---------------- */}
+          <div className="flex flex-col gap-10">
+            {/* Related projects + سوییچ Global */}
             <ListSelector
               title="Related Projects"
               columnDefs={projectColumnDefs}
               rowData={projectsListData}
               selectedIds={selectedProjectIds}
-              onSelectionChange={handleProjectsChange}
-              showSwitcher={true}
+              onSelectionChange={(ids) =>
+                setSelectedProjectIds(ids.map(String))
+              }
+              showSwitcher
               isGlobal={programTemplateData.IsGlobal}
-              onGlobalChange={handleGlobalChange}
+              onGlobalChange={(v) => handleChange("IsGlobal", v)}
               loading={loadingProjects}
               ModalContentComponent={TableSelector}
               modalContentProps={{
                 columnDefs: projectColumnDefs,
                 rowData: projectsListData,
-                selectedRow: selectedRowData,
-                onRowDoubleClick: () => {
-                  if (selectedRowData) {
-                    const newSelection = [
-                      ...selectedProjectIds,
-                      String(selectedRowData.ID),
-                    ];
-                    handleProjectsChange(newSelection);
-                  }
-                },
-                onRowClick: (row: any) => setSelectedRowData(row),
-                onSelectButtonClick: () => {
-                  if (selectedRowData) {
-                    const newSelection = [
-                      ...selectedProjectIds,
-                      String(selectedRowData.ID),
-                    ];
-                    handleProjectsChange(newSelection);
-                  }
-                },
-                isSelectDisabled: !selectedRowData,
+                selectedRow: null,
+                onRowDoubleClick: () => {},
+                onRowClick: () => {},
+                onSelectButtonClick: () => {},
+                isSelectDisabled: true,
               }}
             />
-          </TwoColumnLayout.Item>
 
-          {/* DynamicSelector برای نوع برنامه */}
-          <TwoColumnLayout.Item>
-            <DynamicSelector
-              options={programTypeOptions}
-              selectedValue={selectedProgramTypeId}
-              onChange={(e) => {
-                handleChange(
-                  "nProgramTypeID",
-                  e.target.value ? parseInt(e.target.value) : null
-                );
-                setSelectedProgramTypeId(e.target.value);
+            {/* Meta-data selector */}
+            <ListSelector
+              title="Meta Data"
+              columnDefs={[{ field: "Name", headerName: "Name" }]}
+              rowData={metaNames.map((m) => ({ ID: m.ID, Name: m.Name }))}
+              selectedIds={selectedMetaIds}
+              onSelectionChange={(ids) =>
+                setSelectedMetaIds(ids.map(String))
+              }
+              showSwitcher={false}
+              isGlobal={false}
+              loading={loadingMeta}
+              ModalContentComponent={AddColumnForm}
+              modalContentProps={{
+                onSave: (nf: { ID: number; Name: string }) => {
+                  if (!nf) return;
+                  const id = String(nf.ID);
+                  if (!selectedMetaIds.includes(id))
+                    setSelectedMetaIds((p) => [...p, id]);
+                  if (!metaValues.find((x) => x.ID === id))
+                    setMetaValues((p) => [...p, { ID: id, Name: nf.Name }]);
+                },
+                onSuccessAdd: (nf: { ID: number; Name: string }) => {
+                  if (!nf) return;
+                  const id = String(nf.ID);
+                  if (!selectedMetaIds.includes(id))
+                    setSelectedMetaIds((p) => [...p, id]);
+                  if (!metaValues.find((x) => x.ID === id))
+                    setMetaValues((p) => [...p, { ID: id, Name: nf.Name }]);
+                },
+                entityTypeId: null,
               }}
-              label="Type"
-              showButton={true}
-              onButtonClick={handleOpenModal}
-              className="-mt-24"
-              loading={loadingProgramTypes}
             />
-          </TwoColumnLayout.Item>
+          </div>
+        </div>
 
-          {/* Modal برای انتخاب نوع برنامه */}
-          <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
-            <TableSelector
-              columnDefs={[{ headerName: "Name", field: "label" }]}
-              rowData={getRowData(currentSelector)}
-              selectedRow={selectedRowData}
-              onRowDoubleClick={handleSelectButtonClick}
-              onRowClick={handleRowClick}
-              onSelectButtonClick={handleSelectButtonClick}
-              isSelectDisabled={!selectedRowData}
-            />
-          </DynamicModal>
-
-          {/* جدول جزئیات */}
-          <TwoColumnLayout.Item span={2}>
-            <div className="overflow-x-auto pb-2">
-              <div className="h-[400px] min-w-full">
-                <DataTable
-                  columnDefs={detailColumnDefs}
-                  rowData={enhancedProgramTemplateField}
-                  onRowClick={handleSelectRow}
-                  onRowDoubleClick={handleEditRow}
-                  setSelectedRowData={setSelectedDetailRow}
-                  showAddIcon={true}
-                  showEditIcon={true}
-                  showDeleteIcon={true}
-                  showDuplicateIcon={false}
-                  onAdd={handleAddClick}
-                  onEdit={() =>
-                    selectedDetailRow
-                      ? handleEditRow(selectedDetailRow)
-                      : showAlert(
-                          "warning",
-                          null,
-                          "No selection",
-                          "Please select a row to edit."
-                        )
-                  }
-                  onDelete={handleDeleteRow}
-                  onDuplicate={() => {}}
-                  showSearch={true}
-                  isLoading={loadingFields}
-                  domLayout="normal"
-                  gridOptions={{
-                    rowSelection: "single",
-                    onGridReady: (params) => {
-                      params.api.sizeColumnsToFit();
-                      window.addEventListener("resize", () =>
-                        params.api.sizeColumnsToFit()
-                      );
-                    },
-                  }}
-                  isEditMode={isEditMode}
-                />
-              </div>
-            </div>
-          </TwoColumnLayout.Item>
-
-          {/* Modal افزودن/ویرایش فیلد برنامه */}
-          <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
-            <AddProgramTemplate
-              selectedRow={selectedRow}
-              editingRow={editingRow}
-              onSaved={handleSaved}
-              onCancel={() => {
-                setIsAddModalOpen(false);
+        {/* ============================= جدول جزئیات ============================= */}
+        <div className="mt-10">
+          <div className="h-[400px] w-full overflow-x-auto">
+            <DataTable
+              columnDefs={detailColumnDefs}
+              rowData={enhancedTemplateField}
+              onRowClick={(r) => setSelectedDetailRow(r)}
+              onRowDoubleClick={(r) => {
+                setEditingRow(r);
+                setIsAddModalOpen(true);
+              }}
+              setSelectedRowData={setSelectedDetailRow}
+              showAddIcon
+              showEditIcon
+              showDeleteIcon
+              showDuplicateIcon={false}
+              onAdd={() => {
                 setEditingRow(null);
+                setIsAddModalOpen(true);
               }}
+              onEdit={() =>
+                selectedDetailRow
+                  ? (setEditingRow(selectedDetailRow),
+                    setIsAddModalOpen(true))
+                  : showAlert(
+                      "warning",
+                      null,
+                      "No selection",
+                      "Please select a row to edit."
+                    )
+              }
+              onDelete={() => setShowDeleteConfirm(true)}
+              onDuplicate={() => {}}
+              showSearch
+              isLoading={loadingFields}
+              domLayout="normal"
+              gridOptions={{
+                rowSelection: "single",
+                onGridReady: (p) => {
+                  p.api.sizeColumnsToFit();
+                  window.addEventListener("resize", () =>
+                    p.api.sizeColumnsToFit()
+                  );
+                },
+              }}
+              isEditMode={isEditMode}
             />
-          </DynamicModal>
-        </TwoColumnLayout>
-        {/* پنجره تأیید حذف */}
+          </div>
+        </div>
+
+        {/* ============================= مودال افزودن/ویرایش ============================= */}
+        <DynamicModal
+          isOpen={isAddModalOpen}
+          onClose={() => {
+            setIsAddModalOpen(false);
+            setEditingRow(null);
+          }}
+        >
+          <AddProgramTemplate
+            selectedRow={selectedRow}
+            editingRow={editingRow}
+            onSaved={async () => {
+              if (selectedRow?.ID) {
+                const r = await api.getProgramTemplateField(selectedRow.ID);
+                setProgramTemplateField(r);
+              }
+              setIsAddModalOpen(false);
+              setEditingRow(null);
+            }}
+            onCancel={() => {
+              setIsAddModalOpen(false);
+              setEditingRow(null);
+            }}
+          />
+        </DynamicModal>
+
+        {/* ============================= تأیید حذف ============================= */}
         <DynamicConfirm
           isOpen={showDeleteConfirm}
-          onConfirm={confirmDeleteRow}
+          onConfirm={async () => {
+            try {
+              if (!selectedDetailRow) return;
+              await api.deleteProgramTemplateField(selectedDetailRow.ID);
+              setProgramTemplateField((p) =>
+                p.filter((x) => x.ID !== selectedDetailRow.ID)
+              );
+              setSelectedDetailRow(null);
+              setShowDeleteConfirm(false);
+              showAlert("success", null, "Deleted", "Row deleted successfully.");
+            } catch (err) {
+              console.error(err);
+              showAlert("error", null, "Error", "Failed to delete the row.");
+              setShowDeleteConfirm(false);
+            }
+          }}
           onClose={() => setShowDeleteConfirm(false)}
           variant="delete"
           title="Delete Confirmation"
