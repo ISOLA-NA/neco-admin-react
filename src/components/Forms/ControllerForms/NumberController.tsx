@@ -1,12 +1,15 @@
 // src/components/ControllerForms/NumberController.tsx
+//
+// نسخهٔ پایدار بدون چشمک‌زدن و ریست ورودی‌ها
+
 import React, { useState, useEffect, useRef } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 
 interface NumberControllerProps {
   onMetaChange: (meta: {
-    metaType1: string;
-    metaType2: string;
-    metaType3: string;
+    metaType1: string; // default
+    metaType2: string; // min
+    metaType3: string; // max
   }) => void;
   data?: {
     metaType1?: string;
@@ -15,87 +18,68 @@ interface NumberControllerProps {
   };
 }
 
-const NumberController: React.FC<NumberControllerProps> = ({
-  onMetaChange,
-  data,
-}) => {
-  const [minValue, setMinValue] = useState<number | "">("");
-  const [maxValue, setMaxValue] = useState<number | "">("");
-  const [defaultValue, setDefaultValue] = useState<number | "">("");
+const NumberController: React.FC<NumberControllerProps> = ({ onMetaChange, data }) => {
+  /* ───────────────────── Local state (strings) ───────────────────── */
+  const [defaultValue, setDefaultValue] = useState<string>(data?.metaType1 ?? "");
+  const [minValue,     setMinValue]     = useState<string>(data?.metaType2 ?? "");
+  const [maxValue,     setMaxValue]     = useState<string>(data?.metaType3 ?? "");
 
-  // جلوگیری از reset شدن ورودی بعد از اولین بار
-  const isFirstDataInit = useRef(true);
-  // جلوگیری از ارسال اولیه‌ی onMetaChange
-  const isFirstMetaUpdate = useRef(true);
-
-  // 1) مقداردهی اولیه از props.data **فقط یک‌بار**
+  /* ────────── Sync from props فقط وقتی واقعاً تغییر کند ──────────── */
   useEffect(() => {
-    if (data && isFirstDataInit.current) {
-      setDefaultValue(
-        data.metaType1 && data.metaType1 !== "" ? parseFloat(data.metaType1) : ""
-      );
-      setMinValue(
-        data.metaType2 && data.metaType2 !== "" ? parseFloat(data.metaType2) : ""
-      );
-      setMaxValue(
-        data.metaType3 && data.metaType3 !== "" ? parseFloat(data.metaType3) : ""
-      );
-      isFirstDataInit.current = false;
+    if (
+      data &&
+      (data.metaType1 !== defaultValue ||
+        data.metaType2 !== minValue ||
+        data.metaType3 !== maxValue)
+    ) {
+      setDefaultValue(data.metaType1 ?? "");
+      setMinValue(data.metaType2 ?? "");
+      setMaxValue(data.metaType3 ?? "");
     }
-  }, [data]);
+  }, [data?.metaType1, data?.metaType2, data?.metaType3]); // وابستگی به مقادیر ساده
 
-  // هندلرهای تغییر ورودی
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value === "" ? "" : parseFloat(e.target.value);
-    setMinValue(v);
-  };
-  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value === "" ? "" : parseFloat(e.target.value);
-    setMaxValue(v);
-  };
-  const handleDefaultChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value === "" ? "" : parseFloat(e.target.value);
-    setDefaultValue(v);
-  };
+  /* ─────────────── Notify parent؛ فقط روی تغییر واقعی ────────────── */
+  const lastSent = useRef<{ metaType1: string; metaType2: string; metaType3: string } | null>(null);
 
-  // 2) ارسال onMetaChange **بعد از اولین mount** و فقط زمانی که واقعاً کاربر مقدار رو تغییر داده
   useEffect(() => {
-    if (isFirstMetaUpdate.current) {
-      isFirstMetaUpdate.current = false;
-      return;
+    const current = { metaType1: defaultValue, metaType2: minValue, metaType3: maxValue };
+    if (
+      !lastSent.current ||
+      current.metaType1 !== lastSent.current.metaType1 ||
+      current.metaType2 !== lastSent.current.metaType2 ||
+      current.metaType3 !== lastSent.current.metaType3
+    ) {
+      onMetaChange(current);
+      lastSent.current = current;
     }
-    onMetaChange({
-      metaType1: defaultValue === "" ? "" : defaultValue.toString(),
-      metaType2: minValue === "" ? "" : minValue.toString(),
-      metaType3: maxValue === "" ? "" : maxValue.toString(),
-    });
-    // ⚠️ فقط روی stateهای عددی وابسته‌ایم
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue, minValue, maxValue]);
+  }, [defaultValue, minValue, maxValue, onMetaChange]);
 
+  /* ─────────────────────────── Render ────────────────────────────── */
   return (
     <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-4">
       <DynamicInput
         name="minValue"
         type="number"
         value={minValue}
-        onChange={handleMinChange}
+        onChange={(e) => setMinValue(e.target.value)}
         placeholder="Minimum Value (metaType2)"
         className="border-b-gray-400 focus-within:border-b-gray-700"
       />
+
       <DynamicInput
         name="maxValue"
         type="number"
         value={maxValue}
-        onChange={handleMaxChange}
+        onChange={(e) => setMaxValue(e.target.value)}
         placeholder="Maximum Value (metaType3)"
         className="border-b-gray-400 focus-within:border-b-gray-700"
       />
+
       <DynamicInput
         name="defaultValue"
         type="number"
         value={defaultValue}
-        onChange={handleDefaultChange}
+        onChange={(e) => setDefaultValue(e.target.value)}
         placeholder="Default Value (metaType1)"
         className="border-b-gray-400 focus-within:border-b-gray-700"
       />

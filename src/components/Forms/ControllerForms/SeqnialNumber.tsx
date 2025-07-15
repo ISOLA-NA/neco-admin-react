@@ -1,42 +1,117 @@
-// src/components/ControllerForms/SeqnialNumber.tsx
-import React, { useState, useEffect } from "react";
+// src/components/ControllerForms/SeqenialNumber.tsx
+import React, { useState, useEffect, useRef } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
 
 interface SeqenialNumberProps {
-  onMetaChange?: (data: any) => void;
-  data?: any;
+  /** هربار متادیتا (به جز metaType4) تغییر کند، والد را خبر کن */
+  onMetaChange?: (data: {
+    metaType1: string;             // Command
+    metaType2: string | number;    // NumberOfDigit
+    metaType3: string;             // SeparatorCharacter
+    metaTypeJson: string | null;   // Modes
+    CountInReject: boolean;        // Checkbox
+  }) => void;
+
+  /** برای فیلد metaType4 (CountOfConst) از این پروپ جداگانه استفاده می‌کنیم */
+  onMetaExtraChange?: (data: { metaType4: string | number }) => void;
+
+  /** مقادیر اولیه هنگام ادیت */
+  data?: {
+    metaType1?: string;
+    metaType2?: string | number;
+    metaType3?: string;
+    metaType4?: string | number;
+    metaTypeJson?: string;
+    CountInReject?: boolean;
+  };
 }
 
-const SeqenialNumber: React.FC<SeqenialNumberProps> = ({ onMetaChange, data }) => {
-  const [command, setCommand] = useState(data?.metaType1 || "");
-  const [numberOfDigit, setNumberOfDigit] = useState<number | string>(data?.metaType2 || "");
-  const [separatorCharacter, setSeparatorCharacter] = useState(data?.metaType3 || "");
-  const [countOfConst, setCountOfConst] = useState<number | string>(data?.metaType4 || "");
-  const [mode, setMode] = useState(data?.metaTypeJson || "");
+const modeOptions = [
+  { value: "AfterSubmit", label: "AfterSubmit" },
+  { value: "AfterAccept", label: "AfterAccept" },
+];
 
-  const modeOptions = [
-    { value: "AfterSubmit", label: "AfterSubmit" },
-    { value: "AfterAccept", label: "AfterAccept" },
-  ];
+const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
+  onMetaChange,
+  onMetaExtraChange,
+  data = {},
+}) => {
+  /* ------------ local state ------------ */
+  const [command, setCommand] = useState(data.metaType1 ?? "");
+  const [numberOfDigit, setNumberOfDigit] = useState<string | number>(
+    data.metaType2 ?? ""
+  );
+  const [separatorCharacter, setSeparatorCharacter] = useState(
+    data.metaType3 ?? ""
+  );
+  const [countOfConst, setCountOfConst] = useState<string | number>(
+    data.metaType4 ?? ""
+  );
+  const [mode, setMode] = useState(data.metaTypeJson ?? "");
+  const [countInReject, setCountInReject] = useState<boolean>(
+    !!data.CountInReject
+  );
 
-  // به‌روزرسانی metaData و ارسال آن به کامپوننت پدر
+  /* -------- sync props→state فقط در صورت تفاوت -------- */
   useEffect(() => {
-    if (onMetaChange) {
-      onMetaChange({
-        metaType1: command,
-        metaType2: numberOfDigit,
-        metaType3: separatorCharacter,
-        metaType4: countOfConst,
-        metaTypeJson: mode || null, // اگر mode انتخاب نشده باشد، null خواهد بود
-      });
-    }
-  }, [command, numberOfDigit, separatorCharacter, countOfConst, mode, onMetaChange]);
+    setCommand((p) => (p === (data.metaType1 ?? "") ? p : data.metaType1 ?? ""));
+    setNumberOfDigit((p) =>
+      p === (data.metaType2 ?? "") ? p : data.metaType2 ?? ""
+    );
+    setSeparatorCharacter((p) =>
+      p === (data.metaType3 ?? "") ? p : data.metaType3 ?? ""
+    );
+    setCountOfConst((p) =>
+      p === (data.metaType4 ?? "") ? p : data.metaType4 ?? ""
+    );
+    setMode((p) => (p === (data.metaTypeJson ?? "") ? p : data.metaTypeJson ?? ""));
+    setCountInReject((p) =>
+      p === !!data.CountInReject ? p : !!data.CountInReject
+    );
+  }, [
+    data.metaType1,
+    data.metaType2,
+    data.metaType3,
+    data.metaType4,
+    data.metaTypeJson,
+    data.CountInReject,
+  ]);
 
+  /* -------- push metaCore up (به جز metaType4) -------- */
+  const prevCoreStr = useRef("");
+  useEffect(() => {
+    if (!onMetaChange) return;
+    const core = {
+      metaType1: command,
+      metaType2: numberOfDigit,
+      metaType3: separatorCharacter,
+      metaTypeJson: mode || null,
+      CountInReject: countInReject,
+    };
+    const s = JSON.stringify(core);
+    if (s !== prevCoreStr.current) {
+      prevCoreStr.current = s;
+      onMetaChange(core);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [command, numberOfDigit, separatorCharacter, mode, countInReject]);
+
+  /* -------- push metaType4 up -------- */
+  const prevExtra = useRef<string | number | "">("");
+  useEffect(() => {
+    if (!onMetaExtraChange) return;
+    if (prevExtra.current !== countOfConst) {
+      prevExtra.current = countOfConst;
+      onMetaExtraChange({ metaType4: countOfConst });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countOfConst]);
+
+  /* ------------ UI ------------ */
   return (
-    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex items-center justify-center">
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center">
       <div className="p-4 w-full max-w-lg space-y-6">
-        {/* Command Input */}
         <DynamicInput
           name="Command"
           type="text"
@@ -46,7 +121,6 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({ onMetaChange, data }) =
         />
 
         <div className="flex items-center space-x-4">
-          {/* Number Of Digit */}
           <DynamicInput
             name="Number Of Digit"
             type="number"
@@ -55,7 +129,6 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({ onMetaChange, data }) =
             placeholder="Number Of Digit"
           />
 
-          {/* Separator Character */}
           <DynamicInput
             name="Separator Character"
             type="text"
@@ -66,7 +139,6 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({ onMetaChange, data }) =
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Count of Const */}
           <DynamicInput
             name="Count of Const"
             type="number"
@@ -75,19 +147,24 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({ onMetaChange, data }) =
             placeholder="Count of Const"
           />
 
-          {/* Count In Reject */}
-          <div className="flex items-center space-x-2">
-            {/* اگر نیاز به استفاده از Count In Reject به عنوان یک چک‌باکس دارید، می‌توانید این قسمت را اضافه کنید */}
-          </div>
+          {/* Count In Reject checkbox */}
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={countInReject}
+              onChange={(e) => setCountInReject(e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <span className="font-medium">Count In Reject</span>
+          </label>
         </div>
 
-        {/* Modes Selector */}
         <DynamicSelector
           name="Modes"
+          label="Modes"
           options={modeOptions}
           selectedValue={mode}
           onChange={(e) => setMode(e.target.value)}
-          label="Modes"
         />
       </div>
     </div>

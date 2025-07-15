@@ -4,6 +4,7 @@ import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { FaSave, FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 import AppServices, { MenuTab } from "../../../../services/api.services";
+import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
@@ -21,6 +22,7 @@ interface RowData1 {
   Name: string;
   Description: string;
   Order: number;
+  IconImageId?: string | null; 
 }
 
 // تعریف نوع فرم که فیلد Order می‌تواند عدد یا رشته باشد
@@ -29,6 +31,7 @@ type FormDataType = {
   Name: string;
   Description: string;
   Order: number | string;
+  IconImageId?: string | null;
 };
 
 const Accordion1: React.FC<Accordion1Props> = ({
@@ -42,6 +45,9 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [rowData, setRowData] = useState<RowData1[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData1 | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [iconImageId, setIconImageId] = useState<string | null>(null);
+  const [resetCounter, setResetCounter] = useState<number>(0);
+
 
   // فرم: ذخیره داده‌های فرم
   const [formData, setFormData] = useState<FormDataType>({
@@ -49,6 +55,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
     Name: "",
     Description: "",
     Order: "",
+    IconImageId: null, 
   });
 
   // حالت‌های نمایش DynamicConfirm برای عملیات‌های مختلف
@@ -116,6 +123,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
     onRowClick(row);
     if (row) {
       setFormData({ ...row });
+      setIconImageId(row.IconImageId || null);
     }
   };
 
@@ -135,7 +143,9 @@ const Accordion1: React.FC<Accordion1Props> = ({
       Name: "",
       Description: "",
       Order: "",
+      IconImageId: null,
     });
+    setIconImageId(null);
     onRowClick(null);
   };
 
@@ -179,6 +189,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
         IsVisible: true,
         ModifiedById: null,
         LastModified: null,
+        IconImageId: iconImageId || null,
       };
       console.log("Inserting MenuTab:", newMenuTab);
       showAlert("success", null, "", "MenuTabs Added successfully.");
@@ -198,6 +209,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
         Order: "",
       });
       setSelectedRow(null);
+      setIconImageId(null);
       onRowClick(null);
     } catch (error: any) {
       console.error("Error inserting MenuTab:", error);
@@ -206,8 +218,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -226,6 +238,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
         IsVisible: true,
         ModifiedById: null,
         LastModified: null,
+        IconImageId: iconImageId || null,
       };
       console.log("Updating MenuTab:", updatedMenuTab);
       showAlert("success", null, "", "MenuTab updated successfully.");
@@ -240,8 +253,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
       alert("ویرایش با خطا مواجه شد.");
     } finally {
@@ -267,6 +280,16 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const closeErrorConfirm = () => {
     setErrorConfirmOpen(false);
   };
+
+  const handleUploadSuccess = (insertModel: InsertModel) => {
+    setIconImageId(insertModel.ID || null);
+    setFormData(prev => ({
+      ...prev,
+      IconImageId: insertModel.ID || null,
+    }));
+  };
+
+
 
   return (
     <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
@@ -318,11 +341,11 @@ const Accordion1: React.FC<Accordion1Props> = ({
               showAddIcon={false}
               showDeleteIcon={false}
               showViewIcon={false}
-              onView={() => {}}
+              onView={() => { }}
               onAdd={handleNew}
               onEdit={handleUpdate}
               onDelete={handleDeleteClick}
-              onDuplicate={() => {}}
+              onDuplicate={() => { }}
               isLoading={isLoading}
               showSearch={false}
               domLayout="normal"
@@ -366,52 +389,57 @@ const Accordion1: React.FC<Accordion1Props> = ({
                 className="mt-2"
               />
             </div>
+            <div className="mt-4">
+              <FileUploadHandler
+                selectedFileId={iconImageId}
+                onUploadSuccess={handleUploadSuccess}
+                resetCounter={resetCounter}
+                onReset={() => setResetCounter(prev => prev + 1)}
+                isEditMode={!!selectedRow}
+              />
+            </div>
             <div className="flex items-center gap-4 mt-4">
-            <button
-  onClick={handleInsert}
-  disabled={!!selectedRow}
-  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-    !!selectedRow
-      ? "bg-green-300 text-gray-200 cursor-not-allowed"
-      : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-  }`}
->
-  <FaSave /> Save
-</button>
+              <button
+                onClick={handleInsert}
+                disabled={!!selectedRow}
+                className={`flex items-center gap-2 px-4 py-2 rounded transition ${!!selectedRow
+                    ? "bg-green-300 text-gray-200 cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+                  }`}
+              >
+                <FaSave /> Save
+              </button>
 
               <button
                 onClick={handleUpdate}
                 disabled={!selectedRow}
-                className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                  selectedRow
+                className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
                     ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
                     : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                }`}
+                  }`}
               >
                 <FaEdit /> Update
               </button>
               <button
                 onClick={handleDeleteClick}
                 disabled={!selectedRow}
-                className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-                  selectedRow
+                className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
                     ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
                     : "bg-red-300 text-gray-200 cursor-not-allowed"
-                }`}
+                  }`}
               >
                 <FaTrash /> Delete
               </button>
               <button
-  onClick={handleNew}
-  disabled={!selectedRow}
-  className={`flex items-center gap-2 px-4 py-2 rounded transition ${
-    !selectedRow
-      ? "bg-gray-300 text-gray-200 cursor-not-allowed"
-      : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-  }`}
->
-  <FaPlus /> New
-</button>
+                onClick={handleNew}
+                disabled={!selectedRow}
+                className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
+                    ? "bg-gray-300 text-gray-200 cursor-not-allowed"
+                    : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+                  }`}
+              >
+                <FaPlus /> New
+              </button>
 
             </div>
           </div>

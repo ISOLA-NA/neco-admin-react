@@ -1,11 +1,15 @@
+// src/components/ControllerForms/LookUp/LookUpAdvanceTable.tsx
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { v4 as uuidv4 } from "uuid";
+
 import { useApi } from "../../../context/ApiContext";
+import AppServices from "../../../services/api.services";
+
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
-import AppServices from "../../../services/api.services";
 
-interface LookUpFormsProps {
+interface LookUpAdvanceTableProps {
   data?: {
     metaType1?: string | number | null;
     metaType2?: string | number | null;
@@ -22,133 +26,133 @@ interface LookUpFormsProps {
 
 interface TableRow {
   ID: string;
-  SrcFieldID: string | null;
-  FilterOpration: string | null;
+  SrcFieldID: string;
+  FilterOpration: string;
   FilterText: string;
-  DesFieldID: string | null;
+  DesFieldID: string;
 }
 
-const LookUpForms: React.FC<LookUpFormsProps> = ({
-  data,
+const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
+  data = {},
   onMetaChange,
   onMetaExtraChange,
 }) => {
+  // ─── Helpers ─────────────────────────────────────────────
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
+  const genId = () =>
+    typeof crypto?.randomUUID === "function" ? crypto.randomUUID() : uuidv4();
 
-  const [meta, setMeta] = useState({
-    metaType1: data?.metaType1 ? String(data.metaType1) : "",
-    metaType2: data?.metaType2 ? String(data.metaType2) : "",
-    metaType3: data?.metaType3 || "drop",
-    metaType4: data?.metaType4 || "[]",
-    metaType5: data?.metaType5 || "",
-    LookupMode: data?.LookupMode ? String(data.LookupMode) : "",
-  });
-  const [removeSameName, setRemoveSameName] = useState(!!data?.CountInReject);
-  const [oldLookup, setOldLookup] = useState(!!data?.BoolMeta1);
-  const [tableData, setTableData] = useState<TableRow[]>([]);
-  const [entities, setEntities] = useState<{ ID: any; Name: string }[]>([]);
-  const [fields, setFields] = useState<any[]>([]);
-  const [modesList, setModesList] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [operationList, setOperationList] = useState<
-    { value: string; label: string }[]
-  >([]);
-
-  const isFirstLoad = useRef(true);
+  // ─── Refs ────────────────────────────────────────────────
   const initialModeRef = useRef(true);
 
+  // ─── State ───────────────────────────────────────────────
+  const [meta, setMeta] = useState({
+    metaType1: "",
+    metaType2: "",
+    metaType3: "drop",
+    metaType4: "[]",
+    metaType5: "",
+    LookupMode: "",
+  });
+  const [removeSameName, setRemoveSameName] = useState(false);
+  const [oldLookup, setOldLookup] = useState(false);
+
+  const [entities, setEntities] = useState<{ ID: any; Name: string }[]>([]);
+  const [fields, setFields] = useState<any[]>([]);
+  const [modesList, setModesList] = useState<{ value: string; label: string }[]>([]);
+  const [operationList, setOperationList] = useState<{ value: string; label: string }[]>([]);
+
+  const [tableData, setTableData] = useState<TableRow[]>([]);
+
+  // ─── Sync initial props.data on mount & when data changes ───
   useEffect(() => {
+    // parse metaType4 into tableData
+    let rows: any[] = [];
     try {
-      const parsed = JSON.parse(data?.metaType4 || "[]");
-      if (Array.isArray(parsed)) {
-        setTableData(
-          parsed.map((item: any) => ({
-            ID: String(item.ID ?? crypto.randomUUID()),
+      rows = JSON.parse(data.metaType4 || "[]");
+    } catch {}
+    setTableData(
+      Array.isArray(rows)
+        ? rows.map(item => ({
+            ID: String(item.ID ?? genId()),
             SrcFieldID: item.SrcFieldID || "",
             FilterOpration: item.FilterOpration || "",
             FilterText: item.FilterText || "",
             DesFieldID: item.DesFieldID || "",
           }))
-        );
-      }
-    } catch {
-      setTableData([]);
-    }
+        : []
+    );
 
+    // sync other meta
+    setMeta({
+      metaType1: data.metaType1 != null ? String(data.metaType1) : "",
+      metaType2: data.metaType2 != null ? String(data.metaType2) : "",
+      metaType3: data.metaType3 || "drop",
+      metaType4: data.metaType4 || "[]",
+      metaType5: data.metaType5 || "",
+      LookupMode: data.LookupMode != null ? String(data.LookupMode) : "",
+    });
+    setRemoveSameName(!!data.CountInReject);
+    setOldLookup(!!data.BoolMeta1);
+
+    initialModeRef.current = true;
+  }, [data]);
+
+  // ─── Load entities & enums ─────────────────────────────────
+  useEffect(() => {
     getAllEntityType()
-      .then((res) => Array.isArray(res) && setEntities(res))
+      .then(res => Array.isArray(res) && setEntities(res))
       .catch(console.error);
 
     AppServices.getEnum({ str: "lookMode" })
-      .then((resp) =>
-        setModesList(
-          Object.entries(resp).map(([k, v]) => ({ value: String(v), label: k }))
-        )
+      .then(resp =>
+        setModesList(Object.entries(resp).map(([k, v]) => ({
+          value: String(v),
+          label: k
+        })))
       )
       .catch(console.error);
 
     AppServices.getEnum({ str: "FilterOpration" })
-      .then((resp) =>
-        setOperationList(
-          Object.entries(resp).map(([k, v]) => ({ value: String(v), label: k }))
-        )
+      .then(resp =>
+        setOperationList(Object.entries(resp).map(([k, v]) => ({
+          value: String(v),
+          label: k
+        })))
       )
       .catch(console.error);
-
-    onMetaChange?.({
-      ...data,
-      ...meta,
-      CountInReject: removeSameName,
-      BoolMeta1: oldLookup,
-    });
-
-    isFirstLoad.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ─── Once modesList loaded, restore LookupMode ──────────────
   useEffect(() => {
     if (
       initialModeRef.current &&
       modesList.length > 0 &&
-      data?.LookupMode != null
+      data.LookupMode != null
     ) {
-      const modeValue = String(data.LookupMode);
-      if (modesList.some((m) => m.value === modeValue)) {
-        setMeta((prev) => ({ ...prev, LookupMode: modeValue }));
-        onMetaChange?.({
-          ...data,
-          ...meta,
-          LookupMode: modeValue,
-          CountInReject: removeSameName,
-          BoolMeta1: oldLookup,
-        });
+      const mv = String(data.LookupMode);
+      if (modesList.some(m => m.value === mv)) {
+        setMeta(prev => ({ ...prev, LookupMode: mv }));
       }
       initialModeRef.current = false;
     }
-  }, [
-    modesList,
-    data?.LookupMode,
-    onMetaChange,
-    data,
-    meta,
-    removeSameName,
-    oldLookup,
-  ]);
+  }, [modesList, data.LookupMode]);
 
+  // ─── Load available fields when metaType1 changes ───────────
   useEffect(() => {
-    const id = Number(meta.metaType1);
-    if (!isNaN(id) && id) {
-      getEntityFieldByEntityTypeId(id)
-        .then((res) => setFields(Array.isArray(res) ? res : []))
+    const etId = Number(meta.metaType1);
+    if (!isNaN(etId) && etId > 0) {
+      getEntityFieldByEntityTypeId(etId)
+        .then(res => setFields(Array.isArray(res) ? res : []))
         .catch(console.error);
     } else {
       setFields([]);
     }
-  }, [meta.metaType1, getEntityFieldByEntityTypeId]);
+  }, [meta.metaType1]);
 
-  const handleMetaChange = (partial: Partial<typeof meta>) => {
-    const next = { ...meta, ...partial };
+  // ─── Handlers ──────────────────────────────────────────────
+  const pushMeta = (patch: Partial<typeof meta>) => {
+    const next = { ...meta, ...patch };
     setMeta(next);
     onMetaChange?.({
       ...data,
@@ -158,32 +162,20 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     });
   };
 
-  const handleCheckbox = (
-    name: "removeSameName" | "oldLookup",
-    value: boolean
-  ) => {
-    if (name === "removeSameName") {
-      setRemoveSameName(value);
-      onMetaChange?.({
-        ...data,
-        ...meta,
-        CountInReject: value,
-        BoolMeta1: oldLookup,
-      });
-    } else {
-      setOldLookup(value);
-      onMetaChange?.({
-        ...data,
-        ...meta,
-        CountInReject: removeSameName,
-        BoolMeta1: value,
-      });
-    }
+  const toggleCheckbox = (key: "removeSameName" | "oldLookup", val: boolean) => {
+    if (key === "removeSameName") setRemoveSameName(val);
+    else setOldLookup(val);
+    onMetaChange?.({
+      ...data,
+      ...meta,
+      CountInReject: key === "removeSameName" ? val : removeSameName,
+      BoolMeta1: key === "oldLookup" ? val : oldLookup,
+    });
   };
 
   const handleAddRow = () => {
     const newRow: TableRow = {
-      ID: crypto.randomUUID(),
+      ID: genId(),
       SrcFieldID: "",
       FilterOpration: "",
       FilterText: "",
@@ -191,58 +183,53 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     };
     const next = [...tableData, newRow];
     setTableData(next);
-
-    const newMeta4 = JSON.stringify(next);
-    setMeta((prev) => ({ ...prev, metaType4: newMeta4 }));
-    onMetaExtraChange?.({ metaType4: newMeta4 });
+    const json = JSON.stringify(next);
+    setMeta(prev => ({ ...prev, metaType4: json }));
+    onMetaExtraChange?.({ metaType4: json });
   };
 
-  const handleCellValueChanged = (event: any) => {
-    const updatedRow = event.data as TableRow;
-    const next = tableData.map((r) =>
-      r.ID === updatedRow.ID ? updatedRow : r
-    );
+  const handleCellValueChanged = (e: any) => {
+    const updated = e.data as TableRow;
+    const next = tableData.map(r => (r.ID === updated.ID ? updated : r));
     setTableData(next);
-
-    const newMeta4 = JSON.stringify(next);
-    setMeta((prev) => ({ ...prev, metaType4: newMeta4 }));
-    onMetaExtraChange?.({ metaType4: newMeta4 });
+    const json = JSON.stringify(next);
+    setMeta(prev => ({ ...prev, metaType4: json }));
+    onMetaExtraChange?.({ metaType4: json });
   };
 
-  const columnDefs = useMemo(
-    () => [
-      {
-        headerName: "Src Field",
-        field: "SrcFieldID",
-        editable: true,
-        cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
-        valueFormatter: (p: any) =>
-          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
-      },
-      {
-        headerName: "Operation",
-        field: "FilterOpration",
-        editable: true,
-        cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: operationList.map((o) => o.value) },
-        valueFormatter: (p: any) =>
-          operationList.find((o) => o.value === p.value)?.label || p.value,
-      },
-      { headerName: "Filter Text", field: "FilterText", editable: true },
-      {
-        headerName: "Des Field",
-        field: "DesFieldID",
-        editable: true,
-        cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
-        valueFormatter: (p: any) =>
-          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
-      },
-    ],
-    [fields, operationList]
-  );
+  // ─── AG‑Grid columnDefs ────────────────────────────────────
+  const columnDefs = useMemo(() => [
+    {
+      headerName: "Src Field",
+      field: "SrcFieldID",
+      editable: true,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: { values: fields.map(f => String(f.ID)) },
+      valueFormatter: (p: any) =>
+        fields.find(f => String(f.ID) === p.value)?.DisplayName || p.value,
+    },
+    {
+      headerName: "Operation",
+      field: "FilterOpration",
+      editable: true,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: { values: operationList.map(o => o.value) },
+      valueFormatter: (p: any) =>
+        operationList.find(o => o.value === p.value)?.label || p.value,
+    },
+    { headerName: "Filter Text", field: "FilterText", editable: true },
+    {
+      headerName: "Des Field",
+      field: "DesFieldID",
+      editable: true,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: { values: fields.map(f => String(f.ID)) },
+      valueFormatter: (p: any) =>
+        fields.find(f => String(f.ID) === p.value)?.DisplayName || p.value,
+    },
+  ], [fields, operationList]);
 
+  // ─── Render ────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
       <div className="flex gap-8">
@@ -250,12 +237,9 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
           <DynamicSelector
             name="getInformationFrom"
             label="Get information from"
-            options={entities.map((e) => ({
-              value: String(e.ID),
-              label: e.Name,
-            }))}
+            options={entities.map(e => ({ value: String(e.ID), label: e.Name }))}
             selectedValue={meta.metaType1}
-            onChange={(e) => handleMetaChange({ metaType1: e.target.value })}
+            onChange={e => pushMeta({ metaType1: e.target.value })}
           />
 
           <DynamicSelector
@@ -266,14 +250,15 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
               label: f.DisplayName,
             }))}
             selectedValue={meta.metaType2}
-            onChange={(e) => handleMetaChange({ metaType2: e.target.value })}
+            onChange={e => pushMeta({ metaType2: e.target.value })}
           />
 
           <PostPickerList
             sourceType="projects"
             initialMetaType={meta.metaType5}
+            data={{ metaType5: meta.metaType5 || undefined }}
             metaFieldKey="metaType5"
-            onMetaChange={(o) => handleMetaChange(o)}
+            onMetaChange={o => pushMeta(o)}
             label="Default Projects"
             fullWidth
           />
@@ -281,7 +266,6 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
       </div>
 
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
-        {/* {fields.length > 0 && ( */}
         <DataTable
           columnDefs={columnDefs}
           rowData={tableData}
@@ -295,10 +279,9 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
           showDuplicateIcon={false}
           onRowDoubleClick={() => {}}
         />
-        {/* )} */}
       </div>
     </div>
   );
 };
 
-export default LookUpForms;
+export default LookUpAdvanceTable;

@@ -207,6 +207,7 @@ export interface MenuTab {
   nMenuId: number;
   IsVisible: boolean;
   LastModified: string | null;
+  IconImageId?: string | null;
 }
 
 // Interface for MenuGroup

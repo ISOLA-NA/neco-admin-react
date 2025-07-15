@@ -1,13 +1,16 @@
-// src/components/ControllerForms/LookUpForms.tsx
-
+// src/components/ControllerForms/LookUp.tsx
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { v4 as uuidv4 } from "uuid";
+
 import { useApi } from "../../../context/ApiContext";
+import AppServices from "../../../services/api.services";
+
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
-import AppServices from "../../../services/api.services";
 
-interface LookUpFormsProps {
+/* ──────────────── Types ──────────────── */
+interface LookUpProps {
   data?: {
     metaType1?: string | number | null;
     metaType2?: string | number | null;
@@ -24,30 +27,40 @@ interface LookUpFormsProps {
 
 interface TableRow {
   ID: string;
-  SrcFieldID: string | null;
-  FilterOpration: string | null;
+  SrcFieldID: string;
+  FilterOpration: string;
   FilterText: string;
-  DesFieldID: string | null;
+  DesFieldID: string;
 }
 
-const LookUpForms: React.FC<LookUpFormsProps> = ({
-  data,
+/* ──────────────── Component ──────────────── */
+const LookUp: React.FC<LookUpProps> = ({
+  data = {},
   onMetaChange,
   onMetaExtraChange,
 }) => {
+  /* helpers */
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
+  const genId = () =>
+    typeof crypto?.randomUUID === "function"
+      ? crypto.randomUUID()
+      : uuidv4();
 
+  /* refs */
+  const initialModeRef = useRef(true);
+
+  /* state */
   const [meta, setMeta] = useState({
-    metaType1: data?.metaType1 ? String(data.metaType1) : "",
-    metaType2: data?.metaType2 ? String(data.metaType2) : "",
-    metaType3: data?.metaType3 || "drop",
-    metaType4: data?.metaType4 || "[]",
-    metaType5: data?.metaType5 || "",
-    LookupMode: data?.LookupMode != null ? String(data.LookupMode) : "",
+    metaType1: "",
+    metaType2: "",
+    metaType3: "drop",
+    metaType4: "[]",
+    metaType5: "",
+    LookupMode: "",
   });
+  const [removeSameName, setRemoveSameName] = useState(false);
+  const [oldLookup, setOldLookup] = useState(false);
 
-  const [removeSameName, setRemoveSameName] = useState(!!data?.CountInReject);
-  const [oldLookup, setOldLookup] = useState(!!data?.BoolMeta1);
   const [tableData, setTableData] = useState<TableRow[]>([]);
   const [entities, setEntities] = useState<{ ID: any; Name: string }[]>([]);
   const [fields, setFields] = useState<any[]>([]);
@@ -58,92 +71,89 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     { value: string; label: string }[]
   >([]);
 
-  const initialModeRef = useRef(true);
-
+  /* ─── sync from props.data (edit) ─── */
   useEffect(() => {
-    // metaType4 → جدول پیش‌فرض
+    let parsed: any[] = [];
     try {
-      const parsed = JSON.parse(data?.metaType4 || "[]");
-      if (Array.isArray(parsed)) {
-        setTableData(
-          parsed.map((item: any) => ({
-            ID: String(item.ID ?? crypto.randomUUID()),
-            SrcFieldID: item.SrcFieldID || "",
-            FilterOpration: item.FilterOpration || "",
-            FilterText: item.FilterText || "",
-            DesFieldID: item.DesFieldID || "",
-          }))
-        );
-      }
-    } catch {
-      setTableData([]);
-    }
+      parsed = JSON.parse(data.metaType4 || "[]");
+    } catch {}
 
+    setTableData(
+      Array.isArray(parsed)
+        ? parsed.map((it) => ({
+            ID: String(it.ID ?? genId()),
+            SrcFieldID: it.SrcFieldID || "",
+            FilterOpration: it.FilterOpration || "",
+            FilterText: it.FilterText || "",
+            DesFieldID: it.DesFieldID || "",
+          }))
+        : []
+    );
+
+    setMeta({
+      metaType1: data.metaType1 != null ? String(data.metaType1) : "",
+      metaType2: data.metaType2 != null ? String(data.metaType2) : "",
+      metaType3: data.metaType3 || "drop",
+      metaType4: data.metaType4 || "[]",
+      metaType5: data.metaType5 || "",
+      LookupMode: data.LookupMode != null ? String(data.LookupMode) : "",
+    });
+    setRemoveSameName(!!data.CountInReject);
+    setOldLookup(!!data.BoolMeta1);
+
+    initialModeRef.current = true;
+  }, [data]);
+
+  /* ─── load entities + enums ─── */
+  useEffect(() => {
     getAllEntityType()
-      .then((res) => Array.isArray(res) && setEntities(res))
+      .then((r) => Array.isArray(r) && setEntities(r))
       .catch(console.error);
 
     AppServices.getEnum({ str: "lookMode" })
-      .then((resp) =>
+      .then((r) =>
         setModesList(
-          Object.entries(resp).map(([k, v]) => ({
-            value: String(v),
-            label: k,
-          }))
+          Object.entries(r).map(([k, v]) => ({ value: String(v), label: k }))
         )
       )
       .catch(console.error);
 
     AppServices.getEnum({ str: "FilterOpration" })
-      .then((resp) =>
+      .then((r) =>
         setOperationList(
-          Object.entries(resp).map(([k, v]) => ({
-            value: String(v),
-            label: k,
-          }))
+          Object.entries(r).map(([k, v]) => ({ value: String(v), label: k }))
         )
       )
       .catch(console.error);
-  }, []);
+  }, [getAllEntityType]);
 
-  // ست کردن مقدار LookupMode در حالت ادیت
+  /* ─── after modes loaded, restore LookupMode ─── */
   useEffect(() => {
     if (
       initialModeRef.current &&
-      modesList.length > 0 &&
-      data?.LookupMode !== undefined &&
-      data?.LookupMode !== null
+      modesList.length &&
+      data.LookupMode != null
     ) {
-      const lookupStr = String(data.LookupMode);
-      const exists = modesList.some((m) => m.value === lookupStr);
-      if (exists) {
-        setMeta((prev) => ({ ...prev, LookupMode: lookupStr }));
+      const mv = String(data.LookupMode);
+      if (modesList.some((m) => m.value === mv)) {
+        setMeta((p) => ({ ...p, LookupMode: mv }));
       }
       initialModeRef.current = false;
     }
-  }, [modesList, data?.LookupMode]);
+  }, [modesList, data.LookupMode]);
 
-  useEffect(() => {
-    onMetaChange?.({
-      ...data,
-      ...meta,
-      CountInReject: removeSameName,
-      BoolMeta1: oldLookup,
-    });
-  }, [meta, removeSameName, oldLookup]);
-
+  /* ─── load fields when metaType1 changes ─── */
   useEffect(() => {
     const id = Number(meta.metaType1);
-    if (!isNaN(id) && id) {
+    if (!isNaN(id) && id > 0) {
       getEntityFieldByEntityTypeId(id)
-        .then((res) => setFields(Array.isArray(res) ? res : []))
+        .then((r) => setFields(Array.isArray(r) ? r : []))
         .catch(console.error);
-    } else {
-      setFields([]);
-    }
-  }, [meta.metaType1]);
+    } else setFields([]);
+  }, [meta.metaType1, getEntityFieldByEntityTypeId]);
 
-  const handleMetaChange = (partial: Partial<typeof meta>) => {
+  /* ─── helpers ─── */
+  const pushMeta = (partial: Partial<typeof meta>) => {
     const next = { ...meta, ...partial };
     setMeta(next);
     onMetaChange?.({
@@ -154,20 +164,24 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     });
   };
 
-  const handleCheckbox = (
-    name: "removeSameName" | "oldLookup",
-    value: boolean
+  const toggleCheck = (
+    key: "removeSameName" | "oldLookup",
+    val: boolean
   ) => {
-    if (name === "removeSameName") {
-      setRemoveSameName(value);
-    } else {
-      setOldLookup(value);
-    }
+    if (key === "removeSameName") setRemoveSameName(val);
+    else setOldLookup(val);
+
+    onMetaChange?.({
+      ...data,
+      ...meta,
+      CountInReject: key === "removeSameName" ? val : removeSameName,
+      BoolMeta1: key === "oldLookup" ? val : oldLookup,
+    });
   };
 
-  const handleAddRow = () => {
+  const addRow = () => {
     const newRow: TableRow = {
-      ID: crypto.randomUUID(),
+      ID: genId(),
       SrcFieldID: "",
       FilterOpration: "",
       FilterText: "",
@@ -175,22 +189,21 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     };
     const next = [...tableData, newRow];
     setTableData(next);
-    const meta4 = JSON.stringify(next);
-    setMeta((prev) => ({ ...prev, metaType4: meta4 }));
-    onMetaExtraChange?.({ metaType4: meta4 });
+    const json = JSON.stringify(next);
+    setMeta((p) => ({ ...p, metaType4: json }));
+    onMetaExtraChange?.({ metaType4: json });
   };
 
-  const handleCellValueChanged = (event: any) => {
-    const updatedRow = event.data as TableRow;
-    const next = tableData.map((r) =>
-      r.ID === updatedRow.ID ? updatedRow : r
-    );
+  const onCellChange = (e: any) => {
+    const upd = e.data as TableRow;
+    const next = tableData.map((r) => (r.ID === upd.ID ? upd : r));
     setTableData(next);
-    const meta4 = JSON.stringify(next);
-    setMeta((prev) => ({ ...prev, metaType4: meta4 }));
-    onMetaExtraChange?.({ metaType4: meta4 });
+    const json = JSON.stringify(next);
+    setMeta((p) => ({ ...p, metaType4: json }));
+    onMetaExtraChange?.({ metaType4: json });
   };
 
+  /* ─── AG‑Grid columns ─── */
   const columnDefs = useMemo(
     () => [
       {
@@ -225,9 +238,11 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
     [fields, operationList]
   );
 
+  /* ─── Render ─── */
   return (
     <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
       <div className="flex gap-8">
+        {/* ===== ستون چپ ===== */}
         <div className="flex flex-col space-y-6 w-1/2">
           <DynamicSelector
             name="getInformationFrom"
@@ -237,7 +252,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
               label: e.Name,
             }))}
             selectedValue={meta.metaType1}
-            onChange={(e) => handleMetaChange({ metaType1: e.target.value })}
+            onChange={(e) => pushMeta({ metaType1: e.target.value })}
           />
 
           <DynamicSelector
@@ -248,7 +263,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
               label: f.DisplayName,
             }))}
             selectedValue={meta.metaType2}
-            onChange={(e) => handleMetaChange({ metaType2: e.target.value })}
+            onChange={(e) => pushMeta({ metaType2: e.target.value })}
           />
 
           <DynamicSelector
@@ -256,47 +271,51 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
             label="Modes"
             options={modesList}
             selectedValue={meta.LookupMode}
-            onChange={(e) => handleMetaChange({ LookupMode: e.target.value })}
+            onChange={(e) => pushMeta({ LookupMode: e.target.value })}
           />
 
           <PostPickerList
             sourceType="projects"
             initialMetaType={meta.metaType5}
+            data={{ metaType5: meta.metaType5 || undefined }}
             metaFieldKey="metaType5"
-            onMetaChange={(o) => handleMetaChange(o)}
+            onMetaChange={(o) => pushMeta(o)}
             label="Default Projects"
             fullWidth
           />
         </div>
 
+        {/* ===== ستون راست ===== */}
         <div className="flex flex-col space-y-6 w-1/2">
+          {/* --- نحوهٔ نمایش --- */}
           <div className="space-y-2">
             <label className="block font-medium">Display choices using:</label>
-            {["drop", "radio", "check"].map((type) => (
-              <label key={type} className="flex items-center gap-2">
+            {["drop", "radio", "check"].map((t) => (
+              <label key={t} className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="displayType"
-                  value={type}
-                  checked={meta.metaType3 === type}
-                  onChange={() => handleMetaChange({ metaType3: type })}
+                  value={t}
+                  checked={meta.metaType3 === t}
+                  onChange={() => pushMeta({ metaType3: t })}
                 />
-                {type === "drop"
-                  ? "Drop-Down Menu"
-                  : type === "radio"
+                {t === "drop"
+                  ? "Drop‑Down Menu"
+                  : t === "radio"
                   ? "Radio Buttons"
-                  : "Checkboxes (multiple)"}
+                  : "Checkboxes (allow multiple selections)"}
               </label>
             ))}
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* --- چک‌باکس‌ها --- */}
+          <div className="flex items-center gap-6">
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={removeSameName}
                 onChange={(e) =>
-                  handleCheckbox("removeSameName", e.target.checked)
+                  toggleCheck("removeSameName", e.target.checked)
                 }
               />
               Remove Same Name
@@ -305,7 +324,7 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
               <input
                 type="checkbox"
                 checked={oldLookup}
-                onChange={(e) => handleCheckbox("oldLookup", e.target.checked)}
+                onChange={(e) => toggleCheck("oldLookup", e.target.checked)}
               />
               Old Lookup
             </label>
@@ -313,13 +332,14 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
         </div>
       </div>
 
+      {/* ===== جدول ===== */}
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
         <DataTable
           columnDefs={columnDefs}
           rowData={tableData}
           showAddIcon
-          onAdd={handleAddRow}
-          onCellValueChanged={handleCellValueChanged}
+          onAdd={addRow}
+          onCellValueChanged={onCellChange}
           domLayout="normal"
           showSearch={false}
           showEditIcon={false}
@@ -332,4 +352,4 @@ const LookUpForms: React.FC<LookUpFormsProps> = ({
   );
 };
 
-export default LookUpForms;
+export default LookUp;

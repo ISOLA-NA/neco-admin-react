@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect } from "react";
+// src/components/ControllerForms/PictureBoxFile.tsx
+import React, { useState, useEffect, useCallback } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicModal from "../../utilities/DynamicModal";
 import { FaTrash, FaEye, FaSync, FaUpload } from "react-icons/fa";
@@ -17,86 +18,100 @@ interface InsertModel {
   FileType: string | null;
 }
 
-interface AttachFileProps {
-  onMetaChange?: (data: any) => void;
-  data?: any;
+interface PictureBoxFileProps {
+  onMetaChange?: (meta: { metaType1: string | null }) => void;
+  data?: { metaType1?: string | null; fileName?: string };
 }
 
-const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(data?.metaType1 || null);
-  const [fileName, setFileName] = useState<string>(data?.fileName || "");
-  const [resetCounter, setResetCounter] = useState<number>(0);
+const PictureBoxFile: React.FC<PictureBoxFileProps> = ({
+  data = {},
+  onMetaChange,
+}) => {
+  /* ---------------- state ---------------- */
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(
+    data.metaType1 ?? null
+  );
+  const [fileName, setFileName] = useState<string>(data.fileName ?? "");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isNewUpload, setIsNewUpload] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNewUpload, setIsNewUpload] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [resetCounter, setResetCounter] = useState(0); // برای ریست input
 
-  const isEditMode = !!data?.metaType1;
+  const isEditMode = !!selectedFileId; // بر اساس استیت فعلی
 
-  // ✅ لود فایل از سرور در حالت edit
+  /* -------- بارگذاری پیش‌نمایش در حالت ادیت -------- */
   useEffect(() => {
-    if (!selectedFileId || isNewUpload) return;
+    let revokeUrl: string | undefined;
 
-    fileService
-      .getFile(selectedFileId)
-      .then((res) => {
-        setFileName(res.data.FileName);
-        const path = {
-          FileName: res.data.FileIQ + res.data.FileType,
-          FolderName: res.data.FolderName,
+    const fetchPreview = async () => {
+      if (!selectedFileId || isNewUpload) return;
+
+      setIsLoading(true);
+      try {
+        const metaRes = await fileService.getFile(selectedFileId);
+        const {
+          FileIQ,
+          FileType,
+          FileName: serverFileName,
+          FolderName,
+        } = metaRes.data;
+
+        setFileName(serverFileName);
+
+        const downloadRes = await fileService.download({
+          FileName: `${FileIQ}${FileType}`,
+          FolderName,
           cacheBust: Date.now(),
-        };
-        return fileService.download(path);
-      })
-      .then((downloadRes) => {
-        const uint8Array = new Uint8Array(downloadRes.data);
-        let mimeType = "application/octet-stream";
-        const ext = fileName.split(".").pop()?.toLowerCase();
-        if (ext === "jpg" || ext === "jpeg") mimeType = "image/jpeg";
-        else if (ext === "png") mimeType = "image/png";
+        });
 
-        const blob = new Blob([uint8Array], { type: mimeType });
-        const objectUrl = URL.createObjectURL(blob);
-        setPreviewUrl(objectUrl);
-      })
-      .catch((err) => {
+        const mime =
+          FileType?.toLowerCase() === ".jpg" || FileType?.toLowerCase() === ".jpeg"
+            ? "image/jpeg"
+            : FileType?.toLowerCase() === ".png"
+            ? "image/png"
+            : "application/octet-stream";
+
+        const blob = new Blob([new Uint8Array(downloadRes.data)], { type: mime });
+        const url = URL.createObjectURL(blob);
+        revokeUrl = url;
+        setPreviewUrl(url);
+      } catch (err) {
         console.error("Preview error:", err);
-      });
+        setPreviewUrl(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPreview();
+    return () => {
+      if (revokeUrl) URL.revokeObjectURL(revokeUrl);
+    };
   }, [selectedFileId, isNewUpload]);
 
-  const handleUploadSuccess = (insertedModel: InsertModel) => {
-    setSelectedFileId(insertedModel.ID || null);
-    setFileName(insertedModel.FileName);
-    if (onMetaChange) {
-      onMetaChange({ metaType1: insertedModel.ID || null });
-    }
+  /* -------- helpers -------- */
+  const pushMeta = (id: string | null) => onMetaChange?.({ metaType1: id });
+
+  const handleUploadSuccess = (inserted: InsertModel) => {
+    setSelectedFileId(inserted.ID || null);
+    setFileName(inserted.FileName);
+    pushMeta(inserted.ID || null);
   };
 
   const handleReset = () => {
     setSelectedFileId(null);
-    setResetCounter((prev) => prev + 1);
     setFileName("");
-    setIsNewUpload(false);
     setPreviewUrl(null);
-    if (onMetaChange) {
-      onMetaChange({ metaType1: null });
-    }
+    setIsNewUpload(false);
+    pushMeta(null);
+    setResetCounter((c) => c + 1);
   };
 
-  const handleShowFile = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (previewUrl) {
-      setIsModalOpen(true);
-    } else {
-      alert("No file uploaded!");
-    }
-  };
+  const handleTriggerUpload = () =>
+    (document.getElementById("hidden-upload-trigger") as HTMLInputElement)?.click();
 
-  const handleTriggerUpload = () => {
-    const input = document.getElementById("hidden-upload-trigger") as HTMLInputElement;
-    input?.click();
-  };
-
+  /* -------- آپلود فایل -------- */
   const uploadFile = async (file: File) => {
     try {
       setIsLoading(true);
@@ -104,7 +119,6 @@ const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
       const ext = file.name.split(".").pop()?.toLowerCase();
       if (!["jpg", "jpeg", "png"].includes(ext || "")) {
         alert("Invalid file type. Only jpg, jpeg, png allowed.");
-        setIsLoading(false);
         return;
       }
 
@@ -125,7 +139,7 @@ const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
         ID,
         FileIQ,
         FileName: generatedFileName,
-        FileSize: uploadRes.data.FileSize || file.size,
+        FileSize: uploadRes.data.FileSize ?? file.size,
         FolderName: folderName,
         IsVisible: true,
         LastModified: null,
@@ -136,13 +150,9 @@ const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
       const insertRes = await fileService.insert(insertModel);
       if (!insertRes?.status) throw new Error("Insert failed");
 
-      const insertedModel = insertRes.data;
-
-      handleUploadSuccess(insertedModel);
-      setFileName(file.name);
+      handleUploadSuccess(insertRes.data);
       setIsNewUpload(true);
-      const localUrl = URL.createObjectURL(file);
-      setPreviewUrl(localUrl);
+      setPreviewUrl(URL.createObjectURL(file));
     } catch (err: any) {
       alert("Upload failed: " + (err.message || err));
     } finally {
@@ -150,6 +160,7 @@ const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
     }
   };
 
+  /* -------- UI -------- */
   return (
     <div className="flex flex-col items-center w-full mt-10">
       <div className="flex items-center gap-2 w-full">
@@ -157,34 +168,32 @@ const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
           <div className="w-[32px] h-[32px] rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
         ) : (
           <>
-            {selectedFileId && isEditMode && (
+            {isEditMode ? (
               <button
                 type="button"
                 title="Upload new file"
                 onClick={handleTriggerUpload}
-                className="text-white p-1 rounded transition duration-300 bg-blue-500 hover:bg-blue-700"
+                className="text-white p-1 rounded bg-blue-500 hover:bg-blue-700 transition"
               >
                 <FaSync size={16} />
               </button>
-            )}
-
-            {!isEditMode && !selectedFileId && (
+            ) : (
               <button
                 type="button"
                 title="Upload file"
                 onClick={handleTriggerUpload}
-                className="text-white p-1 rounded transition duration-300 bg-green-600 hover:bg-green-700"
+                className="text-white p-1 rounded bg-green-600 hover:bg-green-700 transition"
               >
                 <FaUpload size={16} />
               </button>
             )}
 
-            {selectedFileId && !isEditMode && (
+            {previewUrl && (
               <button
                 type="button"
                 title="Remove file"
                 onClick={handleReset}
-                className="text-white p-1 rounded transition duration-300 bg-red-500 hover:bg-red-700"
+                className="text-white p-1 rounded bg-red-500 hover:bg-red-700 transition"
               >
                 <FaTrash size={16} />
               </button>
@@ -195,7 +204,7 @@ const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
         <DynamicInput
           name="fileName"
           type="text"
-          value={fileName || ""}
+          value={fileName}
           placeholder="No file selected"
           className="flex-grow -mt-6"
           disabled
@@ -203,47 +212,52 @@ const PictureBoxFile: React.FC<AttachFileProps> = ({ data, onMetaChange }) => {
 
         <button
           type="button"
-          onClick={handleShowFile}
-          className={`flex items-center px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 ${
-            previewUrl
-              ? "hover:bg-purple-700"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
+          onClick={() => previewUrl && setIsModalOpen(true)}
           disabled={!previewUrl || isLoading}
+          className={`flex items-center px-2 py-1 font-semibold rounded transition ${
+            previewUrl
+              ? "bg-purple-500 hover:bg-purple-700 text-white"
+              : "bg-gray-400 cursor-not-allowed text-white"
+          }`}
         >
           <FaEye size={16} className="mr-1" />
           Show
         </button>
       </div>
 
+      {/* input مخفی آپلود */}
       <input
+        key={resetCounter} // برای ریست شدن
         id="hidden-upload-trigger"
         type="file"
         accept=".jpg,.jpeg,.png"
-        style={{ display: "none" }}
+        hidden
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) uploadFile(file);
         }}
       />
 
+      {/* مدال پیش‌نمایش */}
       <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         {previewUrl ? (
           <img
             src={previewUrl}
             alt="Uploaded Preview"
-            className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform transform hover:scale-105"
+            className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105"
+            title="Click to delete the file"
             onClick={(e) => {
               e.stopPropagation();
-              if (window.confirm("Do you want to delete the uploaded file?")) {
+              if (window.confirm("Delete the uploaded file?")) {
                 handleReset();
                 setIsModalOpen(false);
               }
             }}
-            title="Click to delete the file"
           />
         ) : (
-          <p className="text-gray-500 text-center">No file available to display.</p>
+          <p className="text-center text-gray-500">
+            No file available to display.
+          </p>
         )}
       </DynamicModal>
     </div>

@@ -1,6 +1,4 @@
-// src/components/DateTimeSelector.tsx
-
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { FaCalendarAlt, FaClock } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -14,9 +12,9 @@ interface DateTimeSelectorProps {
     metaType4?: string;
   }) => void;
   data?: {
-    metaType1?: string; // "dateonly" یا "datetime"
-    metaType2?: string; // "none"، "today"، "selected" یا "dynamic"
-    metaType3?: string; // تاریخ و زمان به صورت رشته (یا "dynamic")
+    metaType1?: string;
+    metaType2?: string;
+    metaType3?: string;
     metaType4?: string;
   };
 }
@@ -25,110 +23,69 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   onMetaChange,
   data,
 }) => {
-  // تعیین فرمت: فقط تاریخ یا تاریخ و زمان
+  const [initKey, setInitKey] = useState<string>("");
+  const [userTouched, setUserTouched] = useState(false);
+
   const [format, setFormat] = useState<"dateOnly" | "dateTime">("dateOnly");
-
-  // تعیین مقدار پیش‌فرض: "none" | "today" | "selected"
-  const [defaultValue, setDefaultValue] = useState<
-    "none" | "today" | "selected"
-  >("none");
-
-  // آیا مقدار به‌صورت داینامیک تغییر می‌کند؟
+  const [defaultValue, setDefaultValue] = useState<"none" | "today" | "selected">("none");
   const [isDynamic, setIsDynamic] = useState(false);
-
-  // تاریخ انتخاب شده
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
-
-  // زمان انتخاب شده
-  const [selectedTime, setSelectedTime] = useState<{
-    hours: string;
-    minutes: string;
-    seconds: string;
-  }>({
-    hours: "",
-    minutes: "",
-    seconds: "",
-  });
-  const [tempSelectedTime, setTempSelectedTime] = useState<{
-    hours: string;
-    minutes: string;
-    seconds: string;
-  }>({
-    hours: "",
-    minutes: "",
-    seconds: "",
-  });
-
-  // وضعیت مودال‌ها
+  const [selectedTime, setSelectedTime] = useState<{ hours: string; minutes: string; seconds: string; }>({ hours: "", minutes: "", seconds: "" });
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
+  const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
+  const [tempSelectedTime, setTempSelectedTime] = useState<{ hours: string; minutes: string; seconds: string; }>({ hours: "", minutes: "", seconds: "" });
 
-  // برای DatePicker (غیرفعال اگر نمی‌خواهید)
-  const [selectedMonth, setSelectedMonth] = useState<number>(
-    new Date().getMonth()
-  );
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear()
-  );
-
-  // رفرنس‌های اینپوت زمان
-  const hourRef = useRef<HTMLInputElement>(null);
-  const minuteRef = useRef<HTMLInputElement>(null);
-  const secondRef = useRef<HTMLInputElement>(null);
-
-  // --- تابع قالب‌بندی تاریخ ---
+  // format helpers
   const formatDate = (date: Date) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
     const d = String(date.getDate()).padStart(2, "0");
     return `${y}-${m}-${d}`;
   };
-
-  // --- تابع قالب‌بندی زمان ---
-  const formatTime = (time: {
-    hours: string;
-    minutes: string;
-    seconds: string;
-  }) => {
+  const formatTime = (time: { hours: string; minutes: string; seconds: string; }) => {
     const h = time.hours ? time.hours.padStart(2, "0") : "00";
     const m = time.minutes ? time.minutes.padStart(2, "0") : "00";
     const s = time.seconds ? time.seconds.padStart(2, "0") : "00";
     return `${h}:${m}:${s}`;
   };
 
-  // فقط یکبار در mount از data بخوانید
+  // مقداردهی اولیه فقط با کلید جدید
   useEffect(() => {
     if (!data) return;
+    const key = (data.metaType1 ?? "") + "|" + (data.metaType2 ?? "") + "|" + (data.metaType3 ?? "");
+    if (initKey === key) return;
 
-    // metaType1 => تعیین فرمت
-    if (data.metaType1) {
-      setFormat(
-        data.metaType1.toLowerCase() === "datetime" ? "dateTime" : "dateOnly"
-      );
-    }
+    setInitKey(key);
+    setUserTouched(false);
 
-    // metaType2 => تعیین مقدار پیش‌فرض یا داینامیک
-    if (data.metaType2 === "dynamic") {
+    setFormat(data.metaType1?.toLowerCase() === "datetime" ? "dateTime" : "dateOnly");
+    if (data.metaType2 === "dynamic" || (data.metaType3 && data.metaType3.trim().toLowerCase() === "dynamic")) {
       setIsDynamic(true);
       setDefaultValue("today");
-    } else if (data.metaType2 === "selected") {
-      setDefaultValue("selected");
     } else if (data.metaType2 === "today") {
+      setIsDynamic(false);
       setDefaultValue("today");
+    } else if (data.metaType2 === "selected") {
+      setIsDynamic(false);
+      setDefaultValue("selected");
     } else {
+      setIsDynamic(false);
       setDefaultValue("none");
     }
 
-    // metaType3 => تعیین تاریخ و زمان (اگر dynamic نباشد)
-    if (data.metaType3 && data.metaType3.trim().toLowerCase() !== "dynamic") {
-      const [datePart, timePart] = data.metaType3.split(" ");
+    if (
+      data.metaType3 &&
+      data.metaType3.trim() !== "" &&
+      data.metaType3.trim().toLowerCase() !== "dynamic"
+    ) {
+      const [datePart, timePart] = data.metaType3.trim().split(" ");
       if (datePart) {
         const [yy, mm, dd] = datePart.split("-");
         const newDate = new Date(Number(yy), Number(mm) - 1, Number(dd));
-        if (!isNaN(newDate.getTime())) {
-          setSelectedDate(newDate);
-        }
+        setSelectedDate(!isNaN(newDate.getTime()) ? newDate : null);
+      } else {
+        setSelectedDate(null);
       }
       if (timePart) {
         const [hh, mn, sc] = timePart.split(":");
@@ -137,31 +94,40 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
           minutes: mn || "",
           seconds: sc || "00",
         });
+      } else {
+        setSelectedTime({
+          hours: "",
+          minutes: "",
+          seconds: "",
+        });
       }
-    } else if (
-      data.metaType3 &&
-      data.metaType3.trim().toLowerCase() === "dynamic"
-    ) {
-      // اگر explicitly نوشته شده بود "dynamic"
-      setIsDynamic(true);
-      setDefaultValue("today");
+    } else {
+      setSelectedDate(null);
+      setSelectedTime({
+        hours: "",
+        minutes: "",
+        seconds: "",
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // فقط یک بار در mount
+  }, [data]);
 
-  // هر بار که state داخلی تغییر کرد، آن را به والد بفرست
   useEffect(() => {
+    // فقط زمانی که کاربر چیزی تغییر داده یا مقدار اولیه ست شده
+    if (!userTouched && initKey !== "") return;
+
     const metaType1 = format === "dateTime" ? "datetime" : "dateonly";
-    const metaType2 = defaultValue;              // ← همیشه defaultValue
+    let metaType2 = defaultValue;
     let metaType3 = "";
 
     if (isDynamic) {
-      metaType3 = "dynamic";                     // ← وقتی دینامیکه
+      metaType2 = "today";
+      metaType3 = "dynamic";
     } else if (defaultValue === "selected" && selectedDate) {
-      // تاریخ/زمان انتخاب‌شده
       const dateStr = formatDate(selectedDate);
-      const timeStr = formatTime(selectedTime);
+      const timeStr = formatTime(selectedTime); // همواره ست می‌شود!
       metaType3 = `${dateStr} ${timeStr}`;
+    } else if (defaultValue === "today" || defaultValue === "none") {
+      metaType3 = "";
     }
 
     onMetaChange({
@@ -170,33 +136,29 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
       metaType3,
       metaType4: data?.metaType4 || "",
     });
-    // ⚠️ دقت: فقط stateهای داخلی در وابستگی
-  }, [format, defaultValue, selectedDate, selectedTime, isDynamic]);
+    // eslint-disable-next-line
+  }, [format, defaultValue, isDynamic, selectedDate, selectedTime, userTouched]);
 
+  // handlers
+  const handleFormatChange = (val: "dateOnly" | "dateTime") => {
+    setFormat(val);
+    setUserTouched(true);
+  };
   const handleDefaultValueChange = (val: "none" | "today" | "selected") => {
     setDefaultValue(val);
-
-    if (val === "none") {
-      setIsDynamic(false); // تیک برداشته بشه
-      setSelectedDate(null);
-      setSelectedTime({ hours: "", minutes: "", seconds: "" });
-    } else if (val === "today") {
-      setIsDynamic(false); // ❗ تیک نزن، فقط اجازه بده کاربر بزنه
-      setSelectedDate(null);
-      setSelectedTime({ hours: "", minutes: "", seconds: "" });
-    } else if (val === "selected") {
-      setIsDynamic(false);
+    setIsDynamic(false);
+    setUserTouched(true);
+    if (val === "none" || val === "today" || val === "selected") {
       setSelectedDate(null);
       setSelectedTime({ hours: "", minutes: "", seconds: "" });
     }
   };
-
-  // تابع تغییر داینامیک
   const handleDynamicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsDynamic(e.target.checked);
+    setUserTouched(true);
   };
 
-  // اگر isDynamic فعال باشد، هر 30 ثانیه زمان را آپدیت کن
+  // dynamic update
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
     if (isDynamic) {
@@ -216,7 +178,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
     };
   }, [isDynamic]);
 
-  // باز کردن مودال تاریخ
+  // Modal ها و اینپوت های تاریخ و زمان
   const handleDateChange = (date: Date | null) => {
     setTempSelectedDate(date);
   };
@@ -224,9 +186,8 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
     setSelectedDate(tempSelectedDate);
     setDefaultValue("selected");
     setIsDateModalOpen(false);
+    setUserTouched(true);
   };
-
-  // باز کردن مودال زمان
   const handleTimeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (/^\d*$/.test(value)) {
@@ -240,37 +201,28 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
       }));
     }
   };
-  const handleTimeKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    nextRef: React.RefObject<HTMLInputElement> | null
-  ) => {
-    if (e.key === "Tab" && nextRef?.current) {
-      nextRef.current.focus();
-      e.preventDefault();
-    }
-  };
   const handleTimeChange = () => {
     setSelectedTime(tempSelectedTime);
     setIsTimeModalOpen(false);
+    setUserTouched(true);
   };
 
-  // هنگام باز شدن مودال تاریخ
+  // Modal Date
   useEffect(() => {
     if (isDateModalOpen) {
       setTempSelectedDate(selectedDate || new Date());
     }
   }, [isDateModalOpen, selectedDate]);
-
-  // هنگام باز شدن مودال زمان
   useEffect(() => {
     if (isTimeModalOpen) {
       setTempSelectedTime(selectedTime);
     }
   }, [isTimeModalOpen, selectedTime]);
 
+  // رندر کامل:
   return (
     <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
-      {/* انتخاب فرمت تاریخ/زمان */}
+      {/* انتخاب فرمت */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Date and Time Format:
@@ -282,7 +234,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
               name="format"
               value="dateOnly"
               checked={format === "dateOnly"}
-              onChange={() => setFormat("dateOnly")}
+              onChange={() => handleFormatChange("dateOnly")}
               className="form-radio text-blue-600 h-4 w-4"
             />
             <span className="ml-2 text-gray-700">Date Only</span>
@@ -293,14 +245,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
               name="format"
               value="dateTime"
               checked={format === "dateTime"}
-              onChange={() => setFormat("dateTime")}
+              onChange={() => handleFormatChange("dateTime")}
               className="form-radio text-blue-600 h-4 w-4"
             />
             <span className="ml-2 text-gray-700">Date & Time</span>
           </label>
         </div>
       </div>
-
       {/* انتخاب مقدار پیش‌فرض */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -318,7 +269,6 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
             />
             <span className="text-gray-700">None</span>
           </label>
-
           <div className="flex items-center space-x-2">
             <label className="flex items-center space-x-2">
               <input
@@ -331,8 +281,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
               />
               <span className="text-gray-700">Today's Date</span>
             </label>
-
-            {/* چک‌باکس Is Dynamic (در حالت ادیت همیشه فعال، در حالت جدید فقط اگر 'today') */}
+            {/* چک‌باکس Is Dynamic */}
             <label className="flex items-center space-x-1">
               <input
                 type="checkbox"
@@ -347,8 +296,7 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
           </div>
         </div>
       </div>
-
-      {/* نمایش تاریخ و زمان */}
+      {/* انتخاب تاریخ و زمان */}
       <div className="flex items-center space-x-6">
         <label className="flex items-center space-x-2">
           <input
@@ -359,51 +307,44 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
             checked={defaultValue === "selected"}
             onChange={() => {
               setIsDateModalOpen(true);
-              setDefaultValue("selected");
+              handleDefaultValueChange("selected");
             }}
           />
-
           <div className="relative w-64">
             <input
               type="button"
               value={selectedDate ? formatDate(selectedDate) : ""}
               onClick={() => {
                 setIsDateModalOpen(true);
-                setDefaultValue("selected");
+                handleDefaultValueChange("selected");
               }}
               placeholder="Select Date"
               className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
                          cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               readOnly
-              onBlur={() => {
-                if (defaultValue === "selected" && tempSelectedDate) {
-                  setSelectedDate(tempSelectedDate);
-                }
-              }}
             />
             <FaCalendarAlt
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
               onClick={() => {
                 setIsDateModalOpen(true);
-                setDefaultValue("selected");
+                handleDefaultValueChange("selected");
               }}
             />
           </div>
         </label>
-
-        {/* اینپوت زمان */}
+        {/* ورودی زمان همیشه نمایش داده شود */}
         <div className="relative w-48">
           <input
             type="text"
             value={
               selectedTime.hours || selectedTime.minutes || selectedTime.seconds
                 ? `${selectedTime.hours.padStart(
-                  2,
-                  "0"
-                )}:${selectedTime.minutes.padStart(
-                  2,
-                  "0"
-                )}:${selectedTime.seconds.padStart(2, "0")}`
+                    2,
+                    "0"
+                  )}:${selectedTime.minutes.padStart(
+                    2,
+                    "0"
+                  )}:${selectedTime.seconds.padStart(2, "0")}`
                 : ""
             }
             onClick={() => setIsTimeModalOpen(true)}
@@ -418,14 +359,14 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
           />
         </div>
       </div>
-
-      {/* مودال DatePicker */}
+      {/* مودال تاریخ */}
       <DynamicModal
         isOpen={isDateModalOpen}
         onClose={() => {
           if (tempSelectedDate) {
             setSelectedDate(tempSelectedDate);
             setDefaultValue("selected");
+            setUserTouched(true);
           }
           setIsDateModalOpen(false);
         }}
@@ -434,7 +375,6 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
           <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
             Select a Date
           </h2>
-
           {tempSelectedDate && (
             <div className="mb-4 text-center">
               <span className="text-lg font-medium text-pink-600">
@@ -442,16 +382,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
               </span>
             </div>
           )}
-
           <div className="flex justify-center mt-6">
             <DatePicker
               selected={tempSelectedDate}
               onChange={handleDateChange}
               inline
-              openToDate={new Date(selectedYear, selectedMonth, 1)}
             />
           </div>
-
           <div className="flex justify-center mt-6">
             <button
               type="button"
@@ -464,13 +401,13 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
           </div>
         </div>
       </DynamicModal>
-
-      {/* مودال انتخاب زمان */}
+      {/* مودال زمان */}
       <DynamicModal
         isOpen={isTimeModalOpen}
         onClose={() => {
           if (tempSelectedTime) {
             setSelectedTime(tempSelectedTime);
+            setUserTouched(true);
           }
           setIsTimeModalOpen(false);
         }}
@@ -479,10 +416,9 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
           <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
             Select a Time
           </h2>
-
           {tempSelectedTime.hours ||
-            tempSelectedTime.minutes ||
-            tempSelectedTime.seconds ? (
+          tempSelectedTime.minutes ||
+          tempSelectedTime.seconds ? (
             <div className="mb-4 text-center">
               <span className="text-lg font-medium text-pink-600">
                 {formatTime(tempSelectedTime)}
@@ -495,7 +431,6 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
               </span>
             </div>
           )}
-
           <div className="flex justify-center space-x-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
@@ -506,16 +441,11 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 name="hours"
                 value={tempSelectedTime.hours}
                 onChange={handleTimeInputChange}
-                onKeyDown={(e) => handleTimeKeyDown(e, minuteRef)}
-                ref={hourRef}
-                placeholder="00"
                 maxLength={2}
                 className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-                onBlur={() => setSelectedTime(tempSelectedTime)}
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
                 MM
@@ -525,20 +455,11 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 name="minutes"
                 value={tempSelectedTime.minutes}
                 onChange={handleTimeInputChange}
-                onKeyDown={(e) => handleTimeKeyDown(e, secondRef)}
-                ref={minuteRef}
-                placeholder="00"
                 maxLength={2}
                 className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-                onBlur={() => {
-                  if (defaultValue === "selected") {
-                    setSelectedTime(tempSelectedTime);
-                  }
-                }}
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
                 SS
@@ -548,21 +469,12 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
                 name="seconds"
                 value={tempSelectedTime.seconds}
                 onChange={handleTimeInputChange}
-                onKeyDown={(e) => handleTimeKeyDown(e, null)}
-                ref={secondRef}
-                placeholder="00"
                 maxLength={2}
                 className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-                onBlur={() => {
-                  if (defaultValue === "selected") {
-                    setSelectedTime(tempSelectedTime);
-                  }
-                }}
               />
             </div>
           </div>
-
           <div className="flex justify-center mt-6">
             <button
               type="button"

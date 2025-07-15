@@ -239,6 +239,7 @@ const handleEdit = (row: RowData3) => {
       LastModified: null,
       ModifiedById: null,
       IconImageId: null,
+      CommandWeb: ""
     };
     setSelectedRow(null);
     setFormData(newRow);

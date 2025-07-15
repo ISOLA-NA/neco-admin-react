@@ -1,65 +1,45 @@
-import React, { useState, useEffect, useRef } from "react";
+// TextController.tsx
+import React, { useState, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 
 interface TextControllerProps {
-  onMetaChange: (meta: any) => void;
-  data?: {
-    metaType1?: string;
-    metaType2?: string;
-    metaType3?: string;
-  };
+  /** والد باید این متادیتا را در state خودش نگه دارد و در هر تغییر آپدیت کند */
+  onMetaChange: (meta: { metaType1: string }) => void;
+  /** مقدار اولیه‌ای که در حالت ادیت از سرور / فرم بالادستی می‌آید */
+  data?: { metaType1?: string };
   isDisable?: boolean;
 }
 
 const TextController: React.FC<TextControllerProps> = ({
   onMetaChange,
-  data,
+  data = {},
   isDisable = false,
 }) => {
-  const [metaTypes, setMetaTypes] = useState({
-    metaType1: "",
-    metaType2: null as string | null,
-    metaType3: null as string | null,
-  });
+  // مقدار داخل input – در ابتدا از prop
+  const [value, setValue] = useState<string>(data.metaType1 ?? "");
 
-  const prevMetaRef = useRef<string | undefined>();
-
-  // فقط وقتی مقدار اولیه واقعاً تغییر کنه، مقداردهی مجدد کنیم
+  /* وقتی والد مقدار جدید می‌فرستد (مثلاً رکورد دیگری را برای ادیت انتخاب می‌کند)
+     state داخلی را با آن سینک کن */
   useEffect(() => {
-    if (data?.metaType1 !== prevMetaRef.current) {
-      prevMetaRef.current = data?.metaType1;
-      setMetaTypes({
-        metaType1: data?.metaType1 || "",
-        metaType2: data?.metaType2 || null,
-        metaType3: data?.metaType3 || null,
-      });
-    }
-  }, [data?.metaType1, data?.metaType2, data?.metaType3]);
+    setValue(data.metaType1 ?? "");
+  }, [data.metaType1]);
 
-  // فقط metaTypes رو ارسال کنیم نه data دوباره
-  useEffect(() => {
-    onMetaChange({
-      metaType1: metaTypes.metaType1,
-      metaType2: metaTypes.metaType2,
-      metaType3: metaTypes.metaType3,
-    });
-  }, [metaTypes]);
-
+  // کاربر حروف می‌زند
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMetaTypes((prev) => ({
-      ...prev,
-      metaType1: e.target.value,
-    }));
+    const newVal = e.target.value;
+    setValue(newVal);                 // به‌روزرسانی فوری UI
+    onMetaChange({ metaType1: newVal }); // اطلاع به والد
   };
 
   return (
-    <div className="mt-10 p-6 rounded-lg">
+    <div className="mt-10 p-6 rounded-lg bg-white shadow-sm">
       <DynamicInput
-        name="Default Value"
+        name="metaType1"              // حتماً کلید درست
+        label="Default Value"
         type="text"
-        value={metaTypes.metaType1}
+        value={value}                 // چون کنترل‑شده‌ایم
         onChange={handleChange}
-        placeholder="Default Value"
+        placeholder="Enter default value"
         disabled={isDisable}
         className="w-full p-2 border rounded"
       />

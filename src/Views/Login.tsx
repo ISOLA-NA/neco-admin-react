@@ -321,7 +321,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     ></path>
                   </svg>
                 ) : null}
-                ورود
+                Login
               </button>
             </>
           ) : (

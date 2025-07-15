@@ -4,20 +4,31 @@ import React, { useState, useEffect } from "react";
 interface YesNoProps {
   defaultValue?: "yes" | "no";
   onMetaChange: (meta: { metaType1: "yes" | "no" }) => void;
-  data?: any; // داده‌های مربوط به حالت ویرایش
+  data?: { metaType1?: "yes" | "no" }; // داده‌های مربوط به حالت ویرایش
 }
 
-const YesNo: React.FC<YesNoProps> = ({ defaultValue = "yes", onMetaChange, data }) => {
-  // مقدار اولیه تنها یک بار در هنگام mount تنظیم می‌شود.
-  const initialValue = data && data.metaType1 ? data.metaType1 : defaultValue;
-  const [selected, setSelected] = useState<"yes" | "no">(initialValue);
+const YesNo: React.FC<YesNoProps> = ({
+  defaultValue = "yes",
+  onMetaChange,
+  data,
+}) => {
+  // مقدار اولیه: اگر در data مقدار بود، همان، وگرنه مقدار پیشفرض
+  const getInitialValue = () => {
+    if (data && (data.metaType1 === "yes" || data.metaType1 === "no")) {
+      return data.metaType1;
+    }
+    return defaultValue;
+  };
 
-  // در زمان mount، مقدار اولیه به والد ارسال می‌شود.
+  const [selected, setSelected] = useState<"yes" | "no">(getInitialValue());
+
+  // هر وقت مقدار data تغییر کرد یا ورودی‌های جدید اومد، مقدار state هم sync شود
   useEffect(() => {
-    onMetaChange({ metaType1: selected });
-    // اجرای این effect تنها یکبار (در mount) است.
+    const newValue = getInitialValue();
+    setSelected(newValue);
+    onMetaChange({ metaType1: newValue });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data?.metaType1, defaultValue]);
 
   const handleChange = (value: "yes" | "no") => {
     setSelected(value);

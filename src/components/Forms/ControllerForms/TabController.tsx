@@ -1,56 +1,91 @@
-// src/components/ControllerForms/TabController.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CustomTextarea from "../../utilities/DynamicTextArea";
 
 interface TabControllerProps {
-  onMetaChange: (meta: {
-    metaType1: string;
-    metaTypeJson: string | null;
-  }) => void;
-  data?: {
-    metaType1?: string;
-    metaTypeJson?: string | null;
-  };
+  onMetaChange: (meta: { metaType1: string; metaTypeJson: string | null }) => void;
+  data?: { metaType1?: string; metaTypeJson?: string | null };
+  raw?: boolean;
 }
 
 const TabController: React.FC<TabControllerProps> = ({
   onMetaChange,
-  data,
+  data = {},
+  raw = false,
 }) => {
-  // در حالت ادیت، ابتدا metaType1 را چک می‌کنیم تا مقدار multiline (با newlineها) نمایش داده شود
-  const [tabs, setTabs] = useState(() => {
-    if (data) {
-      if (data.metaType1 && data.metaType1.trim() !== "") {
-        return data.metaType1;
-      } else if (data.metaTypeJson && data.metaTypeJson.trim() !== "") {
-        return data.metaTypeJson.replace(/\/n/g, "\n");
-      }
+  // مقدار اولیه (اولویت با metaType1 اگر نبود metaTypeJson)
+  const [tabs, setTabs] = useState<string>(() => {
+    if (data.metaType1 && data.metaType1.trim() !== "") {
+      return data.metaType1;
+    }
+    if (data.metaTypeJson && data.metaTypeJson.trim() !== "") {
+      return data.metaTypeJson.replace(/\\n|\/n/g, "\n");
     }
     return "";
   });
 
-  const handleTabsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    setTabs(newValue);
-    // metaType1: همان مقدار چند خطی (برای نمایش)
-    // metaTypeJson: مقدار پیوسته (بدون newline) ذخیره می‌شود.
-    onMetaChange({
-      metaType1: newValue,
-      metaTypeJson: newValue.trim() === "" ? null : newValue.replace(/\n/g, ""),
-    });
-  };
+  // سینک شدن فقط زمانی که props واقعی عوض شود (مثلاً در حالت ادیت)
+  const prevData = useRef<{ metaType1?: string; metaTypeJson?: string | null }>({});
+  useEffect(() => {
+    const curMetaType1 = data.metaType1 && data.metaType1.trim() !== "" ? data.metaType1 : undefined;
+    const curMetaTypeJson = data.metaTypeJson && data.metaTypeJson.trim() !== "" ? data.metaTypeJson : undefined;
+
+    // اگر مقدار واقعا جدید بود، اعمال کن
+    if (
+      curMetaType1 !== prevData.current.metaType1 ||
+      curMetaTypeJson !== prevData.current.metaTypeJson
+    ) {
+      let next = "";
+      if (curMetaType1 !== undefined) {
+        next = curMetaType1;
+      } else if (curMetaTypeJson !== undefined) {
+        next = curMetaTypeJson.replace(/\\n|\/n/g, "\n");
+      }
+      setTabs(next);
+      prevData.current = { metaType1: curMetaType1, metaTypeJson: curMetaTypeJson };
+    }
+  }, [data.metaType1, data.metaTypeJson, data]);
+
+  // اعلام تغییر
+  const prevMeta = useRef("");
+  useEffect(() => {
+    const meta = {
+      metaType1: tabs,
+      metaTypeJson: tabs.trim() ? tabs.replace(/\n/g, "\\n") : null,
+    };
+    const s = JSON.stringify(meta);
+    if (s !== prevMeta.current) {
+      prevMeta.current = s;
+      onMetaChange(meta);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabs]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setTabs(e.target.value);
+
+  const rows = Math.max(4, tabs.split("\n").length);
 
   return (
-    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex items-center justify-center">
+    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center">
       <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8">
-        <CustomTextarea
-          name="tabs"
-          value={tabs}
-          onChange={handleTabsChange}
-          rows={4}
-          placeholder="Type each tab on a separate line"
-          className="w-full"
-        />
+        {raw ? (
+          <textarea
+            name="tabs"
+            className="w-full border rounded p-2 focus:outline-none focus:ring"
+            rows={rows}
+            value={tabs}
+            onChange={handleChange}
+            placeholder="Type each tab on a separate line"
+          />
+        ) : (
+          <CustomTextarea
+            name="tabs"
+            value={tabs}
+            onChange={handleChange}
+            rows={rows}
+            placeholder="Type each tab on a separate line"
+            className="w-full"
+          />
+        )}
       </div>
     </div>
   );
