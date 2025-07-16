@@ -85,7 +85,8 @@ const App: React.FC = () => {
                   path="/login"
                   element={<Login onLogin={handleLogin} />}
                 />
-                <Route path="/login1" element={<Login1 />} />
+                {/* <Route path="/login1" element={<Login1 />} /> */}
+                <Route path="/test" element={<Login1 />} />
               </Routes>
             </Router>
           </AddEditDeleteProvider>

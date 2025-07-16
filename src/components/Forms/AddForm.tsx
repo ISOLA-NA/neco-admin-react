@@ -21,7 +21,7 @@ import Component16 from "./ControllerForms/TableController";
 import Component17 from "./ControllerForms/PfiLookUpController";
 import Component18 from "./ControllerForms/SeqnialNumber";
 import Component19 from "./ControllerForms/AdvanceTableController";
-import Component20 from "./ControllerForms/WordPanelController";
+import Component20 from "./ControllerForms/wordpanell/WordPanelController";
 import Component21 from "./ControllerForms/ExceclPanelController";
 import Component22 from "./ControllerForms/CalculatedField";
 import Component23 from "./ControllerForms/ExcelCalculator";

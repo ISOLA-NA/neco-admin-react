@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import DynamicInput from "../../utilities/DynamicInput";
+import DynamicInput from "../../../utilities/DynamicInput";
 import { FaTrash, FaDownload, FaUpload, FaSync } from "react-icons/fa";
-import fileService from "../../../services/api.servicesFile";
+import fileService from "../../../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
-import type { InsertModel } from "../../../services/FileUploadHandler";
+import type { InsertModel } from "../../../../services/FileUploadHandler";
 
 interface WordPanelProps {
   onMetaChange?: (data: any) => void;
   data?: any;
 }
 
-const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
+const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
   const [selectedFileId, setSelectedFileId] = useState<string | null>(data?.metaType1 || null);
   const [fileName, setFileName] = useState<string>(data?.fileName || "");
   const [resetCounter, setResetCounter] = useState<number>(0);
@@ -41,6 +41,7 @@ const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
         setPreviewUrl(URL.createObjectURL(blob));
       })
       .catch((err) => {
+        setPreviewUrl(null);
         console.error("Error fetching file info:", err);
       });
   }, [selectedFileId, isNewUpload]);
@@ -107,7 +108,7 @@ const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
             {selectedFileId && isEditMode && (
               <button
                 type="button"
-                title="Upload new Word file"
+                title="آپلود فایل جدید"
                 onClick={() => document.getElementById("hidden-upload-word")?.click()}
                 className="text-white p-2 rounded transition duration-300 bg-blue-500 hover:bg-blue-700"
               >
@@ -117,7 +118,7 @@ const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
             {!isEditMode && !selectedFileId && (
               <button
                 type="button"
-                title="Upload Word file"
+                title="آپلود فایل ورد"
                 onClick={() => document.getElementById("hidden-upload-word")?.click()}
                 className="text-white p-2 rounded transition duration-300 bg-green-600 hover:bg-green-700"
               >
@@ -127,7 +128,7 @@ const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
             {selectedFileId && !isEditMode && (
               <button
                 type="button"
-                title="Remove file"
+                title="حذف فایل"
                 onClick={handleReset}
                 className="text-white p-2 rounded transition duration-300 bg-red-500 hover:bg-red-700"
               >
@@ -155,7 +156,7 @@ const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
           disabled={!previewUrl || isLoading}
         >
           <FaDownload />
-          Download
+          دانلود
         </button>
       </div>
 
@@ -219,4 +220,4 @@ const WordPanel: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
   );
 };
 
-export default WordPanel;
+export default WordPanelNew;

@@ -6,6 +6,9 @@ import { FaEye, FaSync, FaUpload, FaTrash } from "react-icons/fa";
 import fileService from "../../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
 
+/* ------------------------------------------------------------------ */
+/* -----------------------------  Types  ----------------------------- */
+/* ------------------------------------------------------------------ */
 interface InsertModel {
   ID?: string;
   FileIQ?: string;
@@ -19,12 +22,15 @@ interface InsertModel {
 }
 
 interface AttachFileProps {
-  onMetaChange?: (data: { metaType1: string | null }) => void;
+  onMetaChange?: (meta: { metaType1: string | null }) => void;
   data?: { metaType1?: string | null; fileName?: string };
 }
 
+/* ------------------------------------------------------------------ */
+/* --------------------------- Component ----------------------------- */
+/* ------------------------------------------------------------------ */
 const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
-  /* ---------------- state ---------------- */
+  /* ---------------------------  State  --------------------------- */
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data.metaType1 ?? null
   );
@@ -33,86 +39,98 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNewUpload, setIsNewUpload] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [resetCounter, setResetCounter] = useState(0); // ← اضافه شد
+  const [resetCounter, setResetCounter] = useState(0); // ریست input
 
   const isEditMode = !!selectedFileId;
 
-  /* -------- بارگذاری پیش‌نمایش در حالت ادیت -------- */
-  useEffect(() => {
-    let revokeUrl: string | undefined;
+  /* ------------------------------------------------------------------ */
+  /* ---------------------  Helpers: fetch file info  ------------------ */
+  const fetchFileInfo = useCallback(
+    async (openAfter = false) => {
+      if (!selectedFileId) return;
 
-    const loadPreview = async () => {
-      if (!selectedFileId || isNewUpload) return;
       setIsLoading(true);
+      let revoke: string | undefined;
       try {
-        const metaRes = await fileService.getFile(selectedFileId);
+        const meta = await fileService.getFile(selectedFileId);
         const {
           FileIQ,
           FileType,
-          FileName: serverFileName,
+          FileName: srvName,
+          OriginalFileName, // در برخی APIها
           FolderName,
-        } = metaRes.data;
+        } = meta.data;
 
-        setFileName(serverFileName);
+        // نمایش نام
+        setFileName(srvName || OriginalFileName || "");
 
-        const downloadRes = await fileService.download({
+        // دریافت فایل برای پیش‌نمایش
+        const dl = await fileService.download({
           FileName: `${FileIQ}${FileType}`,
           FolderName,
           cacheBust: Date.now(),
         });
 
         const mime =
-          FileType?.toLowerCase() === ".jpg" || FileType?.toLowerCase() === ".jpeg"
+          [".jpg", ".jpeg"].includes(FileType?.toLowerCase() ?? "")
             ? "image/jpeg"
             : FileType?.toLowerCase() === ".png"
             ? "image/png"
             : "application/octet-stream";
 
-        const blob = new Blob([new Uint8Array(downloadRes.data)], { type: mime });
+        const blob = new Blob([new Uint8Array(dl.data)], { type: mime });
         const url = URL.createObjectURL(blob);
-        revokeUrl = url;
+        revoke = url;
         setPreviewUrl(url);
+        if (openAfter) setIsModalOpen(true);
       } catch (err) {
-        console.error("Error loading preview:", err);
+        console.error("Error fetching file info:", err);
         setPreviewUrl(null);
       } finally {
         setIsLoading(false);
+        return () => revoke && URL.revokeObjectURL(revoke);
       }
-    };
+    },
+    [selectedFileId]
+  );
 
-    loadPreview();
-    return () => {
-      if (revokeUrl) URL.revokeObjectURL(revokeUrl);
-    };
+  /* ------------------------------------------------------------------ */
+  /* ----------  Auto‑fetch name & preview when props change  ---------- */
+  useEffect(() => {
+    setSelectedFileId(data.metaType1 ?? null);
+    setFileName(data.fileName ?? "");
+    setPreviewUrl(null);
+    setIsNewUpload(false);
+  }, [data.metaType1, data.fileName]);
+
+  useEffect(() => {
+    if (selectedFileId && !isNewUpload) fetchFileInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFileId, isNewUpload]);
 
-  /* -------- helpers -------- */
-  const handlePreviewUrlChange = useCallback((url: string | null) => {
-    setPreviewUrl(url);
-  }, []);
-
+  /* ------------------------------------------------------------------ */
+  /* ---------------------  Upload Success handler  -------------------- */
   const handleUploadSuccess = (inserted: InsertModel) => {
     setSelectedFileId(inserted.ID || null);
     onMetaChange?.({ metaType1: inserted.ID || null });
   };
 
+  /* ------------------------------------------------------------------ */
+  /* ---------------------------  Reset  ------------------------------ */
   const handleReset = () => {
     setSelectedFileId(null);
     setFileName("");
     setPreviewUrl(null);
     setIsNewUpload(false);
-    setResetCounter((c) => c + 1); // ← ریست input
+    setResetCounter((c) => c + 1);
     onMetaChange?.({ metaType1: null });
   };
 
-  const handleTriggerUpload = () =>
-    (document.getElementById("hidden-upload-trigger") as HTMLInputElement)?.click();
-
-  /* -------- آپلود فایل -------- */
+  /* ------------------------------------------------------------------ */
+  /* --------------------------  Upload  ------------------------------ */
   const uploadFile = async (file: File) => {
     try {
       setIsLoading(true);
-
       const ext = file.name.split(".").pop()?.toLowerCase();
       if (!["jpg", "jpeg", "png"].includes(ext || "")) {
         alert("Invalid file type. Only jpg, jpeg, png allowed.");
@@ -129,14 +147,14 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
       formData.append("FolderName", folderName);
       formData.append("file", file);
 
-      const uploadRes = await fileService.uploadFile(formData);
-      if (!uploadRes?.status) throw new Error("Upload failed");
+      const up = await fileService.uploadFile(formData);
+      if (!up?.status) throw new Error("Upload failed");
 
       const insertModel: InsertModel = {
         ID,
         FileIQ,
         FileName: generatedFileName,
-        FileSize: uploadRes.data.FileSize ?? file.size,
+        FileSize: up.data.FileSize ?? file.size,
         FolderName: folderName,
         IsVisible: true,
         LastModified: null,
@@ -144,50 +162,48 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
         FileType: `.${ext}`,
       };
 
-      const insertRes = await fileService.insert(insertModel);
-      if (!insertRes?.status) throw new Error("Insert failed");
+      const ins = await fileService.insert(insertModel);
+      if (!ins?.status) throw new Error("Insert failed");
 
-      handleUploadSuccess(insertRes.data);
+      handleUploadSuccess(ins.data);
       setFileName(file.name);
       setIsNewUpload(true);
-      handlePreviewUrlChange(URL.createObjectURL(file));
+      setPreviewUrl(URL.createObjectURL(file));
     } catch (err: any) {
       console.error("Upload error:", err);
-      alert("Upload failed: " + (err.message || err));
+      alert(err.message || "Upload failed.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  /* ---------------- UI ---------------- */
+  /* ---------------------------  UI  ------------------------------ */
   return (
     <div className="flex flex-col items-center w-full mt-10">
       <div className="flex items-center gap-2 w-full">
+        {/* ------------ Left buttons ------------ */}
         {isLoading ? (
-          <div className="w-[32px] h-[32px] rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
+          <div className="w-8 h-8 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
         ) : (
           <>
-            {isEditMode ? (
-              <button
-                type="button"
-                title="Upload new file"
-                onClick={handleTriggerUpload}
-                className="text-white p-1 rounded bg-blue-500 hover:bg-blue-700 transition"
-              >
-                <FaSync size={16} />
-              </button>
-            ) : (
-              <button
-                type="button"
-                title="Upload file"
-                onClick={handleTriggerUpload}
-                className="text-white p-1 rounded bg-green-600 hover:bg-green-700 transition"
-              >
-                <FaUpload size={16} />
-              </button>
-            )}
+            {/* آپلود یا جایگزینی */}
+            <button
+              type="button"
+              title={isEditMode ? "Upload new file" : "Upload file"}
+              onClick={() =>
+                (document.getElementById("hidden-upload") as HTMLInputElement)?.click()
+              }
+              className={`text-white p-1 rounded transition ${
+                isEditMode
+                  ? "bg-blue-500 hover:bg-blue-700"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
+            >
+              {isEditMode ? <FaSync size={16} /> : <FaUpload size={16} />}
+            </button>
 
-            {previewUrl && (
+            {/* حذف فایل (در هر دو حالت وقتی فایل داریم) */}
+            {selectedFileId && (
               <button
                 type="button"
                 title="Remove file"
@@ -200,34 +216,43 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
           </>
         )}
 
+        {/* نام فایل */}
         <DynamicInput
           name="fileName"
           type="text"
           value={fileName}
           placeholder="No file selected"
-          className="flex-grow -mt-6"
+          className="flex-grow"
           disabled
         />
 
+        {/* دکمه نمایش */}
         <button
           type="button"
-          onClick={() => previewUrl && setIsModalOpen(true)}
-          disabled={!previewUrl || isLoading}
-          className={`flex items-center px-2 py-1 font-semibold rounded transition ${
-            previewUrl
-              ? "bg-purple-500 hover:bg-purple-700 text-white"
-              : "bg-gray-400 cursor-not-allowed text-white"
-          }`}
+          onClick={async () => {
+            if (previewUrl) {
+              setIsModalOpen(true);
+            } else if (selectedFileId) {
+              await fetchFileInfo(true); // بعد از بارگیری باز شود
+            }
+          }}
+          disabled={!selectedFileId || isLoading}
+          className={`flex items-center px-3 py-2 font-semibold rounded transition
+            ${
+              selectedFileId && !isLoading
+                ? "bg-purple-500 hover:bg-purple-700 text-white"
+                : "bg-gray-400 cursor-not-allowed text-white"
+            }`}
         >
           <FaEye size={16} className="mr-1" />
           Show
         </button>
       </div>
 
-      {/* input مخفی آپلود */}
+      {/* input[file] مخفی */}
       <input
-        key={resetCounter} /* ← ریست‌شونده */
-        id="hidden-upload-trigger"
+        key={resetCounter}
+        id="hidden-upload"
         type="file"
         accept=".jpg,.jpeg,.png"
         hidden
@@ -237,12 +262,12 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
         }}
       />
 
-      {/* مدال نمایش تصویر */}
+      {/* Modal preview */}
       <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         {previewUrl ? (
           <img
             src={previewUrl}
-            alt="Uploaded Preview"
+            alt="Preview"
             className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105"
             title="Click to delete the file"
             onClick={(e) => {
@@ -254,7 +279,7 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
             }}
           />
         ) : (
-          <p className="text-center text-gray-500">No file available to display.</p>
+          <p className="text-center text-gray-500">No file to display.</p>
         )}
       </DynamicModal>
     </div>

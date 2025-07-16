@@ -25,7 +25,7 @@ import CtrMap from "./ControllerForms/MapController";
 import Tab from "./ControllerForms/TabController";
 import CtrUpload from "./ControllerForms/AttachFileController";
 import CtrPictureBox from "./ControllerForms/PictureBoxController";
-import CtrWordPanel from "./ControllerForms/WordPanelController";
+import CtrWordPanel from "./ControllerForms/wordpanell/WordPanelController";
 import CtrExcelPanel from "./ControllerForms/ExceclPanelController";
 import CtrTitle from "./ControllerForms/TitleController";
 
