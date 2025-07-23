@@ -10,9 +10,14 @@ import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { useNavigate } from "react-router-dom";
 import SidebarDrawer from "./SideBar/SidebarDrawer";
 
-// کانتکست‌های جدید
+// کانتکست‌ها
 import { useSubTabDefinitions } from "../../../context/SubTabDefinitionsContext";
 import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
+
+// سرویس گرفتن اطلاعات کاربر
+import projectServiceFile from "../../../services/api.servicesFile";
+// برای گرفتن آدرس عکس
+import FileUploadHandler from "../../../services/FileUploadHandler";
 
 // برای مدیریت آیکون‌های CRUD
 interface IconVisibility {
@@ -42,6 +47,19 @@ type MainTabKey =
   | "Programs"
   | "Projects"
   | "File";
+
+// اینترفیس Token کاربر
+interface UserToken {
+  ID: string;
+  Username: string;
+  Name: string;
+  Family: string;
+  Email: string;
+  Mobile: string;
+  Website: string;
+  UserImageId: string;
+  Code?: string;
+}
 
 const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
   File: { groups: [] },
@@ -87,8 +105,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   // stateها
   const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
-
-  // مقدار اولیه ساب تب هیچ چیز نباشد (یعنی نه null و نه مقدار خاصی)
   const [activeSubTab, setActiveSubTab] = useState<string>("");
 
   const [selectedRow, setSelectedRow] = useState<any>(null);
@@ -116,7 +132,27 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   const navigate = useNavigate();
 
-  // بارگذاری دیتا برای ساب‌تب (فقط اگر ساب‌تب انتخاب باشد)
+  // ---------- state و logic مربوط به کاربر ----------
+  const [userInfo, setUserInfo] = useState<UserToken | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserTokenId = async () => {
+      try {
+        const res = await projectServiceFile.getIdByUserToken();
+        const data = Array.isArray(res.data) ? res.data[0] : res.data;
+        if (data) {
+          setUserInfo(data);
+        }
+      } catch (error) {
+        console.error("Error fetching user token ID:", error);
+      }
+    };
+    fetchUserTokenId();
+  }, []);
+  // ---------- پایان کاربر ----------
+
+  // بارگذاری دیتا برای ساب‌تب
   const fetchSubTabData = async (subTabName: string) => {
     try {
       setIsSubTabLoading(true);
@@ -140,7 +176,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     } catch (error) {
       console.error("Error fetching data for subTab:", subTabName, error);
     } finally {
-      setIsSubTabLoading(false); // وقتی لود تموم شد
+      setIsSubTabLoading(false);
     }
   };
 
@@ -168,7 +204,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
     if (tabName in mainTabsData) {
       setActiveMainTab(tabName as MainTabKey);
-      setActiveSubTab(""); // هیچ ساب‌تبی انتخاب نشود
+      setActiveSubTab("");
       setSelectedRow(null);
       mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
       subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
@@ -230,6 +266,9 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
   const mainTabs = Object.keys(mainTabsData) as MainTabKey[];
 
+  // مقادیر هدر
+  const headerUsername = userInfo?.Username ?? "";
+
   return (
     <>
       {/* دراور File */}
@@ -244,14 +283,28 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           isDrawerOpen ? "filter blur-sm" : ""
         }`}
       >
-        {/* هدر با فلش collapse */}
+        {/* هدر */}
         <Header
-          username="Hasanzade"
+          username={headerUsername}
+          avatarUrl={avatarUrl || undefined}
           collapsed={collapsed}
           onToggleCollapse={toggleCollapse}
         />
 
-        {/* MainTabs و SubTabs داخل انیمیشن collapse */}
+        {/* این کامپوننت فقط برای گرفتن URL تصویر است (هیچ UI‌ای نشان نمی‌دهد) */}
+        {userInfo?.UserImageId && (
+          <div className="hidden">
+            <FileUploadHandler
+              selectedFileId={userInfo.UserImageId}
+              resetCounter={0}
+              onReset={() => {}}
+              onPreviewUrlChange={setAvatarUrl}
+              hideUploader={true}
+            />
+          </div>
+        )}
+
+        {/* MainTabs و SubTabs */}
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden ${
             collapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
