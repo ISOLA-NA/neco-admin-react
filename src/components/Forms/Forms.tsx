@@ -871,7 +871,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 columnDefs={newColumnDefs}
                 rowData={entityFields}
                 setSelectedRowData={setSelectedRowData}
-                /* --------- ویرایش با یک کلیک --------- */
                 gridOptions={{
                   singleClickEdit: true,
                   rowSelection: "single",
@@ -883,7 +882,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                   },
                 }}
                 onCellValueChanged={handleCellValueChanged}
-                /* --------- CRUD --------- */
                 showAddIcon={true}
                 showEditIcon={true}
                 showDeleteIcon={true}
@@ -926,12 +924,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 }}
                 onView={() => setViewModalOpen(true)}
                 onRowDoubleClick={(row) => handleEditClick(row)}
-                /* --------- سایر تنظیمات --------- */
-                domLayout="normal" /* اسکرول عمودی داخلی ag-Grid */
+                domLayout="normal" 
                 showSearch={true}
                 isEditMode={isEditMode}
                 isLoading={isLoadingFields}
-
               />
             </div>
           </div>

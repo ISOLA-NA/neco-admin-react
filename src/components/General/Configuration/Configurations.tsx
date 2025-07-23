@@ -35,6 +35,7 @@ export interface ConfigurationHandle {
   checkNameFilled: () => boolean;
 }
 
+
 const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
   ({ selectedRow }, ref) => {
     const api = useApi();
@@ -85,6 +86,47 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
     const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
     const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
+
+
+    const mapWFStateForDeemedToRadio = (val?: number): string => {
+  switch (val) {
+    case 1: return "accept";
+    case 2: return "reject";
+    case 3: return "close";
+    default: return "accept";
+  }
+};
+
+const mapWFCommandToRadio = (val?: number): string => {
+  switch (val) {
+    case 1: return "accept";
+    case 2: return "close";
+    case 3: return "reject";
+    case 4: return "client";
+    case 5: return "admin";
+    default: return "accept";
+  }
+};
+
+const buildDisplayName = (stateRadio: string, commandRadio: string, stateText: string) => {
+  const stateLabelMap: Record<string, string> = {
+    accept: "Accept",
+    reject: "Reject",
+    close:  "Close",
+  };
+  const cmdLabelMap: Record<string, string> = {
+    accept: "Accept",
+    reject: "Reject",
+    close:  "Close",
+    client: "Previous State Client",
+    admin:  "Previous State Admin",
+  };
+  const stateLabel   = stateLabelMap[stateRadio] ?? "";
+  const commandLabel = cmdLabelMap[commandRadio] ?? "";
+  const base = stateText?.trim() || stateLabel;
+  return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
+};
+
 
     // این تابع وظیفه دارد مقدار فیلد Name را بررسی کند
     // اگر خالی باشد، false برمی‌گرداند
@@ -251,34 +293,93 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     const meetingBtnIds = parseIds(configData.MeetingBtns);
 
     // بارگذاری داده‌های لازم از API
-    useEffect(() => {
-      const fetchInitialData = async () => {
-        try {
-          setLoading(true);
-          // همزمان چند API را فراخوانی می‌کنیم
-          const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
-            await Promise.all([
-              api.getAllProgramTemplates(),
-              api.getAllDefaultRibbons(),
-              api.getTableTransmittal(),
-              api.getAllWfTemplate(),
-              api.getAllAfbtn(),
-            ]);
+// ... بالای کامپوننت (داخل Configuration، قبل از useEffectها لازم نیست چیز دیگری اضافه کنی)
 
-          setProgramTemplates(templates);
-          setDefaultRibbons(ribbons);
-          setEntityTypes(entities);
-          setWfTemplates(wfTemplatesData);
-          setAfButtons(afButtonsData);
-        } catch (error) {
-          console.error("Error fetching initial data:", error);
-        } finally {
-          setLoading(false);
+useEffect(() => {
+  const fetchInitialData = async () => {
+    try {
+      setLoading(true);
+
+      // 1) همزمان همه‌ی دیتاها را بگیر
+      const [templates, ribbons, entities, wfTemplatesData, afButtonsData] =
+        await Promise.all([
+          api.getAllProgramTemplates(),
+          api.getAllDefaultRibbons(),
+          api.getTableTransmittal(),
+          api.getAllWfTemplate(),
+          api.getAllAfbtn(),
+        ]);
+
+      // 2) توابع محلی برای ساخت DisplayName
+      const mapWFStateForDeemedToRadio = (val?: number): string => {
+        switch (val) {
+          case 1: return "accept";
+          case 2: return "reject";
+          case 3: return "close";
+          default: return "accept";
         }
       };
 
-      fetchInitialData();
-    }, [api]);
+      const mapWFCommandToRadio = (val?: number): string => {
+        switch (val) {
+          case 1: return "accept";
+          case 2: return "close";
+          case 3: return "reject";
+          case 4: return "client";
+          case 5: return "admin";
+          default: return "accept";
+        }
+      };
+
+      const buildDisplayName = (
+        stateRadio: string,
+        commandRadio: string,
+        stateText: string
+      ) => {
+        const stateLabelMap: Record<string, string> = {
+          accept: "Accept",
+          reject: "Reject",
+          close: "Close",
+        };
+        const cmdLabelMap: Record<string, string> = {
+          accept: "Accept",
+          reject: "Reject",
+          close: "Close",
+          client: "Previous State Client",
+          admin: "Previous State Admin",
+        };
+        const stateLabel   = stateLabelMap[stateRadio] ?? "";
+        const commandLabel = cmdLabelMap[commandRadio] ?? "";
+        const base = (stateText || "").trim() || stateLabel;
+        return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
+      };
+
+      // 3) دکمه‌ها را تزئین کن
+      const decoratedBtns: AFBtnItem[] = afButtonsData.map((b) => ({
+        ...b,
+        DisplayName: buildDisplayName(
+          mapWFStateForDeemedToRadio(b.WFStateForDeemed),
+          mapWFCommandToRadio(b.WFCommand),
+          b.StateText ?? ""
+        ),
+      }));
+
+      // 4) ست کردن state ها
+      setProgramTemplates(templates);
+      setDefaultRibbons(ribbons);
+      setEntityTypes(entities);
+      setWfTemplates(wfTemplatesData);
+      setAfButtons(decoratedBtns); // حتماً نسخه تزئین‌شده را ست کن
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchInitialData();
+}, [api]);
+
 
     // وقتی کاربر در تب اصلی یک سطر انتخاب می‌کند (selectedRow)، اگر آن سطر عوض شود، باید فرم را پر کنیم
     useEffect(() => {
@@ -337,6 +438,20 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
         });
       }
     }, [selectedRow]);
+
+
+   const refreshButtons = async () => {
+  const data = await api.getAllAfbtn();
+  const decorated = data.map((b) => ({
+    ...b,
+    DisplayName: buildDisplayName(
+      mapWFStateForDeemedToRadio(b.WFStateForDeemed),
+      mapWFCommandToRadio(b.WFCommand),
+      b.StateText ?? ""
+    ),
+  }));
+  setAfButtons(decorated);
+};
 
     return (
       <div>
@@ -467,93 +582,100 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             loading={loading}
           />
 
-          {/* Default Action Buttons (چند مقداری) */}
-          <ListSelector
-            title="Default Action Buttons"
-            className="mt-1"
-            columnDefs={[
-              { headerName: "Name", field: "Name" },
-              { headerName: "Tooltip", field: "Tooltip" },
-            ]}
-            rowData={afButtons}
-            selectedIds={defaultBtnIds}
-            onSelectionChange={(selectedIds) =>
-              handleSelectionChange("DefaultBtn", selectedIds)
-            }
-            isGlobal={false}
-            ModalContentComponent={ButtonComponent}
-            modalContentProps={{
-              columnDefs: [
-                { headerName: "Name", field: "Name" },
-                { headerName: "Tooltip", field: "Tooltip" },
-              ],
-              rowData: afButtons,
-              onClose: handleCloseModal,
-              onRowSelect: handleSelectButtonClick,
-              onSelectFromButton: handleSelectButtonClick,
-            }}
-            loading={loading}
-          />
+       {/* Default Action Buttons (چند مقداری) */}
+<ListSelector
+  title="Default Action Buttons"
+  className="mt-1"
+  columnDefs={[
+    { headerName: "Name", field: "Name" },
+    { headerName: "Tooltip", field: "Tooltip" },
+  ]}
+  rowData={afButtons}
+  selectedIds={defaultBtnIds}
+  onSelectionChange={(selectedIds) =>
+    handleSelectionChange("DefaultBtn", selectedIds)
+  }
+  showSwitcher={false}
+  isGlobal={false}
+  ModalContentComponent={ButtonComponent}
+  modalContentProps={{
+    columnDefs: [
+      { headerName: "Name", field: "Name" },
+      { headerName: "Tooltip", field: "Tooltip" },
+    ],
+    rowData: afButtons,
+    onClose: handleCloseModal,
+    onRowSelect: handleSelectButtonClick,
+    onSelectFromButton: handleSelectButtonClick,
+    refreshButtons, // ⬅️ مهم برای رفرش بعد از Add/Edit/Delete
+  }}
+  loading={loading}
+/>
 
-          {/* Letter Action Buttons (چند مقداری) */}
-          <ListSelector
-            title="Letter Action Buttons"
-            className="mt-1"
-            columnDefs={[
-              { headerName: "Name", field: "Name" },
-              { headerName: "Tooltip", field: "Tooltip" },
-            ]}
-            rowData={afButtons}
-            selectedIds={letterBtnIds}
-            onSelectionChange={(selectedIds) =>
-              handleSelectionChange("LetterBtns", selectedIds)
-            }
-            isGlobal={false}
-            ModalContentComponent={ButtonComponent}
-            modalContentProps={{
-              columnDefs: [
-                { headerName: "Name", field: "Name" },
-                { headerName: "Tooltip", field: "Tooltip" },
-              ],
-              rowData: afButtons,
-              selectedRow: selectedRowData,
-              onClose: handleCloseModal,
-              onRowSelect: handleSelectButtonClick,
-              onSelectFromButton: handleSelectButtonClick,
-              isSelectDisabled: !selectedRowData,
-            }}
-            loading={loading}
-          />
+{/* Letter Action Buttons (چند مقداری) */}
+<ListSelector
+  title="Letter Action Buttons"
+  className="mt-1"
+  columnDefs={[
+    { headerName: "Name", field: "Name" },
+    { headerName: "Tooltip", field: "Tooltip" },
+  ]}
+  rowData={afButtons}
+  selectedIds={letterBtnIds}
+  onSelectionChange={(selectedIds) =>
+    handleSelectionChange("LetterBtns", selectedIds)
+  }
+  showSwitcher={false}
+  isGlobal={false}
+  ModalContentComponent={ButtonComponent}
+  modalContentProps={{
+    columnDefs: [
+      { headerName: "Name", field: "Name" },
+      { headerName: "Tooltip", field: "Tooltip" },
+    ],
+    rowData: afButtons,
+    selectedRow: selectedRowData,
+    onClose: handleCloseModal,
+    onRowSelect: handleSelectButtonClick,
+    onSelectFromButton: handleSelectButtonClick,
+    isSelectDisabled: !selectedRowData,
+    refreshButtons, // ⬅️
+  }}
+  loading={loading}
+/>
 
-          {/* Meeting Action Buttons (چند مقداری) */}
-          <ListSelector
-            title="Meeting Action Buttons"
-            className="mt-1"
-            columnDefs={[
-              { headerName: "Name", field: "Name" },
-              { headerName: "Tooltip", field: "Tooltip" },
-            ]}
-            rowData={afButtons}
-            selectedIds={meetingBtnIds}
-            onSelectionChange={(selectedIds) =>
-              handleSelectionChange("MeetingBtns", selectedIds)
-            }
-            isGlobal={false}
-            ModalContentComponent={ButtonComponent}
-            modalContentProps={{
-              columnDefs: [
-                { headerName: "Name", field: "Name" },
-                { headerName: "Tooltip", field: "Tooltip" },
-              ],
-              rowData: afButtons,
-              selectedRow: selectedRowData,
-              onClose: handleCloseModal,
-              onRowSelect: handleSelectButtonClick,
-              onSelectFromButton: handleSelectButtonClick,
-              isSelectDisabled: !selectedRowData,
-            }}
-            loading={loading}
-          />
+{/* Meeting Action Buttons (چند مقداری) */}
+<ListSelector
+  title="Meeting Action Buttons"
+  className="mt-1"
+  columnDefs={[
+    { headerName: "Name", field: "Name" },
+    { headerName: "Tooltip", field: "Tooltip" },
+  ]}
+  rowData={afButtons}
+  selectedIds={meetingBtnIds}
+  onSelectionChange={(selectedIds) =>
+    handleSelectionChange("MeetingBtns", selectedIds)
+  }
+  showSwitcher={false}
+  isGlobal={false}
+  ModalContentComponent={ButtonComponent}
+  modalContentProps={{
+    columnDefs: [
+      { headerName: "Name", field: "Name" },
+      { headerName: "Tooltip", field: "Tooltip" },
+    ],
+    rowData: afButtons,
+    selectedRow: selectedRowData,
+    onClose: handleCloseModal,
+    onRowSelect: handleSelectButtonClick,
+    onSelectFromButton: handleSelectButtonClick,
+    isSelectDisabled: !selectedRowData,
+    refreshButtons, // ⬅️
+  }}
+  loading={loading}
+/>
+
         </TwoColumnLayout>
 
         {/* مودال عمومی برای انتخاب از جدول (TableSelector) */}

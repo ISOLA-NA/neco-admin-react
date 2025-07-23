@@ -358,30 +358,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               onChange={(e) => handleChange("Describtion", e.target.value)}
             />
           </TwoColumnLayout.Item>
-          {/* 
-          <TwoColumnLayout.Item span={1}>
-            <DynamicInput
-              name="Max Duration (Days)"
-              type="number"
-              value={approvalFlowData.MaxDuration.toString()}
-              placeholder=""
-              onChange={(e) =>
-                handleChange("MaxDuration", parseInt(e.target.value) || 0)
-              }
-            />
-          </TwoColumnLayout.Item> */}
-
-          {/* <TwoColumnLayout.Item span={1}>
-            <DynamicInput
-              name="Project Cost"
-              type="number"
-              value={approvalFlowData.PCost.toString()}
-              placeholder=""
-              onChange={(e) =>
-                handleChange("PCost", parseInt(e.target.value) || 0)
-              }
-            />
-          </TwoColumnLayout.Item> */}
+    
 
           <TwoColumnLayout.Item span={1} className="mt-10">
             <ListSelector

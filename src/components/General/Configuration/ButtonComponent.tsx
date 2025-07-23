@@ -82,7 +82,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmHideCancel, setConfirmHideCancel] = useState<boolean>(false);
   // تابع اکشنی که بعد از زدن دکمه "Confirm" اجرا می‌شود
-  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => {});
+  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => { });
 
   // تابع کمکی برای بازکردن DynamicConfirm
   const openConfirm = (
@@ -115,15 +115,45 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // ==============================
 
   // گرفتن کل داده‌ها از API
-  const fetchAllAFBtn = async () => {
-    try {
-      const response = await api.getAllAfbtn();
-      setRowData(response);
-    } catch (error) {
-      console.error("Error fetching AFBtn data:", error);
-      openConfirm("error", "Error", "Failed to fetch data.", true);
-    }
-  };
+  // const fetchAllAFBtn = async () => {
+  //   try {
+  //     const response = await api.getAllAfbtn();
+  //     setRowData(response);
+  //   } catch (error) {
+  //     console.error("Error fetching AFBtn data:", error);
+  //     openConfirm("error", "Error", "Failed to fetch data.", true);
+  //   }
+  // };
+
+ const fetchAllAFBtn = async () => {
+  try {
+    const response = await api.getAllAfbtn();
+
+    /* 🔵 اگر می‌خواهید کل آرایه را یک‌بار ببینید */
+    console.log("AFBtn raw response ➜", response);
+
+    const decorated = response.map((item, idx) => {
+      /* 🔵 لاگ‌گرفتن از تک‌تک آیتم‌ها */
+      console.log(`AFBtn item #${idx} ➜`, item);
+
+      return {
+        ...item,
+        DisplayName: buildDisplayName(
+          mapWFStateForDeemedToRadio(item.WFStateForDeemed),
+          mapWFCommandToRadio(item.WFCommand),
+          item.StateText ?? ""
+        ),
+      };
+    });
+
+    setRowData(decorated);
+  } catch (error) {
+    console.error("Error fetching AFBtn data:", error);
+    openConfirm("error", "Error", "Failed to fetch data.", true);
+  }
+};
+
+
 
   useEffect(() => {
     fetchAllAFBtn();
@@ -153,10 +183,16 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       return;
     }
 
+    const generatedName = buildDisplayName(
+      selectedState,
+      selectedCommand,
+      stateTextValue
+    );
+
     try {
       const newAFBtn: AFBtnItem = {
         ID: 0,
-        Name: nameValue,
+        Name: generatedName,
         Tooltip: tooltipValue,
         StateText: stateTextValue,
         Order: parseInt(orderValue || "0"),
@@ -187,6 +223,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       return;
     }
 
+    const generatedName = buildDisplayName(selectedState, selectedCommand, stateTextValue);
+
     // ابتدا یک Confirm برای ویرایش با پیام تایید نمایش داده می‌شود
     openConfirm(
       "edit",
@@ -197,7 +235,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         try {
           const updatedAFBtn: AFBtnItem = {
             ID: selectedRow.ID,
-            Name: nameValue,
+            Name: generatedName,
             Tooltip: tooltipValue,
             StateText: stateTextValue,
             Order: parseInt(orderValue || "0"),
@@ -284,35 +322,36 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // =========================
   //  توابع کمکی مپ کردن WF
   // =========================
-  const mapWFStateForDeemedToRadio = (val: number) => {
-    switch (val) {
-      case 1:
-        return "accept";
-      case 2:
-        return "reject";
-      case 3:
-        return "close";
-      default:
-        return "accept";
-    }
-  };
+ const mapWFStateForDeemedToRadio = (val?: number): string => {
+  switch (val) {
+    case 1:
+      return "accept";
+    case 2:
+      return "reject";
+    case 3:
+      return "close";
+    default:
+      return "accept";
+  }
+};
 
-  const mapWFCommandToRadio = (val: number) => {
-    switch (val) {
-      case 1:
-        return "accept";
-      case 2:
-        return "close";
-      case 3:
-        return "reject";
-      case 4:
-        return "client";
-      case 5:
-        return "admin";
-      default:
-        return "accept";
-    }
-  };
+
+ const mapWFCommandToRadio = (val?: number): string => {
+  switch (val) {
+    case 1:
+      return "accept";
+    case 2:
+      return "close";
+    case 3:
+      return "reject";
+    case 4:
+      return "client";
+    case 5:
+      return "admin";
+    default:
+      return "accept";
+  }
+};
 
   const radioToWFStateForDeemed = (radioVal: string): number => {
     switch (radioVal) {
@@ -379,6 +418,24 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     }
   };
 
+  const buildDisplayName = (
+    stateRadio: string,
+    commandRadio: string,
+    stateText: string
+  ) => {
+    // تبدیل مقدار value رادیوها به برچسب نمایشی
+    const stateLabel =
+      RadioOptionsState.find((o) => o.value === stateRadio)?.label ?? "";
+    const commandLabel =
+      RadioOptionsCommand.find((o) => o.value === commandRadio)?.label ?? "";
+
+    // اگر StateText پر شده باشد بگذارید اولِ اسم بیاید، وگرنه همان stateLabel
+    const base = stateText.trim() || stateLabel;
+
+    return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
+  };
+
+
   return (
     <div className="w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4">
       {/* DynamicConfirm برای هشدارها */}
@@ -403,10 +460,13 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           onRowDoubleClick={handleRowDoubleClickLocal}
           setSelectedRowData={handleRowClickLocal}
           showDuplicateIcon={false}
-          onAdd={() => {}}
-          onEdit={() => {}}
-          onDelete={() => {}}
-          onDuplicate={() => {}}
+          showEditIcon={false}
+          showDeleteIcon={false}
+          showAddIcon={false}
+          onAdd={() => { }}
+          onEdit={() => { }}
+          onDelete={() => { }}
+          onDuplicate={() => { }}
           domLayout="normal"
         />
       </div>
@@ -473,7 +533,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
             onUploadSuccess={handleUploadSuccess}
             resetCounter={resetCounter}
             onReset={handleReset}
-            isEditMode={selectedRow !== null} 
+            isEditMode={selectedRow !== null}
           />
         </div>
       </div>
