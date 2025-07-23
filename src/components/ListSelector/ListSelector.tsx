@@ -6,7 +6,7 @@ interface ListSelectorProps {
   title: string;
   className?: string;
   columnDefs: any[];
-  rowData?: { ID: string | number; Name: string }[];
+  rowData?: { ID: string | number; Name: string; DisplayName?: string }[];
   selectedIds: (string | number)[];
   onSelectionChange: (selectedIds: (string | number)[]) => void;
   showSwitcher?: boolean;
@@ -34,6 +34,9 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
 
+  // متنی که باید نمایش داده شود
+  const getLabel = (row: any) => row?.DisplayName ?? row?.Name ?? "";
+
   const handleRowSelect = (data: any) => {
     const id = data.ID;
     if (!selectedIds.includes(id)) {
@@ -43,24 +46,19 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     setSelectedRow(null);
   };
 
-  const handleRemoveName = (id: string | number) => {
+  const handleRemove = (id: string | number) => {
     onSelectionChange(selectedIds.filter((selectedId) => selectedId !== id));
   };
 
-  const selectedNames = rowData
-    .filter((row) => selectedIds.includes(row.ID))
-    .map((row) => row.Name);
+  const selectedItems = rowData.filter((row) => selectedIds.includes(row.ID));
 
   return (
     <div className={classNames("w-full", className)}>
       <div className="flex justify-between items-center p-2 rounded-t-md bg-gradient-to-r from-purple-600 to-indigo-500 h-10">
         <div className="flex items-center gap-2">
-          {/* سوئیچر جدید */}
           {showSwitcher && (
             <div className="flex items-center gap-2">
-              {/* سوئیچر سمت چپ، متن سمت راست */}
               <label className="flex items-center cursor-pointer">
-                {/* سوئیچر سفارشی */}
                 <div
                   className={classNames(
                     "w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300",
@@ -72,9 +70,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
                   <div
                     className={classNames(
                       "bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300",
-                      isGlobal
-                        ? "translate-x-4" // وقتی فعال است، به سمت متن (راست فارسی)
-                        : "translate-x-0"
+                      isGlobal ? "translate-x-4" : "translate-x-0"
                     )}
                   />
                 </div>
@@ -85,6 +81,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             </div>
           )}
         </div>
+
         <div className="flex items-center gap-2">
           <h3 className="text-xs font-semibold text-white">{title}</h3>
           <button
@@ -126,25 +123,20 @@ const ListSelector: React.FC<ListSelectorProps> = ({
               ></path>
             </svg>
           </div>
-        ) : selectedNames.length === 0 ? (
-          <p className="text-gray-500 text-xs text-center">
-            No item is selected
-          </p>
+        ) : selectedItems.length === 0 ? (
+          <p className="text-gray-500 text-xs text-center">No item is selected</p>
         ) : (
           <div className="space-y-2">
-            {selectedNames.map((name, index) => (
+            {selectedItems.map((item) => (
               <div
-                key={index}
+                key={item.ID}
                 className="flex justify-between items-center bg-white p-2 rounded-md shadow-sm transition-shadow duration-300 hover:shadow-md"
               >
-                <span className="text-gray-700 text-xs">{name}</span>
+                <span className="text-gray-700 text-xs">{getLabel(item)}</span>
                 <button
                   className="text-red-500 hover:text-red-700 focus:outline-none"
-                  onClick={() => {
-                    const row = rowData.find((r) => r.Name === name);
-                    if (row) handleRemoveName(row.ID);
-                  }}
-                  aria-label={`حذف ${name}`}
+                  onClick={() => handleRemove(item.ID)}
+                  aria-label={`حذف ${getLabel(item)}`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
