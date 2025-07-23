@@ -84,7 +84,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const [minRejectValue, setMinRejectValue] = useState<string>("");
     const [actDurationValue, setActDurationValue] = useState<string>("");
     const [orderValue, setOrderValue] = useState<string>("");
-    const [acceptChecked, setAcceptChecked] = useState<boolean>(false);
+    const [acceptChecked, setAcceptChecked] = useState<boolean>(true);
     const [rejectChecked, setRejectChecked] = useState<boolean>(false);
 
     const [staticPostValue, setStaticPostValue] = useState<string>("");
@@ -221,9 +221,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         rows.map((r) =>
           r.id === params.data.id
             ? {
-                ...r,
-                [field]: newValue,
-              }
+              ...r,
+              [field]: newValue,
+            }
             : r
         )
       );
@@ -418,7 +418,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         setMinRejectValue("");
         setActDurationValue("");
         setOrderValue("");
-        setAcceptChecked(false);
+        setAcceptChecked(true);
         setRejectChecked(false);
         setCost1("");
         setCost2("");
@@ -500,20 +500,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
-                ...r,
-                nPostID: selectedStaticPost
-                  ? selectedStaticPost.ID.toString()
-                  : "",
-                cost1: Number(cost1) || 0,
-                cost2: Number(cost2) || 0,
-                cost3: Number(cost3) || 0,
-                weight1: Number(weight1) || 0,
-                weight2: Number(weight2) || 0,
-                weight3: Number(weight3) || 0,
-                required: requiredChecked,
-                veto: vetoChecked,
-                code: Number(codeValue) || 0,
-              }
+              ...r,
+              nPostID: selectedStaticPost
+                ? selectedStaticPost.ID.toString()
+                : "",
+              cost1: Number(cost1) || 0,
+              cost2: Number(cost2) || 0,
+              cost3: Number(cost3) || 0,
+              weight1: Number(weight1) || 0,
+              weight2: Number(weight2) || 0,
+              weight3: Number(weight3) || 0,
+              required: requiredChecked,
+              veto: vetoChecked,
+              code: Number(codeValue) || 0,
+            }
             : r
         );
         setTableData(updated);
@@ -636,9 +636,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
     return (
       <div className="flex flex-col md:flex-row h-full relative">
-        {/* دیگر اینجا ToastContainer نداریم تا دوبار پیام نمایش داده نشود */}
 
-        {/* بخش اصلی */}
         <main className="flex-1 p-4 bg-white overflow-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 items-center">
             <DynamicInput
@@ -686,9 +684,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 type="number"
                 value={minRejectValue}
                 onChange={(e) => setMinRejectValue(e.target.value)}
-                disabled={!rejectChecked}
                 className="w-full"
               />
+
             </div>
 
             <DynamicInput
@@ -720,179 +718,178 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           </div>
 
           {/* Approval Context */}
-         {/* Approval Context */}
-<div className="mt-8 p-4 bg-gray-100 rounded-lg">
-  <div className="flex justify-between items-center mb-4">
-    <span className="text-lg font-semibold text-gray-700">
-      Approval Context:
-    </span>
-    <div className="flex space-x-2">
-      <button
-        type="button"
-        onClick={handleAddOrUpdateRow}
-        className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
-      >
-        <FaPlus className="mr-2" /> Add
-      </button>
+          {/* Approval Context */}
+          <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-semibold text-gray-700">
+                Approval Context:
+              </span>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={handleAddOrUpdateRow}
+                  className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+                >
+                  <FaPlus className="mr-2" /> Add
+                </button>
 
-      <button
-        type="button"
-        onClick={handleDeleteRow}
-        className={`flex items-center px-3 py-2 rounded transition-colors ${
-          selectedRow
-            ? "bg-red-500 hover:bg-red-600 text-white"
-            : "bg-red-300 text-white cursor-not-allowed"
-        }`}
-        disabled={!selectedRow}
-      >
-        <FaTimes className="mr-2 text-white" /> Delete
-      </button>
-    </div>
-  </div>
-
-  <div className="grid grid-cols-1 gap-4">
-    {/* Static Post */}
-    <div>
-      <label className="block text-sm text-gray-700">Static Post</label>
-      <DynamicSelector
-        options={staticPostOptions}
-        selectedValue={staticPostValue}
-        onChange={(e) => {
-          const val = e.target.value;
-          setStaticPostValue(val);
-          setSelectedStaticPost(
-            allRoles.find((r) => r.ID.toString() === val) || null
-          );
-        }}
-        label=""
-        showButton
-        onButtonClick={openModal}
-      />
-    </div>
-
-    {/* گرید سه ستونه برای وزن و هزینه */}
-    <div className="grid grid-cols-3 gap-2">
-      <div className="flex flex-col gap-1">
-        <DynamicInput
-          name="Weight1"
-          type="number"
-          value={weight1}
-          onChange={(e) => setWeight1(e.target.value)}
-          className="w-full"
-        />
-        <DynamicInput
-          name="Cost1"
-          type="number"
-          value={cost1}
-          onChange={(e) => setCost1(e.target.value)}
-          className="w-full"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <DynamicInput
-          name="Weight2"
-          type="number"
-          value={weight2}
-          onChange={(e) => setWeight2(e.target.value)}
-          className="w-full"
-        />
-        <DynamicInput
-          name="Cost2"
-          type="number"
-          value={cost2}
-          onChange={(e) => setCost2(e.target.value)}
-          className="w-full"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <DynamicInput
-          name="Weight3"
-          type="number"
-          value={weight3}
-          onChange={(e) => setWeight3(e.target.value)}
-          className="w-full"
-        />
-        <DynamicInput
-          name="Cost3"
-          type="number"
-          value={cost3}
-          onChange={(e) => setCost3(e.target.value)}
-          className="w-full"
-        />
-      </div>
-    </div>
-
-    {/* بخش Code، Veto و Required */}
-    <div className="flex items-center justify-center mt-2 space-x-5">
-      <div className="w-1/3">
-        <DynamicInput
-          name="Code"
-          type="number"
-          value={codeValue}
-          onChange={(e) => setCodeValue(e.target.value)}
-          className="w-full"
-        />
-      </div>
-      <div className="flex items-center space-x-5 mt-4">
-        <label className="flex items-center text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={vetoChecked}
-            onChange={(e) => setVetoChecked(e.target.checked)}
-            className="h-4 w-4 mr-1"
-          />
-          Veto
-        </label>
-        <label className="flex items-center text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={requiredChecked}
-            onChange={(e) => setRequiredChecked(e.target.checked)}
-            className="h-4 w-4 mr-1"
-          />
-          Required
-        </label>
-      </div>
-    </div>
-  </div>
-
-  {!isStage && (
-    <div className="mt-4">
-      {/* ظرف بیرونی: فقط اسکرول افقی */}
-      <div className="overflow-x-auto pb-2">
-        {/* ارتفاع ثابت؛ ظرف با relative برای لودینگ */}
-        <div className="h-[33vh] min-w-full relative">
-          {approvalContextLoading ? (
-            <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-60">
-              <TailSpin height={50} width={50} ariaLabel="loading" color="#FF69B4" />
+                <button
+                  type="button"
+                  onClick={handleDeleteRow}
+                  className={`flex items-center px-3 py-2 rounded transition-colors ${selectedRow
+                      ? "bg-red-500 hover:bg-red-600 text-white"
+                      : "bg-red-300 text-white cursor-not-allowed"
+                    }`}
+                  disabled={!selectedRow}
+                >
+                  <FaTimes className="mr-2 text-white" /> Delete
+                </button>
+              </div>
             </div>
-          ) : (
-            <DataTable
-              columnDefs={columnDefs}
-              rowData={tableData}
-              onCellValueChanged={handleCellValueChanged}
-              setSelectedRowData={handleSelectRow}
-              showDuplicateIcon={false}
-              showEditIcon={false}
-              showAddIcon={false}
-              showDeleteIcon={false}
-              domLayout="normal"
-              gridOptions={{
-                rowSelection: "single",
-                onGridReady: (p) => {
-                  p.api.sizeColumnsToFit();
-                  window.addEventListener("resize", () =>
-                    p.api.sizeColumnsToFit()
-                  );
-                },
-              }}
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  )}
-</div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {/* Static Post */}
+              <div>
+                <label className="block text-sm text-gray-700">Static Post</label>
+                <DynamicSelector
+                  options={staticPostOptions}
+                  selectedValue={staticPostValue}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setStaticPostValue(val);
+                    setSelectedStaticPost(
+                      allRoles.find((r) => r.ID.toString() === val) || null
+                    );
+                  }}
+                  label=""
+                  showButton
+                  onButtonClick={openModal}
+                />
+              </div>
+
+              {/* گرید سه ستونه برای وزن و هزینه */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col gap-1">
+                  <DynamicInput
+                    name="Weight1"
+                    type="number"
+                    value={weight1}
+                    onChange={(e) => setWeight1(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name="Cost1"
+                    type="number"
+                    value={cost1}
+                    onChange={(e) => setCost1(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <DynamicInput
+                    name="Weight2"
+                    type="number"
+                    value={weight2}
+                    onChange={(e) => setWeight2(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name="Cost2"
+                    type="number"
+                    value={cost2}
+                    onChange={(e) => setCost2(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <DynamicInput
+                    name="Weight3"
+                    type="number"
+                    value={weight3}
+                    onChange={(e) => setWeight3(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name="Cost3"
+                    type="number"
+                    value={cost3}
+                    onChange={(e) => setCost3(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              {/* بخش Code، Veto و Required */}
+              <div className="flex items-center justify-center mt-2 space-x-5">
+                <div className="w-1/3">
+                  <DynamicInput
+                    name="Code"
+                    type="number"
+                    value={codeValue}
+                    onChange={(e) => setCodeValue(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex items-center space-x-5 mt-4">
+                  <label className="flex items-center text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={vetoChecked}
+                      onChange={(e) => setVetoChecked(e.target.checked)}
+                      className="h-4 w-4 mr-1"
+                    />
+                    Veto
+                  </label>
+                  <label className="flex items-center text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={requiredChecked}
+                      onChange={(e) => setRequiredChecked(e.target.checked)}
+                      className="h-4 w-4 mr-1"
+                    />
+                    Required
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {!isStage && (
+              <div className="mt-4">
+                {/* ظرف بیرونی: فقط اسکرول افقی */}
+                <div className="overflow-x-auto pb-2">
+                  {/* ارتفاع ثابت؛ ظرف با relative برای لودینگ */}
+                  <div className="h-[33vh] min-w-full relative">
+                    {approvalContextLoading ? (
+                      <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-60">
+                        <TailSpin height={50} width={50} ariaLabel="loading" color="#FF69B4" />
+                      </div>
+                    ) : (
+                      <DataTable
+                        columnDefs={columnDefs}
+                        rowData={tableData}
+                        onCellValueChanged={handleCellValueChanged}
+                        setSelectedRowData={handleSelectRow}
+                        showDuplicateIcon={false}
+                        showEditIcon={false}
+                        showAddIcon={false}
+                        showDeleteIcon={false}
+                        domLayout="normal"
+                        gridOptions={{
+                          rowSelection: "single",
+                          onGridReady: (p) => {
+                            p.api.sizeColumnsToFit();
+                            window.addEventListener("resize", () =>
+                              p.api.sizeColumnsToFit()
+                            );
+                          },
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
 
           <div className="mt-6">
@@ -955,12 +952,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 { headerName: "Tooltip", field: "Tooltip" },
               ],
               rowData: btnList,
-              onRowDoubleClick: () => {},
-              onRowClick: () => {},
-              onSelectButtonClick: () => {},
+              onRowDoubleClick: () => { },
+              onRowClick: () => { },
+              onSelectButtonClick: () => { },
               isSelectDisabled: false,
-              onClose: () => {},
-              onSelectFromButton: () => {},
+              onClose: () => { },
+              onSelectFromButton: () => { },
             }}
           />
         </aside>

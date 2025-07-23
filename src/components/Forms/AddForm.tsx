@@ -649,6 +649,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             onChange={(e) => handleChange("typeOfInformation", e.target.value)}
             label="Type of Information"
             className="md:col-span-2"
+            disabled={isEdit}
           />
 
           {/* چند چک‌باکس در یک ردیف */}
