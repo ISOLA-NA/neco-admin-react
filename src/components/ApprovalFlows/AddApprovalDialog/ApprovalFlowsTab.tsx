@@ -155,23 +155,68 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     }, [api]);
 
     // گرفتن لیست تمام دکمه‌ها
-    useEffect(() => {
-      const fetchButtons = async () => {
-        try {
-          const res = await api.getAllAfbtn();
-          setBtnList(res);
-        } catch (error) {
-          console.error("Error fetching buttons:", error);
-          showAlert(
-            "error",
-            null,
-            "Error",
-            "An error occurred while fetching buttons"
-          );
+// گرفتن لیست تمام دکمه‌ها
+useEffect(() => {
+  const fetchButtons = async () => {
+    try {
+      const res = await api.getAllAfbtn();
+
+      // helperهای محلی
+      const mapWFStateForDeemedToRadio = (val?: number): string => {
+        switch (val) {
+          case 1: return "accept";
+          case 2: return "reject";
+          case 3: return "close";
+          default: return "accept";
         }
       };
-      fetchButtons();
-    }, [api]);
+      const mapWFCommandToRadio = (val?: number): string => {
+        switch (val) {
+          case 1: return "accept";
+          case 2: return "close";
+          case 3: return "reject";
+          case 4: return "client";
+          case 5: return "admin";
+          default: return "accept";
+        }
+      };
+      const buildDisplayName = (stateRadio: string, commandRadio: string, stateText: string) => {
+        const stateLabelMap: Record<string, string> = {
+          accept: "Accept",
+          reject: "Reject",
+          close: "Close",
+        };
+        const cmdLabelMap: Record<string, string> = {
+          accept: "Accept",
+          reject: "Reject",
+          close: "Close",
+          client: "Previous State Client",
+          admin: "Previous State Admin",
+        };
+        const stateLabel = stateLabelMap[stateRadio] ?? "";
+        const cmdLabel   = cmdLabelMap[commandRadio] ?? "";
+        const base = (stateText || "").trim() || stateLabel;
+        return `${base} (State: ${stateLabel} - Command: ${cmdLabel})`;
+      };
+
+      const decorated: AFBtnItem[] = res.map((b: AFBtnItem) => ({
+        ...b,
+        DisplayName: buildDisplayName(
+          mapWFStateForDeemedToRadio(b.WFStateForDeemed),
+          mapWFCommandToRadio(b.WFCommand),
+          b.StateText ?? ""
+        ),
+      }));
+
+      setBtnList(decorated);
+    } catch (error) {
+      console.error("Error fetching buttons:", error);
+      showAlert("error", null, "Error", "An error occurred while fetching buttons");
+    }
+  };
+  fetchButtons();
+}, [api]);
+
 
     // گرفتن تنظیمات مربوط به دکمه اکشن
     useEffect(() => {
