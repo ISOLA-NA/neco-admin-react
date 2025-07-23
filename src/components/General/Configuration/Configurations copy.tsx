@@ -44,7 +44,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     const [configData, setConfigData] = useState({
       id: toValidString(selectedRow?.ID),
       Name: selectedRow?.Name || "",
-      FirstIDProgramTemplate: toValidString(selectedRow?.FirstIDProgramTemplate),
+      FirstIDProgramTemplate: toValidString(
+        selectedRow?.FirstIDProgramTemplate
+      ),
       SelMenuIDForMain: toValidString(selectedRow?.SelMenuIDForMain),
       Description: selectedRow?.Description || "",
       IsVisible: selectedRow?.IsVisible || true,
@@ -52,10 +54,18 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       DefaultBtn: selectedRow?.DefaultBtn || "",
       LetterBtns: selectedRow?.LetterBtns || "",
       MeetingBtns: selectedRow?.MeetingBtns || "",
-      EnityTypeIDForLessonLearn: toValidString(selectedRow?.EnityTypeIDForLessonLearn),
-      EnityTypeIDForTaskCommnet: toValidString(selectedRow?.EnityTypeIDForTaskCommnet),
-      EnityTypeIDForProcesure: toValidString(selectedRow?.EnityTypeIDForProcesure),
-      WFTemplateIDForLessonLearn: toValidString(selectedRow?.WFTemplateIDForLessonLearn),
+      EnityTypeIDForLessonLearn: toValidString(
+        selectedRow?.EnityTypeIDForLessonLearn
+      ),
+      EnityTypeIDForTaskCommnet: toValidString(
+        selectedRow?.EnityTypeIDForTaskCommnet
+      ),
+      EnityTypeIDForProcesure: toValidString(
+        selectedRow?.EnityTypeIDForProcesure
+      ),
+      WFTemplateIDForLessonLearn: toValidString(
+        selectedRow?.WFTemplateIDForLessonLearn
+      ),
     });
 
     const [descriptionError, setDescriptionError] = useState(false);
@@ -75,8 +85,12 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
 
     // State for API data
-    const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>([]);
-    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
+    const [programTemplates, setProgramTemplates] = useState<
+      ProgramTemplateItem[]
+    >([]);
+    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>(
+      []
+    );
     const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
     const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
     const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
@@ -163,21 +177,34 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
       const newConfig = {
         id: toValidString(selectedRow?.ID),
         Name: selectedRow?.Name || "",
-        FirstIDProgramTemplate: toValidString(selectedRow?.FirstIDProgramTemplate),
+        FirstIDProgramTemplate: toValidString(
+          selectedRow?.FirstIDProgramTemplate
+        ),
         SelMenuIDForMain: toValidString(selectedRow?.SelMenuIDForMain),
-        WFTemplateIDForLessonLearn: toValidString(selectedRow?.WFTemplateIDForLessonLearn),
+        WFTemplateIDForLessonLearn: toValidString(
+          selectedRow?.WFTemplateIDForLessonLearn
+        ),
         Description: selectedRow?.Description || "",
         IsVisible: selectedRow?.IsVisible || true,
         LastModified: selectedRow?.LastModified || "",
         DefaultBtn: selectedRow?.DefaultBtn || "",
         LetterBtns: selectedRow?.LetterBtns || "",
         MeetingBtns: selectedRow?.MeetingBtns || "",
-        EnityTypeIDForLessonLearn: toValidString(selectedRow?.EnityTypeIDForLessonLearn),
-        EnityTypeIDForTaskCommnet: toValidString(selectedRow?.EnityTypeIDForTaskCommnet),
-        EnityTypeIDForProcesure: toValidString(selectedRow?.EnityTypeIDForProcesure),
+        EnityTypeIDForLessonLearn: toValidString(
+          selectedRow?.EnityTypeIDForLessonLearn
+        ),
+        EnityTypeIDForTaskCommnet: toValidString(
+          selectedRow?.EnityTypeIDForTaskCommnet
+        ),
+        EnityTypeIDForProcesure: toValidString(
+          selectedRow?.EnityTypeIDForProcesure
+        ),
       };
       console.log("SelectedRow:", selectedRow);
-      console.log("WFTemplateIDForLessonLearn:", newConfig.WFTemplateIDForLessonLearn);
+      console.log(
+        "WFTemplateIDForLessonLearn:",
+        newConfig.WFTemplateIDForLessonLearn
+      );
       setConfigData(newConfig);
     }, [selectedRow]);
 
@@ -267,7 +294,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             value={configData.Description}
             onChange={(e) => handleChange("Description", e.target.value)}
             placeholder=""
-            className={`${descriptionError ? "border-red-500" : "border-gray-300"}`}
+            className={`${
+              descriptionError ? "border-red-500" : "border-gray-300"
+            }`}
           />
 
           <DynamicSelector
@@ -277,7 +306,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: pt.Name,
             }))}
             selectedValue={configData.FirstIDProgramTemplate}
-            onChange={(e) => handleChange("FirstIDProgramTemplate", e.target.value)}
+            onChange={(e) =>
+              handleChange("FirstIDProgramTemplate", e.target.value)
+            }
             label="Program Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}
@@ -307,7 +338,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: llf.Name,
             }))}
             selectedValue={configData.EnityTypeIDForLessonLearn}
-            onChange={(e) => handleChange("EnityTypeIDForLessonLearn", e.target.value)}
+            onChange={(e) =>
+              handleChange("EnityTypeIDForLessonLearn", e.target.value)
+            }
             label="Lesson Learned Form"
             showButton={true}
             onButtonClick={() => handleOpenModal("LessonLearnedForm")}
@@ -322,7 +355,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: wf.Name,
             }))}
             selectedValue={configData.WFTemplateIDForLessonLearn}
-            onChange={(e) => handleChange("WFTemplateIDForLessonLearn", e.target.value)}
+            onChange={(e) =>
+              handleChange("WFTemplateIDForLessonLearn", e.target.value)
+            }
             label="Lesson Learned Af Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("LessonLearnedAfTemplate")}
@@ -337,7 +372,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: cft.Name,
             }))}
             selectedValue={configData.EnityTypeIDForTaskCommnet}
-            onChange={(e) => handleChange("EnityTypeIDForTaskCommnet", e.target.value)}
+            onChange={(e) =>
+              handleChange("EnityTypeIDForTaskCommnet", e.target.value)
+            }
             label="Comment Form Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("CommentFormTemplate")}
@@ -352,7 +389,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: pft.Name,
             }))}
             selectedValue={configData.EnityTypeIDForProcesure}
-            onChange={(e) => handleChange("EnityTypeIDForProcesure", e.target.value)}
+            onChange={(e) =>
+              handleChange("EnityTypeIDForProcesure", e.target.value)
+            }
             label="Procedure Form Template"
             showButton={true}
             onButtonClick={() => handleOpenModal("ProcedureFormTemplate")}
@@ -373,7 +412,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
                 Name: btn.Name,
               }))}
             selectedIds={defaultBtnIds}
-            onSelectionChange={(selectedIds) => handleSelectionChange("DefaultBtn", selectedIds)}
+            onSelectionChange={(selectedIds) =>
+              handleSelectionChange("DefaultBtn", selectedIds)
+            }
             isGlobal={false}
             ModalContentComponent={ButtonComponent}
             modalContentProps={{
@@ -402,7 +443,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
                 Name: btn.Name,
               }))}
             selectedIds={letterBtnIds}
-            onSelectionChange={(selectedIds) => handleSelectionChange("LetterBtns", selectedIds)}
+            onSelectionChange={(selectedIds) =>
+              handleSelectionChange("LetterBtns", selectedIds)
+            }
             isGlobal={false}
             ModalContentComponent={ButtonComponent}
             modalContentProps={{
@@ -433,7 +476,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
                 Name: btn.Name,
               }))}
             selectedIds={meetingBtnIds}
-            onSelectionChange={(selectedIds) => handleSelectionChange("MeetingBtns", selectedIds)}
+            onSelectionChange={(selectedIds) =>
+              handleSelectionChange("MeetingBtns", selectedIds)
+            }
             isGlobal={false}
             ModalContentComponent={ButtonComponent}
             modalContentProps={{
