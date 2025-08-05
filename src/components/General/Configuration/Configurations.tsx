@@ -464,6 +464,7 @@ useEffect(() => {
             onChange={(e) => handleChange("Name", e.target.value)}
             required
             loading={loading}
+            data-testid="new-config-name-input"
           />
 
           {/* فیلد Description */}

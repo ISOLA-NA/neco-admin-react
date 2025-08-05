@@ -1,24 +1,14 @@
-import React, { ReactNode } from "react";
+import React, { InputHTMLAttributes, ReactNode } from "react";
 import { classNames } from "primereact/utils";
 
-interface DynamicInputProps {
+interface DynamicInputProps extends InputHTMLAttributes<HTMLInputElement> {
   name: string;
   label?: string; // ← اضافه شد
-  type: "text" | "number" | "password" | "date" | "time";
-  value?: string | number | null;
-  placeholder?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
-  required?: boolean;
-  className?: string;
   error?: boolean;
   errorMessage?: string;
-  disabled?: boolean;
   loading?: boolean;
-  min?: number;
-  max?: number;
-  step?: number;
 }
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
@@ -39,6 +29,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   min,
   max,
   step,
+  ...others
 }) => {
   // برچسبی که نمایش داده می‌شود: اگر label باشد، آن را نمایش بده، وگرنه از name استفاده کن
   const labelText = label ?? name;
@@ -95,6 +86,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
               ? "bg-gray-100 text-gray-500 cursor-not-allowed"
               : "bg-white text-gray-800"
           )}
+          {...others}
         />
 
         {loading && (
