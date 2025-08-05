@@ -1,10 +1,13 @@
-// AlertTab.tsx
-import React, { useState, useEffect, ChangeEvent } from "react";
-import AppServices, {
+import React, { useState, useEffect } from "react";
+import {
   AlertingWfTemplateItem,
   Role,
 } from "../../../services/api.services";
+import AppServices from "../../../services/api.services";
 import DataTable from "../../TableDynamic/DataTable";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import DynamicSelector from "../../utilities/DynamicSelector";
+import DynamicInput from "../../utilities/DynamicInput";
 
 type AlertObj = {
   SensitiveItemWFTemp: string;
@@ -14,34 +17,37 @@ type AlertObj = {
   nPostID: string;
   sendType: string;
   Comment: string;
-  nWFBoxTemplateId: string;
 };
 
 type AlertTabProps = {
-  /** شناسهٔ جعبهٔ کاری (WFBoxTemplate) – در حالت Edit مقدار >0 است */
   nWFBoxTemplateId: number;
 };
 
-/** لیست ثابت برای Time-Based Alert */
+// گزینه‌های انتخاب
 const sensitiveItemWFTempList = [
-  { value: "2", Name: "DateComplete" },
-  { value: "1", Name: "DateRun" },
+  { value: "2", label: "DateComplete" },
+  { value: "1", label: "DateRun" },
 ];
-/** لیست ثابت برای Change-Based Alert */
-const sensitivityWFTempList = [{ value: "0", Name: "Status" }];
+const sensitivityWFTempList = [{ value: "0", label: "Status" }];
+// اگر نیاز به نمایش متن برای مراحل دارید، این لیست را مطابق با نیاز پر کنید
+const wfStateList: { value: string; label: string }[] = [
+  // مثال: { value: "0", label: "Initial" },
+];
+const sendTypeOptions = [
+  { value: "1", label: "Email" },
+  { value: "2", label: "SMS" },
+  { value: "3", label: "Push Notification" },
+];
 
 export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
-  /** اگر prop غیرصفر باشد یعنی در حالت Edit هستیم و BoxTemplate قفل است */
-  const isFixedBoxTemplate = nWFBoxTemplateId > 0;
-
   const [oldVersion, setOldVersion] = useState(true);
   const [newVersion, setNewVersion] = useState(false);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [boxTemplates, setBoxTemplates] = useState<
-    { ID: number; Name: string }[]
-  >([]);
 
-  const [alertObj, setAlertObj] = useState<AlertObj>({
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [rows, setRows] = useState<AlertObj[]>([]);
+  const [selectedRow] = useState<number | null>(null);
+
+  const [form, setForm] = useState<AlertObj>({
     SensitiveItemWFTemp: "",
     Duration: "",
     SensitivityWFTemp: "",
@@ -49,99 +55,65 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
     nPostID: "",
     sendType: "",
     Comment: "",
-    nWFBoxTemplateId: nWFBoxTemplateId.toString(),
   });
 
-  const [rows, setRows] = useState<AlertObj[]>([]);
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
-
-  // --- بارگذاری نقش‌ها، BoxTemplateها و هشدارهای موجود ---
+  // بارگذاری رول‌ها
   useEffect(() => {
     AppServices.getAllRoles().then(setRoles).catch(console.error);
-
-    // اگر صرفاً برای نمایش در حالت Edit لازم باشد، همین یک آیتم کافی است
-    AppServices.getAllBoxTemplatesByWfTemplateId(16)
-      .then(setBoxTemplates)
-      .catch(console.error);
   }, []);
 
-  // هر بار که ID جعبه عوض شد (مثلاً بین Add و Edit سوییچ شد)
+  // بارگذاری هشدارها بر اساس TemplateId
   useEffect(() => {
-    setAlertObj((prev) => ({
-      ...prev,
-      nWFBoxTemplateId: nWFBoxTemplateId.toString(),
-    }));
-
-    // دریافت هشدارهای موجود برای این BoxTemplate
-    if (nWFBoxTemplateId) {
-      AppServices.getAllAlertingWfTemplateByWFBoxTemplateId(nWFBoxTemplateId)
-        .then((data) =>
-          setRows(
-            data.map((item) => ({
-              SensitiveItemWFTemp: item.SensitiveItemWFTemp?.toString() || "",
-              Duration: item.Duration?.toString() || "",
-              SensitivityWFTemp: item.SensitivityWFTemp?.toString() || "",
-              WFState: item.WFState?.toString() || "",
-              nPostID: item.nPostID,
-              sendType: item.SendType?.toString() || "",
-              Comment: item.Comment || "",
-              nWFBoxTemplateId: item.nWFBoxTemplateId.toString(),
-            }))
-          )
-        )
-        .catch(console.error);
-    } else {
+    if (!nWFBoxTemplateId) {
       setRows([]);
+      return;
     }
+    AppServices.getAllAlertingWfTemplateByWFBoxTemplateId(nWFBoxTemplateId)
+      .then((data) =>
+        setRows(
+          data.map((d) => ({
+            SensitiveItemWFTemp: d.SensitiveItemWFTemp?.toString() || "",
+            Duration: d.Duration?.toString() || "",
+            SensitivityWFTemp: d.SensitivityWFTemp?.toString() || "",
+            WFState: d.WFState?.toString() || "",
+            nPostID: d.nPostID,
+            sendType: d.SendType?.toString() || "",
+            Comment: d.Comment || "",
+          }))
+        )
+      )
+      .catch(console.error);
   }, [nWFBoxTemplateId]);
 
-  const handleChange =
+  const setField =
     (key: keyof AlertObj) =>
-    (
-      e: ChangeEvent<
-        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-      >
-    ) => {
-      setAlertObj((prev) => ({ ...prev, [key]: e.target.value }));
-    };
+    (val: string) =>
+      setForm((prev) => ({ ...prev, [key]: val }));
 
-  // --- افزودن ردیف جدید ---
   const handleAdd = async () => {
-    /** در حالت Edit همیشه از prop استفاده می‌کنیم؛ در غیر این صورت از فرم */
-    const finalBoxTemplateId = isFixedBoxTemplate
-      ? nWFBoxTemplateId
-      : parseInt(alertObj.nWFBoxTemplateId, 10);
-
     const payload: AlertingWfTemplateItem = {
-      Duration: oldVersion ? parseInt(alertObj.Duration, 10) : 0,
+      Duration: oldVersion ? parseInt(form.Duration, 10) : 0,
       SensitiveItemWFTemp: oldVersion
-        ? parseInt(alertObj.SensitiveItemWFTemp, 10)
+        ? parseInt(form.SensitiveItemWFTemp, 10)
         : 0,
       SensitivityWFTemp: newVersion
-        ? parseInt(alertObj.SensitivityWFTemp, 10)
+        ? parseInt(form.SensitivityWFTemp, 10)
         : 0,
-      WFState: newVersion ? parseInt(alertObj.WFState, 10) : 0,
-      SendType: parseInt(alertObj.sendType, 10),
+      WFState: newVersion ? parseInt(form.WFState, 10) : 0,
+      SendType: parseInt(form.sendType, 10),
       nPostTypeID: null,
-      nPostID: alertObj.nPostID,
-      nWFBoxTemplateId: finalBoxTemplateId,
-      Comment: alertObj.Comment,
+      nPostID: form.nPostID,
+      nWFBoxTemplateId: nWFBoxTemplateId,
+      Comment: form.Comment,
       IsVisible: true,
       ModifiedById: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     };
 
     try {
       await AppServices.insertAlertingWfTemplate(payload);
-
-      // سطر جدید در جدول
-      const newRow: AlertObj = {
-        ...alertObj,
-        nWFBoxTemplateId: finalBoxTemplateId.toString(),
-      };
-      setRows((prev) => [...prev, newRow]);
-
-      // ریست فرم (به جز nWFBoxTemplateId در حالت Edit)
-      setAlertObj({
+      setRows((prev) => [...prev, form]);
+      // ریست فرم
+      setForm({
         SensitiveItemWFTemp: "",
         Duration: "",
         SensitivityWFTemp: "",
@@ -149,207 +121,184 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
         nPostID: "",
         sendType: "",
         Comment: "",
-        nWFBoxTemplateId: finalBoxTemplateId.toString(),
       });
-    } catch (err: any) {
-      if (err.response?.data?.errors) console.error(err.response.data.errors);
-      else console.error(err);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const handleDeleteRow = (idx: number | null) => {
-    if (idx === null) return;
-    setRows((prev) => prev.filter((_, i) => i !== idx));
-    setSelectedRowIndex(null);
-  };
-
-  // --- ستون‌های جدول ---
+  // ستون‌های جدول با نمایش لیبل به جای مقدار
   const columnDefs = [
-    { headerName: "Sensitive Item", field: "SensitiveItemWFTemp" },
+    {
+      headerName: "Sensitive Item",
+      field: "SensitiveItemWFTemp",
+      valueGetter: (params: any) =>
+        sensitiveItemWFTempList.find((o) => o.value === params.data.SensitiveItemWFTemp)
+          ?.label || params.data.SensitiveItemWFTemp,
+    },
     { headerName: "Day", field: "Duration" },
-    { headerName: "Sensitivity", field: "SensitivityWFTemp" },
-    { headerName: "Step", field: "WFState" },
-    { headerName: "Send Type", field: "sendType" },
+    {
+      headerName: "Sensitivity",
+      field: "SensitivityWFTemp",
+      valueGetter: (params: any) =>
+        sensitivityWFTempList.find((o) => o.value === params.data.SensitivityWFTemp)
+          ?.label || params.data.SensitivityWFTemp,
+    },
+    {
+      headerName: "Step",
+      field: "WFState",
+      valueGetter: (params: any) =>
+        wfStateList.find((o) => o.value === params.data.WFState)
+          ?.label || params.data.WFState,
+    },
+    {
+      headerName: "Send Type",
+      field: "sendType",
+      valueGetter: (params: any) =>
+        sendTypeOptions.find((o) => o.value === params.data.sendType)
+          ?.label || params.data.sendType,
+    },
     {
       headerName: "Receiver",
       field: "nPostID",
-      valueGetter: (p: any) =>
-        roles.find((r) => r.ID === p.data.nPostID)?.Name || "",
-    },
-    {
-      headerName: "Box Template",
-      field: "nWFBoxTemplateId",
-      valueGetter: (p: any) =>
-        boxTemplates.find((bt) => bt.ID === +p.data.nWFBoxTemplateId)?.Name ||
-        "",
+      valueGetter: (params: any) =>
+        roles.find((r) => r.ID === params.data.nPostID)?.Name || params.data.nPostID,
     },
     { headerName: "Comment", field: "Comment" },
   ];
 
+  // گزینه‌های سلکت
+  const roleOptions = roles.map((r) => ({
+    value: r.ID || "",
+    label: r.Name || "",
+  }));
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* ــــــــــــــ Time-Based / Change-Based ــــــــــــــ */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-        <label className="flex items-center space-x-1">
+      {/* نسخه قدیم یا جدید */}
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
+        <label className="flex items-center space-x-1 sm:col-span-1">
           <input
             type="radio"
-            name="version"
+            name="ver"
             checked={oldVersion}
             onChange={() => {
               setOldVersion(true);
               setNewVersion(false);
             }}
-            className="form-radio"
           />
           <span>Time Based</span>
         </label>
 
-        <select
-          value={alertObj.SensitiveItemWFTemp}
-          onChange={handleChange("SensitiveItemWFTemp")}
-          disabled={!oldVersion}
-          className="w-full border rounded px-2 py-1 disabled:bg-gray-100"
-        >
-          <option value="" hidden>
-            Time Field
-          </option>
-          {sensitiveItemWFTempList.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.Name}
-            </option>
-          ))}
-        </select>
+        <div className="sm:col-span-2">
+          <DynamicSelector
+            label="Time Field"
+            options={sensitiveItemWFTempList}
+            selectedValue={form.SensitiveItemWFTemp}
+            onChange={(e) => setField("SensitiveItemWFTemp")(e.target.value)}
+            disabled={!oldVersion}
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="days"
-          value={alertObj.Duration}
-          onChange={handleChange("Duration")}
-          disabled={!oldVersion}
-          className="w-full border rounded px-2 py-1 disabled:bg-gray-100"
-        />
+        <div className="sm:col-span-2">
+          <DynamicInput
+            label="Days"
+            name="Duration"
+            type="number"
+            value={form.Duration}
+            onChange={(e) => setField("Duration")(e.target.value)}
+            disabled={!oldVersion}
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-        <label className="flex items-center space-x-1">
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
+        <label className="flex items-center space-x-1 sm:col-span-1">
           <input
             type="radio"
-            name="version"
+            name="ver"
             checked={newVersion}
             onChange={() => {
               setNewVersion(true);
               setOldVersion(false);
             }}
-            className="form-radio"
           />
           <span>Change Based</span>
         </label>
 
-        <select
-          value={alertObj.SensitivityWFTemp}
-          onChange={handleChange("SensitivityWFTemp")}
-          disabled={!newVersion}
-          className="w-full border rounded px-2 py-1 disabled:bg-gray-100"
-        >
-          <option value="" hidden>
-            Changing Field
-          </option>
-          {sensitivityWFTempList.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.Name}
-            </option>
-          ))}
-        </select>
+        <div className="sm:col-span-2">
+          <DynamicSelector
+            label="Changing Field"
+            options={sensitivityWFTempList}
+            selectedValue={form.SensitivityWFTemp}
+            onChange={(e) => setField("SensitivityWFTemp")(e.target.value)}
+            disabled={!newVersion}
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="step"
-          value={alertObj.WFState}
-          onChange={handleChange("WFState")}
-          disabled={!newVersion}
-          className="w-full border rounded px-2 py-1 disabled:bg-gray-100"
-        />
+        <div className="sm:col-span-2">
+          <DynamicInput
+            label="Step"
+            name="WFState"
+            type="number"
+            value={form.WFState}
+            onChange={(e) => setField("WFState")(e.target.value)}
+            disabled={!newVersion}
+          />
+        </div>
       </div>
 
-      {/* ــــــــــــــ اطلاعات پیام ــــــــــــــ */}
-      <h6 className="font-medium">Message Information:</h6>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <select
-          value={alertObj.sendType}
-          onChange={handleChange("sendType")}
-          className="w-full border rounded px-2 py-1"
-        >
-          <option value="" hidden>
-            Send Type
-          </option>
-          <option value="1">Email</option>
-          <option value="2">SMS</option>
-          <option value="3">Push Notification</option>
-        </select>
+      {/* اطلاعات پیام */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="sm:col-span-2">
+          <DynamicSelector
+            label="Send Type"
+            options={sendTypeOptions}
+            selectedValue={form.sendType}
+            onChange={(e) => setField("sendType")(e.target.value)}
+          />
+        </div>
 
-        <select
-          value={alertObj.nPostID}
-          onChange={handleChange("nPostID")}
-          className="w-full border rounded px-2 py-1"
-        >
-          <option value="" hidden>
-            Receiver
-          </option>
-          {roles.map((r) => (
-            <option key={r.ID} value={r.ID || ""}>
-              {r.Name || ""}
-            </option>
-          ))}
-        </select>
-
-        {/* در حالت Edit این فیلد قفل می‌شود */}
-        <select
-          value={
-            isFixedBoxTemplate
-              ? nWFBoxTemplateId.toString()
-              : alertObj.nWFBoxTemplateId
-          }
-          onChange={handleChange("nWFBoxTemplateId")}
-          disabled={isFixedBoxTemplate}
-          className="w-full border rounded px-2 py-1 disabled:bg-gray-100"
-        >
-          <option value="" hidden>
-            Box Template
-          </option>
-          {boxTemplates.map((bt) => (
-            <option key={bt.ID} value={bt.ID.toString()}>
-              {bt.Name}
-            </option>
-          ))}
-        </select>
+        <div className="sm:col-span-2">
+          <DynamicSelector
+            label="Receiver"
+            options={roleOptions}
+            selectedValue={form.nPostID}
+            onChange={(e) => setField("nPostID")(e.target.value)}
+          />
+        </div>
       </div>
 
       <textarea
-        placeholder="comment"
-        value={alertObj.Comment}
-        onChange={handleChange("Comment")}
-        className="w-full border rounded px-2 py-1 h-24 resize-none"
+        placeholder="Comment"
+        value={form.Comment}
+        onChange={(e) => setField("Comment")(e.target.value)}
+        className="w-full border rounded px-2 py-1 h-24 resize-none text-xs"
       />
 
-      <div className="flex space-x-2">
+      <div className="flex items-center space-x-2">
         <button
           onClick={handleAdd}
-          className="px-4 py-2 bg-purple-600 text-white rounded"
+          className="flex items-center bg-green-600 text-white px-3 py-2 rounded text-xs"
         >
-          Add
+          <FaPlus className="mr-1" /> Add
+        </button>
+        <button
+          disabled
+          className="flex items-center bg-red-300 cursor-not-allowed text-white px-3 py-2 rounded text-xs"
+        >
+          <FaTrash className="mr-1" /> Delete
         </button>
       </div>
 
-      {/* ــــــــــــــ جدول هشدارها ــــــــــــــ */}
       <div className="h-80">
         <DataTable
           columnDefs={columnDefs}
           rowData={rows}
-          onRowClick={(_, idx) => setSelectedRowIndex(idx)}
-          showDeleteIcon
+          onRowClick={() => {}}
           showAddIcon={false}
           showEditIcon={false}
-          onDelete={() => handleDeleteRow(selectedRowIndex)}
+          showDeleteIcon={false}
           showSearch={false}
         />
       </div>

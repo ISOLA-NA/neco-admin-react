@@ -27,48 +27,28 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   workflowTemplateId = 0,
   onBoxTemplateInserted,
 }) => {
+  /** تب فعلی – در حالت افزودن Approval فعال است، در حالت ویرایش همان رفتار قبلی را دارد */
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
+
   const api = useApi();
 
-  // ریست کامل فرم هر بار که مودال باز می‌شود
+  // ریست کامل فرم هر بار بازشدن
   const [modalKey, setModalKey] = useState<number>(Date.now());
   useEffect(() => {
-    if (isOpen) {
-      setModalKey(Date.now());
-    }
+    if (isOpen) setModalKey(Date.now());
   }, [isOpen]);
 
   const approvalFlowsTabRef = useRef<ApprovalFlowsTabRef | null>(null);
 
-  // --- ذخیره یا ویرایش ---
+  /** ذخیره هنگام ویرایش یا افزودن */
   const handleSaveOrUpdate = async () => {
     try {
-      if (!approvalFlowsTabRef.current) {
-        console.error("ApprovalFlowsTab ref is not attached!");
-        showAlert("error", null, "Error", "Failed to add item");
-        return;
-      }
+      if (!approvalFlowsTabRef.current) return;
       if (!approvalFlowsTabRef.current.validateMinFields()) return;
 
       const formData: ApprovalFlowsTabData =
         approvalFlowsTabRef.current.getFormData();
-      if (!formData) {
-        console.error("No data from ApprovalFlowsTab!");
-        showAlert("error", null, "Error", "No data from form");
-        return;
-      }
 
-      if (formData.tableData.length === 0 && !formData.isStage) {
-        showAlert(
-          "warning",
-          null,
-          "Warning",
-          "No row in Approval Context table!"
-        );
-        return;
-      }
-
-      // ساختار داده برای سرور
       const wfApprovals = formData.tableData.map((row) => ({
         nPostTypeID: null,
         nPostID: row.nPostID,
@@ -83,23 +63,17 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         LastModified: new Date().toISOString(),
       }));
 
-      const predecessorStr =
-        formData.selectedPredecessors.length > 0
-          ? formData.selectedPredecessors.join("|") + "|"
-          : "";
-      const btnIDsStr =
-        formData.selectedDefaultBtnIds.length > 0
-          ? formData.selectedDefaultBtnIds.join("|") + "|"
-          : "";
-
       const payload: any = {
         WFBT: {
-          Name: formData.nameValue || "",
+          Name: formData.nameValue,
           IsStage: formData.isStage,
           ActionMode: parseInt(formData.minAcceptValue, 10) || 0,
-          PredecessorStr: predecessorStr,
-          Left: 0.0,
-          Top: 0.0,
+          PredecessorStr:
+            formData.selectedPredecessors.length > 0
+              ? formData.selectedPredecessors.join("|") + "|"
+              : "",
+          Left: 0,
+          Top: 0,
           ActDuration: parseInt(formData.actDurationValue, 10) || 0,
           MaxDuration: parseInt(formData.actDurationValue, 10) || 0,
           nWFTemplateID: workflowTemplateId,
@@ -110,7 +84,10 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           PreviewsStateId: formData.previewsStateIdValue
             ? parseInt(formData.previewsStateIdValue, 10)
             : null,
-          BtnIDs: btnIDsStr,
+          BtnIDs:
+            formData.selectedDefaultBtnIds.length > 0
+              ? formData.selectedDefaultBtnIds.join("|") + "|"
+              : "",
           ActionBtnID: formData.actionBtnID,
           MinNumberForReject: parseInt(formData.minRejectValue, 10) || 0,
           Order: formData.orderValue ? parseInt(formData.orderValue, 10) : null,
@@ -124,20 +101,17 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         WFAproval: wfApprovals,
       };
 
-      if (editData) {
-        await api.updateBoxTemplate(payload);
-        showAlert("success", null, "Success", "Edited Successfully");
-      } else {
-        await api.insertBoxTemplate(payload);
-        showAlert("success", null, "Success", "Added Successfully");
-      }
+      if (editData) await api.updateBoxTemplate(payload);
+      else await api.insertBoxTemplate(payload);
+
       onBoxTemplateInserted?.();
-    } catch (error) {
-      console.error("Error in save/update BoxTemplate:", error);
-      showAlert("error", null, "Error", "An error occurred while adding item");
+    } catch (err) {
+      console.error(err);
+      showAlert("error", null, "Error", "Failed to save");
     }
   };
 
+  // --- رندر ---
   return (
     <DynamicModal isOpen={isOpen} onClose={onClose} size="large">
       <div className="relative">
@@ -146,6 +120,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           role="tablist"
           className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"
         >
+          {/* Approval Flows */}
           <button
             role="tab"
             className={`tab ${activeTab === "approval" ? "tab-active" : ""}`}
@@ -153,10 +128,16 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           >
             Approval Flows
           </button>
+
+          {/* Alerts – در حالت افزودن غیرفعال */}
           <button
             role="tab"
-            className={`tab ${activeTab === "alert" ? "tab-active" : ""}`}
-            onClick={() => setActiveTab("alert")}
+            title={!editData ? "Alerts is active in edit mode" : undefined}
+            disabled={!editData}
+            className={`tab ${
+              activeTab === "alert" ? "tab-active" : ""
+            } ${!editData ? "cursor-not-allowed opacity-50" : ""}`}
+            onClick={() => editData && setActiveTab("alert")}
           >
             Alerts
           </button>
@@ -172,26 +153,9 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
             />
           )}
 
-          {/* اینجا همان ID جعبهٔ در حال ویرایش را برای AlertTab می‌فرستیم */}
-          {activeTab === "alert" && (
-            <AlertTab nWFBoxTemplateId={editData ? editData.ID : 0} />
+          {activeTab === "alert" && editData && (
+            <AlertTab nWFBoxTemplateId={editData.ID} />
           )}
-        </div>
-
-        {/* دکمه‌های اکشن پایین مودال */}
-        <div className="flex justify-center mt-6 space-x-3 mb-4">
-          <button
-            onClick={handleSaveOrUpdate}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-          >
-            {editData ? "Edit" : "Save"}
-          </button>
-          <button
-            onClick={onClose}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-          >
-            Cancel
-          </button>
         </div>
       </div>
     </DynamicModal>
