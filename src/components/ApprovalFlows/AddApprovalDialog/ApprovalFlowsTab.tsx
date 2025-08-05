@@ -488,6 +488,8 @@ useEffect(() => {
         setGoToPreviousStateID(null);
         setActionBtnID(null);
       }
+
+        console.log("editDataaaaaaaaaaaaaaaaaaaaaaaaaaa", editData);
     }, [editData, initialized, api]);
 
     const staticPostOptions = allRoles.map((role) => ({

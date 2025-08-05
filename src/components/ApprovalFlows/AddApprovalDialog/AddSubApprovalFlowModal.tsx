@@ -1,3 +1,4 @@
+// AddSubApprovalFlowModal.tsx
 import React, { useState, useRef, useEffect } from "react";
 import DynamicModal from "../MainApproval/ModalApprovalFlow";
 import ApprovalFlowsTab, {
@@ -29,7 +30,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
   const api = useApi();
 
-  // برای ریست شدن کامل فرم در هر بار باز شدن مودال
+  // ریست کامل فرم هر بار که مودال باز می‌شود
   const [modalKey, setModalKey] = useState<number>(Date.now());
   useEffect(() => {
     if (isOpen) {
@@ -38,11 +39,8 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   }, [isOpen]);
 
   const approvalFlowsTabRef = useRef<ApprovalFlowsTabRef | null>(null);
-  const handleApprovalFlowsTabRef = (instance: ApprovalFlowsTabRef | null) => {
-    approvalFlowsTabRef.current = instance;
-  };
 
-  // این تابع وقتی روی Save یا Edit کلیک می‌شود
+  // --- ذخیره یا ویرایش ---
   const handleSaveOrUpdate = async () => {
     try {
       if (!approvalFlowsTabRef.current) {
@@ -50,20 +48,16 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         showAlert("error", null, "Error", "Failed to add item");
         return;
       }
-      // بررسی حداقل مقادیر لازم
-      if (!approvalFlowsTabRef.current.validateMinFields()) {
-        return;
-      }
+      if (!approvalFlowsTabRef.current.validateMinFields()) return;
+
       const formData: ApprovalFlowsTabData =
         approvalFlowsTabRef.current.getFormData();
-
       if (!formData) {
         console.error("No data from ApprovalFlowsTab!");
         showAlert("error", null, "Error", "No data from form");
         return;
       }
 
-      // اگر Stage نبود و جدول خالی بود، هشدار
       if (formData.tableData.length === 0 && !formData.isStage) {
         showAlert(
           "warning",
@@ -74,7 +68,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         return;
       }
 
-      // ساختن ساختار داده برای ارسال به سرور
+      // ساختار داده برای سرور
       const wfApprovals = formData.tableData.map((row) => ({
         nPostTypeID: null,
         nPostID: row.nPostID,
@@ -98,7 +92,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           ? formData.selectedDefaultBtnIds.join("|") + "|"
           : "";
 
-      let payload: any = {
+      const payload: any = {
         WFBT: {
           Name: formData.nameValue || "",
           IsStage: formData.isStage,
@@ -130,22 +124,14 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         WFAproval: wfApprovals,
       };
 
-      // اینجا مدال را نمی‌بندیم، صرفاً درخواست را می‌فرستیم
       if (editData) {
-        // حالت ویرایش
-        const result = await api.updateBoxTemplate(payload);
-        console.log("BoxTemplate updated:", result);
+        await api.updateBoxTemplate(payload);
         showAlert("success", null, "Success", "Edited Successfully");
       } else {
-        // حالت درج
-        const result = await api.insertBoxTemplate(payload);
-        console.log("BoxTemplate inserted:", result);
+        await api.insertBoxTemplate(payload);
         showAlert("success", null, "Success", "Added Successfully");
       }
-
-      if (onBoxTemplateInserted) {
-        onBoxTemplateInserted();
-      }
+      onBoxTemplateInserted?.();
     } catch (error) {
       console.error("Error in save/update BoxTemplate:", error);
       showAlert("error", null, "Error", "An error occurred while adding item");
@@ -154,8 +140,8 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
   return (
     <DynamicModal isOpen={isOpen} onClose={onClose} size="large">
-      {/* والد با position relative تا بتوانیم ToastContainer را اینجا با absolute پین کنیم */}
       <div className="relative">
+        {/* تب‌ها */}
         <div
           role="tablist"
           className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"
@@ -180,14 +166,19 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           {activeTab === "approval" && (
             <ApprovalFlowsTab
               key={modalKey}
-              ref={handleApprovalFlowsTabRef}
+              ref={(inst) => (approvalFlowsTabRef.current = inst)}
               editData={editData}
               boxTemplates={boxTemplates}
             />
           )}
-          {activeTab === "alert" && <AlertTab />}
+
+          {/* اینجا همان ID جعبهٔ در حال ویرایش را برای AlertTab می‌فرستیم */}
+          {activeTab === "alert" && (
+            <AlertTab nWFBoxTemplateId={editData ? editData.ID : 0} />
+          )}
         </div>
 
+        {/* دکمه‌های اکشن پایین مودال */}
         <div className="flex justify-center mt-6 space-x-3 mb-4">
           <button
             onClick={handleSaveOrUpdate}
