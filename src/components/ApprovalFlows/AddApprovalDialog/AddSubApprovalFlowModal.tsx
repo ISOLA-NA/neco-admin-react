@@ -27,15 +27,17 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   workflowTemplateId = 0,
   onBoxTemplateInserted,
 }) => {
-  /** تب فعلی – در حالت افزودن Approval فعال است، در حالت ویرایش همان رفتار قبلی را دارد */
+  // همیشه پیش‌فرض روی Approval Flows
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
-
   const api = useApi();
 
   // ریست کامل فرم هر بار بازشدن
   const [modalKey, setModalKey] = useState<number>(Date.now());
   useEffect(() => {
-    if (isOpen) setModalKey(Date.now());
+    if (isOpen) {
+      setModalKey(Date.now());
+      setActiveTab("approval");
+    }
   }, [isOpen]);
 
   const approvalFlowsTabRef = useRef<ApprovalFlowsTabRef | null>(null);
@@ -101,17 +103,22 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
         WFAproval: wfApprovals,
       };
 
-      if (editData) await api.updateBoxTemplate(payload);
-      else await api.insertBoxTemplate(payload);
+      if (editData) {
+        await api.updateBoxTemplate(payload);
+      } else {
+        await api.insertBoxTemplate(payload);
+      }
 
+      // اطلاع به والد
       onBoxTemplateInserted?.();
+      // بستن مودال
+      onClose();
     } catch (err) {
       console.error(err);
       showAlert("error", null, "Error", "Failed to save");
     }
   };
 
-  // --- رندر ---
   return (
     <DynamicModal isOpen={isOpen} onClose={onClose} size="large">
       <div className="relative">
@@ -120,7 +127,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           role="tablist"
           className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"
         >
-          {/* Approval Flows */}
           <button
             role="tab"
             className={`tab ${activeTab === "approval" ? "tab-active" : ""}`}
@@ -129,7 +135,6 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
             Approval Flows
           </button>
 
-          {/* Alerts – در حالت افزودن غیرفعال */}
           <button
             role="tab"
             title={!editData ? "Alerts is active in edit mode" : undefined}
@@ -143,6 +148,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           </button>
         </div>
 
+        {/* محتوای تب‌ها */}
         <div className="mt-4 p-4 overflow-auto">
           {activeTab === "approval" && (
             <ApprovalFlowsTab
@@ -152,11 +158,28 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
               boxTemplates={boxTemplates}
             />
           )}
-
-          {activeTab === "alert" && editData && (
-            <AlertTab nWFBoxTemplateId={editData.ID} />
+          {activeTab === "alert" && (
+            <AlertTab nWFBoxTemplateId={editData ? editData.ID : 0} />
           )}
         </div>
+
+        {/* دکمه‌های Save/Edit و Cancel فقط در تب Approval */}
+        {activeTab === "approval" && (
+          <div className="flex justify-center mt-6 space-x-3 mb-4">
+            <button
+              onClick={handleSaveOrUpdate}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+            >
+              {editData ? "Edit" : "Save"}
+            </button>
+            <button
+              onClick={onClose}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </DynamicModal>
   );
