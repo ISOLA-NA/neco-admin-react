@@ -128,4 +128,12 @@ export const apiConst = Object.freeze({
   getEntityFieldById: "api/EntityField/GetById",
   getPrjRoot: "api/Program/GetByPrjLevel",
   getPrjChildren: "api/ProgramField/GetAllByPrgId",
+
+    // Alerting WF Template
+  insertAlertingWfTemplate: "api/AlertingWfTemplate/Insert",
+  updateAlertingWfTemplate: "api/AlertingWfTemplate/Update",
+  deleteAlertingWfTemplate: "api/AlertingWfTemplate/Delete",
+  getAllAlertingWfTemplate: "api/AlertingWfTemplate/GetAll",
+
+  getAllAlertingWfTemplateByWFBoxTemplateId: "api/AlertingWfTemplate/GetAllByWFBoxTemplateId",
 });

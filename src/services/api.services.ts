@@ -692,6 +692,22 @@ export interface ProjectNode {
   // هر فیلد دیگری که بخواهید اینجا اضافه کنید...
 }
 
+export interface AlertingWfTemplateItem {
+  ID?: number;
+  Duration: number;            // ← قبلاً string بود، حالا number
+  SensitivityWFTemp: number;
+  SensitiveItemWFTemp: number;
+  WFState: number;
+  IsVisible: boolean;
+  Comment: string;
+  SendType: number;
+  nPostTypeID: number | null;
+  nPostID: string;
+  nWFBoxTemplateId: number;
+  LastModified?: string;
+  ModifiedById?: string;
+}
+
 
 // ساخت یک کلاس برای متدهای API
 class ApiService {
@@ -1605,6 +1621,52 @@ class ApiService {
       subProgramID: d.subProgramID,
     }));
   }
+
+  // -------------------------------
+  // AlertingWfTemplate APIs
+  // -------------------------------
+  async getAllAlertingWfTemplate(): Promise<AlertingWfTemplateItem[]> {
+    const response = await httpClient.post<AlertingWfTemplateItem[]>(
+      apiConst.getAllAlertingWfTemplate
+    );
+    return response.data;
+  }
+
+  async insertAlertingWfTemplate(
+    data: AlertingWfTemplateItem
+  ): Promise<AlertingWfTemplateItem> {
+    const response = await httpClient.post<AlertingWfTemplateItem>(
+      apiConst.insertAlertingWfTemplate,
+      data
+    );
+    return response.data;
+  }
+
+  async updateAlertingWfTemplate(
+    data: AlertingWfTemplateItem
+  ): Promise<AlertingWfTemplateItem> {
+    const response = await httpClient.post<AlertingWfTemplateItem>(
+      apiConst.updateAlertingWfTemplate,
+      data
+    );
+    return response.data;
+  }
+
+  async deleteAlertingWfTemplate(id: number): Promise<void> {
+    await httpClient.post(apiConst.deleteAlertingWfTemplate, { ID: id });
+  }
+
+  async getAllAlertingWfTemplateByWFBoxTemplateId(
+    wfBoxTemplateId: number
+  ): Promise<AlertingWfTemplateItem[]> {
+    const response = await httpClient.post<AlertingWfTemplateItem[]>(
+      apiConst.getAllAlertingWfTemplateByWFBoxTemplateId,
+      { ID: wfBoxTemplateId }
+    );
+    return response.data;
+  }
+
+
 
 }
 

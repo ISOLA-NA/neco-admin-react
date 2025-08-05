@@ -357,6 +357,8 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
 
     getApprovalCheckList: AppServices.getApprovalCheckList.bind(AppServices),
     getEntityFieldById: AppServices.getEntityFieldById.bind(AppServices),
+
+    
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
