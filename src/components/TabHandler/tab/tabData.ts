@@ -129,7 +129,7 @@ export const tabsData: TabsData = {
     subtabs: ["ApprovalFlows", "ApprovalChecklist"],
   },
   Programs: {
-    subtabs: ["ProgramTemplate", "ProgramTypes"],
+    subtabs: ["ProgramTemplatessssssssssssssssssssssssss", "ProgramTypes"],
   },
   Projects: {
     subtabs: ["Projects", "ProjectsAccess", "Odp", "Procedures", "Calendars"],

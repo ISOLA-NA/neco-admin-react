@@ -1,0 +1,27 @@
+{
+  "MainMenu": {
+    "File": "File",
+    "General": "General",
+    "Forms":"Forms",
+    "ApprovalFlows":"ApprovalFlows",
+    "Programs":"Programs",
+    "Projects":"Projects"
+  },
+  "SubMenu":{
+    "Configurations":"Configurations",
+    "Commands": "Commands",
+    "Ribbons":"Ribbons",
+    "Enterprise":"Enterprise",
+    "Users":"Users",
+    "Roles":"Roles",
+    "Staffing":"Staffing",
+    "RoleGroups":"RoleGroups",
+    "Categories":"Categories",
+    "ProgramTemplate":"ProgramTempalte",
+    "ProgramTypes":"ProgramTypes",
+    "ProjectsAccess":"ProjectsAccess",
+    "Odp":"Odp",
+    "Procedures":"Procedures",
+    "Calendars":"Calendars"
+  }
+}

@@ -18,18 +18,8 @@ interface PanelHeaderProps {
   onUpdate?: () => void;
   onTogglePanelSizeFromRight: (maximize: boolean) => void;
   isRightMaximized: boolean;
-  /**
-   * تابعی که مشخص می‌کند آیا داده‌ها برای Save معتبر هستند یا خیر.
-   * اگر false برگرداند، یعنی نباید Confirm را نشان دهیم.
-   */
   onCheckCanSave?: () => boolean;
-  /**
-   * تابعی که مشخص می‌کند آیا داده‌ها برای Update معتبر هستند یا خیر.
-   */
   onCheckCanUpdate?: () => boolean;
-  /**
-   * تابعی برای نمایش پیغام خطا اگر معتبر نیست (مثلاً Name خالی است).
-   */
   onShowEmptyNameWarning?: () => void;
 }
 
@@ -46,29 +36,18 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmType, setConfirmType] = useState<"save" | "update" | null>(null);
 
-  // اگر کاربر دکمه Save را زد:
   const handleSaveClick = () => {
-    // ابتدا مطمئن شویم روی نام مشکلی نیست
     if (onCheckCanSave && !onCheckCanSave()) {
-      // اگر داده معتبر نبود (مثلاً Name خالی است)،
-      // دیگر Confirm باز نمی‌کنیم و فقط هشدار را نشان می‌دهیم
-      if (onShowEmptyNameWarning) {
-        onShowEmptyNameWarning();
-      }
+      onShowEmptyNameWarning?.();
       return;
     }
-    // در غیر این صورت، تأیید ذخیره را نشان بده
     setConfirmType("save");
     setConfirmOpen(true);
   };
 
-  // اگر کاربر دکمه Update را زد:
   const handleUpdateClick = () => {
-    // ابتدا مطمئن شویم مشکلی نیست
     if (onCheckCanUpdate && !onCheckCanUpdate()) {
-      if (onShowEmptyNameWarning) {
-        onShowEmptyNameWarning();
-      }
+      onShowEmptyNameWarning?.();
       return;
     }
     setConfirmType("update");
@@ -77,10 +56,10 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
 
   const handleConfirm = () => {
     setConfirmOpen(false);
-    if (confirmType === "update" && onUpdate) {
-      onUpdate();
-    } else if (confirmType === "save" && onSave) {
-      onSave();
+    if (confirmType === "update") {
+      onUpdate?.();
+    } else if (confirmType === "save") {
+      onSave?.();
     }
     setConfirmType(null);
   };
@@ -90,7 +69,6 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
     setConfirmType(null);
   };
 
-  // تنظیم مشخصات تاییدیه بر اساس نوع تایید (save یا update)
   let confirmVariant: "delete" | "edit" | "add" = "add";
   let confirmTitle = "Save Confirmation";
   let confirmMessage = "Are you sure you want to save?";
@@ -105,13 +83,13 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
     <>
       <div className="flex items-center justify-between p-4 bg-white shadow-md rounded-t-md">
         {/* سمت چپ: دکمه‌های Save و Update */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 rtl:space-x-reverse">
           {onSave && (
             <button
               onClick={handleSaveClick}
               className="flex items-center text-green-600 hover:text-green-800 transition"
             >
-              <FiSave size={20} className="mr-2" />
+              <FiSave size={20} className="ltr:mr-2 rtl:ml-2" />
               <span className="font-medium">Save</span>
             </button>
           )}
@@ -121,14 +99,14 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
               onClick={handleUpdateClick}
               className="flex items-center text-yellow-600 hover:text-yellow-800 transition"
             >
-              <FiRefreshCw size={20} className="mr-2" />
+              <FiRefreshCw size={20} className="ltr:mr-2 rtl:ml-2" />
               <span className="font-medium">Update</span>
             </button>
           )}
         </div>
 
         {/* سمت راست: دکمه‌های Maximize/Minimize و Close */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 rtl:space-x-reverse">
           {isRightMaximized ? (
             <button
               onClick={() => onTogglePanelSizeFromRight(false)}
