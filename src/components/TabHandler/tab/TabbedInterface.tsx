@@ -65,7 +65,7 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
     groups: [
       {
         label: "Setup",
-        subtabs: ["Configurations", "Commands", "Ribbons", "Enterprise"],
+        subtabs: ["Configurations", "Commands", "Ribbons", "Enterprises"],
       },
       {
         label: "User",

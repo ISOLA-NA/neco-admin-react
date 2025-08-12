@@ -11,7 +11,7 @@
     "Configurations": "پیکربندی",
     "Commands": "تنظیمات کامند",
     "Ribbons": "منوها",
-    "Enterprise": "شرکت‌ها",
+    "Enterprises": "شرکت‌ها",
     "Users": "کاربران",
     "Roles": "نقش‌ها",
     "Staffing": "پرسنل",
@@ -20,7 +20,7 @@
     "ProgramTemplate": "ساختمان برنامه",
     "ProgramTypes":"نوع برنامه ",
     "ProjectsAccess": "دسترسی پروژه",
-    "Odp": "ODP",
+    "Odp": "مبتنی بر نیاز",
     "Procedures": "فرم‌ها",
     "Calendars": "تقویم"
   }

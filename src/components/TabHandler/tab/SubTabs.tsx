@@ -26,7 +26,7 @@ const subtabIcons: { [key: string]: string } = {
   Roles: "/images/general/roles.png",
   Staffing: "/images/general/assignment.png",
   RoleGroups: "/images/general/grouping.png",
-  Enterprise: "/images/general/company.png",
+  Enterprises: "/images/general/company.png",
 
   Forms: "/images/forms/forms.png",
   Categories: "/images/forms/cata.png",

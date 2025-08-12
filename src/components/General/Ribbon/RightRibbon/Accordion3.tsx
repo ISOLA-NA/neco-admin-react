@@ -421,6 +421,17 @@ const handleEdit = (row: RowData3) => {
   };
 
   return (
+  <>
+     {/* Radio margin for LTR and RTL */}
+    <style>{`
+      [dir="ltr"] input[type="radio"] {
+        margin-right: 6px;
+      }
+      [dir="rtl"] input[type="radio"] {
+        margin-left: 6px;
+      }
+    `}</style>
+
     <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
       {/* Accordion header */}
       <div
@@ -443,7 +454,7 @@ const handleEdit = (row: RowData3) => {
             <>
               {/* Search bar */}
               <div className="flex items-center justify-between mb-4">
-                <div className="relative max-w-sm">
+                <div className="relative max-w-sm w-full">
                   <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                   <input
                     type="text"
@@ -457,13 +468,7 @@ const handleEdit = (row: RowData3) => {
               </div>
 
               {/* DataTable */}
-              <div
-                style={{
-                  height: "300px",
-                  overflowY: "auto",
-                  marginTop: "-15px",
-                }}
-              >
+              <div style={{ height: "300px", overflowY: "auto", marginTop: "-15px" }}>
                 <DataTable
                   columnDefs={columnDefs}
                   rowData={filteredRowData}
@@ -502,7 +507,7 @@ const handleEdit = (row: RowData3) => {
                     className="mt-2"
                   />
 
-                  {/* 🟢 Windows App Command input + modal button */}
+                  {/* Windows App Command + modal */}
                   <div className="flex items-center gap-2">
                     <DynamicInput
                       name="Windows App Command"
@@ -511,23 +516,20 @@ const handleEdit = (row: RowData3) => {
                       placeholder=""
                       onChange={(e) => {
                         const val = e.target.value;
-                        setWindowsAppCommand(val);                          
-                        setFormData((prev) => ({ ...prev, Command: val }));  
+                        setWindowsAppCommand(val);
+                        setFormData((prev) => ({ ...prev, Command: val }));
                       }}
-                      className="flex-1"                               
+                      className="flex-1"
                     />
-
                     <button
                       type="button"
                       title="انتخاب Command"
                       onClick={() => setCommandModalOpen(true)}
-                      className="h-9 px-3 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold
-               flex items-center justify-center mt-4"
+                      className="h-9 px-3 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold flex items-center justify-center"
                     >
                       cmd
                     </button>
                   </div>
-
 
                   <DynamicInput
                     name="Description"
@@ -546,77 +548,102 @@ const handleEdit = (row: RowData3) => {
                     value={formData.Order || 0}
                     placeholder="Order"
                     onChange={(e) =>
-                      handleInputChange(
-                        "Order",
-                        parseInt(e.target.value, 10) || 0
-                      )
+                      handleInputChange("Order", parseInt(e.target.value, 10) || 0)
                     }
                     className="mt-2"
                   />
 
-                  <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                    <DynamicRadioGroup
-                      options={[
-                        { value: "0", label: "Large" },
-                        { value: "1", label: "Medium" },
-                        { value: "2", label: "Small" },
-                      ]}
-                      title="Size"
-                      name="size"
-                      selectedValue={selectedSize}
-                      onChange={handleRadioChange}
-                      className="w-full md:w-1/2"
-                      isRowClicked={true}
-                    />
-                    <FileUploadHandler
-                      selectedFileId={iconImageId}
-                      onUploadSuccess={handleUploadSuccess}
-                      resetCounter={resetCounter}
-                      onReset={() => setResetCounter((prev) => prev + 1)}
-                      isEditMode={isEditing}
-                    />
+                  {/* Size radios and File Upload side by side */}
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span className="text-lg font-medium">Size:</span>
+                      {/* Inline radios */}
+                      <label className="flex items-center text-lg">
+                        <input
+                          type="radio"
+                          name="size"
+                          value="0"
+                          checked={selectedSize === "0"}
+                          onChange={() => handleRadioChange("0")}
+                        />
+                        Large
+                      </label>
+                      <label className="flex items-center text-lg">
+                        <input
+                          type="radio"
+                          name="size"
+                          value="1"
+                          checked={selectedSize === "1"}
+                          onChange={() => handleRadioChange("1")}
+                        />
+                        Medium
+                      </label>
+                      <label className="flex items-center text-lg">
+                        <input
+                          type="radio"
+                          name="size"
+                          value="2"
+                          checked={selectedSize === "2"}
+                          onChange={() => handleRadioChange("2")}
+                        />
+                        Small
+                      </label>
+                    </div>
+                    <div className="w-full sm:w-96">
+                      <FileUploadHandler
+                        selectedFileId={iconImageId}
+                        onUploadSuccess={handleUploadSuccess}
+                        resetCounter={resetCounter}
+                        onReset={() => setResetCounter((prev) => prev + 1)}
+                        isEditMode={isEditing}
+                      />
+                    </div>
                   </div>
                 </div>
+
                 {/* Action buttons */}
                 <div className="flex items-center gap-4 mt-4">
                   <button
                     onClick={handleInsert}
                     disabled={isEditing}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${isEditing
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      isEditing
                         ? "bg-green-300 text-gray-200 cursor-not-allowed"
                         : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-                      }`}
+                    }`}
                   >
                     <FaSave /> Save
                   </button>
-
                   <button
                     onClick={handleUpdate}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      selectedRow
                         ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
                         : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                      }`}
+                    }`}
                   >
                     <FaEdit /> Update
                   </button>
                   <button
                     onClick={handleDeleteClick}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      selectedRow
                         ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
                         : "bg-red-300 text-gray-200 cursor-not-allowed"
-                      }`}
+                    }`}
                   >
                     <FaTrash /> Delete
                   </button>
                   <button
                     onClick={handleNew}
                     disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
+                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+                      !selectedRow
                         ? "bg-gray-300 text-gray-200 cursor-not-allowed"
                         : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-                      }`}
+                    }`}
                   >
                     <FaPlus /> New
                   </button>
@@ -624,18 +651,15 @@ const handleEdit = (row: RowData3) => {
               </div>
             </>
           ) : (
-            // If no MenuGroup is selected
-            isOpen && (
-              <p className="text-gray-500">
-                Please select a Menu Group in Accordion2 so the Menu Items will
-                be displayed.
-              </p>
-            )
+            <p className="text-gray-500">
+              Please select a Menu Group in Accordion2 so the Menu Items will
+              be displayed.
+            </p>
           )}
         </div>
       )}
 
-      {/* Confirm Insert */}
+      {/* Confirm dialogs & Modal */}
       <DynamicConfirm
         isOpen={confirmInsertOpen}
         title="Insert Confirmation"
@@ -644,8 +668,6 @@ const handleEdit = (row: RowData3) => {
         onClose={() => setConfirmInsertOpen(false)}
         variant="add"
       />
-
-      {/* Confirm Update */}
       <DynamicConfirm
         isOpen={confirmUpdateOpen}
         title="Update Confirmation"
@@ -654,8 +676,6 @@ const handleEdit = (row: RowData3) => {
         onClose={() => setConfirmUpdateOpen(false)}
         variant="edit"
       />
-
-      {/* Confirm Delete */}
       <DynamicConfirm
         isOpen={confirmDeleteOpen}
         title="Delete Confirmation"
@@ -664,8 +684,6 @@ const handleEdit = (row: RowData3) => {
         onClose={() => setConfirmDeleteOpen(false)}
         variant="delete"
       />
-
-      {/* Error message (only Name is required now) */}
       <DynamicConfirm
         isOpen={errorConfirmOpen}
         title="Error"
@@ -675,15 +693,15 @@ const handleEdit = (row: RowData3) => {
         variant="error"
         hideCancelButton={true}
       />
-
-      {/* ---- Windows App Command Modal ---- */}
       <WindowsCommandSelectorModal
         isOpen={commandModalOpen}
         onClose={() => setCommandModalOpen(false)}
         onSelect={handleSelectCommand}
       />
     </div>
-  );
+  </>
+);
+
 
 };
 
