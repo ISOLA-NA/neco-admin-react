@@ -591,7 +591,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                     onChange={(e) => setAcceptChecked(e.target.checked)}
                     className="h-4 w-4 mr-2"
                   />
-                  Min Accept
+                  <span>Min Accept</span>
                 </label>
                 <DynamicInput
                   name=""

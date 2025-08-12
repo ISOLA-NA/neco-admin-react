@@ -195,116 +195,115 @@ const DataTable: React.FC<DataTableProps> = ({
     return [...filteredRowData].sort((a, b) => a.clientOrder - b.clientOrder);
   }, [filteredRowData]);
 
-  return (
-    <div className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2">
+    return (
+    <div dir="rtl" className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2">
       {/* نوار بالایی شامل جستجو و دکمه‌ها */}
       {(showSearch ||
-  showAddIcon ||
-  showEditIcon ||
-  showDeleteIcon ||
-  showDuplicateIcon ||
-  showViewIcon) && (
-  <div className="flex items-center justify-between mb-4 bg-gray-300 p-2 rounded-md shadow-sm">
-    {showSearch && (
-      <div className="relative max-w-sm">
-        <FaSearch
-          className="absolute left-3 rtl:right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-        />
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchText}
-          onChange={onSearchChange}
-          className="w-full ltr:pl-10 ltr:pr-3 rtl:pr-10 rtl:pl-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-          style={{ fontFamily: "inherit" }}
-        />
-      </div>
-    )}
+        showAddIcon ||
+        showEditIcon ||
+        showDeleteIcon ||
+        showDuplicateIcon ||
+        showViewIcon) && (
+        <div className="flex items-center justify-between mb-4 bg-gray-300 p-2 rounded-md shadow-sm">
+          {showSearch && (
+            <div className="relative max-w-sm">
+              <FaSearch
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              />
+              <input
+                type="text"
+                placeholder="جستجو..."
+                value={searchText}
+                onChange={onSearchChange}
+                className="w-full rtl:pr-10 rtl:pl-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                style={{ fontFamily: "inherit" }}
+              />
+            </div>
+          )}
 
-    <div className="flex items-center space-x-4 rtl:space-x-reverse">
-      {showDuplicateIcon && (
-        <button
-          className={`
-            ${baseIconButton}
-            bg-yellow-50 hover:bg-yellow-100 text-yellow-600
-            ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
-          `}
-          title="Duplicate"
-          onClick={onDuplicate}
-          disabled={!isRowSelected || !isEditMode}
-        >
-          <FiCopy size={20} />
-        </button>
+          <div className="flex items-center space-x-4 rtl:space-x-reverse">
+            {showDuplicateIcon && (
+              <button
+                className={`
+                  ${baseIconButton}
+                  bg-yellow-50 hover:bg-yellow-100 text-yellow-600
+                  ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
+                `}
+                title="Duplicate"
+                onClick={onDuplicate}
+                disabled={!isRowSelected || !isEditMode}
+              >
+                <FiCopy size={20} />
+              </button>
+            )}
+
+            {showEditIcon && (
+              <button
+                className={`
+                  ${baseIconButton}
+                  bg-blue-50 hover:bg-blue-100 text-blue-600
+                  ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
+                `}
+                title="Edit"
+                onClick={onEdit}
+                disabled={!isRowSelected || !isEditMode}
+              >
+                <FiEdit size={20} />
+              </button>
+            )}
+
+            {showDeleteIcon && (
+              <button
+                className={`
+                  ${baseIconButton}
+                  bg-red-50 hover:bg-red-100 text-red-600
+                  ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
+                `}
+                title="Delete"
+                onClick={onDelete}
+                disabled={!isRowSelected || !isEditMode}
+              >
+                <FiTrash2 size={20} />
+              </button>
+            )}
+
+            {showAddIcon && (
+              <button
+                type="button"
+                className={`
+                  ${baseIconButton}
+                  bg-green-50 hover:bg-green-100 text-green-600
+                  ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
+                `}
+                title="Add"
+                onClick={onAdd}
+                disabled={!isEditMode}
+              >
+                <FiPlus size={20} />
+              </button>
+            )}
+
+            {showViewIcon && (
+              <button
+                className={`
+                  ${baseIconButton}
+                  bg-gray-50 hover:bg-gray-100 text-gray-600
+                  ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
+                `}
+                title="View"
+                onClick={onView}
+                disabled={!isEditMode}
+              >
+                <FiEye size={20} />
+              </button>
+            )}
+          </div>
+        </div>
       )}
-
-      {showEditIcon && (
-        <button
-          className={`
-            ${baseIconButton}
-            bg-blue-50 hover:bg-blue-100 text-blue-600
-            ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
-          `}
-          title="Edit"
-          onClick={onEdit}
-          disabled={!isRowSelected || !isEditMode}
-        >
-          <FiEdit size={20} />
-        </button>
-      )}
-
-      {showDeleteIcon && (
-        <button
-          className={`
-            ${baseIconButton}
-            bg-red-50 hover:bg-red-100 text-red-600
-            ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
-          `}
-          title="Delete"
-          onClick={onDelete}
-          disabled={!isRowSelected || !isEditMode}
-        >
-          <FiTrash2 size={20} />
-        </button>
-      )}
-
-      {showAddIcon && (
-        <button
-          type="button"
-          className={`
-            ${baseIconButton}
-            bg-green-50 hover:bg-green-100 text-green-600
-            ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
-          `}
-          title="Add"
-          onClick={onAdd}
-          disabled={!isEditMode}
-        >
-          <FiPlus size={20} />
-        </button>
-      )}
-
-      {showViewIcon && (
-        <button
-          className={`
-            ${baseIconButton}
-            bg-gray-50 hover:bg-gray-100 text-gray-600
-            ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
-          `}
-          title="View"
-          onClick={onView}
-          disabled={!isEditMode}
-        >
-          <FiEye size={20} />
-        </button>
-      )}
-    </div>
-  </div>
-)}
-
 
       {/* بخش جدول */}
       <div className="flex-grow" style={{ minHeight: 0 }}>
-        <div className={gridClasses}>
+        <div className={`${gridClasses} ag-rtl`}>  {/* کلاس ag-rtl برای پشتیبانی AG Grid از RTL */}
           <AgGridReact
             onGridReady={onGridReady}
             onGridSizeChanged={onGridSizeChanged}
@@ -317,7 +316,7 @@ const DataTable: React.FC<DataTableProps> = ({
             onRowDoubleClicked={handleRowDoubleClickInternal}
             domLayout={domLayout}
             suppressHorizontalScroll={false}
-            gridOptions={gridOptions}
+            gridOptions={{ ...gridOptions, enableRtl: true }}  
             singleClickEdit={true}
             stopEditingWhenCellsLoseFocus={true}
             onCellValueChanged={onCellValueChanged}
@@ -334,7 +333,7 @@ const DataTable: React.FC<DataTableProps> = ({
           className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
           onClick={onAdd}
         >
-          Add New
+          افزودن مورد جدید
         </button>
       )}
 
@@ -346,6 +345,7 @@ const DataTable: React.FC<DataTableProps> = ({
       )}
     </div>
   );
+  
 };
 
 export default DataTable;
