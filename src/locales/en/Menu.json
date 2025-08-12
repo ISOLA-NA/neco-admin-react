@@ -22,6 +22,9 @@
     "ProjectsAccess":"ProjectsAccess",
     "Odp":"Odp",
     "Procedures":"Procedures",
-    "Calendars":"Calendars"
+    "Calendars":"Calendars",
+    "Forms": "Forms",
+    "ApprovalFlows": "ApprovalFlows",
+     "Projects":"Projects"
   }
 }

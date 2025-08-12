@@ -21,7 +21,10 @@
     "ProgramTypes":"نوع برنامه ",
     "ProjectsAccess": "دسترسی پروژه",
     "Odp": "مبتنی بر نیاز",
-    "Procedures": "فرم‌ها",
-    "Calendars": "تقویم"
+    "Procedures": "روند کار",
+    "Calendars": "تقویم",
+    "Forms": "فرم‌ها",
+    "ApprovalFlows": "جریان‌های کار",
+     "Projects":"پروژه ها"
   }
 }
