@@ -215,7 +215,6 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
     <FiRefreshCw size={16} />
   </button>
 )}
-ّ
         </div>
       )}
 

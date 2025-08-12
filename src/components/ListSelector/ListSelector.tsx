@@ -52,53 +52,67 @@ const ListSelector: React.FC<ListSelectorProps> = ({
 
   const selectedItems = rowData.filter((row) => selectedIds.includes(row.ID));
 
-  return (
-    <div className={classNames("w-full", className)}>
-      <div className="flex justify-between items-center p-2 rounded-t-md bg-gradient-to-r from-purple-600 to-indigo-500 h-10">
-        <div className="flex items-center gap-2">
-          {showSwitcher && (
-            <div className="flex items-center gap-2">
-              <label className="flex items-center cursor-pointer">
-                <div
-                  className={classNames(
-                    "w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300",
-                    isGlobal ? "bg-pink-500" : "bg-gray-400"
-                  )}
-                  onClick={() => onGlobalChange && onGlobalChange(!isGlobal)}
-                  style={{ minWidth: 36 }}
-                >
-                  <div
-                    className={classNames(
-                      "bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300",
-                      isGlobal ? "translate-x-4" : "translate-x-0"
-                    )}
-                  />
-                </div>
-                <span className="text-white text-xs ml-2 select-none">
-                  Global
-                </span>
-              </label>
-            </div>
-          )}
-        </div>
+return (
+  <>
+    {/* استایل داخلی برای جابجایی دکمه + در LTR/RTL */}
+    <style>{`
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        border-radius: 0.375rem 0.375rem 0 0;
+        background: linear-gradient(to right, #7e22ce, #4f46e5);
+        height: 2.5rem;
+        transition: flex-direction 0.2s;
+      }
+      /* در حالت راست‌چین، دکمه + به سمت چپ منتقل شود */
+      .rtl .header {
+        flex-direction: row;
+      }
+    `}</style>
 
-        <div className="flex items-center gap-2">
-          <h3 className="text-xs font-semibold text-white">{title}</h3>
-          <button
-            className={classNames(
-              "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center",
-              "hover:bg-purple-500",
-              isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
-            )}
-            onClick={() => setIsDialogOpen(true)}
-            aria-label={`افزودن ${title}`}
-            disabled={isGlobal}
-          >
-            +
-          </button>
-        </div>
+    <div className={classNames("w-full", className, "rtl")}>
+      {/* ▶︎ هدر: Title و دکمه + ◀︎ */}
+      <div className="header">
+        {/* عنوان */}
+        <h3 className="text-xs font-semibold text-white">{title}</h3>
+        {/* سوئیچر اختیاری */}
+        {showSwitcher && (
+          <label className="flex items-center cursor-pointer">
+            <div
+              className={classNames(
+                "w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300",
+                isGlobal ? "bg-pink-500" : "bg-gray-400"
+              )}
+              onClick={() => onGlobalChange && onGlobalChange(!isGlobal)}
+              style={{ minWidth: 36 }}
+            >
+              <div
+                className={classNames(
+                  "bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300",
+                  isGlobal ? "translate-x-4" : "translate-x-0"
+                )}
+              />
+            </div>
+            <span className="text-white text-xs ml-2 select-none">Global</span>
+          </label>
+        )}
+        {/* دکمه + */}
+        <button
+          className={classNames(
+            "bg-purple-600 text-white px-1 py-1 rounded text-xs transition-colors duration-300 h-7 w-7 flex items-center justify-center hover:bg-purple-500",
+            isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
+          )}
+          onClick={() => setIsDialogOpen(true)}
+          aria-label={`افزودن ${title}`}
+          disabled={isGlobal}
+        >
+          +
+        </button>
       </div>
 
+      {/* ▶︎ محتوای زیر هدر (مثل لیست یا مدیال) ▶︎ */}
       <div className="relative h-32 overflow-y-auto bg-gray-200 rounded-b-md p-3">
         {loading ? (
           <div className="flex justify-center items-center h-full">
@@ -115,22 +129,24 @@ const ListSelector: React.FC<ListSelectorProps> = ({
                 r="10"
                 stroke="currentColor"
                 strokeWidth="4"
-              ></circle>
+              />
               <path
                 className="opacity-75"
                 fill="currentColor"
                 d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
+              />
             </svg>
           </div>
         ) : selectedItems.length === 0 ? (
-          <p className="text-gray-500 text-xs text-center">No item is selected</p>
+          <p className="text-gray-500 text-xs text-center">
+            No item is selected
+          </p>
         ) : (
           <div className="space-y-2">
             {selectedItems.map((item) => (
               <div
                 key={item.ID}
-                className="flex justify-between items-center bg-white p-2 rounded-md shadow-sm transition-shadow duration-300 hover:shadow-md"
+                className="flex justify-between items-center bg-white p-2 rounded-md shadow-sm hover:shadow-md transition-shadow"
               >
                 <span className="text-gray-700 text-xs">{getLabel(item)}</span>
                 <button
@@ -157,6 +173,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         )}
       </div>
 
+      {/* ▶︎ مدیال انتخاب/افزودن آیتم ▶︎ */}
       <DynamicModal
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
@@ -167,21 +184,20 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           columnDefs={columnDefs}
           rowData={rowData}
           selectedRow={selectedRow}
-          onRowDoubleClick={(row: any) => {
-            handleRowSelect(row);
-          }}
-          onRowClick={(row: any) => {
-            setSelectedRow(row);
-          }}
-          onSelectButtonClick={() => {
-            if (selectedRow) handleRowSelect(selectedRow);
-          }}
+          onRowDoubleClick={(row: any) => handleRowSelect(row)}
+          onRowClick={(row: any) => setSelectedRow(row)}
+          onSelectButtonClick={() =>
+            selectedRow && handleRowSelect(selectedRow)
+          }
           isSelectDisabled={!selectedRow}
           onClose={() => setIsDialogOpen(false)}
         />
       </DynamicModal>
     </div>
-  );
+  </>
+);
+
+
 };
 
 export default ListSelector;

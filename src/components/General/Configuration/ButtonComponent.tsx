@@ -435,10 +435,18 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
   };
 
+return (
+  <>
+    {/* استایل داخلی برای همهٔ رادیوباتن‌ها در حالت RTL */}
+    <style>{`
+      .rtl input[type="radio"] {
+        margin-left: 6px;
+      }
+    `}</style>
 
-  return (
-    <div className="w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4">
-      {/* DynamicConfirm برای هشدارها */}
+    <div className="w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4 space-y-6 rtl">
+
+      {/* ✅ DynamicConfirm برای هشدارها */}
       <DynamicConfirm
         isOpen={confirmOpen}
         variant={confirmVariant}
@@ -449,9 +457,9 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         hideCancelButton={confirmHideCancel}
       />
 
-      {/* بخش جدول */}
+      {/* ✅ جدول آیتم‌ها */}
       <div
-        className="mb-4 w-full overflow-hidden"
+        className="w-full overflow-hidden mb-4"
         style={{ height: "400px", overflowY: "auto" }}
       >
         <DataTable
@@ -463,71 +471,82 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           showEditIcon={false}
           showDeleteIcon={false}
           showAddIcon={false}
-          onAdd={() => { }}
-          onEdit={() => { }}
-          onDelete={() => { }}
-          onDuplicate={() => { }}
+          onAdd={() => {}}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onDuplicate={() => {}}
           domLayout="normal"
         />
       </div>
 
-      {/* فرم ورودی‌ها */}
-      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {/* ✅ فرم ورودی‌ها */}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* ▶︎ فیلدهای متنی + رادیوها ◀︎ */}
+        <div className="lg:col-span-2 space-y-6">
+
+          {/* فیلدهای متنی */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <DynamicInput
               name="Name"
               type="text"
               value={nameValue}
               onChange={(e) => setNameValue(e.target.value)}
-              className="sm:mr-2"
+              className="w-full"
             />
             <DynamicInput
               name="StateText"
               type="text"
               value={stateTextValue}
               onChange={(e) => setStateTextValue(e.target.value)}
-              className="sm:ml-2"
+              className="w-full"
             />
             <DynamicInput
               name="Tooltip"
               type="text"
               value={tooltipValue}
               onChange={(e) => setTooltipValue(e.target.value)}
-              className="sm:mr-2"
+              className="w-full"
             />
             <DynamicInput
               name="Order"
               type="text"
               value={orderValue}
               onChange={(e) => setOrderValue(e.target.value)}
-              className="sm:ml-2"
+              className="w-full"
             />
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+
+          {/* گروه‌های رادیویی */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* State */}
             <DynamicRadioGroup
               key={`state-${isRowClicked ? "controlled" : "uncontrolled"}`}
+              className="flex flex-col gap-2"
               title="State:"
               name="stateGroup"
               options={RadioOptionsState}
               selectedValue={selectedState}
-              onChange={(value) => setSelectedState(value)}
+              onChange={(val) => setSelectedState(val)}
               isRowClicked={isRowClicked}
             />
+
+            {/* Command */}
             <DynamicRadioGroup
               key={`command-${isRowClicked ? "controlled" : "uncontrolled"}`}
+              className="flex flex-col gap-2"
               title="Command:"
               name="commandGroup"
               options={RadioOptionsCommand}
               selectedValue={selectedCommand}
-              onChange={(value) => setSelectedCommand(value)}
+              onChange={(val) => setSelectedCommand(val)}
               isRowClicked={isRowClicked}
             />
           </div>
         </div>
 
-        {/* آپلود فایل */}
-        <div className="lg:col-span-1 flex flex-col items-start mt-4 lg:mt-0">
+        {/* ▶︎ آپلود فایل ◀︎ */}
+        <div className="lg:col-span-1 flex flex-col items-start">
           <FileUploadHandler
             selectedFileId={selectedFileId}
             onUploadSuccess={handleUploadSuccess}
@@ -538,44 +557,35 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         </div>
       </div>
 
-      {/* نمایش تصویر در صورت وجود */}
-      <div className="mt-4">
-        {selectedFileId ? (
-          !imageError ? (
-            <img
-              src={`/api/getImage/${selectedFileId}`}
-              alt="Selected"
-              className="w-32 h-32 object-cover"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            <div />
-          )
-        ) : (
-          <p />
-        )}
-      </div>
+      {/* ✅ پیش‌نمایش تصویر آپلودشده */}
+      {selectedFileId && !imageError && (
+        <div className="mt-4">
+          <img
+            src={`/api/getImage/${selectedFileId}`}
+            alt="Selected"
+            className="w-32 h-32 object-cover"
+            onError={() => setImageError(true)}
+          />
+        </div>
+      )}
 
-      {/* دکمه‌های عملیات */}
-      <div className="mt-6 flex justify-start space-x-4">
-        {/* دکمه Add: وقتی روی یک ردیف کلیک شده، دکمه Add غیرفعال می‌شود */}
+      {/* ✅ دکمه‌های عملیات */}
+      <div className="mt-6 flex justify-start space-x-4 rtl:space-x-reverse">
         <DynamicButton
           text="Add"
           onClick={handleAddClick}
           isDisabled={isRowClicked}
         />
-
-        {/* دکمه Edit: تنها در صورتی فعال است که ردیفی انتخاب شده باشد */}
         <DynamicButton
           text="Edit"
           onClick={handleEditClick}
           isDisabled={!selectedRow}
         />
-
-        {/* دکمه New: همیشه فعال و فرم را ریست می‌کند */}
-        <DynamicButton text="New" onClick={handleNewClick} isDisabled={false} />
-
-        {/* دکمه Delete: تنها درصورتی فعال که ردیفی انتخاب شده باشد */}
+        <DynamicButton
+          text="New"
+          onClick={handleNewClick}
+          isDisabled={false}
+        />
         <DynamicButton
           text="Delete"
           onClick={handleDeleteClick}
@@ -583,7 +593,9 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         />
       </div>
     </div>
-  );
+  </>
+);
+
 };
 
 export default ButtonComponent;
