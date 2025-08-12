@@ -1,0 +1,30 @@
+{
+  "MainMenu": {
+    "File": "فایل",
+    "General": "عمومی",
+    "Forms": "فرم",
+    "ApprovalFlows": "جریان کار",
+    "Programs": "برنامه",
+    "Projects": "پروژه"
+  },
+  "SubMenu": {
+    "Configurations": "پیکربندی",
+    "Commands": "تنظیمات کامند",
+    "Ribbons": "منوها",
+    "Enterprises": "شرکت‌ها",
+    "Users": "کاربران",
+    "Roles": "نقش‌ها",
+    "Staffing": "پرسنل",
+    "RoleGroups": "نقش گروه‌ها",
+    "Categories": "دسته‌بندی‌ها",
+    "ProgramTemplate": "ساختمان برنامه",
+    "ProgramTypes":"نوع برنامه ",
+    "ProjectsAccess": "دسترسی پروژه",
+    "Odp": "مبتنی بر نیاز",
+    "Procedures": "روند کار",
+    "Calendars": "تقویم",
+    "Forms": "فرم‌ها",
+    "ApprovalFlows": "جریان‌های کار",
+     "Projects":"پروژه ها"
+  }
+}

@@ -681,354 +681,368 @@ useEffect(() => {
       validateMinFields: () => validateMinFields(),
     }));
 
-    return (
-      <div className="flex flex-col md:flex-row h-full relative">
+ return (
+  <div className="flex flex-col md:flex-row h-full relative">
+    {/* RTL-specific styles */}
+    <style>{`
+      /* span margin for RTL */
+      [dir="rtl"] span {
+        margin-right: 3px;
+      }
+      /* preserve Tailwind gaps in RTL */
+      [dir="rtl"] .space-x-2 > * + * {
+        margin-left: 0 !important;
+        margin-right: 0.5rem !important;
+      }
+      [dir="rtl"] .space-x-5 > * + * {
+        margin-left: 0 !important;
+        margin-right: 1.25rem !important;
+      }
+      /* specific margin for Delete button in RTL */
+      [dir="rtl"] button.bg-red-500.text-white.px-4.py-2.rounded.hover\\:bg-red-600.transition-colors {
+        margin-right: 10px !important;
+      }
+    `}</style>
 
-        <main className="flex-1 p-4 bg-white overflow-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 items-center">
+    <main className="flex-1 p-4 bg-white overflow-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 items-center">
+        <DynamicInput
+          name="Name"
+          type="text"
+          value={nameValue}
+          onChange={(e) => setNameValue(e.target.value)}
+          className="w-full"
+        />
+
+        {!isStage && (
+          <div>
+            <label className="flex items-center text-sm text-gray-700 mb-1">
+              <input
+                type="checkbox"
+                checked={acceptChecked}
+                onChange={(e) => setAcceptChecked(e.target.checked)}
+                className="h-4 w-4 mr-2"
+              />
+              <span>Min Accept</span>
+            </label>
             <DynamicInput
-              name="Name"
-              type="text"
-              value={nameValue}
-              onChange={(e) => setNameValue(e.target.value)}
+              name=""
+              type="number"
+              value={minAcceptValue}
+              onChange={(e) => setMinAcceptValue(e.target.value)}
+              disabled={!acceptChecked}
               className="w-full"
             />
+          </div>
+        )}
 
-            {!isStage && (
-              <div>
-                <label className="flex items-center text-sm text-gray-700 mb-1">
-                  <input
-                    type="checkbox"
-                    checked={acceptChecked}
-                    onChange={(e) => setAcceptChecked(e.target.checked)}
-                    className="h-4 w-4 mr-2"
-                  />
-                  Min Accept
-                </label>
-                <DynamicInput
-                  name=""
-                  type="number"
-                  value={minAcceptValue}
-                  onChange={(e) => setMinAcceptValue(e.target.value)}
-                  disabled={!acceptChecked}
-                  className="w-full"
-                />
-              </div>
-            )}
+        <div>
+          <label className="flex items-center text-sm text-gray-700 mb-1">
+            <input
+              type="checkbox"
+              checked={rejectChecked}
+              onChange={(e) => setRejectChecked(e.target.checked)}
+              className="h-4 w-4 mr-2"
+            />
+            <span>Min Reject</span>
+          </label>
+          <DynamicInput
+            name=""
+            type="number"
+            value={minRejectValue}
+            onChange={(e) => setMinRejectValue(e.target.value)}
+            className="w-full"
+          />
+        </div>
 
-            <div>
-              <label className="flex items-center text-sm text-gray-700 mb-1">
-                <input
-                  type="checkbox"
-                  checked={rejectChecked}
-                  onChange={(e) => setRejectChecked(e.target.checked)}
-                  className="h-4 w-4 mr-2"
-                />
-                Min Reject
-              </label>
+        <DynamicInput
+          name="Act Duration"
+          type="number"
+          value={actDurationValue}
+          onChange={(e) => setActDurationValue(e.target.value)}
+          className="w-full"
+        />
+        <DynamicInput
+          name="Order"
+          type="number"
+          value={orderValue}
+          onChange={(e) => setOrderValue(e.target.value)}
+          className="w-full"
+        />
+      </div>
+
+      <div className="mt-6">
+        <label className="flex items-center text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={isStage}
+            onChange={(e) => setIsStage(e.target.checked)}
+            className="h-4 w-4"
+          />
+          <span>Is Stage</span>
+        </label>
+      </div>
+
+      {/* Approval Context */}
+      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-lg font-semibold text-gray-700">
+            Approval Context:
+          </span>
+          <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={handleAddOrUpdateRow}
+              className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+            >
+              <FaPlus className="mr-2" /> Add
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteRow}
+              className={`flex items-center px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition-colors ${
+                selectedRow ? "" : "cursor-not-allowed opacity-50"
+              }`}
+              disabled={!selectedRow}
+            >
+              <FaTimes className="mr-2 text-white" /> Delete
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {/* Static Post */}
+          <div>
+            <label className="block text-sm text-gray-700">Static Post</label>
+            <DynamicSelector
+              options={staticPostOptions}
+              selectedValue={staticPostValue}
+              onChange={(e) => {
+                const val = e.target.value;
+                setStaticPostValue(val);
+                setSelectedStaticPost(
+                  allRoles.find((r) => r.ID.toString() === val) || null
+                );
+              }}
+              label=""
+              showButton
+              onButtonClick={openModal}
+            />
+          </div>
+
+          {/* Weights & Costs */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="flex flex-col gap-1">
               <DynamicInput
-                name=""
+                name="Weight1"
                 type="number"
-                value={minRejectValue}
-                onChange={(e) => setMinRejectValue(e.target.value)}
+                value={weight1}
+                onChange={(e) => setWeight1(e.target.value)}
                 className="w-full"
               />
-
-            </div>
-
-            <DynamicInput
-              name="Act Duration"
-              type="number"
-              value={actDurationValue}
-              onChange={(e) => setActDurationValue(e.target.value)}
-              className="w-full"
-            />
-            <DynamicInput
-              name="Order"
-              type="number"
-              value={orderValue}
-              onChange={(e) => setOrderValue(e.target.value)}
-              className="w-full"
-            />
-          </div>
-
-          <div className="mt-6">
-            <label className="flex items-center text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={isStage}
-                onChange={(e) => setIsStage(e.target.checked)}
-                className="h-4 w-4"
+              <DynamicInput
+                name="Cost1"
+                type="number"
+                value={cost1}
+                onChange={(e) => setCost1(e.target.value)}
+                className="w-full"
               />
-              <span className="ml-2">Is Stage</span>
-            </label>
+            </div>
+            <div className="flex flex-col gap-1">
+              <DynamicInput
+                name="Weight2"
+                type="number"
+                value={weight2}
+                onChange={(e) => setWeight2(e.target.value)}
+                className="w-full"
+              />
+              <DynamicInput
+                name="Cost2"
+                type="number"
+                value={cost2}
+                onChange={(e) => setCost2(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <DynamicInput
+                name="Weight3"
+                type="number"
+                value={weight3}
+                onChange={(e) => setWeight3(e.target.value)}
+                className="w-full"
+              />
+              <DynamicInput
+                name="Cost3"
+                type="number"
+                value={cost3}
+                onChange={(e) => setCost3(e.target.value)}
+                className="w-full"
+              />
+            </div>
           </div>
 
-          {/* Approval Context */}
-          {/* Approval Context */}
-          <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-semibold text-gray-700">
-                Approval Context:
-              </span>
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  onClick={handleAddOrUpdateRow}
-                  className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
-                >
-                  <FaPlus className="mr-2" /> Add
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleDeleteRow}
-                  className={`flex items-center px-3 py-2 rounded transition-colors ${selectedRow
-                      ? "bg-red-500 hover:bg-red-600 text-white"
-                      : "bg-red-300 text-white cursor-not-allowed"
-                    }`}
-                  disabled={!selectedRow}
-                >
-                  <FaTimes className="mr-2 text-white" /> Delete
-                </button>
-              </div>
+          {/* Code, Veto & Required */}
+          <div className="flex items-center justify-center mt-2 space-x-5">
+            <div className="w-1/3">
+              <DynamicInput
+                name="Code"
+                type="number"
+                value={codeValue}
+                onChange={(e) => setCodeValue(e.target.value)}
+                className="w-full"
+              />
             </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              {/* Static Post */}
-              <div>
-                <label className="block text-sm text-gray-700">Static Post</label>
-                <DynamicSelector
-                  options={staticPostOptions}
-                  selectedValue={staticPostValue}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setStaticPostValue(val);
-                    setSelectedStaticPost(
-                      allRoles.find((r) => r.ID.toString() === val) || null
-                    );
-                  }}
-                  label=""
-                  showButton
-                  onButtonClick={openModal}
+            <div className="flex space-x-5 mt-4">
+              <label className="flex items-center text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={vetoChecked}
+                  onChange={(e) => setVetoChecked(e.target.checked)}
+                  className="h-4 w-4 mr-1"
                 />
-              </div>
-
-              {/* گرید سه ستونه برای وزن و هزینه */}
-              <div className="grid grid-cols-3 gap-2">
-                <div className="flex flex-col gap-1">
-                  <DynamicInput
-                    name="Weight1"
-                    type="number"
-                    value={weight1}
-                    onChange={(e) => setWeight1(e.target.value)}
-                    className="w-full"
-                  />
-                  <DynamicInput
-                    name="Cost1"
-                    type="number"
-                    value={cost1}
-                    onChange={(e) => setCost1(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <DynamicInput
-                    name="Weight2"
-                    type="number"
-                    value={weight2}
-                    onChange={(e) => setWeight2(e.target.value)}
-                    className="w-full"
-                  />
-                  <DynamicInput
-                    name="Cost2"
-                    type="number"
-                    value={cost2}
-                    onChange={(e) => setCost2(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <DynamicInput
-                    name="Weight3"
-                    type="number"
-                    value={weight3}
-                    onChange={(e) => setWeight3(e.target.value)}
-                    className="w-full"
-                  />
-                  <DynamicInput
-                    name="Cost3"
-                    type="number"
-                    value={cost3}
-                    onChange={(e) => setCost3(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* بخش Code، Veto و Required */}
-              <div className="flex items-center justify-center mt-2 space-x-5">
-                <div className="w-1/3">
-                  <DynamicInput
-                    name="Code"
-                    type="number"
-                    value={codeValue}
-                    onChange={(e) => setCodeValue(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex items-center space-x-5 mt-4">
-                  <label className="flex items-center text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={vetoChecked}
-                      onChange={(e) => setVetoChecked(e.target.checked)}
-                      className="h-4 w-4 mr-1"
-                    />
-                    Veto
-                  </label>
-                  <label className="flex items-center text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={requiredChecked}
-                      onChange={(e) => setRequiredChecked(e.target.checked)}
-                      className="h-4 w-4 mr-1"
-                    />
-                    Required
-                  </label>
-                </div>
-              </div>
+                <span>Veto</span>
+              </label>
+              <label className="flex items-center text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={requiredChecked}
+                  onChange={(e) => setRequiredChecked(e.target.checked)}
+                  className="h-4 w-4 mr-1"
+                />
+                <span>Required</span>
+              </label>
             </div>
+          </div>
+        </div>
 
-            {!isStage && (
-              <div className="mt-4">
-                {/* ظرف بیرونی: فقط اسکرول افقی */}
-                <div className="overflow-x-auto pb-2">
-                  {/* ارتفاع ثابت؛ ظرف با relative برای لودینگ */}
-                  <div className="h-[33vh] min-w-full relative">
-                    {approvalContextLoading ? (
-                      <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-60">
-                        <TailSpin height={50} width={50} ariaLabel="loading" color="#FF69B4" />
-                      </div>
-                    ) : (
-                      <DataTable
-                        columnDefs={columnDefs}
-                        rowData={tableData}
-                        onCellValueChanged={handleCellValueChanged}
-                        setSelectedRowData={handleSelectRow}
-                        showDuplicateIcon={false}
-                        showEditIcon={false}
-                        showAddIcon={false}
-                        showDeleteIcon={false}
-                        domLayout="normal"
-                        gridOptions={{
-                          rowSelection: "single",
-                          onGridReady: (p) => {
-                            p.api.sizeColumnsToFit();
-                            window.addEventListener("resize", () =>
-                              p.api.sizeColumnsToFit()
-                            );
-                          },
-                        }}
-                      />
-                    )}
-                  </div>
+        {!isStage && (
+          <div className="mt-4 overflow-x-auto pb-2">
+            <div className="h-[33vh] min-w-full relative">
+              {approvalContextLoading ? (
+                <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-60">
+                  <TailSpin
+                    height={50}
+                    width={50}
+                    ariaLabel="loading"
+                    color="#FF69B4"
+                  />
                 </div>
-              </div>
-            )}
+              ) : (
+                <DataTable
+                  columnDefs={columnDefs}
+                  rowData={tableData}
+                  onCellValueChanged={handleCellValueChanged}
+                  setSelectedRowData={handleSelectRow}
+                  showDuplicateIcon={false}
+                  showEditIcon={false}
+                  showAddIcon={false}
+                  showDeleteIcon={false}
+                  domLayout="normal"
+                  gridOptions={{
+                    rowSelection: "single",
+                    onGridReady: (p) => {
+                      p.api.sizeColumnsToFit();
+                      window.addEventListener("resize", () =>
+                        p.api.sizeColumnsToFit()
+                      );
+                    },
+                  }}
+                />
+              )}
+            </div>
           </div>
-
-
-          <div className="mt-6">
-            <label className="flex items-center text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={isDeemed}
-                onChange={(e) => setIsDeemed(e.target.checked)}
-                className="h-4 w-4"
-              />
-              <span className="ml-2">Deemed as Approved Or Reject</span>
-            </label>
-          </div>
-
-          <DeemedSection
-            deemDay={deemDay}
-            setDeemDay={setDeemDay}
-            deemCondition={deemCondition}
-            setDeemCondition={setDeemCondition}
-            deemAction={deemAction}
-            setDeemAction={setDeemAction}
-            previewsStateId={previewsStateId}
-            setPreviewsStateId={setPreviewsStateId}
-            goToPreviousStateID={goToPreviousStateID}
-            setGoToPreviousStateID={setGoToPreviousStateID}
-            boxTemplates={boxTemplates}
-            disableMain={!isDeemed}
-            showAdminSection={true}
-            actionBtnOptions={actionBtnOptions}
-            actionBtnID={actionBtnID}
-            setActionBtnID={setActionBtnID}
-          />
-        </main>
-
-        {/* بخش کناری (Predecessor ها و لیست دکمه‌ها) */}
-        <aside className="w-full md:w-64 bg-gray-100 p-4 border-t md:border-l border-gray-300 overflow-auto mt-4 md:mt-0">
-          <BoxPredecessor
-            boxTemplates={boxTemplates}
-            selectedPredecessors={selectedPredecessors}
-            onSelectionChange={setSelectedPredecessors}
-            currentBoxId={editData ? editData.ID : 0}
-          />
-          <ListSelector
-            title="Button"
-            columnDefs={[
-              { headerName: "Name", field: "Name" },
-              { headerName: "Tooltip", field: "Tooltip" },
-            ]}
-            rowData={btnList}
-            selectedIds={selectedDefaultBtnIds}
-            onSelectionChange={(selectedIds: (string | number)[]) =>
-              handleSelectionChange("DefaultBtn", selectedIds)
-            }
-            showSwitcher={false}
-            isGlobal={false}
-            ModalContentComponent={ButtonComponent}
-            modalContentProps={{
-              columnDefs: [
-                { headerName: "Name", field: "Name" },
-                { headerName: "Tooltip", field: "Tooltip" },
-              ],
-              rowData: btnList,
-              onRowDoubleClick: () => { },
-              onRowClick: () => { },
-              onSelectButtonClick: () => { },
-              isSelectDisabled: false,
-              onClose: () => { },
-              onSelectFromButton: () => { },
-            }}
-          />
-        </aside>
-
-        {/* مودال انتخاب پست (Static Post) */}
-        <DynamicModal isOpen={isModalOpen} onClose={closeModal}>
-          <TableSelector
-            columnDefs={rolesColumnDefs}
-            rowData={allRoles}
-            onRowDoubleClick={handleRoleSelect}
-            onRowClick={(data: Role) => setSelectedStaticPost(data)}
-            onSelectButtonClick={() => {
-              if (selectedStaticPost) {
-                setStaticPostValue(selectedStaticPost.ID.toString());
-                closeModal();
-              } else {
-                showAlert("error", null, "Error", "No row is selected.");
-              }
-            }}
-            isSelectDisabled={!selectedStaticPost}
-          />
-        </DynamicModal>
+        )}
       </div>
-    );
+
+      <div className="mt-6">
+        <label className="flex items-center text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={isDeemed}
+            onChange={(e) => setIsDeemed(e.target.checked)}
+            className="h-4 w-4"
+          />
+          <span className="ml-2">Deemed as Approved Or Reject</span>
+        </label>
+      </div>
+
+      <DeemedSection
+        deemDay={deemDay}
+        setDeemDay={setDeemDay}
+        deemCondition={deemCondition}
+        setDeemCondition={setDeemCondition}
+        deemAction={deemAction}
+        setDeemAction={setDeemAction}
+        previewsStateId={previewsStateId}
+        setPreviewsStateId={setPreviewsStateId}
+        goToPreviousStateID={goToPreviousStateID}
+        setGoToPreviousStateID={setGoToPreviousStateID}
+        boxTemplates={boxTemplates}
+        disableMain={!isDeemed}
+        showAdminSection={true}
+        actionBtnOptions={actionBtnOptions}
+        actionBtnID={actionBtnID}
+        setActionBtnID={setActionBtnID}
+      />
+    </main>
+
+    <aside className="w-full md:w-64 bg-gray-100 p-4 border-t md:border-l border-gray-300 overflow-auto mt-4 md:mt-0">
+      <BoxPredecessor
+        boxTemplates={boxTemplates}
+        selectedPredecessors={selectedPredecessors}
+        onSelectionChange={setSelectedPredecessors}
+        currentBoxId={editData ? editData.ID : 0}
+      />
+      <ListSelector
+        title="Button"
+        columnDefs={[
+          { headerName: "Name", field: "Name" },
+          { headerName: "Tooltip", field: "Tooltip" },
+        ]}
+        rowData={btnList}
+        selectedIds={selectedDefaultBtnIds}
+        onSelectionChange={(ids) => handleSelectionChange("DefaultBtn", ids)}
+        showSwitcher={false}
+        isGlobal={false}
+        ModalContentComponent={ButtonComponent}
+        modalContentProps={{
+          columnDefs: [
+            { headerName: "Name", field: "Name" },
+            { headerName: "Tooltip", field: "Tooltip" },
+          ],
+          rowData: btnList,
+          onRowDoubleClick: () => {},
+          onRowClick: () => {},
+          onSelectButtonClick: () => {},
+          isSelectDisabled: false,
+          onClose: () => {},
+          onSelectFromButton: () => {},
+        }}
+      />
+    </aside>
+
+    <DynamicModal isOpen={isModalOpen} onClose={closeModal}>
+      <TableSelector
+        columnDefs={rolesColumnDefs}
+        rowData={allRoles}
+        onRowDoubleClick={handleRoleSelect}
+        onRowClick={(data: Role) => setSelectedStaticPost(data)}
+        onSelectButtonClick={() => {
+          if (selectedStaticPost) {
+            setStaticPostValue(selectedStaticPost.ID.toString());
+            closeModal();
+          } else {
+            showAlert("error", null, "Error", "No row is selected.");
+          }
+        }}
+        isSelectDisabled={!selectedStaticPost}
+      />
+    </DynamicModal>
+  </div>
+);
+
+
   }
 );
 

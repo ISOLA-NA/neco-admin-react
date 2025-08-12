@@ -109,7 +109,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
       <div className="flex items-center gap-2">
         <div className="relative flex-1 min-w-0">
           {leftIcon && (
-            <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none">
+            <div className="absolute top-1/2 transform -translate-y-1/2 text-purple-600 pointer-events-none ltr:left-2 rtl:right-2">
               {leftIcon}
             </div>
           )}
@@ -119,11 +119,11 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
             onClick={handleToggleDropdown}
             disabled={disabled}
             className={classNames(
-              "w-full text-xs h-9 border border-purple-500 rounded transition focus:outline-none focus:ring-1 focus:ring-purple-500 flex items-center pl-2 pr-2 justify-between",
+              "w-full text-xs h-9 border border-purple-500 rounded transition focus:outline-none focus:ring-1 focus:ring-purple-500 flex items-center justify-between ltr:pl-2 ltr:pr-2 rtl:pr-2 rtl:pl-2",
               disabled ? "bg-gray-300 text-gray-800" : "bg-white"
             )}
           >
-            <span className="block w-full truncate whitespace-nowrap overflow-hidden text-left">
+            <span className="block w-full truncate whitespace-nowrap overflow-hidden ltr:text-left rtl:text-justify">
               {loading
                 ? "Loading..."
                 : selectedOption
@@ -172,7 +172,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                   style={optionStyle}
                   className="cursor-pointer text-xs px-2 hover:bg-purple-100"
                 >
-                  <span className="block w-full truncate whitespace-nowrap overflow-hidden">
+                  <span className="block w-full truncate whitespace-nowrap overflow-hidden ltr:text-left rtl:text-justify">
                     {option.label}
                   </span>
                 </div>
@@ -181,7 +181,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                 <div
                   onClick={handleAddCustomOption}
                   style={optionStyle}
-                  className="cursor-pointer text-xs px-2 hover:bg-purple-100 whitespace-nowrap font-semibold"
+                  className="cursor-pointer text-xs ltr:px-2 rtl:px-2 hover:bg-purple-100 whitespace-nowrap font-semibold"
                 >
                   Add "{customInput}"
                 </div>
@@ -190,7 +190,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
           )}
 
           {loading && (
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+            <div className="absolute top-1/2 transform -translate-y-1/2 ltr:right-2 rtl:left-2">
               <svg
                 className="animate-spin h-4 w-4 text-purple-600"
                 xmlns="http://www.w3.org/2000/svg"
@@ -221,7 +221,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
             onClick={onButtonClick}
             disabled={disabled}
             className={classNames(
-              "bg-purple-600 text-white px-2 py-1 rounded text-xs shadow-sm transition-colors duration-300 h-9 flex items-center justify-center",
+              "bg-purple-600 text-white px-3 py-1 rounded text-xs shadow-sm transition-colors duration-300 h-9 flex items-center justify-center ltr:ml-2 rtl:mr-2",
               disabled ? "bg-gray-500 cursor-not-allowed" : "hover:bg-pink-500"
             )}
             title="اضافه کردن"

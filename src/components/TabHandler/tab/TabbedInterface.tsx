@@ -1,25 +1,24 @@
 // src/components/TabbedInterface.tsx
 
 import React, { useState, useRef, useEffect } from "react";
-import Header from "../tab/Header"; // ← مسیر هدر
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+
+import Header from "../tab/Header";
 import MainTabs from "./MainTabs";
 import SubTabs from "./SubTabs";
 import TabContent from "../tabcontent/TabContent";
-import { subTabComponents } from "./SubTabsImports";
-import { showAlert } from "../../utilities/Alert/DynamicAlert";
-import { useNavigate } from "react-router-dom";
 import SidebarDrawer from "./SideBar/SidebarDrawer";
 
-// کانتکست‌ها
+import { subTabComponents } from "./SubTabsImports";
+import { showAlert } from "../../utilities/Alert/DynamicAlert";
+
 import { useSubTabDefinitions } from "../../../context/SubTabDefinitionsContext";
 import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
 
-// سرویس گرفتن اطلاعات کاربر
 import projectServiceFile from "../../../services/api.servicesFile";
-// برای گرفتن آدرس عکس
 import FileUploadHandler from "../../../services/FileUploadHandler";
 
-// برای مدیریت آیکون‌های CRUD
 interface IconVisibility {
   showAdd: boolean;
   showEdit: boolean;
@@ -27,19 +26,19 @@ interface IconVisibility {
   showDuplicate: boolean;
 }
 
-// Props برای TabbedInterface
 interface TabbedInterfaceProps {
   onLogout: () => void;
 }
 
-// گروه‌ها و تعاریف تب‌ها
 interface TabGroup {
   label: string;
   subtabs: string[];
 }
+
 interface MainTabDefinition {
   groups: TabGroup[];
 }
+
 type MainTabKey =
   | "General"
   | "Forms"
@@ -48,7 +47,6 @@ type MainTabKey =
   | "Projects"
   | "File";
 
-// اینترفیس Token کاربر
 interface UserToken {
   ID: string;
   Username: string;
@@ -69,17 +67,35 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
         label: "Setup",
         subtabs: ["Configurations", "Commands", "Ribbons", "Enterprises"],
       },
-      { label: "User", subtabs: ["Users", "Roles", "Staffing", "RoleGroups"] },
+      {
+        label: "User",
+        subtabs: ["Users", "Roles", "Staffing", "RoleGroups"],
+      },
     ],
   },
   Forms: {
-    groups: [{ label: "Manage", subtabs: ["Forms", "Categories"] }],
+    groups: [
+      {
+        label: "Manage",
+        subtabs: ["Forms", "Categories"],
+      },
+    ],
   },
   ApprovalFlows: {
-    groups: [{ label: "Flows", subtabs: ["ApprovalFlows"] }],
+    groups: [
+      {
+        label: "Flows",
+        subtabs: ["ApprovalFlows"],
+      },
+    ],
   },
   Programs: {
-    groups: [{ label: "Setup", subtabs: ["ProgramTemplate", "ProgramTypes"] }],
+    groups: [
+      {
+        label: "Setup",
+        subtabs: ["ProgramTemplate", "ProgramTypes"],
+      },
+    ],
   },
   Projects: {
     groups: [
@@ -98,23 +114,26 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
 };
 
 const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
-  // کانتکست‌ها
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const { handleAdd, handleEdit, handleDelete, handleDuplicate } =
     useAddEditDelete();
 
-  // stateها
+  // Main & Sub tabs
   const [activeMainTab, setActiveMainTab] = useState<MainTabKey>("General");
   const [activeSubTab, setActiveSubTab] = useState<string>("");
 
-  const [selectedRow, setSelectedRow] = useState<any>(null);
+  // Drawer (left) and Side panel (right)
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState<boolean>(false);
 
-  // collapse header
+  // Collapse header/tabs
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const toggleCollapse = () => setCollapsed((prev) => !prev);
 
-  // جدول
+  // Grid state
   const [currentColumnDefs, setCurrentColumnDefs] = useState<any[]>([]);
   const [currentRowData, setCurrentRowData] = useState<any[]>([]);
   const [currentIconVisibility, setCurrentIconVisibility] =
@@ -124,38 +143,35 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       showDelete: true,
       showDuplicate: false,
     });
+  const [isSubTabLoading, setIsSubTabLoading] = useState<boolean>(false);
 
+  // Selected row
+  const [selectedRow, setSelectedRow] = useState<any>(null);
+
+  // Refs for scrolling
   const mainTabsRef = useRef<HTMLDivElement>(null);
   const subTabsRef = useRef<HTMLDivElement>(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [isSubTabLoading, setIsSubTabLoading] = useState(false);
 
-  const navigate = useNavigate();
-
-  // ---------- state و logic مربوط به کاربر ----------
+  // User profile
   const [userInfo, setUserInfo] = useState<UserToken | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserTokenId = async () => {
+    (async () => {
       try {
         const res = await projectServiceFile.getIdByUserToken();
         const data = Array.isArray(res.data) ? res.data[0] : res.data;
-        if (data) {
-          setUserInfo(data);
-        }
+        if (data) setUserInfo(data);
       } catch (error) {
         console.error("Error fetching user token ID:", error);
       }
-    };
-    fetchUserTokenId();
+    })();
   }, []);
-  // ---------- پایان کاربر ----------
 
-  // بارگذاری دیتا برای ساب‌تب
+  // Load data for active sub-tab
   const fetchSubTabData = async (subTabName: string) => {
+    setIsSubTabLoading(true);
     try {
-      setIsSubTabLoading(true);
       const def = subTabDefinitions[subTabName];
       if (!def) {
         setCurrentRowData([]);
@@ -166,7 +182,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           showDelete: false,
           showDuplicate: false,
         });
-        setIsSubTabLoading(false);
         return;
       }
       const data = await fetchDataForSubTab(subTabName);
@@ -174,7 +189,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       setCurrentColumnDefs(def.columnDefs);
       setCurrentIconVisibility(def.iconVisibility);
     } catch (error) {
-      console.error("Error fetching data for subTab:", subTabName, error);
+      console.error("Error loading subTab:", subTabName, error);
     } finally {
       setIsSubTabLoading(false);
     }
@@ -195,95 +210,96 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     }
   }, [activeSubTab, subTabDefinitions]);
 
-  // هندل تب‌ها
-  const handleMainTabChange = (tabName: string) => {
-    if (tabName === "File") {
+  // Handle main-tab switching
+  const handleMainTabChange = (tabKey: MainTabKey) => {
+    // close drawer & side-panel on any tab switch
+    setIsDrawerOpen(false);
+    setIsSidePanelOpen(false);
+
+    if (tabKey === "File") {
       setIsDrawerOpen(true);
-      setIsPanelOpen(false);
       return;
     }
-    if (tabName in mainTabsData) {
-      setActiveMainTab(tabName as MainTabKey);
-      setActiveSubTab("");
-      setSelectedRow(null);
-      mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-      subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-    } else {
-      console.warn(`Unknown tabName: ${tabName}`);
-    }
-  };
-
-  const handleSubTabChange = (subtab: string) => {
-    setActiveSubTab(subtab);
+    setActiveMainTab(tabKey);
+    setActiveSubTab("");
     setSelectedRow(null);
-    setIsPanelOpen(false);
+    mainTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   };
 
-  // عملیات CRUD
+  // Handle sub-tab switching
+  const handleSubTabChange = (subKey: string) => {
+    setIsDrawerOpen(false);
+    setIsSidePanelOpen(false);
+
+    setActiveSubTab(subKey);
+    setSelectedRow(null);
+    subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+  };
+
+  // CRUD actions
   const handleAddClick = () => {
     handleAdd();
     setSelectedRow(null);
   };
-  const handleEditClick = () => {
-    handleEdit();
-  };
+  const handleEditClick = () => handleEdit();
   const handleDeleteClick = async () => {
     if (!selectedRow?.ID) {
-      alert("No row is selected for deletion");
+      showAlert("error", "", t("alert.genericError"));
       return;
     }
     try {
       await handleDelete(activeSubTab, selectedRow.ID);
-      setIsPanelOpen(false);
       setSelectedRow(null);
-
-      showAlert("success", null, "Deleted", "Record deleted successfully.");
+      showAlert("success", "", t("alert.successTitle"));
       await fetchSubTabData(activeSubTab);
     } catch {
-      showAlert("error", null, "Error", "Failed to delete record.");
+      showAlert("error", "", t("alert.genericError"));
     }
   };
-  const handleDuplicateClick = () => {
-    handleDuplicate();
-  };
-  const handleRowClick = (data: any) => setSelectedRow(data);
-  const handleRowDoubleClick = (rowData: any) => setSelectedRow(rowData);
+  const handleDuplicateClick = () => handleDuplicate();
 
+  // Row selection
+  const handleRowClick = (data: any) => {
+    setSelectedRow(data);
+    // optional: close side-panel on single click
+    setIsSidePanelOpen(false);
+  };
+  const handleRowDoubleClick = (data: any) => {
+    setSelectedRow(data);
+    // open side-panel on double-click without toggling header collapse
+    setIsSidePanelOpen(true);
+  };
+
+  // Logout
   const handleLogoutClick = () => {
     onLogout();
-    showAlert("success", null, "خروج", "شما با موفقیت خارج شدید.");
+    showAlert("success", "", t("alert.successTitle"));
     navigate("/login");
     setIsDrawerOpen(false);
   };
 
-  const handleCloseDrawer = () => setIsDrawerOpen(false);
-
-  // جلوگیری از اسکرول وقتی دراور باز است
+  // Prevent background scroll when drawer is open
   useEffect(() => {
     document.body.style.overflow = isDrawerOpen ? "hidden" : "auto";
   }, [isDrawerOpen]);
 
   const mainTabs = Object.keys(mainTabsData) as MainTabKey[];
-
-  // مقادیر هدر
   const headerUsername = userInfo?.Username ?? "";
 
   return (
     <>
-      {/* دراور File */}
       <SidebarDrawer
         isOpen={isDrawerOpen}
-        onClose={handleCloseDrawer}
+        onClose={() => setIsDrawerOpen(false)}
         onLogout={handleLogoutClick}
       />
 
       <div
-        className={`w-full h-screen flex flex-col bg-gray-100 overflow-hidden transition-filter duration-300 ${
+        className={`w-full h-screen flex flex-col bg-gray-100 overflow-hidden ${
           isDrawerOpen ? "filter blur-sm" : ""
         }`}
       >
-        {/* هدر */}
         <Header
           username={headerUsername}
           avatarUrl={avatarUrl || undefined}
@@ -291,7 +307,6 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
           onToggleCollapse={toggleCollapse}
         />
 
-        {/* این کامپوننت فقط برای گرفتن URL تصویر است (هیچ UI‌ای نشان نمی‌دهد) */}
         {userInfo?.UserImageId && (
           <div className="hidden">
             <FileUploadHandler
@@ -299,12 +314,12 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
               resetCounter={0}
               onReset={() => {}}
               onPreviewUrlChange={setAvatarUrl}
-              hideUploader={true}
+              hideUploader
             />
           </div>
         )}
 
-        {/* MainTabs و SubTabs */}
+        {/* Collapsible Main & Sub Tabs */}
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden ${
             collapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
@@ -321,10 +336,14 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
               mainTabsRef.current?.scrollBy({ left: 150, behavior: "smooth" })
             }
             tabsRef={mainTabsRef}
+            renderLabel={(key: MainTabKey) => t(`MainMenu.${key}`)}
           />
 
           <SubTabs
-            groups={mainTabsData[activeMainTab].groups}
+            groups={mainTabsData[activeMainTab].groups.map((grp) => ({
+              label: grp.label,
+              subtabs: grp.subtabs,
+            }))}
             activeSubTab={activeSubTab}
             onSubTabChange={handleSubTabChange}
             scrollLeft={() =>
@@ -335,10 +354,11 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
             }
             subTabsRef={subTabsRef}
             isLoading={isSubTabLoading}
+            renderSubLabel={(subKey: string) => t(`SubMenu.${subKey}`)}
           />
         </div>
 
-        {/* محتوای تب فعلی */}
+        {/* Content & Side Panel */}
         <div className="flex-1 overflow-hidden">
           {activeSubTab ? (
             <TabContent
@@ -357,11 +377,11 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
               onDuplicate={handleDuplicateClick}
               onRowClick={handleRowClick}
               onRowDoubleClick={handleRowDoubleClick}
-              isPanelOpen={isPanelOpen}
-              setIsPanelOpen={setIsPanelOpen}
+              isPanelOpen={isSidePanelOpen}
+              setIsPanelOpen={setIsSidePanelOpen}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500 text-lg"></div>
+            <div className="flex items-center justify-center h-full text-gray-500 text-lg" />
           )}
         </div>
       </div>

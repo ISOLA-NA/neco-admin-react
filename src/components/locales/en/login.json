@@ -1,0 +1,32 @@
+{
+  "switch": {
+    "usernamePassword": "Username / Password",
+    "otp": "OTP"
+  },
+  "alert": {
+    "errorTitle": "Error",
+    "successTitle": "Success",
+    "selectLanguage": "Please select a language.",
+    "enterCredentials": "Please enter username and password.",
+    "invalidApiResponse": "Invalid API response or MyUser is missing.",
+    "loginSuccess": "You have successfully logged in.",
+    "userCannotLogin": "Regular users cannot log in here.",
+    "enterPhone": "Please enter a phone number.",
+    "otpSent": "OTP code sent.",
+    "otpFailed": "Failed to send OTP.",
+    "genericError": "An error occurred during login."
+  },
+  "button": {
+    "login": "Login",
+    "sendOtp": "Send Code"
+  },
+  "labelInput": {
+    "username": "Username",
+    "password": "Password",
+    "phoneNumber": "Phone Number"
+  },
+  "logoAlt": "Company Logo",
+   "header": {
+    "title": "NECO Organizational Project Management System"
+  }
+}

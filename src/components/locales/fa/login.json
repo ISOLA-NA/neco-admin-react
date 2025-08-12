@@ -1,0 +1,32 @@
+{
+  "switch": {
+    "usernamePassword": "نام کاربری / رمز",
+    "otp": "کد یک‌بارمصرف"
+  },
+  "alert": {
+    "errorTitle": "خطا",
+    "successTitle": "موفقیت",
+    "selectLanguage": "لطفاً زبان را انتخاب کنید.",
+    "enterCredentials": "لطفاً نام کاربری و پسورد را وارد کنید.",
+    "invalidApiResponse": "ساختار پاسخ API نامعتبر است یا MyUser وجود ندارد.",
+    "loginSuccess": "شما با موفقیت وارد شدید.",
+    "userCannotLogin": "کاربر معمولی نمی‌تواند لاگین کند.",
+    "enterPhone": "لطفاً شماره تلفن را وارد کنید.",
+    "otpSent": "کد OTP ارسال شد.",
+    "otpFailed": "ارسال OTP ناموفق بود.",
+    "genericError": "خطایی در فرآیند لاگین رخ داده است."
+  },
+  "button": {
+    "login": "ورود",
+    "sendOtp": "ارسال کد"
+  },
+  "labelInput": {
+    "username": "نام کاربری",
+    "password": "رمز عبور",
+    "phoneNumber": "شماره تلفن"
+  },
+  "logoAlt": "لوگوی شرکت",
+   "header": {
+    "title": "سامانه مدیریت پروژه سازمانی نکو"
+  }
+}

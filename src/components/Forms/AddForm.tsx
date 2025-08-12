@@ -505,341 +505,320 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     "component16", // Table
   ];
 
-  return (
-    <div className=" flex items-center justify-center">
-      {isLoading && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+ return (
+  <div className="flex items-center justify-center">
+    {/* only apply these in RTL */}
+    <style>{`
+      [dir="rtl"] label.ml-3.text-gray-700.font-medium {
+        margin-right: 8px;
+      }
+      [dir="rtl"] .button-group > button {
+        margin-inline-start: 8px;
+      }
+    `}</style>
+
+    {isLoading && (
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+        <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+      </div>
+    )}
+    <div className="w-full max-w-3xl bg-white rounded-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center">
+        {isEdit ? "Edit Column" : "Add New Column"}
+      </h2>
+      <form
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
+        onSubmit={handleSubmit}
+      >
+        {/* Column Name */}
+        <DynamicInput
+          name="Column Name"
+          type="text"
+          value={formData.formName}
+          placeholder="Column Name"
+          onChange={(e) => handleChange("formName", e.target.value)}
+          required={true}
+        />
+        {errors.formName && (
+          <p className="text-red-500 md:col-span-2">{errors.formName}</p>
+        )}
+
+        {/* Order */}
+        <DynamicInput
+          name="Order"
+          type="number"
+          value={formData.order}
+          placeholder="Order"
+          onChange={(e) => handleChange("order", e.target.value)}
+        />
+
+        {/* Description */}
+        <CustomTextarea
+          name="Description"
+          value={formData.description}
+          onChange={(e) => handleChange("description", e.target.value)}
+          placeholder="Description"
+          className="md:col-span-1 -mt-3"
+        />
+
+        {/* Command selector */}
+        <DynamicSelector
+          name="command"
+          options={commandOptions}
+          selectedValue={formData.command}
+          onChange={(e) => handleChange("command", e.target.value)}
+          label="Command"
+          allowCustom={true}
+          className="md:col-span-1 -mt-3"
+        />
+
+        {/* Required in Workflow */}
+        <div className="flex items-center md:col-span-1 translate-y-[24px] -mt-12">
+          <input
+            type="checkbox"
+            id="isRequiredInWf"
+            name="isRequiredInWf"
+            checked={formData.isRequiredInWf}
+            onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
+            className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+          />
+          <label
+            htmlFor="isRequiredInWf"
+            className="ml-3 text-gray-700 font-medium"
+          >
+            Is Required In Wf
+          </label>
         </div>
-      )}
-      <div className="w-full max-w-3xl bg-white rounded-lg">
-        <h2 className="text-3xl font-bold mb-6 text-center">
-          {isEdit ? "Edit Column" : "Add New Column"}
-        </h2>
-        <form
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
-          onSubmit={handleSubmit}
-        >
-          {/* Column Name */}
-          <DynamicInput
-            name="Column Name"
-            type="text"
-            value={formData.formName}
-            placeholder="Column Name"
-            onChange={(e) => handleChange("formName", e.target.value)}
-            required={true}
-          />
-          {errors.formName && (
-            <p className="text-red-500 md:col-span-2">{errors.formName}</p>
-          )}
 
-          {/* Order */}
-          <DynamicInput
-            name="Order"
-            type="number"
-            value={formData.order}
-            placeholder="Order"
-            onChange={(e) => handleChange("order", e.target.value)}
-          />
+        {/* Print Code */}
+        <DynamicInput
+          name="Print Code"
+          type="text"
+          value={formData.printCode}
+          placeholder="Print Code"
+          onChange={(e) => handleChange("printCode", e.target.value)}
+          className="-mt-3"
+        />
 
-          {/* Description */}
-          <CustomTextarea
-            name="Description"
-            value={formData.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            placeholder="Description"
-            className="md:col-span-1 -mt-3"
-          />
-
-          {/* Command selector با امکان تایپ دلخواه */}
-          <DynamicSelector
-            name="command"
-            options={commandOptions}
-            selectedValue={formData.command}
-            onChange={(e) => handleChange("command", e.target.value)}
-            label="Command"
-            allowCustom={true}
-            className="md:col-span-1 -mt-3"
-          />
-
-          {/* Required in Workflow */}
-          <div className="flex items-center md:col-span-1 translate-y-[24px] -mt-12">
-            <input
-              type="checkbox"
-              id="isRequiredInWf"
-              name="isRequiredInWf"
-              checked={formData.isRequiredInWf}
-              onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
-              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-            />
-            <label
-              htmlFor="isRequiredInWf"
-              className="ml-3 text-gray-700 font-medium"
-            >
-              Is Required In Wf
-            </label>
-          </div>
-
-          <DynamicInput
-            name="Print Code"
-            type="text"
-            value={formData.printCode}
-            placeholder="Print Code"
-            onChange={(e) => handleChange("printCode", e.target.value)}
-            className="-mt-3"
-          />
-
-          {/* Editable in Workflow, Workflow Box, Show in Alert */}
-          <div className="md:col-span-2 flex flex-col space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center  translate-y-[10px]">
-                <input
-                  type="checkbox"
-                  id="isEditableInWf"
-                  name="isEditableInWf"
-                  checked={formData.isEditableInWf}
-                  onChange={(e) =>
-                    handleChange("isEditableInWf", e.target.checked)
-                  }
-                  className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="isEditableInWf"
-                  className="ml-3 text-gray-700 font-medium"
-                >
-                  Is Editable in Workflow
-                </label>
-              </div>
-              <DynamicInput
-                name="Allowed WfBox Name"
-                type="text"
-                value={formData.allowedWfBoxName}
-                placeholder=""
+        {/* Editable in Workflow, Workflow Box, Show in Alert */}
+        <div className="md:col-span-2 flex flex-col space-y-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center translate-y-[10px]">
+              <input
+                type="checkbox"
+                id="isEditableInWf"
+                name="isEditableInWf"
+                checked={formData.isEditableInWf}
                 onChange={(e) =>
-                  handleChange("allowedWfBoxName", e.target.value)
-                }
-                className="flex-1"
-              />
-              <div className="flex items-center  translate-y-[10px]">
-                <input
-                  type="checkbox"
-                  id="showInAlert"
-                  name="showInAlert"
-                  checked={formData.showInAlert}
-                  onChange={(e) =>
-                    handleChange("showInAlert", e.target.checked)
-                  }
-                  className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="showInAlert"
-                  className="ml-3 text-gray-700 font-medium"
-                >
-                  Show in Alert
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Type of Information */}
-          <DynamicSelector
-            name="typeOfInformation"
-            options={typeOfInformationOptions}
-            selectedValue={formData.typeOfInformation}
-            onChange={(e) => handleChange("typeOfInformation", e.target.value)}
-            label="Type of Information"
-            className="md:col-span-2"
-            disabled={isEdit}
-          />
-
-          {/* چند چک‌باکس در یک ردیف */}
-          <div className="flex flex-wrap md:col-span-2 space-x-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="required"
-                name="required"
-                checked={formData.required}
-                onChange={(e) => handleChange("required", e.target.checked)}
-                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="required"
-                className="ml-3 text-gray-700 font-medium"
-              >
-                Required
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="mainColumns"
-                name="mainColumns"
-                checked={formData.mainColumns}
-                onChange={(e) => handleChange("mainColumns", e.target.checked)}
-                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="mainColumns"
-                className="ml-3 text-gray-700 font-medium"
-              >
-                Main Columns
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showInListView"
-                name="showInListView"
-                checked={formData.showInListView}
-                onChange={(e) =>
-                  handleChange("showInListView", e.target.checked)
+                  handleChange("isEditableInWf", e.target.checked)
                 }
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
               <label
-                htmlFor="showInListView"
+                htmlFor="isEditableInWf"
                 className="ml-3 text-gray-700 font-medium"
               >
-                Show in List
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="rightToLeft"
-                name="rightToLeft"
-                checked={formData.rightToLeft}
-                onChange={(e) => handleChange("rightToLeft", e.target.checked)}
-                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="rightToLeft"
-                className="ml-3 text-gray-700 font-medium"
-              >
-                Right to Left
-              </label>
-            </div>
-          </div>
-
-          {/* چک‌باکس جدید برای Count In Reject */}
-          <div className="flex items-center md:col-span-2">
-            <input
-              type="checkbox"
-              id="countInReject"
-              name="countInReject"
-              checked={formData.countInReject}
-              onChange={(e) => handleChange("countInReject", e.target.checked)}
-              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-            />
-            <label
-              htmlFor="countInReject"
-              className="ml-3 text-gray-700 font-medium"
-            >
-              Count In Reject
-            </label>
-          </div>
-
-          {/* ردیف Read Only, Show in Tab و Program Meta Column Name */}
-          <div className="flex flex-wrap md:col-span-2 space-x-4 items-center">
-            <div className="flex items-center  translate-y-[10px]">
-              <input
-                type="checkbox"
-                id="readOnly"
-                name="readOnly"
-                checked={formData.readOnly}
-                onChange={(e) => handleChange("readOnly", e.target.checked)}
-                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="readOnly"
-                className="ml-3 text-gray-700 font-medium"
-              >
-                Read Only
+                Is Editable in Workflow
               </label>
             </div>
             <DynamicInput
-              name="Show in Tab"
+              name="Allowed WfBox Name"
               type="text"
-              value={formData.showInTab}
-              onChange={(e) => handleChange("showInTab", e.target.value)}
+              value={formData.allowedWfBoxName}
               placeholder=""
+              onChange={(e) =>
+                handleChange("allowedWfBoxName", e.target.value)
+              }
               className="flex-1"
             />
-            {/* در برخی نوع‌ها metaType4 پنهان می‌ماند */}
-            {!hiddenTypesForProgramMeta.includes(
-              formData.typeOfInformation
-            ) && (
-                <DynamicInput
-                  name="Program Meta ColumnName"
-                  type="text"
-                  value={metaExtra.metaType4}
-                  onChange={(e) =>
-                    setMetaExtra((prev) => ({
-                      ...prev,
-                      metaType4: e.target.value,
-                    }))
-                  }
-                  className="flex-1"
-                />
-              )}
+            <div className="flex items-center translate-y-[10px]">
+              <input
+                type="checkbox"
+                id="showInAlert"
+                name="showInAlert"
+                checked={formData.showInAlert}
+                onChange={(e) => handleChange("showInAlert", e.target.checked)}
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="showInAlert"
+                className="ml-3 text-gray-700 font-medium"
+              >
+                Show in Alert
+              </label>
+            </div>
           </div>
+        </div>
 
-          {/* کنترلر داینامیک (مثلاً Lookup, SeqnialNumber, ...) */}
-          <div className="md:col-span-2">{renderSelectedComponent()}</div>
+        {/* Type of Information */}
+        <DynamicSelector
+          name="typeOfInformation"
+          options={typeOfInformationOptions}
+          selectedValue={formData.typeOfInformation}
+          onChange={(e) => handleChange("typeOfInformation", e.target.value)}
+          label="Type of Information"
+          className="md:col-span-2"
+          disabled={isEdit}
+        />
 
-          {/* دکمه‌های Cancel و Submit */}
-          <div className="md:col-span-2 flex justify-center space-x-6">
-            <button
-              type="button"
-              className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
-              onClick={() => {
-                setFormData({
-                  formName: "",
-                  order: "",
-                  description: "",
-                  command: "",
-                  isRequiredInWf: false,
-                  printCode: "",
-                  isEditableInWf: false,
-                  allowedWfBoxName: "",
-                  showInAlert: false,
-                  typeOfInformation: "component1",
-                  required: false,
-                  mainColumns: false,
-                  showInListView: false,
-                  rightToLeft: false,
-                  readOnly: false,
-                  metaColumnName: "",
-                  showInTab: "",
-                  countInReject: false,
-                });
-                setDynamicMeta({});
-                setErrors({});
-                onClose();
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              disabled={isLoading}
-            >
-              {isLoading
-                ? isEdit
-                  ? "Updating..."
-                  : "Adding..."
-                : isEdit
-                  ? "Update Column"
-                  : "Add Column"}
-            </button>
+        {/* Checkboxes row */}
+        <div className="flex flex-wrap md:col-span-2 space-x-4">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="required"
+              name="required"
+              checked={formData.required}
+              onChange={(e) => handleChange("required", e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="required" className="ml-3 text-gray-700 font-medium">
+              Required
+            </label>
           </div>
-        </form>
-      </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="mainColumns"
+              name="mainColumns"
+              checked={formData.mainColumns}
+              onChange={(e) => handleChange("mainColumns", e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="mainColumns" className="ml-3 text-gray-700 font-medium">
+              Main Columns
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="showInListView"
+              name="showInListView"
+              checked={formData.showInListView}
+              onChange={(e) => handleChange("showInListView", e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="showInListView" className="ml-3 text-gray-700 font-medium">
+              Show in List
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="rightToLeft"
+              name="rightToLeft"
+              checked={formData.rightToLeft}
+              onChange={(e) => handleChange("rightToLeft", e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="rightToLeft" className="ml-3 text-gray-700 font-medium">
+              Right to Left
+            </label>
+          </div>
+        </div>
+
+        {/* Count In Reject */}
+        <div className="flex items-center md:col-span-2">
+          <input
+            type="checkbox"
+            id="countInReject"
+            name="countInReject"
+            checked={formData.countInReject}
+            onChange={(e) => handleChange("countInReject", e.target.checked)}
+            className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+          />
+          <label htmlFor="countInReject" className="ml-3 text-gray-700 font-medium">
+            Count In Reject
+          </label>
+        </div>
+
+        {/* Read Only, Show in Tab, Program Meta Column Name */}
+        <div className="flex flex-wrap md:col-span-2 space-x-4 items-center">
+          <div className="flex items-center translate-y-[10px]">
+            <input
+              type="checkbox"
+              id="readOnly"
+              name="readOnly"
+              checked={formData.readOnly}
+              onChange={(e) => handleChange("readOnly", e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label htmlFor="readOnly" className="ml-3 text-gray-700 font-medium">
+              Read Only
+            </label>
+          </div>
+          <DynamicInput
+            name="Show in Tab"
+            type="text"
+            value={formData.showInTab}
+            onChange={(e) => handleChange("showInTab", e.target.value)}
+            placeholder=""
+            className="flex-1"
+          />
+          {!hiddenTypesForProgramMeta.includes(formData.typeOfInformation) && (
+            <DynamicInput
+              name="Program Meta ColumnName"
+              type="text"
+              value={metaExtra.metaType4}
+              onChange={(e) =>
+                setMetaExtra((prev) => ({
+                  ...prev,
+                  metaType4: e.target.value,
+                }))
+              }
+              className="flex-1"
+            />
+          )}
+        </div>
+
+        {/* Dynamic controller */}
+        <div className="md:col-span-2">{renderSelectedComponent()}</div>
+
+        {/* Buttons */}
+        <div className="md:col-span-2 flex justify-center button-group">
+          <button
+            type="button"
+            className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
+            onClick={() => {
+              setFormData(getInitialFormData());
+              setMetaCore({
+                metaType1: "",
+                metaType2: null,
+                metaType3: null,
+                LookupMode: null,
+                oldLookup: false,
+                metaType5: null,
+                metaTypeJson: null,
+              });
+              setMetaExtra({ metaType4: "" });
+              setErrors({});
+              onClose();
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading
+              ? isEdit
+                ? "Updating..."
+                : "Adding..."
+              : isEdit
+              ? "Update Column"
+              : "Add Column"}
+          </button>
+        </div>
+      </form>
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default AddColumnForm;

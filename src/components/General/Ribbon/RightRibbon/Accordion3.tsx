@@ -167,7 +167,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       ModifiedById: row.ModifiedById === "" ? null : row.ModifiedById,
       IconImageId: row.IconImageId === "" ? null : row.IconImageId,
     };
-  
+
     setSelectedRow(sanitizedRow);               // انتخاب ردیف
     setFormData(sanitizedRow);                  // پر کردن فرم (Command و CommandWeb هر دو داخلش هستند)
     setWindowsAppCommand(sanitizedRow.Command || "");  // مقدار ورودی WindowsAppCommand
@@ -176,7 +176,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setIsEditing(true);
     setIsAdding(false);
   };
-  
+
 
   const handleRowDoubleClick = (row: RowData3) => {
     onRowDoubleClick(row.ID);
@@ -201,15 +201,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
   };
 
   // ادیت
-const handleEdit = (row: RowData3) => {
-  setSelectedRow(row);                         // همان ردیف
-  setFormData(row);                            // داده‌های فرم
-  setWindowsAppCommand(row.Command || "");     // هم‌زمان ورودی WindowsAppCommand
-  setSelectedSize(String(row.Order ?? 0));     // سایز
-  setIconImageId(row.IconImageId ?? null);     // آیکن
-  setIsEditing(true);
-  setIsAdding(false);
-};
+  const handleEdit = (row: RowData3) => {
+    setSelectedRow(row);                         // همان ردیف
+    setFormData(row);                            // داده‌های فرم
+    setWindowsAppCommand(row.Command || "");     // هم‌زمان ورودی WindowsAppCommand
+    setSelectedSize(String(row.Order ?? 0));     // سایز
+    setIconImageId(row.IconImageId ?? null);     // آیکن
+    setIsEditing(true);
+    setIsAdding(false);
+  };
 
   // حذف از اکشن جدول
   const handleDelete = (row: RowData3) => {
@@ -309,7 +309,7 @@ const handleEdit = (row: RowData3) => {
         ID: 0,
         Name: formData.Name!,
         Command: formData.Command || "",
-        CommandWeb: formData.CommandWeb || "", 
+        CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
         Order: formData.Order || 0,
         nMenuGroupId: selectedMenuGroupId!,
@@ -321,13 +321,13 @@ const handleEdit = (row: RowData3) => {
         HelpText: "",
         KeyTip: "",
         Size: formData.Order || 0,
-        
+
       };
       showAlert("success", null, "", "MenuItem updated successfully.");
       await AppServices.insertMenuItem(newMenuItem);
       await loadRowData();
       setFormData({ Name: "", Command: "", Description: "", Order: 0 });
-      setWindowsAppCommand(""); 
+      setWindowsAppCommand("");
       setSelectedSize("0");
       setIconImageId(null);
       setIsAdding(false);
@@ -421,269 +421,284 @@ const handleEdit = (row: RowData3) => {
   };
 
   return (
-    <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
-      {/* Accordion header */}
-      <div
-        className="flex justify-between items-center p-4 bg-white border-b border-gray-300 rounded-t-lg cursor-pointer"
-        onClick={toggleAccordion}
-      >
-        <span className="text-xl font-medium">Menu Items</span>
-        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full">
-          {isOpen ? (
-            <FiChevronUp className="text-gray-700" size={20} />
-          ) : (
-            <FiChevronDown className="text-gray-700" size={20} />
-          )}
-        </div>
-      </div>
+    <>
+      {/* Radio margin for LTR and RTL */}
+      <style>{`
+      [dir="ltr"] input[type="radio"] {
+        margin-right: 6px;
+      }
+      [dir="rtl"] input[type="radio"] {
+        margin-left: 6px;
+      }
+    `}</style>
 
-      {isOpen && (
-        <div className="p-4 bg-white rounded-b-lg">
-          {selectedMenuGroupId !== null ? (
-            <>
-              {/* Search bar */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="relative max-w-sm">
-                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-                    style={{ fontFamily: "inherit" }}
+      <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
+        {/* Accordion header */}
+        <div
+          className="flex justify-between items-center p-4 bg-white border-b border-gray-300 rounded-t-lg cursor-pointer"
+          onClick={toggleAccordion}
+        >
+          <span className="text-xl font-medium">Menu Items</span>
+          <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full">
+            {isOpen ? (
+              <FiChevronUp className="text-gray-700" size={20} />
+            ) : (
+              <FiChevronDown className="text-gray-700" size={20} />
+            )}
+          </div>
+        </div>
+
+        {isOpen && (
+          <div className="p-4 bg-white rounded-b-lg">
+            {selectedMenuGroupId !== null ? (
+              <>
+                {/* Search bar */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="relative max-w-sm w-full">
+                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                      style={{ fontFamily: "inherit" }}
+                    />
+                  </div>
+                </div>
+
+                {/* DataTable */}
+                <div style={{ height: "300px", overflowY: "auto", marginTop: "-15px" }}>
+                  <DataTable
+                    columnDefs={columnDefs}
+                    rowData={filteredRowData}
+                    onRowClick={handleRowClick}
+                    onRowDoubleClick={(data) => handleRowDoubleClick(data)}
+                    isLoading={isLoading}
+                    showSearch={false}
+                    domLayout="normal"
+                    showAddIcon={false}
+                    showEditIcon={false}
+                    showDeleteIcon={false}
+                    showDuplicateIcon={false}
                   />
                 </div>
-              </div>
 
-              {/* DataTable */}
-              <div
-                style={{
-                  height: "300px",
-                  overflowY: "auto",
-                  marginTop: "-15px",
-                }}
-              >
-                <DataTable
-                  columnDefs={columnDefs}
-                  rowData={filteredRowData}
-                  onRowClick={handleRowClick}
-                  onRowDoubleClick={(data) => handleRowDoubleClick(data)}
-                  isLoading={isLoading}
-                  showSearch={false}
-                  domLayout="normal"
-                  showAddIcon={false}
-                  showEditIcon={false}
-                  showDeleteIcon={false}
-                  showDuplicateIcon={false}
-                />
-              </div>
-
-              {/* The form */}
-              <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
-                <div className="grid grid-cols-1 gap-6">
-                  <DynamicInput
-                    name="Name"
-                    type="text"
-                    value={formData.Name || ""}
-                    placeholder="Name"
-                    onChange={(e) => handleInputChange("Name", e.target.value)}
-                    className="mt-2"
-                  />
-
-                  <DynamicInput
-                    name="Windows web Command"
-                    type="text"
-                    value={formData.CommandWeb || ""}
-                    placeholder=""
-                    onChange={(e) =>
-                      handleInputChange("CommandWeb", e.target.value)
-                    }
-                    className="mt-2"
-                  />
-
-                  {/* 🟢 Windows App Command input + modal button */}
-                  <div className="flex items-center gap-2">
+                {/* The form */}
+                <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
+                  <div className="grid grid-cols-1 gap-6">
                     <DynamicInput
-                      name="Windows App Command"
+                      name="Name"
                       type="text"
-                      value={windowsAppCommand}
-                      placeholder=""
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setWindowsAppCommand(val);                          
-                        setFormData((prev) => ({ ...prev, Command: val }));  
-                      }}
-                      className="flex-1"                               
+                      value={formData.Name || ""}
+                      placeholder="Name"
+                      onChange={(e) => handleInputChange("Name", e.target.value)}
+                      className="mt-2"
                     />
 
+                    <DynamicInput
+                      name="Windows web Command"
+                      type="text"
+                      value={formData.CommandWeb || ""}
+                      placeholder=""
+                      onChange={(e) =>
+                        handleInputChange("CommandWeb", e.target.value)
+                      }
+                      className="mt-2"
+                    />
+
+                    {/* Windows App Command + modal */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        name="Windows App Command"
+                        type="text"
+                        value={windowsAppCommand}
+                        placeholder=""
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setWindowsAppCommand(val);
+                          setFormData((prev) => ({ ...prev, Command: val }));
+                        }}
+                        className="flex-1 h-9 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <button
+                        type="button"
+                        title="انتخاب Command"
+                        onClick={() => setCommandModalOpen(true)}
+                        className="h-9 px-4 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold flex items-center justify-center"
+                      >
+                        cmd
+                      </button>
+                    </div>
+
+
+                    <DynamicInput
+                      name="Description"
+                      type="text"
+                      value={formData.Description || ""}
+                      placeholder="Description"
+                      onChange={(e) =>
+                        handleInputChange("Description", e.target.value)
+                      }
+                      className="mt-2"
+                    />
+
+                    <DynamicInput
+                      name="Order"
+                      type="number"
+                      value={formData.Order || 0}
+                      placeholder="Order"
+                      onChange={(e) =>
+                        handleInputChange("Order", parseInt(e.target.value, 10) || 0)
+                      }
+                      className="mt-2"
+                    />
+
+                    {/* Size radios and File Upload side by side */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-4">
+                        <span className="text-lg font-medium">Size:</span>
+                        {/* Inline radios */}
+                        <label className="flex items-center text-lg">
+                          <input
+                            type="radio"
+                            name="size"
+                            value="0"
+                            checked={selectedSize === "0"}
+                            onChange={() => handleRadioChange("0")}
+                          />
+                          Large
+                        </label>
+                        <label className="flex items-center text-lg">
+                          <input
+                            type="radio"
+                            name="size"
+                            value="1"
+                            checked={selectedSize === "1"}
+                            onChange={() => handleRadioChange("1")}
+                          />
+                          Medium
+                        </label>
+                        <label className="flex items-center text-lg">
+                          <input
+                            type="radio"
+                            name="size"
+                            value="2"
+                            checked={selectedSize === "2"}
+                            onChange={() => handleRadioChange("2")}
+                          />
+                          Small
+                        </label>
+                      </div>
+                      <div className="w-full sm:w-96">
+                        <FileUploadHandler
+                          selectedFileId={iconImageId}
+                          onUploadSuccess={handleUploadSuccess}
+                          resetCounter={resetCounter}
+                          onReset={() => setResetCounter((prev) => prev + 1)}
+                          isEditMode={isEditing}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-4 mt-4">
                     <button
-                      type="button"
-                      title="انتخاب Command"
-                      onClick={() => setCommandModalOpen(true)}
-                      className="h-9 px-3 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold
-               flex items-center justify-center mt-4"
+                      onClick={handleInsert}
+                      disabled={isEditing}
+                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${isEditing
+                          ? "bg-green-300 text-gray-200 cursor-not-allowed"
+                          : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
+                        }`}
                     >
-                      cmd
+                      <FaSave /> Save
+                    </button>
+                    <button
+                      onClick={handleUpdate}
+                      disabled={!selectedRow}
+                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
+                          ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                          : "bg-blue-300 text-gray-200 cursor-not-allowed"
+                        }`}
+                    >
+                      <FaEdit /> Update
+                    </button>
+                    <button
+                      onClick={handleDeleteClick}
+                      disabled={!selectedRow}
+                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
+                          ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                          : "bg-red-300 text-gray-200 cursor-not-allowed"
+                        }`}
+                    >
+                      <FaTrash /> Delete
+                    </button>
+                    <button
+                      onClick={handleNew}
+                      disabled={!selectedRow}
+                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
+                          ? "bg-gray-300 text-gray-200 cursor-not-allowed"
+                          : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
+                        }`}
+                    >
+                      <FaPlus /> New
                     </button>
                   </div>
-
-
-                  <DynamicInput
-                    name="Description"
-                    type="text"
-                    value={formData.Description || ""}
-                    placeholder="Description"
-                    onChange={(e) =>
-                      handleInputChange("Description", e.target.value)
-                    }
-                    className="mt-2"
-                  />
-
-                  <DynamicInput
-                    name="Order"
-                    type="number"
-                    value={formData.Order || 0}
-                    placeholder="Order"
-                    onChange={(e) =>
-                      handleInputChange(
-                        "Order",
-                        parseInt(e.target.value, 10) || 0
-                      )
-                    }
-                    className="mt-2"
-                  />
-
-                  <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                    <DynamicRadioGroup
-                      options={[
-                        { value: "0", label: "Large" },
-                        { value: "1", label: "Medium" },
-                        { value: "2", label: "Small" },
-                      ]}
-                      title="Size"
-                      name="size"
-                      selectedValue={selectedSize}
-                      onChange={handleRadioChange}
-                      className="w-full md:w-1/2"
-                      isRowClicked={true}
-                    />
-                    <FileUploadHandler
-                      selectedFileId={iconImageId}
-                      onUploadSuccess={handleUploadSuccess}
-                      resetCounter={resetCounter}
-                      onReset={() => setResetCounter((prev) => prev + 1)}
-                      isEditMode={isEditing}
-                    />
-                  </div>
                 </div>
-                {/* Action buttons */}
-                <div className="flex items-center gap-4 mt-4">
-                  <button
-                    onClick={handleInsert}
-                    disabled={isEditing}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${isEditing
-                        ? "bg-green-300 text-gray-200 cursor-not-allowed"
-                        : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-                      }`}
-                  >
-                    <FaSave /> Save
-                  </button>
-
-                  <button
-                    onClick={handleUpdate}
-                    disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                        ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                        : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                      }`}
-                  >
-                    <FaEdit /> Update
-                  </button>
-                  <button
-                    onClick={handleDeleteClick}
-                    disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                        ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                        : "bg-red-300 text-gray-200 cursor-not-allowed"
-                      }`}
-                  >
-                    <FaTrash /> Delete
-                  </button>
-                  <button
-                    onClick={handleNew}
-                    disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
-                        ? "bg-gray-300 text-gray-200 cursor-not-allowed"
-                        : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-                      }`}
-                  >
-                    <FaPlus /> New
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            // If no MenuGroup is selected
-            isOpen && (
+              </>
+            ) : (
               <p className="text-gray-500">
                 Please select a Menu Group in Accordion2 so the Menu Items will
                 be displayed.
               </p>
-            )
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
 
-      {/* Confirm Insert */}
-      <DynamicConfirm
-        isOpen={confirmInsertOpen}
-        title="Insert Confirmation"
-        message="Are you sure you want to add this Menu Item?"
-        onConfirm={confirmInsert}
-        onClose={() => setConfirmInsertOpen(false)}
-        variant="add"
-      />
-
-      {/* Confirm Update */}
-      <DynamicConfirm
-        isOpen={confirmUpdateOpen}
-        title="Update Confirmation"
-        message="Are you sure you want to update this Menu Item?"
-        onConfirm={confirmUpdate}
-        onClose={() => setConfirmUpdateOpen(false)}
-        variant="edit"
-      />
-
-      {/* Confirm Delete */}
-      <DynamicConfirm
-        isOpen={confirmDeleteOpen}
-        title="Delete Confirmation"
-        message={`Are you sure you want to delete Menu Item "${selectedRow?.Name}"?`}
-        onConfirm={confirmDelete}
-        onClose={() => setConfirmDeleteOpen(false)}
-        variant="delete"
-      />
-
-      {/* Error message (only Name is required now) */}
-      <DynamicConfirm
-        isOpen={errorConfirmOpen}
-        title="Error"
-        message="Name is required."
-        onConfirm={closeErrorConfirm}
-        onClose={closeErrorConfirm}
-        variant="error"
-        hideCancelButton={true}
-      />
-
-      {/* ---- Windows App Command Modal ---- */}
-      <WindowsCommandSelectorModal
-        isOpen={commandModalOpen}
-        onClose={() => setCommandModalOpen(false)}
-        onSelect={handleSelectCommand}
-      />
-    </div>
+        {/* Confirm dialogs & Modal */}
+        <DynamicConfirm
+          isOpen={confirmInsertOpen}
+          title="Insert Confirmation"
+          message="Are you sure you want to add this Menu Item?"
+          onConfirm={confirmInsert}
+          onClose={() => setConfirmInsertOpen(false)}
+          variant="add"
+        />
+        <DynamicConfirm
+          isOpen={confirmUpdateOpen}
+          title="Update Confirmation"
+          message="Are you sure you want to update this Menu Item?"
+          onConfirm={confirmUpdate}
+          onClose={() => setConfirmUpdateOpen(false)}
+          variant="edit"
+        />
+        <DynamicConfirm
+          isOpen={confirmDeleteOpen}
+          title="Delete Confirmation"
+          message={`Are you sure you want to delete Menu Item "${selectedRow?.Name}"?`}
+          onConfirm={confirmDelete}
+          onClose={() => setConfirmDeleteOpen(false)}
+          variant="delete"
+        />
+        <DynamicConfirm
+          isOpen={errorConfirmOpen}
+          title="Error"
+          message="Name is required."
+          onConfirm={closeErrorConfirm}
+          onClose={closeErrorConfirm}
+          variant="error"
+          hideCancelButton={true}
+        />
+        <WindowsCommandSelectorModal
+          isOpen={commandModalOpen}
+          onClose={() => setCommandModalOpen(false)}
+          onSelect={handleSelectCommand}
+        />
+      </div>
+    </>
   );
+
 
 };
 

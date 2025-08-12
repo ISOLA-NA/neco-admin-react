@@ -738,90 +738,100 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     })),
   ];
 
-  return (
-    <div style={{ width: "100%", boxSizing: "border-box" }}>
-      <TwoColumnLayout>
-        <TwoColumnLayout.Item span={1}>
-          <DynamicInput
-            name="Name"
-            type="text"
-            value={formData.Name}
-            placeholder="Enter form name"
-            onChange={(e) => handleChange("Name", e.target.value)}
-            required={true}
-          />
-        </TwoColumnLayout.Item>
+   return (
+  <div style={{ width: "100%", boxSizing: "border-box" }} dir="rtl">
+    <style>{`.flex.items-center.space-x-2 { margin-right: 10px; }`}</style>
+    <TwoColumnLayout>
 
-        <TwoColumnLayout.Item span={1}>
-          <DynamicInput
-            name="Command"
-            type="text"
-            value={formData.Code}
-            placeholder="Enter command"
-            onChange={(e) => handleChange("Code", e.target.value)}
-          />
-        </TwoColumnLayout.Item>
+      {/* Name Field */}
+      <TwoColumnLayout.Item span={1}>
+        <DynamicInput
+          name="Name"
+          type="text"
+          value={formData.Name}
+          placeholder="Enter form name"
+          onChange={(e) => handleChange("Name", e.target.value)}
+          required
+        />
+      </TwoColumnLayout.Item>
 
-        <TwoColumnLayout.Item span={1}>
-          <DynamicSelector
-            options={catAOptions}
-            selectedValue={
-              formData.nEntityCateAID ? formData.nEntityCateAID.toString() : ""
+      {/* Command Field */}
+      <TwoColumnLayout.Item span={1}>
+        <DynamicInput
+          name="Command"
+          type="text"
+          value={formData.Code}
+          placeholder="Enter command"
+          onChange={(e) => handleChange("Code", e.target.value)}
+        />
+      </TwoColumnLayout.Item>
+
+      {/* Category A Selector */}
+      <TwoColumnLayout.Item span={1}>
+        <DynamicSelector
+          options={catAOptions}
+          selectedValue={formData.nEntityCateAID?.toString() || ""}
+          onChange={(e) =>
+            handleChange(
+              "nEntityCateAID",
+              e.target.value ? parseInt(e.target.value, 10) : null
+            )
+          }
+          label="Category A"
+          showButton
+          onButtonClick={() => handleOpenModal("A")}
+        />
+      </TwoColumnLayout.Item>
+
+      {/* Category B Selector */}
+      <TwoColumnLayout.Item span={1}>
+        <DynamicSelector
+          options={catBOptions}
+          selectedValue={formData.nEntityCateBID?.toString() || ""}
+          onChange={(e) =>
+            handleChange(
+              "nEntityCateBID",
+              e.target.value ? parseInt(e.target.value, 10) : null
+            )
+          }
+          label="Category B"
+          showButton
+          onButtonClick={() => handleOpenModal("B")}
+        />
+      </TwoColumnLayout.Item>
+
+      {/* IsDoc Switcher */}
+      <TwoColumnLayout.Item span={1}>
+        <DynamicSwitcher
+          isChecked={formData.IsDoc}
+          onChange={() => handleChange("IsDoc", !formData.IsDoc)}
+          leftLabel="Transmitaal"
+          rightLabel=""
+        />
+      </TwoColumnLayout.Item>
+
+      {/* IsMegaForm Switcher */}
+      <TwoColumnLayout.Item span={1}>
+        <DynamicSwitcher
+          isChecked={formData.IsMegaForm}
+          onChange={() => {
+            if (!isEditMode) {
+              handleChange("IsMegaForm", !formData.IsMegaForm);
             }
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              handleChange(
-                "nEntityCateAID",
-                e.target.value ? parseInt(e.target.value) : null
-              );
-            }}
-            label="Category A"
-            showButton={true}
-            onButtonClick={() => handleOpenModal("A")}
-          />
-        </TwoColumnLayout.Item>
+          }}
+          leftLabel="Is Mega Form"
+          rightLabel=""
+          disabled={isEditMode}
+        />
+      </TwoColumnLayout.Item>
 
-        <TwoColumnLayout.Item span={1}>
-          <DynamicSelector
-            options={catBOptions}
-            selectedValue={
-              formData.nEntityCateBID ? formData.nEntityCateBID.toString() : ""
-            }
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              handleChange(
-                "nEntityCateBID",
-                e.target.value ? parseInt(e.target.value) : null
-              );
-            }}
-            label="Category B"
-            showButton={true}
-            onButtonClick={() => handleOpenModal("B")}
-          />
-        </TwoColumnLayout.Item>
-
-        <TwoColumnLayout.Item span={1}>
-          <DynamicSwitcher
-            isChecked={formData.IsDoc}
-            onChange={() => handleChange("IsDoc", !formData.IsDoc)}
-            leftLabel="Transmitaal"
-            rightLabel=""
-          />
-        </TwoColumnLayout.Item>
-
-        <TwoColumnLayout.Item span={1}>
-          <DynamicSwitcher
-            isChecked={formData.IsMegaForm}
-            onChange={() => {
-              if (!isEditMode) {
-                handleChange("IsMegaForm", !formData.IsMegaForm);
-              }
-            }}
-            leftLabel="Is Mega Form"
-            rightLabel=""
-            disabled={isEditMode}
-          />
-        </TwoColumnLayout.Item>
-
-        <TwoColumnLayout.Item span={2} className="mt-5">
+      {/* Upload panel + ListSelector */}
+      <TwoColumnLayout.Item
+        span={2}
+        className="mt-5 flex items-center space-x-2 rtl:space-x-reverse"
+      >
+        {/* UploadFilesPanel container (half width) */}
+        <div className="w-1/2 flex space-x-2 rtl:space-x-reverse">
           <UploadFilesPanel
             onWordUpload={handleWordUpload}
             onExcelUpload={handleExcelUpload}
@@ -832,19 +842,19 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             onDownloadWord={handleDownloadWord}
             onDownloadExcel={handleDownloadExcel}
           />
-        </TwoColumnLayout.Item>
+        </div>
 
-        <TwoColumnLayout.Item span={1} className="mt-10">
+        {/* ListSelector (half width) */}
+        <div className="w-1/2">
           <ListSelector
             title="Related Projects"
             columnDefs={[{ field: "Name", headerName: "Project Name" }]}
             rowData={projectData}
             selectedIds={formData.ProjectsStr.split("|").filter(Boolean)}
-            onSelectionChange={(selectedIds) => {
-              const str = selectedIds.map(String).join("|") + "|";
-              handleChange("ProjectsStr", str);
-            }}
-            showSwitcher={true}
+            onSelectionChange={(ids) =>
+              handleChange("ProjectsStr", ids.map(String).join("|") + "|")
+            }
+            showSwitcher
             isGlobal={formData.IsGlobal}
             onGlobalChange={(val) => handleChange("IsGlobal", val)}
             className="-mt-5"
@@ -859,129 +869,118 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
               isSelectDisabled: !selectedRowData,
             }}
           />
-        </TwoColumnLayout.Item>
+        </div>
+      </TwoColumnLayout.Item>
 
-        {/* ───────── Two-ColumnLayout.Item: DataTable ───────── */}
-        <TwoColumnLayout.Item span={2}>
-          {/* ظرف بیرونی: اسکرول افقی */}
-          <div className="overflow-x-auto pb-2">
-            {/* ظرف درونی: اسکرول عمودی با ارتفاع ثابت */}
-            <div className="h-[400px] min-w-full flex flex-col justify-end">
-              <DataTable
-                columnDefs={newColumnDefs}
-                rowData={entityFields}
-                setSelectedRowData={setSelectedRowData}
-                gridOptions={{
-                  singleClickEdit: true,
-                  rowSelection: "single",
-                  onGridReady: (p) => {
-                    p.api.sizeColumnsToFit();
-                    window.addEventListener("resize", () =>
-                      p.api.sizeColumnsToFit()
-                    );
-                  },
-                }}
-                onCellValueChanged={handleCellValueChanged}
-                showAddIcon={true}
-                showEditIcon={true}
-                showDeleteIcon={true}
-                showViewIcon={true}
-                showDuplicateIcon={false}
-                onAdd={handleAddClick}
-                onEdit={() =>
-                  selectedRowData
-                    ? handleEditClick(selectedRowData)
-                    : showAlert(
-                      "error",
-                      undefined,
-                      "Error",
-                      "No row is selected!"
-                    )
+      {/* DataTable */}
+      <TwoColumnLayout.Item span={2}>
+        <div className="overflow-x-auto pb-2">
+          <div className="h-[400px] min-w-full flex flex-col justify-end">
+            <DataTable
+              columnDefs={newColumnDefs}
+              rowData={entityFields}
+              setSelectedRowData={setSelectedRowData}
+              gridOptions={{
+                singleClickEdit: true,
+                rowSelection: "single",
+                onGridReady: (p) => {
+                  p.api.sizeColumnsToFit();
+                  window.addEventListener("resize", () =>
+                    p.api.sizeColumnsToFit()
+                  );
+                },
+              }}
+              onCellValueChanged={handleCellValueChanged}
+              showAddIcon
+              showEditIcon
+              showDeleteIcon
+              showViewIcon
+              showDuplicateIcon={false}
+              onAdd={handleAddClick}
+              onEdit={() =>
+                selectedRowData
+                  ? handleEditClick(selectedRowData)
+                  : showAlert("error", undefined, "Error", "No row is selected!")
+              }
+              onDelete={async () => {
+                if (!selectedRowData) {
+                  showAlert(
+                    "error",
+                    undefined,
+                    "Error",
+                    "No row selected for deletion"
+                  );
+                  return;
                 }
-                onDelete={async () => {
-                  if (!selectedRowData) {
-                    showAlert(
-                      "error",
-                      undefined,
-                      "Error",
-                      "No row selected for deletion"
-                    );
-                    return;
-                  }
-                  try {
-                    await api.deleteEntityField(selectedRowData.ID);
-                    showAlert(
-                      "success",
-                      undefined,
-                      "Success",
-                      "Deleted successfully"
-                    );
-                    setSelectedRowData(null);
-                    refreshEntityFields();
-                  } catch {
-                    showAlert("error", undefined, "Error", "Delete failed!");
-                  }
-                }}
-                onView={() => setViewModalOpen(true)}
-                onRowDoubleClick={(row) => handleEditClick(row)}
-                domLayout="normal" 
-                showSearch={true}
-                isEditMode={isEditMode}
-                isLoading={isLoadingFields}
-              />
-            </div>
+                try {
+                  await api.deleteEntityField(selectedRowData.ID);
+                  showAlert(
+                    "success",
+                    undefined,
+                    "Success",
+                    "Deleted successfully"
+                  );
+                  setSelectedRowData(null);
+                  refreshEntityFields();
+                } catch {
+                  showAlert("error", undefined, "Error", "Delete failed!");
+                }
+              }}
+              onView={() => setViewModalOpen(true)}
+              onRowDoubleClick={(row) => handleEditClick(row)}
+              domLayout="normal"
+              showSearch
+              isEditMode={isEditMode}
+              isLoading={isLoadingFields}
+            />
           </div>
-        </TwoColumnLayout.Item>
-      </TwoColumnLayout>
+        </div>
+      </TwoColumnLayout.Item>
+    </TwoColumnLayout>
 
-      {/* مدال انتخاب Category A / B */}
-      <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
-        <TableSelector
-          columnDefs={[{ headerName: "Name", field: "label" }]}
-          rowData={
-            currentSelector === "A"
-              ? catAOptions.map((opt) => ({
-                value: opt.value,
-                label: opt.label,
-              }))
-              : currentSelector === "B"
-                ? catBOptions.map((opt) => ({
-                  value: opt.value,
-                  label: opt.label,
-                }))
-                : []
-          }
-          onRowClick={handleRowClick}
-          onRowDoubleClick={handleSelectButtonClick}
-          onSelectButtonClick={handleSelectButtonClick}
-          isSelectDisabled={!selectedRowData}
-        />
-      </DynamicModal>
-
-      {/* مدال افزودن/ویرایش فیلد */}
-      <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
-        <AddColumnForm
-          key={addModalKey}
-          existingData={editingData}
-          isEdit={!!editingData}
-          entityTypeId={formData.ID}
-          onClose={handleAddModalClose}
-          onSave={() => {
-            refreshEntityFields();
-            handleAddModalClose();
-          }}
-        />
-      </DynamicModal>
-
-      {/* مدال نمایش فرم ساخته‌شده */}
-      <FormGeneratorView
-        isOpen={viewModalOpen}
-        onClose={() => setViewModalOpen(false)}
-        entityFields={entityFields}
-        selectedRow={selectedRow}
+    {/* Category A/B Modal */}
+    <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
+      <TableSelector
+        columnDefs={[{ headerName: "Name", field: "label" }]}
+        rowData={
+          currentSelector === "A"
+            ? catAOptions.map((opt) => ({ value: opt.value, label: opt.label }))
+            : currentSelector === "B"
+            ? catBOptions.map((opt) => ({ value: opt.value, label: opt.label }))
+            : []
+        }
+        onRowClick={handleRowClick}
+        onRowDoubleClick={handleSelectButtonClick}
+        onSelectButtonClick={handleSelectButtonClick}
+        isSelectDisabled={!selectedRowData}
       />
-    </div>
-  );
+    </DynamicModal>
+
+    {/* Add/Edit Field Modal */}
+    <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
+      <AddColumnForm
+        key={addModalKey}
+        existingData={editingData}
+        isEdit={!!editingData}
+        entityTypeId={formData.ID}
+        onClose={handleAddModalClose}
+        onSave={() => {
+          refreshEntityFields();
+          handleAddModalClose();
+        }}
+      />
+    </DynamicModal>
+
+    {/* Form Generator View Modal */}
+    <FormGeneratorView
+      isOpen={viewModalOpen}
+      onClose={() => setViewModalOpen(false)}
+      entityFields={entityFields}
+      selectedRow={selectedRow}
+    />
+  </div>
+);
+
 });
 
 FormsCommand1.displayName = "FormsCommand1";
