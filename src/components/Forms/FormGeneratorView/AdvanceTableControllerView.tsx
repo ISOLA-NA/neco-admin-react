@@ -1,7 +1,6 @@
 // src/components/AdvanceTableControllerView.tsx
 import React, { useState } from "react";
 import DataTable from "../../TableDynamic/DataTable";
-import { FiPlus, FiEdit, FiTrash2 } from "react-icons/fi";
 
 interface AdvanceTableControllerViewProps {
   initialRows?: any[];
@@ -33,7 +32,7 @@ const AdvanceTableControllerView: React.FC<AdvanceTableControllerViewProps> = ({
 
   const handleEdit = () => {
     if (!selectedRow) return;
-    // به عنوان نمونه، مقدار ردیف انتخاب‌شده را ویرایش می‌کنیم
+    // نمونه: مقدار ردیف انتخاب‌شده را ویرایش می‌کنیم
     const updatedRows = rowData.map((row) =>
       row.ID === selectedRow.ID ? { ...row, Name: row.Name + " (Edited)" } : row
     );
@@ -56,52 +55,25 @@ const AdvanceTableControllerView: React.FC<AdvanceTableControllerViewProps> = ({
         </div>
       )}
 
-      {/* Toolbar */}
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={handleAdd}
-          className="text-green-600 hover:text-green-800"
-          title="Add"
-        >
-          <FiPlus size={20} />
-        </button>
-        <button
-          onClick={handleEdit}
-          className={`text-blue-600 hover:text-blue-800 ${
-            !selectedRow ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          title="Edit"
-          disabled={!selectedRow}
-        >
-          <FiEdit size={20} />
-        </button>
-        <button
-          onClick={handleDelete}
-          className={`text-red-600 hover:text-red-800 ${
-            !selectedRow ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          title="Delete"
-          disabled={!selectedRow}
-        >
-          <FiTrash2 size={20} />
-        </button>
-      </div>
-
-      {/* جدول با ارتفاع کوچک */}
-      <div className="ag-theme-quartz h-40">
+      {/* جدول با دکمه‌های داخلی خود DataTable */}
+      <div className="ag-theme-quartz h-60">
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
           onRowDoubleClick={() => {}}
+          // برای اینکه دکمه‌های داخلی بدانند کدام ردیف انتخاب است
           setSelectedRowData={setSelectedRow}
-          showDuplicateIcon={false}
-          showEditIcon={false}
-          showAddIcon={false}
-          showDeleteIcon={false}
-          onAdd={() => {}}
-          onEdit={() => {}}
-          onDelete={() => {}}
+          // نمایش آیکن‌های داخلی جدول
+          showAddIcon={true}
+          showEditIcon={true}
+          showDeleteIcon={true}
+          showDuplicateIcon={false} // در صورت نیاز می‌توانید true کنید و onDuplicate اضافه کنید
+          // اتصال هندلرها به دکمه‌های داخلی
+          onAdd={handleAdd}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
           onDuplicate={() => {}}
+          // سایر تنظیمات
           domLayout="autoHeight"
           showSearch={false}
           showAddNew={false}

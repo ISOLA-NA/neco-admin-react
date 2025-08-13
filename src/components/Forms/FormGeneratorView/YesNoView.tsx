@@ -6,20 +6,26 @@ interface YesNoViewProps {
     metaType1?: "yes" | "no";
     DisplayName?: string;
   };
+  /** در صورت نیاز می‌تونی جهت رو هم مستقیماً بدی؛ پیش‌فرض از والد می‌گیره */
+  dir?: "ltr" | "rtl";
 }
 
-const YesNoView: React.FC<YesNoViewProps> = ({ data }) => {
+const YesNoView: React.FC<YesNoViewProps> = ({ data, dir }) => {
   const selected = data?.metaType1 || "yes";
 
   return (
-    <div className="p-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg flex items-center">
+    <div
+      dir={dir}
+      className="p-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg flex items-center gap-4"
+    >
       {data?.DisplayName && (
-        <span className="mr-4 text-sm font-medium text-gray-700">
+        <span className="text-sm font-medium text-gray-700">
           {data.DisplayName}
         </span>
       )}
-      <div className="flex items-center space-x-4">
-        <label className="flex items-center space-x-1">
+
+      <div className="flex items-center gap-4">
+        <label className="flex items-center gap-1">
           <input
             type="radio"
             name="yesnoView"
@@ -27,10 +33,12 @@ const YesNoView: React.FC<YesNoViewProps> = ({ data }) => {
             checked={selected === "yes"}
             disabled
             className="appearance-none w-4 h-4 rounded-full border-2 border-purple-500 checked:bg-purple-500"
+            readOnly
           />
           <span className="text-gray-800">Yes</span>
         </label>
-        <label className="flex items-center space-x-1">
+
+        <label className="flex items-center gap-1">
           <input
             type="radio"
             name="yesnoView"
@@ -38,6 +46,7 @@ const YesNoView: React.FC<YesNoViewProps> = ({ data }) => {
             checked={selected === "no"}
             disabled
             className="appearance-none w-4 h-4 rounded-full border-2 border-purple-500 checked:bg-purple-500"
+            readOnly
           />
           <span className="text-gray-800">No</span>
         </label>
