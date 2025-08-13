@@ -738,7 +738,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     })),
   ];
 
-   return (
+  return (
   <div style={{ width: "100%", boxSizing: "border-box" }}>
     <TwoColumnLayout>
 
@@ -827,10 +827,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       {/* Upload panel + ListSelector */}
       <TwoColumnLayout.Item
         span={2}
-        className="mt-5 flex items-center space-x-2 rtl:space-x-reverse"
+        className="mt-5 flex items-start gap-4"
       >
         {/* UploadFilesPanel container (half width) */}
-        <div className="w-1/2 flex space-x-2 rtl:space-x-reverse">
+        <div className="w-1/2 flex flex-wrap items-center gap-2 min-w-0">
           <UploadFilesPanel
             onWordUpload={handleWordUpload}
             onExcelUpload={handleExcelUpload}
@@ -856,7 +856,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             showSwitcher
             isGlobal={formData.IsGlobal}
             onGlobalChange={(val) => handleChange("IsGlobal", val)}
-            className="-mt-5"
+            /* className="-mt-5" حذف شد */
             ModalContentComponent={TableSelector}
             modalContentProps={{
               columnDefs: [{ headerName: "Project Name", field: "Name" }],
@@ -979,6 +979,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     />
   </div>
 );
+
 
 });
 
