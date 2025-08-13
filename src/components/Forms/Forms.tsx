@@ -739,8 +739,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   ];
 
    return (
-  <div style={{ width: "100%", boxSizing: "border-box" }} dir="rtl">
-    <style>{`.flex.items-center.space-x-2 { margin-right: 10px; }`}</style>
+  <div style={{ width: "100%", boxSizing: "border-box" }}>
     <TwoColumnLayout>
 
       {/* Name Field */}

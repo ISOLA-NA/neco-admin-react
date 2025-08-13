@@ -505,16 +505,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     "component16", // Table
   ];
 
- return (
+  return (
   <div className="flex items-center justify-center">
-    {/* only apply these in RTL */}
     <style>{`
-      [dir="rtl"] label.ml-3.text-gray-700.font-medium {
-        margin-right: 8px;
-      }
-      [dir="rtl"] .button-group > button {
-        margin-inline-start: 8px;
-      }
+      /* در RTL، فاصله‌ی labelهایی که ml-3 دارند از راست اعمال شود */
+      [dir="rtl"] label.ml-3 { margin-right: .75rem; margin-left: 0; }
     `}</style>
 
     {isLoading && (
@@ -522,10 +517,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
       </div>
     )}
+
     <div className="w-full max-w-3xl bg-white rounded-lg">
       <h2 className="text-3xl font-bold mb-6 text-center">
         {isEdit ? "Edit Column" : "Add New Column"}
       </h2>
+
       <form
         className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
         onSubmit={handleSubmit}
@@ -561,7 +558,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           className="md:col-span-1 -mt-3"
         />
 
-        {/* Command selector */}
+        {/* Command */}
         <DynamicSelector
           name="command"
           options={commandOptions}
@@ -582,15 +579,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
             className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
           />
-          <label
-            htmlFor="isRequiredInWf"
-            className="ml-3 text-gray-700 font-medium"
-          >
+          <label htmlFor="isRequiredInWf" className="ml-3 text-gray-700 font-medium">
             Is Required In Wf
           </label>
         </div>
 
-        {/* Print Code */}
         <DynamicInput
           name="Print Code"
           type="text"
@@ -601,36 +594,31 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         />
 
         {/* Editable in Workflow, Workflow Box, Show in Alert */}
-        <div className="md:col-span-2 flex flex-col space-y-4">
-          <div className="flex items-center space-x-4">
+        <div className="md:col-span-2 flex flex-col gap-4">
+          <div className="flex items-center gap-4">
             <div className="flex items-center translate-y-[10px]">
               <input
                 type="checkbox"
                 id="isEditableInWf"
                 name="isEditableInWf"
                 checked={formData.isEditableInWf}
-                onChange={(e) =>
-                  handleChange("isEditableInWf", e.target.checked)
-                }
+                onChange={(e) => handleChange("isEditableInWf", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="isEditableInWf"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="isEditableInWf" className="ml-3 text-gray-700 font-medium">
                 Is Editable in Workflow
               </label>
             </div>
+
             <DynamicInput
               name="Allowed WfBox Name"
               type="text"
               value={formData.allowedWfBoxName}
               placeholder=""
-              onChange={(e) =>
-                handleChange("allowedWfBoxName", e.target.value)
-              }
+              onChange={(e) => handleChange("allowedWfBoxName", e.target.value)}
               className="flex-1"
             />
+
             <div className="flex items-center translate-y-[10px]">
               <input
                 type="checkbox"
@@ -640,10 +628,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("showInAlert", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="showInAlert"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="showInAlert" className="ml-3 text-gray-700 font-medium">
                 Show in Alert
               </label>
             </div>
@@ -661,8 +646,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           disabled={isEdit}
         />
 
-        {/* Checkboxes row */}
-        <div className="flex flex-wrap md:col-span-2 space-x-4">
+        {/* checkbox row */}
+        <div className="flex flex-wrap md:col-span-2 gap-4">
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -676,6 +661,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               Required
             </label>
           </div>
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -689,6 +675,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               Main Columns
             </label>
           </div>
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -702,6 +689,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               Show in List
             </label>
           </div>
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -732,8 +720,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           </label>
         </div>
 
-        {/* Read Only, Show in Tab, Program Meta Column Name */}
-        <div className="flex flex-wrap md:col-span-2 space-x-4 items-center">
+        {/* Read Only / Show in Tab / Program Meta Column Name */}
+        <div className="flex flex-wrap md:col-span-2 gap-4 items-center">
           <div className="flex items-center translate-y-[10px]">
             <input
               type="checkbox"
@@ -747,6 +735,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               Read Only
             </label>
           </div>
+
           <DynamicInput
             name="Show in Tab"
             type="text"
@@ -755,6 +744,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             placeholder=""
             className="flex-1"
           />
+
           {!hiddenTypesForProgramMeta.includes(formData.typeOfInformation) && (
             <DynamicInput
               name="Program Meta ColumnName"
@@ -774,29 +764,40 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         {/* Dynamic controller */}
         <div className="md:col-span-2">{renderSelectedComponent()}</div>
 
-        {/* Buttons */}
-        <div className="md:col-span-2 flex justify-center button-group">
+        {/* Actions */}
+        <div className="md:col-span-2 flex justify-center gap-6">
           <button
             type="button"
             className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
             onClick={() => {
-              setFormData(getInitialFormData());
-              setMetaCore({
-                metaType1: "",
-                metaType2: null,
-                metaType3: null,
-                LookupMode: null,
-                oldLookup: false,
-                metaType5: null,
-                metaTypeJson: null,
+              setFormData({
+                formName: "",
+                order: "",
+                description: "",
+                command: "",
+                isRequiredInWf: false,
+                printCode: "",
+                isEditableInWf: false,
+                allowedWfBoxName: "",
+                showInAlert: false,
+                typeOfInformation: "component1",
+                required: false,
+                mainColumns: false,
+                showInListView: false,
+                rightToLeft: false,
+                readOnly: false,
+                metaColumnName: "",
+                showInTab: "",
+                countInReject: false,
               });
-              setMetaExtra({ metaType4: "" });
+              setDynamicMeta({});
               setErrors({});
               onClose();
             }}
           >
             Cancel
           </button>
+
           <button
             type="submit"
             className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${
@@ -804,20 +805,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             }`}
             disabled={isLoading}
           >
-            {isLoading
-              ? isEdit
-                ? "Updating..."
-                : "Adding..."
-              : isEdit
-              ? "Update Column"
-              : "Add Column"}
+            {isLoading ? (isEdit ? "Updating..." : "Adding...") : (isEdit ? "Update Column" : "Add Column")}
           </button>
         </div>
       </form>
     </div>
   </div>
 );
-
 
 };
 
