@@ -1,0 +1,17 @@
+{
+    "Configuration": {
+      "Name": "نام",
+      "Description": "توضیحات",
+      "ProgramTemplate": "قالب برنامه",
+      "DefaultRibbon": "منو پیش فرض",
+      "LessonLearnedForm": "قالب جریان آموزش",
+      "LessonLearnedAfTemplate": "قالب فرم آموزش",
+      "CommentFormTemplate": "قالب فرم نظر",
+      "ProcedureFormTemplate": "قالب فرم روند کار",
+      "DefaultActionButtons": "دکمه پیش فرض",
+      "LetterActionButtons": "دکمه نامه",
+      "MeetingActionButtons": "دکمه های جلسه",
+      "NoItemSelected": "موردی انتخاب نشده است"
+    }
+  }
+  

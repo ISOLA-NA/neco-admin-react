@@ -1,0 +1,17 @@
+{
+    "Configuration": {
+      "Name": "Name",
+      "Description": "Description",
+      "ProgramTemplate": "Program Template",
+      "DefaultRibbon": "Default Ribbon",
+      "LessonLearnedForm": "Lesson Learned Form",
+      "LessonLearnedAfTemplate": "Lesson Learned Af Template",
+      "CommentFormTemplate": "Comment Form Template",
+      "ProcedureFormTemplate": "Procedure Form Template",
+      "DefaultActionButtons": "Default Action Buttons",
+      "LetterActionButtons": "Letter Action Buttons",
+      "MeetingActionButtons": "Meeting Action Buttons",
+      "NoItemSelected": "No item is selected"
+    }
+  }
+  
