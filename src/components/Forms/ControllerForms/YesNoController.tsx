@@ -1,10 +1,9 @@
-// src/components/ControllerForms/YesNoController.tsx
 import React, { useState, useEffect } from "react";
 
 interface YesNoProps {
   defaultValue?: "yes" | "no";
   onMetaChange: (meta: { metaType1: "yes" | "no" }) => void;
-  data?: { metaType1?: "yes" | "no" }; // داده‌های مربوط به حالت ویرایش
+  data?: { metaType1?: "yes" | "no" };
 }
 
 const YesNo: React.FC<YesNoProps> = ({
@@ -12,7 +11,7 @@ const YesNo: React.FC<YesNoProps> = ({
   onMetaChange,
   data,
 }) => {
-  // مقدار اولیه: اگر در data مقدار بود، همان، وگرنه مقدار پیشفرض
+  // تعیین مقدار اولیه
   const getInitialValue = () => {
     if (data && (data.metaType1 === "yes" || data.metaType1 === "no")) {
       return data.metaType1;
@@ -22,7 +21,7 @@ const YesNo: React.FC<YesNoProps> = ({
 
   const [selected, setSelected] = useState<"yes" | "no">(getInitialValue());
 
-  // هر وقت مقدار data تغییر کرد یا ورودی‌های جدید اومد، مقدار state هم sync شود
+  // سینک کردن مقدار state با تغییر props
   useEffect(() => {
     const newValue = getInitialValue();
     setSelected(newValue);
@@ -37,9 +36,9 @@ const YesNo: React.FC<YesNoProps> = ({
 
   return (
     <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex items-center justify-center">
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center gap-4">
         <span className="text-gray-700 font-medium">Default value:</span>
-        <label className="flex items-center space-x-1 cursor-pointer">
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="radio"
             name="yesno"
@@ -50,7 +49,7 @@ const YesNo: React.FC<YesNoProps> = ({
           />
           <span className="text-gray-800">Yes</span>
         </label>
-        <label className="flex items-center space-x-1 cursor-pointer">
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="radio"
             name="yesno"

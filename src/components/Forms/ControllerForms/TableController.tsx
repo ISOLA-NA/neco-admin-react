@@ -129,80 +129,89 @@ const TableController: React.FC<TableControllerProps> = ({ onMetaChange, data = 
   };
 
   /* ---------- UI ---------- */
-  return (
-    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center">
-      <div className="p-4 w-full max-w-xl">
-        {/* Fix Row */}
-        <div className="flex items-center space-x-4 mb-4">
-          <label className="flex items-center space-x-2">
+ return (
+  <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center">
+    <div className="p-4 w-full max-w-xl">
+      {/* Fix Row */}
+      <div className="mb-4">
+        <div className="flex flex-nowrap items-center gap-4">
+          <label className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap">
             <input
               type="checkbox"
               checked={isRowFixed}
               onChange={(e) => setIsRowFixed(e.target.checked)}
             />
-            <span>Fix Row</span>
+            <span className="whitespace-nowrap">Fix&nbsp;Row</span>
           </label>
-          <DynamicInput
-            name="FixRowValue"
-            type="number"
-            value={fixRowValue}
-            onChange={(e) => setFixRowValue(e.target.value)}
-          />
-        </div>
 
-        {/* textarea for headers */}
-        <CustomTextarea
-          name="columnTitles"
-          value={headerInput}
-          onChange={(e) => setHeaderInput(e.target.value)}
-          placeholder="Enter each header on a new line"
-          rows={headerInput.split("\n").length || 1}
-        />
-
-        <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          onClick={openModal}
-          type="button"
-        >
-          Def Val
-        </button>
-
-        {/* modal */}
-        <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <h2 className="text-lg font-bold mb-4">Dynamic Table</h2>
-          <div style={{ height: 400, overflow: "auto" }}>
-            <DataTable
-              columnDefs={columnDefs}
-              rowData={tableData}
-              onCellValueChanged={handleCellChange}
-              domLayout="autoHeight"
-              showAddIcon={false}
-              showEditIcon={false}
-              showDeleteIcon={false}
-              showDuplicateIcon={false}
-              showSearch={false}
+          {/* اگر DynamicInput کلاس نمی‌گیرد، همین دیو بیرونی کافیست */}
+          <div className="shrink-0">
+            <DynamicInput
+              name="FixRowValue"
+              type="number"
+              value={fixRowValue}
+              onChange={(e) => setFixRowValue(e.target.value)}
+              /* اگر پشتیبانی می‌کند مفید است: className="w-24" */
             />
-            <div className="flex flex-col space-y-2 mt-4">
-              <button
-                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-                onClick={handleAddRow}
-                type="button"
-              >
-                Add New
-              </button>
-              <button
-                className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
-                onClick={() => setIsModalOpen(false)}
-                type="button"
-              >
-                Save
-              </button>
-            </div>
           </div>
-        </DynamicModal>
+        </div>
       </div>
+
+      {/* textarea for headers */}
+      <CustomTextarea
+        name="columnTitles"
+        value={headerInput}
+        onChange={(e) => setHeaderInput(e.target.value)}
+        placeholder="Enter each header on a new line"
+        rows={headerInput.split("\n").length || 1}
+      />
+
+      <button
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        onClick={openModal}
+        type="button"
+      >
+        Def Val
+      </button>
+
+      {/* modal */}
+      <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h2 className="text-lg font-bold mb-4">Dynamic Table</h2>
+        <div style={{ height: 400, overflow: "auto" }}>
+          <DataTable
+            columnDefs={columnDefs}
+            rowData={tableData}
+            onCellValueChanged={handleCellChange}
+            domLayout="autoHeight"
+            showAddIcon={false}
+            showEditIcon={false}
+            showDeleteIcon={false}
+            showDuplicateIcon={false}
+            showSearch={false}
+          />
+          <div className="flex flex-col space-y-2 mt-4">
+            <button
+              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+              onClick={handleAddRow}
+              type="button"
+            >
+              Add New
+            </button>
+            <button
+              className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+              onClick={() => setIsModalOpen(false)}
+              type="button"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </DynamicModal>
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default TableController;

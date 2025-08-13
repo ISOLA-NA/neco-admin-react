@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import DynamicInput    from "../../utilities/DynamicInput";
 import CustomTextarea  from "../../utilities/DynamicTextArea";
@@ -35,12 +34,10 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
       setMetaType3(data.metaType3 ?? "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.metaType1, data?.metaType2, data?.metaType3]); // وابستگی به مقادیر ساده
+  }, [data?.metaType1, data?.metaType2, data?.metaType3]);
 
   /* ─── Inform parent only when values really change ─── */
-  const lastSentRef = useRef<{ metaType1: string; metaType2: string; metaType3: string } | null>(
-    null
-  );
+  const lastSentRef = useRef<{ metaType1: string; metaType2: string; metaType3: string } | null>(null);
 
   useEffect(() => {
     const current = { metaType1, metaType2, metaType3 };
@@ -57,16 +54,30 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
 
   /* ─────────────────── Render ─────────────────── */
   return (
-    <div className="p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg space-y-4">
+    <div className="choice-controller p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg space-y-4">
+      <style>
+        {`
+          /* فاصله‌ی 3px برای همه spanها فقط داخل همین کامپوننت در حالت RTL */
+          [dir="rtl"] .choice-controller span { margin-right: 3px; }
+
+          /* بهبود دسترسی و تمرکز روی رادیو/چک‌باکس‌ها (اختیاری) */
+          .choice-controller input[type="radio"],
+          .choice-controller input[type="checkbox"] {
+            accent-color: #9333ea; /* مشابه text-purple-600 */
+          }
+        `}
+      </style>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* نوع نمایش گزینه‌ها */}
         <div>
-          <div className="mb-2 font-medium text-gray-700">
-            Display choices using:
-          </div>
+          <div className="mb-2 font-medium text-gray-700">Display choices using:</div>
           <div className="space-y-2">
             {(["drop", "radio", "check"] as const).map((mode) => (
-              <label key={mode} className="flex items-center space-x-2">
+              <label
+                key={mode}
+                className="flex items-center gap-2 cursor-pointer select-none"
+              >
                 <input
                   type="radio"
                   name="metaType2"
@@ -77,7 +88,7 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
                 />
                 <span>
                   {mode === "drop"
-                    ? "Drop‑Down Menu"
+                    ? "Drop-Down Menu"
                     : mode === "radio"
                     ? "Radio Buttons"
                     : "Check Box"}
@@ -89,9 +100,7 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
 
         {/* فهرست گزینه‌ها + مقدار پیش‌فرض */}
         <div>
-          <div className="mb-2 font-medium text-gray-700">
-            Type each choice on a separate line:
-          </div>
+          <div className="mb-2 font-medium text-gray-700">Type each choice on a separate line:</div>
           <CustomTextarea
             name="metaType3"
             value={metaType3}

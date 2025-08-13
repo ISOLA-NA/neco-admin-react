@@ -263,274 +263,279 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
 
   // رندر کامل
   return (
-    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
-      {/* انتخاب فرمت */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          فرمت تاریخ و زمان:
+  <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
+    {/* انتخاب فرمت */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        فرمت تاریخ و زمان:
+      </label>
+      <div className="flex gap-6">
+        <label className="inline-flex items-center gap-2">
+          <input
+            type="radio"
+            name="format"
+            value="dateOnly"
+            checked={format === "dateOnly"}
+            onChange={() => handleFormatChange("dateOnly")}
+            className="form-radio text-blue-600 h-4 w-4"
+          />
+          <span className="text-gray-700">فقط تاریخ</span>
         </label>
-        <div className="flex space-x-6">
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="format"
-              value="dateOnly"
-              checked={format === "dateOnly"}
-              onChange={() => handleFormatChange("dateOnly")}
-              className="form-radio text-blue-600 h-4 w-4"
-            />
-            <span className="ml-2 text-gray-700">فقط تاریخ</span>
-          </label>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="format"
-              value="dateTime"
-              checked={format === "dateTime"}
-              onChange={() => handleFormatChange("dateTime")}
-              className="form-radio text-blue-600 h-4 w-4"
-            />
-            <span className="ml-2 text-gray-700">تاریخ و ساعت</span>
-          </label>
-        </div>
+        <label className="inline-flex items-center gap-2">
+          <input
+            type="radio"
+            name="format"
+            value="dateTime"
+            checked={format === "dateTime"}
+            onChange={() => handleFormatChange("dateTime")}
+            className="form-radio text-blue-600 h-4 w-4"
+          />
+          <span className="text-gray-700">تاریخ و ساعت</span>
+        </label>
       </div>
-      {/* انتخاب مقدار پیش‌فرض */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          مقدار پیش‌فرض:
+    </div>
+
+    {/* انتخاب مقدار پیش‌فرض */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        مقدار پیش‌فرض:
+      </label>
+      <div className="space-y-4">
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="defaultValue"
+            value="none"
+            checked={defaultValue === "none"}
+            onChange={() => handleDefaultValueChange("none")}
+            className="form-radio text-blue-600 h-4 w-4"
+          />
+          <span className="text-gray-700">هیچ‌کدام</span>
         </label>
-        <div className="space-y-4">
-          <label className="flex items-center space-x-2">
+
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2">
             <input
               type="radio"
               name="defaultValue"
-              value="none"
-              checked={defaultValue === "none"}
-              onChange={() => handleDefaultValueChange("none")}
+              value="today"
+              checked={defaultValue === "today"}
+              onChange={() => handleDefaultValueChange("today")}
               className="form-radio text-blue-600 h-4 w-4"
             />
-            <span className="text-gray-700">هیچ‌کدام</span>
+            <span className="text-gray-700">امروز</span>
           </label>
-          <div className="flex items-center space-x-2">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="defaultValue"
-                value="today"
-                checked={defaultValue === "today"}
-                onChange={() => handleDefaultValueChange("today")}
-                className="form-radio text-blue-600 h-4 w-4"
-              />
-              <span className="text-gray-700">امروز</span>
-            </label>
-            <label className="flex items-center space-x-1">
-              <input
-                type="checkbox"
-                name="isDynamic"
-                checked={isDynamic}
-                onChange={handleDynamicChange}
-                disabled={defaultValue !== "today"}
-                className="form-checkbox text-blue-600 h-4 w-4"
-              />
-              <span className="text-gray-700">داینامیک</span>
-            </label>
-          </div>
+
+          <label className="flex items-center gap-1">
+            <input
+              type="checkbox"
+              name="isDynamic"
+              checked={isDynamic}
+              onChange={handleDynamicChange}
+              disabled={defaultValue !== "today"}
+              className="form-checkbox text-blue-600 h-4 w-4"
+            />
+            <span className="text-gray-700">داینامیک</span>
+          </label>
         </div>
       </div>
-      {/* انتخاب تاریخ و زمان */}
-      <div className="flex items-center space-x-6">
-        <label className="flex items-center space-x-2">
+    </div>
+
+    {/* انتخاب تاریخ و زمان */}
+    <div className="flex items-center gap-6">
+      <label className="flex items-center gap-2">
+        <input
+          type="radio"
+          name="dateOption"
+          value="dateOption1"
+          className="form-radio text-blue-600 h-4 w-4"
+          checked={defaultValue === "selected"}
+          onChange={() => {
+            setIsDateModalOpen(true);
+            handleDefaultValueChange("selected");
+          }}
+        />
+        <div className="relative w-64">
           <input
-            type="radio"
-            name="dateOption"
-            value="dateOption1"
-            className="form-radio text-blue-600 h-4 w-4"
-            checked={defaultValue === "selected"}
-            onChange={() => {
+            type="button"
+            value={selectedDate ? formatPersian(selectedDate) : ""}
+            onClick={() => {
               setIsDateModalOpen(true);
               handleDefaultValueChange("selected");
             }}
-          />
-          <div className="relative w-64">
-            <input
-              type="button"
-              value={selectedDate ? formatPersian(selectedDate) : ""}
-              onClick={() => {
-                setIsDateModalOpen(true);
-                handleDefaultValueChange("selected");
-              }}
-              placeholder="تاریخ را انتخاب کنید"
-              className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
-                         cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              readOnly
-            />
-            <FaCalendarAlt
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-              onClick={() => {
-                setIsDateModalOpen(true);
-                handleDefaultValueChange("selected");
-              }}
-            />
-          </div>
-        </label>
-        {/* اینپوت ساعت همیشه فعال */}
-        <div className="relative w-48">
-          <input
-            type="text"
-            value={
-              selectedTime.hours || selectedTime.minutes || selectedTime.seconds
-                ? `${selectedTime.hours.padStart(
-                    2,
-                    "0"
-                  )}:${selectedTime.minutes.padStart(
-                    2,
-                    "0"
-                  )}:${selectedTime.seconds.padStart(2, "0")}`
-                : ""
-            }
-            onClick={() => setIsTimeModalOpen(true)}
-            placeholder="ساعت را انتخاب کنید"
+            placeholder="تاریخ را انتخاب کنید"
             className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
                        cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             readOnly
           />
-          <FaClock
+          <FaCalendarAlt
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-            onClick={() => setIsTimeModalOpen(true)}
+            onClick={() => {
+              setIsDateModalOpen(true);
+              handleDefaultValueChange("selected");
+            }}
           />
         </div>
-      </div>
-      {/* مودال انتخاب تاریخ */}
-      <DynamicModal
-        isOpen={isDateModalOpen}
-        onClose={() => {
-          if (tempSelectedDate) {
-            setSelectedDate(tempSelectedDate);
-            setDefaultValue("selected");
-            setUserTouched(true);
+      </label>
+
+      {/* ورودی ساعت */}
+      <div className="relative w-48">
+        <input
+          type="text"
+          value={
+            selectedTime.hours || selectedTime.minutes || selectedTime.seconds
+              ? `${selectedTime.hours.padStart(2, "0")}:${selectedTime.minutes.padStart(
+                  2,
+                  "0"
+                )}:${selectedTime.seconds.padStart(2, "0")}`
+              : ""
           }
-          setIsDateModalOpen(false);
-        }}
-      >
-        <PersianDatePicker
-          selectedDate={tempSelectedDate}
-          onDateChange={handleDateChange}
-          selectedMonth={selectedMonth}
-          setSelectedMonth={setSelectedMonth}
-          selectedYear={selectedYear}
-          setSelectedYear={setSelectedYear}
+          onClick={() => setIsTimeModalOpen(true)}
+          placeholder="ساعت را انتخاب کنید"
+          className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
+                     cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          readOnly
         />
+        <FaClock
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+          onClick={() => setIsTimeModalOpen(true)}
+        />
+      </div>
+    </div>
+
+    {/* مودال انتخاب تاریخ */}
+    <DynamicModal
+      isOpen={isDateModalOpen}
+      onClose={() => {
+        if (tempSelectedDate) {
+          setSelectedDate(tempSelectedDate);
+          setDefaultValue("selected");
+          setUserTouched(true);
+        }
+        setIsDateModalOpen(false);
+      }}
+    >
+      <PersianDatePicker
+        selectedDate={tempSelectedDate}
+        onDateChange={handleDateChange}
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+      />
+      <div className="flex justify-center mt-6">
+        <button
+          type="button"
+          onClick={handleSelectDate}
+          className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
+                     focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          انتخاب تاریخ
+        </button>
+      </div>
+    </DynamicModal>
+
+    {/* مودال انتخاب ساعت */}
+    <DynamicModal
+      isOpen={isTimeModalOpen}
+      onClose={() => {
+        if (tempSelectedTime) {
+          setSelectedTime(tempSelectedTime);
+          setUserTouched(true);
+        }
+        setIsTimeModalOpen(false);
+      }}
+    >
+      <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+        <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
+          انتخاب ساعت
+        </h2>
+        {tempSelectedTime.hours ||
+        tempSelectedTime.minutes ||
+        tempSelectedTime.seconds ? (
+          <div className="mb-4 text-center">
+            <span className="text-lg font-medium text-pink-600">
+              {formatTime(tempSelectedTime)}
+            </span>
+          </div>
+        ) : (
+          <div className="mb-4 text-center">
+            <span className="text-lg font-medium text-gray-500">
+              ساعت انتخاب نشده
+            </span>
+          </div>
+        )}
+        <div className="flex justify-center gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+              HH
+            </label>
+            <input
+              type="text"
+              name="hours"
+              value={tempSelectedTime.hours}
+              onChange={handleTimeInputChange}
+              onKeyDown={(e) => handleTimeKeyDown(e, minuteRef)}
+              ref={hourRef}
+              placeholder="00"
+              maxLength={2}
+              className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              onBlur={() => setSelectedTime(tempSelectedTime)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+              MM
+            </label>
+            <input
+              type="text"
+              name="minutes"
+              value={tempSelectedTime.minutes}
+              onChange={handleTimeInputChange}
+              onKeyDown={(e) => handleTimeKeyDown(e, secondRef)}
+              ref={minuteRef}
+              placeholder="00"
+              maxLength={2}
+              className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              onBlur={() => setSelectedTime(tempSelectedTime)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+              SS
+            </label>
+            <input
+              type="text"
+              name="seconds"
+              value={tempSelectedTime.seconds}
+              onChange={handleTimeInputChange}
+              onKeyDown={(e) => handleTimeKeyDown(e, null)}
+              ref={secondRef}
+              placeholder="00"
+              maxLength={2}
+              className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              onBlur={() => setSelectedTime(tempSelectedTime)}
+            />
+          </div>
+        </div>
         <div className="flex justify-center mt-6">
           <button
             type="button"
-            onClick={handleSelectDate}
+            onClick={handleTimeChange}
             className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
                        focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            انتخاب تاریخ
+            ذخیره ساعت
           </button>
         </div>
-      </DynamicModal>
-      {/* مودال انتخاب ساعت */}
-      <DynamicModal
-        isOpen={isTimeModalOpen}
-        onClose={() => {
-          if (tempSelectedTime) {
-            setSelectedTime(tempSelectedTime);
-            setUserTouched(true);
-          }
-          setIsTimeModalOpen(false);
-        }}
-      >
-        <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
-          <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
-            انتخاب ساعت
-          </h2>
-          {tempSelectedTime.hours ||
-          tempSelectedTime.minutes ||
-          tempSelectedTime.seconds ? (
-            <div className="mb-4 text-center">
-              <span className="text-lg font-medium text-pink-600">
-                {formatTime(tempSelectedTime)}
-              </span>
-            </div>
-          ) : (
-            <div className="mb-4 text-center">
-              <span className="text-lg font-medium text-gray-500">
-                ساعت انتخاب نشده
-              </span>
-            </div>
-          )}
-          <div className="flex justify-center space-x-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-                HH
-              </label>
-              <input
-                type="text"
-                name="hours"
-                value={tempSelectedTime.hours}
-                onChange={handleTimeInputChange}
-                onKeyDown={(e) => handleTimeKeyDown(e, minuteRef)}
-                ref={hourRef}
-                placeholder="00"
-                maxLength={2}
-                className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-                onBlur={() => setSelectedTime(tempSelectedTime)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-                MM
-              </label>
-              <input
-                type="text"
-                name="minutes"
-                value={tempSelectedTime.minutes}
-                onChange={handleTimeInputChange}
-                onKeyDown={(e) => handleTimeKeyDown(e, secondRef)}
-                ref={minuteRef}
-                placeholder="00"
-                maxLength={2}
-                className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-                onBlur={() => setSelectedTime(tempSelectedTime)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-                SS
-              </label>
-              <input
-                type="text"
-                name="seconds"
-                value={tempSelectedTime.seconds}
-                onChange={handleTimeInputChange}
-                onKeyDown={(e) => handleTimeKeyDown(e, null)}
-                ref={secondRef}
-                placeholder="00"
-                maxLength={2}
-                className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-                onBlur={() => setSelectedTime(tempSelectedTime)}
-              />
-            </div>
-          </div>
-          <div className="flex justify-center mt-6">
-            <button
-              type="button"
-              onClick={handleTimeChange}
-              className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
-                         focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              ذخیره ساعت
-            </button>
-          </div>
-        </div>
-      </DynamicModal>
-    </div>
-  );
+      </div>
+    </DynamicModal>
+  </div>
+);
+
 };
 
 export default PersianCalendarPicker;

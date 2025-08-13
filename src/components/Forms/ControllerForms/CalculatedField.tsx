@@ -83,22 +83,24 @@ const CalculatedField: React.FC<CalculatedFieldProps> = ({
 
   /* ---------- UI ---------- */
   return (
-    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center">
-      <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 space-y-6">
-        {/* Expression */}
-        <DynamicInput
-          name="Expression"
-          type="text"
-          value={expression}
-          onChange={(e) => setExpression(e.target.value)}
-          placeholder="Enter expression"
-          className="w-full"
-        />
+  <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center" dir="rtl">
+    <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 space-y-6">
+      {/* Expression */}
+      <DynamicInput
+        name="Expression"
+        type="text"
+        value={expression}
+        onChange={(e) => setExpression(e.target.value)}
+        placeholder="Enter expression"
+        className="w-full"
+      />
 
-        {/* Type */}
-        <label className="block text-sm font-medium text-gray-700">Type:</label>
-        <div className="flex items-center space-x-6">
-          <label className="flex items-center gap-2">
+      {/* Type (radios close to the label) */}
+      <div className="grid grid-cols-[auto,1fr] items-center gap-2">
+        <label className="text-sm font-medium text-gray-700 text-right">Type:</label>
+        <div className="flex flex-wrap items-center gap-4">
+          <label className="inline-flex items-center gap-2 flex-row-reverse">
+            <span>Number</span>
             <input
               type="radio"
               name="calc-type"
@@ -107,9 +109,10 @@ const CalculatedField: React.FC<CalculatedFieldProps> = ({
               onChange={() => setType("number")}
               className="text-purple-600 focus:ring-purple-500"
             />
-            <span>Number</span>
           </label>
-          <label className="flex items-center gap-2">
+
+          <label className="inline-flex items-center gap-2 flex-row-reverse">
+            <span>Date</span>
             <input
               type="radio"
               name="calc-type"
@@ -118,32 +121,34 @@ const CalculatedField: React.FC<CalculatedFieldProps> = ({
               onChange={() => setType("date")}
               className="text-purple-600 focus:ring-purple-500"
             />
-            <span>Date</span>
           </label>
         </div>
-
-        {/* Format */}
-        <DynamicInput
-          name="Format"
-          type="text"
-          value={format}
-          onChange={(e) => setFormat(e.target.value)}
-          placeholder="Enter format"
-          className="w-full"
-        />
-
-        {/* Unit (metaType4) */}
-        <DynamicInput
-          name="Unit"
-          type="text"
-          value={unit}
-          onChange={(e) => setUnit(e.target.value)}
-          placeholder="Enter unit"
-          className="w-full"
-        />
       </div>
+
+      {/* Format */}
+      <DynamicInput
+        name="Format"
+        type="text"
+        value={format}
+        onChange={(e) => setFormat(e.target.value)}
+        placeholder="Enter format"
+        className="w-full"
+      />
+
+      {/* Unit (metaType4) */}
+      <DynamicInput
+        name="Unit"
+        type="text"
+        value={unit}
+        onChange={(e) => setUnit(e.target.value)}
+        placeholder="Enter unit"
+        className="w-full"
+      />
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default CalculatedField;

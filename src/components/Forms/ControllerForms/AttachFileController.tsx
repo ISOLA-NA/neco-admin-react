@@ -178,12 +178,15 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
   };
 
   /* ---------------------------  UI  ------------------------------ */
-  return (
-    <div className="flex flex-col items-center w-full mt-10">
-      <div className="flex items-center gap-2 w-full">
-        {/* ------------ Left buttons ------------ */}
+ return (
+  <div className="w-full mt-10">
+    {/* ردیف اصلی: سه ستون، همه از پایین هم‌تراز */}
+    <div className="grid grid-cols-[auto,1fr,auto] items-end gap-2 w-full">
+
+      {/* ستون چپ: گروه دکمه‌ها داخل یک ظرف ثابت */}
+      <div className="flex items-end gap-2">
         {isLoading ? (
-          <div className="w-8 h-8 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
+          <div className="h-10 w-10 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
         ) : (
           <>
             {/* آپلود یا جایگزینی */}
@@ -193,7 +196,7 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
               onClick={() =>
                 (document.getElementById("hidden-upload") as HTMLInputElement)?.click()
               }
-              className={`text-white p-1 rounded transition ${
+              className={`shrink-0 inline-flex items-center justify-center h-10 w-10 text-white rounded transition ${
                 isEditMode
                   ? "bg-blue-500 hover:bg-blue-700"
                   : "bg-green-600 hover:bg-green-700"
@@ -202,31 +205,35 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
               {isEditMode ? <FaSync size={16} /> : <FaUpload size={16} />}
             </button>
 
-            {/* حذف فایل (در هر دو حالت وقتی فایل داریم) */}
+            {/* حذف فایل */}
             {selectedFileId && (
               <button
                 type="button"
                 title="Remove file"
                 onClick={handleReset}
-                className="text-white p-1 rounded bg-red-500 hover:bg-red-700 transition"
+                className="shrink-0 inline-flex items-center justify-center h-10 w-10 text-white rounded bg-red-500 hover:bg-red-700 transition"
               >
                 <FaTrash size={16} />
               </button>
             )}
           </>
         )}
+      </div>
 
-        {/* نام فایل */}
+      {/* ستون وسط: اینپوت (با لیبل داخلی خودش) */}
+      <div className="min-w-0">
         <DynamicInput
           name="fileName"
           type="text"
           value={fileName}
           placeholder="No file selected"
-          className="flex-grow"
+          className="w-full"
           disabled
         />
+      </div>
 
-        {/* دکمه نمایش */}
+      {/* ستون راست: دکمه نمایش */}
+      <div className="flex items-end">
         <button
           type="button"
           onClick={async () => {
@@ -237,7 +244,7 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
             }
           }}
           disabled={!selectedFileId || isLoading}
-          className={`flex items-center px-3 py-2 font-semibold rounded transition
+          className={`shrink-0 inline-flex items-center justify-center h-10 px-4 font-semibold rounded transition
             ${
               selectedFileId && !isLoading
                 ? "bg-purple-500 hover:bg-purple-700 text-white"
@@ -248,42 +255,44 @@ const AttachFile: React.FC<AttachFileProps> = ({ data = {}, onMetaChange }) => {
           Show
         </button>
       </div>
-
-      {/* input[file] مخفی */}
-      <input
-        key={resetCounter}
-        id="hidden-upload"
-        type="file"
-        accept=".jpg,.jpeg,.png"
-        hidden
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) uploadFile(file);
-        }}
-      />
-
-      {/* Modal preview */}
-      <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105"
-            title="Click to delete the file"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (window.confirm("Delete the uploaded file?")) {
-                handleReset();
-                setIsModalOpen(false);
-              }
-            }}
-          />
-        ) : (
-          <p className="text-center text-gray-500">No file to display.</p>
-        )}
-      </DynamicModal>
     </div>
-  );
+
+    {/* input[file] مخفی */}
+    <input
+      key={resetCounter}
+      id="hidden-upload"
+      type="file"
+      accept=".jpg,.jpeg,.png"
+      hidden
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) uploadFile(file);
+      }}
+    />
+
+    {/* Modal preview */}
+    <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      {previewUrl ? (
+        <img
+          src={previewUrl}
+          alt="Preview"
+          className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105"
+          title="Click to delete the file"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm("Delete the uploaded file?")) {
+              handleReset();
+              setIsModalOpen(false);
+            }
+          }}
+        />
+      ) : (
+        <p className="text-center text-gray-500">No file to display.</p>
+      )}
+    </DynamicModal>
+  </div>
+);
+
 };
 
 export default AttachFile;
