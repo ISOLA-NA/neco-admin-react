@@ -1,0 +1,12 @@
+{
+    "ProgramTemplate": {
+      "ProgramName": "Program Name",
+      "Duration": "Duration",
+      "ActivityBudget": "Activity Budget",
+      "AfBudget": "Af Budget",
+      "Type": "Type",
+      "RelatedProjects": "Related Projects",
+      "MetaData": "Meta Data"
+    }
+  }
+  

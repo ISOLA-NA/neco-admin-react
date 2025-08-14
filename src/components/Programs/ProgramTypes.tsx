@@ -12,6 +12,7 @@ import DynamicInput from "../utilities/DynamicInput";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { useApi } from "../../context/ApiContext";
 import { ProgramType as IProgramType } from "../../services/api.services";
+import { useTranslation } from "react-i18next";
 
 // Define handle interface for ref
 export interface ProgramTypeHandle {
@@ -29,6 +30,7 @@ const ProgramType: ForwardRefRenderFunction<
   ProgramTypeHandle,
   ProgramTypeProps
 > = ({ selectedRow }, ref) => {
+  const { t } = useTranslation();
   const api = useApi();
 
   // State with complete ProgramType interface
@@ -132,7 +134,7 @@ const ProgramType: ForwardRefRenderFunction<
     <TwoColumnLayout>
       {/* Name Input */}
       <DynamicInput
-        name="Program Name"
+        name={t("ProgramType.ProgramName")}
         type="text"
         value={programTypeData.Name}
         placeholder=""
@@ -140,7 +142,7 @@ const ProgramType: ForwardRefRenderFunction<
         required={true}
       />
       <DynamicInput
-        name="Description"
+        name={t("ProgramType.Description")}
         type="text"
         value={programTypeData.Describtion}
         placeholder=""

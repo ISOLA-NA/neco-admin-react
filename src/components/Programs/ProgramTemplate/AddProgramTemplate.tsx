@@ -12,6 +12,7 @@ import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import { ProgramTemplateItem } from "../../../services/api.services";
 import AddColumnForm from "../../Forms/AddForm";
 import ListSelector from "../../ListSelector/ListSelector";
+import { useTranslation } from "react-i18next";
 
 interface AddProgramTemplateProps {
   selectedRow: ProgramTemplateItem | null;
@@ -27,6 +28,8 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
   editingRow,
   onCancel,
 }) => {
+  const { t } = useTranslation();
+
   // مقدار اولیه فرم با همه فیلدها
   const initialFormData = {
     activityname: "",
@@ -544,7 +547,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="activityname"
-                label="Activity Name"
+                label={t("AddProgramTemplate.ActivityName")}
                 type="text"
                 value={formData.activityname}
                 onChange={handleChange}
@@ -552,7 +555,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="Code"
-                label="Code"
+                label={t("AddProgramTemplate.Code")}
                 type="text"
                 value={formData.Code}
                 onChange={handleChange}
@@ -563,7 +566,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-2 gap-6">
               <DynamicSelector
                 name="responsiblepost"
-                label="Responsible Post"
+                label={t("AddProgramTemplate.ResponsiblePost")}
                 options={roleOptions}
                 selectedValue={formData.responsiblepost}
                 onChange={handleChange}
@@ -572,7 +575,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicSelector
                 name="approvalFlow"
-                label="Approval Flow"
+                label={t("AddProgramTemplate.ApprovalFlow")}
                 options={approvalFlowOptions}
                 selectedValue={formData.approvalFlow}
                 onChange={handleChange}
@@ -584,7 +587,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="duration"
-                label="Duration"
+                label={t("AddProgramTemplate.Duration")}
                 type="number"
                 value={formData.duration}
                 onChange={handleChange}
@@ -592,7 +595,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="lag"
-                label="Lag"
+                label={t("AddProgramTemplate.Lag")}
                 type="number"
                 value={formData.lag}
                 onChange={handleChange}
@@ -602,7 +605,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             {/* Program Type */}
             <DynamicSelector
               name="programtype"
-              label="Program Type"
+              label={t("AddProgramTemplate.ProgramType")}
               options={programTypeOptions}
               selectedValue={formData.programtype}
               onChange={handleChange}
@@ -610,8 +613,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             />
             {/* Program Template */}
             <DynamicSelector
-              name="programtemplate"
-              label="Program Template"
+              label={t("AddProgramTemplate.ProgramTemplate")}
               options={programTemplateOptions}
               selectedValue={formData.programtemplate}
               onChange={handleChange}
@@ -620,7 +622,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             {/* Activity Type */}
             <DynamicSelector
               name="activitytype"
-              label="Activity Type"
+              label={t("AddProgramTemplate.ActivityType")}
               options={activityTypeOptions}
               selectedValue={formData.activitytype}
               onChange={handleChange}
@@ -629,7 +631,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             {/* Form Name */}
             <DynamicSelector
               name="formname"
-              label="Form Name"
+              label={t("AddProgramTemplate.FormName")}
               options={formOptions}
               selectedValue={formData.formname}
               onChange={handleChange}
@@ -638,7 +640,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             {/* Meta Data Selector */}
             <div className="mt-6 rounded-md">
               <ListSelector
-                title="Meta Data"
+                title={t("AddProgramTemplate.MetaData")}
                 columnDefs={[{ field: "Name", headerName: "Name" }]}
                 rowData={metaNames.map((m) => ({
                   ID: String(m.ID),
@@ -695,7 +697,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="start"
-                label="Start"
+                label={t("AddProgramTemplate.Start")}
                 type="text"
                 value={formData.start}
                 onChange={handleChange}
@@ -703,7 +705,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="finish"
-                label="Finish"
+                label={t("AddProgramTemplate.Finish")}
                 type="text"
                 value={formData.finish}
                 onChange={handleChange}
@@ -713,7 +715,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             {/* Check List */}
             <DynamicSelector
               name="checkList"
-              label="Check List"
+              label={t("AddProgramTemplate.CheckList")}
               options={checkListOptions}
               selectedValue={formData.checkList}
               onChange={handleChange}
@@ -722,7 +724,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             {/* Procedure */}
             <DynamicSelector
               name="procedure"
-              label="Procedure"
+              label={t("AddProgramTemplate.Procedure")}
               options={procedureOptions}
               selectedValue={formData.procedure}
               onChange={handleChange}
@@ -732,7 +734,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="weight1"
-                label="Weight1"
+                label={t("AddProgramTemplate.Weight1")}
                 type="number"
                 value={formData.weight1}
                 onChange={handleChange}
@@ -740,7 +742,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="weight2"
-                label="Weight2"
+                label={t("AddProgramTemplate.Weight2")}
                 type="number"
                 value={formData.weight2}
                 onChange={handleChange}
@@ -748,7 +750,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="weight3"
-                label="Weight3"
+                label={t("AddProgramTemplate.Weight3")}
                 type="number"
                 value={formData.weight3}
                 onChange={handleChange}
@@ -759,7 +761,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="approvalToExecutionWeight"
-                label="Approval Execution"
+                label={t("AddProgramTemplate.ApprovalExecution")}
                 type="number"
                 value={formData.approvalToExecutionWeight}
                 onChange={handleChange}
@@ -767,7 +769,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="wfW2"
-                label="WF W2"
+                label={t("AddProgramTemplate.WFW2")}
                 type="number"
                 value={formData.wfW2}
                 onChange={handleChange}
@@ -775,7 +777,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="wfW3"
-                label="WF W3"
+                label={t("AddProgramTemplate.WFW3")}
                 type="number"
                 value={formData.wfW3}
                 onChange={handleChange}
@@ -786,7 +788,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="activityBudget1"
-                label="Activity Budget1"
+                label={t("AddProgramTemplate.ActivityBudget1")}
                 type="number"
                 value={formData.activityBudget1}
                 onChange={handleChange}
@@ -794,7 +796,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="activityBudget2"
-                label="Activity Budget2"
+                label={t("AddProgramTemplate.ActivityBudget2")}
                 type="number"
                 value={formData.activityBudget2}
                 onChange={handleChange}
@@ -802,7 +804,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="activityBudget3"
-                label="Activity Budget3"
+                label={t("AddProgramTemplate.ActivityBudget3")}
                 type="number"
                 value={formData.activityBudget3}
                 onChange={handleChange}
@@ -813,7 +815,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="approvalBudget1"
-                label="Approval Budget1"
+                label={t("AddProgramTemplate.ApprovalBudget1")}
                 type="number"
                 value={formData.approvalBudget1}
                 onChange={handleChange}
@@ -821,7 +823,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="approvalBudget2"
-                label="Approval Budget2"
+                label={t("AddProgramTemplate.ApprovalBudget2")}
                 type="number"
                 value={formData.approvalBudget2}
                 onChange={handleChange}
@@ -829,7 +831,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="approvalBudget3"
-                label="Approval Budget3"
+                label={t("AddProgramTemplate.ApprovalBudget3")}
                 type="number"
                 value={formData.approvalBudget3}
                 onChange={handleChange}
@@ -840,7 +842,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name="afDuration"
-                label="AF Duration"
+                label={t("AddProgramTemplate.AFDuration")}
                 type="number"
                 value={formData.afDuration}
                 onChange={handleChange}
@@ -848,7 +850,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="programDuration"
-                label="Program Duration"
+                label={t("AddProgramTemplate.ProgramDuration")}
                 type="number"
                 value={formData.programDuration}
                 onChange={handleChange}
@@ -859,7 +861,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="programExecutionBudget"
-                label="Program Exec Budget"
+                label={t("AddProgramTemplate.ProgramExecBudget")}
                 type="number"
                 value={formData.programExecutionBudget}
                 onChange={handleChange}
@@ -867,7 +869,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="subCost2Act"
-                label="SubCost2Act"
+                label={t("AddProgramTemplate.SubCost2Act")}
                 type="number"
                 value={formData.subCost2Act}
                 onChange={handleChange}
@@ -875,7 +877,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="subCost3Act"
-                label="SubCost3Act"
+                label={t("AddProgramTemplate.SubCost3Act")}
                 type="number"
                 value={formData.subCost3Act}
                 onChange={handleChange}
@@ -885,7 +887,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="programApprovalBudget"
-                label="Program Approval Budget"
+                label={t("AddProgramTemplate.ProgramApprovalBudget")}
                 type="number"
                 value={formData.programApprovalBudget}
                 onChange={handleChange}
@@ -893,7 +895,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="subCost2Apr"
-                label="SubCost2Apr"
+                label={t("AddProgramTemplate.SubCost2Apr")}
                 type="number"
                 value={formData.subCost2Apr}
                 onChange={handleChange}
@@ -901,7 +903,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="subCost3Apr"
-                label="SubCost3Apr"
+                label={t("AddProgramTemplate.SubCost3Apr")}
                 type="number"
                 value={formData.subCost3Apr}
                 onChange={handleChange}
@@ -912,7 +914,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             <div className="grid grid-cols-3 gap-6">
               <DynamicInput
                 name="programToPlanWeight"
-                label="Program To Plan Weight"
+                label={t("AddProgramTemplate.ProgramToPlanWeight")}
                 type="number"
                 value={formData.programToPlanWeight}
                 onChange={handleChange}
@@ -920,7 +922,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="w2SubProg"
-                label="W2 SubProg"
+                label={t("AddProgramTemplate.W2SubProg")}
                 type="number"
                 value={formData.w2SubProg}
                 onChange={handleChange}
@@ -928,7 +930,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               />
               <DynamicInput
                 name="w3SubProg"
-                label="W3 SubProg"
+                label={t("AddProgramTemplate.W3SubProg")}
                 type="number"
                 value={formData.w3SubProg}
                 onChange={handleChange}
@@ -947,14 +949,14 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               onClick={handleUpdate}
               className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
             >
-              Update
+              {t("Global.Edit")}
             </button>
           ) : (
             <button
               onClick={handleSave}
               className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
             >
-              Save
+              {t("Global.Add")}
             </button>
           )}
           <button
@@ -967,7 +969,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             }}
             className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
           >
-            Cancel
+            {t("Global.Cancel")}
           </button>
         </div>
       </div>

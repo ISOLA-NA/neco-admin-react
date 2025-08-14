@@ -23,6 +23,7 @@ import {
 } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import AddColumnForm from "../../Forms/AddForm"; // برای انتخاب متادیتا
+import { useTranslation } from "react-i18next";
 
 /* ---------- types ---------- */
 export interface ProgramTemplateHandle {
@@ -37,6 +38,7 @@ interface ProgramTemplateProps {
 /* ===================================================================== */
 const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
   ({ selectedRow }, ref) => {
+    const { t } = useTranslation();
     const api = useApi();
 
     /* ---------------- state اصلی ---------------- */
@@ -100,9 +102,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const isEditMode = Boolean(selectedRow);
 
     /* ------------ متادیتا (لیست سلکتور) ------------ */
-    const [metaValues, setMetaValues] = useState<{ ID: string; Name: string }[]>(
-      []
-    );
+    const [metaValues, setMetaValues] = useState<
+      { ID: string; Name: string }[]
+    >([]);
     const [metaNames, setMetaNames] = useState<{ ID: string; Name: string }[]>(
       []
     );
@@ -142,7 +144,10 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
     /* --- template list for grid mapping --- */
     useEffect(() => {
-      api.getAllProgramTemplates().then(setProgramTemplates).catch(console.error);
+      api
+        .getAllProgramTemplates()
+        .then(setProgramTemplates)
+        .catch(console.error);
     }, [api]);
 
     /* --- forms, roles, wf templates, enum --- */
@@ -195,7 +200,10 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         )
       )
         .then((arr) => {
-          const ok = (arr.filter(Boolean) || []) as { ID: string; Name: string }[];
+          const ok = (arr.filter(Boolean) || []) as {
+            ID: string;
+            Name: string;
+          }[];
           setMetaValues(ok);
           setMetaNames(ok);
         })
@@ -252,16 +260,56 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       { headerName: "Duration", field: "ActDuration", flex: 1, minWidth: 100 },
       { headerName: "Start", field: "Top", flex: 1, minWidth: 80 },
       { headerName: "End", field: "Left", flex: 1, minWidth: 80 },
-      { headerName: "Responsible Post", field: "nPostName", flex: 3, minWidth: 150 },
-      { headerName: "Approval Flow", field: "nWFTemplateName", flex: 3, minWidth: 150 },
+      {
+        headerName: "Responsible Post",
+        field: "nPostName",
+        flex: 3,
+        minWidth: 150,
+      },
+      {
+        headerName: "Approval Flow",
+        field: "nWFTemplateName",
+        flex: 3,
+        minWidth: 150,
+      },
       { headerName: "Activity Type", field: "PFIType", flex: 2, minWidth: 150 },
-      { headerName: "Form Name", field: "nEntityTypeName", flex: 3, minWidth: 150 },
+      {
+        headerName: "Form Name",
+        field: "nEntityTypeName",
+        flex: 3,
+        minWidth: 150,
+      },
       { headerName: "Weight", field: "Weight1", flex: 1, minWidth: 80 },
-      { headerName: "Activity Budget", field: "PCostAct", flex: 1, minWidth: 80 },
-      { headerName: "Program Template", field: "nProgramTemplateName", flex: 3, minWidth: 150 },
-      { headerName: "Program Duration", field: "WFDuration", flex: 1, minWidth: 80 },
-      { headerName: "Program Execution Budget", field: "PCostAprov", flex: 1, minWidth: 80 },
-      { headerName: "Program to plan", field: "WeightWF", flex: 1, minWidth: 80 },
+      {
+        headerName: "Activity Budget",
+        field: "PCostAct",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Program Template",
+        field: "nProgramTemplateName",
+        flex: 3,
+        minWidth: 150,
+      },
+      {
+        headerName: "Program Duration",
+        field: "WFDuration",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Program Execution Budget",
+        field: "PCostAprov",
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        headerName: "Program to plan",
+        field: "WeightWF",
+        flex: 1,
+        minWidth: 80,
+      },
     ];
 
     /* ================================================================= */
@@ -286,7 +334,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             "success",
             null,
             selectedRow ? "Updated" : "Saved",
-            `Program Template ${selectedRow ? "updated" : "added"} successfully.`
+            `Program Template ${
+              selectedRow ? "updated" : "added"
+            } successfully.`
           );
           return true;
         } catch (err) {
@@ -307,7 +357,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           {/* ---------------- ستون چپ (ورودی‌ها) ---------------- */}
           <div className="flex flex-col gap-10">
             <DynamicInput
-              name="Program Name"
+              name={t("ProgramTemplate.ProgramName")}
               type="text"
               value={programTemplateData.Name}
               placeholder="Enter program name"
@@ -316,7 +366,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             />
 
             <DynamicInput
-              name="Duration"
+              name={t("ProgramTemplate.Duration")}
               type="number"
               value={programTemplateData.Duration}
               placeholder="Enter duration"
@@ -327,7 +377,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             {/* Activity & Af budgets در یک ردیف */}
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
-                name="Activity Budget"
+                name={t("ProgramTemplate.ActivityBudget")}
                 type="number"
                 value={programTemplateData.PCostAct}
                 placeholder="Activity budget"
@@ -336,7 +386,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                 }
               />
               <DynamicInput
-                name="Af Budget"
+                name={t("ProgramTemplate.AfBudget")}
                 type="number"
                 value={programTemplateData.PCostAprov}
                 placeholder="Af budget"
@@ -348,7 +398,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
             {/* نوع برنامه (در تصویر پایین ستون چپ) */}
             <DynamicSelector
-              label="Type"
+              label={t("ProgramTemplate.Type")}
               options={programTypeOptions}
               selectedValue={selectedProgramTypeId}
               onChange={(e) => {
@@ -367,7 +417,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           <div className="flex flex-col gap-10">
             {/* Related projects + سوییچ Global */}
             <ListSelector
-              title="Related Projects"
+              title={t("ProgramTemplate.RelatedProjects")}
               columnDefs={projectColumnDefs}
               rowData={projectsListData}
               selectedIds={selectedProjectIds}
@@ -392,13 +442,11 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
             {/* Meta-data selector */}
             <ListSelector
-              title="Meta Data"
+              title={t("ProgramTemplate.MetaData")}
               columnDefs={[{ field: "Name", headerName: "Name" }]}
               rowData={metaNames.map((m) => ({ ID: m.ID, Name: m.Name }))}
               selectedIds={selectedMetaIds}
-              onSelectionChange={(ids) =>
-                setSelectedMetaIds(ids.map(String))
-              }
+              onSelectionChange={(ids) => setSelectedMetaIds(ids.map(String))}
               showSwitcher={false}
               isGlobal={false}
               loading={loadingMeta}
@@ -448,8 +496,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               }}
               onEdit={() =>
                 selectedDetailRow
-                  ? (setEditingRow(selectedDetailRow),
-                    setIsAddModalOpen(true))
+                  ? (setEditingRow(selectedDetailRow), setIsAddModalOpen(true))
                   : showAlert(
                       "warning",
                       null,
@@ -483,6 +530,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             setIsAddModalOpen(false);
             setEditingRow(null);
           }}
+          size="large"
         >
           <AddProgramTemplate
             selectedRow={selectedRow}
@@ -514,7 +562,12 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               );
               setSelectedDetailRow(null);
               setShowDeleteConfirm(false);
-              showAlert("success", null, "Deleted", "Row deleted successfully.");
+              showAlert(
+                "success",
+                null,
+                "Deleted",
+                "Row deleted successfully."
+              );
             } catch (err) {
               console.error(err);
               showAlert("error", null, "Error", "Failed to delete the row.");
