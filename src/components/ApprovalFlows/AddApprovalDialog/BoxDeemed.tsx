@@ -4,6 +4,7 @@ import DynamicSelector from "../../utilities/DynamicSelector";
 import DynamicInput from "../../utilities/DynamicInput";
 import AppServices, { GetEnumResponse } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
+import { useTranslation } from "react-i18next";
 
 interface DeemedSectionProps {
   deemDay: number;
@@ -40,12 +41,19 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
   actionBtnID,
   setActionBtnID,
 }) => {
+  const { t } = useTranslation();
   // حالا value ها را به string تبدیل می‌کنیم
-  const [fromOptions, setFromOptions] = useState<{ value: string; label: string }[]>([]);
-  const [statusOptions, setStatusOptions] = useState<{ value: string; label: string }[]>([]);
+  const [fromOptions, setFromOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [statusOptions, setStatusOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const [loadingEnums, setLoadingEnums] = useState<boolean>(false);
   const [errorEnums, setErrorEnums] = useState<string | null>(null);
-  const [localActionBtnOptions, setLocalActionBtnOptions] = useState<{ value: string; label: string }[]>([]);
+  const [localActionBtnOptions, setLocalActionBtnOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
   const api = useApi();
 
   useEffect(() => {
@@ -54,12 +62,13 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
       setErrorEnums(null);
 
       try {
-        const response1: GetEnumResponse = await AppServices.getEnum({ str: "DeemCondition" });
-        const fromOpts = Object.entries(response1)
-          .map(([key, val]) => ({
-            value: String(val),   // ← به string تبدیل می‌کنیم
-            label: key,
-          }));
+        const response1: GetEnumResponse = await AppServices.getEnum({
+          str: "DeemCondition",
+        });
+        const fromOpts = Object.entries(response1).map(([key, val]) => ({
+          value: String(val), // ← به string تبدیل می‌کنیم
+          label: key,
+        }));
         setFromOptions(fromOpts);
       } catch (error) {
         console.error("Error fetching DeemCondition enums:", error);
@@ -67,12 +76,13 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
       }
 
       try {
-        const response2: GetEnumResponse = await AppServices.getEnum({ str: "DeemAction" });
-        const statusOpts = Object.entries(response2)
-          .map(([key, val]) => ({
-            value: String(val),   // ← به string تبدیل می‌کنیم
-            label: key,
-          }));
+        const response2: GetEnumResponse = await AppServices.getEnum({
+          str: "DeemAction",
+        });
+        const statusOpts = Object.entries(response2).map(([key, val]) => ({
+          value: String(val), // ← به string تبدیل می‌کنیم
+          label: key,
+        }));
         setStatusOptions(statusOpts);
       } catch (error) {
         console.error("Error fetching DeemAction enums:", error);
@@ -103,7 +113,7 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
   }, [api]);
 
   // قبلا boxTemplates دارای عدد بود، اینجا به string تبدیل می‌کنیم
-  const previousStateOptions = boxTemplates.map(box => ({
+  const previousStateOptions = boxTemplates.map((box) => ({
     value: String(box.ID),
     label: box.Name,
   }));
@@ -115,10 +125,10 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
           {/* After */}
           <div className="w-40">
             <DynamicInput
-              name="After"
+              name={t("AddApprovalFlows.After")}
               type="number"
               value={deemDay}
-              onChange={e => setDeemDay(Number(e.target.value))}
+              onChange={(e) => setDeemDay(Number(e.target.value))}
               disabled={disableMain}
             />
           </div>
@@ -127,9 +137,9 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
           <div className="w-40">
             <DynamicSelector
               options={fromOptions}
-              selectedValue={String(deemCondition)}        // ← string
-              onChange={e => setDeemCondition(Number(e.target.value))}
-              label="From"
+              selectedValue={String(deemCondition)}
+              onChange={(e) => setDeemCondition(Number(e.target.value))}
+              label={t("AddApprovalFlows.From")}
               disabled={disableMain}
             />
           </div>
@@ -138,9 +148,9 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
           <div className="w-40">
             <DynamicSelector
               options={statusOptions}
-              selectedValue={String(deemAction)}           // ← string
-              onChange={e => setDeemAction(Number(e.target.value))}
-              label="The status will set to"
+              selectedValue={String(deemAction)}
+              onChange={(e) => setDeemAction(Number(e.target.value))}
+              label={t("AddApprovalFlows.TheStatusWillSetTo")}
               disabled={disableMain}
             />
           </div>
@@ -149,11 +159,15 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
           <div className="w-40">
             <DynamicSelector
               options={previousStateOptions}
-              selectedValue={previewsStateId !== null ? String(previewsStateId) : ""}
-              onChange={e =>
-                setPreviewsStateId(e.target.value ? Number(e.target.value) : null)
+              selectedValue={
+                previewsStateId !== null ? String(previewsStateId) : ""
               }
-              label="Previous State"
+              onChange={(e) =>
+                setPreviewsStateId(
+                  e.target.value ? Number(e.target.value) : null
+                )
+              }
+              label={t("AddApprovalFlows.PreviousState")}
               disabled={disableMain}
             />
           </div>
@@ -164,10 +178,10 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
               <DynamicSelector
                 options={localActionBtnOptions}
                 selectedValue={actionBtnID !== null ? String(actionBtnID) : ""}
-                onChange={e =>
+                onChange={(e) =>
                   setActionBtnID(e.target.value ? Number(e.target.value) : null)
                 }
-                label="Select Action Button"
+                label={t("AddApprovalFlows.SelectActionButton")}
                 disabled={disableMain}
               />
             </div>
@@ -185,17 +199,17 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
       {/* بخش Admin-only */}
       <div className="bg-gray-100 p-2 rounded">
         <p className="text-sm text-gray-700 mb-2">
-          If user clicks on a button with command{" "}
-          <span className="font-bold">
-            "Go to Previous State By Admin"
-          </span>
-          , the previous state will set to:
+          {t("AddApprovalFlows.IfUserClicksAdmin")}
         </p>
         <DynamicSelector
           options={previousStateOptions}
-          selectedValue={goToPreviousStateID !== null ? String(goToPreviousStateID) : ""}
-          onChange={e =>
-            setGoToPreviousStateID(e.target.value ? Number(e.target.value) : null)
+          selectedValue={
+            goToPreviousStateID !== null ? String(goToPreviousStateID) : ""
+          }
+          onChange={(e) =>
+            setGoToPreviousStateID(
+              e.target.value ? Number(e.target.value) : null
+            )
           }
           label=""
           className="w-40"

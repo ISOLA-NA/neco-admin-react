@@ -1,0 +1,33 @@
+{
+    "AddApprovalFlows": {
+      "ApprovalFlows": "جریان‌های تایید",
+      "Alerts": "هشدارها",
+      "Name": "نام",
+      "MinAccept": "حداقل تایید",
+      "MinReject": "حداقل رد",
+      "ActDuration": "مدت زمان اقدام",
+      "Order": "ترتیب",
+      "IsStage": "مرحله‌ای است",
+      "ApprovalContext": "زمینه تایید:",
+      "StaticPost": "سمت استاتیک",
+      "Weight1": "وزن ۱",
+      "Weight2": "وزن ۲",
+      "Weight3": "وزن ۳",
+      "Cost1": "هزینه ۱",
+      "Cost2": "هزینه ۲",
+      "Cost3": "هزینه ۳",
+      "Code": "کد",
+      "Veto": "وتو",
+      "Required": "الزامی",
+      "DeemedAsApprovedOrReject": "در حکم تایید یا رد",
+      "After": "بعد از",
+      "From": "از",
+      "TheStatusWillSetTo": "وضعیت تنظیم می‌شود به",
+      "PreviousState": "وضعیت قبلی",
+      "SelectActionButton": "انتخاب دکمه اقدام",
+      "IfUserClicksAdmin": "اگر کاربر روی دکمه‌ای با دستور \"بازگشت به وضعیت قبلی توسط ادمین\" کلیک کند، وضعیت قبلی تنظیم خواهد شد به:",
+      "Predecessor": "پیش‌نیاز",
+      "Button": "دکمه"
+    }
+  }
+  

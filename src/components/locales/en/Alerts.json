@@ -1,0 +1,14 @@
+{
+    "Alerts": {
+      "TimeBased": "Time Based",
+      "ChangeBased": "Change Based",
+      "TimeField": "Time Field",
+      "Days": "Days",
+      "ChangingField": "Changing Field",
+      "Step": "Step",
+      "SendType": "Send Type",
+      "Receiver": "Receiver",
+      "Comment": "Comment"
+    }
+  }
+  

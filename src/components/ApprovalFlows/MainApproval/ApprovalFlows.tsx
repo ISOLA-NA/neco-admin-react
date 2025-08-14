@@ -21,6 +21,7 @@ import {
 } from "../../../services/api.services";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
+import { useTranslation } from "react-i18next";
 
 export interface ApprovalFlowHandle {
   save: () => Promise<boolean>;
@@ -42,6 +43,7 @@ interface MappedProject {
 
 const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   ({ selectedRow }, ref) => {
+    const { t } = useTranslation();
     const api = useApi();
     const { handleSaveApprovalFlow } = useAddEditDelete();
 
@@ -64,8 +66,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [isLoadingBoxTemplates, setIsLoadingBoxTemplates] = useState<boolean>(false);
-
+    const [isLoadingBoxTemplates, setIsLoadingBoxTemplates] =
+      useState<boolean>(false);
 
     // id ساب‌آیتمی که قصد حذفش رو داریم
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
@@ -152,7 +154,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         setBoxTemplates([]);
       }
     }, [selectedRow, api]);
-
 
     // صادر کردن متدها از طریق ref
     useImperativeHandle(ref, () => ({
@@ -341,7 +342,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         <TwoColumnLayout>
           <TwoColumnLayout.Item span={1}>
             <DynamicInput
-              name="Approval Flow Name"
+              name={t("ApprovalFlows.ApprovalFlowName")}
               type="text"
               value={approvalFlowData.Name}
               placeholder=""
@@ -352,17 +353,16 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
           <TwoColumnLayout.Item span={1}>
             <CustomTextarea
-              name="Description"
+              name={t("ApprovalFlows.Description")}
               value={approvalFlowData.Describtion}
               placeholder=""
               onChange={(e) => handleChange("Describtion", e.target.value)}
             />
           </TwoColumnLayout.Item>
-    
 
           <TwoColumnLayout.Item span={1} className="mt-10">
             <ListSelector
-              title="Related Projects"
+              title={t("ApprovalFlows.RelatedProjects")}
               columnDefs={projectColumnDefs}
               rowData={mappedProjects}
               selectedIds={selectedProjectIds}
@@ -395,7 +395,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                       setIsModalOpen(true);
                     }}
                     onEdit={() =>
-                      selectedSubRowData && handleBoxTemplateEdit(selectedSubRowData)
+                      selectedSubRowData &&
+                      handleBoxTemplateEdit(selectedSubRowData)
                     }
                     onDelete={() => {
                       if (selectedSubRowData) {
@@ -404,7 +405,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                       }
                     }}
                     onDuplicate={() =>
-                      selectedSubRowData && handleBoxTemplateDuplicate(selectedSubRowData)
+                      selectedSubRowData &&
+                      handleBoxTemplateDuplicate(selectedSubRowData)
                     }
                     domLayout="normal"
                     gridOptions={{
@@ -423,7 +425,6 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               </div>
             )}
           </TwoColumnLayout.Item>
-
         </TwoColumnLayout>
 
         <DynamicConfirm

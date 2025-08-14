@@ -1,0 +1,33 @@
+{
+    "AddApprovalFlows": {
+      "ApprovalFlows": "Approval Flows",
+      "Alerts": "Alerts",
+      "Name": "Name",
+      "MinAccept": "Min Accept",
+      "MinReject": "Min Reject",
+      "ActDuration": "Act Duration",
+      "Order": "Order",
+      "IsStage": "Is Stage",
+      "ApprovalContext": "Approval Context:",
+      "StaticPost": "Static Post",
+      "Weight1": "Weight 1",
+      "Weight2": "Weight 2",
+      "Weight3": "Weight 3",
+      "Cost1": "Cost 1",
+      "Cost2": "Cost 2",
+      "Cost3": "Cost 3",
+      "Code": "Code",
+      "Veto": "Veto",
+      "Required": "Required",
+      "DeemedAsApprovedOrReject": "Deemed as Approved Or Reject",
+      "After": "After",
+      "From": "From",
+      "TheStatusWillSetTo": "The status will set to",
+      "PreviousState": "Previous State",
+      "SelectActionButton": "Select Action Button",
+      "IfUserClicksAdmin": "If user clicks on a button with command \"Go to Previous State By Admin\", the previous state will set to:",
+      "Predecessor": "Predecessor",
+      "Button": "Button"
+    }
+  }
+  

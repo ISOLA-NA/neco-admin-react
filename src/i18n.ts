@@ -16,6 +16,9 @@ import enRoleGroup from "./components/locales/en/RoleGroup.json";
 import enForms from "./components/locales/en/Forms.json";
 import enAddForms from "./components/locales/en/AddForms.json";
 import enCategory from "./components/locales/en/Category.json";
+import enApprovalFlows from "./components/locales/en/ApprovalFlows.json";
+import enAddApprovalFlows from "./components/locales/en/AddApprovalFlows.json";
+import enAlerts from "./components/locales/en/Alerts.json";
 
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
@@ -32,6 +35,9 @@ import faRoleGroup from "./components/locales/fa/RoleGroup.json";
 import faForms from "./components/locales/fa/Forms.json";
 import faAddForms from "./components/locales/fa/AddForms.json";
 import faCategory from "./components/locales/fa/Category.json";
+import faApprovalFlows from "./components/locales/fa/ApprovalFlows.json";
+import faAddApprovalFlows from "./components/locales/fa/AddApprovalFlows.json";
+import faAlerts from "./components/locales/fa/Alerts.json";
 
 const resources = {
   en: {
@@ -50,6 +56,9 @@ const resources = {
       ...enForms,
       ...enAddForms,
       ...enCategory,
+      ...enApprovalFlows,
+      ...enAddApprovalFlows,
+      ...enAlerts,
     },
   },
   fa: {
@@ -68,6 +77,9 @@ const resources = {
       ...faForms,
       ...faAddForms,
       ...faCategory,
+      ...faApprovalFlows,
+      ...faAddApprovalFlows,
+      ...faAlerts,
     },
   },
 };

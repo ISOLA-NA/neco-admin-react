@@ -136,7 +136,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
             </div>
           ) : selectedItems.length === 0 ? (
             <p className="text-gray-500 text-xs text-center">
-              No item is selected
+              {t("Global.Noitemisselected")}
             </p>
           ) : (
             <div className="space-y-2">

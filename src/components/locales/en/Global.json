@@ -7,7 +7,8 @@
       "New": "New",
       "Design": "Design",
       "Duplicate": "Duplicate",
-      "Cancel":"Cancel"
+      "Cancel":"Cancel",
+      "Noitemisselected":"No item is selected"
     }
   }
   

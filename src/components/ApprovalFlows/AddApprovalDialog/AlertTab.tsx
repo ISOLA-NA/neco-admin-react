@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  AlertingWfTemplateItem,
-  Role,
-} from "../../../services/api.services";
+import { AlertingWfTemplateItem, Role } from "../../../services/api.services";
 import AppServices from "../../../services/api.services";
 import DataTable from "../../TableDynamic/DataTable";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import DynamicInput from "../../utilities/DynamicInput";
+import { useTranslation } from "react-i18next";
 
 type AlertObj = {
   SensitiveItemWFTemp: string;
@@ -40,6 +38,7 @@ const sendTypeOptions = [
 ];
 
 export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
+  const { t } = useTranslation();
   const [oldVersion, setOldVersion] = useState(true);
   const [newVersion, setNewVersion] = useState(false);
 
@@ -85,10 +84,8 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
       .catch(console.error);
   }, [nWFBoxTemplateId]);
 
-  const setField =
-    (key: keyof AlertObj) =>
-    (val: string) =>
-      setForm((prev) => ({ ...prev, [key]: val }));
+  const setField = (key: keyof AlertObj) => (val: string) =>
+    setForm((prev) => ({ ...prev, [key]: val }));
 
   const handleAdd = async () => {
     const payload: AlertingWfTemplateItem = {
@@ -96,9 +93,7 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
       SensitiveItemWFTemp: oldVersion
         ? parseInt(form.SensitiveItemWFTemp, 10)
         : 0,
-      SensitivityWFTemp: newVersion
-        ? parseInt(form.SensitivityWFTemp, 10)
-        : 0,
+      SensitivityWFTemp: newVersion ? parseInt(form.SensitivityWFTemp, 10) : 0,
       WFState: newVersion ? parseInt(form.WFState, 10) : 0,
       SendType: parseInt(form.sendType, 10),
       nPostTypeID: null,
@@ -133,36 +128,39 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
       headerName: "Sensitive Item",
       field: "SensitiveItemWFTemp",
       valueGetter: (params: any) =>
-        sensitiveItemWFTempList.find((o) => o.value === params.data.SensitiveItemWFTemp)
-          ?.label || params.data.SensitiveItemWFTemp,
+        sensitiveItemWFTempList.find(
+          (o) => o.value === params.data.SensitiveItemWFTemp
+        )?.label || params.data.SensitiveItemWFTemp,
     },
     { headerName: "Day", field: "Duration" },
     {
       headerName: "Sensitivity",
       field: "SensitivityWFTemp",
       valueGetter: (params: any) =>
-        sensitivityWFTempList.find((o) => o.value === params.data.SensitivityWFTemp)
-          ?.label || params.data.SensitivityWFTemp,
+        sensitivityWFTempList.find(
+          (o) => o.value === params.data.SensitivityWFTemp
+        )?.label || params.data.SensitivityWFTemp,
     },
     {
       headerName: "Step",
       field: "WFState",
       valueGetter: (params: any) =>
-        wfStateList.find((o) => o.value === params.data.WFState)
-          ?.label || params.data.WFState,
+        wfStateList.find((o) => o.value === params.data.WFState)?.label ||
+        params.data.WFState,
     },
     {
       headerName: "Send Type",
       field: "sendType",
       valueGetter: (params: any) =>
-        sendTypeOptions.find((o) => o.value === params.data.sendType)
-          ?.label || params.data.sendType,
+        sendTypeOptions.find((o) => o.value === params.data.sendType)?.label ||
+        params.data.sendType,
     },
     {
       headerName: "Receiver",
       field: "nPostID",
       valueGetter: (params: any) =>
-        roles.find((r) => r.ID === params.data.nPostID)?.Name || params.data.nPostID,
+        roles.find((r) => r.ID === params.data.nPostID)?.Name ||
+        params.data.nPostID,
     },
     { headerName: "Comment", field: "Comment" },
   ];
@@ -176,23 +174,24 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       {/* نسخه قدیم یا جدید */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
-        <label className="flex items-center space-x-1 sm:col-span-1">
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
+        <label className="flex items-center gap-2 sm:col-span-1 h-10">
           <input
             type="radio"
             name="ver"
+            className="h-4 w-4"
             checked={oldVersion}
             onChange={() => {
               setOldVersion(true);
               setNewVersion(false);
             }}
           />
-          <span>Time Based</span>
+          <span className="text-sm">{t("Alerts.TimeBased")}</span>
         </label>
 
         <div className="sm:col-span-2">
           <DynamicSelector
-            label="Time Field"
+            label={t("Alerts.TimeField")}
             options={sensitiveItemWFTempList}
             selectedValue={form.SensitiveItemWFTemp}
             onChange={(e) => setField("SensitiveItemWFTemp")(e.target.value)}
@@ -202,7 +201,7 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
 
         <div className="sm:col-span-2">
           <DynamicInput
-            label="Days"
+            label={t("Alerts.Days")}
             name="Duration"
             type="number"
             value={form.Duration}
@@ -212,23 +211,24 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
-        <label className="flex items-center space-x-1 sm:col-span-1">
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
+        <label className="flex items-center gap-2 sm:col-span-1 h-10">
           <input
             type="radio"
             name="ver"
+            className="h-4 w-4"
             checked={newVersion}
             onChange={() => {
               setNewVersion(true);
               setOldVersion(false);
             }}
           />
-          <span>Change Based</span>
+          <span className="text-sm">{t("Alerts.ChangeBased")}</span>
         </label>
 
         <div className="sm:col-span-2">
           <DynamicSelector
-            label="Changing Field"
+            label={t("Alerts.ChangingField")}
             options={sensitivityWFTempList}
             selectedValue={form.SensitivityWFTemp}
             onChange={(e) => setField("SensitivityWFTemp")(e.target.value)}
@@ -238,7 +238,7 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
 
         <div className="sm:col-span-2">
           <DynamicInput
-            label="Step"
+            label={t("Alerts.Step")}
             name="WFState"
             type="number"
             value={form.WFState}
@@ -252,7 +252,7 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="sm:col-span-2">
           <DynamicSelector
-            label="Send Type"
+            label={t("Alerts.SendType")}
             options={sendTypeOptions}
             selectedValue={form.sendType}
             onChange={(e) => setField("sendType")(e.target.value)}
@@ -261,7 +261,7 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
 
         <div className="sm:col-span-2">
           <DynamicSelector
-            label="Receiver"
+            label={t("Alerts.Receiver")}
             options={roleOptions}
             selectedValue={form.nPostID}
             onChange={(e) => setField("nPostID")(e.target.value)}
@@ -270,24 +270,24 @@ export default function AlertTab({ nWFBoxTemplateId }: AlertTabProps) {
       </div>
 
       <textarea
-        placeholder="Comment"
+        placeholder={t("Alerts.Comment")}
         value={form.Comment}
         onChange={(e) => setField("Comment")(e.target.value)}
         className="w-full border rounded px-2 py-1 h-24 resize-none text-xs"
       />
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <button
           onClick={handleAdd}
-          className="flex items-center bg-green-600 text-white px-3 py-2 rounded text-xs"
+          className="flex items-center gap-1 bg-green-600 text-white px-3 py-2 rounded text-xs"
         >
-          <FaPlus className="mr-1" /> Add
+          <FaPlus /> {t("Global.Add")}
         </button>
         <button
           disabled
-          className="flex items-center bg-red-300 cursor-not-allowed text-white px-3 py-2 rounded text-xs"
+          className="flex items-center gap-1 bg-red-300 cursor-not-allowed text-white px-3 py-2 rounded text-xs"
         >
-          <FaTrash className="mr-1" /> Delete
+          <FaTrash /> {t("Global.Delete")}
         </button>
       </div>
 

@@ -9,6 +9,7 @@ import AlertTab from "./AlertTab";
 import { BoxTemplate } from "../../../services/api.services";
 import { useApi } from "../../../context/ApiContext";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 interface AddSubApprovalFlowModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   workflowTemplateId = 0,
   onBoxTemplateInserted,
 }) => {
+  const { t } = useTranslation();
   // همیشه پیش‌فرض روی Approval Flows
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
   const api = useApi();
@@ -132,19 +134,19 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
             className={`tab ${activeTab === "approval" ? "tab-active" : ""}`}
             onClick={() => setActiveTab("approval")}
           >
-            Approval Flows
+            {t("AddApprovalFlows.ApprovalFlows")}
           </button>
 
           <button
             role="tab"
             title={!editData ? "Alerts is active in edit mode" : undefined}
             disabled={!editData}
-            className={`tab ${
-              activeTab === "alert" ? "tab-active" : ""
-            } ${!editData ? "cursor-not-allowed opacity-50" : ""}`}
+            className={`tab ${activeTab === "alert" ? "tab-active" : ""} ${
+              !editData ? "cursor-not-allowed opacity-50" : ""
+            }`}
             onClick={() => editData && setActiveTab("alert")}
           >
-            Alerts
+            {t("AddApprovalFlows.Alerts")}
           </button>
         </div>
 
@@ -165,18 +167,18 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
         {/* دکمه‌های Save/Edit و Cancel فقط در تب Approval */}
         {activeTab === "approval" && (
-          <div className="flex justify-center mt-6 space-x-3 mb-4">
+          <div className="flex justify-center mt-6 gap-3 mb-4">
             <button
               onClick={handleSaveOrUpdate}
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
             >
-              {editData ? "Edit" : "Save"}
+              {editData ? t("Global.Edit") : t("Global.Add")}
             </button>
             <button
               onClick={onClose}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
             >
-              Cancel
+              {t("Global.Cancel")}
             </button>
           </div>
         )}
