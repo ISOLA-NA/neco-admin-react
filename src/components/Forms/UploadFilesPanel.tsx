@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { FiTrash2, FiDownload, FiLoader } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 
 interface UploadFilesPanelProps {
   onWordUpload: (file: File) => Promise<any>;
@@ -22,6 +23,7 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
   onDownloadWord,
   onDownloadExcel,
 }) => {
+  const { t } = useTranslation();
   const wordInputRef = useRef<HTMLInputElement | null>(null);
   const excelInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -71,7 +73,7 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
           className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {wordLoading && <FiLoader className="animate-spin" size={18} />}
-          {wordFileName ? "Change Word File" : "Upload Word File"}
+          {wordFileName ? t("Forms.ChangeWordFile") : t("Forms.UploadWordFile")}
         </button>
 
         {/* info row (small) */}
@@ -99,7 +101,9 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
               </button>
             </>
           ) : (
-            <span className="text-gray-400">No Word file selected</span>
+            <span className="text-gray-400">
+              {t("Forms.NoWordfileselected")}
+            </span>
           )}
         </div>
 
@@ -121,7 +125,9 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
           className="bg-pink-600 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {excelLoading && <FiLoader className="animate-spin" size={18} />}
-          {excelFileName ? "Change Excel File" : "Upload Excel File"}
+          {excelFileName
+            ? t("Forms.ChaneExcelFile")
+            : t("Forms.UploadExcelFile")}
         </button>
 
         {/* info row (small) */}
@@ -149,7 +155,9 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
               </button>
             </>
           ) : (
-            <span className="text-gray-400">No Excel file selected</span>
+            <span className="text-gray-400">
+              {t("Forms.NoExcellfileselected")}
+            </span>
           )}
         </div>
 

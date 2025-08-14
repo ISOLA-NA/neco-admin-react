@@ -13,6 +13,9 @@ import enUser from "./components/locales/en/User.json";
 import enRole from "./components/locales/en/Roles.json";
 import enStaffing from "./components/locales/en/Staffing.json";
 import enRoleGroup from "./components/locales/en/RoleGroup.json";
+import enForms from "./components/locales/en/Forms.json";
+import enAddForms from "./components/locales/en/AddForms.json";
+import enCategory from "./components/locales/en/Category.json";
 
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
@@ -26,6 +29,9 @@ import faUser from "./components/locales/fa/User.json";
 import faRole from "./components/locales/fa/Roles.json";
 import faStaffing from "./components/locales/fa/Staffing.json";
 import faRoleGroup from "./components/locales/fa/RoleGroup.json";
+import faForms from "./components/locales/fa/Forms.json";
+import faAddForms from "./components/locales/fa/AddForms.json";
+import faCategory from "./components/locales/fa/Category.json";
 
 const resources = {
   en: {
@@ -41,6 +47,9 @@ const resources = {
       ...enRole,
       ...enStaffing,
       ...enRoleGroup,
+      ...enForms,
+      ...enAddForms,
+      ...enCategory,
     },
   },
   fa: {
@@ -56,6 +65,9 @@ const resources = {
       ...faRole,
       ...faStaffing,
       ...faRoleGroup,
+      ...faForms,
+      ...faAddForms,
+      ...faCategory,
     },
   },
 };

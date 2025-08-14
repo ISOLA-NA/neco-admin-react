@@ -1,0 +1,18 @@
+{
+    "Forms": {
+      "Name": "نام فرم",
+      "Command": "کامند",
+      "CategoryA": "دسته بندی A",
+      "CategoryB": "دسته بندی B",
+      "IsMegaForm": "مگا فرم",
+      "Transmittal": "ترنزمیتال",
+      "RelatedProjects": "پروژه های مرتبط",
+      "UploadExcelFile": " فایل اکسل",
+      "UploadWordFile": "آپلود فایل ورد",
+      "ChangeWordFile":"تغییر فایل ورد",
+      "ChaneExcellFile":"تغییر فایل اکسل",
+      "NoWordfileselected":"هیچ فایل وردی انتخاب نشده است ",
+      "NoExcellfileselected":"هیچ فایل اکسلی انتخاب نشده است "
+    }
+  }
+  

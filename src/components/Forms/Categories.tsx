@@ -12,6 +12,7 @@ import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSelector from "../utilities/DynamicSelector"; // وارد کردن DynamicSelector
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { CategoryItem } from "../../services/api.services";
+import { useTranslation } from "react-i18next";
 
 export interface CategoryHandle {
   save: () => Promise<any>;
@@ -25,6 +26,7 @@ interface CategoriesProps {
 
 const Categories = forwardRef<CategoryHandle, CategoriesProps>(
   ({ selectedRow, selectedCategoryType }, ref) => {
+    const { t } = useTranslation();
     const { handleSaveCatA, handleSaveCatB } = useAddEditDelete();
 
     // وضعیت برای داده‌های فرم
@@ -131,7 +133,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
         <TwoColumnLayout>
           <TwoColumnLayout.Item span={1}>
             <DynamicInput
-              name="Name"
+              name={t("Category.Name")}
               type="text"
               value={formData.Name}
               onChange={handleNameChange}
@@ -142,7 +144,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
           <TwoColumnLayout.Item span={1}>
             <DynamicSelector
               name="categoryType"
-              label="نوع دسته‌بندی"
+              label={t("Category.CategoryType")}
               options={categoryOptions}
               selectedValue={categoryType}
               onChange={handleCategoryTypeChange}
@@ -153,7 +155,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
 
           <TwoColumnLayout.Item span={2}>
             <CustomTextarea
-              name="Description"
+              name={t("Category.Description")}
               value={formData.Description}
               placeholder="توضیحات دسته‌بندی را وارد کنید"
               onChange={handleDescriptionChange}

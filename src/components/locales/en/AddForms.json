@@ -1,0 +1,28 @@
+{
+  "AddForms": {
+    "EditColumn": "Edit Column",
+    "AddNewColumn": "Add New Column",
+    "Order": "Order",
+    "ColumnName": "Column Name",
+    "Description": "Description",
+    "Command": "Command",
+    "PrintCode": "Print Code",
+    "IsRequiredInWf": "Is Required In Wf",
+    "AllowedWfBoxName": "Allowed WfBox Name",
+    "IsEditableInWorkflow": "Is Editable in Workflow",
+    "TypeOfInformation": "Type of Information",
+    "ShowInAlert": "Show in Alert",
+    "RightToLeft": "Right to Left",
+    "ShowInList": "Show in List",
+    "MainColumns": "Main Columns",
+    "Required": "Required",
+    "CountInReject": "Count In Reject",
+    "ProgramMetaColumnName": "Program Meta ColumnName",
+    "ShowInTab": "Show in Tab",
+    "ReadOnly": "Read Only",
+    "Updating": "Updating...",
+    "Adding": "Adding...",
+    "UpdateColumn": "Update Column",
+    "AddColumn": "Add Column"
+  }
+}

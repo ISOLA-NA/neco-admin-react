@@ -1,0 +1,18 @@
+{
+    "Forms": {
+      "Name": "Name",
+      "Command": "Command",
+      "CategoryA": "Category A",
+      "CategoryB": "Category B",
+      "IsMegaForm": "Is Mega Form",
+      "Transmittal": "Transmittal",
+      "RelatedProjects": "Related Projects",
+      "UploadExcelFile": "Upload Excel File",
+      "UploadWordFile": "Upload Word File",
+      "ChangeWordFile":"Change Word File",
+      "ChaneExcelFile":"Chane Excel File",
+      "NoWordfileselected":"No Word file selected",
+      "NoExcelfileselected":"No Excel file selected"
+    }
+  }
+  

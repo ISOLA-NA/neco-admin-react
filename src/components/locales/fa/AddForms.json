@@ -1,0 +1,29 @@
+{
+    "AddForms": {
+      "EditColumn": "ویرایش ستون",
+      "AddNewColumn": "اضافه کردن ستون",        
+      "Order": "ترتیب",
+      "ColumnName": "نام ستون",
+      "Description": "توضیحات",
+      "Command": "کامند",
+      "PrintCode": "پرینت کد",
+      "IsRequiredInWf": "الزامی در WF",
+      "AllowedWfBoxName": "نام مجاز Wf Box",
+      "IsEditableInWorkflow": "قابل ویرایش در WF",
+      "TypeOfInformation": "نوع اطلاعات این ستون",
+      "ShowInAlert": "نمایش در هشدار",
+      "RightToLeft": "راست به چپ",
+      "ShowInList": "نمایش لیستی",
+      "MainColumns": "ستون‌های اصلی",
+      "Required": "الزامی",
+      "CountInReject": "شمارش در رد",
+      "ProgramMetaColumnName": "نام ستون متا برنامه",
+      "ShowInTab": "نمایش در تب",
+      "ReadOnly": "فقط خواندنی",
+      "Updating": "در حال بروزرسانی...",
+      "Adding": "در حال افزودن...",
+      "UpdateColumn": "بروزرسانی ستون",
+      "AddColumn": "افزودن ستون"
+    }
+  }
+  
