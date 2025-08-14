@@ -1,0 +1,13 @@
+{
+    "Staffing": {
+      "ProjectName": "نام پروژه",
+      "RolesType": "پست ها",
+      "SuperiorRole": "سمت مافوق",
+      "UserName": "کاربر",
+      "RelatedRibbons": "منو های مرتبط",
+      "Enterprise": "شرکت",
+      "ShowCommandBar": " آدرس بار",
+      "AccessToNewProjects": "دسترسی پروژه"
+    }
+  }
+  

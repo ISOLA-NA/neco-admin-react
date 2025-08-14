@@ -1,0 +1,13 @@
+{
+    "Staffing": {
+      "ProjectName": "Project Name",
+      "RolesType": "Roles Type",
+      "SuperiorRole": "Superior Role",
+      "UserName": "User Name",
+      "RelatedRibbons": "Related Ribbons",
+      "Enterprise": "Enterprise",
+      "ShowCommandBar": "Show Command Bar",
+      "AccessToNewProjects": "Access To New Projects"
+    }
+  }
+  

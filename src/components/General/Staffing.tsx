@@ -15,6 +15,7 @@ import { Role, useApi } from "../../context/ApiContext";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import { useTranslation } from "react-i18next";
 
 interface StaffingData {
   id: string;
@@ -42,6 +43,7 @@ interface StaffingProps {
 
 const Staffing = forwardRef<StaffingHandle, StaffingProps>(
   ({ selectedRow }, ref) => {
+    const { t } = useTranslation();
     const api = useApi();
     const [projects, setProjects] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
@@ -123,7 +125,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             "A dynamic role has been selected; please select a project"
           );
           // throw new Error("Missing ProjectID");
-          return false
+          return false;
         }
       }
 
@@ -136,7 +138,6 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
         );
         return false;
       }
-
 
       const currentUserId = localStorage.getItem("currentUserId") || undefined;
       const sd = staffingData;
@@ -169,7 +170,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
       try {
         await api.updateRole(payload);
-        return true
+        return true;
       } catch (e) {
         console.error(e);
         throw e;
@@ -224,9 +225,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
     if (isLoading)
       return (
-        <div className="flex justify-center items-center h-48">
-          Loading...
-        </div>
+        <div className="flex justify-center items-center h-48">Loading...</div>
       );
 
     return (
@@ -239,7 +238,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             ]}
             selectedValue={staffingData.Name}
             onChange={(e) => handleChange("nPostTypeID", e.target.value)}
-            label="Roles Type"
+            label={t("Staffing.RolesType")}
             showButton
             onButtonClick={() => openModal("nPostTypeID")}
             disabled={!!selectedRow}
@@ -254,7 +253,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             ]}
             selectedValue={staffingData.ProjectID}
             onChange={(e) => handleChange("ProjectID", e.target.value)}
-            label="Project Name"
+            label={t("Staffing.ProjectName")}
             showButton
             onButtonClick={() => openModal("ProjectID")}
             disabled={staffingData.isStaticPost}
@@ -267,11 +266,10 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             ]}
             selectedValue={staffingData.OwnerID}
             onChange={(e) => handleChange("OwnerID", e.target.value)}
-            label="User Name"
+            label={t("Staffing.UserName")}
             showButton
             onButtonClick={() => openModal("OwnerID")}
           />
-
 
           <DynamicSelector
             options={[
@@ -280,7 +278,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             ]}
             selectedValue={staffingData.ParrentId}
             onChange={(e) => handleChange("ParrentId", e.target.value)}
-            label="Superior Role"
+            label={t("Staffing.SuperiorRole")}
             showButton
             onButtonClick={() => openModal("ParrentId")}
           />
@@ -295,11 +293,10 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             ]}
             selectedValue={staffingData.nCompanyID}
             onChange={(e) => handleChange("nCompanyID", e.target.value)}
-            label="Enterprise"
+            label={t("Staffing.Enterprise")}
             showButton
             onButtonClick={() => openModal("nCompanyID")}
           />
-
 
           <DynamicSelector
             options={[
@@ -311,7 +308,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             ]}
             selectedValue={staffingData.nMenuID}
             onChange={(e) => handleChange("nMenuID", e.target.value)}
-            label="Related Ribbons"
+            label={t("Staffing.RelatedRibbons")}
             showButton
             onButtonClick={() => openModal("nMenuID")}
           />
@@ -320,21 +317,23 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             isChecked={staffingData.isAccessCreateProject}
             onChange={() => handleSwitcher("isAccessCreateProject")}
             leftLabel=""
-            rightLabel="Access To New Projects"
+            rightLabel={t("Staffing.AccessToNewProjects")}
           />
 
           <DynamicSwitcher
             isChecked={staffingData.isHaveAddressbar}
             onChange={() => handleSwitcher("isHaveAddressbar")}
             leftLabel=""
-            rightLabel="Show Command Bar"
+            rightLabel={t("Staffing.ShowCommandBar")}
           />
         </TwoColumnLayout>
 
         <DynamicModal isOpen={modalOpen} onClose={closeModal}>
           {currentSelector === "ProjectID" && (
             <TableSelector
-              columnDefs={[{ headerName: "Project Name", field: "ProjectName" }]}
+              columnDefs={[
+                { headerName: "Project Name", field: "ProjectName" },
+              ]}
               rowData={projects}
               // selectedRow={selectedRowData}
               onRowClick={onRowClick}
@@ -399,7 +398,6 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
               isSelectDisabled={!selectedRowData}
             />
           )}
-
         </DynamicModal>
       </div>
     );

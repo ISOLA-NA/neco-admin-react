@@ -1,6 +1,7 @@
 import React from "react";
 import DynamicModal from "../utilities/DynamicModal";
 import { classNames } from "primereact/utils";
+import { useTranslation } from "react-i18next";
 
 interface ListSelectorProps {
   title: string;
@@ -31,6 +32,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   modalContentProps = {},
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
 
@@ -89,7 +91,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
                   />
                 </div>
                 <span className="text-white text-xs select-none ml-2 rtl:mr-2">
-                  Global
+                  {t("Global.Global")}
                 </span>
               </label>
             )}
@@ -143,7 +145,9 @@ const ListSelector: React.FC<ListSelectorProps> = ({
                   key={item.ID}
                   className="flex justify-between items-center bg-white p-2 rounded-md shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <span className="text-gray-700 text-xs">{getLabel(item)}</span>
+                  <span className="text-gray-700 text-xs">
+                    {getLabel(item)}
+                  </span>
                   <button
                     className="text-red-500 hover:text-red-700 focus:outline-none"
                     onClick={() => handleRemove(item.ID)}

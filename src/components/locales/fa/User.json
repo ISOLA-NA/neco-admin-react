@@ -1,0 +1,17 @@
+{
+    "User": {
+      "Code": "شماره پرسنل",
+      "Username": "نام کاربری",
+      "Name": "نام",
+      "Family": "نام خانوادگی",
+      "Password": "رمز عبور",
+      "ConfirmPassword":"تایید رمز عبور",
+      "ChangePassword": "تغییر پسورد",
+      "Mobile": "موبایل",
+      "Email": "ایمیل",
+      "UserType": "نقش کاربر",
+      "Website": "وب سایت",
+      "UserProfileImage":"تصویر پروفایل کاربر"
+    }
+  }
+  

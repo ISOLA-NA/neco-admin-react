@@ -1,0 +1,17 @@
+{
+    "User": {
+      "Code": "Code",
+      "Username": "Username",
+      "Name": "Name",
+      "Family": "Family",
+      "Password": "Password",
+      "ConfirmPassword":"Confirm Password",
+      "ChangePassword": "Change Password",
+      "Mobile": "Mobile",
+      "Email": "Email",
+      "UserType": "User Type",
+      "Website": "Website",
+      "UserProfileImage":"User Profile Image"
+    }
+  }
+  

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { classNames } from "primereact/utils";
+import { useTranslation } from "react-i18next";
 
 interface Option {
   value: string;
@@ -39,6 +40,7 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   loading = false,
   allowCustom = false,
 }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [customInput, setCustomInput] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);

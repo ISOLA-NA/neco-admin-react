@@ -1,0 +1,14 @@
+{
+    "Roles": {
+      "RoleCode": "Role Code",
+      "Role": "Role",
+      "Responsibilities": "Responsibilities",
+      "JobDescription": "Job Description",
+      "Competencies": "Competencies",
+      "Authorities": "Authorities",
+      "Type": "Type",
+      "Grade": "Grade",
+      "StaticPost": "Static Post"
+    }
+  }
+  

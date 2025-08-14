@@ -11,6 +11,7 @@ import DynamicInput from "../utilities/DynamicInput";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { Company } from "../../services/api.services";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 export interface CompanyHandle {
   save: () => Promise<boolean>;
@@ -23,6 +24,7 @@ interface EnterpriseProps {
 
 const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
   ({ selectedRow }, ref) => {
+    const { t } = useTranslation();
     const { handleSaveCompany } = useAddEditDelete();
 
     const [enterpriseData, setEnterpriseData] = useState<Company>({
@@ -128,7 +130,7 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
     return (
       <TwoColumnLayout>
         <DynamicInput
-          name="Enterprise Name"
+          name={t("Company.EnterpriseName")}
           type="text"
           value={enterpriseData.Name}
           onChange={(e) => handleChange("Name", e.target.value)}
@@ -136,14 +138,14 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
         />
 
         <DynamicInput
-          name="Describtion"
+          name={t("Company.Description")}
           type="text"
           value={enterpriseData.Describtion || ""}
           onChange={(e) => handleChange("Describtion", e.target.value)}
         />
 
         <DynamicInput
-          name="Type"
+          name={t("Company.Type")}
           type="text"
           value={enterpriseData.Type || ""}
           onChange={(e) => handleChange("Type", e.target.value)}
@@ -151,7 +153,7 @@ const Enterprise = forwardRef<CompanyHandle, EnterpriseProps>(
         />
 
         <DynamicInput
-          name="Information"
+          name={t("Company.Information")}
           type="text"
           value={enterpriseData.Information || ""}
           onChange={(e) => handleChange("Information", e.target.value)}

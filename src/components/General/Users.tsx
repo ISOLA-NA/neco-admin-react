@@ -16,6 +16,7 @@ import type {
 import AppServices from "../../services/api.services";
 import DynamicConfirm from "../utilities/DynamicConfirm";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 export interface UserHandle {
   save: () => Promise<UserType | null>;
@@ -27,6 +28,7 @@ interface UserProps {
 }
 
 const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
+  const { t } = useTranslation();
   const { handleSaveUser } = useAddEditDelete();
 
   const [userTypeOptions, setUserTypeOptions] = useState<
@@ -269,7 +271,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     <TwoColumnLayout>
       <div>
         <DynamicInput
-          name="Username"
+          name={t("User.Username")}
           type="text"
           value={userData.Username}
           onChange={(e) => handleChange("Username", e.target.value)}
@@ -279,7 +281,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       </div>
       <div>
         <DynamicInput
-          name="Code"
+          name={t("User.Code")}
           type="number"
           value={userData.Code}
           onChange={(e) => handleChange("Code", e.target.value)}
@@ -288,7 +290,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       </div>
       <div>
         <DynamicInput
-          name="Name"
+          name={t("User.Name")}
           type="text"
           value={userData.Name}
           onChange={(e) => handleChange("Name", e.target.value)}
@@ -298,7 +300,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       </div>
       <div>
         <DynamicInput
-          name="Family"
+          name={t("User.Family")}
           type="text"
           value={userData.Family}
           onChange={(e) => handleChange("Family", e.target.value)}
@@ -309,7 +311,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         <>
           <div>
             <DynamicInput
-              name="Password"
+              name={t("User.Password")}
               type="password"
               value={userData.Password}
               onChange={(e) => handleChange("Password", e.target.value)}
@@ -319,7 +321,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           </div>
           <div>
             <DynamicInput
-              name="Confirm Password"
+              name={t("User.ConfirmPassword")}
               type="password"
               value={userData.ConfirmPassword}
               onChange={(e) => handleChange("ConfirmPassword", e.target.value)}
@@ -333,7 +335,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         <>
           <div>
             <DynamicInput
-              name="Password"
+              name={t("User.Password")}
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -346,14 +348,14 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
               onClick={handleChangePasswordClick}
               className="px-5 py-2.5 border rounded bg-gradient-to-r from-[#e14aa7] via-[#6761f0] to-[#b23ace] text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-[#b23ace] hover:via-[#6761f0] hover:to-[#e14aa7]"
             >
-              Change Password
+              {t("User.ChangePassword")}
             </button>
           </div>
         </>
       )}
       <div>
         <DynamicInput
-          name="Email"
+          name={t("User.Email")}
           type="text"
           value={userData.Email}
           onChange={(e) => handleChange("Email", e.target.value)}
@@ -362,7 +364,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       </div>
       <div>
         <DynamicInput
-          name="Mobile"
+          name={t("User.Mobile")}
           type="text"
           value={userData.Mobile}
           onChange={(e) => handleChange("Mobile", e.target.value)}
@@ -371,7 +373,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       </div>
       <div>
         <DynamicInput
-          name="Website"
+          name={t("User.Website")}
           type="text"
           value={userData.Website}
           onChange={(e) => handleChange("Website", e.target.value)}
@@ -384,13 +386,15 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           options={userTypeOptions}
           selectedValue={userData.userType.toString()}
           onChange={(e) => handleChange("userType", parseInt(e.target.value))}
-          label="User Type"
+          label={t("User.UserType")}
           className="-mt-6"
         />
       </div>
       <div>
         <div className="border rounded-lg p-4 bg-gray-50">
-          <h3 className="text-lg font-medium mb-4">User Profile Image</h3>
+          <h3 className="text-lg font-medium mb-4">
+            {t("User.UserProfileImage")}
+          </h3>
           <FileUploadHandler
             selectedFileId={userData.UserImageId}
             onUploadSuccess={handleImageUploadSuccess}

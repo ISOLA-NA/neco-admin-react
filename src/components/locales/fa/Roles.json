@@ -1,0 +1,14 @@
+{
+    "Roles": {
+      "RoleCode": "کد سمت",
+      "Role": "سمت",
+      "Responsibilities": "مسئولیت‌ها",
+      "JobDescription": "توضیحات سمت",
+      "Competencies": "شایستگی‌ها",
+      "Authorities": "اختیارات",
+      "Type": "نوع سمت",
+      "Grade": "درجه",
+      "StaticPost": "سمت استاتیک"
+    }
+  }
+  

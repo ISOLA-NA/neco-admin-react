@@ -20,6 +20,7 @@ import {
   User,
 } from "../../services/api.services";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 export interface RoleGroupsHandle {
   save: () => Promise<boolean>;
@@ -61,6 +62,7 @@ const getAssociatedItems = <T extends { ID: string; Name: string }>(
 
 const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
   ({ selectedRow }, ref) => {
+    const { t } = useTranslation();
     const api = useApi();
     const dataCache = useRef<{
       projects?: Project[];
@@ -327,7 +329,7 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
     return (
       <TwoColumnLayout>
         <DynamicInput
-          name="Name"
+          name={t("RoleGroup.Name")}
           type="text"
           value={formData.Name}
           placeholder="Enter group name"
@@ -337,7 +339,7 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
         />
 
         <CustomTextarea
-          name="Description"
+          name={t("RoleGroup.Description")}
           value={formData.Description || ""}
           placeholder="Enter description"
           onChange={(e) => handleChange("Description", e.target.value)}
@@ -345,7 +347,7 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
         />
 
         <ListSelector
-          title="Projects"
+          title={t("RoleGroup.Projects")}
           className="mb-4"
           columnDefs={columnDefs.projects}
           rowData={processedData.projectsListData}
@@ -370,7 +372,7 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
         />
 
         <ListSelector
-          title="Members"
+          title={t("RoleGroup.Members")}
           className="mb-4"
           columnDefs={columnDefs.members}
           rowData={processedData.processedRoles}
