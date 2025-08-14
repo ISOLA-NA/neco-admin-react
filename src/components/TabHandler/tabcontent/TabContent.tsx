@@ -30,11 +30,12 @@ import ProjectAccess, {
 import { ApprovalFlowHandle } from "../../ApprovalFlows/MainApproval/ApprovalFlows";
 import { FormsHandle } from "../../Forms/Forms";
 import { CategoryHandle } from "../../Forms/Categories";
-
+import DynamicButton from "../../utilities/DynamicButtons";
 import DynamicInput from "../../utilities/DynamicInput";
-import { FaSave, FaEdit, FaTrash } from "react-icons/fa";
+import { FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import { useSubTabDefinitions } from "../../../context/SubTabDefinitionsContext";
+import { useTranslation } from "react-i18next";
 
 interface TabContentProps {
   component: React.LazyExoticComponent<React.ComponentType<any>> | null;
@@ -75,6 +76,7 @@ const TabContent: FC<TabContentProps> = ({
   setIsPanelOpen,
 }) => {
   const api = useApi();
+  const { t } = useTranslation();
   const { fetchDataForSubTab } = useSubTabDefinitions();
   const [panelWidth, setPanelWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -114,7 +116,7 @@ const TabContent: FC<TabContentProps> = ({
   );
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState<() => void>(() => { });
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
 
   // وضعیت نمایش پنل راست
   // const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -448,9 +450,9 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          // "خطایی در فرآیند ذخیره دستور رخ داده است.";
-          "";
+            data?.message ||
+            // "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            "";
       showAlert("error", null, "Error", message);
     }
   };
@@ -595,13 +597,13 @@ const TabContent: FC<TabContentProps> = ({
             const result =
               selectedCategoryType === "cata"
                 ? await api.updateCatA({
-                  ...categoriesRef.current.getData(),
-                  categoryType: selectedCategoryType,
-                })
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  })
                 : await api.updateCatB({
-                  ...categoriesRef.current.getData(),
-                  categoryType: selectedCategoryType,
-                });
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  });
             showAlert("success", null, "", "Category updated successfully.");
             await fetchData();
           }
@@ -617,8 +619,8 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     }
   };
@@ -685,15 +687,20 @@ const TabContent: FC<TabContentProps> = ({
   };
 
   // یک تابع برای New
-  const handleNewClick = () => {
-    resetInputs();
-    setPendingSelectedRow(null);
-    onRowClick(null);
-    setIsAdding(true);
-    setIsPanelOpen(true);
-    // Save فعال، Update غیرفعال
-    setCanSave(true);
-    setCanUpdate(false);
+  // const handleNewClick = () => {
+  //   resetInputs();
+  //   setPendingSelectedRow(null);
+  //   onRowClick(null);
+  //   setIsAdding(true);
+  //   setIsPanelOpen(true);
+  //   // Save فعال، Update غیرفعال
+  //   setCanSave(true);
+  //   setCanUpdate(false);
+  // };
+
+  const handleNewClickRibbons = () => {
+    setNameInput("");
+    setDescriptionInput("");
   };
 
   // عملیات CRUD از دکمه‌های بالا یا داخل DataTable
@@ -955,7 +962,7 @@ const TabContent: FC<TabContentProps> = ({
             <div className="mt-4 w-full p-4 bg-white rounded-md shadow-md">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DynamicInput
-                  name="Name"
+                  name={t("Ribbons.Name")}
                   type="text"
                   value={nameInput}
                   placeholder="Enter name"
@@ -963,7 +970,7 @@ const TabContent: FC<TabContentProps> = ({
                   required
                 />
                 <DynamicInput
-                  name="Description"
+                  name={t("Ribbons.Description")}
                   type="text"
                   value={descriptionInput}
                   placeholder="Enter description"
@@ -971,56 +978,54 @@ const TabContent: FC<TabContentProps> = ({
                 />
               </div>
 
-              <div className="flex items-center gap-4 mt-4">
-                {/* Save */}
-                <button
+              <div className="flex items-center gap-4 mt-6 justify-center">
+                {/* Save - سبز سازمانی */}
+                <DynamicButton
+                  text="Save"
+                  leftIcon={<FaSave />}
                   onClick={handleInsert}
-                  disabled={!canSave}
-                  className={`flex items-center gap-2 px-4 py-2 rounded transition
-          ${canSave
-                      ? "bg-green-500 hover:bg-green-600 text-white"
-                      : "bg-green-200 text-green-700 cursor-not-allowed"
-                    }`}
-                >
-                  <FaSave /> Save
-                </button>
+                  isDisabled={!nameInput.trim()}
+                  variant="orgGreen"
+                  size="md"
+                />
 
-                {/* Update */}
-                <button
+                {/* Update - زرد سازمانی */}
+                <DynamicButton
+                  text="Update"
+                  leftIcon={<FaEdit />}
                   onClick={handleUpdate}
-                  disabled={!canUpdate}
-                  className={`flex items-center gap-2 px-4 py-2 rounded transition
-          ${canUpdate
-                      ? "bg-blue-500 hover:bg-blue-600 text-white"
-                      : "bg-blue-200 text-blue-700 cursor-not-allowed"
-                    }`}
-                >
-                  <FaEdit /> Update
-                </button>
+                  isDisabled={!selectedRow}
+                  variant="orgYellow"
+                  size="md"
+                />
 
-                {/* New */}
-                <button
-                  onClick={handleNewClick}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition"
-                >
-                  New
-                </button>
+                {/* New - آبی سازمانی (فقط پاک کردن فیلدها) */}
+                <DynamicButton
+                  text="New"
+                  leftIcon={<FaPlus />}
+                  onClick={handleNewClickRibbons}
+                  variant="orgBlue"
+                  size="md"
+                />
 
-                {/* Delete */}
-                <button
+                {/* Delete - قرمز سازمانی */}
+                <DynamicButton
+                  text="Delete"
+                  leftIcon={<FaTrash />}
                   onClick={handleDeleteClick}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                >
-                  <FaTrash /> Delete
-                </button>
+                  isDisabled={!selectedRow}
+                  variant="orgRed"
+                  size="md"
+                />
               </div>
             </div>
           )}
+
           <DataTable
             columnDefs={columnDefs}
             rowData={fetchedRowData}
             onRowDoubleClick={handleDoubleClick}
-            setSelectedRowData={handleRowClickLocal}
+            setSelectedRowData={handleRowClickLocal} // این تابع باید selectedRow رو ست کنه
             showDuplicateIcon={showDuplicateIcon}
             showEditIcon={showEditIcon}
             showAddIcon={showAddIcon}
@@ -1031,8 +1036,6 @@ const TabContent: FC<TabContentProps> = ({
             onDuplicate={handleDuplicateClick}
             isLoading={isLoading}
           />
-
-
         </div>
       </div>
 
@@ -1048,8 +1051,9 @@ const TabContent: FC<TabContentProps> = ({
       {/* پنل راست */}
       {isPanelOpen && (
         <div
-          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
-            }`}
+          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
+            isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
+          }`}
           style={{
             transition: "opacity 0.1s ease-out",
             backgroundColor: "#f3f4f6",
@@ -1069,48 +1073,48 @@ const TabContent: FC<TabContentProps> = ({
               activeSubTab !== "ProjectsAccess" && (
                 <PanelHeader
                   isExpanded={false}
-                  toggleExpand={() => { }}
+                  toggleExpand={() => {}}
                   onSave={
                     isAdding &&
-                      (activeSubTab === "Configurations" ||
-                        activeSubTab === "Commands" ||
-                        activeSubTab === "Users" ||
-                        activeSubTab === "Ribbons" ||
-                        activeSubTab === "Roles" ||
-                        activeSubTab === "RoleGroups" ||
-                        activeSubTab === "Enterprises" ||
-                        activeSubTab === "Staffing" ||
-                        activeSubTab === "ProgramTemplate" ||
-                        activeSubTab === "ProgramTypes" ||
-                        activeSubTab === "Odp" ||
-                        activeSubTab === "Procedures" ||
-                        activeSubTab === "Calendars" ||
-                        activeSubTab === "ProjectsAccess" ||
-                        activeSubTab === "ApprovalFlows" ||
-                        activeSubTab === "Forms" ||
-                        activeSubTab === "Categories")
+                    (activeSubTab === "Configurations" ||
+                      activeSubTab === "Commands" ||
+                      activeSubTab === "Users" ||
+                      activeSubTab === "Ribbons" ||
+                      activeSubTab === "Roles" ||
+                      activeSubTab === "RoleGroups" ||
+                      activeSubTab === "Enterprises" ||
+                      activeSubTab === "Staffing" ||
+                      activeSubTab === "ProgramTemplate" ||
+                      activeSubTab === "ProgramTypes" ||
+                      activeSubTab === "Odp" ||
+                      activeSubTab === "Procedures" ||
+                      activeSubTab === "Calendars" ||
+                      activeSubTab === "ProjectsAccess" ||
+                      activeSubTab === "ApprovalFlows" ||
+                      activeSubTab === "Forms" ||
+                      activeSubTab === "Categories")
                       ? handleInsert
                       : undefined
                   }
                   onUpdate={
                     !isAdding &&
-                      (activeSubTab === "Configurations" ||
-                        activeSubTab === "Commands" ||
-                        activeSubTab === "Users" ||
-                        activeSubTab === "Ribbons" ||
-                        activeSubTab === "Roles" ||
-                        activeSubTab === "Enterprises" ||
-                        activeSubTab === "RoleGroups" ||
-                        activeSubTab === "Staffing" ||
-                        activeSubTab === "ProgramTemplate" ||
-                        activeSubTab === "ProgramTypes" ||
-                        activeSubTab === "Odp" ||
-                        activeSubTab === "Procedures" ||
-                        activeSubTab === "Calendars" ||
-                        activeSubTab === "ProjectsAccess" ||
-                        activeSubTab === "ApprovalFlows" ||
-                        activeSubTab === "Forms" ||
-                        activeSubTab === "Categories")
+                    (activeSubTab === "Configurations" ||
+                      activeSubTab === "Commands" ||
+                      activeSubTab === "Users" ||
+                      activeSubTab === "Ribbons" ||
+                      activeSubTab === "Roles" ||
+                      activeSubTab === "Enterprises" ||
+                      activeSubTab === "RoleGroups" ||
+                      activeSubTab === "Staffing" ||
+                      activeSubTab === "ProgramTemplate" ||
+                      activeSubTab === "ProgramTypes" ||
+                      activeSubTab === "Odp" ||
+                      activeSubTab === "Procedures" ||
+                      activeSubTab === "Calendars" ||
+                      activeSubTab === "ProjectsAccess" ||
+                      activeSubTab === "ApprovalFlows" ||
+                      activeSubTab === "Forms" ||
+                      activeSubTab === "Categories")
                       ? handleUpdate
                       : undefined
                   }
@@ -1144,8 +1148,8 @@ const TabContent: FC<TabContentProps> = ({
                         isAdding
                           ? "add-mode"
                           : selectedRow
-                            ? selectedRow.ID
-                            : "no-selection"
+                          ? selectedRow.ID
+                          : "no-selection"
                       }
                       selectedRow={isAdding ? null : selectedRow}
                       ref={getActiveRef()}

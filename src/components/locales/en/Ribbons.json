@@ -1,0 +1,14 @@
+{
+    "Ribbons": {
+      "Name": "Name",
+      "WindowsWebCommand": "Windows web Command",
+      "WindowsAppCommand": "Windows app Command",
+      "Description": "Description",
+      "Order": "Order",
+      "Size": "Size :",
+      "Large": "Large",
+      "Medium": "Medium",
+      "Small": "Small"
+    }
+  }
+  

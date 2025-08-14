@@ -10,13 +10,17 @@ import {
 import { FaSearch, FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import DynamicInput from "../../../utilities/DynamicInput";
 import DynamicRadioGroup from "../../../utilities/DynamicRadiogroup";
-import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler";
+import FileUploadHandler, {
+  InsertModel,
+} from "../../../../services/FileUploadHandler";
 import DataTable from "../../../TableDynamic/DataTable";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 import AppServices, { MenuItem } from "../../../../services/api.services";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
 import WindowsCommandSelectorModal from "./WindowsCommandSelectorModal";
+import DynamicButton from "../../../utilities/DynamicButtons";
+import { useTranslation } from "react-i18next";
 
 interface Accordion3Props {
   selectedMenuGroupId: number | null;
@@ -44,6 +48,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
   isOpen,
   toggleAccordion,
 }) => {
+  const { t } = useTranslation();
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [rowData, setRowData] = useState<RowData3[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData3 | null>(null);
@@ -168,15 +173,14 @@ const Accordion3: React.FC<Accordion3Props> = ({
       IconImageId: row.IconImageId === "" ? null : row.IconImageId,
     };
 
-    setSelectedRow(sanitizedRow);               // انتخاب ردیف
-    setFormData(sanitizedRow);                  // پر کردن فرم (Command و CommandWeb هر دو داخلش هستند)
-    setWindowsAppCommand(sanitizedRow.Command || "");  // مقدار ورودی WindowsAppCommand
-    setSelectedSize(String(sanitizedRow.Order ?? 0));  // رادیو سایز
-    setIconImageId(sanitizedRow.IconImageId ?? null);  // عکس آیکن
+    setSelectedRow(sanitizedRow); // انتخاب ردیف
+    setFormData(sanitizedRow); // پر کردن فرم (Command و CommandWeb هر دو داخلش هستند)
+    setWindowsAppCommand(sanitizedRow.Command || ""); // مقدار ورودی WindowsAppCommand
+    setSelectedSize(String(sanitizedRow.Order ?? 0)); // رادیو سایز
+    setIconImageId(sanitizedRow.IconImageId ?? null); // عکس آیکن
     setIsEditing(true);
     setIsAdding(false);
   };
-
 
   const handleRowDoubleClick = (row: RowData3) => {
     onRowDoubleClick(row.ID);
@@ -202,11 +206,11 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   // ادیت
   const handleEdit = (row: RowData3) => {
-    setSelectedRow(row);                         // همان ردیف
-    setFormData(row);                            // داده‌های فرم
-    setWindowsAppCommand(row.Command || "");     // هم‌زمان ورودی WindowsAppCommand
-    setSelectedSize(String(row.Order ?? 0));     // سایز
-    setIconImageId(row.IconImageId ?? null);     // آیکن
+    setSelectedRow(row); // همان ردیف
+    setFormData(row); // داده‌های فرم
+    setWindowsAppCommand(row.Command || ""); // هم‌زمان ورودی WindowsAppCommand
+    setSelectedSize(String(row.Order ?? 0)); // سایز
+    setIconImageId(row.IconImageId ?? null); // آیکن
     setIsEditing(true);
     setIsAdding(false);
   };
@@ -239,7 +243,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       LastModified: null,
       ModifiedById: null,
       IconImageId: null,
-      CommandWeb: ""
+      CommandWeb: "",
     };
     setSelectedRow(null);
     setFormData(newRow);
@@ -321,7 +325,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
         HelpText: "",
         KeyTip: "",
         Size: formData.Order || 0,
-
       };
       showAlert("success", null, "", "MenuItem updated successfully.");
       await AppServices.insertMenuItem(newMenuItem);
@@ -339,8 +342,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -380,8 +383,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
@@ -413,11 +416,12 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setErrorConfirmOpen(false);
   };
 
-  const handleSelectCommand = (cmd: string) => {             // ⭐ NEW
-    console.log("🎯 Windows Cmd selected:", cmd);            // ⭐ NEW
-    setWindowsAppCommand(cmd);                               // ⭐ NEW
-    setFormData((prev) => ({ ...prev, Command: cmd }));      // ⭐ NEW  ← اگر می‌خواهید همراه رکورد ذخیره شود
-    setCommandModalOpen(false);                              // ⭐ NEW  ← بستن مودال
+  const handleSelectCommand = (cmd: string) => {
+    // ⭐ NEW
+    console.log("🎯 Windows Cmd selected:", cmd); // ⭐ NEW
+    setWindowsAppCommand(cmd); // ⭐ NEW
+    setFormData((prev) => ({ ...prev, Command: cmd })); // ⭐ NEW  ← اگر می‌خواهید همراه رکورد ذخیره شود
+    setCommandModalOpen(false); // ⭐ NEW  ← بستن مودال
   };
 
   return (
@@ -468,7 +472,13 @@ const Accordion3: React.FC<Accordion3Props> = ({
                 </div>
 
                 {/* DataTable */}
-                <div style={{ height: "300px", overflowY: "auto", marginTop: "-15px" }}>
+                <div
+                  style={{
+                    height: "300px",
+                    overflowY: "auto",
+                    marginTop: "-15px",
+                  }}
+                >
                   <DataTable
                     columnDefs={columnDefs}
                     rowData={filteredRowData}
@@ -488,16 +498,18 @@ const Accordion3: React.FC<Accordion3Props> = ({
                 <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
                   <div className="grid grid-cols-1 gap-6">
                     <DynamicInput
-                      name="Name"
+                      name={t("Ribbons.Name")}
                       type="text"
                       value={formData.Name || ""}
                       placeholder="Name"
-                      onChange={(e) => handleInputChange("Name", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("Name", e.target.value)
+                      }
                       className="mt-2"
                     />
 
                     <DynamicInput
-                      name="Windows web Command"
+                      name={t("Ribbons.WindowsWebCommand")}
                       type="text"
                       value={formData.CommandWeb || ""}
                       placeholder=""
@@ -508,32 +520,34 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     />
 
                     {/* Windows App Command + modal */}
-                    <div className="flex items-center gap-2">
-                      <input
-                        name="Windows App Command"
-                        type="text"
-                        value={windowsAppCommand}
-                        placeholder=""
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setWindowsAppCommand(val);
-                          setFormData((prev) => ({ ...prev, Command: val }));
-                        }}
-                        className="flex-1 h-9 px-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                      <button
-                        type="button"
-                        title="انتخاب Command"
-                        onClick={() => setCommandModalOpen(true)}
-                        className="h-9 px-4 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold flex items-center justify-center"
-                      >
-                        cmd
-                      </button>
+                    <div className="flex flex-col gap-1">
+                      <span>{t("Ribbons.WindowsAppCommand")}</span>
+                      <div className="flex items-center gap-2">
+                        <DynamicInput
+                          name=""
+                          type="text"
+                          value={windowsAppCommand}
+                          placeholder=""
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setWindowsAppCommand(val);
+                            setFormData((prev) => ({ ...prev, Command: val }));
+                          }}
+                          className="flex-1"
+                        />
+                        <button
+                          type="button"
+                          title="انتخاب Command"
+                          onClick={() => setCommandModalOpen(true)}
+                          className="h-9 px-4 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold flex items-center justify-center"
+                        >
+                          cmd
+                        </button>
+                      </div>
                     </div>
 
-
                     <DynamicInput
-                      name="Description"
+                      name={t("Ribbons.Description")}
                       type="text"
                       value={formData.Description || ""}
                       placeholder="Description"
@@ -544,12 +558,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     />
 
                     <DynamicInput
-                      name="Order"
+                      name={t("Ribbons.Order")}
                       type="number"
                       value={formData.Order || 0}
                       placeholder="Order"
                       onChange={(e) =>
-                        handleInputChange("Order", parseInt(e.target.value, 10) || 0)
+                        handleInputChange(
+                          "Order",
+                          parseInt(e.target.value, 10) || 0
+                        )
                       }
                       className="mt-2"
                     />
@@ -557,7 +574,10 @@ const Accordion3: React.FC<Accordion3Props> = ({
                     {/* Size radios and File Upload side by side */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                       <div className="flex flex-wrap items-center gap-4">
-                        <span className="text-lg font-medium">Size:</span>
+                        <span className="text-lg font-medium">
+                          {" "}
+                          {t("Ribbons.Size")}
+                        </span>
                         {/* Inline radios */}
                         <label className="flex items-center text-lg">
                           <input
@@ -567,7 +587,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                             checked={selectedSize === "0"}
                             onChange={() => handleRadioChange("0")}
                           />
-                          Large
+                          {t("Ribbons.Large")}
                         </label>
                         <label className="flex items-center text-lg">
                           <input
@@ -577,7 +597,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                             checked={selectedSize === "1"}
                             onChange={() => handleRadioChange("1")}
                           />
-                          Medium
+                          {t("Ribbons.Medium")}
                         </label>
                         <label className="flex items-center text-lg">
                           <input
@@ -587,7 +607,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                             checked={selectedSize === "2"}
                             onChange={() => handleRadioChange("2")}
                           />
-                          Small
+                          {t("Ribbons.Small")}
                         </label>
                       </div>
                       <div className="w-full sm:w-96">
@@ -603,47 +623,46 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   </div>
 
                   {/* Action buttons */}
-                  <div className="flex items-center gap-4 mt-4">
-                    <button
+                  <div className="flex justify-center items-center gap-4 mt-6">
+                    {/* Add - سبز سازمانی */}
+                    <DynamicButton
+                      text={t("Global.Add")}
+                      leftIcon={<FaSave />}
                       onClick={handleInsert}
-                      disabled={isEditing}
-                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${isEditing
-                          ? "bg-green-300 text-gray-200 cursor-not-allowed"
-                          : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-                        }`}
-                    >
-                      <FaSave /> Save
-                    </button>
-                    <button
+                      isDisabled={isEditing}
+                      variant="orgGreen"
+                      size="md"
+                    />
+
+                    {/* Edit - زرد سازمانی */}
+                    <DynamicButton
+                      text={t("Global.Edit")}
+                      leftIcon={<FaEdit />}
                       onClick={handleUpdate}
-                      disabled={!selectedRow}
-                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                          ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                          : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                        }`}
-                    >
-                      <FaEdit /> Update
-                    </button>
-                    <button
+                      isDisabled={!selectedRow}
+                      variant="orgYellow"
+                      size="md"
+                    />
+
+                    {/* Delete - قرمز سازمانی */}
+                    <DynamicButton
+                      text={t("Global.Delete")}
+                      leftIcon={<FaTrash />}
                       onClick={handleDeleteClick}
-                      disabled={!selectedRow}
-                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                          ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                          : "bg-red-300 text-gray-200 cursor-not-allowed"
-                        }`}
-                    >
-                      <FaTrash /> Delete
-                    </button>
-                    <button
+                      isDisabled={!selectedRow}
+                      variant="orgRed"
+                      size="md"
+                    />
+
+                    {/* New - آبی سازمانی */}
+                    <DynamicButton
+                      text={t("Global.New")}
+                      leftIcon={<FaPlus />}
                       onClick={handleNew}
-                      disabled={!selectedRow}
-                      className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
-                          ? "bg-gray-300 text-gray-200 cursor-not-allowed"
-                          : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-                        }`}
-                    >
-                      <FaPlus /> New
-                    </button>
+                      isDisabled={!selectedRow}
+                      variant="orgBlue"
+                      size="md"
+                    />
                   </div>
                 </div>
               </>
@@ -698,8 +717,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
       </div>
     </>
   );
-
-
 };
 
 export default Accordion3;

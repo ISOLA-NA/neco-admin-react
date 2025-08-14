@@ -8,7 +8,9 @@ import FileUploadHandler, {
 } from "../../../services/FileUploadHandler";
 import { useApi } from "../../../context/ApiContext";
 import { AFBtnItem } from "../../../services/api.services";
-import DynamicConfirm from "../../utilities/DynamicConfirm"; // اضافه کردن ایمپورت
+import DynamicConfirm from "../../utilities/DynamicConfirm";
+import { useTranslation } from "react-i18next";
+import { FaPlus, FaPencilAlt, FaTrash, FaUndo } from "react-icons/fa";
 
 interface ButtonComponentProps {
   columnDefs: { headerName: string; field: string }[];
@@ -59,6 +61,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // وضعیت خطای تصویر
   const [imageError, setImageError] = useState<boolean>(false);
 
+  const { t } = useTranslation();
+
   // رادیوها
   const RadioOptionsState = [
     { value: "accept", label: "Accept" },
@@ -82,7 +86,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmHideCancel, setConfirmHideCancel] = useState<boolean>(false);
   // تابع اکشنی که بعد از زدن دکمه "Confirm" اجرا می‌شود
-  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => { });
+  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => {});
 
   // تابع کمکی برای بازکردن DynamicConfirm
   const openConfirm = (
@@ -125,35 +129,33 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   //   }
   // };
 
- const fetchAllAFBtn = async () => {
-  try {
-    const response = await api.getAllAfbtn();
+  const fetchAllAFBtn = async () => {
+    try {
+      const response = await api.getAllAfbtn();
 
-    /* 🔵 اگر می‌خواهید کل آرایه را یک‌بار ببینید */
-    console.log("AFBtn raw response ➜", response);
+      /* 🔵 اگر می‌خواهید کل آرایه را یک‌بار ببینید */
+      console.log("AFBtn raw response ➜", response);
 
-    const decorated = response.map((item, idx) => {
-      /* 🔵 لاگ‌گرفتن از تک‌تک آیتم‌ها */
-      console.log(`AFBtn item #${idx} ➜`, item);
+      const decorated = response.map((item, idx) => {
+        /* 🔵 لاگ‌گرفتن از تک‌تک آیتم‌ها */
+        console.log(`AFBtn item #${idx} ➜`, item);
 
-      return {
-        ...item,
-        DisplayName: buildDisplayName(
-          mapWFStateForDeemedToRadio(item.WFStateForDeemed),
-          mapWFCommandToRadio(item.WFCommand),
-          item.StateText ?? ""
-        ),
-      };
-    });
+        return {
+          ...item,
+          DisplayName: buildDisplayName(
+            mapWFStateForDeemedToRadio(item.WFStateForDeemed),
+            mapWFCommandToRadio(item.WFCommand),
+            item.StateText ?? ""
+          ),
+        };
+      });
 
-    setRowData(decorated);
-  } catch (error) {
-    console.error("Error fetching AFBtn data:", error);
-    openConfirm("error", "Error", "Failed to fetch data.", true);
-  }
-};
-
-
+      setRowData(decorated);
+    } catch (error) {
+      console.error("Error fetching AFBtn data:", error);
+      openConfirm("error", "Error", "Failed to fetch data.", true);
+    }
+  };
 
   useEffect(() => {
     fetchAllAFBtn();
@@ -223,7 +225,11 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       return;
     }
 
-    const generatedName = buildDisplayName(selectedState, selectedCommand, stateTextValue);
+    const generatedName = buildDisplayName(
+      selectedState,
+      selectedCommand,
+      stateTextValue
+    );
 
     // ابتدا یک Confirm برای ویرایش با پیام تایید نمایش داده می‌شود
     openConfirm(
@@ -322,36 +328,35 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // =========================
   //  توابع کمکی مپ کردن WF
   // =========================
- const mapWFStateForDeemedToRadio = (val?: number): string => {
-  switch (val) {
-    case 1:
-      return "accept";
-    case 2:
-      return "reject";
-    case 3:
-      return "close";
-    default:
-      return "accept";
-  }
-};
+  const mapWFStateForDeemedToRadio = (val?: number): string => {
+    switch (val) {
+      case 1:
+        return "accept";
+      case 2:
+        return "reject";
+      case 3:
+        return "close";
+      default:
+        return "accept";
+    }
+  };
 
-
- const mapWFCommandToRadio = (val?: number): string => {
-  switch (val) {
-    case 1:
-      return "accept";
-    case 2:
-      return "close";
-    case 3:
-      return "reject";
-    case 4:
-      return "client";
-    case 5:
-      return "admin";
-    default:
-      return "accept";
-  }
-};
+  const mapWFCommandToRadio = (val?: number): string => {
+    switch (val) {
+      case 1:
+        return "accept";
+      case 2:
+        return "close";
+      case 3:
+        return "reject";
+      case 4:
+        return "client";
+      case 5:
+        return "admin";
+      default:
+        return "accept";
+    }
+  };
 
   const radioToWFStateForDeemed = (radioVal: string): number => {
     switch (radioVal) {
@@ -435,167 +440,194 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
   };
 
-return (
-  <>
-    {/* استایل داخلی برای همهٔ رادیوباتن‌ها در حالت RTL */}
-    <style>{`
-      .rtl input[type="radio"] {
-        margin-left: 6px;
-      }
-    `}</style>
+  return (
+    <>
+      {/* استایل داخلی برای همهٔ رادیوباتن‌ها در حالت RTL */}
+      <style>{`
+        .rtl input[type="radio"] {
+          margin-left: 6px;
+        }
+      `}</style>
 
-    <div className="w-full h-full flex flex-col overflow-x-hidden bg-white rounded-lg p-4 space-y-6 rtl">
-
-      {/* ✅ DynamicConfirm برای هشدارها */}
-      <DynamicConfirm
-        isOpen={confirmOpen}
-        variant={confirmVariant}
-        title={confirmTitle}
-        message={confirmMessage}
-        onConfirm={handleConfirm}
-        onClose={() => setConfirmOpen(false)}
-        hideCancelButton={confirmHideCancel}
-      />
-
-      {/* ✅ جدول آیتم‌ها */}
-      <div
-        className="w-full overflow-hidden mb-4"
-        style={{ height: "400px", overflowY: "auto" }}
-      >
-        <DataTable
-          columnDefs={columnDefs}
-          rowData={rowData}
-          onRowDoubleClick={handleRowDoubleClickLocal}
-          setSelectedRowData={handleRowClickLocal}
-          showDuplicateIcon={false}
-          showEditIcon={false}
-          showDeleteIcon={false}
-          showAddIcon={false}
-          onAdd={() => {}}
-          onEdit={() => {}}
-          onDelete={() => {}}
-          onDuplicate={() => {}}
-          domLayout="normal"
-        />
-      </div>
-
-      {/* ✅ فرم ورودی‌ها */}
-      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* ▶︎ فیلدهای متنی + رادیوها ◀︎ */}
-        <div className="lg:col-span-2 space-y-6">
-
-          {/* فیلدهای متنی */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DynamicInput
-              name="Name"
-              type="text"
-              value={nameValue}
-              onChange={(e) => setNameValue(e.target.value)}
-              className="w-full"
+      {/* ظرف کلی: بدون min-h-screen تا فاصله‌ی اضافی ته کارت ایجاد نشود */}
+      <div className="w-full h-full flex flex-col bg-white rounded-lg rtl">
+        {/* لایهٔ اسکرول: محتوا + فوتر استیکی هر دو داخل این هستند */}
+        <div className="flex-1 overflow-y-auto">
+          {/* پدینگ افقی ثابت برای کل محتوا */}
+          <div className="p-4">
+            {/* ✅ DynamicConfirm برای هشدارها */}
+            <DynamicConfirm
+              isOpen={confirmOpen}
+              variant={confirmVariant}
+              title={confirmTitle}
+              message={confirmMessage}
+              onConfirm={handleConfirm}
+              onClose={() => setConfirmOpen(false)}
+              hideCancelButton={confirmHideCancel}
             />
-            <DynamicInput
-              name="StateText"
-              type="text"
-              value={stateTextValue}
-              onChange={(e) => setStateTextValue(e.target.value)}
-              className="w-full"
-            />
-            <DynamicInput
-              name="Tooltip"
-              type="text"
-              value={tooltipValue}
-              onChange={(e) => setTooltipValue(e.target.value)}
-              className="w-full"
-            />
-            <DynamicInput
-              name="Order"
-              type="text"
-              value={orderValue}
-              onChange={(e) => setOrderValue(e.target.value)}
-              className="w-full"
-            />
+
+            {/* ✅ جدول آیتم‌ها */}
+            <div
+              className="w-full overflow-hidden mb-4"
+              style={{ height: "400px", overflowY: "auto" }}
+            >
+              <DataTable
+                columnDefs={columnDefs}
+                rowData={rowData}
+                onRowDoubleClick={handleRowDoubleClickLocal}
+                setSelectedRowData={handleRowClickLocal}
+                showDuplicateIcon={false}
+                showEditIcon={false}
+                showDeleteIcon={false}
+                showAddIcon={false}
+                onAdd={() => {}}
+                onEdit={() => {}}
+                onDelete={() => {}}
+                onDuplicate={() => {}}
+                domLayout="normal"
+              />
+            </div>
+
+            {/* ✅ فرم ورودی‌ها */}
+            <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* ▶︎ فیلدهای متنی + رادیوها ◀︎ */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* فیلدهای متنی */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <DynamicInput
+                    name={t("Configuration.Name")}
+                    type="text"
+                    value={nameValue}
+                    onChange={(e) => setNameValue(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name={t("Configuration.StateText")}
+                    type="text"
+                    value={stateTextValue}
+                    onChange={(e) => setStateTextValue(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name={t("Configuration.Tooltip")}
+                    type="text"
+                    value={tooltipValue}
+                    onChange={(e) => setTooltipValue(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name={t("Configuration.Order")}
+                    type="text"
+                    value={orderValue}
+                    onChange={(e) => setOrderValue(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* گروه‌های رادیویی */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* State */}
+                  <DynamicRadioGroup
+                    key={`state-${
+                      isRowClicked ? "controlled" : "uncontrolled"
+                    }`}
+                    className="flex flex-col gap-2"
+                    title={t("Configuration.State")}
+                    name="stateGroup"
+                    options={RadioOptionsState}
+                    selectedValue={selectedState}
+                    onChange={(val) => setSelectedState(val)}
+                    isRowClicked={isRowClicked}
+                  />
+
+                  {/* Command */}
+                  <DynamicRadioGroup
+                    key={`command-${
+                      isRowClicked ? "controlled" : "uncontrolled"
+                    }`}
+                    className="flex flex-col gap-2"
+                    title={t("Configuration.Command")}
+                    name="commandGroup"
+                    options={RadioOptionsCommand}
+                    selectedValue={selectedCommand}
+                    onChange={(val) => setSelectedCommand(val)}
+                    isRowClicked={isRowClicked}
+                  />
+                </div>
+              </div>
+
+              {/* ▶︎ آپلود فایل ◀︎ */}
+              <div className="lg:col-span-1 flex flex-col items-start">
+                <FileUploadHandler
+                  selectedFileId={selectedFileId}
+                  onUploadSuccess={handleUploadSuccess}
+                  resetCounter={resetCounter}
+                  onReset={handleReset}
+                  isEditMode={selectedRow !== null}
+                />
+              </div>
+            </div>
+
+            {/* ✅ پیش‌نمایش تصویر آپلودشده */}
+            {selectedFileId && !imageError && (
+              <div className="mt-4">
+                <img
+                  src={`/api/getImage/${selectedFileId}`}
+                  alt="Selected"
+                  className="w-32 h-32 object-cover"
+                  onError={() => setImageError(true)}
+                />
+              </div>
+            )}
+            {/* <div className="h-2" /> */}
           </div>
 
-          {/* گروه‌های رادیویی */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* State */}
-            <DynamicRadioGroup
-              key={`state-${isRowClicked ? "controlled" : "uncontrolled"}`}
-              className="flex flex-col gap-2"
-              title="State:"
-              name="stateGroup"
-              options={RadioOptionsState}
-              selectedValue={selectedState}
-              onChange={(val) => setSelectedState(val)}
-              isRowClicked={isRowClicked}
-            />
+          <div className="bg-white/90 backdrop-blur mt-6 py-2">
+            <div className="flex items-center justify-center gap-3">
+              {/* Add - سبز سازمانی */}
+              <DynamicButton
+                text={t("Global.Add")}
+                onClick={handleAddClick}
+                isDisabled={isRowClicked}
+                size="md"
+                variant="orgGreen"
+                leftIcon={<FaPlus />}
+              />
 
-            {/* Command */}
-            <DynamicRadioGroup
-              key={`command-${isRowClicked ? "controlled" : "uncontrolled"}`}
-              className="flex flex-col gap-2"
-              title="Command:"
-              name="commandGroup"
-              options={RadioOptionsCommand}
-              selectedValue={selectedCommand}
-              onChange={(val) => setSelectedCommand(val)}
-              isRowClicked={isRowClicked}
-            />
+              {/* Edit - آبی سازمانی */}
+              <DynamicButton
+                text={t("Global.Edit")}
+                onClick={handleEditClick}
+                isDisabled={!selectedRow}
+                size="md"
+                variant="orgYellow"
+                leftIcon={<FaPencilAlt />}
+              />
+
+              {/* New - زرد سازمانی */}
+              <DynamicButton
+                text={t("Global.New")}
+                onClick={handleNewClick}
+                size="md"
+                variant="orgBlue"
+                leftIcon={<FaUndo />}
+              />
+
+              {/* Delete - قرمز سازمانی */}
+              <DynamicButton
+                text={t("Global.Delete")}
+                onClick={handleDeleteClick}
+                isDisabled={isDeleteDisabled}
+                size="md"
+                variant="orgRed"
+                leftIcon={<FaTrash />}
+              />
+            </div>
           </div>
         </div>
-
-        {/* ▶︎ آپلود فایل ◀︎ */}
-        <div className="lg:col-span-1 flex flex-col items-start">
-          <FileUploadHandler
-            selectedFileId={selectedFileId}
-            onUploadSuccess={handleUploadSuccess}
-            resetCounter={resetCounter}
-            onReset={handleReset}
-            isEditMode={selectedRow !== null}
-          />
-        </div>
       </div>
-
-      {/* ✅ پیش‌نمایش تصویر آپلودشده */}
-      {selectedFileId && !imageError && (
-        <div className="mt-4">
-          <img
-            src={`/api/getImage/${selectedFileId}`}
-            alt="Selected"
-            className="w-32 h-32 object-cover"
-            onError={() => setImageError(true)}
-          />
-        </div>
-      )}
-
-      {/* ✅ دکمه‌های عملیات */}
-      <div className="mt-6 flex justify-start space-x-4 rtl:space-x-reverse">
-        <DynamicButton
-          text="Add"
-          onClick={handleAddClick}
-          isDisabled={isRowClicked}
-        />
-        <DynamicButton
-          text="Edit"
-          onClick={handleEditClick}
-          isDisabled={!selectedRow}
-        />
-        <DynamicButton
-          text="New"
-          onClick={handleNewClick}
-          isDisabled={false}
-        />
-        <DynamicButton
-          text="Delete"
-          onClick={handleDeleteClick}
-          isDisabled={isDeleteDisabled}
-        />
-      </div>
-    </div>
-  </>
-);
-
+    </>
+  );
 };
 
 export default ButtonComponent;

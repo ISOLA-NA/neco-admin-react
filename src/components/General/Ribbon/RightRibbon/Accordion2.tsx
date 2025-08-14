@@ -7,7 +7,11 @@ import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsConte
 import AppServices, { MenuGroup } from "../../../../services/api.services";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
-import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler";
+import FileUploadHandler, {
+  InsertModel,
+} from "../../../../services/FileUploadHandler";
+import { useTranslation } from "react-i18next";
+import DynamicButton from "../../../utilities/DynamicButtons";
 
 interface Accordion2Props {
   selectedMenuTabId: number | null;
@@ -36,13 +40,14 @@ const Accordion2: React.FC<Accordion2Props> = ({
   isOpen,
   toggleAccordion,
 }) => {
+  const { t } = useTranslation();
+
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [rowData, setRowData] = useState<RowData2[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData2 | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
-
 
   // Form state
   const [formData, setFormData] = useState<Partial<RowData2>>({
@@ -211,7 +216,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
       onRowClick(null);
       setIsAdding(false);
       setIconImageId(null);
-      setResetCounter(prev => prev + 1);
+      setResetCounter((prev) => prev + 1);
     } catch (error: any) {
       console.error("Error inserting MenuGroup:", error);
       const data = error.response?.data;
@@ -219,8 +224,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -253,8 +258,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
@@ -296,12 +301,11 @@ const Accordion2: React.FC<Accordion2Props> = ({
 
   const handleUploadSuccess = (insertModel: InsertModel) => {
     setIconImageId(insertModel.ID || null);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       IconImageId: insertModel.ID || null,
     }));
   };
-  
 
   return (
     <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
@@ -359,7 +363,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                   showAddIcon={false}
                   showDeleteIcon={false}
                   showViewIcon={false}
-                  onView={() => { }}
+                  onView={() => {}}
                   onAdd={handleNew}
                   onEdit={() => {
                     if (selectedRow) {
@@ -368,7 +372,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     }
                   }}
                   onDelete={handleDeleteClick}
-                  onDuplicate={() => { }}
+                  onDuplicate={() => {}}
                   isLoading={isLoading}
                   showSearch={false}
                   domLayout="normal"
@@ -379,7 +383,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
               <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
                 <div className="flex gap-4">
                   <DynamicInput
-                    name="Name"
+                    name={t("Ribbons.Name")}
                     type="text"
                     value={formData.Name || ""}
                     placeholder="Name"
@@ -389,7 +393,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     className="mt-2 flex-1"
                   />
                   <DynamicInput
-                    name="Description"
+                    name={t("Ribbons.Description")}
                     type="text"
                     value={formData.Description || ""}
                     placeholder="Description"
@@ -401,7 +405,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                 </div>
                 <div className="mt-4">
                   <DynamicInput
-                    name="Order"
+                    name={t("Ribbons.Order")}
                     type="number"
                     value={formData.Order || 0}
                     placeholder="Order"
@@ -419,54 +423,52 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     selectedFileId={iconImageId}
                     onUploadSuccess={handleUploadSuccess}
                     resetCounter={resetCounter}
-                    onReset={() => setResetCounter(prev => prev + 1)}
+                    onReset={() => setResetCounter((prev) => prev + 1)}
                     isEditMode={isEditing}
                   />
                 </div>
 
                 {/* Buttons */}
-                <div className="flex items-center gap-4 mt-4">
-                  <button
+                <div className="flex justify-center items-center gap-4 mt-6">
+                  {/* Save - سبز سازمانی (همان منطق قبلی: وقتی ردیف انتخاب شده باشد غیرفعال) */}
+                  <DynamicButton
+                    text={t("Global.New")}
+                    leftIcon={<FaSave />}
                     onClick={handleInsert}
-                    disabled={!!selectedRow}   // یعنی اگر selectedRow وجود داشت، Save غیرفعال است
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${!!selectedRow
-                      ? "bg-green-300 text-gray-200 cursor-not-allowed"
-                      : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-                      }`}
-                  >
-                    <FaSave /> Save
-                  </button>
+                    isDisabled={!!selectedRow}
+                    variant="orgGreen"
+                    size="md"
+                  />
 
-                  <button
+                  {/* Edit - زرد سازمانی (فقط وقتی ردیفی انتخاب شده فعال) */}
+                  <DynamicButton
+                    text={t("Global.Edit")}
+                    leftIcon={<FaEdit />}
                     onClick={handleUpdate}
-                    disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                      ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                      : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                      }`}
-                  >
-                    <FaEdit /> Update
-                  </button>
-                  <button
+                    isDisabled={!selectedRow}
+                    variant="orgYellow"
+                    size="md"
+                  />
+
+                  {/* Delete - قرمز سازمانی (مثل قبل) */}
+                  <DynamicButton
+                    text={t("Global.Delete")}
+                    leftIcon={<FaTrash />}
                     onClick={handleDeleteClick}
-                    disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                      ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                      : "bg-red-300 text-gray-200 cursor-not-allowed"
-                      }`}
-                  >
-                    <FaTrash /> Delete
-                  </button>
-                  <button
+                    isDisabled={!selectedRow}
+                    variant="orgRed"
+                    size="md"
+                  />
+
+                  {/* New - آبی سازمانی (مثل قبل: وقتی ردیفی انتخاب نشده غیرفعال) */}
+                  <DynamicButton
+                    text={t("Global.New")}
+                    leftIcon={<FaPlus />}
                     onClick={handleNew}
-                    disabled={!selectedRow}
-                    className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
-                      ? "bg-gray-300 text-gray-200 cursor-not-allowed"
-                      : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-                      }`}
-                  >
-                    <FaPlus /> New
-                  </button>
+                    isDisabled={!selectedRow}
+                    variant="orgBlue"
+                    size="md"
+                  />
                 </div>
               </div>
             </>

@@ -1,0 +1,14 @@
+{
+    "Ribbons": {
+      "Name": "نام",
+      "WindowsWebCommand": "دستور وب ویندوز",
+      "WindowsAppCommand": "دستور برنامه ویندوز",
+      "Description": "توضیحات",
+      "Order": "ترتیب",
+      "Size": "اندازه :",
+      "Large": "بزرگ",
+      "Medium": "متوسط",
+      "Small": "کوچک"
+    }
+  }
+  

@@ -9,6 +9,7 @@ import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { CommandItem, GetEnumResponse } from "../../services/api.services";
 import AppServices from "../../services/api.services";
 import DynamicSwitcher from "../utilities/DynamicSwitcher";
+import { useTranslation } from "react-i18next";
 
 export interface CommandHandle {
   save: () => Promise<CommandItem | null>;
@@ -64,6 +65,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
     const [, setErrorViewModes] = useState<string | null>(null);
     const [, setErrorApiModes] = useState<string | null>(null);
+    const { t } = useTranslation();
 
     // به‌روزرسانی داده‌های فرم هنگام تغییر selectedRow
     useEffect(() => {
@@ -189,7 +191,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       <TwoColumnLayout>
         {/* Name */}
         <DynamicInput
-          name="Name"
+          name={t("CommandPage.Name")}
           type="text"
           value={commandData.Name}
           placeholder=""
@@ -198,7 +200,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* Describtion */}
         <CustomTextarea
-          name="Describtion"
+          name={t("CommandPage.Describtion")}
           value={commandData.Describtion || ""}
           placeholder=""
           onChange={(e) => handleChange("Describtion", e.target.value)}
@@ -206,17 +208,17 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* ViewMode */}
         <DynamicSelector
-          name="View Mode"
+          name="ViewMode"
           options={viewModes}
           selectedValue={commandData.ViewMode || ""}
           onChange={(e) => handleChange("ViewMode", e.target.value)}
-          label="View Mode"
+          label={t("CommandPage.ViewMode")}
           loading={loadingViewModes}
         />
 
         {/* MainColumnIDName */}
         <DynamicInput
-          name="Main Column IDName"
+          name={t("CommandPage.MainColumnIDName")}
           type="text"
           value={commandData.MainColumnIDName || ""}
           placeholder=""
@@ -225,7 +227,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* ColorColumn */}
         <DynamicInput
-          name="Color Column"
+          name={t("CommandPage.ColorColumn")}
           type="text"
           value={commandData.ColorColumn || ""}
           placeholder=""
@@ -234,7 +236,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* GroupName */}
         <DynamicInput
-          name="Group Name"
+          name={t("CommandPage.GroupName")}
           type="text"
           value={commandData.GroupName || ""}
           placeholder=""
@@ -243,7 +245,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* QR */}
         <CustomTextarea
-          name="Query"
+          name={t("CommandPage.Query")}
           value={commandData.QR || ""}
           placeholder=""
           onChange={(e) => handleChange("QR", e.target.value)}
@@ -251,7 +253,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* DefaultColumns */}
         <CustomTextarea
-          name="Hidden Columns"
+          name={t("CommandPage.HiddenColumns")}
           value={commandData.DefaultColumns || ""}
           placeholder=""
           onChange={(e) => handleChange("DefaultColumns", e.target.value)}
@@ -259,7 +261,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* InvisibleColumns */}
         <CustomTextarea
-          name="Invisible Columns"
+          name={t("CommandPage.InvisibleColumns")}
           value={commandData.InvisibleColumns || ""}
           placeholder=""
           onChange={(e) => handleChange("InvisibleColumns", e.target.value)}
@@ -267,7 +269,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* ApiColumns */}
         <CustomTextarea
-          name="Api Columns"
+          name={t("CommandPage.ApiColumns")}
           value={commandData.ApiColumns || ""}
           placeholder=""
           onChange={(e) => handleChange("ApiColumns", e.target.value)}
@@ -275,7 +277,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* SpParam */}
         <CustomTextarea
-          name="Sp Parameters"
+          name={t("CommandPage.SpParameters")}
           value={commandData.SpParam || ""}
           placeholder=""
           onChange={(e) => handleChange("SpParam", e.target.value)}
@@ -283,7 +285,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* Api Mode Selector */}
         <DynamicSelector
-          name="Api Mode"
+          name={t("CommandPage.ApiMode")}
           options={apiModes}
           selectedValue={commandData.CmdType || ""}
           onChange={(e) => handleChange("CmdType", e.target.value)}
@@ -293,7 +295,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* Grid Command */}
         <DynamicInput
-          name="Grid Command"
+          name={t("CommandPage.GridCommand")}
           type="text"
           value={commandData.gridCmd || ""}
           placeholder=""
@@ -302,7 +304,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* Report Command */}
         <DynamicInput
-          name="Report Command"
+          name={t("CommandPage.ReportCommand")}
           type="text"
           value={commandData.tabCmd || ""}
           placeholder=""
@@ -317,7 +319,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
               handleChange("ProjectIntensive", !commandData.ProjectIntensive)
             }
             leftLabel=""
-            rightLabel="ProjectIntensive"
+            rightLabel={t("CommandPage.ProjectIntensive")}
           />
         </div>
       </TwoColumnLayout>

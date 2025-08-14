@@ -1,0 +1,20 @@
+{
+    "CommandPage": {
+      "Name": "Name",
+      "Description": "Description",
+      "ViewMode": "View Mode",
+      "MainColumnIDName": "Main Column IDName",
+      "ColorColumn": "Color Column",
+      "GroupName": "Group Name",
+      "Query": "Query",
+      "HiddenColumns": "Hidden Columns",
+      "InvisibleColumns": "Invisible Columns",
+      "ApiColumns": "Api Columns",
+      "SpParameters": "Sp Parameters",
+      "ApiMode": "Api Mode",
+      "GridCommand": "Grid Command",
+      "ReportCommand": "Report Command",
+      "ProjectIntensive": "ProjectIntensive"
+    }
+  }
+  

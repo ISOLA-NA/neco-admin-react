@@ -4,10 +4,14 @@ import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { FaSave, FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
 import { useSubTabDefinitions } from "../../../../context/SubTabDefinitionsContext";
 import AppServices, { MenuTab } from "../../../../services/api.services";
-import FileUploadHandler, { InsertModel } from "../../../../services/FileUploadHandler";
+import FileUploadHandler, {
+  InsertModel,
+} from "../../../../services/FileUploadHandler";
 import DataTable from "../../../TableDynamic/DataTable";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
+import DynamicButton from "../../../utilities/DynamicButtons";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 interface Accordion1Props {
   onRowClick: (row: any) => void;
@@ -22,7 +26,7 @@ interface RowData1 {
   Name: string;
   Description: string;
   Order: number;
-  IconImageId?: string | null; 
+  IconImageId?: string | null;
 }
 
 // تعریف نوع فرم که فیلد Order می‌تواند عدد یا رشته باشد
@@ -48,14 +52,13 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
 
-
   // فرم: ذخیره داده‌های فرم
   const [formData, setFormData] = useState<FormDataType>({
     ID: 0,
     Name: "",
     Description: "",
     Order: "",
-    IconImageId: null, 
+    IconImageId: null,
   });
 
   // حالت‌های نمایش DynamicConfirm برای عملیات‌های مختلف
@@ -63,6 +66,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
+
+  const { t } = useTranslation();
 
   // حالت جستجو
   const [searchText, setSearchText] = useState<string>("");
@@ -218,8 +223,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -253,8 +258,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
       alert("ویرایش با خطا مواجه شد.");
     } finally {
@@ -283,13 +288,11 @@ const Accordion1: React.FC<Accordion1Props> = ({
 
   const handleUploadSuccess = (insertModel: InsertModel) => {
     setIconImageId(insertModel.ID || null);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       IconImageId: insertModel.ID || null,
     }));
   };
-
-
 
   return (
     <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
@@ -341,11 +344,11 @@ const Accordion1: React.FC<Accordion1Props> = ({
               showAddIcon={false}
               showDeleteIcon={false}
               showViewIcon={false}
-              onView={() => { }}
+              onView={() => {}}
               onAdd={handleNew}
               onEdit={handleUpdate}
               onDelete={handleDeleteClick}
-              onDuplicate={() => { }}
+              onDuplicate={() => {}}
               isLoading={isLoading}
               showSearch={false}
               domLayout="normal"
@@ -356,7 +359,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
           <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
             <div className="flex gap-4">
               <DynamicInput
-                name="Name"
+                name={t("Ribbons.Name")}
                 type="text"
                 value={formData.Name}
                 onChange={(e) =>
@@ -365,7 +368,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
                 className="mt-2 flex-1"
               />
               <DynamicInput
-                name="Description"
+                name={t("Ribbons.Description")}
                 type="text"
                 value={formData.Description}
                 onChange={(e) =>
@@ -376,7 +379,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
             </div>
             <div className="mt-4">
               <DynamicInput
-                name="Order"
+                name={t("Ribbons.Order")}
                 type="number"
                 value={formData.Order}
                 onChange={(e) => {
@@ -394,53 +397,50 @@ const Accordion1: React.FC<Accordion1Props> = ({
                 selectedFileId={iconImageId}
                 onUploadSuccess={handleUploadSuccess}
                 resetCounter={resetCounter}
-                onReset={() => setResetCounter(prev => prev + 1)}
+                onReset={() => setResetCounter((prev) => prev + 1)}
                 isEditMode={!!selectedRow}
               />
             </div>
-            <div className="flex items-center gap-4 mt-4">
-              <button
+            <div className="flex justify-center items-center gap-4 mt-6">
+              {/* Add - سبز سازمانی */}
+              <DynamicButton
+                text={t("Global.Add")}
+                leftIcon={<FaSave />}
                 onClick={handleInsert}
-                disabled={!!selectedRow}
-                className={`flex items-center gap-2 px-4 py-2 rounded transition ${!!selectedRow
-                    ? "bg-green-300 text-gray-200 cursor-not-allowed"
-                    : "bg-green-500 text-white hover:bg-green-600 cursor-pointer"
-                  }`}
-              >
-                <FaSave /> Save
-              </button>
+                isDisabled={!!selectedRow} // غیرفعال اگر ردیفی انتخاب شده باشد
+                variant="orgGreen"
+                size="md"
+              />
 
-              <button
+              {/* Edit - آبی سازمانی */}
+              <DynamicButton
+                text={t("Global.Edit")}
+                leftIcon={<FaEdit />}
                 onClick={handleUpdate}
-                disabled={!selectedRow}
-                className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                    ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-                    : "bg-blue-300 text-gray-200 cursor-not-allowed"
-                  }`}
-              >
-                <FaEdit /> Update
-              </button>
-              <button
-                onClick={handleDeleteClick}
-                disabled={!selectedRow}
-                className={`flex items-center gap-2 px-4 py-2 rounded transition ${selectedRow
-                    ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
-                    : "bg-red-300 text-gray-200 cursor-not-allowed"
-                  }`}
-              >
-                <FaTrash /> Delete
-              </button>
-              <button
-                onClick={handleNew}
-                disabled={!selectedRow}
-                className={`flex items-center gap-2 px-4 py-2 rounded transition ${!selectedRow
-                    ? "bg-gray-300 text-gray-200 cursor-not-allowed"
-                    : "bg-gray-500 text-white hover:bg-gray-600 cursor-pointer"
-                  }`}
-              >
-                <FaPlus /> New
-              </button>
+                isDisabled={!selectedRow} // فقط وقتی ردیفی انتخاب نشده غیرفعال
+                variant="orgYellow"
+                size="md"
+              />
 
+              {/* Delete - قرمز سازمانی */}
+              <DynamicButton
+                text={t("Global.Delete")}
+                leftIcon={<FaTrash />}
+                onClick={handleDeleteClick}
+                isDisabled={!selectedRow}
+                variant="orgRed"
+                size="md"
+              />
+
+              {/* New - زرد سازمانی */}
+              <DynamicButton
+                text={t("Global.New")}
+                variant="orgBlue"
+                leftIcon={<FaPlus />}
+                onClick={handleNew}
+                isDisabled={!selectedRow} // مثل قبل، غیرفعال اگر ردیفی انتخاب نشده
+                size="md"
+              />
             </div>
           </div>
         </div>

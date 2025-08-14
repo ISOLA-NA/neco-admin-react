@@ -11,7 +11,12 @@
       "DefaultActionButtons": "Default Action Buttons",
       "LetterActionButtons": "Letter Action Buttons",
       "MeetingActionButtons": "Meeting Action Buttons",
-      "NoItemSelected": "No item is selected"
+      "NoItemSelected": "No item is selected",
+      "StateText": "State Text",
+      "Order": "Order",
+      "Tooltip": "Tooltip",
+      "State": "State",
+      "Command": "Command"
     }
   }
   

@@ -11,7 +11,12 @@
       "DefaultActionButtons": "دکمه پیش فرض",
       "LetterActionButtons": "دکمه نامه",
       "MeetingActionButtons": "دکمه های جلسه",
-      "NoItemSelected": "موردی انتخاب نشده است"
+      "NoItemSelected": "موردی انتخاب نشده است",
+      "StateText": "متن وضعیت",
+      "Order": "ترتیب",
+      "Tooltip": "متن راهنما",
+      "State": "وضعیت :",
+      "Command": "کامند :"
     }
   }
   

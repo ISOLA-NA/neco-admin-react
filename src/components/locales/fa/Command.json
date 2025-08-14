@@ -1,0 +1,20 @@
+{
+    "CommandPage": {
+      "Name": "نام",
+      "Description": "توضیحات",
+      "ViewMode": "حالت نمایش",
+      "MainColumnIDName": "شناسه ستون اصلی",
+      "ColorColumn": "ستون رنگ",
+      "GroupName": "نام گروه",
+      "Query": "کوئری",
+      "HiddenColumns": "ستون‌های مخفی",
+      "InvisibleColumns": "ستون‌های نامرئی",
+      "ApiColumns": "ستون‌های API",
+      "SpParameters": "پارامترهای SP",
+      "ApiMode": "حالت API",
+      "GridCommand": "کامند شبکه",
+      "ReportCommand": "کامند گزارش",
+      "ProjectIntensive": "ProjectIntensive"
+    }
+  }
+  
