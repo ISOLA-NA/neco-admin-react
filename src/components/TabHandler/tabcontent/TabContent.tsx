@@ -932,7 +932,8 @@ const TabContent: FC<TabContentProps> = ({
         }}
       >
         <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100 w-full">
-          <div className="font-bold text-gray-700 text-sm">{activeSubTab}</div>
+          <div className="font-bold text-gray-700 text-sm"> </div>
+          {/* <div className="font-bold text-gray-700 text-sm">{activeSubTab}</div> */}
           <button
             onClick={togglePanelSize}
             className="text-gray-700 hover:text-gray-900 transition"

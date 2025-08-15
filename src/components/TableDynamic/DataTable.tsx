@@ -7,7 +7,8 @@ import { TailSpin } from "react-loader-spinner";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import "./DataTable.css"; // فایل CSS سفارشی شما
-import type { GridOptions } from "ag-grid-community"; // ← اضافه کن
+import type { GridOptions, ColDef } from "ag-grid-community"; // ← اضافه کن
+import { useTranslation } from "react-i18next"; // ← i18n
 
 interface DataTableProps {
   columnDefs: any[];
@@ -67,6 +68,8 @@ const DataTable: React.FC<DataTableProps> = ({
   isEditMode = true,
   direction = "rtl",
 }) => {
+  const { t } = useTranslation();
+
   const [searchText, setSearchText] = useState("");
   const gridApiRef = useRef<any>(null);
   const [originalRowData, setOriginalRowData] = useState<any[]>([]);
@@ -84,15 +87,14 @@ const DataTable: React.FC<DataTableProps> = ({
     setFilteredRowData(mappedData);
   }, [rowData]);
 
-  // useEffect برای اسکرول به آخرین ردیف هنگام تغییر داده‌ها (با توجه به clientOrder)
+  // useEffect برای اسکرول به بالای جدول هنگام تغییر داده‌ها
   useEffect(() => {
     if (gridApiRef.current && filteredRowData && filteredRowData.length > 0) {
-      // اسکرول به بالای جدول (ردیف اول)
       gridApiRef.current.ensureIndexVisible(0, "top");
     }
   }, [filteredRowData]);
 
-  // تابع جستجو: فیلتر کردن داده‌ها بر اساس تمام مقادیر هر سطر
+  // تابع جستجو
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
@@ -105,11 +107,8 @@ const DataTable: React.FC<DataTableProps> = ({
         return Object.values(item).some((val) => {
           if (val === null || val === undefined) return false;
           let strVal = "";
-          if (typeof val === "object") {
-            strVal = JSON.stringify(val);
-          } else {
-            strVal = val.toString();
-          }
+          if (typeof val === "object") strVal = JSON.stringify(val);
+          else strVal = val.toString();
           return strVal.toLowerCase().includes(lowerValue);
         });
       });
@@ -120,15 +119,12 @@ const DataTable: React.FC<DataTableProps> = ({
   // وقتی grid آماده شد
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api;
-    // ست کردن sort پیش‌فرض بر اساس clientOrder (که در داده‌های ما وجود دارد)
     // params.api.setSortModel([{ colId: "clientOrder", sort: "asc" }]);
     params.api.sizeColumnsToFit();
-    if (isLoading) {
-      params.api.showLoadingOverlay();
-    }
+    if (isLoading) params.api.showLoadingOverlay();
   };
 
-  // تغییر اندازه grid: تنظیم مجدد عرض ستون‌ها
+  // تغییر اندازه grid
   const onGridSizeChanged = (params: any) => {
     params.api.sizeColumnsToFit();
   };
@@ -142,20 +138,14 @@ const DataTable: React.FC<DataTableProps> = ({
 
   // نمایش یا مخفی کردن overlay بارگذاری
   useEffect(() => {
-    if (gridApiRef.current) {
-      if (isLoading) {
-        gridApiRef.current.showLoadingOverlay();
-      } else {
-        gridApiRef.current.hideOverlay();
-      }
-    }
+    if (!gridApiRef.current) return;
+    if (isLoading) gridApiRef.current.showLoadingOverlay();
+    else gridApiRef.current.hideOverlay();
   }, [isLoading]);
 
-  // کلیک روی ردیف: ارسال داده به والد و علامت‌گذاری سطر انتخاب شده
+  // کلیک روی ردیف
   const handleRowClick = (event: any) => {
-    if (setSelectedRowData) {
-      setSelectedRowData(event.data);
-    }
+    if (setSelectedRowData) setSelectedRowData(event.data);
     setIsRowSelected(true);
 
     // 🔥 هایلایت کردن ردیف از طریق API
@@ -163,9 +153,7 @@ const DataTable: React.FC<DataTableProps> = ({
       node.setSelected(node === event.node);
     });
 
-    if (onRowClick) {
-      onRowClick(event.data);
-    }
+    if (onRowClick) onRowClick(event.data);
   };
 
   // دوبار کلیک روی ردیف
@@ -175,14 +163,12 @@ const DataTable: React.FC<DataTableProps> = ({
 
   const gridClasses = "ag-theme-quartz w-full h-full overflow-y-auto";
 
-  // تابع جهت استایل دهی به ردیف انتخاب شده
-  const getRowClass = (params: any) => {
-    return params.node.selected ? "ag-row-selected" : "";
-  };
+  // تابع جهت استایل‌دهی به ردیف انتخاب شده
+  const getRowClass = (params: any) =>
+    params.node.selected ? "ag-row-selected" : "";
 
   const gridOptions = {
     getRowClass: getRowClass,
-    // در صورت نیاز می‌توانید sortModel پیش‌فرض را در gridOptions هم تعریف کنید
     defaultColDef: {
       sortable: true,
     },
@@ -192,14 +178,41 @@ const DataTable: React.FC<DataTableProps> = ({
   const baseIconButton =
     "rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none";
 
-  // اگر بخواهیم همیشه داده‌ها به ترتیب clientOrder نمایش داده شوند، می‌توانیم از useMemo استفاده کنیم
-  const sortedFilteredRowData = useMemo(() => {
-    return [...filteredRowData].sort((a, b) => a.clientOrder - b.clientOrder);
-  }, [filteredRowData]);
+  // داده‌ها به ترتیب clientOrder
+  const sortedFilteredRowData = useMemo(
+    () =>
+      [...filteredRowData].sort(
+        (a, b) => (a.clientOrder ?? 0) - (b.clientOrder ?? 0)
+      ),
+    [filteredRowData]
+  );
 
   const isRtl = direction === "rtl";
 
   console.log("rtl", isRtl);
+
+  // ← تراز سلول‌ها و هدر بر اساس جهت
+  const defaultColDefAligned: ColDef = useMemo(
+    () => ({
+      sortable: true,
+      cellStyle: { textAlign: isRtl ? "right" : "left" },
+      headerClass: isRtl ? "rtl-header" : "ltr-header",
+    }),
+    [isRtl]
+  );
+
+  // ← پاک کردن انتخاب و سپس اجرای onAdd
+  const handleAddClick = () => {
+    if (gridApiRef.current) {
+      gridApiRef.current.deselectAll();
+    }
+    setIsRowSelected(false);
+    if (setSelectedRowData) {
+      // @ts-ignore: اعلام به والد که انتخابی وجود ندارد
+      setSelectedRowData({});
+    }
+    onAdd();
+  };
 
   return (
     <div
@@ -223,7 +236,7 @@ const DataTable: React.FC<DataTableProps> = ({
               />
               <input
                 type="text"
-                placeholder="جستجو..."
+                placeholder={t("DataTable.Toolbar.SearchPlaceholder")}
                 value={searchText}
                 onChange={onSearchChange}
                 className={`w-full ${
@@ -241,12 +254,10 @@ const DataTable: React.FC<DataTableProps> = ({
           >
             {showDuplicateIcon && (
               <button
-                className={`
-                  ${baseIconButton}
-                  bg-yellow-50 hover:bg-yellow-100 text-yellow-600
-                  ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-                title="Duplicate"
+                className={`${baseIconButton} bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${
+                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={t("DataTable.Buttons.Duplicate")}
                 onClick={onDuplicate}
                 disabled={!isRowSelected || !isEditMode}
               >
@@ -256,12 +267,10 @@ const DataTable: React.FC<DataTableProps> = ({
 
             {showEditIcon && (
               <button
-                className={`
-                  ${baseIconButton}
-                  bg-blue-50 hover:bg-blue-100 text-blue-600
-                  ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-                title="Edit"
+                className={`${baseIconButton} bg-blue-50 hover:bg-blue-100 text-blue-600 ${
+                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={t("DataTable.Buttons.Edit")}
                 onClick={onEdit}
                 disabled={!isRowSelected || !isEditMode}
               >
@@ -271,12 +280,10 @@ const DataTable: React.FC<DataTableProps> = ({
 
             {showDeleteIcon && (
               <button
-                className={`
-                  ${baseIconButton}
-                  bg-red-50 hover:bg-red-100 text-red-600
-                  ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-                title="Delete"
+                className={`${baseIconButton} bg-red-50 hover:bg-red-100 text-red-600 ${
+                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={t("DataTable.Buttons.Delete")}
                 onClick={onDelete}
                 disabled={!isRowSelected || !isEditMode}
               >
@@ -287,13 +294,11 @@ const DataTable: React.FC<DataTableProps> = ({
             {showAddIcon && (
               <button
                 type="button"
-                className={`
-                  ${baseIconButton}
-                  bg-green-50 hover:bg-green-100 text-green-600
-                  ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-                title="Add"
-                onClick={onAdd}
+                className={`${baseIconButton} bg-green-50 hover:bg-green-100 text-green-600 ${
+                  !isEditMode ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={t("DataTable.Buttons.Add")}
+                onClick={handleAddClick}
                 disabled={!isEditMode}
               >
                 <FiPlus size={20} />
@@ -302,12 +307,10 @@ const DataTable: React.FC<DataTableProps> = ({
 
             {showViewIcon && (
               <button
-                className={`
-                  ${baseIconButton}
-                  bg-gray-50 hover:bg-gray-100 text-gray-600
-                  ${!isEditMode ? "opacity-50 cursor-not-allowed" : ""}
-                `}
-                title="View"
+                className={`${baseIconButton} bg-gray-50 hover:bg-gray-100 text-gray-600 ${
+                  !isEditMode ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={t("DataTable.Buttons.View")}
                 onClick={onView}
                 disabled={!isEditMode}
               >
@@ -325,7 +328,6 @@ const DataTable: React.FC<DataTableProps> = ({
             direction === "rtl" ? "ag-rtl" : "ag-ltr"
           }`}
         >
-          {" "}
           {/* کلاس ag-rtl برای پشتیبانی AG Grid از RTL */}
           <AgGridReact
             key={direction}
@@ -343,11 +345,14 @@ const DataTable: React.FC<DataTableProps> = ({
             singleClickEdit={false}
             stopEditingWhenCellsLoseFocus={true}
             onCellValueChanged={onCellValueChanged}
-            overlayLoadingTemplate={
-              '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height="80" width="80" /></div>'
-            }
+            /* متن بارگذاری هم با i18n */
+            overlayLoadingTemplate={`<div class="custom-loading-overlay"><div style="margin-top:8px;font-weight:500;">${t(
+              "DataTable.Status.Loading"
+            )}</div></div>`}
             rowSelection="single"
             enableRtl={isRtl}
+            /* ← تراز پیش‌فرض ستون‌ها بر اساس جهت */
+            defaultColDef={defaultColDefAligned}
           />
         </div>
       </div>
@@ -356,9 +361,9 @@ const DataTable: React.FC<DataTableProps> = ({
         <button
           type="button"
           className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
-          onClick={onAdd}
+          onClick={handleAddClick}
         >
-          افزودن مورد جدید
+          {t("DataTable.Toolbar.AddNew")}
         </button>
       )}
 
