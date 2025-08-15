@@ -347,6 +347,7 @@ const DataTable: React.FC<DataTableProps> = ({
               '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height="80" width="80" /></div>'
             }
             rowSelection="single"
+            enableRtl={isRtl}
           />
         </div>
       </div>

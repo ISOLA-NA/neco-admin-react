@@ -124,49 +124,6 @@
   margin-inline-end: 0;
 }
 
-/* ===================== Header layout: RTL override ===================== */
-/* هم با ag-rtl و هم با dir="rtl" فعال می‌شود */
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-cell .ag-header-cell-label,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-group-cell-label {
-  flex-direction: row-reverse;  /* متن سمت راست، آیکن‌ها سمت چپ متن */
-}
-
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-cell-text,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-group-text {
-  text-align: right;
-  margin-inline-end: .4rem;     /* فاصله‌ی کوچک بین متن و آیکن‌ها */
-  margin-inline-start: 0;
-  direction: rtl;
-}
-
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-icon,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-sort-indicator-icon,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-icon.ag-header-cell-menu-button {
-  margin-inline-start: .4rem;   /* سمت چپ متن در RTL */
-  margin-inline-end: 0;
-}
-
-/* اگر دکمهٔ منوی ستون جداست، در RTL بیار سمت راست متن */
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-cell-menu-button {
-  order: -1;
-}
-
-/* ===================== Floating filter: base (LTR) ===================== */
-.ag-floating-filter-full-body,
-.ag-floating-filter-body {
-  direction: ltr;
-}
-
-.ag-floating-filter-button,
-.ag-floating-filter-button-button {
-  order: 1;                     /* بعد از ورودی (سمت راست ظرف) */
-  margin-inline-start: .35rem;  /* فاصله سمت راست ورودی در LTR */
-  margin-inline-end: 0;
-}
-
-.ag-floating-filter-input {
-  text-align: left;             /* LTR: ورودی‌ها چپ‌چین */
-}
 
 /* ===================== Floating filter: RTL override ===================== */
 :is(.ag-rtl, html[dir="rtl"]) .ag-floating-filter-full-body,
@@ -184,3 +141,12 @@
 :is(.ag-rtl, html[dir="rtl"]) .ag-floating-filter-input {
   text-align: right;            /* RTL: ورودی‌ها راست‌چین */
 }
+
+/* هدر و سلول‌ها در حالت RTL */
+.ag-theme-quartz.ag-rtl .ag-header .ag-header-cell-text,
+.ag-theme-quartz.ag-rtl .ag-header .ag-header-group-text {
+  text-align: right !important;
+  direction: rtl;
+}
+
+
