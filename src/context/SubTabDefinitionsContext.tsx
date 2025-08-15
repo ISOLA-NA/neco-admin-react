@@ -20,10 +20,12 @@ import {
   MenuGroup,
   MenuItem,
 } from "./ApiContext";
+import { useTranslation } from "react-i18next"; // ← طبق سبک خواسته‌شده
+import type { ColDef } from "ag-grid-community"; // ← تایپ دقیق ستون‌ها
 
 interface SubTabDefinition {
   endpoint?: (params?: any) => Promise<any[]>;
-  columnDefs: any[];
+  columnDefs: ColDef[]; // ← به جای any[]
   iconVisibility: {
     showAdd: boolean;
     showEdit: boolean;
@@ -45,6 +47,7 @@ export const SubTabDefinitionsProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const api = useApi();
+  const { t, i18n } = useTranslation(); // ← t و i18n از hook
 
   const [programTemplates, setProgramTemplates] = useState<
     ProgramTemplateItem[]
@@ -59,30 +62,8 @@ export const SubTabDefinitionsProvider: React.FC<{
 
   useEffect(() => {
     const token = Cookies.get("token");
-    // Only fetch protected data if token exists
     if (!token) return;
 
-    // const fetchInitialData = async () => {
-    //   try {
-    //     const [templates, ribbons, menusData , usersData , projectsData , companiesData ] = await Promise.all([
-    //       api.getAllProgramTemplates(),
-    //       api.getAllDefaultRibbons(),
-    //       api.getAllMenu(),
-    //       api.getAllUsers(),
-    //       api.getAllProject(),
-    //       api.getAllCompanies(),
-
-    //     ]);
-    //     setProgramTemplates(templates);
-    //     setDefaultRibbons(ribbons);
-    //     setMenus(menusData);
-    //     setAllUsers(usersData);
-    //     setAllProjects(projectsData);
-    //     setAllCompanies(companiesData);
-    //   } catch (error) {
-    //     console.error("Error in SubTabDefinitionsProvider:", error);
-    //   }
-    // };
     const fetchInitialData = async () => {
       try {
         const [
@@ -92,7 +73,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           usersData,
           projectsData,
           companiesData,
-          rolesData, // ✅ اضافه شده
+          rolesData,
         ] = await Promise.all([
           api.getAllProgramTemplates(),
           api.getAllDefaultRibbons(),
@@ -100,7 +81,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           api.getAllUsers(),
           api.getAllProject(),
           api.getAllCompanies(),
-          api.getAllRoles(), // ✅ نقش‌ها
+          api.getAllRoles(),
         ]);
 
         setProgramTemplates(templates);
@@ -109,7 +90,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         setAllUsers(usersData);
         setAllProjects(projectsData);
         setAllCompanies(companiesData);
-        setAllRoles(rolesData); // ✅ ذخیره نقش‌ها
+        setAllRoles(rolesData);
       } catch (error) {
         console.error("Error in SubTabDefinitionsProvider:", error);
       }
@@ -123,11 +104,11 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllConfigurations,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
           },
           {
-            headerName: "Prg.Template",
+            headerName: t("DataTable.Headers.ProgramTemplateShort"),
             field: "FirstIDProgramTemplate",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
@@ -142,7 +123,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             },
           },
           {
-            headerName: "Default Ribbon",
+            headerName: t("DataTable.Headers.DefaultRibbon"),
             field: "SelMenuIDForMain",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
@@ -166,9 +147,13 @@ export const SubTabDefinitionsProvider: React.FC<{
       Commands: {
         endpoint: api.getAllCommands,
         columnDefs: [
-          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
           {
-            headerName: "Description",
+            headerName: t("DataTable.Headers.Name"),
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: t("DataTable.Headers.Description"),
             field: "Description",
             filter: "agTextColumnFilter",
           },
@@ -184,13 +169,13 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllMenu,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
         ],
         iconVisibility: {
-          showAdd: true, // Adjust based on needs
+          showAdd: true,
           showEdit: true,
           showDelete: true,
           showDuplicate: false,
@@ -200,37 +185,37 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllUsers,
         columnDefs: [
           {
-            headerName: "Username",
+            headerName: t("DataTable.Headers.Username"),
             field: "Username",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.FirstName"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Last Name",
+            headerName: t("DataTable.Headers.LastName"),
             field: "Family",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "User Type",
+            headerName: t("DataTable.Headers.UserType"),
             field: "userType",
             filter: "agNumberColumnFilter",
           },
           {
-            headerName: "Website",
+            headerName: t("DataTable.Headers.Website"),
             field: "Website",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Mobile",
+            headerName: t("DataTable.Headers.Mobile"),
             field: "Mobile",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Email",
+            headerName: t("DataTable.Headers.Email"),
             field: "Email",
             filter: "agTextColumnFilter",
           },
@@ -246,22 +231,22 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllRoles,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Description",
+            headerName: t("DataTable.Headers.Description"),
             field: "Description",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Post Code",
+            headerName: t("DataTable.Headers.PostCode"),
             field: "PostCode",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Grade",
+            headerName: t("DataTable.Headers.Grade"),
             field: "Grade",
             filter: "agTextColumnFilter",
           },
@@ -277,12 +262,12 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllCompanies,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Description",
+            headerName: t("DataTable.Headers.Description"),
             field: "Description",
             filter: "agTextColumnFilter",
           },
@@ -298,7 +283,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllPostCat,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
@@ -323,11 +308,14 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
 
         columnDefs: [
-          { headerName: "Role", field: "Name", filter: "agTextColumnFilter" },
+          {
+            headerName: t("DataTable.Headers.Role"),
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
 
           {
-            headerName: "Project Name",
-            // می‌تونیم field رو بذاریم nProjectID ولی ارزش نمایش valueGetter مهمه
+            headerName: t("DataTable.Headers.ProjectName"),
             field: "nProjectID",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
@@ -338,7 +326,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             },
           },
           {
-            headerName: "User",
+            headerName: t("DataTable.Headers.User"),
             field: "OwnerID",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
@@ -347,7 +335,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             },
           },
           {
-            headerName: "Enterprise",
+            headerName: t("DataTable.Headers.Enterprise"),
             field: "nCompanyID",
             filter: "agTextColumnFilter",
             valueGetter: (params: any) => {
@@ -359,10 +347,9 @@ export const SubTabDefinitionsProvider: React.FC<{
           },
 
           {
-            headerName: "Superior",
+            headerName: t("DataTable.Headers.Superior"),
             field: "ParrentId",
             filter: "agTextColumnFilter",
-            /** مقدار متن را از allRoles می‌گیرد */
             valueGetter: (params: any) => {
               const sup = allRoles.find(
                 (r: any) => r.ID === params.data.ParrentId
@@ -383,7 +370,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllProgramTemplates,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
@@ -399,7 +386,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllProgramType,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
@@ -415,51 +402,53 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllProjectsWithCalendar,
         columnDefs: [
           {
-            headerName: "Project Name",
+            headerName: t("DataTable.Headers.ProjectName"),
             field: "ProjectName",
             filter: "agTextColumnFilter",
             minWidth: 140,
           },
           {
-            headerName: "Status",
+            headerName: t("DataTable.Headers.Status"),
             field: "State",
             filter: "agTextColumnFilter",
             minWidth: 100,
           },
           {
-            headerName: "Act Start",
+            headerName: t("DataTable.Headers.ActStart"),
             field: "AcualStartTime",
             filter: "agDateColumnFilter",
             minWidth: 110,
           },
           {
-            headerName: "Duration",
+            headerName: t("DataTable.Headers.Duration"),
             field: "TotalDuration",
             filter: "agNumberColumnFilter",
             minWidth: 100,
           },
           {
-            headerName: "Budget Act",
+            headerName: t("DataTable.Headers.BudgetAct"),
             field: "PCostAct",
             filter: "agNumberColumnFilter",
             minWidth: 110,
           },
           {
-            headerName: "Budget Appr",
+            headerName: t("DataTable.Headers.BudgetAppr"),
             field: "PCostAprov",
             filter: "agNumberColumnFilter",
             minWidth: 110,
           },
           {
-            headerName: "Phase",
+            headerName: t("DataTable.Headers.Phase"),
             field: "IsIdea",
             valueGetter: (params: any) =>
-              params.data.IsIdea ? "IsIdea" : "Project",
+              params.data.IsIdea
+                ? t("DataTable.Headers.IsIdea")
+                : t("DataTable.Headers.Project"),
             filter: "agTextColumnFilter",
             minWidth: 100,
           },
           {
-            headerName: "Calendar",
+            headerName: t("DataTable.Headers.Calendar"),
             field: "calendarName",
             filter: "agTextColumnFilter",
             minWidth: 120,
@@ -476,51 +465,53 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllProjectsWithCalendar,
         columnDefs: [
           {
-            headerName: "Project Name",
+            headerName: t("DataTable.Headers.ProjectName"),
             field: "ProjectName",
             filter: "agTextColumnFilter",
             minWidth: 140,
           },
           {
-            headerName: "Status",
+            headerName: t("DataTable.Headers.Status"),
             field: "State",
             filter: "agTextColumnFilter",
             minWidth: 100,
           },
           {
-            headerName: "Act Start",
+            headerName: t("DataTable.Headers.ActStart"),
             field: "AcualStartTime",
             filter: "agDateColumnFilter",
             minWidth: 110,
           },
           {
-            headerName: "Duration",
+            headerName: t("DataTable.Headers.Duration"),
             field: "TotalDuration",
             filter: "agNumberColumnFilter",
             minWidth: 100,
           },
           {
-            headerName: "Budget Act",
+            headerName: t("DataTable.Headers.BudgetAct"),
             field: "PCostAct",
             filter: "agNumberColumnFilter",
             minWidth: 110,
           },
           {
-            headerName: "Budget Appr",
+            headerName: t("DataTable.Headers.BudgetAppr"),
             field: "PCostAprov",
             filter: "agNumberColumnFilter",
             minWidth: 110,
           },
           {
-            headerName: "Phase",
+            headerName: t("DataTable.Headers.Phase"),
             field: "IsIdea",
             valueGetter: (params: any) =>
-              params.data.IsIdea ? "IsIdea" : "Project",
+              params.data.IsIdea
+                ? t("DataTable.Headers.IsIdea")
+                : t("DataTable.Headers.Project"),
             filter: "agTextColumnFilter",
             minWidth: 100,
           },
           {
-            headerName: "Calendar",
+            headerName: t("DataTable.Headers.Calendar"),
             field: "calendarName",
             filter: "agTextColumnFilter",
             minWidth: 120,
@@ -537,22 +528,22 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllOdpWithExtra,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Address",
+            headerName: t("DataTable.Headers.Address"),
             field: "Address",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "WFTemplateName",
+            headerName: t("DataTable.Headers.WFTemplateName"),
             field: "WFTemplateName",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "EntityTypeName",
+            headerName: t("DataTable.Headers.EntityTypeName"),
             field: "EntityTypeName",
             filter: "agTextColumnFilter",
           },
@@ -568,12 +559,12 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllEntityCollection,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Description",
+            headerName: t("DataTable.Headers.Description"),
             field: "Description",
             filter: "agTextColumnFilter",
           },
@@ -589,7 +580,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllCalendar,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
@@ -605,7 +596,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllWfTemplate,
         columnDefs: [
           {
-            headerName: "AF Name",
+            headerName: t("DataTable.Headers.AFName"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
@@ -621,25 +612,25 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getTableTransmittal,
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
             sortable: true,
           },
           {
-            headerName: "Transmittal",
+            headerName: t("DataTable.Headers.Transmittal"),
             field: "IsDoc", // Using Name field for Transmittal
             filter: "agTextColumnFilter",
             sortable: true,
           },
           {
-            headerName: "CatA",
+            headerName: t("DataTable.Headers.CatA"),
             field: "EntityCateAName",
             filter: "agTextColumnFilter",
             sortable: true,
           },
           {
-            headerName: "CatB",
+            headerName: t("DataTable.Headers.CatB"),
             field: "EntityCateBName",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -649,7 +640,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           showAdd: true,
           showEdit: true,
           showDelete: true,
-          showDuplicate: true, // Enabled since we have duplicateEntityType API
+          showDuplicate: true,
         },
       },
       Categories: {
@@ -657,7 +648,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),
         columnDefs: [
           {
-            headerName: "Name",
+            headerName: t("DataTable.Headers.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
@@ -675,14 +666,18 @@ export const SubTabDefinitionsProvider: React.FC<{
       MenuTab: {
         endpoint: (params: { ID: number }) => api.getAllMenuTab(params.ID),
         columnDefs: [
-          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
           {
-            headerName: "Description",
+            headerName: t("DataTable.Headers.Name"),
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: t("DataTable.Headers.Description"),
             field: "Description",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Order",
+            headerName: t("DataTable.Headers.Order"),
             field: "Order",
             filter: "agNumberColumnFilter",
           },
@@ -698,14 +693,18 @@ export const SubTabDefinitionsProvider: React.FC<{
       MenuGroup: {
         endpoint: (params: { ID: number }) => api.getAllMenuGroup(params.ID),
         columnDefs: [
-          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
           {
-            headerName: "Description",
+            headerName: t("DataTable.Headers.Name"),
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: t("DataTable.Headers.Description"),
             field: "Description",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Order",
+            headerName: t("DataTable.Headers.Order"),
             field: "Order",
             filter: "agNumberColumnFilter",
           },
@@ -721,19 +720,23 @@ export const SubTabDefinitionsProvider: React.FC<{
       MenuItem: {
         endpoint: (params: { ID: number }) => api.getAllMenuItem(params.ID),
         columnDefs: [
-          { headerName: "Name", field: "Name", filter: "agTextColumnFilter" },
           {
-            headerName: "Command",
+            headerName: t("DataTable.Headers.Name"),
+            field: "Name",
+            filter: "agTextColumnFilter",
+          },
+          {
+            headerName: t("DataTable.Headers.Command"),
             field: "Command",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Description",
+            headerName: t("DataTable.Headers.Description"),
             field: "Description",
             filter: "agTextColumnFilter",
           },
           {
-            headerName: "Order",
+            headerName: t("DataTable.Headers.Order"),
             field: "Order",
             filter: "agNumberColumnFilter",
           },
@@ -756,10 +759,12 @@ export const SubTabDefinitionsProvider: React.FC<{
     allUsers,
     allProjects,
     allCompanies,
+    allRoles, // برای valueGetter سرپرست
+    i18n.language, // با تغییر زبان، عنوان ستون‌ها رفرش شود
+    t, // اطمینان از وابستگی به تابع ترجمه
   ]);
 
   const fetchDataForSubTab = async (subTabName: string, params?: any) => {
-    // If no token or endpoint not defined, return empty
     const token = Cookies.get("token");
     if (!token) return [];
 

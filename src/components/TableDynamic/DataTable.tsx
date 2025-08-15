@@ -40,6 +40,7 @@ interface DataTableProps {
   isLoading?: boolean;
 
   isEditMode?: boolean;
+  direction?: "rtl" | "ltr";
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -64,6 +65,7 @@ const DataTable: React.FC<DataTableProps> = ({
   showAddNew = false,
   isLoading = false,
   isEditMode = true,
+  direction = "rtl",
 }) => {
   const [searchText, setSearchText] = useState("");
   const gridApiRef = useRef<any>(null);
@@ -195,8 +197,15 @@ const DataTable: React.FC<DataTableProps> = ({
     return [...filteredRowData].sort((a, b) => a.clientOrder - b.clientOrder);
   }, [filteredRowData]);
 
-    return (
-    <div dir="rtl" className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2">
+  const isRtl = direction === "rtl";
+
+  console.log("rtl", isRtl);
+
+  return (
+    <div
+      dir={direction}
+      className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2"
+    >
       {/* نوار بالایی شامل جستجو و دکمه‌ها */}
       {(showSearch ||
         showAddIcon ||
@@ -208,20 +217,28 @@ const DataTable: React.FC<DataTableProps> = ({
           {showSearch && (
             <div className="relative max-w-sm">
               <FaSearch
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                className={`absolute ${
+                  isRtl ? "right-3" : "left-3"
+                } top-1/2 transform -translate-y-1/2 text-gray-500`}
               />
               <input
                 type="text"
                 placeholder="جستجو..."
                 value={searchText}
                 onChange={onSearchChange}
-                className="w-full rtl:pr-10 rtl:pl-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                className={`w-full ${
+                  isRtl ? "pr-10 pl-3" : "pl-10 pr-3"
+                } py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition`}
                 style={{ fontFamily: "inherit" }}
               />
             </div>
           )}
 
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
+          <div
+            className={`flex items-center space-x-4 ${
+              isRtl ? "rtl:space-x-reverse" : ""
+            }`}
+          >
             {showDuplicateIcon && (
               <button
                 className={`
@@ -303,8 +320,15 @@ const DataTable: React.FC<DataTableProps> = ({
 
       {/* بخش جدول */}
       <div className="flex-grow" style={{ minHeight: 0 }}>
-        <div className={`${gridClasses} ag-rtl`}>  {/* کلاس ag-rtl برای پشتیبانی AG Grid از RTL */}
+        <div
+          className={`${gridClasses} ${
+            direction === "rtl" ? "ag-rtl" : "ag-ltr"
+          }`}
+        >
+          {" "}
+          {/* کلاس ag-rtl برای پشتیبانی AG Grid از RTL */}
           <AgGridReact
+            key={direction}
             onGridReady={onGridReady}
             onGridSizeChanged={onGridSizeChanged}
             columnDefs={columnDefs}
@@ -316,13 +340,13 @@ const DataTable: React.FC<DataTableProps> = ({
             onRowDoubleClicked={handleRowDoubleClickInternal}
             domLayout={domLayout}
             suppressHorizontalScroll={false}
-            gridOptions={{ ...gridOptions, enableRtl: true }}  
-            singleClickEdit={true}
+            singleClickEdit={false}
             stopEditingWhenCellsLoseFocus={true}
             onCellValueChanged={onCellValueChanged}
             overlayLoadingTemplate={
               '<div class="custom-loading-overlay"><TailSpin color="#7e3af2" height="80" width="80" /></div>'
             }
+            rowSelection="single"
           />
         </div>
       </div>
@@ -345,7 +369,6 @@ const DataTable: React.FC<DataTableProps> = ({
       )}
     </div>
   );
-  
 };
 
 export default DataTable;

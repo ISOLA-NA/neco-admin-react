@@ -1,0 +1,80 @@
+{
+    "DataTable": {
+      "Toolbar": {
+        "SearchPlaceholder": "جستجو...",
+        "AddNew": "افزودن مورد جدید"
+      },
+      "Buttons": {
+        "Duplicate": "تکثیر",
+        "Edit": "ویرایش",
+        "Delete": "حذف",
+        "Add": "افزودن",
+        "View": "نمایش"
+      },
+      "Status": {
+        "Loading": "در حال بارگذاری..."
+      },
+      "Headers": {
+        "Name": "نام",
+        "ProgramTemplateShort": "قالب برنامه",
+        "DefaultRibbon": "ریبون پیش‌فرض",
+        "Username": "نام‌کاربری",
+        "FirstName": "نام",
+        "LastName": "نام‌خانوادگی",
+        "UserType": "نوع کاربر",
+        "Website": "وب‌سایت",
+        "Mobile": "موبایل",
+        "Email": "ایمیل",
+        "Description": "توضیحات",
+        "PostCode": "کد سمت",
+        "Grade": "رتبه",
+        "Address": "آدرس",
+        "WFTemplateName": "نام الگوی گردش‌کار",
+        "EntityTypeName": "نام نوع موجودیت",
+        "Role": "نقش",
+        "ProjectName": "نام پروژه",
+        "User": "کاربر",
+        "Enterprise": "شرکت",
+        "Superior": "سرپرست",
+        "Status": "وضعیت",
+        "ActStart": "شروع واقعی",
+        "Duration": "مدت‌زمان",
+        "BudgetAct": "بودجه واقعی",
+        "BudgetAppr": "بودجه مصوب",
+        "Phase": "فاز",
+        "Calendar": "تقویم",
+        "IsIdea": "ایده",
+        "Project": "پروژه",
+        "Transmittal": "ترانسمیتال",
+        "CatA": "دسته A",
+        "CatB": "دسته B",
+        "AFName": "نام جریان تأیید (AF)",
+        "Command": "دستور",
+        "Order": "ترتیب"
+      },
+      "SubTabs": {
+        "Configurations": "پیکربندی‌ها",
+        "Commands": "دستورات",
+        "Ribbons": "ریبون‌ها",
+        "Users": "کاربران",
+        "Roles": "نقش‌ها",
+        "Enterprises": "شرکت‌ها",
+        "RoleGroups": "گروه‌های نقش",
+        "Staffing": "چیدمان نقش‌ها",
+        "ProgramTemplate": "قالب برنامه",
+        "ProgramTypes": "انواع برنامه",
+        "Projects": "پروژه‌ها",
+        "ProjectsAccess": "دسترسی پروژه‌ها",
+        "Odp": "ODP",
+        "Procedures": "رویه‌ها",
+        "Calendars": "تقویم‌ها",
+        "ApprovalFlows": "جریان‌های تأیید",
+        "Forms": "فرم‌ها",
+        "Categories": "دسته‌ها",
+        "MenuTab": "تب منو",
+        "MenuGroup": "گروه منو",
+        "MenuItem": "آیتم منو"
+      }
+    }
+  }
+  

@@ -1,3 +1,4 @@
+// src/i18n.ts
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
@@ -27,6 +28,7 @@ import enProjectsAccess from "./components/locales/en/ProjectAccess.json";
 import enODP from "./components/locales/en/ODP.json";
 import enProcedure from "./components/locales/en/Procedure.json";
 import enCalendar from "./components/locales/en/Calendar.json";
+import enDataTable from "./components/locales/en/DataTable.json";
 
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
@@ -54,6 +56,7 @@ import faProjectsAccess from "./components/locales/fa/ProjectAccess.json";
 import faODP from "./components/locales/fa/ODP.json";
 import faProcedure from "./components/locales/fa/Procedure.json";
 import faCalendar from "./components/locales/fa/Calendar.json";
+import faDataTable from "./components/locales/fa/DataTable.json";
 
 const resources = {
   en: {
@@ -83,6 +86,7 @@ const resources = {
       ...enODP,
       ...enProcedure,
       ...enCalendar,
+      ...enDataTable,
     },
   },
   fa: {
@@ -112,6 +116,7 @@ const resources = {
       ...faODP,
       ...faProcedure,
       ...faCalendar,
+      ...faDataTable,
     },
   },
 };
@@ -123,13 +128,18 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 });
 
-// ★ هم‌گام‌سازی جهت و زبانِ عنصر <html> با تغییر زبان
+// ★ هم‌گام‌سازی جهت و زبانِ عنصر <html> با تغییر زبان (fa و fa-IR و ... را پوشش بده)
 const setDir = (lng: string) => {
+  const isRtl = /^(fa|ar|he|ur)(-|$)/.test(lng);
   document.documentElement.lang = lng;
-  document.documentElement.dir = lng === "fa" ? "rtl" : "ltr";
+  document.documentElement.dir = isRtl ? "rtl" : "ltr";
+  document.documentElement.classList.toggle("rtl", isRtl);
 };
 setDir(i18n.language);
 
-i18n.on("languageChanged", (lng) => setDir(lng));
+i18n.on("languageChanged", (lng) => {
+  localStorage.setItem("i18nextLng", lng);
+  setDir(lng);
+});
 
 export default i18n;

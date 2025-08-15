@@ -1,0 +1,80 @@
+{
+    "DataTable": {
+      "Toolbar": {
+        "SearchPlaceholder": "Search...",
+        "AddNew": "Add new item"
+      },
+      "Buttons": {
+        "Duplicate": "Duplicate",
+        "Edit": "Edit",
+        "Delete": "Delete",
+        "Add": "Add",
+        "View": "View"
+      },
+      "Status": {
+        "Loading": "Loading..."
+      },
+      "Headers": {
+        "Name": "Name",
+        "ProgramTemplateShort": "Prg. Template",
+        "DefaultRibbon": "Default Ribbon",
+        "Username": "Username",
+        "FirstName": "Name",
+        "LastName": "Last Name",
+        "UserType": "User Type",
+        "Website": "Website",
+        "Mobile": "Mobile",
+        "Email": "Email",
+        "Description": "Description",
+        "PostCode": "Post Code",
+        "Grade": "Grade",
+        "Address": "Address",
+        "WFTemplateName": "WF Template Name",
+        "EntityTypeName": "Entity Type Name",
+        "Role": "Role",
+        "ProjectName": "Project Name",
+        "User": "User",
+        "Enterprise": "Enterprise",
+        "Superior": "Superior",
+        "Status": "Status",
+        "ActStart": "Act Start",
+        "Duration": "Duration",
+        "BudgetAct": "Budget Act",
+        "BudgetAppr": "Budget Appr",
+        "Phase": "Phase",
+        "Calendar": "Calendar",
+        "IsIdea": "IsIdea",
+        "Project": "Project",
+        "Transmittal": "Transmittal",
+        "CatA": "CatA",
+        "CatB": "CatB",
+        "AFName": "AF Name",
+        "Command": "Command",
+        "Order": "Order"
+      },
+      "SubTabs": {
+        "Configurations": "Configurations",
+        "Commands": "Commands",
+        "Ribbons": "Ribbons",
+        "Users": "Users",
+        "Roles": "Roles",
+        "Enterprises": "Enterprises",
+        "RoleGroups": "Role Groups",
+        "Staffing": "Staffing",
+        "ProgramTemplate": "Program Template",
+        "ProgramTypes": "Program Types",
+        "Projects": "Projects",
+        "ProjectsAccess": "Projects Access",
+        "Odp": "ODP",
+        "Procedures": "Procedures",
+        "Calendars": "Calendars",
+        "ApprovalFlows": "Approval Flows",
+        "Forms": "Forms",
+        "Categories": "Categories",
+        "MenuTab": "Menu Tab",
+        "MenuGroup": "Menu Group",
+        "MenuItem": "Menu Item"
+      }
+    }
+  }
+  

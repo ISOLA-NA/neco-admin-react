@@ -99,88 +99,88 @@
   cursor: pointer;
 }
 
-/* ===================== Header layout: base (LTR) ===================== */
-/* flex را روشن می‌کنیم تا کنترل چیدمان آیکن/متن دست ما باشد */
-.ag-header .ag-header-cell .ag-header-cell-label,
-.ag-header .ag-header-group-cell-label {
-  display: flex;
-  flex-direction: row;          /* LTR: متن سمت چپ، آیکن‌ها سمت راست متن */
-  align-items: center;
+/* ====== RTL headers: متن هدر راست، آیکن‌ها سمت چپ متن ======
+.ag-rtl .ag-header .ag-header-cell .ag-header-cell-label,
+.ag-rtl .ag-header .ag-header-group-cell-label {
+  display: flex !important;
+  flex-direction: row-reverse !important;
+  align-items: center !important;
+}
+.ag-rtl .ag-header .ag-header-cell-text,
+.ag-rtl .ag-header .ag-header-group-text {
+  text-align: right !important;
+  margin-inline-end: .4rem !important;
+  margin-inline-start: 0 !important;
+  direction: rtl !important;
+}
+.ag-rtl .ag-header .ag-header-icon,
+.ag-rtl .ag-header .ag-sort-indicator-icon,
+.ag-rtl .ag-header .ag-header-icon.ag-header-cell-menu-button {
+  margin-inline-start: .4rem !important;
+  margin-inline-end: 0 !important;
+}
+.ag-rtl .ag-header .ag-header-cell-menu-button {
+  order: -1 !important;
 }
 
+/* Floating filter in RTL */
+/* .ag-rtl .ag-floating-filter-full-body,
+.ag-rtl .ag-floating-filter-body {
+  direction: rtl;
+}
+.ag-rtl .ag-floating-filter-button,
+.ag-rtl .ag-floating-filter-button-button {
+  order: -1;
+  margin-inline-end: .35rem;
+  margin-inline-start: 0;
+}
+.ag-rtl .ag-floating-filter-input {
+  text-align: right;
+} */
+/* فقط وقتی که صفحه راست‌چین هست */
+html[dir="rtl"] .ag-floating-filter-full-body,
+html[dir="rtl"] .ag-floating-filter-body {
+  direction: rtl;
+}
+
+html[dir="rtl"] .ag-floating-filter-button,
+html[dir="rtl"] .ag-floating-filter-button-button {
+  order: -1;
+  margin-inline-end: .35rem;
+  margin-inline-start: 0;
+}
+
+html[dir="rtl"] .ag-floating-filter-input {
+  text-align: right;
+}
+
+
+/* ====== LTR headers (صریح برای جلوگیری از تداخل) ====== */
+/* .ag-header .ag-header-cell .ag-header-cell-label,
+.ag-header .ag-header-group-cell-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 .ag-header .ag-header-cell-text,
 .ag-header .ag-header-group-text {
   text-align: left;
   margin-inline-start: 0;
-  margin-inline-end: .4rem;     /* فاصله‌ی کوچک بین متن و آیکن‌ها */
+  margin-inline-end: .4rem;
   direction: ltr;
-}
-
-/* آیکن‌های هدر در LTR */
-.ag-header .ag-header-icon,
-.ag-header .ag-sort-indicator-icon,
-.ag-header .ag-header-icon.ag-header-cell-menu-button {
-  margin-inline-start: .4rem;   /* سمت راست متن در LTR */
-  margin-inline-end: 0;
-}
-
-/* ===================== Header layout: RTL override ===================== */
-/* هم با ag-rtl و هم با dir="rtl" فعال می‌شود */
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-cell .ag-header-cell-label,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-group-cell-label {
-  flex-direction: row-reverse;  /* متن سمت راست، آیکن‌ها سمت چپ متن */
-}
-
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-cell-text,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-group-text {
-  text-align: right;
-  margin-inline-end: .4rem;     /* فاصله‌ی کوچک بین متن و آیکن‌ها */
-  margin-inline-start: 0;
-  direction: rtl;
-}
-
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-icon,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-sort-indicator-icon,
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-icon.ag-header-cell-menu-button {
-  margin-inline-start: .4rem;   /* سمت چپ متن در RTL */
-  margin-inline-end: 0;
-}
-
-/* اگر دکمهٔ منوی ستون جداست، در RTL بیار سمت راست متن */
-:is(.ag-rtl, html[dir="rtl"]) .ag-header .ag-header-cell-menu-button {
-  order: -1;
-}
-
-/* ===================== Floating filter: base (LTR) ===================== */
+} */
 .ag-floating-filter-full-body,
 .ag-floating-filter-body {
   direction: ltr;
 }
-
 .ag-floating-filter-button,
 .ag-floating-filter-button-button {
-  order: 1;                     /* بعد از ورودی (سمت راست ظرف) */
-  margin-inline-start: .35rem;  /* فاصله سمت راست ورودی در LTR */
+  order: 1;
+  margin-inline-start: .35rem;
   margin-inline-end: 0;
 }
-
 .ag-floating-filter-input {
-  text-align: left;             /* LTR: ورودی‌ها چپ‌چین */
+  text-align: right ! ;
 }
 
-/* ===================== Floating filter: RTL override ===================== */
-:is(.ag-rtl, html[dir="rtl"]) .ag-floating-filter-full-body,
-:is(.ag-rtl, html[dir="rtl"]) .ag-floating-filter-body {
-  direction: rtl;
-}
 
-:is(.ag-rtl, html[dir="rtl"]) .ag-floating-filter-button,
-:is(.ag-rtl, html[dir="rtl"]) .ag-floating-filter-button-button {
-  order: -1;                    /* قبل از ورودی (سمت راست ظرف) */
-  margin-inline-end: .35rem;    /* فاصله سمت چپ ورودی در RTL */
-  margin-inline-start: 0;
-}
-
-:is(.ag-rtl, html[dir="rtl"]) .ag-floating-filter-input {
-  text-align: right;            /* RTL: ورودی‌ها راست‌چین */
-}

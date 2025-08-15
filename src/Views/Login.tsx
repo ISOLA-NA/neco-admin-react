@@ -24,7 +24,6 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-
   const { t, i18n } = useTranslation();
   const [isOtp, setIsOtp] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -33,7 +32,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const isRtl = i18n.dir(i18n.language) === "rtl";
-
 
   const navigate = useNavigate();
 
@@ -64,7 +62,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       "Saturday",
     ];
     const d = new Date();
-    const seq = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}-${d.getUTCHours()}-${weekDays[d.getUTCDay()]}`;
+    const seq = `${d.getUTCFullYear()}-${
+      d.getUTCMonth() + 1
+    }-${d.getUTCDate()}-${d.getUTCHours()}-${weekDays[d.getUTCDay()]}`;
     return CryptoJS.SHA512(CryptoJS.enc.Utf8.parse(seq)).toString(
       CryptoJS.enc.Hex
     );
@@ -79,7 +79,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     try {
       if (!isOtp) {
         if (!username || !password) {
-          showAlert("error", null, t("alert.errorTitle"), t("alert.enterCredentials"));
+          showAlert(
+            "error",
+            null,
+            t("alert.errorTitle"),
+            t("alert.enterCredentials")
+          );
           return;
         }
 
@@ -91,18 +96,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           SeqKey: generateSeqKey(),
         };
 
-        const response: WebLoginResponse = await AppServices.webLogin(loginData);
+        const response: WebLoginResponse = await AppServices.webLogin(
+          loginData
+        );
 
         if (!response || !response.MyUser) {
           throw new Error(t("alert.invalidApiResponse"));
         }
 
         const { MyUser } = response;
-        Cookies.set(
-          "token",
-          `${MyUser.TTKK}:${MyUser.Username}`,
-          { expires: defaultTokenHours / 24 }
-        );
+        Cookies.set("token", `${MyUser.TTKK}:${MyUser.Username}`, {
+          expires: defaultTokenHours / 24,
+        });
         Cookies.set("userId", MyUser.ID.toString(), {
           expires: defaultTokenHours / 24,
         });
@@ -112,14 +117,29 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             expires: defaultTokenHours / 24,
           });
           onLogin();
-          showAlert("success", null, t("alert.successTitle"), t("alert.loginSuccess"));
+          showAlert(
+            "success",
+            null,
+            t("alert.successTitle"),
+            t("alert.loginSuccess")
+          );
           navigate("/");
         } else {
-          showAlert("error", null, t("alert.errorTitle"), t("alert.userCannotLogin"));
+          showAlert(
+            "error",
+            null,
+            t("alert.errorTitle"),
+            t("alert.userCannotLogin")
+          );
         }
       } else {
         if (!phoneNumber) {
-          showAlert("error", null, t("alert.errorTitle"), t("alert.enterPhone"));
+          showAlert(
+            "error",
+            null,
+            t("alert.errorTitle"),
+            t("alert.enterPhone")
+          );
           return;
         }
 
@@ -131,9 +151,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         const response: SendOtpResponse = await AppServices.sendOtp(otpData);
         if (response.success) {
-          showAlert("success", null, t("alert.successTitle"), t("alert.otpSent"));
+          showAlert(
+            "success",
+            null,
+            t("alert.successTitle"),
+            t("alert.otpSent")
+          );
         } else {
-          showAlert("error", null, t("alert.errorTitle"), response.message || t("alert.otpFailed"));
+          showAlert(
+            "error",
+            null,
+            t("alert.errorTitle"),
+            response.message || t("alert.otpFailed")
+          );
         }
       }
     } catch (error: any) {
@@ -141,9 +171,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         typeof error?.response?.data === "string"
           ? error.response.data
           : error?.response?.data?.value?.message ||
-          error?.response?.data?.message ||
-          error.message ||
-          t("alert.genericError");
+            error?.response?.data?.message ||
+            error.message ||
+            t("alert.genericError");
       showAlert("error", null, t("alert.errorTitle"), message);
     } finally {
       setLoading(false);
@@ -186,7 +216,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             />
           </div>
         </div>
-
 
         {/* Toggle Switcher */}
         <div className="flex justify-center items-center mt-20">
@@ -236,8 +265,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
               <button
                 type="submit"
-                className={`w-full mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base flex items-center justify-center ${loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                className={`w-full mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base flex items-center justify-center ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 disabled={loading}
               >
                 {loading && (
@@ -279,8 +309,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
               <button
                 type="submit"
-                className={`w-full flex items-center justify-center gap-2 mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base ${loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                className={`w-full flex items-center justify-center gap-2 mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 disabled={loading}
               >
                 {loading && (

@@ -75,6 +75,8 @@ const TabContent: FC<TabContentProps> = ({
   isPanelOpen,
   setIsPanelOpen,
 }) => {
+  const { i18n } = useTranslation();
+
   const api = useApi();
   const { t } = useTranslation();
   const { fetchDataForSubTab } = useSubTabDefinitions();
@@ -1035,6 +1037,7 @@ const TabContent: FC<TabContentProps> = ({
             onDelete={handleDeleteClick}
             onDuplicate={handleDuplicateClick}
             isLoading={isLoading}
+            direction={i18n.dir()}
           />
         </div>
       </div>
