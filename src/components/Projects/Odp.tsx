@@ -15,6 +15,7 @@ import ListSelector from "../ListSelector/ListSelector";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { useApi } from "../../context/ApiContext";
 import type { OdpWithExtra } from "../../services/api.services";
+import { useTranslation } from "react-i18next";
 
 // Types
 export interface IODP {
@@ -69,6 +70,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   { selectedRow },
   ref
 ) => {
+  const { t } = useTranslation();
   const api = useApi();
 
   const isEditMode = Boolean(selectedRow?.ID);
@@ -96,10 +98,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       try {
         setLoadingFormTemplates(true);
         const res = await api.getTableTransmittal();
-        setFormTemplates(res.map((item: any) => ({
-          ID: item.ID,
-          Name: item.Name,
-        })));
+        setFormTemplates(
+          res.map((item: any) => ({
+            ID: item.ID,
+            Name: item.Name,
+          }))
+        );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching Form Templates failed.");
       } finally {
@@ -119,10 +123,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       try {
         setLoadingApprovalFlows(true);
         const res = await api.getAllWfTemplate();
-        setApprovalFlows(res.map((item: any) => ({
-          ID: item.ID,
-          Name: item.Name,
-        })));
+        setApprovalFlows(
+          res.map((item: any) => ({
+            ID: item.ID,
+            Name: item.Name,
+          }))
+        );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching Approval Flows failed.");
       } finally {
@@ -140,10 +146,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       try {
         setLoadingProgramTemplates(true);
         const res = await api.getAllProgramTemplates();
-        setProgramTemplates(res.map((pt: any) => ({
-          ID: pt.ID,
-          Name: pt.Name,
-        })));
+        setProgramTemplates(
+          res.map((pt: any) => ({
+            ID: pt.ID,
+            Name: pt.Name,
+          }))
+        );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching Program Templates failed.");
       } finally {
@@ -154,8 +162,10 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   }, [api]);
 
   // Modal state for Program Template TableSelector
-  const [isProgramTemplateModalOpen, setIsProgramTemplateModalOpen] = useState(false);
-  const [selectedProgramTemplateRow, setSelectedProgramTemplateRow] = useState<ItemType | null>(null);
+  const [isProgramTemplateModalOpen, setIsProgramTemplateModalOpen] =
+    useState(false);
+  const [selectedProgramTemplateRow, setSelectedProgramTemplateRow] =
+    useState<ItemType | null>(null);
 
   // Projects for Relate Project
   const [projectsData, setProjectsData] = useState<ItemType[]>([]);
@@ -166,10 +176,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       try {
         setLoadingProjects(true);
         const res = await api.getAllProject();
-        setProjectsData(res.map((proj: any) => ({
-          ID: proj.ID,
-          Name: proj.ProjectName,
-        })));
+        setProjectsData(
+          res.map((proj: any) => ({
+            ID: proj.ID,
+            Name: proj.ProjectName,
+          }))
+        );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching projects failed.");
       } finally {
@@ -242,12 +254,14 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   };
 
   // --- Program Template Modal handlers
-  const handleOpenProgramTemplateModal = () => setIsProgramTemplateModalOpen(true);
+  const handleOpenProgramTemplateModal = () =>
+    setIsProgramTemplateModalOpen(true);
   const handleCloseProgramTemplateModal = () => {
     setSelectedProgramTemplateRow(null);
     setIsProgramTemplateModalOpen(false);
   };
-  const handleProgramTemplateRowClick = (data: ItemType) => setSelectedProgramTemplateRow(data);
+  const handleProgramTemplateRowClick = (data: ItemType) =>
+    setSelectedProgramTemplateRow(data);
   const handleProgramTemplateRowDoubleClick = (data: ItemType) => {
     handleChange("nProgramTemplateID", data.ID);
     handleCloseProgramTemplateModal();
@@ -281,9 +295,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         ID: isEditMode ? selectedRow!.ID! : 0,
         ...restOdp,
         ModifiedById:
-          OdpData.ModifiedById != null
-            ? String(OdpData.ModifiedById)
-            : null,
+          OdpData.ModifiedById != null ? String(OdpData.ModifiedById) : null,
         ProjectsStr: finalRelateProjectsStr,
         LastModified: new Date().toISOString(),
         IsVisible: OdpData.IsVisible ?? true,
@@ -344,7 +356,9 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       loading={loadingFormTemplates}
       className="mb-4"
     />
-  ) : <></>;
+  ) : (
+    <></>
+  );
 
   const approvalFlowSelector = isEditMode ? (
     <DynamicSelector
@@ -359,42 +373,44 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       loading={loadingApprovalFlows}
       className="mb-4"
     />
-  ) : <></>;
+  ) : (
+    <></>
+  );
 
   // --- UI ---
   return (
     <>
       <TwoColumnLayout>
         <DynamicInput
-          name="ODP Name"
+          name={t("ODP.ODPName")}
           type="text"
           value={OdpData.Name}
           placeholder=""
-          onChange={(e: { target: { value: string | number | boolean | null } }) =>
-            handleChange("Name", e.target.value)
-          }
+          onChange={(e: {
+            target: { value: string | number | boolean | null };
+          }) => handleChange("Name", e.target.value)}
           required={true}
           className="mb-4"
         />
 
         <CustomTextarea
-          name="Description"
+          name={t("ODP.Description")}
           value={OdpData.Description}
           placeholder=""
-          onChange={(e: { target: { value: string | number | boolean | null } }) =>
-            handleChange("Description", e.target.value)
-          }
+          onChange={(e: {
+            target: { value: string | number | boolean | null };
+          }) => handleChange("Description", e.target.value)}
           className="mb-4"
         />
 
         <DynamicInput
-          name="Address"
+          name={t("ODP.Address")}
           type="text"
           value={OdpData.Address}
           placeholder=""
-          onChange={(e: { target: { value: string | number | boolean | null } }) =>
-            handleChange("Address", e.target.value)
-          }
+          onChange={(e: {
+            target: { value: string | number | boolean | null };
+          }) => handleChange("Address", e.target.value)}
           required={true}
           className="mb-4"
         />
@@ -410,7 +426,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
             const idNumber = val ? parseInt(val, 10) : null;
             handleChange("nProgramTemplateID", idNumber);
           }}
-          label="Program Template"
+          label={t("ODP.ProgramTemplate")}
           showButton={true}
           onButtonClick={handleOpenProgramTemplateModal} // اینجا مودال باز می‌شود!
           disabled={false}
@@ -422,7 +438,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         {approvalFlowSelector}
 
         <ListSelector
-          title="Related Projects"
+          title={t("ODP.RelatedProjects")}
           className="mt-4"
           columnDefs={projectColumnDefs}
           rowData={projectsListData}

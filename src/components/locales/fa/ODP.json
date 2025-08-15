@@ -1,0 +1,13 @@
+{
+    "ODP": {
+      "ODPName": "نام ODP",
+      "Address": "آدرس",
+      "Description": "توضیحات",
+      "ProgramTemplate": "قالب برنامه",
+      "ApprovalFlowTemplate": "قالب جریان تایید",
+      "FormTemplate": "قالب فرم",
+      "RelatedProjects": "پروژه‌های مرتبط",
+      "Public": "عمومی"
+    }
+  }
+  

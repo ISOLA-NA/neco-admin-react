@@ -1,0 +1,25 @@
+{
+    "Projects": {
+      "Status": "Status",
+      "ProjectName": "Project Name",
+      "Phase": "Phase",
+      "Configuration": "Configuration",
+      "ProjectCharteredDate": "Project Chartered Date",
+      "IdeaStartDate": "Idea Start Date",
+      "ProjectPlanDuration": "Project Plan Duration",
+      "IdeaPlanDuration": "Idea Plan Duration",
+      "ProjectApprovalBudget": "Project Approval Budget",
+      "PlanningExecutionBudget": "Planning Execution Budget",
+      "Files": "Files",
+      "Tasks": "Tasks",
+      "ProgramItems": "Program Items",
+      "AssignedCalendars": "Assigned Calendars",
+      "Letters": "Letters",
+      "Roles": "Roles",
+      "FileSize": "File Size",
+      "Knowledge": "Knowledge",
+      "Issues": "Issues",
+      "Meetings": "Meetings"
+    }
+  }
+  

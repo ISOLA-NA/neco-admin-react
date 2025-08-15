@@ -1,0 +1,33 @@
+{
+    "ProjectAccess": {
+      "CreateMeeting": "تهیه جلسه",
+      "CreateLetter": "تهیه نامه",
+      "CreateKnowledge": "دانش",
+      "CreateIssue": "اقدام موردی",
+      "AllowToAllTask": "نمایش تمامی تسک ها",
+      "CreateAlert": "هشدار",
+      "AllowToWordPrint": "پرینت ورد",
+      "AllowToEditRequest": "قابلیت ویرایش درخواست",
+      "ShowComment": "نمایش نقطه نظر",
+      "ShowApproval": "نمایش جریان کار",
+      "ShowProcedure": "نمایش دستورالعمل",
+      "ShowCheckList": "نمایش چک لیست",
+      "ShowLessons": "درس آموخته ها",
+      "ShowLogs": "نمایش لاگها",
+      "ShowAssignment": "نمایش مدارک محول شده",
+      "ShowRelated": "نمایش ارجاعات",
+      "AllowToDownloadGroup": "دانلود گروهی",
+      "SelectPost": "انتخاب پست",
+      "SelectPlaceholder": "-- انتخاب کنید --",
+      "Search": "جستجو...",
+      "Loading": "در حال بارگذاری...",
+      "NoResultsFound": "موردی یافت نشد",
+      "Name": "نام",
+      "Actions": "اقدامات",
+      "Access": "دسترسی‌ها",
+      "Mode": "حالت",
+      "Read": "خواندن",
+      "Write": "نوشتن"
+    }
+  }
+  

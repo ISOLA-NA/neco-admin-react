@@ -22,6 +22,11 @@ import enAlerts from "./components/locales/en/Alerts.json";
 import enProgramTemplate from "./components/locales/en/ProgramTemplate.json";
 import enAddProgramTemplate from "./components/locales/en/AddProgramTemplate.json";
 import enProgramType from "./components/locales/en/ProgramType.json";
+import enProjects from "./components/locales/en/Projects.json";
+import enProjectsAccess from "./components/locales/en/ProjectAccess.json";
+import enODP from "./components/locales/en/ODP.json";
+import enProcedure from "./components/locales/en/Procedure.json";
+import enCalendar from "./components/locales/en/Calendar.json";
 
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
@@ -44,6 +49,11 @@ import faAlerts from "./components/locales/fa/Alerts.json";
 import faProgramTemplate from "./components/locales/fa/ProgramTemplate.json";
 import faAddProgramTemplate from "./components/locales/fa/AddProgramTemplate.json";
 import faProgramType from "./components/locales/fa/ProgramType.json";
+import faProjects from "./components/locales/fa/Projects.json";
+import faProjectsAccess from "./components/locales/fa/ProjectAccess.json";
+import faODP from "./components/locales/fa/ODP.json";
+import faProcedure from "./components/locales/fa/Procedure.json";
+import faCalendar from "./components/locales/fa/Calendar.json";
 
 const resources = {
   en: {
@@ -68,6 +78,11 @@ const resources = {
       ...enProgramTemplate,
       ...enAddProgramTemplate,
       ...enProgramType,
+      ...enProjects,
+      ...enProjectsAccess,
+      ...enODP,
+      ...enProcedure,
+      ...enCalendar,
     },
   },
   fa: {
@@ -92,6 +107,11 @@ const resources = {
       ...faProgramTemplate,
       ...faAddProgramTemplate,
       ...faProgramType,
+      ...faProjects,
+      ...faProjectsAccess,
+      ...faODP,
+      ...faProcedure,
+      ...faCalendar,
     },
   },
 };

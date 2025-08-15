@@ -1,0 +1,21 @@
+{
+  "Calendars": {
+    "CalendarName": "Calendar Name",
+    "Exceptions": "Exceptions",
+    "RoutineWorkingHours": "Routine Working Hours",
+    "Saturday": "Saturday",
+    "Sunday": "Sunday",
+    "Monday": "Monday",
+    "Tuesday": "Tuesday",
+    "Wednesday": "Wednesday",
+    "Thursday": "Thursday",
+    "Friday": "Friday",
+    "Hours": "Hours",
+    "Value": "Value (0-1)",
+    "SetWorkingHoursFor": "Set Working Hours for {{date}}",
+    "WorkingHours": "Working Hours",
+    "EnterHours01": "Enter hours (0-1)",
+    "EnterValidNumber01": "Please enter a valid number between 0 and 1",
+    "SaveFailed": "Failed to save calendar"
+  }
+}

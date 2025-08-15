@@ -1,0 +1,13 @@
+{
+    "ODP": {
+      "ODPName": "ODP Name",
+      "Address": "Address",
+      "Description": "Description",
+      "ProgramTemplate": "Program Template",
+      "ApprovalFlowTemplate": "Approval Flow Template",
+      "FormTemplate": "Form Template",
+      "RelatedProjects": "Related Projects",
+      "Public": "Public"
+    }
+  }
+  

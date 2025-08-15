@@ -1,0 +1,33 @@
+{
+    "ProjectAccess": {
+      "CreateMeeting": "Create Meeting",
+      "CreateLetter": "Create Letter",
+      "CreateKnowledge": "Create Knowledge",
+      "CreateIssue": "Create Issue",
+      "AllowToAllTask": "Allow To All Tasks",
+      "CreateAlert": "Create Alert",
+      "AllowToWordPrint": "Allow To Word Print",
+      "AllowToEditRequest": "Allow To Edit Request",
+      "ShowComment": "Show Comment",
+      "ShowApproval": "Show Approval",
+      "ShowProcedure": "Show Procedure",
+      "ShowCheckList": "Show Check List",
+      "ShowLessons": "Show Lessons",
+      "ShowLogs": "Show Logs",
+      "ShowAssignment": "Show Assignment",
+      "ShowRelated": "Show Related",
+      "AllowToDownloadGroup": "Allow To Download Group",
+      "SelectPost": "Select post",
+      "SelectPlaceholder": "-- Select --",
+      "Search": "Search...",
+      "Loading": "Loading...",
+      "NoResultsFound": "No results found",
+      "Name": "Name",
+      "Actions": "Actions",
+      "Access": "Access",
+      "Mode": "Mode",
+      "Read": "Read",
+      "Write": "Write"
+    }
+  }
+  

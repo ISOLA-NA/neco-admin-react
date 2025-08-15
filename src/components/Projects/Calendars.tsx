@@ -9,6 +9,7 @@ import { useApi } from "../../context/ApiContext";
 import DynamicInput from "../utilities/DynamicInput";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { FaCalendarAlt } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export interface CalendarHandle {
   save: () => Promise<boolean>;
@@ -46,9 +47,12 @@ const parseJsonSafely = (
 
 const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
   ({ selectedRow }, ref) => {
+    const { t, i18n } = useTranslation();
     const api = useApi();
 
-    const [activeTab, setActiveTab] = useState("routine");
+    const [activeTab, setActiveTab] = useState<"routine" | "exception">(
+      "routine"
+    );
     const [calendarData, setCalendarData] = useState<Calendar>({
       Name: "",
       SpecialDay: "{}",
@@ -96,7 +100,14 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
         try {
           setIsLoading(true);
           if (!calendarData.Name.trim()) {
-            showAlert("error", null, "Error", "Calendar name is required");
+            showAlert(
+              "error",
+              null,
+              t("Global.Error", { defaultValue: "Error" }),
+              t("Calendars.CalendarNameRequired", {
+                defaultValue: "Calendar name is required",
+              })
+            );
             return false;
           }
 
@@ -111,15 +122,20 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
 
           if (selectedRow?.ID) {
             await api.updateCalendar(dataToSave);
-            // showAlert("success", null, "Success", "Calendar updated successfully");
           } else {
             await api.insertCalendar(dataToSave);
-            // showAlert("success", null, "Success", "Calendar created successfully");
           }
           return true;
         } catch (error) {
           console.error("Error saving calendar:", error);
-          showAlert("error", null, "Error", "Failed to save calendar");
+          showAlert(
+            "error",
+            null,
+            t("Global.Error", { defaultValue: "Error" }),
+            t("Calendars.SaveFailed", {
+              defaultValue: "Failed to save calendar",
+            })
+          );
           return false;
         } finally {
           setIsLoading(false);
@@ -138,7 +154,6 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
       }));
     };
 
-    // تغییر مقدار به محدوده 0 تا 1
     const handleRoutineChange = (
       day: string,
       e: React.ChangeEvent<HTMLInputElement>
@@ -162,7 +177,6 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
       });
     };
 
-    // تغییر مقدار به محدوده 0 تا 1
     const handleSaveModal = () => {
       if (!selectedDate) return;
 
@@ -171,8 +185,10 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
         showAlert(
           "error",
           null,
-          "Error",
-          "Please enter a valid number between 0 and 1"
+          t("Global.Error", { defaultValue: "Error" }),
+          t("Calendars.EnterValidNumber01", {
+            defaultValue: "Please enter a valid number between 0 and 1",
+          })
         );
         return;
       }
@@ -193,7 +209,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
       setModalValue(exceptionData[dateStr]?.toString() || "");
     };
 
-    const weekDays = [
+    const weekDayKeys = [
       "Saturday",
       "Sunday",
       "Monday",
@@ -201,19 +217,30 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
       "Wednesday",
       "Thursday",
       "Friday",
-    ];
+    ] as const;
+
+    const weekDaysLocalized = weekDayKeys.map((k) =>
+      t(`Calendars.${k}`, { defaultValue: k })
+    );
 
     return (
-      <div className="p-4 bg-white rounded-lg shadow-sm max-w-7xl mx-auto">
+      <div
+        className="p-4 bg-white rounded-lg shadow-sm max-w-7xl mx-auto"
+        dir={i18n.dir()}
+      >
         <div className="flex justify-center mb-6">
           <div className="w-full md:w-1/2">
             <DynamicInput
-              name="Calendar Name"
+              name={t("Calendars.CalendarName", {
+                defaultValue: "Calendar Name",
+              })}
               type="text"
               value={calendarData.Name}
               onChange={handleNameChange}
               required={true}
-              placeholder="Enter calendar name"
+              placeholder={t("Calendars.EnterCalendarName", {
+                defaultValue: "Enter calendar name",
+              })}
               leftIcon={<FaCalendarAlt />}
               loading={isLoading}
               disabled={isLoading}
@@ -232,7 +259,9 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
               }`}
               onClick={() => setActiveTab("routine")}
             >
-              Routine Working Hours
+              {t("Calendars.RoutineWorkingHours", {
+                defaultValue: "Routine Working Hours",
+              })}
             </button>
             <button
               className={`px-5 py-2 text-sm font-medium rounded-full transition-all duration-300 transform ${
@@ -242,7 +271,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
               }`}
               onClick={() => setActiveTab("exception")}
             >
-              Exceptions
+              {t("Calendars.Exceptions", { defaultValue: "Exceptions" })}
             </button>
           </div>
         </div>
@@ -251,38 +280,45 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
           {activeTab === "routine" && (
             <div className="routine-tab p-4 bg-white rounded-lg shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {weekDays.map((day) => (
-                  <div
-                    key={day}
-                    className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg"
-                  >
-                    <label className="flex items-center gap-2 min-w-[120px]">
-                      <input
-                        type="checkbox"
-                        className="form-checkbox h-5 w-5 text-purple-600 rounded border-purple-600"
-                        checked={day in routineData}
-                        onChange={() => handleRoutineToggle(day)}
-                      />
-                      <span className="text-gray-700 whitespace-nowrap">
-                        {day}
-                      </span>
-                    </label>
-                    <div className="flex-grow">
-                      <DynamicInput
-                        name={`${day} Hours`}
-                        type="number"
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        value={routineData[day]?.toString() || ""}
-                        onChange={(e) => handleRoutineChange(day, e)}
-                        disabled={!(day in routineData)}
-                        placeholder="Hours (0-1)"
-                        className="w-full"
-                      />
+                {weekDayKeys.map((dayKey, idx) => {
+                  const dayLabel = weekDaysLocalized[idx];
+                  return (
+                    <div
+                      key={dayKey}
+                      className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg"
+                    >
+                      <label className="flex items-center gap-2 min-w-[120px]">
+                        <input
+                          type="checkbox"
+                          className="form-checkbox h-5 w-5 text-purple-600 rounded border-purple-600"
+                          checked={dayKey in routineData}
+                          onChange={() => handleRoutineToggle(dayKey)}
+                        />
+                        <span className="text-gray-700 whitespace-nowrap">
+                          {dayLabel}
+                        </span>
+                      </label>
+                      <div className="flex-grow">
+                        <DynamicInput
+                          name={`${dayLabel} ${t("Calendars.Hours", {
+                            defaultValue: "Hours",
+                          })}`}
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          value={routineData[dayKey]?.toString() || ""}
+                          onChange={(e) => handleRoutineChange(dayKey, e)}
+                          disabled={!(dayKey in routineData)}
+                          placeholder={t("Calendars.Value", {
+                            defaultValue: "Value (0-1)",
+                          })}
+                          className="w-full"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -297,7 +333,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                 >
                   {Array.from({ length: 12 }, (_, i) => (
                     <option key={i} value={i}>
-                      {new Date(0, i).toLocaleString("default", {
+                      {new Date(0, i).toLocaleString(i18n.language, {
                         month: "long",
                       })}
                     </option>
@@ -319,13 +355,14 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                 </select>
               </div>
 
+              {/* نام کامل روزهای هفته در هدر تب استثناها */}
               <div className="grid grid-cols-7 gap-2">
-                {weekDays.map((day) => (
+                {weekDaysLocalized.map((dayLabel) => (
                   <div
-                    key={day}
+                    key={`head-${dayLabel}`}
                     className="text-center font-bold text-gray-600 p-2"
                   >
-                    {day.slice(0, 3)}
+                    {dayLabel}
                   </div>
                 ))}
 
@@ -375,17 +412,24 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
               <div className="bg-white rounded-lg p-6 w-full max-w-md">
                 <h3 className="text-lg font-bold mb-4 text-gray-800">
-                  Set Working Hours for {selectedDate}
+                  {t("Calendars.SetWorkingHoursFor", {
+                    defaultValue: "Set Working Hours for {{date}}",
+                    date: selectedDate,
+                  })}
                 </h3>
                 <DynamicInput
-                  name="Working Hours"
+                  name={t("Calendars.WorkingHours", {
+                    defaultValue: "Working Hours",
+                  })}
                   type="number"
                   min={0}
                   max={1}
                   step={0.1}
                   value={modalValue}
                   onChange={(e) => setModalValue(e.target.value)}
-                  placeholder="Enter hours (0-1)"
+                  placeholder={t("Calendars.EnterHours01", {
+                    defaultValue: "Enter hours (0-1)",
+                  })}
                   className="w-full"
                 />
                 <div className="flex justify-end gap-4 mt-6">
@@ -393,13 +437,13 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                     className="px-4 py-2 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50"
                     onClick={() => setSelectedDate(null)}
                   >
-                    Cancel
+                    {t("Global.Cancel", { defaultValue: "Cancel" })}
                   </button>
                   <button
                     className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
                     onClick={handleSaveModal}
                   >
-                    Save
+                    {t("Global.Add", { defaultValue: "Add" })}
                   </button>
                 </div>
               </div>

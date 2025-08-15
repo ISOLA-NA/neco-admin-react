@@ -9,6 +9,7 @@ import TableSelector from "../General/Configuration/TableSelector";
 import { useApi } from "../../context/ApiContext";
 import { EntityCollection, Project } from "../../services/api.services";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 export interface ProcedureHandle {
   save: () => Promise<boolean>;
@@ -36,6 +37,7 @@ const getAssociatedProjects = (
 
 const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
   ({ selectedRow }, ref) => {
+    const { t } = useTranslation();
     const api = useApi();
 
     // Initial procedure data state
@@ -183,7 +185,7 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
       <TwoColumnLayout>
         {/* Name Input */}
         <DynamicInput
-          name="Name"
+          name={t("Procedure.Name")}
           type="text"
           value={procedureData.Name}
           onChange={(e) => handleChange("Name", e.target.value)}
@@ -193,7 +195,7 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
 
         {/* Description */}
         <CustomTextarea
-          name="Description"
+          name={t("Procedure.Description")}
           value={procedureData.Description || ""}
           onChange={(e) => handleChange("Description", e.target.value)}
           className="mb-4"
@@ -202,7 +204,7 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
         <div className="-mt-10">
           {/* Projects Selector */}
           <ListSelector
-            title="Projects"
+            title={t("Procedure.Projects")}
             className="mb-4"
             columnDefs={projectColumnDefs}
             rowData={projectsListData}
