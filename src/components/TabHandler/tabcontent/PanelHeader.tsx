@@ -9,6 +9,7 @@ import {
   FiRefreshCw,
 } from "react-icons/fi";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
+import { useTranslation } from "react-i18next";
 
 interface PanelHeaderProps {
   isExpanded: boolean;
@@ -33,6 +34,9 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
   onCheckCanUpdate,
   onShowEmptyNameWarning,
 }) => {
+
+  const { t } = useTranslation();
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmType, setConfirmType] = useState<"save" | "update" | null>(null);
 
@@ -90,7 +94,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
               className="flex items-center text-green-600 hover:text-green-800 transition"
             >
               <FiSave size={20} className="ltr:mr-2 rtl:ml-2" />
-              <span className="font-medium">Save</span>
+              <span className="font-medium">{t("Global.Add")}</span>
             </button>
           )}
 
@@ -100,7 +104,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
               className="flex items-center text-yellow-600 hover:text-yellow-800 transition"
             >
               <FiRefreshCw size={20} className="ltr:mr-2 rtl:ml-2" />
-              <span className="font-medium">Update</span>
+              <span className="font-medium">{t("Global.Edit")}</span>
             </button>
           )}
         </div>
@@ -111,7 +115,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
             <button
               onClick={() => onTogglePanelSizeFromRight(false)}
               className="text-gray-600 hover:text-gray-800 transition"
-              title="Minimize"
+              title={t("Global.Minimize")}
             >
               <FiMinimize2 size={20} />
             </button>
@@ -119,7 +123,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
             <button
               onClick={() => onTogglePanelSizeFromRight(true)}
               className="text-gray-600 hover:text-gray-800 transition"
-              title="Maximize"
+              title={t("Global.maximize")}
             >
               <FiMaximize2 size={20} />
             </button>
@@ -128,7 +132,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
           <button
             onClick={onClose}
             className="text-red-600 hover:text-red-800 transition"
-            title="Close"
+            title={t("Global.Close")}
           >
             <FiX size={20} />
           </button>

@@ -8,6 +8,9 @@
       "Design": "Design",
       "Duplicate": "Duplicate",
       "Cancel":"Cancel",
+      "Close":"Close",
+      "Minimize":"Minimize",
+      "maximize":"maximize",
       "Noitemisselected":"No item is selected"
     }
   }

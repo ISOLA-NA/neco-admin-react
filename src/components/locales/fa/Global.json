@@ -8,6 +8,9 @@
       "Design": "طراحی",
       "Duplicate": "تکراری",
       "Cancel":"لغو",
+      "Close":"بستن",
+      "Minimize":"کوچک کردن",
+      "maximize":"بزرگ کردن",
       "Noitemisselected":"هنوز هیچ آیتمی انتخاب نشده است "
     }
   }
