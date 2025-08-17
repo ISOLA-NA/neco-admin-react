@@ -1,0 +1,14 @@
+{
+    "ChoiceController": {
+      "DisplayChoicesUsing": "نمایش گزینه‌ها به این صورت:",
+      "DropDownMenu": "منوی کشویی",
+      "RadioButtons": "دکمه‌های رادیویی",
+      "CheckBox": "چک‌باکس",
+      "TypeEachChoiceOnSeparateLine": "هر گزینه را در یک خط جداگانه بنویسید:",
+      "EnterEachChoiceOnNewLine": "هر گزینه را در یک خط جدید وارد کنید",
+      "DefaultValueLabel": "مقدار پیش‌فرض:",
+      "EnterDefaultValue": "مقدار پیش‌فرض را وارد کنید",
+      "ChooseAnOption": "یک گزینه انتخاب کنید:"
+    }
+  }
+  

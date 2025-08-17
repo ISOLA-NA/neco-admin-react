@@ -1,0 +1,10 @@
+{
+    "NumberController": {
+      "MinValuePlaceholder": "حداقل مقدار",
+      "MaxValuePlaceholder": "حداکثر مقدار",
+      "DefaultValuePlaceholder": "مقدار پیش‌فرض",
+      "MaxValueLabel": "حداکثر مقدار",
+      "MaximumValuePlaceholder": "حداکثر مقدار"
+    }
+  }
+  

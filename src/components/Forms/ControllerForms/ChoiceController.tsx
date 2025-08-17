@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import DynamicInput    from "../../utilities/DynamicInput";
-import CustomTextarea  from "../../utilities/DynamicTextArea";
+import DynamicInput from "../../utilities/DynamicInput";
+import CustomTextarea from "../../utilities/DynamicTextArea";
+import { useTranslation } from "react-i18next";
 
 interface ChoiceControllerProps {
   onMetaChange: (meta: {
@@ -15,10 +16,16 @@ interface ChoiceControllerProps {
   };
 }
 
-const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data }) => {
+const ChoiceController: React.FC<ChoiceControllerProps> = ({
+  onMetaChange,
+  data,
+}) => {
+  const { t } = useTranslation();
   /* ─────────────────── Local state ─────────────────── */
   const [metaType1, setMetaType1] = useState<string>(data?.metaType1 ?? "");
-  const [metaType2, setMetaType2] = useState<"drop" | "radio" | "check">(data?.metaType2 ?? "drop");
+  const [metaType2, setMetaType2] = useState<"drop" | "radio" | "check">(
+    data?.metaType2 ?? "drop"
+  );
   const [metaType3, setMetaType3] = useState<string>(data?.metaType3 ?? "");
 
   /* ─── Sync from props only when real changes detected ─── */
@@ -37,7 +44,11 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
   }, [data?.metaType1, data?.metaType2, data?.metaType3]);
 
   /* ─── Inform parent only when values really change ─── */
-  const lastSentRef = useRef<{ metaType1: string; metaType2: string; metaType3: string } | null>(null);
+  const lastSentRef = useRef<{
+    metaType1: string;
+    metaType2: string;
+    metaType3: string;
+  } | null>(null);
 
   useEffect(() => {
     const current = { metaType1, metaType2, metaType3 };
@@ -71,7 +82,9 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* نوع نمایش گزینه‌ها */}
         <div>
-          <div className="mb-2 font-medium text-gray-700">Display choices using:</div>
+          <div className="mb-2 font-medium text-gray-700">
+            {t("ChoiceController.DisplayChoicesUsing")}
+          </div>
           <div className="space-y-2">
             {(["drop", "radio", "check"] as const).map((mode) => (
               <label
@@ -88,10 +101,10 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
                 />
                 <span>
                   {mode === "drop"
-                    ? "Drop-Down Menu"
+                    ? t("ChoiceController.DropDownMenu")
                     : mode === "radio"
-                    ? "Radio Buttons"
-                    : "Check Box"}
+                    ? t("ChoiceController.RadioButtons")
+                    : t("ChoiceController.CheckBox")}
                 </span>
               </label>
             ))}
@@ -100,23 +113,25 @@ const ChoiceController: React.FC<ChoiceControllerProps> = ({ onMetaChange, data 
 
         {/* فهرست گزینه‌ها + مقدار پیش‌فرض */}
         <div>
-          <div className="mb-2 font-medium text-gray-700">Type each choice on a separate line:</div>
+          {/* <div className="mb-2 font-medium text-gray-700">
+            {t("ChoiceController.TypeEachChoiceOnSeparateLine")}
+          </div> */}
           <CustomTextarea
-            name="metaType3"
+            name={t("ChoiceController.EnterEachChoiceOnNewLine")}
             value={metaType3}
             onChange={(e) => setMetaType3(e.target.value)}
-            placeholder="Enter each choice on a new line"
             rows={4}
             className="resize-none w-full"
           />
 
-          <div className="mt-4 font-medium text-gray-700">Default value:</div>
+          {/* <div className="mt-4 font-medium text-gray-700">
+            {t("ChoiceController.DefaultValueLabel")}
+          </div> */}
           <DynamicInput
-            name="metaType1"
+            name={t("ChoiceController.EnterDefaultValue")}
             type="text"
             value={metaType1}
             onChange={(e) => setMetaType1(e.target.value)}
-            placeholder="Enter default value"
             className="w-full"
           />
         </div>

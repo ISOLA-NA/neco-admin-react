@@ -30,8 +30,10 @@ import enProcedure from "./components/locales/en/Procedure.json";
 import enCalendar from "./components/locales/en/Calendar.json";
 import enDataTable from "./components/locales/en/DataTable.json";
 import enAlerts from "./components/locales/en/Alerts.json";
-import enDynamicConfirm from "./components/locales/en/DynamicConfirm.json"
-import enTextController from "./components/locales/en/Forms/TextController.json"
+import enDynamicConfirm from "./components/locales/en/DynamicConfirm.json";
+import enTextController from "./components/locales/en/Forms/TextController.json";
+import enChoiceController from "./components/locales/en/Forms/ChoiceController.json";
+import enNumberController from "./components/locales/en/Forms/NumberController.json";
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
 import faLogin from "./components/locales/fa/login.json";
@@ -61,7 +63,9 @@ import faCalendar from "./components/locales/fa/Calendar.json";
 import faDataTable from "./components/locales/fa/DataTable.json";
 import faAlerts from "./components/locales/fa/Alerts.json";
 import faDynamicConfirm from "./components/locales/fa/DynamicConfirm.json";
-import faTextController from "./components/locales/fa/Forms/TextController.json"
+import faTextController from "./components/locales/fa/Forms/TextController.json";
+import faChoiceController from "./components/locales/fa/Forms/ChoiceController.json";
+import faNumberController from "./components/locales/fa/Forms/NumberController.json";
 
 const resources = {
   en: {
@@ -94,7 +98,9 @@ const resources = {
       ...enDataTable,
       ...enAlerts,
       ...enDynamicConfirm,
-      ...enTextController
+      ...enTextController,
+      ...enChoiceController,
+      ...enNumberController,
     },
   },
   fa: {
@@ -127,7 +133,9 @@ const resources = {
       ...faDataTable,
       ...faAlerts,
       ...faDynamicConfirm,
-      ...faTextController
+      ...faTextController,
+      ...faChoiceController,
+      ...faNumberController,
     },
   },
 };

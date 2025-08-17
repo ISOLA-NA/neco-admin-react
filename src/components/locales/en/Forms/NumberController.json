@@ -1,0 +1,10 @@
+{
+    "NumberController": {
+      "MinValuePlaceholder": "Minimum Value",
+      "MaxValuePlaceholder": "Maximum Value",
+      "DefaultValuePlaceholder": "Default Value",
+      "MaxValueLabel": "Max Value",
+      "MaximumValuePlaceholder": "Maximum Value"
+    }
+  }
+  

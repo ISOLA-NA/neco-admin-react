@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
+import { useTranslation } from "react-i18next";
 
 interface NumberControllerProps {
   onMetaChange: (meta: {
@@ -18,11 +19,17 @@ interface NumberControllerProps {
   };
 }
 
-const NumberController: React.FC<NumberControllerProps> = ({ onMetaChange, data }) => {
+const NumberController: React.FC<NumberControllerProps> = ({
+  onMetaChange,
+  data,
+}) => {
+  const { t } = useTranslation();
   /* ───────────────────── Local state (strings) ───────────────────── */
-  const [defaultValue, setDefaultValue] = useState<string>(data?.metaType1 ?? "");
-  const [minValue,     setMinValue]     = useState<string>(data?.metaType2 ?? "");
-  const [maxValue,     setMaxValue]     = useState<string>(data?.metaType3 ?? "");
+  const [defaultValue, setDefaultValue] = useState<string>(
+    data?.metaType1 ?? ""
+  );
+  const [minValue, setMinValue] = useState<string>(data?.metaType2 ?? "");
+  const [maxValue, setMaxValue] = useState<string>(data?.metaType3 ?? "");
 
   /* ────────── Sync from props فقط وقتی واقعاً تغییر کند ──────────── */
   useEffect(() => {
@@ -39,10 +46,18 @@ const NumberController: React.FC<NumberControllerProps> = ({ onMetaChange, data 
   }, [data?.metaType1, data?.metaType2, data?.metaType3]); // وابستگی به مقادیر ساده
 
   /* ─────────────── Notify parent؛ فقط روی تغییر واقعی ────────────── */
-  const lastSent = useRef<{ metaType1: string; metaType2: string; metaType3: string } | null>(null);
+  const lastSent = useRef<{
+    metaType1: string;
+    metaType2: string;
+    metaType3: string;
+  } | null>(null);
 
   useEffect(() => {
-    const current = { metaType1: defaultValue, metaType2: minValue, metaType3: maxValue };
+    const current = {
+      metaType1: defaultValue,
+      metaType2: minValue,
+      metaType3: maxValue,
+    };
     if (
       !lastSent.current ||
       current.metaType1 !== lastSent.current.metaType1 ||
@@ -58,29 +73,26 @@ const NumberController: React.FC<NumberControllerProps> = ({ onMetaChange, data 
   return (
     <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-4">
       <DynamicInput
-        name="minValue"
+        name={t("NumberController.MinValuePlaceholder")}
         type="number"
         value={minValue}
         onChange={(e) => setMinValue(e.target.value)}
-        placeholder="Minimum Value (metaType2)"
         className="border-b-gray-400 focus-within:border-b-gray-700"
       />
 
       <DynamicInput
-        name="maxValue"
+        name={t("NumberController.MaxValuePlaceholder")}
         type="number"
         value={maxValue}
         onChange={(e) => setMaxValue(e.target.value)}
-        placeholder="Maximum Value (metaType3)"
         className="border-b-gray-400 focus-within:border-b-gray-700"
       />
 
       <DynamicInput
-        name="defaultValue"
+        name={t("NumberController.DefaultValuePlaceholder")}
         type="number"
         value={defaultValue}
         onChange={(e) => setDefaultValue(e.target.value)}
-        placeholder="Default Value (metaType1)"
         className="border-b-gray-400 focus-within:border-b-gray-700"
       />
     </div>

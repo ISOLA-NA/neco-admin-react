@@ -1,0 +1,14 @@
+{
+    "ChoiceController": {
+      "DisplayChoicesUsing": "Display choices using:",
+      "DropDownMenu": "Drop-Down Menu",
+      "RadioButtons": "Radio Buttons",
+      "CheckBox": "Check Box",
+      "TypeEachChoiceOnSeparateLine": "Type each choice on a separate line:",
+      "EnterEachChoiceOnNewLine": "Enter each choice on a new line",
+      "DefaultValueLabel": "Default value:",
+      "EnterDefaultValue": "Enter default value",
+      "ChooseAnOption": "Choose an option:"
+    }
+  }
+  
