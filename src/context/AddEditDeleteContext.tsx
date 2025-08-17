@@ -439,7 +439,6 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         // Updating existing user
         result = await api.updateUser(userRequest);
         // console.log("User updated:", result);
-        showAlert("success", null, "", "User updated successfully.");
       } else {
         // Creating new user
         result = await api.insertUser(userRequest);

@@ -1,13 +1,14 @@
 {
-    "Staffing": {
-      "ProjectName": "نام پروژه",
-      "RolesType": "پست ها",
-      "SuperiorRole": "سمت مافوق",
-      "UserName": "کاربر",
-      "RelatedRibbons": "منو های مرتبط",
-      "Enterprise": "شرکت",
-      "ShowCommandBar": " آدرس بار",
-      "AccessToNewProjects": "دسترسی پروژه"
-    }
+  "Staffing": {
+    "ProjectName": "نام پروژه",
+    "RolesType": "پست ها",
+    "SuperiorRole": "سمت مافوق",
+    "UserName": "کاربر",
+    "RelatedRibbons": "منو های مرتبط",
+    "Enterprise": "شرکت",
+    "ShowCommandBar": " آدرس بار",
+    "AccessToNewProjects": "دسترسی پروژه",
+    "DynamicRoleSelectProject": "یک نقش پویا انتخاب شده است؛ لطفاً یک پروژه انتخاب کنید.",
+    "SelectUserBeforeSaving": "لطفاً قبل از ذخیره‌سازی، یک کاربر انتخاب کنید."
   }
-  
+}

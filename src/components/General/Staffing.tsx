@@ -119,23 +119,14 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
       if (staffingData.nPostTypeID) {
         const sel = roles.find((r) => r.ID === staffingData.nPostTypeID);
         if (sel && !sel.isStaticPost && !staffingData.ProjectID) {
-          showAlert(
-            "warning",
-            null,
-            "A dynamic role has been selected; please select a project"
-          );
+          showAlert("warning", null, t("Staffing.DynamicRoleSelectProject"));
           // throw new Error("Missing ProjectID");
           return false;
         }
       }
 
       if (!staffingData.OwnerID) {
-        showAlert(
-          "warning",
-          null,
-          "Warning",
-          "Please select a user before saving."
-        );
+        showAlert("warning", "", t("Staffing.SelectUserBeforeSaving"));
         return false;
       }
 
@@ -324,7 +315,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             isChecked={staffingData.isHaveAddressbar}
             onChange={() => handleSwitcher("isHaveAddressbar")}
             leftLabel=""
-            rightLabel={t("Staffing.ShowCommandBar")}
+            rightLabel={t("Staffing.AccessToNewProjects")}
           />
         </TwoColumnLayout>
 

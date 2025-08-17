@@ -1,13 +1,14 @@
 {
-    "Staffing": {
-      "ProjectName": "Project Name",
-      "RolesType": "Roles Type",
-      "SuperiorRole": "Superior Role",
-      "UserName": "User Name",
-      "RelatedRibbons": "Related Ribbons",
-      "Enterprise": "Enterprise",
-      "ShowCommandBar": "Show Command Bar",
-      "AccessToNewProjects": "Access To New Projects"
-    }
+  "Staffing": {
+    "ProjectName": "Project Name",
+    "RolesType": "Roles Type",
+    "SuperiorRole": "Superior Role",
+    "UserName": "User Name",
+    "RelatedRibbons": "Related Ribbons",
+    "Enterprise": "Enterprise",
+    "ShowCommandBar": "Show Command Bar",
+    "AccessToNewProjects": "Access To New Projects",
+    "DynamicRoleSelectProject": "A dynamic role has been selected; please select a project",
+    "SelectUserBeforeSaving": "Please select a user before saving."
   }
-  
+}

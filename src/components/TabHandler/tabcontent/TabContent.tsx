@@ -348,7 +348,7 @@ const TabContent: FC<TabContentProps> = ({
             const ok = await staffingRef.current.save();
             console.log("📦 نتیجه save():", ok);
             if (!ok) return;
-            showAlert("success", null, "", "Staffing added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Staffing"));
             await fetchData();
           }
           break;
@@ -494,14 +494,14 @@ const TabContent: FC<TabContentProps> = ({
         case "Roles":
           if (selectedRow && roleRef.current) {
             await roleRef.current.save();
-            showAlert("success", null, "", "Role updated successfully");
+            showAlert("success", null, "", t("Alerts.Updated.Role"));
             await fetchData();
           }
           break;
         case "Enterprises":
           if (selectedRow && companyRef.current) {
             await companyRef.current.save();
-            showAlert("success", null, "", t("Alerts.Updated.Ribbon"));
+            showAlert("success", null, "", t("Alerts.Updated.Enterprise"));
             await fetchData();
           }
           break;
