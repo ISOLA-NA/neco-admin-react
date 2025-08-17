@@ -142,7 +142,8 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const validateForm = (): boolean => {
       // 1) نام
       if (!nameValue.trim()) {
-        showAlert("error", null, "Error", "Name is required.");
+        showAlert("error", null, "", t("AddApprovalFlows.NameRequired"));
+
         return false;
       }
 
@@ -153,8 +154,8 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           showAlert(
             "error",
             null,
-            "Error",
-            "Select at least one of Min Accept or Min Reject."
+            "",
+            t("AddApprovalFlows.SelectMinAcceptOrMinReject")
           );
           return false;
         }
@@ -163,7 +164,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         if (acceptChecked) {
           const v = Number(minAcceptValue);
           if (!Number.isFinite(v) || v <= 0) {
-            showAlert("error", null, "Error", "Invalid Min Accept value.");
+            showAlert(
+              "error",
+              null,
+              "",
+              t("AddApprovalFlows.InvalidMinAccept")
+            );
             return false;
           }
         }
@@ -172,7 +178,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         if (rejectChecked) {
           const v = Number(minRejectValue);
           if (!Number.isFinite(v) || v <= 0) {
-            showAlert("error", null, "Error", "Invalid Min Reject value.");
+            showAlert(
+              "error",
+              null,
+              "",
+              t("AddApprovalFlows.InvalidMinReject")
+            );
             return false;
           }
         }
@@ -182,9 +193,10 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           showAlert(
             "error",
             null,
-            "Error",
-            "Approval Context must have at least one row."
+            "",
+            t("AddApprovalFlows.ApprovalContextMustHaveOneRow")
           );
+
           return false;
         }
       }
@@ -354,7 +366,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     // ۱) ستون‌ها
     const columnDefs = [
       {
-        headerName: "Post",
+        headerName: t("AddApprovalFlows.Post"),
         field: "nPostID",
         flex: 3,
         minWidth: 100,
@@ -362,49 +374,49 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           allRoles.find((r) => r.ID + "" === p.data.nPostID)?.Name || "",
       },
       {
-        headerName: "Cost1",
+        headerName: t("AddApprovalFlows.Cost1"),
         field: "cost1",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: "Cost2",
+        headerName: t("AddApprovalFlows.Cost2"),
         field: "cost2",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: "Cost3",
+        headerName: t("AddApprovalFlows.Cost3"),
         field: "cost3",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: "Weight1",
+        headerName: t("AddApprovalFlows.Weight1"),
         field: "weight1",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: "Weight2",
+        headerName: t("AddApprovalFlows.Weight2"),
         field: "weight2",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: "Weight3",
+        headerName: t("AddApprovalFlows.Weight3"),
         field: "weight3",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: "Required",
+        headerName: t("AddApprovalFlows.Required"),
         field: "required",
         flex: 0.8,
         minWidth: 90,
@@ -417,7 +429,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         ),
       },
       {
-        headerName: "Veto",
+        headerName: t("AddApprovalFlows.Veto"),
         field: "veto",
         flex: 0.8,
         minWidth: 90,
@@ -430,7 +442,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         ),
       },
       {
-        headerName: "Code",
+        headerName: t("AddApprovalFlows.Code"),
         field: "code",
         flex: 1,
         minWidth: 110,
@@ -587,22 +599,28 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         showAlert(
           "error",
           null,
-          "Error",
-          "Please select at least one of Min Accept or Min Reject and enter a valid value."
+          "",
+          t("AddApprovalFlows.SelectMinAcceptOrMinRejectValid")
         );
+
         return false;
       }
       if (acceptChecked && !isStage) {
         const val = parseInt(minAcceptValue, 10);
         if (!minAcceptValue || isNaN(val) || val === 0) {
-          showAlert("error", null, "Error", "Invalid Min Accept value.");
+          showAlert(
+            "error",
+            null,
+            t("AddApprovalFlows.Error"),
+            t("AddApprovalFlows.InvalidMinAccept")
+          );
           return false;
         }
       }
       if (rejectChecked) {
         const val = parseInt(minRejectValue, 10);
         if (!minRejectValue || isNaN(val) || val === 0) {
-          showAlert("error", null, "Error", "Invalid Min Reject value.");
+          showAlert("error", null, "", t("AddApprovalFlows.InvalidMinReject"));
           return false;
         }
       }
@@ -612,7 +630,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     // افزودن یا ویرایش ردیف جدول
     const handleAddOrUpdateRow = () => {
       if (!staticPostValue) {
-        showAlert("error", null, "Error", "Static Post is empty!");
+        showAlert("error", null, "", t("AddApprovalFlows.StaticPostEmpty"));
         return;
       }
       if (!validateMinFields()) return;
@@ -640,7 +658,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         );
         setTableData(updated);
         resetForm();
-        showAlert("success", null, "Success", "Row Updated Successfully");
+        showAlert(
+          "success",
+          null,
+          t("AddApprovalFlows.Success"),
+          t("AddApprovalFlows.RowUpdatedSuccessfully")
+        );
       } else {
         // افزودن سطر جدید
         const newRow: TableRow = {
@@ -657,19 +680,35 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
           code: Number(codeValue) || 0,
         };
         setTableData([...tableData, newRow]);
-        showAlert("success", null, "Success", "Row Added Successfully");
+        showAlert(
+          "success",
+          null,
+          t("AddApprovalFlows.Success"),
+          t("AddApprovalFlows.RowAddedSuccessfully")
+        );
       }
     };
 
     // حذف ردیف
     const handleDeleteRow = () => {
       if (!selectedRow) {
-        showAlert("error", null, "Error", "No row is selected.");
+        showAlert(
+          "error",
+          null,
+          t("AddApprovalFlows.Error"),
+          t("AddApprovalFlows.NoRowSelected")
+        );
+
         return;
       }
       setTableData(tableData.filter((r) => r.id !== selectedRow.id));
       resetForm();
-      showAlert("success", null, "Success", "Row Deleted Successfully");
+      showAlert(
+        "success",
+        null,
+        t("AddApprovalFlows.Success"),
+        t("AddApprovalFlows.RowDeletedSuccessfully")
+      );
     };
 
     // تکثیر ردیف
@@ -1101,7 +1140,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 setStaticPostValue(selectedStaticPost.ID.toString());
                 closeModal();
               } else {
-                showAlert("error", null, "Error", "No row is selected.");
+                showAlert(
+                  "error",
+                  null,
+                  t("AddApprovalFlows.Error"),
+                  t("AddApprovalFlows.NoRowSelected")
+                );
               }
             }}
             isSelectDisabled={!selectedStaticPost}
