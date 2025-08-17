@@ -19,18 +19,15 @@ const RightProjectAccess: React.FC<RightProps> = ({
   const dir = i18n.dir();
   const isRtl = dir === "rtl";
 
-  // ثابت‌های خوانایی
   const READ_MODE = 1;
   const WRITE_MODE = 2;
 
-  // 1 = Read، 2 = Write
   const isRead = selectedRow.AccessMode === READ_MODE;
   const modeLabel = isRead
     ? t("ProjectAccess.Read", { defaultValue: "Read" })
     : t("ProjectAccess.Write", { defaultValue: "Write" });
   const labelClass = isRead ? "text-gray-500" : "text-blue-600 font-semibold";
 
-  // نگاشت فیلدهای بولی → کلید ترجمه
   const keyToI18n: Record<string, string> = {
     CreateMeeting: "ProjectAccess.CreateMeeting",
     CreateLetter: "ProjectAccess.CreateLetter",
@@ -98,7 +95,6 @@ const RightProjectAccess: React.FC<RightProps> = ({
               isRtl ? "pr-8" : "pl-8"
             } px-2 py-1 flex items-center`}
           >
-            {/* چک‌باکس با موقعیت مطلق → می‌چسبد به لبهٔ راست در RTL و لبهٔ چپ در LTR */}
             <input
               type="checkbox"
               checked={(selectedRow as any)[key]}
@@ -109,8 +105,6 @@ const RightProjectAccess: React.FC<RightProps> = ({
                 isRtl ? "right-2" : "left-2"
               }`}
             />
-
-            {/* متن با ترازبندی درست و فضای مناسب */}
             <span
               className={`text-xs truncate w-full ${
                 isRtl ? "text-right" : "text-left"

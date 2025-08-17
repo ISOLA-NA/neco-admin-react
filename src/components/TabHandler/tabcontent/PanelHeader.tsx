@@ -35,6 +35,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
   onShowEmptyNameWarning,
 }) => {
 
+  // طبق درخواست شما: بدون namespace
   const { t } = useTranslation();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -74,48 +75,51 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
   };
 
   let confirmVariant: "delete" | "edit" | "add" = "add";
-  let confirmTitle = "Save Confirmation";
-  let confirmMessage = "Are you sure you want to save?";
+  let confirmTitle = t("DynamicConfirm.Confirmations.Save.Title");
+  let confirmMessage = t("DynamicConfirm.Confirmations.Save.Message");
 
   if (confirmType === "update") {
     confirmVariant = "edit";
-    confirmTitle = "Update Confirmation";
-    confirmMessage = "Are you sure you want to update?";
+    confirmTitle = t("DynamicConfirm.Confirmations.Update.Title");
+    confirmMessage = t("DynamicConfirm.Confirmations.Update.Message");
   }
 
   return (
     <>
       <div className="flex items-center justify-between p-4 bg-white shadow-md rounded-t-md">
         {/* سمت چپ: دکمه‌های Save و Update */}
-        <div className="flex items-center space-x-4 rtl:space-x-reverse">
+        <div className="flex items-center gap-4">
           {onSave && (
             <button
               onClick={handleSaveClick}
-              className="flex items-center text-green-600 hover:text-green-800 transition"
+              className="flex items-center gap-2 text-green-600 hover:text-green-800 transition"
+              title={t("DynamicConfirm.Buttons.Add")}
             >
-              <FiSave size={20} className="ltr:mr-2 rtl:ml-2" />
-              <span className="font-medium">{t("Global.Add")}</span>
+              <FiSave size={20} />
+              <span className="font-medium">{t("DynamicConfirm.Buttons.Add")}</span>
             </button>
           )}
 
           {onUpdate && (
             <button
               onClick={handleUpdateClick}
-              className="flex items-center text-yellow-600 hover:text-yellow-800 transition"
+              className="flex items-center gap-2 text-yellow-600 hover:text-yellow-800 transition"
+              title={t("DynamicConfirm.Buttons.Edit")}
             >
-              <FiRefreshCw size={20} className="ltr:mr-2 rtl:ml-2" />
-              <span className="font-medium">{t("Global.Edit")}</span>
+              <FiRefreshCw size={20} />
+              <span className="font-medium">{t("DynamicConfirm.Buttons.Edit")}</span>
             </button>
           )}
         </div>
 
         {/* سمت راست: دکمه‌های Maximize/Minimize و Close */}
-        <div className="flex items-center space-x-4 rtl:space-x-reverse">
+        <div className="flex items-center gap-4">
           {isRightMaximized ? (
             <button
               onClick={() => onTogglePanelSizeFromRight(false)}
               className="text-gray-600 hover:text-gray-800 transition"
-              title={t("Global.Minimize")}
+              title={t("DynamicConfirm.Buttons.Minimize")}
+              aria-label={t("DynamicConfirm.Buttons.Minimize")}
             >
               <FiMinimize2 size={20} />
             </button>
@@ -123,7 +127,8 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
             <button
               onClick={() => onTogglePanelSizeFromRight(true)}
               className="text-gray-600 hover:text-gray-800 transition"
-              title={t("Global.maximize")}
+              title={t("DynamicConfirm.Buttons.Maximize")}
+              aria-label={t("DynamicConfirm.Buttons.Maximize")}
             >
               <FiMaximize2 size={20} />
             </button>
@@ -132,7 +137,8 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({
           <button
             onClick={onClose}
             className="text-red-600 hover:text-red-800 transition"
-            title={t("Global.Close")}
+            title={t("DynamicConfirm.Buttons.Close")}
+            aria-label={t("DynamicConfirm.Buttons.Close")}
           >
             <FiX size={20} />
           </button>

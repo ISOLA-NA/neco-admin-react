@@ -1,13 +1,21 @@
 {
-    "ODP": {
-      "ODPName": "نام ODP",
-      "Address": "آدرس",
-      "Description": "توضیحات",
-      "ProgramTemplate": "قالب برنامه",
-      "ApprovalFlowTemplate": "قالب جریان تایید",
-      "FormTemplate": "قالب فرم",
-      "RelatedProjects": "پروژه‌های مرتبط",
-      "Public": "عمومی"
+  "ODP": {
+    "ODPName": "نام ODP",
+    "Address": "آدرس",
+    "Description": "توضیحات",
+    "ProgramTemplate": "قالب برنامه",
+    "ApprovalFlowTemplate": "قالب جریان تایید",
+    "FormTemplate": "قالب فرم",
+    "RelatedProjects": "پروژه‌های مرتبط",
+    "Public": "عمومی",
+    "Alerts": {
+      "Titles": {
+        "Attention": "توجه"
+      },
+      "Messages": {
+        "NameRequired": "نام ODP نمی‌تواند خالی باشد.",
+        "AddressRequired": "آدرس نمی‌تواند خالی باشد."
+      }
     }
   }
-  
+}

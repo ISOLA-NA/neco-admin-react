@@ -366,61 +366,64 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     // ۱) ستون‌ها
     const columnDefs = [
       {
-        headerName: t("AddApprovalFlows.Post"),
+        headerName: t("AddApprovalFlows.StaticPost", { defaultValue: "Post" }),
         field: "nPostID",
         flex: 3,
-        minWidth: 100,
+        minWidth: 110,
         valueGetter: (p: any) =>
-          allRoles.find((r) => r.ID + "" === p.data.nPostID)?.Name || "",
+          allRoles.find((r: any) => String(r.ID) === p.data.nPostID)?.Name ||
+          "",
       },
       {
-        headerName: t("AddApprovalFlows.Cost1"),
+        headerName: t("AddApprovalFlows.Cost1", { defaultValue: "Cost 1" }),
         field: "cost1",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: t("AddApprovalFlows.Cost2"),
+        headerName: t("AddApprovalFlows.Cost2", { defaultValue: "Cost 2" }),
         field: "cost2",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: t("AddApprovalFlows.Cost3"),
+        headerName: t("AddApprovalFlows.Cost3", { defaultValue: "Cost 3" }),
         field: "cost3",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: t("AddApprovalFlows.Weight1"),
+        headerName: t("AddApprovalFlows.Weight1", { defaultValue: "Weight 1" }),
         field: "weight1",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: t("AddApprovalFlows.Weight2"),
+        headerName: t("AddApprovalFlows.Weight2", { defaultValue: "Weight 2" }),
         field: "weight2",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: t("AddApprovalFlows.Weight3"),
+        headerName: t("AddApprovalFlows.Weight3", { defaultValue: "Weight 3" }),
         field: "weight3",
         flex: 1,
         minWidth: 110,
         editable: true,
       },
       {
-        headerName: t("AddApprovalFlows.Required"),
+        headerName: t("AddApprovalFlows.Required", {
+          defaultValue: "Required",
+        }),
         field: "required",
         flex: 0.8,
         minWidth: 90,
-        cellRenderer: (p) => (
+        cellRenderer: (p: any) => (
           <input
             type="checkbox"
             checked={p.value}
@@ -429,11 +432,11 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         ),
       },
       {
-        headerName: t("AddApprovalFlows.Veto"),
+        headerName: t("AddApprovalFlows.Veto", { defaultValue: "Veto" }),
         field: "veto",
         flex: 0.8,
         minWidth: 90,
-        cellRenderer: (p) => (
+        cellRenderer: (p: any) => (
           <input
             type="checkbox"
             checked={p.value}
@@ -442,7 +445,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         ),
       },
       {
-        headerName: t("AddApprovalFlows.Code"),
+        headerName: t("AddApprovalFlows.Code", { defaultValue: "Code" }),
         field: "code",
         flex: 1,
         minWidth: 110,

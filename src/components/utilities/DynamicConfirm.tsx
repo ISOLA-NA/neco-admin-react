@@ -2,6 +2,7 @@
 
 import React from "react";
 import { FiAlertTriangle, FiCheck } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 
 /**
  * بسته به سلیقه می‌توانید Variantهای بیشتری اضافه کنید،
@@ -25,13 +26,16 @@ interface DynamicConfirmProps {
 
 const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
   isOpen,
-  title = "Confirmation",
-  message = "Are you sure you want to proceed?",
+  title,
+  message,
   onConfirm,
   onClose,
   variant,
   hideCancelButton = false,
 }) => {
+  // طبق درخواست شما: بدون namespace
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   // تعیین رنگ‌ها بر اساس variant
@@ -75,6 +79,11 @@ const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
       break;
   }
 
+  const resolvedTitle =
+    title ?? t("DynamicConfirm.Confirmations.Default.Title");
+  const resolvedMessage =
+    message ?? t("DynamicConfirm.Confirmations.Default.Message");
+
   return (
     <div
       className="
@@ -83,32 +92,39 @@ const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
         backdrop-blur-sm
       "
       style={{ overflow: "hidden" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={resolvedTitle}
     >
       <div className="bg-white rounded-lg shadow-lg p-6 w-80 relative flex flex-col items-center">
         {/* هدر و آیکون */}
-        <div className={`mb-4 flex items-center justify-center ${headerColor}`}>
-          <IconComponent size={iconSize} className="mr-2" />
-          <h2 className="text-lg font-bold">{title}</h2>
+        <div className={`mb-4 flex items-center justify-center gap-2 ${headerColor}`}>
+          <IconComponent size={iconSize} aria-hidden />
+          <h2 className="text-lg font-bold">{resolvedTitle}</h2>
         </div>
+
         {/* متن پیام */}
         <p className="text-gray-700 text-center mb-6 whitespace-pre-line">
-          {message}
+          {resolvedMessage}
         </p>
+
         {/* دکمه‌ها */}
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center items-center gap-4">
           {!hideCancelButton && (
             <button
               onClick={onClose}
               className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700"
             >
-              Cancel
+              {t("DynamicConfirm.Buttons.Cancel")}
             </button>
           )}
           <button
             onClick={onConfirm}
             className={`px-4 py-2 rounded text-white ${confirmButtonColor}`}
           >
-            {hideCancelButton ? "OK" : "Confirm"}
+            {hideCancelButton
+              ? t("DynamicConfirm.Buttons.Ok")
+              : t("DynamicConfirm.Buttons.Confirm")}
           </button>
         </div>
       </div>
