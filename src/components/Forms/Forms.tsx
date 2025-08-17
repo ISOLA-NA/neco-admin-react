@@ -669,7 +669,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   /* ───────── ستون‌ها: newColumnDefs با flex/minWidth ───────── */
   const newColumnDefs = [
     {
-      headerName: "Order",
+      headerName: t("Forms.Columns.Order"),
       field: "orderValue",
       editable: true,
       sortable: true,
@@ -678,7 +678,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       minWidth: 90,
     },
     {
-      headerName: "Column Name",
+      headerName: t("Forms.Columns.ColumnName"),
       field: "DisplayName",
       editable: true,
       sortable: true,
@@ -687,7 +687,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       minWidth: 180,
     },
     {
-      headerName: "Type",
+      headerName: t("Forms.Columns.Type"),
       field: "ColumnType",
       editable: false,
       sortable: true,
@@ -702,7 +702,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       },
     },
     {
-      headerName: "Command",
+      headerName: t("Forms.Columns.Command"),
       field: "Code",
       editable: true,
       sortable: true,
@@ -710,15 +710,15 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       flex: 1,
       minWidth: 130,
     },
-    /* ---------- ستون‌های Boolean مشابه ---------- */
     ...[
-      { headerName: "Show In List", field: "IsShowGrid" },
-      { headerName: "Required", field: "IsRequire" },
-      { headerName: "Main Column", field: "IsMainColumn" },
-      { headerName: "Is Rtl", field: "IsRTL" },
-      { headerName: "Count In Reject", field: "CountInReject" },
+      { headerNameKey: "ShowInList", field: "IsShowGrid" },
+      { headerNameKey: "Required", field: "IsRequire" },
+      { headerNameKey: "MainColumn", field: "IsMainColumn" },
+      { headerNameKey: "IsRtl", field: "IsRTL" },
+      { headerNameKey: "CountInReject", field: "CountInReject" },
     ].map((c) => ({
-      ...c,
+      headerName: t(`Forms.Columns.${c.headerNameKey}`),
+      field: c.field,
       editable: true,
       sortable: true,
       filter: true,

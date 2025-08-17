@@ -1,18 +1,29 @@
 {
-    "Forms": {
-      "Name": "نام فرم",
+  "Forms": {
+    "Name": "نام فرم",
+    "Command": "کامند",
+    "CategoryA": "دسته‌بندی A",
+    "CategoryB": "دسته‌بندی B",
+    "IsMegaForm": "مگا فرم",
+    "Transmittal": "ترنزمیتال",
+    "RelatedProjects": "پروژه‌های مرتبط",
+    "UploadExcelFile": "آپلود فایل اکسل",
+    "UploadWordFile": "آپلود فایل ورد",
+    "ChangeWordFile": "تغییر فایل ورد",
+    "ChangeExcelFile": "تغییر فایل اکسل",
+    "NoWordFileSelected": "هیچ فایل وردی انتخاب نشده است",
+    "NoExcelFileSelected": "هیچ فایل اکسل انتخاب نشده است",
+
+    "Columns": {
+      "Order": "ترتیب",
+      "ColumnName": "نام ستون",
+      "Type": "نوع",
       "Command": "کامند",
-      "CategoryA": "دسته بندی A",
-      "CategoryB": "دسته بندی B",
-      "IsMegaForm": "مگا فرم",
-      "Transmittal": "ترنزمیتال",
-      "RelatedProjects": "پروژه های مرتبط",
-      "UploadExcelFile": " فایل اکسل",
-      "UploadWordFile": "آپلود فایل ورد",
-      "ChangeWordFile":"تغییر فایل ورد",
-      "ChaneExcellFile":"تغییر فایل اکسل",
-      "NoWordfileselected":"هیچ فایل وردی انتخاب نشده است ",
-      "NoExcellfileselected":"هیچ فایل اکسلی انتخاب نشده است "
+      "ShowInList": "نمایش در لیست",
+      "Required": "اجباری",
+      "MainColumn": "ستون اصلی",
+      "IsRtl": "راست‌به‌چپ",
+      "CountInReject": "شمارش در رد"
     }
   }
-  
+}

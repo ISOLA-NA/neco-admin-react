@@ -574,7 +574,7 @@ const TabContent: FC<TabContentProps> = ({
         case "Forms":
           if (formsRef.current) {
             await formsRef.current.save();
-            showAlert("success", null, "", "Form updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.Form"));
             await fetchData();
           }
           break;

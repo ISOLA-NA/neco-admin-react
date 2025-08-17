@@ -1,18 +1,29 @@
 {
-    "Forms": {
-      "Name": "Name",
+  "Forms": {
+    "Name": "Name",
+    "Command": "Command",
+    "CategoryA": "Category A",
+    "CategoryB": "Category B",
+    "IsMegaForm": "Is Mega Form",
+    "Transmittal": "Transmittal",
+    "RelatedProjects": "Related Projects",
+    "UploadExcelFile": "Upload Excel File",
+    "UploadWordFile": "Upload Word File",
+    "ChangeWordFile": "Change Word File",
+    "ChangeExcelFile": "Change Excel File",
+    "NoWordFileSelected": "No Word file selected",
+    "NoExcelFileSelected": "No Excel file selected",
+
+    "Columns": {
+      "Order": "Order",
+      "ColumnName": "Column Name",
+      "Type": "Type",
       "Command": "Command",
-      "CategoryA": "Category A",
-      "CategoryB": "Category B",
-      "IsMegaForm": "Is Mega Form",
-      "Transmittal": "Transmittal",
-      "RelatedProjects": "Related Projects",
-      "UploadExcelFile": "Upload Excel File",
-      "UploadWordFile": "Upload Word File",
-      "ChangeWordFile":"Change Word File",
-      "ChaneExcelFile":"Chane Excel File",
-      "NoWordfileselected":"No Word file selected",
-      "NoExcelfileselected":"No Excel file selected"
+      "ShowInList": "Show In List",
+      "Required": "Required",
+      "MainColumn": "Main Column",
+      "IsRtl": "Is RTL",
+      "CountInReject": "Count In Reject"
     }
   }
-  
+}
