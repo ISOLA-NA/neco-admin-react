@@ -197,7 +197,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
         IconImageId: iconImageId || null,
       };
       console.log("Inserting MenuGroup:", newMenuGroup);
-      showAlert("success", null, "", "MenuGroup updated successfully.");
+      showAlert("success", null, "", t("Alerts.Added.MenuGroup"));
       await AppServices.insertMenuGroup(newMenuGroup);
       await loadRowData();
       if (tableContainerRef.current) {
@@ -247,7 +247,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
         IconImageId: iconImageId || null,
       };
       console.log("Updating MenuGroup:", updatedMenuGroup);
-      showAlert("success", null, "", "MenuGroup updated successfully.");
+      showAlert("success", null, "", t("Alerts.Updated.MenuGroup"));
       await AppServices.updateMenuGroup(updatedMenuGroup);
       await loadRowData();
       setIsEditing(false);
@@ -283,6 +283,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
       setTimeout(() => {
         setSuppressSelection(false);
       }, 500);
+      showAlert("success", null, "", t("Alerts.Deleted.MenuGroup"));
     } catch (error) {
       console.error("Error deleting MenuGroup:", error);
     } finally {
@@ -432,7 +433,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                 <div className="flex justify-center items-center gap-4 mt-6">
                   {/* Save - سبز سازمانی (همان منطق قبلی: وقتی ردیف انتخاب شده باشد غیرفعال) */}
                   <DynamicButton
-                    text={t("Global.New")}
+                    text={t("Global.Add")}
                     leftIcon={<FaSave />}
                     onClick={handleInsert}
                     isDisabled={!!selectedRow}

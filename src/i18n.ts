@@ -19,7 +19,7 @@ import enAddForms from "./components/locales/en/AddForms.json";
 import enCategory from "./components/locales/en/Category.json";
 import enApprovalFlows from "./components/locales/en/ApprovalFlows.json";
 import enAddApprovalFlows from "./components/locales/en/AddApprovalFlows.json";
-import enAlerts from "./components/locales/en/Alerts.json";
+import enAlertsTab from "./components/locales/en/AlertsTab.json";
 import enProgramTemplate from "./components/locales/en/ProgramTemplate.json";
 import enAddProgramTemplate from "./components/locales/en/AddProgramTemplate.json";
 import enProgramType from "./components/locales/en/ProgramType.json";
@@ -29,6 +29,7 @@ import enODP from "./components/locales/en/ODP.json";
 import enProcedure from "./components/locales/en/Procedure.json";
 import enCalendar from "./components/locales/en/Calendar.json";
 import enDataTable from "./components/locales/en/DataTable.json";
+import enAlerts from "./components/locales/en/Alerts.json";
 
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
@@ -47,7 +48,7 @@ import faAddForms from "./components/locales/fa/AddForms.json";
 import faCategory from "./components/locales/fa/Category.json";
 import faApprovalFlows from "./components/locales/fa/ApprovalFlows.json";
 import faAddApprovalFlows from "./components/locales/fa/AddApprovalFlows.json";
-import faAlerts from "./components/locales/fa/Alerts.json";
+import faAlertsTab from "./components/locales/fa/AlertsTab.json";
 import faProgramTemplate from "./components/locales/fa/ProgramTemplate.json";
 import faAddProgramTemplate from "./components/locales/fa/AddProgramTemplate.json";
 import faProgramType from "./components/locales/fa/ProgramType.json";
@@ -57,6 +58,7 @@ import faODP from "./components/locales/fa/ODP.json";
 import faProcedure from "./components/locales/fa/Procedure.json";
 import faCalendar from "./components/locales/fa/Calendar.json";
 import faDataTable from "./components/locales/fa/DataTable.json";
+import faAlerts from "./components/locales/fa/Alerts.json";
 
 const resources = {
   en: {
@@ -77,7 +79,7 @@ const resources = {
       ...enCategory,
       ...enApprovalFlows,
       ...enAddApprovalFlows,
-      ...enAlerts,
+      ...enAlertsTab,
       ...enProgramTemplate,
       ...enAddProgramTemplate,
       ...enProgramType,
@@ -87,6 +89,7 @@ const resources = {
       ...enProcedure,
       ...enCalendar,
       ...enDataTable,
+      ...enAlerts,
     },
   },
   fa: {
@@ -107,7 +110,7 @@ const resources = {
       ...faCategory,
       ...faApprovalFlows,
       ...faAddApprovalFlows,
-      ...faAlerts,
+      ...faAlertsTab,
       ...faProgramTemplate,
       ...faAddProgramTemplate,
       ...faProgramType,
@@ -117,6 +120,7 @@ const resources = {
       ...faProcedure,
       ...faCalendar,
       ...faDataTable,
+      ...faAlerts,
     },
   },
 };

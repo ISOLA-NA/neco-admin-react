@@ -238,7 +238,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
             selectedRowData.ID.toString(),
           ];
           handleProjectsChange(newSelection);
-          showAlert("success", null, "Success", "Added Successfully");
+          // showAlert("success", null, "Success", "Added Successfully");
         }
         setSelectedRowData(null);
       }
@@ -300,7 +300,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         // ۱. بارگذاری مجدد لیست
         await handleBoxTemplatesChanged();
         // ۲. حالا پیام موفقیت
-        showAlert("success", null, "موفقیت", "زیرجریان با موفقیت حذف شد");
+        // showAlert("success", null, "موفقیت", "زیرجریان با موفقیت حذف شد");
       } catch (err) {
         console.error("Error deleting BoxTemplate:", err);
         showAlert("error", null, "خطا", "حذف با شکست مواجه شد");
@@ -310,7 +310,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     const handleBoxTemplateDuplicate = (box: BoxTemplate) => {
       console.log("Duplicate BoxTemplate:", box);
       // فراخوانی متد duplicate در صورت وجود
-      showAlert("info", null, "Info", "Added Successfully");
+      // showAlert("info", null, "Info", "Added Successfully");
     };
 
     const handleSubRowDoubleClick = (data: any) => {

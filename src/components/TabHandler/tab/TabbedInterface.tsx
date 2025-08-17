@@ -274,7 +274,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   // Logout
   const handleLogoutClick = () => {
     onLogout();
-    showAlert("success", "", t("alert.successTitle"));
+    showAlert("success", "", t("Global.LogOut"));
     navigate("/login");
     setIsDrawerOpen(false);
   };

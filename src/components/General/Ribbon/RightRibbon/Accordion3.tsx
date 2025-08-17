@@ -326,7 +326,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
         KeyTip: "",
         Size: formData.Order || 0,
       };
-      showAlert("success", null, "", "MenuItem updated successfully.");
+      showAlert("success", null, "", t("Alerts.Added.MenuItem"));
+
       await AppServices.insertMenuItem(newMenuItem);
       await loadRowData();
       setFormData({ Name: "", Command: "", Description: "", Order: 0 });
@@ -371,7 +372,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
         KeyTip: "",
         Size: formData.Order || 0,
       };
-      showAlert("success", null, "", "MenuItem updated successfully.");
+      showAlert("success", null, "", t("Alerts.Updated.MenuTab"));
       await AppServices.updateMenuItem(updatedMenuItem);
       await loadRowData();
       setIsEditing(false);
@@ -404,6 +405,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       setSelectedSize("0");
       setIconImageId(null);
       setResetCounter((prev) => prev + 1);
+      showAlert("success", null, "", t("Alerts.Deleted.MenuItem"));
     } catch (error) {
       console.error("Error deleting MenuItem:", error);
     } finally {

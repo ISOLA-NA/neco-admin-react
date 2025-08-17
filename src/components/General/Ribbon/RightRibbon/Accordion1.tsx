@@ -197,7 +197,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
         IconImageId: iconImageId || null,
       };
       console.log("Inserting MenuTab:", newMenuTab);
-      showAlert("success", null, "", "MenuTabs Added successfully.");
+      showAlert("success", null, "", t("Alerts.Added.MenuTab"));
       await AppServices.insertMenuTab(newMenuTab);
       await loadRowData();
       // اسکرول به انتهای جدول پس از بارگذاری مجدد
@@ -246,10 +246,10 @@ const Accordion1: React.FC<Accordion1Props> = ({
         IconImageId: iconImageId || null,
       };
       console.log("Updating MenuTab:", updatedMenuTab);
-      showAlert("success", null, "", "MenuTab updated successfully.");
+      showAlert("success", null, "", t("Alerts.Updated.MenuTab"));
 
       await AppServices.updateMenuTab(updatedMenuTab);
-      alert("ویرایش با موفقیت انجام شد.");
+      // alert("ویرایش با موفقیت انجام شد.");
       await loadRowData();
     } catch (error: any) {
       console.error("Error updating MenuTab:", error);
@@ -274,6 +274,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
       await loadRowData();
       setSelectedRow(null);
       onRowClick(null);
+      showAlert("success", null, "", t("Alerts.Deleted.MenuTab"));
     } catch (error) {
       console.error("Error deleting MenuTab:", error);
     } finally {

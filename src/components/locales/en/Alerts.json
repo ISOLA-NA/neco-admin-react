@@ -1,14 +1,91 @@
 {
     "Alerts": {
-      "TimeBased": "Time Based",
-      "ChangeBased": "Change Based",
-      "TimeField": "Time Field",
-      "Days": "Days",
-      "ChangingField": "Changing Field",
-      "Step": "Step",
-      "SendType": "Send Type",
-      "Receiver": "Receiver",
-      "Comment": "Comment"
+      "Titles": {
+        "Success": "Success",
+        "Error": "Error",
+        "Warning": "Warning",
+        "Deleted": "Deleted",
+        "Updated": "Updated",
+        "DeleteConfirm": "Delete Confirmation"
+      },
+      "Messages": {
+        "FailedToFetch": "Failed to fetch data.",
+        "FailedToDelete": "Failed to delete data.",
+        "NameEmpty": "Name cannot be empty.",
+        "SelectRowToDelete": "Please select a row to delete.",
+        "SelectRowToDuplicate": "Please select a row to duplicate.",
+        "DeleteConfirm": "Are you sure you want to delete this {{entity}}?",
+        "DeletedSuccessDynamic": "{{entity}} deleted successfully."
+      },
+      "Added": {
+        "Configuration": "Configuration added successfully.",
+        "Command": "Command added successfully.",
+        "User": "User added successfully.",
+        "Ribbon": "Ribbon added successfully.",
+        "Role": "Role added successfully.",
+        "Enterprise": "Enterprise added successfully.",
+        "RoleGroup": "Role Group added successfully.",
+        "Staffing": "Staffing added successfully.",
+        "ProgramTemplate": "Program Template added successfully.",
+        "ProgramType": "Program Type added successfully.",
+        "Odp": "Odp added successfully.",
+        "Procedure": "Procedure added successfully.",
+        "Calendar": "Calendar added successfully.",
+        "ProjectAccess": "Project Access added successfully.",
+        "ApprovalFlow": "Approval Flow added successfully.",
+        "Form": "Form added successfully.",
+        "Category": "Category added successfully.",
+        "MenuTab": "Menu Tab added successfully.",
+        "MenuGroup": "Menu Group added successfully.",
+        "MenuItem": "Menu Item added successfully."
+      },
+      "Updated": {
+        "Configuration": "Configuration updated successfully.",
+        "Command": "Command updated successfully.",
+        "User": "User updated successfully.",
+        "Ribbon": "Ribbon updated successfully.",
+        "Role": "Role updated successfully.",
+        "Enterprise": "Enterprise updated successfully.",
+        "RoleGroup": "Role Group updated successfully.",
+        "Staffing": "Staffing updated successfully.",
+        "ProgramTemplate": "Program Template updated successfully.",
+        "ProgramType": "Program Type updated successfully.",
+        "Odp": "Odp updated successfully.",
+        "Procedure": "Procedure updated successfully.",
+        "Calendar": "Calendar updated successfully.",
+        "ProjectAccess": "Project Access updated successfully.",
+        "ApprovalFlow": "Approval Flow updated successfully.",
+        "Form": "Form updated successfully.",
+        "Category": "Category updated successfully.",
+        "MenuTab": "Menu Tab updated successfully.",
+        "MenuGroup": "Menu Group updated successfully.",
+        "MenuItem": "Menu Item updated successfully."
+      },
+      "Deleted":{
+       "Deleted" :"Deleted Successfully",
+       "MenuTab":"MenuTab Deleted Successfully",
+       "MenuGroup":"MenuGroup Deleted Successfully",
+       "MenuItem":"MenuItem Deleted Successfully"
+      },
+      "Entities": {
+        "Configurations": "Configuration",
+        "Commands": "Command",
+        "Users": "User",
+        "Ribbons": "Ribbon",
+        "Roles": "Role",
+        "Enterprises": "Enterprise",
+        "RoleGroups": "Role Group",
+        "Staffing": "Staffing",
+        "ProgramTemplate": "Program Template",
+        "ProgramTypes": "Program Type",
+        "Odp": "Odp",
+        "Procedures": "Procedure",
+        "Calendars": "Calendar",
+        "ProjectsAccess": "Project Access",
+        "ApprovalFlows": "Approval Flow",
+        "Forms": "Form",
+        "Categories": "Category"
+      }
     }
   }
   

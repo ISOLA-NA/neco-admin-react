@@ -297,21 +297,21 @@ const TabContent: FC<TabContentProps> = ({
           if (configurationRef.current) {
             const result = await configurationRef.current.save();
             if (!result) return;
-            showAlert("success", null, "Configuration added successfully");
+            showAlert("success", null, "", t("Alerts.Added.Configuration"));
           }
           break;
         case "Commands":
           if (commandRef.current) {
             const result = await commandRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Command added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Command"));
           }
           break;
         case "Users":
           if (userRef.current) {
             const result = await userRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "User added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.User"));
           }
           break;
         case "Ribbons":
@@ -320,27 +320,27 @@ const TabContent: FC<TabContentProps> = ({
             Description: descriptionInput,
             IsVisible: true,
           });
-          showAlert("success", null, "", "Ribbon added successfully.");
+          showAlert("success", null, "", t("Alerts.Added.Ribbon"));
           break;
         case "Roles":
           if (roleRef.current) {
             const result = await roleRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Role added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Role"));
           }
           break;
         case "Enterprises":
           if (companyRef.current) {
             const result = await companyRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Enterprise added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Enterprise"));
           }
           break;
         case "RoleGroups":
           if (roleGroupsRef.current) {
             const result = await roleGroupsRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Role Group added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.RoleGroup"));
           }
           break;
         case "Staffing":
@@ -357,66 +357,56 @@ const TabContent: FC<TabContentProps> = ({
           if (programTemplateRef.current) {
             const result = await programTemplateRef.current.save();
             if (!result) return;
-            // showAlert(
-            //   "success",
-            //   null,
-            //   "",
-            //   "Program Template added successfully."
-            // );
+            showAlert("success", null, "", t("Alerts.Added.Staffing"));
           }
           break;
         case "ProgramTypes":
           if (programTypeRef.current) {
             const result = await programTypeRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Program Type added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.ProgramType"));
           }
           break;
         case "Odp":
           if (odpRef.current) {
             const result = await odpRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Odp added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Odp"));
           }
           break;
         case "Procedures":
           if (procedureRef.current) {
             const result = await procedureRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Procedure added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Procedure"));
           }
           break;
         case "Calendars":
           if (calendarRef.current) {
             const result = await calendarRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Calendar added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Calendar"));
           }
           break;
         case "ProjectsAccess":
           if (projectAccessRef.current) {
             const result = await projectAccessRef.current.save();
             if (!result) return;
-            showAlert(
-              "success",
-              null,
-              "",
-              "Project Access added successfully."
-            );
+            showAlert("success", null, "", t("Alerts.Added.ProjectAccess"));
           }
           break;
         case "ApprovalFlows":
           if (approvalFlowRef.current) {
             const result = await approvalFlowRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Approval Flow added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.ApprovalFlow"));
           }
           break;
         case "Forms":
           if (formsRef.current) {
             const result = await formsRef.current.save();
             if (!result) return;
-            showAlert("success", null, "", "Form added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Form"));
           }
           break;
         case "Categories":
@@ -435,7 +425,7 @@ const TabContent: FC<TabContentProps> = ({
               });
             }
             if (!result) return;
-            showAlert("success", null, "", "Category added successfully.");
+            showAlert("success", null, "", t("Alerts.Added.Category"));
           }
           break;
         default:
@@ -455,7 +445,7 @@ const TabContent: FC<TabContentProps> = ({
             data?.message ||
             // "خطایی در فرآیند ذخیره دستور رخ داده است.";
             "";
-      showAlert("error", null, "Error", message);
+      showAlert("error", null, t("Alerts.Titles.Error"), message);
     }
   };
 
@@ -469,14 +459,14 @@ const TabContent: FC<TabContentProps> = ({
         case "Configurations":
           if (configurationRef.current) {
             await configurationRef.current.save();
-            showAlert("success", null, "Configuration updated successfully");
+            showAlert("success", null, "", t("Alerts.Updated.Configuration"));
             await fetchData();
           }
           break;
         case "Commands":
           if (commandRef.current) {
             await commandRef.current.save();
-            showAlert("success", null, "", "Command updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.Command"));
             await fetchData();
           }
           break;
@@ -484,6 +474,7 @@ const TabContent: FC<TabContentProps> = ({
           if (userRef.current) {
             const result = await userRef.current.save();
             if (result) {
+              showAlert("success", null, "", t("Alerts.Updated.User"));
               await fetchData();
             }
           }
@@ -496,7 +487,7 @@ const TabContent: FC<TabContentProps> = ({
               Description: descriptionInput,
               IsVisible: selectedRow.IsVisible,
             });
-            showAlert("success", null, "", "Ribbon updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.Ribbon"));
             await fetchData();
           }
           break;
@@ -510,30 +501,23 @@ const TabContent: FC<TabContentProps> = ({
         case "Enterprises":
           if (selectedRow && companyRef.current) {
             await companyRef.current.save();
-            showAlert("success", null, "", "Enterprise updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.Ribbon"));
             await fetchData();
           }
           break;
         case "RoleGroups":
           if (selectedRow && roleGroupsRef.current) {
             await roleGroupsRef.current.save();
-            showAlert("success", null, "", "Role Group updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.RoleGroup"));
             await fetchData();
           }
           break;
-        // case "Staffing":
-        //   if (staffingRef.current) {
-        //     await staffingRef.current.save();
-        //     showAlert("success", null, "", "Staffing  successfully.");
-        //     await fetchData();
-        //   }
-        //   break;
         case "Staffing":
           if (staffingRef.current) {
             const ok = await staffingRef.current.save();
             console.log("📦 نتیجه save():", ok);
             if (!ok) return;
-            showAlert("success", null, "", "Staffing updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.Staffing"));
             await fetchData();
           }
           break;
@@ -541,49 +525,49 @@ const TabContent: FC<TabContentProps> = ({
         case "ProgramTemplate":
           if (programTemplateRef.current) {
             await programTemplateRef.current.save();
+            showAlert("success", null, "", t("Alerts.Updated.ProgramTemplate"));
             await fetchData();
           }
           break;
         case "ProgramTypes":
           if (programTypeRef.current) {
             await programTypeRef.current.save();
+            showAlert("success", null, "", t("Alerts.Updated.ProgramType"));
             await fetchData();
           }
           break;
         case "Odp":
           if (odpRef.current) {
             await odpRef.current.save();
+            showAlert("success", null, "", t("Alerts.Updated.Odp"));
             await fetchData();
           }
           break;
         case "Procedures":
           if (procedureRef.current) {
             await procedureRef.current.save();
+            showAlert("success", null, "", t("Alerts.Updated.Procedure"));
             await fetchData();
           }
           break;
         case "Calendars":
           if (calendarRef.current) {
             await calendarRef.current.save();
-            showAlert("success", null, "", "Calendar updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.Calendar"));
             await fetchData();
           }
           break;
         case "ProjectsAccess":
           if (projectAccessRef.current) {
             await projectAccessRef.current.save();
+            showAlert("success", null, "", t("Alerts.Updated.ProjectsAccess"));
             await fetchData();
           }
           break;
         case "ApprovalFlows":
           if (approvalFlowRef.current) {
             await approvalFlowRef.current.save();
-            showAlert(
-              "success",
-              null,
-              "Updated",
-              "Approval Flow updated successfully."
-            );
+            showAlert("success", null, "", t("Alerts.Updated.ApprovalFlow"));
             await fetchData();
           }
           break;
@@ -606,7 +590,7 @@ const TabContent: FC<TabContentProps> = ({
                     ...categoriesRef.current.getData(),
                     categoryType: selectedCategoryType,
                   });
-            showAlert("success", null, "", "Category updated successfully.");
+            showAlert("success", null, "", t("Alerts.Updated.Category"));
             await fetchData();
           }
           break;
@@ -785,12 +769,14 @@ const TabContent: FC<TabContentProps> = ({
             }
             break;
         }
+        // showAlert("success", null, "", `${activeSubTab} deleted successfully.`);
         showAlert(
           "success",
           null,
-          "Deleted",
-          `${activeSubTab} deleted successfully.`
+          "",
+          `${activeSubTab} ${t("Alerts.Deleted.Deleted")}`
         );
+
         setIsPanelOpen(false);
         await fetchData();
       } catch (error) {

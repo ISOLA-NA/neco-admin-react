@@ -1,0 +1,14 @@
+{
+    "Alerts": {
+      "TimeBased": "بر اساس زمان",
+      "ChangeBased": "بر اساس تغییر",
+      "TimeField": "فیلد زمان",
+      "Days": "روزها",
+      "ChangingField": "فیلد تغییر",
+      "Step": "گام",
+      "SendType": "نوع ارسال",
+      "Receiver": "گیرنده",
+      "Comment": "توضیحات"
+    }
+  }
+  

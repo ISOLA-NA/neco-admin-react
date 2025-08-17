@@ -309,10 +309,10 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 
       if (isEditMode && typeof dataToSave.ID === "number") {
         await api.updateOdp(dataToSave);
-        showAlert("success", null, "Success", "ODP updated successfully.");
+        // showAlert("success", null, "Success", "ODP updated successfully.");/
       } else {
         await api.insertOdp(dataToSave);
-        showAlert("success", null, "Success", "ODP added successfully.");
+        // showAlert("success", null, "Success", "ODP added successfully.");
       }
       return true;
     } catch (error) {

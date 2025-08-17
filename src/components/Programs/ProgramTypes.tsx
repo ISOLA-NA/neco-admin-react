@@ -100,12 +100,12 @@ const ProgramType: ForwardRefRenderFunction<
           ...dataToSave,
           ID: selectedRow.ID,
         });
-        showAlert(
-          "success",
-          null,
-          "موفقیت",
-          " برنامه با موفقیت به‌روزرسانی شد."
-        );
+        // showAlert(
+        //   "success",
+        //   null,
+        //   "موفقیت",
+        //   " برنامه با موفقیت به‌روزرسانی شد."
+        // );
       } else {
         // ایجاد نوع برنامه جدید
         await api.insertProgramType(dataToSave);

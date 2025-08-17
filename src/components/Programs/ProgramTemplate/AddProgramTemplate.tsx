@@ -323,7 +323,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
       };
       console.log("Saving payload:", payload);
       await api.insertProgramTemplateField(payload);
-      showAlert("success", null, "Saved", "Program field added successfully.");
+      // showAlert("success", null, "Saved", "Program field added successfully.");
       onSaved();
       // ریست فرم بعد از ذخیره
       setFormData(initialFormData);
@@ -383,12 +383,12 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
       };
       console.log("Updating payload:", payload);
       await api.updateProgramTemplateField(payload);
-      showAlert(
-        "success",
-        null,
-        "Updated",
-        "Program field updated successfully."
-      );
+      // showAlert(
+      //   "success",
+      //   null,
+      //   "Updated",
+      //   "Program field updated successfully."
+      // );
       // ریست فرم بعد از ویرایش
       setFormData(initialFormData);
       setSelectedMetaIds([]);

@@ -11,7 +11,8 @@
       "Close":"Close",
       "Minimize":"Minimize",
       "maximize":"maximize",
-      "Noitemisselected":"No item is selected"
+      "Noitemisselected":"No item is selected",
+      "LogOut":"You have successfully logged out."
     }
   }
   
