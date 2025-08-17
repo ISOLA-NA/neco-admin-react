@@ -277,11 +277,11 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   const save = async (): Promise<boolean> => {
     try {
       if (!OdpData.Name.trim()) {
-        showAlert("warning", null, "Attention", "ODP Name cannot be empty.");
+        showAlert("warning", null, "", t("ODP.Alerts.Messages.NameRequired"));
         return false;
       }
       if (!OdpData.Address.trim()) {
-        showAlert("warning", null, "Attention", "Address cannot be empty.");
+        showAlert("warning", null,"", t("ODP.Alerts.Messages.AddressRequired"));
         return false;
       }
 

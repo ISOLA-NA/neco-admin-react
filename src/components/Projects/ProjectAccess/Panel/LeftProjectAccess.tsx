@@ -2,7 +2,7 @@
    src/components/Projects/ProjectAccess/Panel/LeftProjectAccess.tsx
    ---------------------------------------------------------- */
 import React, { useState, useEffect, useMemo } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import SelectorProjectAccess, { OptionType } from "../SelectorProjectAccess";
 import {
   AccessProject,
@@ -12,6 +12,7 @@ import {
 import { useApi } from "../../../../context/ApiContext";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
 import { useTranslation } from "react-i18next";
+import DynamicConfirm from "../../../utilities/DynamicConfirm";
 
 interface LeftProjectAccessProps {
   selectedRow?: { ID: string };
@@ -41,6 +42,10 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [selectedPostId, setSelectedPostId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Confirm state for delete
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [rowToDelete, setRowToDelete] = useState<AccessProject | null>(null);
 
   /* -------------------- maps & selector options --------------------- */
   const rolesMap = useMemo(() => {
@@ -100,116 +105,136 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
 
   const handleSelectRow = (r: AccessProject) => {
     setSelectedRowId(r.ID);
-    onEditStart(r);
+    onEditStart(r); // تأیید ادیت در هدر (PAHeader) انجام می‌شود
   };
 
-  const handleDelete = async (r: AccessProject) => {
-    if (!confirm(`Delete ${r.PostName}?`)) return;
-    await api.deleteAccessProject(r.ID!);
-    setRows((prev) => prev.filter((x) => x.ID !== r.ID));
-    showAlert("success", null, "Deleted", "");
+  // OPEN delete confirm
+  const handleAskDelete = (r: AccessProject) => {
+    setRowToDelete(r);
+    setConfirmOpen(true);
+  };
+
+  // CONFIRM delete action
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    try {
+      await api.deleteAccessProject(rowToDelete.ID!);
+      setRows((prev) => prev.filter((x) => x.ID !== rowToDelete.ID));
+      showAlert("success", null, "", t("Alerts.Deleted.Deleted", { defaultValue: "Deleted successfully." }));
+    } catch (e) {
+      showAlert("error", null, t("DynamicConfirm.Confirmations.Default.Title", { defaultValue: "Error" }), t("Alerts.Errors.Default", { defaultValue: "Failed to delete." }));
+    } finally {
+      setConfirmOpen(false);
+      setRowToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmOpen(false);
+    setRowToDelete(null);
   };
 
   /* --------------------------- UI --------------------------- */
   return (
-    <div className="h-full p-2 flex flex-col" dir={dir}>
-      {/* Select Post */}
-      <div className="mb-2">
-        <SelectorProjectAccess
-          options={options}
-          selectedValue={selectedPostId}
-          onChange={handlePostChange}
-          loading={loading}
-          disabled={false}
-        />
-      </div>
+    <>
+      {/* DynamicConfirm for Delete */}
+      <DynamicConfirm
+        isOpen={confirmOpen}
+        variant="delete"
+        title={t("DynamicConfirm.Confirmations.Delete.Title", {
+          defaultValue: "Delete Confirmation",
+        })}
+        message={t("DynamicConfirm.Confirmations.Delete.Message", {
+          defaultValue: "Are you sure you want to perform the delete operation?",
+        })}
+        onConfirm={handleConfirmDelete}
+        onClose={handleCancelDelete}
+      />
 
-      {/* Table */}
-      <div className="flex-1 overflow-y-auto border rounded bg-white">
-        <table className="w-full text-xs border-separate border-spacing-0">
-          <thead>
-            <tr className="bg-gray-100 border-b">
-              <th className={`p-2 ${isRtl ? "text-right" : "text-left"}`}>
-                {t("ProjectAccess.Name", { defaultValue: "Name" })}
-              </th>
-              <th className="p-2 text-center">
-                {t("ProjectAccess.Actions", { defaultValue: "Actions" })}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={2} className="p-4 text-center">
-                  Loading...
-                </td>
+      <div className="h-full p-2 flex flex-col" dir={dir}>
+        {/* Select Post */}
+        <div className="mb-2">
+          <SelectorProjectAccess
+            options={options}
+            selectedValue={selectedPostId}
+            onChange={handlePostChange}
+            loading={loading}
+            disabled={false}
+          />
+        </div>
+
+        {/* Table */}
+        <div className="flex-1 overflow-y-auto border rounded bg-white">
+          <table className="w-full text-xs border-separate border-spacing-0">
+            <thead>
+              <tr className="bg-gray-100 border-b">
+                <th className={`p-2 ${isRtl ? "text-right" : "text-left"}`}>
+                  {t("ProjectAccess.Name", { defaultValue: "Name" })}
+                </th>
+                <th className="p-2 text-center">
+                  {t("ProjectAccess.Actions", { defaultValue: "Actions" })}
+                </th>
               </tr>
-            ) : filteredRows.length === 0 ? (
-              <tr>
-                <td colSpan={2} className="p-4 text-center">
-                  No records.
-                </td>
-              </tr>
-            ) : (
-              filteredRows.map((r) => (
-                <tr
-                  key={r.ID}
-                  onClick={() => handleSelectRow(r)}
-                  className={`cursor-pointer ${
-                    selectedRowId === r.ID
-                      ? `${
-                          isRtl ? "border-r-4" : "border-l-4"
-                        } border-blue-400 bg-blue-50`
-                      : "hover:bg-gray-50"
-                  }`}
-                >
-                  <td className="p-2 truncate max-w-[200px]">
-                    {r.PostName || rolesMap[r.nPostID.trim().toLowerCase()]}
-                  </td>
-
-                  {/* دکمه‌ها کنار هم با فلکس + gap و بدون به‌هم‌ریختگی در RTL */}
-                  <td className="p-2">
-                    <div className="flex items-center justify-center gap-2 flex-nowrap">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectRow(r);
-                        }}
-                        className="px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 text-[0.8rem] flex items-center gap-2"
-                        aria-label={t("Global.Edit", { defaultValue: "Edit" })}
-                        title={t("Global.Edit", { defaultValue: "Edit" })}
-                      >
-                        <FaEdit />
-                        <span>
-                          {t("Global.Edit", { defaultValue: "Edit" })}
-                        </span>
-                      </button>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(r);
-                        }}
-                        className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-[0.8rem] flex items-center gap-2"
-                        aria-label={t("Global.Delete", {
-                          defaultValue: "Delete",
-                        })}
-                        title={t("Global.Delete", { defaultValue: "Delete" })}
-                      >
-                        <FaTrash />
-                        <span>
-                          {t("Global.Delete", { defaultValue: "Delete" })}
-                        </span>
-                      </button>
-                    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={2} className="p-4 text-center">
+                    Loading...
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : filteredRows.length === 0 ? (
+                <tr>
+                  <td colSpan={2} className="p-4 text-center">
+                    No records.
+                  </td>
+                </tr>
+              ) : (
+                filteredRows.map((r) => (
+                  <tr
+                    key={r.ID}
+                    onClick={() => handleSelectRow(r)}
+                    className={`cursor-pointer ${
+                      selectedRowId === r.ID
+                        ? `${
+                            isRtl ? "border-r-4" : "border-l-4"
+                          } border-blue-400 bg-blue-50`
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <td className="p-2 truncate max-w-[200px]">
+                      {r.PostName || rolesMap[r.nPostID.trim().toLowerCase()]}
+                    </td>
+
+                    {/* ستون Actions — فقط Delete (دکمه Edit حذف شد) */}
+                    <td className="p-2">
+                      <div className="flex items-center justify-center gap-2 flex-nowrap">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAskDelete(r);
+                          }}
+                          className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-[0.8rem] flex items-center gap-2"
+                          aria-label={t("Global.Delete", {
+                            defaultValue: "Delete",
+                          })}
+                          title={t("Global.Delete", { defaultValue: "Delete" })}
+                        >
+                          <FaTrash />
+                          <span>
+                            {t("Global.Delete", { defaultValue: "Delete" })}
+                          </span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

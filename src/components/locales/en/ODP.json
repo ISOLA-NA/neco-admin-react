@@ -1,13 +1,21 @@
 {
-    "ODP": {
-      "ODPName": "ODP Name",
-      "Address": "Address",
-      "Description": "Description",
-      "ProgramTemplate": "Program Template",
-      "ApprovalFlowTemplate": "Approval Flow Template",
-      "FormTemplate": "Form Template",
-      "RelatedProjects": "Related Projects",
-      "Public": "Public"
+  "ODP": {
+    "ODPName": "ODP Name",
+    "Address": "Address",
+    "Description": "Description",
+    "ProgramTemplate": "Program Template",
+    "ApprovalFlowTemplate": "Approval Flow Template",
+    "FormTemplate": "Form Template",
+    "RelatedProjects": "Related Projects",
+    "Public": "Public",
+    "Alerts": {
+      "Titles": {
+        "Attention": "Attention"
+      },
+      "Messages": {
+        "NameRequired": "ODP Name cannot be empty.",
+        "AddressRequired": "Address cannot be empty."
+      }
     }
   }
-  
+}
