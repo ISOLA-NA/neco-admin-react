@@ -1,0 +1,32 @@
+{
+    "DynamicConfirm": {
+        "Buttons": {
+            "Add": "Add",
+            "Edit": "Edit",
+            "Minimize": "Minimize",
+            "Maximize": "Maximize",
+            "Close": "Close",
+            "Cancel": "Cancel",
+            "Confirm": "Confirm",
+            "Ok": "OK"
+        },
+        "Confirmations": {
+            "Save": {
+                "Title": "Save Confirmation",
+                "Message": "Are you sure you want to save?"
+            },
+            "Update": {
+                "Title": "Update Confirmation",
+                "Message": "Are you sure you want to update?"
+            },
+            "Delete": {
+                "Title": "Delete Confirmation",
+                "Message": "Are you sure you want to perform the delete operation?"
+            },
+            "Default": {
+                "Title": "Confirmation",
+                "Message": "Are you sure you want to proceed?"
+            }
+        }
+    }
+}

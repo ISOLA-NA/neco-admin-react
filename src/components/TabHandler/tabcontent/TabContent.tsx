@@ -118,7 +118,7 @@ const TabContent: FC<TabContentProps> = ({
   );
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => { });
 
   // وضعیت نمایش پنل راست
   // const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -442,9 +442,9 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            // "خطایی در فرآیند ذخیره دستور رخ داده است.";
-            "";
+          data?.message ||
+          // "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          "";
       showAlert("error", null, t("Alerts.Titles.Error"), message);
     }
   };
@@ -583,13 +583,13 @@ const TabContent: FC<TabContentProps> = ({
             const result =
               selectedCategoryType === "cata"
                 ? await api.updateCatA({
-                    ...categoriesRef.current.getData(),
-                    categoryType: selectedCategoryType,
-                  })
+                  ...categoriesRef.current.getData(),
+                  categoryType: selectedCategoryType,
+                })
                 : await api.updateCatB({
-                    ...categoriesRef.current.getData(),
-                    categoryType: selectedCategoryType,
-                  });
+                  ...categoriesRef.current.getData(),
+                  categoryType: selectedCategoryType,
+                });
             showAlert("success", null, "", t("Alerts.Updated.Category"));
             await fetchData();
           }
@@ -605,8 +605,8 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     }
   };
@@ -703,10 +703,9 @@ const TabContent: FC<TabContentProps> = ({
       return;
     }
     setConfirmVariant("delete");
-    setConfirmTitle("Delete Confirmation");
-    setConfirmMessage(
-      `Are you sure you want to delete this ${activeSubTab.toLowerCase()}?`
-    );
+    setConfirmTitle(t("DynamicConfirm.Confirmations.Delete.Title"));
+    setConfirmMessage(t("DynamicConfirm.Confirmations.Delete.Message"));
+
     setConfirmAction(() => async () => {
       try {
         switch (activeSubTab) {
@@ -1041,9 +1040,8 @@ const TabContent: FC<TabContentProps> = ({
       {/* پنل راست */}
       {isPanelOpen && (
         <div
-          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
-            isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
-          }`}
+          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
+            }`}
           style={{
             transition: "opacity 0.1s ease-out",
             backgroundColor: "#f3f4f6",
@@ -1063,48 +1061,48 @@ const TabContent: FC<TabContentProps> = ({
               activeSubTab !== "ProjectsAccess" && (
                 <PanelHeader
                   isExpanded={false}
-                  toggleExpand={() => {}}
+                  toggleExpand={() => { }}
                   onSave={
                     isAdding &&
-                    (activeSubTab === "Configurations" ||
-                      activeSubTab === "Commands" ||
-                      activeSubTab === "Users" ||
-                      activeSubTab === "Ribbons" ||
-                      activeSubTab === "Roles" ||
-                      activeSubTab === "RoleGroups" ||
-                      activeSubTab === "Enterprises" ||
-                      activeSubTab === "Staffing" ||
-                      activeSubTab === "ProgramTemplate" ||
-                      activeSubTab === "ProgramTypes" ||
-                      activeSubTab === "Odp" ||
-                      activeSubTab === "Procedures" ||
-                      activeSubTab === "Calendars" ||
-                      activeSubTab === "ProjectsAccess" ||
-                      activeSubTab === "ApprovalFlows" ||
-                      activeSubTab === "Forms" ||
-                      activeSubTab === "Categories")
+                      (activeSubTab === "Configurations" ||
+                        activeSubTab === "Commands" ||
+                        activeSubTab === "Users" ||
+                        activeSubTab === "Ribbons" ||
+                        activeSubTab === "Roles" ||
+                        activeSubTab === "RoleGroups" ||
+                        activeSubTab === "Enterprises" ||
+                        activeSubTab === "Staffing" ||
+                        activeSubTab === "ProgramTemplate" ||
+                        activeSubTab === "ProgramTypes" ||
+                        activeSubTab === "Odp" ||
+                        activeSubTab === "Procedures" ||
+                        activeSubTab === "Calendars" ||
+                        activeSubTab === "ProjectsAccess" ||
+                        activeSubTab === "ApprovalFlows" ||
+                        activeSubTab === "Forms" ||
+                        activeSubTab === "Categories")
                       ? handleInsert
                       : undefined
                   }
                   onUpdate={
                     !isAdding &&
-                    (activeSubTab === "Configurations" ||
-                      activeSubTab === "Commands" ||
-                      activeSubTab === "Users" ||
-                      activeSubTab === "Ribbons" ||
-                      activeSubTab === "Roles" ||
-                      activeSubTab === "Enterprises" ||
-                      activeSubTab === "RoleGroups" ||
-                      activeSubTab === "Staffing" ||
-                      activeSubTab === "ProgramTemplate" ||
-                      activeSubTab === "ProgramTypes" ||
-                      activeSubTab === "Odp" ||
-                      activeSubTab === "Procedures" ||
-                      activeSubTab === "Calendars" ||
-                      activeSubTab === "ProjectsAccess" ||
-                      activeSubTab === "ApprovalFlows" ||
-                      activeSubTab === "Forms" ||
-                      activeSubTab === "Categories")
+                      (activeSubTab === "Configurations" ||
+                        activeSubTab === "Commands" ||
+                        activeSubTab === "Users" ||
+                        activeSubTab === "Ribbons" ||
+                        activeSubTab === "Roles" ||
+                        activeSubTab === "Enterprises" ||
+                        activeSubTab === "RoleGroups" ||
+                        activeSubTab === "Staffing" ||
+                        activeSubTab === "ProgramTemplate" ||
+                        activeSubTab === "ProgramTypes" ||
+                        activeSubTab === "Odp" ||
+                        activeSubTab === "Procedures" ||
+                        activeSubTab === "Calendars" ||
+                        activeSubTab === "ProjectsAccess" ||
+                        activeSubTab === "ApprovalFlows" ||
+                        activeSubTab === "Forms" ||
+                        activeSubTab === "Categories")
                       ? handleUpdate
                       : undefined
                   }
@@ -1138,8 +1136,8 @@ const TabContent: FC<TabContentProps> = ({
                         isAdding
                           ? "add-mode"
                           : selectedRow
-                          ? selectedRow.ID
-                          : "no-selection"
+                            ? selectedRow.ID
+                            : "no-selection"
                       }
                       selectedRow={isAdding ? null : selectedRow}
                       ref={getActiveRef()}

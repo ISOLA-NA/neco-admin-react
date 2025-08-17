@@ -330,14 +330,14 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           if (selectedRow) await api.updateProgramTemplate(body);
           else await api.insertProgramTemplate(body);
 
-          showAlert(
-            "success",
-            null,
-            selectedRow ? "Updated" : "Saved",
-            `Program Template ${
-              selectedRow ? "updated" : "added"
-            } successfully.`
-          );
+          // showAlert(
+          //   "success",
+          //   null,
+          //   selectedRow ? "Updated" : "Saved",
+          //   `Program Template ${
+          //     selectedRow ? "updated" : "added"
+          //   } successfully.`
+          // );
           return true;
         } catch (err) {
           console.error(err);
@@ -562,12 +562,12 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               );
               setSelectedDetailRow(null);
               setShowDeleteConfirm(false);
-              showAlert(
-                "success",
-                null,
-                "Deleted",
-                "Row deleted successfully."
-              );
+              // showAlert(
+              //   "success",
+              //   null,
+              //   "Deleted",
+              //   "Row deleted successfully."
+              // );
             } catch (err) {
               console.error(err);
               showAlert("error", null, "Error", "Failed to delete the row.");
