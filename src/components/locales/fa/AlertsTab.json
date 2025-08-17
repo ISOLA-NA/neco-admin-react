@@ -1,14 +1,25 @@
 {
-    "Alerts": {
-      "TimeBased": "بر اساس زمان",
-      "ChangeBased": "بر اساس تغییر",
-      "TimeField": "فیلد زمان",
-      "Days": "روزها",
-      "ChangingField": "فیلد تغییر",
-      "Step": "گام",
-      "SendType": "نوع ارسال",
-      "Receiver": "گیرنده",
-      "Comment": "توضیحات"
+  "AlertsTab": {
+    "TimeBased": "بر اساس زمان",
+    "ChangeBased": "بر اساس تغییر",
+    "TimeField": "فیلد زمان",
+    "Days": "روزها",
+    "ChangingField": "فیلد تغییر",
+    "Step": "گام",
+    "SendType": "نوع ارسال",
+    "Receiver": "گیرنده",
+    "Comment": "توضیحات",
+    "Titles": {
+      "Attention": "توجه",
+      "Validation": "اعتبارسنجی"
+    },
+    "Messages": {
+      "DaysRequired": "وقتی «فیلد زمان» انتخاب شده است، مقدار «روزها» نمی‌تواند خالی باشد.",
+      "StepRequired": "وقتی «فیلد تغییر» انتخاب شده است، مقدار «گام» نمی‌تواند خالی باشد.",
+      "TimeOrChangeRequired": "حداقل یکی از «فیلد زمان» یا «فیلد تغییر» باید انتخاب شود.",
+      "SendTypeRequired": "«نوع ارسال» الزامی است.",
+      "ReceiverRequired": "«گیرنده» الزامی است.",
+      "Added": "هشدار با موفقیت اضافه شد."
     }
   }
-  
+}
