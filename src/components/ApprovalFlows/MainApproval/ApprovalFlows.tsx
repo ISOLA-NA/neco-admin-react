@@ -260,33 +260,42 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
 
     /* ───────── ستون‌های BoxTemplate با flex/minWidth ───────── */
     const boxTemplateColumnDefs = [
-      {
-        headerName: "Name",
-        field: "Name",
-        filter: "agTextColumnFilter",
-        sortable: true,
-        flex: 1.2,
-        minWidth: 160,
-      },
-      {
-        headerName: "Predecessor",
-        field: "PredecessorStr",
-        filter: "agTextColumnFilter",
-        sortable: true,
-        flex: 2,
-        minWidth: 220,
-        valueGetter: (params: any) => {
-          if (!params.data?.PredecessorStr) return "";
-          return params.data.PredecessorStr.split("|")
-            .filter(Boolean)
-            .map((id: string) => {
-              const found = boxTemplates.find((b) => b.ID.toString() === id);
-              return found ? found.Name : id;
-            })
-            .join(" - ");
-        },
-      },
-    ];
+  {
+    headerName: t("AddApprovalFlows.Name", { defaultValue: "Name" }),
+    field: "Name",
+    filter: "agTextColumnFilter",
+    sortable: true,
+    flex: 1.2,
+    minWidth: 160
+  },
+  {
+    headerName: t("AddApprovalFlows.Predecessor", { defaultValue: "Predecessor" }),
+    field: "PredecessorStr",
+    filter: "agTextColumnFilter",
+    sortable: true,
+    flex: 2,
+    minWidth: 220,
+    valueGetter: (params: any) => {
+      const raw = params?.data?.PredecessorStr;
+      if (!raw) return "";
+      const ids = String(raw)
+        .split("|")
+        .filter(Boolean);
+
+      // اگر boxTemplates هنوز نیامده باشد
+      if (!Array.isArray(boxTemplates) || boxTemplates.length === 0) {
+        return ids.join(" - ");
+      }
+
+      return ids
+        .map((id: string) => {
+          const found = boxTemplates.find((b: any) => String(b?.ID) === id);
+          return found?.Name ?? id;
+        })
+        .join(" - ");
+    }
+  }
+];
 
     const handleBoxTemplateEdit = (box: BoxTemplate) => {
       setSelectedSubRowData(box);

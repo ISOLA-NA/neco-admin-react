@@ -298,90 +298,91 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
     // ۱) ستون‌ها
     const columnDefs = [
-      {
-        headerName: "Post",
-        field: "nPostID",
-        flex: 3,
-        minWidth: 180,
-        valueGetter: (p: any) =>
-          allRoles.find((r) => r.ID + "" === p.data.nPostID)?.Name || "",
-      },
-      {
-        headerName: "Cost1",
-        field: "cost1",
-        flex: 1,
-        minWidth: 110,
-        editable: true,
-      },
-      {
-        headerName: "Cost2",
-        field: "cost2",
-        flex: 1,
-        minWidth: 110,
-        editable: true,
-      },
-      {
-        headerName: "Cost3",
-        field: "cost3",
-        flex: 1,
-        minWidth: 110,
-        editable: true,
-      },
-      {
-        headerName: "Weight1",
-        field: "weight1",
-        flex: 1,
-        minWidth: 110,
-        editable: true,
-      },
-      {
-        headerName: "Weight2",
-        field: "weight2",
-        flex: 1,
-        minWidth: 110,
-        editable: true,
-      },
-      {
-        headerName: "Weight3",
-        field: "weight3",
-        flex: 1,
-        minWidth: 110,
-        editable: true,
-      },
-      {
-        headerName: "Required",
-        field: "required",
-        flex: 0.8,
-        minWidth: 90,
-        cellRenderer: (p) => (
-          <input
-            type="checkbox"
-            checked={p.value}
-            onChange={() => handleCheckboxChange(p, "required")}
-          />
-        ),
-      },
-      {
-        headerName: "Veto",
-        field: "veto",
-        flex: 0.8,
-        minWidth: 90,
-        cellRenderer: (p) => (
-          <input
-            type="checkbox"
-            checked={p.value}
-            onChange={() => handleCheckboxChange(p, "veto")}
-          />
-        ),
-      },
-      {
-        headerName: "Code",
-        field: "code",
-        flex: 1,
-        minWidth: 110,
-        editable: true,
-      },
-    ];
+  {
+    headerName: t("AddApprovalFlows.StaticPost", { defaultValue: "Post" }),
+    field: "nPostID",
+    flex: 3,
+    minWidth: 110,
+    valueGetter: (p: any) =>
+      allRoles.find((r: any) => String(r.ID) === p.data.nPostID)?.Name || "",
+  },
+  {
+    headerName: t("AddApprovalFlows.Cost1", { defaultValue: "Cost 1" }),
+    field: "cost1",
+    flex: 1,
+    minWidth: 110,
+    editable: true,
+  },
+  {
+    headerName: t("AddApprovalFlows.Cost2", { defaultValue: "Cost 2" }),
+    field: "cost2",
+    flex: 1,
+    minWidth: 110,
+    editable: true,
+  },
+  {
+    headerName: t("AddApprovalFlows.Cost3", { defaultValue: "Cost 3" }),
+    field: "cost3",
+    flex: 1,
+    minWidth: 110,
+    editable: true,
+  },
+  {
+    headerName: t("AddApprovalFlows.Weight1", { defaultValue: "Weight 1" }),
+    field: "weight1",
+    flex: 1,
+    minWidth: 110,
+    editable: true,
+  },
+  {
+    headerName: t("AddApprovalFlows.Weight2", { defaultValue: "Weight 2" }),
+    field: "weight2",
+    flex: 1,
+    minWidth: 110,
+    editable: true,
+  },
+  {
+    headerName: t("AddApprovalFlows.Weight3", { defaultValue: "Weight 3" }),
+    field: "weight3",
+    flex: 1,
+    minWidth: 110,
+    editable: true,
+  },
+  {
+    headerName: t("AddApprovalFlows.Required", { defaultValue: "Required" }),
+    field: "required",
+    flex: 0.8,
+    minWidth: 90,
+    cellRenderer: (p: any) => (
+      <input
+        type="checkbox"
+        checked={p.value}
+        onChange={() => handleCheckboxChange(p, "required")}
+      />
+    ),
+  },
+  {
+    headerName: t("AddApprovalFlows.Veto", { defaultValue: "Veto" }),
+    field: "veto",
+    flex: 0.8,
+    minWidth: 90,
+    cellRenderer: (p: any) => (
+      <input
+        type="checkbox"
+        checked={p.value}
+        onChange={() => handleCheckboxChange(p, "veto")}
+      />
+    ),
+  },
+  {
+    headerName: t("AddApprovalFlows.Code", { defaultValue: "Code" }),
+    field: "code",
+    flex: 1,
+    minWidth: 110,
+    editable: true,
+  },
+];
+
 
     const rolesColumnDefs = [
       { headerName: "Name", field: "Name", sortable: true, filter: true },
