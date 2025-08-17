@@ -48,9 +48,15 @@ const TableSelector: React.FC<TableSelectorProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg p-4 flex flex-col" style={{ height: "600px" }}>
+    <div
+      className="bg-white rounded-lg p-4 flex flex-col"
+      style={{ height: "600px" }}
+    >
       {/* ظرف جدول با ارتفاع ثابت و اسکرول */}
-      <div className="flex-grow overflow-y-auto mb-4" style={{ height: "100%" }}>
+      <div
+        className="flex-grow overflow-y-auto mb-4"
+        style={{ height: "100%" }}
+      >
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
@@ -75,6 +81,8 @@ const TableSelector: React.FC<TableSelectorProps> = ({
           onClick={handleSelectClick}
           isDisabled={isSelectDisabled || !localSelectedRow}
           className="w-48"
+          variant="orgBlue"
+          size="md"
         />
       </div>
     </div>
