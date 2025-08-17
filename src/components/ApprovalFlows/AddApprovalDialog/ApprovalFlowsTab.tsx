@@ -68,6 +68,7 @@ export interface ApprovalFlowsTabData {
 export interface ApprovalFlowsTabRef {
   getFormData: () => ApprovalFlowsTabData;
   validateMinFields: () => boolean;
+  validateForm: () => boolean;
 }
 
 interface ApprovalFlowsTabProps {
@@ -136,6 +137,60 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     const [approvalContextLoading, setApprovalContextLoading] =
       useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    // داخل ApprovalFlowsTab.tsx، کنار validateMinFields:
+    const validateForm = (): boolean => {
+      // 1) نام
+      if (!nameValue.trim()) {
+        showAlert("error", null, "Error", "Name is required.");
+        return false;
+      }
+
+      // 2) فقط وقتی استیج نیست، بقیه الزامات را بررسی کن
+      if (!isStage) {
+        // حداقل یکی از مین‌ها انتخاب شده باشد
+        if (!acceptChecked && !rejectChecked) {
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "Select at least one of Min Accept or Min Reject."
+          );
+          return false;
+        }
+
+        // اگر Accept تیک خورد، عدد معتبر > 0 باشد
+        if (acceptChecked) {
+          const v = Number(minAcceptValue);
+          if (!Number.isFinite(v) || v <= 0) {
+            showAlert("error", null, "Error", "Invalid Min Accept value.");
+            return false;
+          }
+        }
+
+        // اگر Reject تیک خورد، عدد معتبر > 0 باشد
+        if (rejectChecked) {
+          const v = Number(minRejectValue);
+          if (!Number.isFinite(v) || v <= 0) {
+            showAlert("error", null, "Error", "Invalid Min Reject value.");
+            return false;
+          }
+        }
+
+        // 3) جدول Approval Context خالی نباشد
+        if (tableData.length === 0) {
+          showAlert(
+            "error",
+            null,
+            "Error",
+            "Approval Context must have at least one row."
+          );
+          return false;
+        }
+      }
+
+      return true;
+    };
 
     // گرفتن لیست نقش‌ها
     useEffect(() => {
@@ -302,7 +357,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         headerName: "Post",
         field: "nPostID",
         flex: 3,
-        minWidth: 180,
+        minWidth: 100,
         valueGetter: (p: any) =>
           allRoles.find((r) => r.ID + "" === p.data.nPostID)?.Name || "",
       },
@@ -699,6 +754,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         actionBtnID,
       }),
       validateMinFields: () => validateMinFields(),
+      validateForm: () => validateForm(),
     }));
 
     return (
