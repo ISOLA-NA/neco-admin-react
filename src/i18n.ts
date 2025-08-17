@@ -31,6 +31,7 @@ import enCalendar from "./components/locales/en/Calendar.json";
 import enDataTable from "./components/locales/en/DataTable.json";
 import enAlerts from "./components/locales/en/Alerts.json";
 import enDynamicConfirm from "./components/locales/en/DynamicConfirm.json"
+import enTextController from "./components/locales/en/Forms/TextController.json"
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
 import faLogin from "./components/locales/fa/login.json";
@@ -59,7 +60,8 @@ import faProcedure from "./components/locales/fa/Procedure.json";
 import faCalendar from "./components/locales/fa/Calendar.json";
 import faDataTable from "./components/locales/fa/DataTable.json";
 import faAlerts from "./components/locales/fa/Alerts.json";
-import faDynamicConfirm from "./components/locales/fa/DynamicConfirm.json"
+import faDynamicConfirm from "./components/locales/fa/DynamicConfirm.json";
+import faTextController from "./components/locales/fa/Forms/TextController.json"
 
 const resources = {
   en: {
@@ -91,7 +93,8 @@ const resources = {
       ...enCalendar,
       ...enDataTable,
       ...enAlerts,
-      ...enDynamicConfirm
+      ...enDynamicConfirm,
+      ...enTextController
     },
   },
   fa: {
@@ -123,7 +126,8 @@ const resources = {
       ...faCalendar,
       ...faDataTable,
       ...faAlerts,
-      ...faDynamicConfirm
+      ...faDynamicConfirm,
+      ...faTextController
     },
   },
 };

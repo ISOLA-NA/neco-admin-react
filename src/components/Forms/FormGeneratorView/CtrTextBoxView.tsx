@@ -37,7 +37,6 @@ const CtrTextBoxView: React.FC<CtrTextBoxViewProps> = ({
 
   return (
     <div className="mt-10 bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
-
       <DynamicInput
         name={data?.DisplayName || "Default Value"}
         type="text"

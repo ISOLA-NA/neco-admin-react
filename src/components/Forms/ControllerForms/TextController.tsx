@@ -1,6 +1,7 @@
 // TextController.tsx
 import React, { useState, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
+import { useTranslation } from "react-i18next";
 
 interface TextControllerProps {
   /** والد باید این متادیتا را در state خودش نگه دارد و در هر تغییر آپدیت کند */
@@ -15,6 +16,8 @@ const TextController: React.FC<TextControllerProps> = ({
   data = {},
   isDisable = false,
 }) => {
+  const { t } = useTranslation();
+
   // مقدار داخل input – در ابتدا از prop
   const [value, setValue] = useState<string>(data.metaType1 ?? "");
 
@@ -27,19 +30,19 @@ const TextController: React.FC<TextControllerProps> = ({
   // کاربر حروف می‌زند
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.value;
-    setValue(newVal);                 // به‌روزرسانی فوری UI
+    setValue(newVal); // به‌روزرسانی فوری UI
     onMetaChange({ metaType1: newVal }); // اطلاع به والد
   };
 
   return (
     <div className="mt-10 p-6 rounded-lg bg-white shadow-sm">
       <DynamicInput
-        name="metaType1"              // حتماً کلید درست
-        label="Default Value"
+        name="metaType1" // حتماً کلید درست
+        label={t("TextController.DefaultValue")}
         type="text"
-        value={value}                 // چون کنترل‑شده‌ایم
+        value={value} // چون کنترل‑شده‌ایم
         onChange={handleChange}
-        placeholder="Enter default value"
+        placeholder={t("TextController.EnterDefaultValue")}
         disabled={isDisable}
         className="w-full p-2 border rounded"
       />
