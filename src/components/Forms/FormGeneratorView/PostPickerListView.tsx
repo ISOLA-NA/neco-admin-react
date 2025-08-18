@@ -4,6 +4,7 @@ import DynamicModal from "../../utilities/DynamicModal";
 import RolePickerTabs from "../ControllerForms/PostPickerList/RolePickerTabs"; // مسیر را مطابق پروژه تنظیم کنید
 import { useApi } from "../../../context/ApiContext";
 import { SelectedItem } from "../ControllerForms/PostPickerList/MembersTable";
+import { useTranslation } from "react-i18next";
 
 interface PostPickerListViewProps {
   data?: {
@@ -19,6 +20,7 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
   fullWidth = false,
   onMetaChange,
 }) => {
+  const { t } = useTranslation();
   const api = useApi();
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,8 +99,7 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
           className="bg-indigo-500 text-white px-2 py-1 rounded-md hover:bg-indigo-600 flex items-center"
           title="Add"
         >
-          <FaPlus className="mr-1" />
-          Add
+          <FaPlus className="mr-1" /> {t("PostPickerList.Buttons.Add")}
         </button>
       </div>
 
@@ -106,7 +107,9 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
       <div className="overflow-y-auto max-h-32 border border-gray-200 p-2 rounded">
         {isLoadingInitial ? (
           <div className="flex justify-center items-center h-full">
-            <span className="text-gray-500">Loading...</span>
+            <span className="text-gray-500">
+              {t("PostPickerList.Messages.Loading")}
+            </span>
           </div>
         ) : selectedItems.length > 0 ? (
           <div className="flex flex-wrap gap-2">
@@ -127,7 +130,10 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">No default values selected</p>
+          <p className="text-gray-500 text-sm">
+            {" "}
+            {t("PostPickerList.Labels.NoDefaultValues")}
+          </p>
         )}
       </div>
 

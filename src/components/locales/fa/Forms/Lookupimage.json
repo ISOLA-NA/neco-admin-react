@@ -1,0 +1,19 @@
+{
+    "LookupUmage": {
+      "Form": {
+        "GetInformationFrom": "دریافت اطلاعات از",
+        "WhatColumnToDisplay": "کدام ستون نمایش داده شود",
+        "RemoveSameName": "حذف نام‌های تکراری"
+      },
+      "Columns": {
+        "SrcField": "فیلد مبدأ",
+        "Operation": "عملیات",
+        "FilterText": "متن فیلتر",
+        "DesField": "فیلد مقصد"
+      },
+      "View": {
+        "SelectOption": "انتخاب گزینه"
+      }
+    }
+  }
+  

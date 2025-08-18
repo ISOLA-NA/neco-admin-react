@@ -1,0 +1,29 @@
+{
+    "excelpanel": {
+      "Labels": {
+        "FileName": "نام فایل",
+        "ShowDocument":"نمایش سند"
+      },
+      "Placeholders": {
+        "NoFileSelected": "فایلی انتخاب نشده است"
+      },
+      "Buttons": {
+        "Upload": "آپلود",
+        "UploadNew": "آپلود فایل جدید",
+        "Remove": "حذف فایل",
+        "Download": "دانلود"
+      },
+      "Tooltips": {
+        "Upload": "آپلود فایل",
+        "UploadNew": "آپلود فایل جدید",
+        "Remove": "حذف فایل"
+      },
+      "Alerts": {
+        "OnlyExcelAllowed": "فقط فایل‌های ‎.xls‎ یا ‎.xlsx‎ مجاز هستند.",
+        "NoFileToDownload": "فایلی برای دانلود موجود نیست.",
+        "UploadFailed": "آپلود ناموفق بود.",
+        "DownloadFailed": "دانلود فایل ناموفق بود."
+      }
+    }
+  }
+  

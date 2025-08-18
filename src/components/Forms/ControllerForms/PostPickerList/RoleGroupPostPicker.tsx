@@ -4,6 +4,7 @@ import DataTable from "../../../TableDynamic/DataTable"; // مسیر را مطا
 import { useApi } from "../../../../context/ApiContext";
 import ReusableButton from "../../../utilities/DynamicButtons";
 import { SelectedItem } from "./MembersTable"; // یا از مسیر مشترک وارد کنید
+import { useTranslation } from "react-i18next";
 
 interface RoleGroupPostPickerProps {
   onSelect: (selected: SelectedItem[]) => void;
@@ -21,6 +22,7 @@ const RoleGroupPostPicker: React.FC<RoleGroupPostPickerProps> = ({
   onSelect,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const api = useApi();
   const [roleGroups, setRoleGroups] = useState<PostCat[]>([]);
   const [allRoles, setAllRoles] = useState<any[]>([]);
@@ -28,8 +30,14 @@ const RoleGroupPostPicker: React.FC<RoleGroupPostPickerProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const columnDefs = [
-    { field: "Name", headerName: "Name" },
-    { field: "Description", headerName: "Description" },
+    {
+      field: "Name",
+      headerName: t("PostPickerList.Tables.RoleGroupNameHeader"),
+    },
+    {
+      field: "Description",
+      headerName: t("PostPickerList.Tables.RoleGroupDescriptionHeader"),
+    },
   ];
 
   // تابع کمکی برای تجزیه آیدی‌ها از رشته (مثلاً "4|5|6")
@@ -90,7 +98,7 @@ const RoleGroupPostPicker: React.FC<RoleGroupPostPickerProps> = ({
 
   return (
     <div className="bg-white p-4 rounded-lg flex flex-col h-full">
-      <div className="flex-grow mb-4" style={{ height: "400px" }} >
+      <div className="flex-grow mb-4" style={{ height: "400px" }}>
         <DataTable
           columnDefs={columnDefs}
           rowData={roleGroups}
@@ -110,10 +118,12 @@ const RoleGroupPostPicker: React.FC<RoleGroupPostPickerProps> = ({
       </div>
       <div className="flex justify-center mt-4">
         <ReusableButton
-          text="Select"
+          text={t("PostPickerList.Buttons.Select")}
           onClick={handleSelectClick}
           isDisabled={!selectedRow}
           className="w-40"
+          variant="orgBlue"
+          size="md"
         />
       </div>
     </div>

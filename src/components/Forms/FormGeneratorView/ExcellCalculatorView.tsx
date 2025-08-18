@@ -1,5 +1,6 @@
 // src/components/ExcellCalculatorView.tsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface ExcellCalculatorViewProps {
   data?: {
@@ -13,6 +14,7 @@ const ExcellCalculatorView: React.FC<ExcellCalculatorViewProps> = ({
   data,
   dir,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       dir={dir}
@@ -30,13 +32,13 @@ const ExcellCalculatorView: React.FC<ExcellCalculatorViewProps> = ({
           type="button"
           className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 transition duration-300"
         >
-          Calculated
+          {t("excelcalculator.Buttons.Calculated")}
         </button>
         <button
           type="button"
           className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
         >
-          Show
+          {t("excelcalculator.Buttons.Show")}
         </button>
       </div>
     </div>

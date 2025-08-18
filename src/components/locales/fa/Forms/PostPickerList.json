@@ -1,0 +1,31 @@
+{
+    "PostPickerList": {
+      "Labels": {
+        "DefaultValues": "مقادیر پیش‌فرض",
+        "NoDefaultValues": "هیچ مقدار پیش‌فرضی انتخاب نشده است",
+        "DefaultProjects": "پروژه‌های پیش‌فرض"
+      },
+      "Buttons": {
+        "Add": "افزودن",
+        "Select": "انتخاب",
+        "Remove": "حذف",
+        "Close": "بستن",
+        "Roles": "نقش‌ها",
+        "RoleGroups": "گروه‌های نقش"
+      },
+      "Tables": {
+        "ProjectsHeader": "پروژه",
+        "RolesHeader": "نقش",
+        "NameHeader": "نام",
+        "FamilyHeader": "نام خانوادگی",
+        "EnterpriseHeader": "شرکت",
+        "SuperIndentHeader": "سرپرست",
+        "RoleGroupNameHeader": "نام",
+        "RoleGroupDescriptionHeader": "توضیحات"
+      },
+      "Messages": {
+        "Loading": "در حال بارگذاری…"
+      }
+    }
+  }
+  

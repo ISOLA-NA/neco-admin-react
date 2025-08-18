@@ -2,15 +2,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicSelector from "../../utilities/DynamicSelector";
+import { useTranslation } from "react-i18next";
 
 interface SeqenialNumberProps {
   /** هربار متادیتا (به جز metaType4) تغییر کند، والد را خبر کن */
   onMetaChange?: (data: {
-    metaType1: string;             // Command
-    metaType2: string | number;    // NumberOfDigit
-    metaType3: string;             // SeparatorCharacter
-    metaTypeJson: string | null;   // Modes
-    CountInReject: boolean;        // Checkbox
+    metaType1: string; // Command
+    metaType2: string | number; // NumberOfDigit
+    metaType3: string; // SeparatorCharacter
+    metaTypeJson: string | null; // Modes
+    CountInReject: boolean; // Checkbox
   }) => void;
 
   /** برای فیلد metaType4 (CountOfConst) از این پروپ جداگانه استفاده می‌کنیم */
@@ -37,6 +38,7 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
   onMetaExtraChange,
   data = {},
 }) => {
+  const { t } = useTranslation();
   /* ------------ local state ------------ */
   const [command, setCommand] = useState(data.metaType1 ?? "");
   const [numberOfDigit, setNumberOfDigit] = useState<string | number>(
@@ -55,7 +57,9 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
 
   /* -------- sync props→state فقط در صورت تفاوت -------- */
   useEffect(() => {
-    setCommand((p) => (p === (data.metaType1 ?? "") ? p : data.metaType1 ?? ""));
+    setCommand((p) =>
+      p === (data.metaType1 ?? "") ? p : data.metaType1 ?? ""
+    );
     setNumberOfDigit((p) =>
       p === (data.metaType2 ?? "") ? p : data.metaType2 ?? ""
     );
@@ -65,7 +69,9 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
     setCountOfConst((p) =>
       p === (data.metaType4 ?? "") ? p : data.metaType4 ?? ""
     );
-    setMode((p) => (p === (data.metaTypeJson ?? "") ? p : data.metaTypeJson ?? ""));
+    setMode((p) =>
+      p === (data.metaTypeJson ?? "") ? p : data.metaTypeJson ?? ""
+    );
     setCountInReject((p) =>
       p === !!data.CountInReject ? p : !!data.CountInReject
     );
@@ -109,88 +115,87 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
   }, [countOfConst]);
 
   /* ------------ UI ------------ */
-return (
-  <div
-    dir="rtl"
-    className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center"
-  >
-    <div className="p-4 w-full max-w-lg space-y-6 text-right [&_input]:text-right [&_select]:text-right [&_textarea]:text-right">
-
-      {/* Command: تمام عرض */}
-      <div className="w-full">
-        <DynamicInput
-          name="Command"
-          type="text"
-          value={command}
-          onChange={(e) => setCommand(e.target.value)}
-          placeholder="Command"
-        />
-      </div>
-
-      {/* Number Of Digit + Separator Character: مجموع = عرض Command */}
-      <div className="grid grid-cols-2 gap-4 w-full items-end">
-        <div className="min-w-0">
+  return (
+    <div
+      dir="rtl"
+      className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center"
+    >
+      <div className="p-4 w-full max-w-lg space-y-6 text-right [&_input]:text-right [&_select]:text-right [&_textarea]:text-right">
+        {/* Command: تمام عرض */}
+        <div className="w-full">
           <DynamicInput
-            name="Number Of Digit"
-            type="number"
-            value={numberOfDigit}
-            onChange={(e) => setNumberOfDigit(e.target.value)}
-            placeholder="Number Of Digit"
-          />
-        </div>
-        <div className="min-w-0">
-          <DynamicInput
-            name="Separator Character"
+            name={t("SeqenialNumber.Labels.Command")}
             type="text"
-            value={separatorCharacter}
-            onChange={(e) => setSeparatorCharacter(e.target.value)}
-            placeholder="Separator Character"
-          />
-        </div>
-      </div>
-
-      {/* Count of Const + Count In Reject: مجموع = عرض Command */}
-      <div className="grid grid-cols-2 gap-4 w-full items-end">
-        <div className="min-w-0">
-          <DynamicInput
-            name="Count of Const"
-            type="number"
-            value={countOfConst}
-            onChange={(e) => setCountOfConst(e.target.value)}
-            placeholder="Count of Const"
+            value={command}
+            onChange={(e) => setCommand(e.target.value)}
+            placeholder={t("SeqenialNumber.Placeholders.Command")}
           />
         </div>
 
-        {/* Count In Reject: هم‌تراز با چک‌باکس، بدون پس‌زمینه، فاصله کم بین چک‌باکس و متن */}
-        <div className="min-w-0">
-          <label className="inline-flex flex-row-reverse items-center gap-1 h-10 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={countInReject}
-              onChange={(e) => setCountInReject(e.target.checked)}
-              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+        {/* Number Of Digit + Separator Character: مجموع = عرض Command */}
+        <div className="grid grid-cols-2 gap-4 w-full items-end">
+          <div className="min-w-0">
+            <DynamicInput
+              name={t("SeqenialNumber.Labels.NumberOfDigit")}
+              type="number"
+              value={numberOfDigit}
+              onChange={(e) => setNumberOfDigit(e.target.value)}
+              placeholder={t("SeqenialNumber.Placeholders.NumberOfDigit")}
             />
-            <span className="font-medium leading-tight">Count In Reject</span>
-          </label>
+          </div>
+          <div className="min-w-0">
+            <DynamicInput
+              name={t("SeqenialNumber.Labels.SeparatorCharacter")}
+              type="text"
+              value={separatorCharacter}
+              onChange={(e) => setSeparatorCharacter(e.target.value)}
+              placeholder={t("SeqenialNumber.Placeholders.SeparatorCharacter")}
+            />
+          </div>
+        </div>
+
+        {/* Count of Const + Count In Reject: مجموع = عرض Command */}
+        <div className="grid grid-cols-2 gap-4 w-full items-end">
+          <div className="min-w-0">
+            <DynamicInput
+              name={t("SeqenialNumber.Labels.CountOfConst")}
+              type="number"
+              value={countOfConst}
+              onChange={(e) => setCountOfConst(e.target.value)}
+              placeholder={t("SeqenialNumber.Placeholders.CountOfConst")}
+            />
+          </div>
+
+          {/* Count In Reject: هم‌تراز با چک‌باکس، بدون پس‌زمینه، فاصله کم بین چک‌باکس و متن */}
+          <div className="min-w-0">
+            <label className="inline-flex flex-row-reverse items-center gap-1 h-10 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={countInReject}
+                onChange={(e) => setCountInReject(e.target.checked)}
+                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+              />
+              <span className="font-medium leading-tight">
+                {" "}
+                {t("SeqenialNumber.Labels.CountInReject")}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Modes: تمام عرض */}
+        <div className="w-full">
+          <DynamicSelector
+            name="Modes"
+            label={t("SeqenialNumber.Labels.Modes")}
+            options={modeOptions}
+            selectedValue={mode}
+            onChange={(e) => setMode(e.target.value)}
+          />
         </div>
       </div>
-
-      {/* Modes: تمام عرض */}
-      <div className="w-full">
-        <DynamicSelector
-          name="Modes"
-          label="Modes"
-          options={modeOptions}
-          selectedValue={mode}
-          onChange={(e) => setMode(e.target.value)}
-        />
-      </div>
-
     </div>
-  </div>
-);
-
-
+  );
 };
 
 export default SeqenialNumber;

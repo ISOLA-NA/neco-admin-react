@@ -1,0 +1,17 @@
+{
+    "AdvanceLookupAdvanceTable": {
+      "Form": {
+        "ForFirstFormGetInformationFrom": "برای فرم اول، دریافت اطلاعات از",
+        "ForSecondFormGetInformationFrom": "برای فرم دوم، دریافت اطلاعات از",
+        "LookupMode": "حالت جست‌وجو (Lookup)",
+        "ShowColumnsOfFirstForm": "ستون‌های فرم اول به شکل زیر نمایش داده شوند"
+      },
+      "Columns": {
+        "SrcField": "فیلد مبدأ",
+        "Operation": "عملیات",
+        "FilterText": "متن فیلتر",
+        "DesField": "فیلد مقصد"
+      }
+    }
+  }
+  

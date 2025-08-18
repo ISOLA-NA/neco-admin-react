@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import WordPanelOld from "./OldWordpanel";
 import WordPanelNew from "./NewWordpanel";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   onMetaChange?: (meta: any) => void;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const WordPanelSwitcher: React.FC<Props> = ({ onMetaChange, data }) => {
+  const { t } = useTranslation();
   /* ------------------------------------------------------------------ */
   /* ---------------------------  Local state  ------------------------- */
   /* ------------------------------------------------------------------ */
@@ -49,7 +51,7 @@ const WordPanelSwitcher: React.FC<Props> = ({ onMetaChange, data }) => {
   };
 
   useEffect(() => emitChange(), [isShowNewWindow]); // eslint-disable-line
-  useEffect(() => emitChange(), [panelMode]);       // eslint-disable-line
+  useEffect(() => emitChange(), [panelMode]); // eslint-disable-line
 
   /* ------------------------------------------------------------------ */
   /* ----------------------------  Handlers  --------------------------- */
@@ -94,7 +96,7 @@ const WordPanelSwitcher: React.FC<Props> = ({ onMetaChange, data }) => {
             checked={isShowNewWindow}
             onChange={handleCheckboxChange}
           />
-          <span>Is Show New Window</span>
+          <span>{t("wordpanel.Switcher.IsShowNewWindow")}</span>
         </label>
 
         {panelMode === "1" && (
@@ -115,7 +117,7 @@ const WordPanelSwitcher: React.FC<Props> = ({ onMetaChange, data }) => {
             onClick={handleDefValClick}
             disabled={isEditMode}
           >
-            Def Val
+            {t("wordpanel.Switcher.DefVal")}
           </button>
         )}
 
@@ -138,7 +140,7 @@ const WordPanelSwitcher: React.FC<Props> = ({ onMetaChange, data }) => {
               onChange={() => handlePanelChange("0")}
               disabled={isEditMode}
             />
-            Old Version
+            {t("wordpanel.Switcher.OldVersion")}
           </label>
 
           <label
@@ -158,7 +160,7 @@ const WordPanelSwitcher: React.FC<Props> = ({ onMetaChange, data }) => {
               onChange={() => handlePanelChange("1")}
               disabled={isEditMode}
             />
-            New Word Panel
+            {t("wordpanel.Switcher.NewWordPanel")}
           </label>
         </div>
       </div>

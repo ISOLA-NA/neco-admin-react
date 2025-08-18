@@ -1,0 +1,18 @@
+{
+    "LookUpRealValue": {
+      "Form": {
+        "GetInformationFrom": "دریافت اطلاعات از",
+        "WhatColumnToDisplay": "کدام ستون نمایش داده شود",
+        "Modes": "حالت‌ها",
+        "DefaultProjects": "پروژه‌های پیش‌فرض",
+        "OldLookup": "جستجوی قدیمی"
+      },
+      "Columns": {
+        "SrcField": "فیلد مبدأ",
+        "Operation": "عملیات",
+        "FilterText": "متن فیلتر",
+        "DesField": "فیلد مقصد"
+      }
+    }
+  }
+  

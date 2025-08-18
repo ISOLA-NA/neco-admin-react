@@ -1,6 +1,7 @@
 // src/components/TableControllerView.tsx
 import React, { useMemo } from "react";
 import DataTable from "../../TableDynamic/DataTable";
+import { useTranslation } from "react-i18next";
 
 interface TableControllerViewProps {
   data?: {
@@ -43,6 +44,7 @@ const getHeadersFromMeta = (meta: string) => {
 };
 
 const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
+  const { t } = useTranslation();
   // metaType1 برای ذخیره‌سازی معمولاً بدون newline است؛ اما برای نمایش، اگر newline داشته باشد، همان استفاده شود.
   // در صورتی که metaType1 شامل newline نباشد، برای نمایش آن را به صورت multiline تبدیل می‌کنیم.
   const metaHeaderStored = data?.metaType1 || "";

@@ -1,0 +1,23 @@
+{
+    "SeqenialNumber": {
+      "Labels": {
+        "Command": "Command",
+        "NumberOfDigit": "Number of digits",
+        "SeparatorCharacter": "Separator character",
+        "CountOfConst": "Count of const",
+        "CountInReject": "Count in reject",
+        "Modes": "Modes"
+      },
+      "Placeholders": {
+        "Command": "Command",
+        "NumberOfDigit": "Number of digits",
+        "SeparatorCharacter": "Separator character",
+        "CountOfConst": "Count of const"
+      },
+      "Options": {
+        "AfterSubmit": "After submit",
+        "AfterAccept": "After accept"
+      }
+    }
+  }
+  

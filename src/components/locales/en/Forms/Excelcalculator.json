@@ -1,0 +1,17 @@
+{
+    "excelcalculator": {
+      "Labels": {
+        "Input": "Input",
+        "Output": "Output"
+      },
+      "Placeholders": {
+        "EnterInput": "Enter input value",
+        "EnterOutput": "Enter output value"
+      },
+      "Buttons": {
+        "Calculated": "Calculated",
+        "Show": "Show"
+      }
+    }
+  }
+  

@@ -4,10 +4,10 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useApi } from "../../../context/ApiContext";
 import AppServices from "../../../services/api.services";
-
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
+import { useTranslation } from "react-i18next";
 
 interface LookUpAdvanceTableProps {
   data?: {
@@ -37,6 +37,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   onMetaChange,
   onMetaExtraChange,
 }) => {
+  const { t } = useTranslation();
   // ─── Helpers ─────────────────────────────────────────────
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
   const genId = () =>
@@ -59,8 +60,12 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
 
   const [entities, setEntities] = useState<{ ID: any; Name: string }[]>([]);
   const [fields, setFields] = useState<any[]>([]);
-  const [modesList, setModesList] = useState<{ value: string; label: string }[]>([]);
-  const [operationList, setOperationList] = useState<{ value: string; label: string }[]>([]);
+  const [modesList, setModesList] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [operationList, setOperationList] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
@@ -73,7 +78,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     } catch {}
     setTableData(
       Array.isArray(rows)
-        ? rows.map(item => ({
+        ? rows.map((item) => ({
             ID: String(item.ID ?? genId()),
             SrcFieldID: item.SrcFieldID || "",
             FilterOpration: item.FilterOpration || "",
@@ -101,24 +106,28 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   // ─── Load entities & enums ─────────────────────────────────
   useEffect(() => {
     getAllEntityType()
-      .then(res => Array.isArray(res) && setEntities(res))
+      .then((res) => Array.isArray(res) && setEntities(res))
       .catch(console.error);
 
     AppServices.getEnum({ str: "lookMode" })
-      .then(resp =>
-        setModesList(Object.entries(resp).map(([k, v]) => ({
-          value: String(v),
-          label: k
-        })))
+      .then((resp) =>
+        setModesList(
+          Object.entries(resp).map(([k, v]) => ({
+            value: String(v),
+            label: k,
+          }))
+        )
       )
       .catch(console.error);
 
     AppServices.getEnum({ str: "FilterOpration" })
-      .then(resp =>
-        setOperationList(Object.entries(resp).map(([k, v]) => ({
-          value: String(v),
-          label: k
-        })))
+      .then((resp) =>
+        setOperationList(
+          Object.entries(resp).map(([k, v]) => ({
+            value: String(v),
+            label: k,
+          }))
+        )
       )
       .catch(console.error);
   }, []);
@@ -131,8 +140,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       data.LookupMode != null
     ) {
       const mv = String(data.LookupMode);
-      if (modesList.some(m => m.value === mv)) {
-        setMeta(prev => ({ ...prev, LookupMode: mv }));
+      if (modesList.some((m) => m.value === mv)) {
+        setMeta((prev) => ({ ...prev, LookupMode: mv }));
       }
       initialModeRef.current = false;
     }
@@ -143,7 +152,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     const etId = Number(meta.metaType1);
     if (!isNaN(etId) && etId > 0) {
       getEntityFieldByEntityTypeId(etId)
-        .then(res => setFields(Array.isArray(res) ? res : []))
+        .then((res) => setFields(Array.isArray(res) ? res : []))
         .catch(console.error);
     } else {
       setFields([]);
@@ -162,7 +171,10 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     });
   };
 
-  const toggleCheckbox = (key: "removeSameName" | "oldLookup", val: boolean) => {
+  const toggleCheckbox = (
+    key: "removeSameName" | "oldLookup",
+    val: boolean
+  ) => {
     if (key === "removeSameName") setRemoveSameName(val);
     else setOldLookup(val);
     onMetaChange?.({
@@ -184,50 +196,57 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     const next = [...tableData, newRow];
     setTableData(next);
     const json = JSON.stringify(next);
-    setMeta(prev => ({ ...prev, metaType4: json }));
+    setMeta((prev) => ({ ...prev, metaType4: json }));
     onMetaExtraChange?.({ metaType4: json });
   };
 
   const handleCellValueChanged = (e: any) => {
     const updated = e.data as TableRow;
-    const next = tableData.map(r => (r.ID === updated.ID ? updated : r));
+    const next = tableData.map((r) => (r.ID === updated.ID ? updated : r));
     setTableData(next);
     const json = JSON.stringify(next);
-    setMeta(prev => ({ ...prev, metaType4: json }));
+    setMeta((prev) => ({ ...prev, metaType4: json }));
     onMetaExtraChange?.({ metaType4: json });
   };
 
   // ─── AG‑Grid columnDefs ────────────────────────────────────
-  const columnDefs = useMemo(() => [
-    {
-      headerName: "Src Field",
-      field: "SrcFieldID",
-      editable: true,
-      cellEditor: "agSelectCellEditor",
-      cellEditorParams: { values: fields.map(f => String(f.ID)) },
-      valueFormatter: (p: any) =>
-        fields.find(f => String(f.ID) === p.value)?.DisplayName || p.value,
-    },
-    {
-      headerName: "Operation",
-      field: "FilterOpration",
-      editable: true,
-      cellEditor: "agSelectCellEditor",
-      cellEditorParams: { values: operationList.map(o => o.value) },
-      valueFormatter: (p: any) =>
-        operationList.find(o => o.value === p.value)?.label || p.value,
-    },
-    { headerName: "Filter Text", field: "FilterText", editable: true },
-    {
-      headerName: "Des Field",
-      field: "DesFieldID",
-      editable: true,
-      cellEditor: "agSelectCellEditor",
-      cellEditorParams: { values: fields.map(f => String(f.ID)) },
-      valueFormatter: (p: any) =>
-        fields.find(f => String(f.ID) === p.value)?.DisplayName || p.value,
-    },
-  ], [fields, operationList]);
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: t("LookUpAdvanceTable.Columns.SrcField"),
+        field: "SrcFieldID",
+        editable: true,
+        cellEditor: "agSelectCellEditor",
+        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
+        valueFormatter: (p: any) =>
+          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
+      },
+      {
+        headerName: t("LookUpAdvanceTable.Columns.Operation"),
+        field: "FilterOpration",
+        editable: true,
+        cellEditor: "agSelectCellEditor",
+        cellEditorParams: { values: operationList.map((o) => o.value) },
+        valueFormatter: (p: any) =>
+          operationList.find((o) => o.value === p.value)?.label || p.value,
+      },
+      {
+        headerName: t("LookUpAdvanceTable.Columns.FilterText"),
+        field: "FilterText",
+        editable: true,
+      },
+      {
+        headerName: t("LookUpAdvanceTable.Columns.DesField"),
+        field: "DesFieldID",
+        editable: true,
+        cellEditor: "agSelectCellEditor",
+        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
+        valueFormatter: (p: any) =>
+          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
+      },
+    ],
+    [t, fields, operationList]
+  );
 
   // ─── Render ────────────────────────────────────────────────
   return (
@@ -236,21 +255,24 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         <div className="flex flex-col space-y-6 w-1/2">
           <DynamicSelector
             name="getInformationFrom"
-            label="Get information from"
-            options={entities.map(e => ({ value: String(e.ID), label: e.Name }))}
+            label={t("LookUpAdvanceTable.Form.GetInformationFrom")}
+            options={entities.map((e) => ({
+              value: String(e.ID),
+              label: e.Name,
+            }))}
             selectedValue={meta.metaType1}
-            onChange={e => pushMeta({ metaType1: e.target.value })}
+            onChange={(e) => pushMeta({ metaType1: e.target.value })}
           />
 
           <DynamicSelector
             name="displayColumn"
-            label="What Column To Display"
+            label={t("LookUpAdvanceTable.Form.WhatColumnToDisplay")}
             options={fields.map((f: any) => ({
               value: String(f.ID),
               label: f.DisplayName,
             }))}
             selectedValue={meta.metaType2}
-            onChange={e => pushMeta({ metaType2: e.target.value })}
+            onChange={(e) => pushMeta({ metaType2: e.target.value })}
           />
 
           <PostPickerList
@@ -258,8 +280,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             initialMetaType={meta.metaType5}
             data={{ metaType5: meta.metaType5 || undefined }}
             metaFieldKey="metaType5"
-            onMetaChange={o => pushMeta(o)}
-            label="Default Projects"
+            onMetaChange={(o) => pushMeta(o)}
+            label={t("LookUpAdvanceTable.Form.DefaultProjects")}
             fullWidth
           />
         </div>

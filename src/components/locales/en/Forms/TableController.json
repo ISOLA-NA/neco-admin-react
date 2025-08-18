@@ -1,0 +1,21 @@
+{
+    "TableController": {
+      "Labels": {
+        "FixRow": "Fix Row",
+        "FixRowValue": "Fix Row Value",
+        "ColumnTitles": "Column titles"
+      },
+      "Placeholders": {
+        "EnterEachHeaderOnNewLine": "Enter each header on a new line"
+      },
+      "Buttons": {
+        "DefVal": "Def Val",
+        "AddNew": "Add New",
+        "Save": "Save"
+      },
+      "Titles": {
+        "DynamicTable": "Dynamic Table"
+      }
+    }
+  }
+  

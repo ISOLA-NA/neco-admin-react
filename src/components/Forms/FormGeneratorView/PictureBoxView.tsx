@@ -3,8 +3,11 @@ import React, { useState, useCallback, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicModal from "../../utilities/DynamicModal";
 import { FaTrash, FaEye, FaUpload } from "react-icons/fa";
-import FileUploadHandler, { InsertModel } from "../../../services/FileUploadHandler";
+import FileUploadHandler, {
+  InsertModel,
+} from "../../../services/FileUploadHandler";
 import fileService from "../../../services/api.servicesFile";
+import { useTranslation } from "react-i18next";
 
 interface PictureBoxViewProps {
   data?: {
@@ -15,9 +18,18 @@ interface PictureBoxViewProps {
   onMetaChange?: (data: any) => void;
 }
 
-const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) => {
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(data?.metaType1 || null);
-  const [fileName, setFileName] = useState<string>(data?.fileName || "No file selected");
+const PictureBoxView: React.FC<PictureBoxViewProps> = ({
+  data,
+  onMetaChange,
+}) => {
+  const { t } = useTranslation();
+
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(
+    data?.metaType1 || null
+  );
+  const [fileName, setFileName] = useState<string>(
+    data?.fileName || "No file selected"
+  );
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -26,7 +38,8 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) =
   // واکشی اطلاعات فایل (نام و URL پیش‌نمایش) در صورت وجود selectedFileId
   useEffect(() => {
     if (selectedFileId) {
-      fileService.getFile(selectedFileId)
+      fileService
+        .getFile(selectedFileId)
         .then((res) => {
           // فرض بر این است که res.data شامل FileName و FileIQ (URL پیش‌نمایش) می‌باشد
           setFileName(res.data.FileName);
@@ -59,7 +72,7 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) =
   // حذف فایل
   const handleReset = () => {
     setSelectedFileId(null);
-    setResetCounter(prev => prev + 1);
+    setResetCounter((prev) => prev + 1);
     setFileName("No file selected");
     if (onMetaChange) {
       onMetaChange({ metaType1: null });
@@ -73,13 +86,13 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) =
     if (previewUrl) {
       setIsModalOpen(true);
     } else {
-      alert("No file uploaded!");
+      alert(t("PictureBoxFile.Messages.NoFileUploaded"));
     }
   };
 
   // تغییر وضعیت نمایش بخش آپلود؛ با کلیک روی دکمه Upload، بخش آپلود زیر سطر اصلی ظاهر/مخفی می‌شود و previewUrl پاک می‌شود
   const handleToggleUploadHandler = () => {
-    setShowUploadHandler(prev => !prev);
+    setShowUploadHandler((prev) => !prev);
     setPreviewUrl(null);
   };
 
@@ -91,18 +104,18 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) =
           <button
             type="button"
             onClick={handleReset}
-            title="Delete file"
-            className="bg-red-500 text-white p-1 rounded hover:bg-red-700 transition duration-300 mt-5"
+            title={t("PictureBoxFile.Titles.ClickToDelete")}
+            className="inline-flex items-center justify-center bg-red-500 text-white p-1 rounded hover:bg-red-700 transition duration-300 mt-5"
           >
             <FaTrash size={16} />
           </button>
         )}
 
         <DynamicInput
-          name={data?.DisplayName || "File Name"}
+          name={data?.DisplayName || t("PictureBoxFile.Labels.FileName")}
           type="text"
           value={fileName}
-          placeholder="No file selected"
+          placeholder={t("PictureBoxFile.Labels.NoFileSelected")}
           disabled
           className="flex-grow"
         />
@@ -110,24 +123,26 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) =
         <button
           type="button"
           onClick={handleToggleUploadHandler}
-          className="flex items-center px-2 py-1 bg-blue-500 text-white font-semibold rounded transition duration-300 hover:bg-blue-700 mt-5"
-          title="Upload file"
+          className="inline-flex items-center gap-2 px-2 py-1 bg-blue-500 text-white font-semibold rounded transition duration-300 hover:bg-blue-700 mt-5"
+          title={t("PictureBoxFile.Titles.UploadFile")}
         >
-          <FaUpload size={16} className="mr-1" />
-          Upload
+          <FaUpload size={16} />
+          {t("PictureBoxFile.Buttons.Upload")}
         </button>
 
         <button
           type="button"
           onClick={handleShowFile}
-          className={`flex items-center px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 mt-5 ${
-            previewUrl ? "hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"
+          className={`inline-flex items-center gap-2 px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 mt-5 ${
+            previewUrl
+              ? "hover:bg-purple-700"
+              : "bg-gray-400 cursor-not-allowed"
           }`}
           disabled={!previewUrl}
-          title="View file"
+          title={t("PictureBoxFile.Titles.ViewFile")}
         >
-          <FaEye size={16} className="mr-1" />
-          View
+          <FaEye size={16} />
+          {t("PictureBoxFile.Buttons.View")}
         </button>
       </div>
 
@@ -147,7 +162,7 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) =
             onClick={handleToggleUploadHandler}
             className="mt-2 px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-700 transition duration-300"
           >
-            Cancel
+            {t("PictureBoxFile.Buttons.Cancel")}
           </button>
         </div>
       )}
@@ -179,15 +194,17 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({ data, onMetaChange }) =
             className="w-[300px] h-[300px] object-cover mx-auto rounded-lg shadow-lg cursor-pointer transition-transform transform hover:scale-105"
             onClick={(e) => {
               e.stopPropagation();
-              if (window.confirm("Do you want to delete the uploaded file?")) {
+              if (window.confirm(t("PictureBoxFile.Messages.DeleteConfirm"))) {
                 handleReset();
                 setIsModalOpen(false);
               }
             }}
-            title="Click to delete the file"
+            title={t("PictureBoxFile.Buttons.Delete")}
           />
         ) : (
-          <p className="text-gray-500 text-center">No file available to display.</p>
+          <p className="text-gray-500 text-center">
+            {t("PictureBoxFile.Messages.NoFileToDisplay")}
+          </p>
         )}
       </DynamicModal>
     </div>

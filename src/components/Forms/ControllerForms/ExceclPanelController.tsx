@@ -4,6 +4,7 @@ import DynamicInput from "../../utilities/DynamicInput";
 import { FaTrash, FaDownload, FaSync, FaUpload } from "react-icons/fa";
 import fileService from "../../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 
 /* ------------------------------------------------------------------ */
 /* ----------------------------- Types ------------------------------- */
@@ -24,7 +25,7 @@ interface ExcelPanelProps {
   onMetaChange?: (meta: any) => void;
   data?: {
     metaType1?: string | null; // Guid
-    fileName?: string;         // نام اصلی فایل (اختیاری است)
+    fileName?: string; // نام اصلی فایل (اختیاری است)
   };
 }
 
@@ -32,6 +33,8 @@ interface ExcelPanelProps {
 /* --------------------------- Component ----------------------------- */
 /* ------------------------------------------------------------------ */
 const ExcelPanel: React.FC<ExcelPanelProps> = ({ data = {}, onMetaChange }) => {
+  const { t } = useTranslation();
+
   /* -------------------------  Local state  ------------------------- */
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data.metaType1 ?? null
@@ -39,7 +42,7 @@ const ExcelPanel: React.FC<ExcelPanelProps> = ({ data = {}, onMetaChange }) => {
   const [fileName, setFileName] = useState<string>(data.fileName ?? "");
   const [isLoading, setIsLoading] = useState(false);
   const [isNewUpload, setIsNewUpload] = useState(false); // وقتی کاربر همین الان فایل را آپلود کرده
-  const [resetCounter, setResetCounter] = useState(0);   // برای ریست input [type=file]
+  const [resetCounter, setResetCounter] = useState(0); // برای ریست input [type=file]
 
   const isEditMode = !!data.metaType1; // رکورد موجود (ویرایش)
 
@@ -97,7 +100,7 @@ const ExcelPanel: React.FC<ExcelPanelProps> = ({ data = {}, onMetaChange }) => {
       /* ---- validate extension ---- */
       const ext = file.name.split(".").pop()?.toLowerCase();
       if (!["xls", "xlsx"].includes(ext || "")) {
-        alert("Only .xls or .xlsx files are allowed.");
+        alert(t("excelpanel.Alerts.OnlyExcelAllowed"));
         return;
       }
 
@@ -156,7 +159,8 @@ const ExcelPanel: React.FC<ExcelPanelProps> = ({ data = {}, onMetaChange }) => {
 
   /* ------------------------  Download existing file --------------------- */
   const handleDownloadFile = async () => {
-    if (!selectedFileId) return alert("No file to download.");
+    if (!selectedFileId) return alert(t("excelpanel.Alerts.DownloadFailed"));
+
     setIsLoading(true);
     try {
       const info = await fileService.getFile(selectedFileId);
@@ -190,103 +194,110 @@ const ExcelPanel: React.FC<ExcelPanelProps> = ({ data = {}, onMetaChange }) => {
 
   /* -------------------------------  UI  -------------------------------- */
   return (
-  <div className="w-full mt-10">
-    {/* ردیف اصلی: سه ستون (دکمه‌های چپ / اینپوت / دکمه دانلود) */}
-    <div className="grid grid-cols-[auto,1fr,auto] items-end gap-2 w-full">
-      {/* ستون چپ: اکشن‌ها با عرض ثابت تا پرش نداشته باشد */}
-      <div className="flex gap-2 self-end shrink-0 w-[88px]">
-        {isLoading ? (
-          <div className="h-10 w-10 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
-        ) : (
-          <>
-            {/* جایگزینی فایل (ویرایش) */}
-            {selectedFileId && isEditMode && (
-              <button
-                type="button"
-                title="Upload new file"
-                onClick={() =>
-                  (document.getElementById("hidden-upload") as HTMLInputElement)?.click()
-                }
-                className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-blue-500 hover:bg-blue-700 transition"
-              >
-                <FaSync size={16} />
-              </button>
-            )}
+    <div className="w-full mt-10">
+      {/* ردیف اصلی: سه ستون (دکمه‌های چپ / اینپوت / دکمه دانلود) */}
+      <div className="grid grid-cols-[auto,1fr,auto] items-end gap-2 w-full">
+        {/* ستون چپ: اکشن‌ها با عرض ثابت تا پرش نداشته باشد */}
+        <div className="flex gap-2 self-end shrink-0 w-[88px]">
+          {isLoading ? (
+            <div className="h-10 w-10 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
+          ) : (
+            <>
+              {/* جایگزینی فایل (ویرایش) */}
+              {selectedFileId && isEditMode && (
+                <button
+                  type="button"
+                  title={t("excelpanel.Tooltips.UploadNew")}
+                  onClick={() =>
+                    (
+                      document.getElementById(
+                        "hidden-upload"
+                      ) as HTMLInputElement
+                    )?.click()
+                  }
+                  className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-blue-500 hover:bg-blue-700 transition"
+                >
+                  <FaSync size={16} />
+                </button>
+              )}
 
-            {/* آپلود اولیه (ایجاد) */}
-            {!isEditMode && !selectedFileId && (
-              <button
-                type="button"
-                title="Upload file"
-                onClick={() =>
-                  (document.getElementById("hidden-upload") as HTMLInputElement)?.click()
-                }
-                className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-green-600 hover:bg-green-700 transition"
-              >
-                <FaUpload size={16} />
-              </button>
-            )}
+              {/* آپلود اولیه (ایجاد) */}
+              {!isEditMode && !selectedFileId && (
+                <button
+                  type="button"
+                  title={t("excelpanel.Tooltips.Upload")}
+                  onClick={() =>
+                    (
+                      document.getElementById(
+                        "hidden-upload"
+                      ) as HTMLInputElement
+                    )?.click()
+                  }
+                  className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-green-600 hover:bg-green-700 transition"
+                >
+                  <FaUpload size={16} />
+                </button>
+              )}
 
-            {/* حذف فایل (ایجاد) */}
-            {selectedFileId && !isEditMode && (
-              <button
-                type="button"
-                title="Remove file"
-                onClick={handleReset}
-                className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-red-500 hover:bg-red-700 transition"
-              >
-                <FaTrash size={16} />
-              </button>
-            )}
-          </>
-        )}
+              {/* حذف فایل (ایجاد) */}
+              {selectedFileId && !isEditMode && (
+                <button
+                  type="button"
+                  title={t("excelpanel.Tooltips.Remove")}
+                  onClick={handleReset}
+                  className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-red-500 hover:bg-red-700 transition"
+                >
+                  <FaTrash size={16} />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* ستون وسط: اینپوت نام فایل (لیبل + اینپوت داخل خودش) */}
+        <div className="min-w-0 self-end">
+          <DynamicInput
+            name={t("excelpanel.Labels.FileName")}
+            type="text"
+            value={fileName || ""}
+            placeholder={t("excelpanel.Placeholders.NoFileSelected")}
+            className="w-full"
+            disabled
+          />
+        </div>
+
+        {/* ستون راست: دکمه دانلود */}
+        <div className="self-end shrink-0">
+          <button
+            type="button"
+            onClick={handleDownloadFile}
+            disabled={!selectedFileId || isLoading}
+            className={`inline-flex items-center gap-2 justify-center h-10 px-4 text-sm font-semibold rounded transition ${
+              selectedFileId && !isLoading
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : "bg-gray-400 cursor-not-allowed text-white"
+            }`}
+          >
+            <FaDownload size={16} />
+            {t("excelpanel.Buttons.Download")}
+          </button>
+        </div>
       </div>
 
-      {/* ستون وسط: اینپوت نام فایل (لیبل + اینپوت داخل خودش) */}
-      <div className="min-w-0 self-end">
-        <DynamicInput
-          name="fileName"
-          type="text"
-          value={fileName || ""}
-          placeholder="No file selected"
-          className="w-full"
-          disabled
-        />
-      </div>
-
-      {/* ستون راست: دکمه دانلود */}
-      <div className="self-end shrink-0">
-        <button
-          type="button"
-          onClick={handleDownloadFile}
-          disabled={!selectedFileId || isLoading}
-          className={`inline-flex items-center justify-center h-10 px-4 text-sm font-semibold rounded transition ${
-            selectedFileId && !isLoading
-              ? "bg-purple-600 text-white hover:bg-purple-700"
-              : "bg-gray-400 cursor-not-allowed text-white"
-          }`}
-        >
-          <FaDownload size={16} className="mr-2" />
-          Download
-        </button>
-      </div>
+      {/* input[type=file] پنهان */}
+      <input
+        key={resetCounter}
+        id="hidden-upload"
+        type="file"
+        accept=".xls,.xlsx"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) uploadFile(file);
+        }}
+      />
     </div>
-
-    {/* input[type=file] پنهان */}
-    <input
-      key={resetCounter}
-      id="hidden-upload"
-      type="file"
-      accept=".xls,.xlsx"
-      className="hidden"
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) uploadFile(file);
-      }}
-    />
-  </div>
-);
-
+  );
 };
 
 export default ExcelPanel;

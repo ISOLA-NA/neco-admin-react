@@ -4,6 +4,7 @@ import { FaTrash, FaDownload, FaUpload, FaSync } from "react-icons/fa";
 import fileService from "../../../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
 import type { InsertModel } from "../../../../services/FileUploadHandler";
+import { useTranslation } from "react-i18next";
 
 interface WordPanelProps {
   onMetaChange?: (data: any) => void;
@@ -11,7 +12,10 @@ interface WordPanelProps {
 }
 
 const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(data?.metaType1 || null);
+  const { t } = useTranslation();
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(
+    data?.metaType1 || null
+  );
   const [fileName, setFileName] = useState<string>(data?.fileName || "");
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [isNewUpload, setIsNewUpload] = useState<boolean>(false);
@@ -67,8 +71,8 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
   };
 
   const handleDownloadFile = async () => {
-    if (!selectedFileId) return alert("No file to download.");
-
+    if (!selectedFileId)
+      return alert(t("wordpanel.New.Alerts.NoFileToDownload"));
     try {
       const infoRes = await fileService.getFile(selectedFileId);
       const { FileIQ, FileType, FolderName, FileName } = infoRes.data;
@@ -80,9 +84,10 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
       };
 
       const res = await fileService.download(path);
-      const mimeType = FileType === ".doc"
-        ? "application/msword"
-        : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      const mimeType =
+        FileType === ".doc"
+          ? "application/msword"
+          : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
       const blob = new Blob([new Uint8Array(res.data)], { type: mimeType });
       const url = URL.createObjectURL(blob);
@@ -108,8 +113,10 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
             {selectedFileId && isEditMode && (
               <button
                 type="button"
-                title="آپلود فایل جدید"
-                onClick={() => document.getElementById("hidden-upload-word")?.click()}
+                title={t("wordpanel.New.Titles.SyncNewWord")}
+                onClick={() =>
+                  document.getElementById("hidden-upload-word")?.click()
+                }
                 className="text-white p-2 rounded transition duration-300 bg-blue-500 hover:bg-blue-700"
               >
                 <FaSync size={16} />
@@ -118,8 +125,10 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
             {!isEditMode && !selectedFileId && (
               <button
                 type="button"
-                title="آپلود فایل ورد"
-                onClick={() => document.getElementById("hidden-upload-word")?.click()}
+                title={t("wordpanel.New.Titles.UploadWord")}
+                onClick={() =>
+                  document.getElementById("hidden-upload-word")?.click()
+                }
                 className="text-white p-2 rounded transition duration-300 bg-green-600 hover:bg-green-700"
               >
                 <FaUpload size={16} />
@@ -128,7 +137,7 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
             {selectedFileId && !isEditMode && (
               <button
                 type="button"
-                title="حذف فایل"
+                title={t("wordpanel.New.Titles.DeleteWord")}
                 onClick={handleReset}
                 className="text-white p-2 rounded transition duration-300 bg-red-500 hover:bg-red-700"
               >
@@ -142,7 +151,7 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
           name="fileName"
           type="text"
           value={fileName || ""}
-          placeholder="No file selected"
+          placeholder={t("wordpanel.New.Placeholders.FileName")}
           className="flex-grow -mt-6"
           disabled
         />
@@ -151,12 +160,14 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
           type="button"
           onClick={handleDownloadFile}
           className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-purple-600 text-white rounded-md transition ${
-            previewUrl ? "hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"
+            previewUrl
+              ? "hover:bg-purple-700"
+              : "bg-gray-400 cursor-not-allowed"
           }`}
           disabled={!previewUrl || isLoading}
         >
           <FaDownload />
-          دانلود
+          {t("wordpanel.New.Buttons.Download")}
         </button>
       </div>
 
@@ -173,7 +184,7 @@ const WordPanelNew: React.FC<WordPanelProps> = ({ data, onMetaChange }) => {
             setIsLoading(true);
             const ext = file.name.split(".").pop()?.toLowerCase();
             if (!["doc", "docx"].includes(ext || "")) {
-              alert("Only .doc or .docx files are allowed.");
+              alert(t("wordpanel.New.Alerts.OnlyDocAllowed"));
               return;
             }
 

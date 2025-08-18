@@ -1,5 +1,6 @@
 // src/components/ControllerForms/ViewControllers/YesNoView.tsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface YesNoViewProps {
   data?: {
@@ -11,6 +12,8 @@ interface YesNoViewProps {
 }
 
 const YesNoView: React.FC<YesNoViewProps> = ({ data, dir }) => {
+  const { t } = useTranslation();
+
   const selected = data?.metaType1 || "yes";
 
   return (
@@ -35,7 +38,7 @@ const YesNoView: React.FC<YesNoViewProps> = ({ data, dir }) => {
             className="appearance-none w-4 h-4 rounded-full border-2 border-purple-500 checked:bg-purple-500"
             readOnly
           />
-          <span className="text-gray-800">Yes</span>
+          <span className="text-gray-800">{t("YesNo.Yes")}</span>
         </label>
 
         <label className="flex items-center gap-1">
@@ -48,7 +51,7 @@ const YesNoView: React.FC<YesNoViewProps> = ({ data, dir }) => {
             className="appearance-none w-4 h-4 rounded-full border-2 border-purple-500 checked:bg-purple-500"
             readOnly
           />
-          <span className="text-gray-800">No</span>
+          <span className="text-gray-800">{t("YesNo.No")}</span>
         </label>
       </div>
     </div>

@@ -5,6 +5,7 @@ import DynamicModal from "../../utilities/DynamicModal";
 import { FaTrash, FaEye, FaSync, FaUpload } from "react-icons/fa";
 import fileService from "../../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 
 /* ------------------------------------------------------------------ */
 /* -----------------------------  Types  ----------------------------- */
@@ -33,6 +34,7 @@ const PictureBoxFile: React.FC<PictureBoxFileProps> = ({
   data = {},
   onMetaChange,
 }) => {
+  const { t } = useTranslation();
   /* ---------------------------  State  --------------------------- */
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data.metaType1 ?? null
@@ -77,12 +79,11 @@ const PictureBoxFile: React.FC<PictureBoxFileProps> = ({
           cacheBust: Date.now(),
         });
 
-        const mime =
-          [".jpg", ".jpeg"].includes(FileType?.toLowerCase() ?? "")
-            ? "image/jpeg"
-            : FileType?.toLowerCase() === ".png"
-            ? "image/png"
-            : "application/octet-stream";
+        const mime = [".jpg", ".jpeg"].includes(FileType?.toLowerCase() ?? "")
+          ? "image/jpeg"
+          : FileType?.toLowerCase() === ".png"
+          ? "image/png"
+          : "application/octet-stream";
 
         const blob = new Blob([new Uint8Array(dl.data)], { type: mime });
         const url = URL.createObjectURL(blob);
@@ -141,7 +142,7 @@ const PictureBoxFile: React.FC<PictureBoxFileProps> = ({
 
       const ext = file.name.split(".").pop()?.toLowerCase();
       if (!["jpg", "jpeg", "png"].includes(ext || "")) {
-        alert("Invalid file type. Only jpg, jpeg, png allowed.");
+        alert(t("PictureBoxFile.Errors.InvalidType"));
         return;
       }
 
@@ -186,119 +187,127 @@ const PictureBoxFile: React.FC<PictureBoxFileProps> = ({
   /* ------------------------------------------------------------------ */
   /* -----------------------------  UI  ------------------------------- */
   return (
-  <div className="w-full mt-10">
-    {/* ردیف اصلی: سه بخش در یک خط، هم‌تراز از پایین */}
-    <div className="flex w-full items-end gap-2">
-      {/* بخش چپ: اکشن‌ها (عرض ثابت تا چیدمان نپَرَد) */}
-      <div className="flex gap-2 self-end shrink-0 w-[88px]">
-        {isLoading ? (
-          <div className="h-10 w-10 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
-        ) : (
-          <>
-            {/* آپلود یا جایگزینی */}
-            <button
-              type="button"
-              title={isEditMode ? "Upload new file" : "Upload file"}
-              onClick={() =>
-                (document.getElementById("hidden-upload") as HTMLInputElement)?.click()
-              }
-              className={`inline-flex items-center justify-center h-10 w-10 text-white rounded transition ${
-                isEditMode
-                  ? "bg-blue-500 hover:bg-blue-700"
-                  : "bg-green-600 hover:bg-green-700"
-              }`}
-            >
-              {isEditMode ? <FaSync size={16} /> : <FaUpload size={16} />}
-            </button>
-
-            {/* حذف */}
-            {selectedFileId && (
+    <div className="w-full mt-10">
+      {/* ردیف اصلی: سه بخش در یک خط، هم‌تراز از پایین */}
+      <div className="flex w-full items-end gap-2">
+        {/* بخش چپ: اکشن‌ها (عرض ثابت تا چیدمان نپَرَد) */}
+        <div className="flex gap-2 self-end shrink-0 w-[88px]">
+          {isLoading ? (
+            <div className="h-10 w-10 rounded-full border-4 border-t-blue-500 border-gray-300 animate-spin" />
+          ) : (
+            <>
+              {/* آپلود یا جایگزینی */}
               <button
                 type="button"
-                title="Remove file"
-                onClick={handleReset}
-                className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-red-500 hover:bg-red-700 transition"
+                title={
+                  isEditMode
+                    ? t("PictureBoxFile.Titles.UploadNewFile")
+                    : t("PictureBoxFile.Titles.UploadFile")
+                }
+                onClick={() =>
+                  (
+                    document.getElementById("hidden-upload") as HTMLInputElement
+                  )?.click()
+                }
+                className={`inline-flex items-center justify-center h-10 w-10 text-white rounded transition ${
+                  isEditMode
+                    ? "bg-blue-500 hover:bg-blue-700"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
               >
-                <FaTrash size={16} />
+                {isEditMode ? <FaSync size={16} /> : <FaUpload size={16} />}
               </button>
-            )}
-          </>
+
+              {/* حذف */}
+              {selectedFileId && (
+                <button
+                  type="button"
+                  title={t("PictureBoxFile.Titles.RemoveFile")}
+                  onClick={handleReset}
+                  className="inline-flex items-center justify-center h-10 w-10 text-white rounded bg-red-500 hover:bg-red-700 transition"
+                >
+                  <FaTrash size={16} />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* بخش وسط: اینپوت (لیبل + اینپوت داخل خود کامپوننت) */}
+        <div className="flex-1 min-w-0 self-end">
+          <DynamicInput
+            name={t("PictureBoxFile.Labels.FileName")}
+            type="text"
+            value={fileName}
+            placeholder={t("PictureBoxFile.Labels.NoFileSelected")}
+            className="w-full"
+            disabled
+          />
+        </div>
+
+        {/* بخش راست: دکمه نمایش */}
+        <div className="self-end shrink-0">
+          <button
+            type="button"
+            onClick={async () => {
+              if (previewUrl) {
+                setIsModalOpen(true);
+              } else if (selectedFileId) {
+                await fetchFileInfo(true); // بارگیری و نمایش
+              }
+            }}
+            disabled={!selectedFileId || isLoading}
+            className={`inline-flex items-center gap-2 justify-center h-10 px-4 font-semibold rounded transition
+              ${
+                selectedFileId && !isLoading
+                  ? "bg-purple-500 hover:bg-purple-700 text-white"
+                  : "bg-gray-400 cursor-not-allowed text-white"
+              }`}
+          >
+            <FaEye size={16} />
+            {t("PictureBoxFile.Buttons.Show")}
+          </button>
+        </div>
+      </div>
+
+      {/* input[file] مخفی */}
+      <input
+        key={resetCounter}
+        id="hidden-upload"
+        type="file"
+        accept=".jpg,.jpeg,.png"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) uploadFile(file);
+        }}
+      />
+
+      {/* Modal preview */}
+      <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105"
+            title={t("PictureBoxFile.Titles.ClickToDelete")}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm(t("PictureBoxFile.Messages.DeleteConfirm"))) {
+                handleReset();
+                setIsModalOpen(false);
+              }
+            }}
+          />
+        ) : (
+          <p className="text-center text-gray-500">
+            {" "}
+            {t("PictureBoxFile.Messages.NoFileToDisplay")}
+          </p>
         )}
-      </div>
-
-      {/* بخش وسط: اینپوت (لیبل + اینپوت داخل خود کامپوننت) */}
-      <div className="flex-1 min-w-0 self-end">
-        <DynamicInput
-          name="fileName"
-          type="text"
-          value={fileName}
-          placeholder="No file selected"
-          className="w-full"
-          disabled
-        />
-      </div>
-
-      {/* بخش راست: دکمه نمایش */}
-      <div className="self-end shrink-0">
-        <button
-          type="button"
-          onClick={async () => {
-            if (previewUrl) {
-              setIsModalOpen(true);
-            } else if (selectedFileId) {
-              await fetchFileInfo(true); // بارگیری و نمایش
-            }
-          }}
-          disabled={!selectedFileId || isLoading}
-          className={`inline-flex items-center justify-center h-10 px-4 font-semibold rounded transition
-            ${
-              selectedFileId && !isLoading
-                ? "bg-purple-500 hover:bg-purple-700 text-white"
-                : "bg-gray-400 cursor-not-allowed text-white"
-            }`}
-        >
-          <FaEye size={16} className="mr-1" />
-          Show
-        </button>
-      </div>
+      </DynamicModal>
     </div>
-
-    {/* input[file] مخفی */}
-    <input
-      key={resetCounter}
-      id="hidden-upload"
-      type="file"
-      accept=".jpg,.jpeg,.png"
-      hidden
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) uploadFile(file);
-      }}
-    />
-
-    {/* Modal preview */}
-    <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-      {previewUrl ? (
-        <img
-          src={previewUrl}
-          alt="Preview"
-          className="max-w-full max-h-[80vh] mx-auto rounded-lg shadow-lg cursor-pointer transition-transform hover:scale-105"
-          title="Click to delete the file"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (window.confirm("Delete the uploaded file?")) {
-              handleReset();
-              setIsModalOpen(false);
-            }
-          }}
-        />
-      ) : (
-        <p className="text-center text-gray-500">No file to display.</p>
-      )}
-    </DynamicModal>
-  </div>
-);
-
+  );
 };
 
 export default PictureBoxFile;

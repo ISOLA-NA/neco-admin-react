@@ -1,0 +1,73 @@
+{
+    "wordpanel": {
+      "Common": {
+        "NoFileSelected": "فایلی انتخاب نشده است",
+        "Buttons": {
+          "Upload": "آپلود",
+          "Replace": "جایگزینی",
+          "Delete": "حذف",
+          "Download": "دانلود",
+          "New": "جدید",
+          "Close": "بستن",
+          "View": "نمایش"
+        },
+        "Tooltips": {
+          "UploadFile": "آپلود فایل",
+          "UploadNewFile": "آپلود فایل جدید",
+          "RemoveFile": "حذف فایل",
+          "DownloadFile": "دانلود فایل",
+          "Reset": "بازنشانی"
+        },
+        "Messages": {
+          "Loading": "در حال بارگذاری…"
+        }
+      },
+      "Switcher": {
+        "IsShowNewWindow": "نمایش در پنجره جدید",
+        "DefVal": "مقدار پیش‌فرض",
+        "OldVersion": "نسخه قدیمی",
+        "NewWordPanel": "ورد پنل جدید"
+      },
+      "New": {
+        "Placeholders": {
+          "FileName": "فایلی انتخاب نشده است"
+        },
+        "Titles": {
+          "UploadWord": "آپلود فایل ورد",
+          "SyncNewWord": "آپلود فایل جدید",
+          "DeleteWord": "حذف فایل"
+        },
+        "Alerts": {
+          "OnlyDocAllowed": "فقط فایل‌های .doc یا .docx مجاز هستند.",
+          "UploadFailed": "بارگذاری انجام نشد.",
+          "DownloadFailed": "دانلود انجام نشد.",
+          "NoFileToDownload": "فایلی برای دانلود وجود ندارد."
+        },
+        "Buttons": {
+          "Download": "دانلود"
+        }
+      },
+      "View": {
+          "ButtonShowDocument": "نمایش سند",
+          "Alerts": {
+            "NoFileToDownload": "فایلی برای دانلود وجود ندارد.",
+            "DownloadFailed": "دانلود فایل ناموفق بود."
+          }
+        },
+      "Old": {
+        "Labels": {
+          "FileNamePrefix": "نام فایل:"
+        },
+        "Messages": {
+          "LoadingFile": "در حال بارگذاری فایل ...",
+          "BadFormat": "فرمت فایل مناسب نیست.",
+          "DocxRenderError": "خطا در نمایش فایل ورد."
+        },
+        "Buttons": {
+          "DownloadEditedDocx": "دانلود فایل ورد",
+          "New": "جدید"
+        }
+      }
+    }
+  }
+  

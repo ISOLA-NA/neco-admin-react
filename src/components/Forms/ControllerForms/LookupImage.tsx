@@ -10,6 +10,7 @@ import AppServices, {
   EntityType,
   GetEnumResponse,
 } from "../../../services/api.services";
+import { useTranslation } from "react-i18next";
 
 interface LookupUmageProps {
   data?: {
@@ -38,14 +39,13 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
   onMetaChange,
   onMetaExtraChange,
 }) => {
+  const { t } = useTranslation();
   /* ---------------- state ---------------- */
   const [meta, setMeta] = useState({
     metaType1: data.metaType1 ? String(data.metaType1) : "",
     metaType2: data.metaType2 ? String(data.metaType2) : "",
   });
-  const [removeSameName, setRemoveSameName] = useState(
-    !!data.removeSameName
-  );
+  const [removeSameName, setRemoveSameName] = useState(!!data.removeSameName);
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
   /* برای مقایسهٔ metaType4 قبلی */
@@ -90,15 +90,13 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
         setTableData([]);
       }
     }
-  }, [
-    data.metaType1,
-    data.metaType2,
-    data.metaType4,
-    data.removeSameName,
-  ]);
+  }, [data.metaType1, data.metaType2, data.metaType4, data.removeSameName]);
 
   /* -------- propagate changes to parent -------- */
-  const pushUp = (metaPatch?: Partial<typeof meta>, overrideTable?: TableRow[]) =>
+  const pushUp = (
+    metaPatch?: Partial<typeof meta>,
+    overrideTable?: TableRow[]
+  ) =>
     onMetaChange?.({
       ...(metaPatch ? { ...meta, ...metaPatch } : meta),
       metaType4: JSON.stringify(overrideTable ?? tableData),
@@ -160,7 +158,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
   const columnDefs = useMemo(
     () => [
       {
-        headerName: "Src Field",
+        headerName: t("LookupUmage.Columns.SrcField"),
         field: "SrcFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
@@ -169,7 +167,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
           fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
       },
       {
-        headerName: "Operation",
+        headerName: t("LookupUmage.Columns.Operation"),
         field: "FilterOpration",
         editable: true,
         cellEditor: "agSelectCellEditor",
@@ -177,9 +175,13 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
         valueFormatter: (p: any) =>
           operationList.find((o) => o.value === p.value)?.label || p.value,
       },
-      { headerName: "Filter Text", field: "FilterText", editable: true },
       {
-        headerName: "Des Field",
+        headerName: t("LookupUmage.Columns.FilterText"),
+        field: "FilterText",
+        editable: true,
+      },
+      {
+        headerName: t("LookupUmage.Columns.DesField"),
         field: "DesFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
@@ -205,9 +207,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
 
   const handleCellValueChanged = (e: any) => {
     const upd = e.data as TableRow;
-    setTableData((prev) =>
-      prev.map((r) => (r.ID === upd.ID ? upd : r))
-    );
+    setTableData((prev) => prev.map((r) => (r.ID === upd.ID ? upd : r)));
   };
 
   /* ---------------- render ---------------- */
@@ -218,7 +218,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
         <div className="flex flex-col w-1/2 space-y-6">
           <DynamicSelector
             name="getInformationFrom"
-            label="Get Information From"
+            label={t("LookupUmage.Form.GetInformationFrom")}
             options={entityTypes.map((ent) => ({
               value: String(ent.ID),
               label: ent.Name,
@@ -235,7 +235,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
 
           <DynamicSelector
             name="displayColumn"
-            label="What Column To Display"
+            label={t("LookupUmage.Form.WhatColumnToDisplay")}
             options={fields.map((f) => ({
               value: String(f.ID),
               label: f.DisplayName,
@@ -260,7 +260,8 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
             <span className="text-gray-700 font-medium">
-              Remove Same Name
+              {" "}
+              {t("LookupUmage.Form.RemoveSameName")}
             </span>
           </label>
         </div>

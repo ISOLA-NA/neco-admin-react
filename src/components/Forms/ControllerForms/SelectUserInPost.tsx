@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useApi } from "../../../context/ApiContext";
 import { PostType } from "../../../services/api.services";
+import { useTranslation } from "react-i18next";
 
 interface SelectUserInPostProps {
   onMetaChange: (meta: { metaType1: string }) => void;
@@ -14,6 +15,7 @@ const SelectUserInPost: React.FC<SelectUserInPostProps> = ({
   data,
   isDisable = false,
 }) => {
+  const { t } = useTranslation();
   const { getAllPostTypes } = useApi();
 
   /* ---------------- state ---------------- */
@@ -54,14 +56,17 @@ const SelectUserInPost: React.FC<SelectUserInPostProps> = ({
   /* -------- UI -------- */
   return (
     <div className="my-4">
-      <label className="block font-medium mb-2">Select Post Type</label>
+      <label className="block font-medium mb-2">
+        {t("SelectUserInPost.Label")}
+      </label>
+
       <select
         value={selectedPostTypeId}
         onChange={handleChange}
         disabled={isDisable}
         className="w-full p-2 border rounded focus:outline-none focus:border-gray-700"
       >
-        <option value="">-- Select a post type --</option>
+        <option value="">{t("SelectUserInPost.Placeholder")}</option>
         {postTypes.map((pt) => (
           <option key={pt.ID} value={pt.ID}>
             {pt.Name}

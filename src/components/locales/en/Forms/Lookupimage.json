@@ -1,0 +1,19 @@
+{
+    "LookupUmage": {
+      "Form": {
+        "GetInformationFrom": "Get Information From",
+        "WhatColumnToDisplay": "What Column To Display",
+        "RemoveSameName": "Remove Same Name"
+      },
+      "Columns": {
+        "SrcField": "Src Field",
+        "Operation": "Operation",
+        "FilterText": "Filter Text",
+        "DesField": "Des Field"
+      },
+      "View": {
+        "SelectOption": "Select Option"
+      }
+    }
+  }
+  

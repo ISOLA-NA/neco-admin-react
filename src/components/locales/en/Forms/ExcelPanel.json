@@ -1,0 +1,29 @@
+{
+    "excelpanel": {
+      "Labels": {
+        "FileName": "File Name",
+        "ShowDocument":"ShowDocument"
+      },
+      "Placeholders": {
+        "NoFileSelected": "No file selected"
+      },
+      "Buttons": {
+        "Upload": "Upload",
+        "UploadNew": "Upload new file",
+        "Remove": "Remove file",
+        "Download": "Download"
+      },
+      "Tooltips": {
+        "Upload": "Upload file",
+        "UploadNew": "Upload new file",
+        "Remove": "Remove file"
+      },
+      "Alerts": {
+        "OnlyExcelAllowed": "Only .xls or .xlsx files are allowed.",
+        "NoFileToDownload": "No file to download.",
+        "UploadFailed": "Upload failed.",
+        "DownloadFailed": "Failed to download file."
+      }
+    }
+  }
+  

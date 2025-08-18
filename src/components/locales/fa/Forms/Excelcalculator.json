@@ -1,0 +1,17 @@
+{
+    "excelcalculator": {
+      "Labels": {
+        "Input": "ورودی",
+        "Output": "خروجی"
+      },
+      "Placeholders": {
+        "EnterInput": "مقدار ورودی را وارد کنید",
+        "EnterOutput": "مقدار خروجی را وارد کنید"
+      },
+      "Buttons": {
+        "Calculated": "محاسبه شد",
+        "Show": "نمایش"
+      }
+    }
+  }
+  

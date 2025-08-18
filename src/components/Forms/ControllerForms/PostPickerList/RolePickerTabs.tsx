@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import MembersTable, { SelectedItem } from "./MembersTable"; // مسیر را تنظیم کنید
 import RoleGroupPostPicker from "./RoleGroupPostPicker"; // مسیر را تنظیم کنید
+import { useTranslation } from "react-i18next";
 
 interface RolePickerTabsProps {
   onSelect: (selected: SelectedItem[]) => void;
@@ -12,6 +13,7 @@ const RolePickerTabs: React.FC<RolePickerTabsProps> = ({
   onSelect,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"roles" | "roleGroups">("roles");
 
   return (
@@ -25,10 +27,10 @@ const RolePickerTabs: React.FC<RolePickerTabsProps> = ({
           }`}
           onClick={() => setActiveTab("roles")}
         >
-          Roles
+          {t("PostPickerList.Buttons.Roles")}
         </button>
         <button
-        type="button"
+          type="button"
           className={`px-4 py-2 ${
             activeTab === "roleGroups"
               ? "border-b-2 border-blue-500 font-bold"
@@ -36,7 +38,7 @@ const RolePickerTabs: React.FC<RolePickerTabsProps> = ({
           }`}
           onClick={() => setActiveTab("roleGroups")}
         >
-          Role Groups
+          {t("PostPickerList.Buttons.RoleGroups")}
         </button>
       </div>
       {/* محتوای تب فعال */}

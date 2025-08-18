@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import CustomTextarea from "../../utilities/DynamicTextArea";
+import { useTranslation } from "react-i18next";
 
 interface TabControllerProps {
-  onMetaChange: (meta: { metaType1: string; metaTypeJson: string | null }) => void;
+  onMetaChange: (meta: {
+    metaType1: string;
+    metaTypeJson: string | null;
+  }) => void;
   data?: { metaType1?: string; metaTypeJson?: string | null };
   raw?: boolean;
 }
@@ -12,6 +16,7 @@ const TabController: React.FC<TabControllerProps> = ({
   data = {},
   raw = false,
 }) => {
+  const { t } = useTranslation();
   // مقدار اولیه (اولویت با metaType1 اگر نبود metaTypeJson)
   const [tabs, setTabs] = useState<string>(() => {
     if (data.metaType1 && data.metaType1.trim() !== "") {
@@ -24,10 +29,18 @@ const TabController: React.FC<TabControllerProps> = ({
   });
 
   // سینک شدن فقط زمانی که props واقعی عوض شود (مثلاً در حالت ادیت)
-  const prevData = useRef<{ metaType1?: string; metaTypeJson?: string | null }>({});
+  const prevData = useRef<{ metaType1?: string; metaTypeJson?: string | null }>(
+    {}
+  );
   useEffect(() => {
-    const curMetaType1 = data.metaType1 && data.metaType1.trim() !== "" ? data.metaType1 : undefined;
-    const curMetaTypeJson = data.metaTypeJson && data.metaTypeJson.trim() !== "" ? data.metaTypeJson : undefined;
+    const curMetaType1 =
+      data.metaType1 && data.metaType1.trim() !== ""
+        ? data.metaType1
+        : undefined;
+    const curMetaTypeJson =
+      data.metaTypeJson && data.metaTypeJson.trim() !== ""
+        ? data.metaTypeJson
+        : undefined;
 
     // اگر مقدار واقعا جدید بود، اعمال کن
     if (
@@ -41,7 +54,10 @@ const TabController: React.FC<TabControllerProps> = ({
         next = curMetaTypeJson.replace(/\\n|\/n/g, "\n");
       }
       setTabs(next);
-      prevData.current = { metaType1: curMetaType1, metaTypeJson: curMetaTypeJson };
+      prevData.current = {
+        metaType1: curMetaType1,
+        metaTypeJson: curMetaTypeJson,
+      };
     }
   }, [data.metaType1, data.metaTypeJson, data]);
 
@@ -60,7 +76,8 @@ const TabController: React.FC<TabControllerProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabs]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setTabs(e.target.value);
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+    setTabs(e.target.value);
 
   const rows = Math.max(4, tabs.split("\n").length);
 
@@ -69,20 +86,20 @@ const TabController: React.FC<TabControllerProps> = ({
       <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8">
         {raw ? (
           <textarea
-            name="tabs"
+            name={t("tabcontroller.Placeholders.Tab")}
             className="w-full border rounded p-2 focus:outline-none focus:ring"
             rows={rows}
             value={tabs}
             onChange={handleChange}
-            placeholder="Type each tab on a separate line"
+            placeholder={t("tabcontroller.Placeholders.EnterEachTab")}
           />
         ) : (
           <CustomTextarea
-            name="tabs"
+            name={t("tabcontroller.Placeholders.Tab")}
             value={tabs}
             onChange={handleChange}
             rows={rows}
-            placeholder="Type each tab on a separate line"
+            placeholder={t("tabcontroller.Placeholders.EnterEachTab")}
             className="w-full"
           />
         )}

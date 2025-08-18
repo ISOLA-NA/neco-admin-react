@@ -36,6 +36,26 @@ import enChoiceController from "./components/locales/en/Forms/ChoiceController.j
 import enNumberController from "./components/locales/en/Forms/NumberController.json";
 import enDateTimeEnglish from "./components/locales/en/Forms/DateTimeEnglish.json";
 import enLookUp from "./components/locales/en/Forms/LookUp.json";
+import enLookUpRealValue from "./components/locales/en/Forms/LookUpRealValue.json";
+import enLookUpAdvanceTable from "./components/locales/en/Forms/LookUpAdvanceTable.json";
+import enAdvanceLookUpAdvanceTable from "./components/locales/en/Forms/AdvanceLookupAdvanceTable.json";
+import enHyperLink from "./components/locales/en/Forms/HyperLinkController.json";
+import enPostPickerList from "./components/locales/en/Forms/PostPickerList.json";
+import enLookupImage from "./components/locales/en/Forms/Lookupimage.json";
+import enSelectUserInPost from "./components/locales/en/Forms/SelectUserInPost.json";
+import enYesNo from "./components/locales/en/Forms/YesNoController.json";
+import enAttachFile from "./components/locales/en/Forms/AttachFile.json";
+import enPictureBox from "./components/locales/en/Forms/PictureBoxFile.json";
+import enTable from "./components/locales/en/Forms/TableController.json";
+import enPfiLookUp from "./components/locales/en/Forms/PfiLookup.json";
+import enAdvanceTable from "./components/locales/en/Forms/AdvanceTable.json";
+import enSeqenialNumber from "./components/locales/en/Forms/SeqenialNumber.json";
+import enWordPanel from "./components/locales/en/Forms/WordPanel.json";
+import enExcelPanel from "./components/locales/en/Forms/ExcelPanel.json";
+import enCalculatedField from "./components/locales/en/Forms/Calculatedfield.json";
+import enExcelCalculator from "./components/locales/en/Forms/Excelcalculator.json";
+import enTab from "./components/locales/en/Forms/Tabcontroller.json";
+import enMap from "./components/locales/en/Forms/Map.json";
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
 import faLogin from "./components/locales/fa/login.json";
@@ -70,6 +90,26 @@ import faChoiceController from "./components/locales/fa/Forms/ChoiceController.j
 import faNumberController from "./components/locales/fa/Forms/NumberController.json";
 import faDateTimeEnglish from "./components/locales/fa/Forms/DateTimeEnglish.json";
 import faLookUp from "./components/locales/fa/Forms/LookUp.json";
+import faLookUpRealValue from "./components/locales/fa/Forms/LookUpRealValue.json";
+import faLookUpAdvanceTable from "./components/locales/fa/Forms/LookUpAdvanceTable.json";
+import faAdvanceLookUpAdvanceTable from "./components/locales/fa/Forms/AdvanceLookupAdvanceTable.json";
+import faHyperLink from "./components/locales/fa/Forms/HyperLinkController.json";
+import faPostPickerList from "./components/locales/fa/Forms/PostPickerList.json";
+import faLookupImage from "./components/locales/fa/Forms/Lookupimage.json";
+import faSelectUserInPost from "./components/locales/fa/Forms/SelectUserInPost.json";
+import faYesNo from "./components/locales/fa/Forms/YesNoController.json";
+import faAttachFile from "./components/locales/fa/Forms/AttachFile.json";
+import faPictureBox from "./components/locales/fa/Forms/PictureBoxFile.json";
+import faTable from "./components/locales/fa/Forms//TableController.json";
+import faPfiLookUp from "./components/locales/fa/Forms/PfiLookup.json";
+import faAdvanceTable from "./components/locales/fa/Forms/AdvanceTable.json";
+import faSeqenialNumber from "./components/locales/fa/Forms/SeqenialNumber.json";
+import faWordPanel from "./components/locales/fa/Forms/WordPanel.json";
+import faExcelPanel from "./components/locales/fa/Forms/ExcelPanel.json";
+import faCalculatedField from "./components/locales/fa/Forms/Calculatedfield.json";
+import faExcelCalculator from "./components/locales/fa/Forms/Excelcalculator.json";
+import faTab from "./components/locales/fa/Forms/Tabcontroller.json";
+import faMap from "./components/locales/fa/Forms/Map.json";
 
 const resources = {
   en: {
@@ -106,7 +146,27 @@ const resources = {
       ...enChoiceController,
       ...enNumberController,
       ...enDateTimeEnglish,
-      ...enLookUp
+      ...enLookUp,
+      ...enLookUpRealValue,
+      ...enLookUpAdvanceTable,
+      ...enAdvanceLookUpAdvanceTable,
+      ...enHyperLink,
+      ...enPostPickerList,
+      ...enLookupImage,
+      ...enSelectUserInPost,
+      ...enYesNo,
+      ...enAttachFile,
+      ...enPictureBox,
+      ...enTable,
+      ...enPfiLookUp,
+      ...enAdvanceTable,
+      ...enSeqenialNumber,
+      ...enWordPanel,
+      ...enExcelPanel,
+      ...enCalculatedField,
+      ...enExcelCalculator,
+      ...enTab,
+      ...enMap,
     },
   },
   fa: {
@@ -143,7 +203,27 @@ const resources = {
       ...faChoiceController,
       ...faNumberController,
       ...faDateTimeEnglish,
-      ...faLookUp
+      ...faLookUp,
+      ...faLookUpRealValue,
+      ...faLookUpAdvanceTable,
+      ...faAdvanceLookUpAdvanceTable,
+      ...faHyperLink,
+      ...faPostPickerList,
+      ...faLookupImage,
+      ...faSelectUserInPost,
+      ...faYesNo,
+      ...faAttachFile,
+      ...faPictureBox,
+      ...faTable,
+      ...faPfiLookUp,
+      ...faAdvanceTable,
+      ...faSeqenialNumber,
+      ...faWordPanel,
+      ...faExcelPanel,
+      ...faCalculatedField,
+      ...faExcelCalculator,
+      ...faTab,
+      ...faMap,
     },
   },
 };

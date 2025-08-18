@@ -1,0 +1,16 @@
+{
+    "LookUpAdvanceTable": {
+      "Form": {
+        "GetInformationFrom": "Get information from",
+        "WhatColumnToDisplay": "What Column To Display",
+        "DefaultProjects": "Default Projects"
+      },
+      "Columns": {
+        "SrcField": "Src Field",
+        "Operation": "Operation",
+        "FilterText": "Filter Text",
+        "DesField": "Des Field"
+      }
+    }
+  }
+  

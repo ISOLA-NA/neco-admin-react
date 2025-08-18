@@ -1,0 +1,20 @@
+{
+    "calculatedfield": {
+      "Labels": {
+        "Expression": "Expression",
+        "Type": "Type",
+        "Format": "Format",
+        "Unit": "Unit"
+      },
+      "Options": {
+        "Number": "Number",
+        "Date": "Date"
+      },
+      "Placeholders": {
+        "EnterExpression": "Enter expression",
+        "EnterFormat": "Enter format",
+        "EnterUnit": "Enter unit"
+      }
+    }
+  }
+  

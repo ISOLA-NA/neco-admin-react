@@ -5,6 +5,7 @@ import DynamicModal from "../../../utilities/DynamicModal";
 import RolePickerTabs from "./RolePickerTabs";
 import TableSelector from "../../../General/Configuration/TableSelector";
 import { useApi } from "../../../../context/ApiContext";
+import { useTranslation } from "react-i18next";
 
 export interface SelectedItem {
   id: string;
@@ -29,9 +30,14 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
   metaFieldKey = "metaType1",
   fullWidth = false,
   onMetaChange,
-  label = "Default Value(s)",
-  emptyText = "No default values selected",
+  label,
+  emptyText,
 }) => {
+  const { t } = useTranslation();
+  const finalLabel = label || t("PostPickerList.Labels.DefaultValues");
+  const finalEmptyText =
+    emptyText || t("PostPickerList.Labels.NoDefaultValues");
+
   const api = useApi();
 
   /* ---------- state ---------- */
@@ -111,7 +117,7 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
         <TableSelector
           columnDefs={[{ headerName: "Project", field: "ProjectName" }]}
           rowData={projects}
-          onRowClick={() => {}}                      
+          onRowClick={() => {}}
           onRowDoubleClick={(row: any) =>
             row.ID && addItems([{ id: String(row.ID), name: row.ProjectName }])
           }
@@ -136,20 +142,24 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
       style={{ minHeight: 120, width: fullWidth ? "100%" : "auto" }}
     >
       <div className="flex items-center justify-between mb-2">
-        <label className="text-gray-700 text-sm font-semibold">{label}</label>
+        <label className="text-gray-700 text-sm font-semibold">
+          {finalLabel}
+        </label>
         <button
           type="button"
           onClick={() => setModalOpen(true)}
           className="bg-indigo-500 text-white px-2 py-1 rounded-md hover:bg-indigo-600 flex items-center"
         >
-          <FaPlus className="mr-1" /> Add
+          <FaPlus className="mr-1" /> {t("PostPickerList.Buttons.Add")}
         </button>
       </div>
 
       <div className="overflow-y-auto max-h-32 border border-gray-200 p-2 rounded">
         {loading ? (
           <div className="flex justify-center items-center h-full">
-            <span className="text-gray-500">Loading…</span>
+            <span className="text-gray-500">
+              {t("PostPickerList.Messages.Loading")}
+            </span>
           </div>
         ) : selected.length ? (
           <div className="flex flex-wrap gap-2">
@@ -169,7 +179,7 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">{emptyText}</p>
+          <p className="text-gray-500">{finalEmptyText}</p>
         )}
       </div>
 

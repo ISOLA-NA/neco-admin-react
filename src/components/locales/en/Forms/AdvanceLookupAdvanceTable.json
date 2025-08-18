@@ -1,0 +1,17 @@
+{
+    "AdvanceLookupAdvanceTable": {
+      "Form": {
+        "ForFirstFormGetInformationFrom": "For first form, Get information from",
+        "ForSecondFormGetInformationFrom": "For second form, Get information from",
+        "LookupMode": "Lookup Mode",
+        "ShowColumnsOfFirstForm": "Show columns of first form as below"
+      },
+      "Columns": {
+        "SrcField": "Src Field",
+        "Operation": "Operation",
+        "FilterText": "Filter Text",
+        "DesField": "Des Field"
+      }
+    }
+  }
+  

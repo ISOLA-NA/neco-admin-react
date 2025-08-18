@@ -1,0 +1,73 @@
+{
+    "wordpanel": {
+      "Common": {
+        "NoFileSelected": "No file selected",
+        "Buttons": {
+          "Upload": "Upload",
+          "Replace": "Replace",
+          "Delete": "Delete",
+          "Download": "Download",
+          "New": "New",
+          "Close": "Close",
+          "View": "View"
+        },
+        "Tooltips": {
+          "UploadFile": "Upload file",
+          "UploadNewFile": "Upload new file",
+          "RemoveFile": "Remove file",
+          "DownloadFile": "Download file",
+          "Reset": "Reset"
+        },
+        "Messages": {
+          "Loading": "Loading…"
+        }
+      },
+      "Switcher": {
+        "IsShowNewWindow": "Is Show New Window",
+        "DefVal": "Def Val",
+        "OldVersion": "Old Version",
+        "NewWordPanel": "New Word Panel"
+      },
+      "New": {
+        "Placeholders": {
+          "FileName": "No file selected"
+        },
+        "Titles": {
+          "UploadWord": "Upload Word file",
+          "SyncNewWord": "Upload new file",
+          "DeleteWord": "Delete file"
+        },
+        "Alerts": {
+          "OnlyDocAllowed": "Only .doc or .docx files are allowed.",
+          "UploadFailed": "Upload failed.",
+          "DownloadFailed": "Download failed.",
+          "NoFileToDownload": "No file to download."
+        },
+        "Buttons": {
+          "Download": "Download"
+        }
+    },
+    "View": {
+        "ButtonShowDocument": "Show Document",
+        "Alerts": {
+          "NoFileToDownload": "No file to download.",
+          "DownloadFailed": "Failed to download file."
+        }
+      },
+      "Old": {
+        "Labels": {
+          "FileNamePrefix": "File name:"
+        },
+        "Messages": {
+          "LoadingFile": "Loading file…",
+          "BadFormat": "Invalid file format.",
+          "DocxRenderError": "Error rendering Word file."
+        },
+        "Buttons": {
+          "DownloadEditedDocx": "Download edited Word",
+          "New": "New"
+        }
+      }
+    }
+  }
+  

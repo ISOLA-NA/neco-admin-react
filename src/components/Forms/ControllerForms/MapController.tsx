@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import DynamicModal from "../../utilities/DynamicModal";
 import { Map, Marker, Bounds } from "pigeon-maps";
+import { useTranslation } from "react-i18next";
 
 interface MapModalButtonPigeonProps {
   onMetaChange?: (meta: { metaType1: string }) => void;
@@ -11,14 +12,20 @@ const MapModalButtonPigeon: React.FC<MapModalButtonPigeonProps> = ({
   onMetaChange,
   data,
 }) => {
+  const { t } = useTranslation();
   const defaultLocation: [number, number] = [35.6892, 51.389]; // تهران
 
   // پارس مقدار ذخیره‌شده
-  const parseMetaType1 = (meta: string): { location: [number, number]; zoom: number } => {
+  const parseMetaType1 = (
+    meta: string
+  ): { location: [number, number]; zoom: number } => {
     try {
       const [latlng, zoomStr] = meta.split("|");
       const [latStr, lngStr] = latlng.split(",");
-      return { location: [parseFloat(latStr), parseFloat(lngStr)], zoom: parseInt(zoomStr, 10) };
+      return {
+        location: [parseFloat(latStr), parseFloat(lngStr)],
+        zoom: parseInt(zoomStr, 10),
+      };
     } catch {
       return { location: defaultLocation, zoom: 6 };
     }
@@ -55,7 +62,9 @@ const MapModalButtonPigeon: React.FC<MapModalButtonPigeonProps> = ({
   // فقط زمانی که کاربر مکان جدید انتخاب کرد و خودش تغییر داد مقدار را به والد اعلام کن
   const prevSent = useRef<string>("");
   useEffect(() => {
-    const newMeta = `${markerLocation[0]},${markerLocation[1]}|${Math.floor(zoom)}`;
+    const newMeta = `${markerLocation[0]},${markerLocation[1]}|${Math.floor(
+      zoom
+    )}`;
     if (onMetaChange && newMeta !== prevSent.current) {
       onMetaChange({ metaType1: newMeta });
       prevSent.current = newMeta;
@@ -96,7 +105,9 @@ const MapModalButtonPigeon: React.FC<MapModalButtonPigeonProps> = ({
 
   const handleSelect = () => {
     // مقدار جدید را به والد ارسال کن و مودال را ببند
-    const metaType1Value = `${markerLocation[0]},${markerLocation[1]}|${Math.floor(zoom)}`;
+    const metaType1Value = `${markerLocation[0]},${
+      markerLocation[1]
+    }|${Math.floor(zoom)}`;
     if (onMetaChange) {
       onMetaChange({ metaType1: metaType1Value });
       prevSent.current = metaType1Value;
@@ -107,8 +118,12 @@ const MapModalButtonPigeon: React.FC<MapModalButtonPigeonProps> = ({
   return (
     <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex items-center justify-center">
       <div className="flex flex-col items-center justify-center gap-4">
-        <button type="button" className="btn btn-primary" onClick={handleOpenModal}>
-          Choose your area
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleOpenModal}
+        >
+          {t("mapmodal.Buttons.ChooseArea")}
         </button>
         <DynamicModal isOpen={isModalOpen} onClose={handleCloseModal}>
           <div className="flex-1 flex flex-col">
@@ -124,8 +139,12 @@ const MapModalButtonPigeon: React.FC<MapModalButtonPigeonProps> = ({
               </Map>
             </div>
             <div className="mt-4 flex justify-center items-center">
-              <button type="button" className="btn btn-success" onClick={handleSelect}>
-                Select
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={handleSelect}
+              >
+                {t("mapmodal.Buttons.Select")}
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 // src/components/ExcelPanelView.tsx
 import React, { useState, useEffect } from "react";
 import fileService from "../../../services/api.servicesFile";
+import { useTranslation } from "react-i18next";
 
 interface ExcelPanelViewProps {
   data?: {
@@ -11,6 +12,7 @@ interface ExcelPanelViewProps {
 }
 
 const ExcelPanelView: React.FC<ExcelPanelViewProps> = ({ data }) => {
+  const { t } = useTranslation();
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data?.metaType4 || null
   );
@@ -79,7 +81,7 @@ const ExcelPanelView: React.FC<ExcelPanelViewProps> = ({ data }) => {
         onClick={handleDownloadFile}
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
       >
-        Show Document
+        {t("excelpanel.Labels.ShowDocument")}
       </button>
     </div>
   );

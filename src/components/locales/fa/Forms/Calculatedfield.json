@@ -1,0 +1,20 @@
+{
+    "calculatedfield": {
+      "Labels": {
+        "Expression": "عبارت",
+        "Type": "نوع",
+        "Format": "قالب",
+        "Unit": "واحد"
+      },
+      "Options": {
+        "Number": "عددی",
+        "Date": "تاریخ"
+      },
+      "Placeholders": {
+        "EnterExpression": "عبارت را وارد کنید",
+        "EnterFormat": "قالب را وارد کنید",
+        "EnterUnit": "واحد را وارد کنید"
+      }
+    }
+  }
+  

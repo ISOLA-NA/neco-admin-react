@@ -14,9 +14,9 @@
     "NoTimeSelected": "زمانی انتخاب نشده است",
     "SaveTimeButton": "ذخیره زمان",
     "SelectDateButton": "انتخاب تاریخ",
-    "HoursShort": "HH",
-    "MinutesShort": "MM",
-    "SecondsShort": "SS",
+    "HoursShort": "ساعت",
+    "MinutesShort": "دقیقه",
+    "SecondsShort": "ثانیه",
 
     "SelectedDatePrefix": "تاریخ انتخاب‌شده:",
     "MonthLabel": "ماه",

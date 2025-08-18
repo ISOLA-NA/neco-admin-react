@@ -1,0 +1,33 @@
+{
+    "PictureBoxFile": {
+      "Labels": {
+        "FileName": "نام فایل",
+        "NoFileSelected": "هیچ فایلی انتخاب نشده است"
+      },
+      "Buttons": {
+        "Upload": "بارگذاری",
+        "Show": "نمایش",
+        "View": "مشاهده",
+        "Delete": "حذف",
+        "Cancel": "انصراف"
+      },
+      "Titles": {
+        "UploadFile": "بارگذاری فایل",
+        "UploadNewFile": "بارگذاری فایل جدید",
+        "RemoveFile": "حذف فایل",
+        "ViewFile": "مشاهده فایل",
+        "ClickToDelete": "برای حذف فایل کلیک کنید"
+      },
+      "Messages": {
+        "NoFileToDisplay": "فایلی برای نمایش وجود ندارد.",
+        "NoFileUploaded": "هیچ فایلی بارگذاری نشده است!",
+        "DeleteConfirm": "فایل بارگذاری‌شده حذف شود؟"
+      },
+      "Errors": {
+        "InvalidType": "نوع فایل نامعتبر است. فقط jpg، jpeg، png مجاز است.",
+        "UploadFailed": "بارگذاری ناموفق بود.",
+        "InsertFailed": "ثبت ناموفق بود"
+      }
+    }
+  }
+  

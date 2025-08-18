@@ -25,7 +25,7 @@ const LookUpImageView: React.FC<LookUpImageViewProps> = ({
     <div className="w-full">
       <DynamicSelector
         name="lookupView"
-        label={data?.DisplayName || "Select Option"}
+        label={data?.DisplayName || t("LookupUmage.View.SelectOption")}
         options={options}
         selectedValue={selectedValue}
         onChange={onChange}

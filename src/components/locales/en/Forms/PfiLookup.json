@@ -1,0 +1,21 @@
+{
+    "PfiLookup": {
+      "Labels": {
+        "SelectEntityType": "Select Entity Type",
+        "Modes": "Modes"
+      }
+    },
+    "PfiLookupView": {
+      "Labels": {
+        "DisplayName": "Display Name"
+      },
+      "Placeholders": {
+        "NoDisplayName": "No display name"
+      },
+      "Buttons": {
+        "View": "View",
+        "ResetDisplayName": "Reset display name"
+      }
+    }
+  }
+  

@@ -1,0 +1,31 @@
+{
+    "PostPickerList": {
+      "Labels": {
+        "DefaultValues": "Default Value(s)",
+        "NoDefaultValues": "No default values selected",
+        "DefaultProjects": "Default Projects"
+      },
+      "Buttons": {
+        "Add": "Add",
+        "Select": "Select",
+        "Remove": "Remove",
+        "Close": "Close",
+        "Roles": "Roles",
+        "RoleGroups": "Role Groups"
+      },
+      "Tables": {
+        "ProjectsHeader": "Project",
+        "RolesHeader": "Role",
+        "NameHeader": "Name",
+        "FamilyHeader": "Family",
+        "EnterpriseHeader": "Enterprise",
+        "SuperIndentHeader": "SuperIndent",
+        "RoleGroupNameHeader": "Name",
+        "RoleGroupDescriptionHeader": "Description"
+      },
+      "Messages": {
+        "Loading": "Loading…"
+      }
+    }
+  }
+  

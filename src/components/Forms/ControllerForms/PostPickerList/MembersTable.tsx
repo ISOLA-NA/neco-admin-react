@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import DataTable from "../../../TableDynamic/DataTable"; // مسیر را مطابق پروژه خود تنظیم کنید
 import { useApi } from "../../../../context/ApiContext";
 import ReusableButton from "../../../utilities/DynamicButtons";
+import { useTranslation } from "react-i18next";
 
 export interface SelectedItem {
   id: string;
@@ -15,19 +16,32 @@ interface MembersTableProps {
 }
 
 const MembersTable: React.FC<MembersTableProps> = ({ onSelect, onClose }) => {
+  const { t } = useTranslation();
+
   const api = useApi();
   const [membersList, setMembersList] = useState<any[]>([]);
   const [selectedRow, setSelectedRow] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const columnDefs = [
-    { field: "Name", headerName: "Role" },
-    { field: "UserNameFromAllUser", headerName: "Name" },
-    { field: "UserFamily", headerName: "Family" },
-    { field: "Enterprise", headerName: "Enterprise" },
-    { field: "SuperIndent", headerName: "SuperIndent" },
+    { field: "Name", headerName: t("PostPickerList.Tables.RolesHeader") },
+    {
+      field: "UserNameFromAllUser",
+      headerName: t("PostPickerList.Tables.NameHeader"),
+    },
+    {
+      field: "UserFamily",
+      headerName: t("PostPickerList.Tables.FamilyHeader"),
+    },
+    {
+      field: "Enterprise",
+      headerName: t("PostPickerList.Tables.EnterpriseHeader"),
+    },
+    {
+      field: "SuperIndent",
+      headerName: t("PostPickerList.Tables.SuperIndentHeader"),
+    },
   ];
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -81,28 +95,28 @@ const MembersTable: React.FC<MembersTableProps> = ({ onSelect, onClose }) => {
 
   return (
     <div className="bg-white p-4 rounded-lg flex flex-col h-full">
-     <div className="flex-grow mb-4" style={{ height: "400px" }}>
-  <DataTable
-    columnDefs={columnDefs}
-    rowData={membersList}
-    onRowDoubleClick={handleRowDoubleClick}
-    setSelectedRowData={handleRowClick}
-    showDuplicateIcon={false}
-    showEditIcon={false}
-    showAddIcon={false}
-    showDeleteIcon={false}
-    onAdd={() => {}}
-    onEdit={() => {}}
-    onDelete={() => {}}
-    onDuplicate={() => {}}
-    showSearch={true}
-    isLoading={loading}
-  />
-</div>
+      <div className="flex-grow mb-4" style={{ height: "400px" }}>
+        <DataTable
+          columnDefs={columnDefs}
+          rowData={membersList}
+          onRowDoubleClick={handleRowDoubleClick}
+          setSelectedRowData={handleRowClick}
+          showDuplicateIcon={false}
+          showEditIcon={false}
+          showAddIcon={false}
+          showDeleteIcon={false}
+          onAdd={() => {}}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onDuplicate={() => {}}
+          showSearch={true}
+          isLoading={loading}
+        />
+      </div>
 
       <div className="flex justify-center mt-4">
         <ReusableButton
-          text="Select"
+          text={t("PostPickerList.Buttons.Select")}
           onClick={handleSelectClick}
           isDisabled={!selectedRow}
           className="w-40"

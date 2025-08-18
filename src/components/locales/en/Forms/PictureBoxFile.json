@@ -1,0 +1,33 @@
+{
+    "PictureBoxFile": {
+      "Labels": {
+        "FileName": "File Name",
+        "NoFileSelected": "No file selected"
+      },
+      "Buttons": {
+        "Upload": "Upload",
+        "Show": "Show",
+        "View": "View",
+        "Delete": "Delete",
+        "Cancel": "Cancel"
+      },
+      "Titles": {
+        "UploadFile": "Upload file",
+        "UploadNewFile": "Upload new file",
+        "RemoveFile": "Remove file",
+        "ViewFile": "View file",
+        "ClickToDelete": "Click to delete the file"
+      },
+      "Messages": {
+        "NoFileToDisplay": "No file to display.",
+        "NoFileUploaded": "No file uploaded!",
+        "DeleteConfirm": "Delete the uploaded file?"
+      },
+      "Errors": {
+        "InvalidType": "Invalid file type. Only jpg, jpeg, png allowed.",
+        "UploadFailed": "Upload failed.",
+        "InsertFailed": "Insert failed"
+      }
+    }
+  }
+  

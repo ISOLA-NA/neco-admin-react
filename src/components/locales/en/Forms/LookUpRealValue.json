@@ -1,0 +1,18 @@
+{
+    "LookUpRealValue": {
+      "Form": {
+        "GetInformationFrom": "Get information from",
+        "WhatColumnToDisplay": "What Column To Display",
+        "Modes": "Modes",
+        "DefaultProjects": "Default Projects",
+        "OldLookup": "Old Lookup"
+      },
+      "Columns": {
+        "SrcField": "Src Field",
+        "Operation": "Operation",
+        "FilterText": "Filter Text",
+        "DesField": "Des Field"
+      }
+    }
+  }
+  

@@ -1,0 +1,21 @@
+{
+    "PfiLookup": {
+      "Labels": {
+        "SelectEntityType": "انتخاب نوع موجودیت",
+        "Modes": "حالت‌ها"
+      }
+    },
+    "PfiLookupView": {
+      "Labels": {
+        "DisplayName": "نام نمایشی"
+      },
+      "Placeholders": {
+        "NoDisplayName": "نام نمایشی وارد نشده"
+      },
+      "Buttons": {
+        "View": "مشاهده",
+        "ResetDisplayName": "بازنشانی نام نمایشی"
+      }
+    }
+  }
+  

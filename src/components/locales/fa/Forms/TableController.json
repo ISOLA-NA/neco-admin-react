@@ -1,0 +1,21 @@
+{
+    "TableController": {
+      "Labels": {
+        "FixRow": "قفل‌کردن ردیف",
+        "FixRowValue": "مقدار ردیفِ قفل‌شده",
+        "ColumnTitles": "عناوین ستون‌ها"
+      },
+      "Placeholders": {
+        "EnterEachHeaderOnNewLine": "هر عنوان ستون را در یک خط بنویسید"
+      },
+      "Buttons": {
+        "DefVal": "مقادیر پیش‌فرض",
+        "AddNew": "افزودن ردیف",
+        "Save": "ذخیره"
+      },
+      "Titles": {
+        "DynamicTable": "جدول پویا"
+      }
+    }
+  }
+  

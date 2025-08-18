@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import fileService from "../../../services/api.servicesFile";
+import { useTranslation } from "react-i18next";
 
 interface WordPanelViewProps {
   data?: {
@@ -10,19 +11,18 @@ interface WordPanelViewProps {
 }
 
 const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(data?.metaType4 || null);
+  const { t } = useTranslation();
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(
+    data?.metaType4 || null
+  );
   const [fileName, setFileName] = useState<string>(data?.fileName || "");
 
   useEffect(() => {
     if (selectedFileId) {
       fileService
         .getFile(selectedFileId)
-        .then((res) => {
-          setFileName(res.data.FileName);
-        })
-        .catch((err) => {
-          console.error("Error fetching file info:", err);
-        });
+        .then((res) => setFileName(res.data.FileName))
+        .catch((err) => console.error("Error fetching file info:", err));
     } else {
       setFileName("");
     }
@@ -30,25 +30,27 @@ const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
 
   const handleDownloadFile = async () => {
     if (!selectedFileId) {
-      alert("No file to download.");
+      alert(t("wordpanel.View.Alerts.NoFileToDownload"));
       return;
     }
     try {
       const infoRes = await fileService.getFile(selectedFileId);
       const { FileIQ, FileType, FolderName, FileName } = infoRes.data;
+
       const downloadingFileObject = {
-        FileName: FileIQ + FileType, // مثلاً 123e4567.doc
-        FolderName: FolderName,
+        FileName: FileIQ + FileType,
+        FolderName,
         cacheBust: Date.now(),
       };
       const downloadRes = await fileService.download(downloadingFileObject);
       const uint8Array = new Uint8Array(downloadRes.data);
+
       let mimeType = "application/octet-stream";
-      if (FileType === ".doc") {
-        mimeType = "application/msword";
-      } else if (FileType === ".docx") {
-        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-      }
+      if (FileType === ".doc") mimeType = "application/msword";
+      else if (FileType === ".docx")
+        mimeType =
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
       const blob = new Blob([uint8Array], { type: mimeType });
       const blobUrl = (window.URL || window.webkitURL).createObjectURL(blob);
       const link = document.createElement("a");
@@ -58,7 +60,7 @@ const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
       (window.URL || window.webkitURL).revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Error downloading file:", error);
-      alert("Failed to download file.");
+      alert(t("wordpanel.View.Alerts.DownloadFailed"));
     }
   };
 
@@ -72,7 +74,7 @@ const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
         onClick={handleDownloadFile}
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
       >
-        Show Document
+        {t("wordpanel.View.ButtonShowDocument")}
       </button>
     </div>
   );

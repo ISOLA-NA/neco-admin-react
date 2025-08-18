@@ -2,8 +2,11 @@ import React, { useState, useCallback, useEffect } from "react";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicModal from "../../utilities/DynamicModal";
 import { FaTrash, FaEye, FaUpload } from "react-icons/fa";
-import FileUploadHandler, { InsertModel } from "../../../services/FileUploadHandler";
+import FileUploadHandler, {
+  InsertModel,
+} from "../../../services/FileUploadHandler";
 import fileService from "../../../services/api.servicesFile";
+import { useTranslation } from "react-i18next";
 
 interface AttachFileViewProps {
   data: {
@@ -14,7 +17,11 @@ interface AttachFileViewProps {
   onMetaChange?: (data: any) => void;
 }
 
-const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) => {
+const AttachFileView: React.FC<AttachFileViewProps> = ({
+  data,
+  onMetaChange,
+}) => {
+  const { t } = useTranslation();
   // مقدار اولیه fileId و fileName از data
   const [fileId, setFileId] = useState<string | null>(data.metaType1 || null);
   const [fileName, setFileName] = useState<string>(data.fileName || "");
@@ -50,7 +57,10 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
             .then((downloadRes) => {
               const uint8Array = new Uint8Array(downloadRes.data);
               let mimeType = "application/octet-stream";
-              if (res.data.FileType === ".jpg" || res.data.FileType === ".jpeg") {
+              if (
+                res.data.FileType === ".jpg" ||
+                res.data.FileType === ".jpeg"
+              ) {
                 mimeType = "image/jpeg";
               } else if (res.data.FileType === ".png") {
                 mimeType = "image/png";
@@ -60,7 +70,11 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
               setPreviewUrl(objectUrl);
               // ذخیره نام فایل دریافتی از سرور در state
               setFileName(res.data.FileName);
-              console.log("File downloaded. Updated previewUrl and fileName:", objectUrl, res.data.FileName);
+              console.log(
+                "File downloaded. Updated previewUrl and fileName:",
+                objectUrl,
+                res.data.FileName
+              );
             })
             .catch((err) => {
               console.error("Error downloading file:", err);
@@ -103,7 +117,7 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
       setIsModalOpen(true);
       console.log("Showing file preview.");
     } else {
-      alert("No file uploaded!");
+      alert(t("AttachFile.Messages.NoFileUploaded"));
       console.log("Attempted to view file, but no previewUrl available.");
     }
   };
@@ -112,7 +126,10 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
     setShowUploadHandler((prev) => !prev);
     // در زمان تغییر وضعیت آپلود، preview پاک می‌شود
     setPreviewUrl(null);
-    console.log("Toggle upload handler. showUploadHandler:", !showUploadHandler);
+    console.log(
+      "Toggle upload handler. showUploadHandler:",
+      !showUploadHandler
+    );
   };
 
   return (
@@ -122,8 +139,8 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
           <button
             type="button"
             onClick={handleReset}
-            title="Delete file"
-            className="bg-red-500 text-white p-1 rounded hover:bg-red-700 transition duration-300 mt-5"
+            title={t("AttachFile.Buttons.Delete")}
+            className="inline-flex items-center justify-center bg-red-500 text-white p-1 rounded hover:bg-red-700 transition duration-300 mt-5"
           >
             <FaTrash size={16} />
           </button>
@@ -131,7 +148,7 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
 
         {/* استفاده از DynamicInput برای نمایش fileName؛ در صورت عدم وجود، placeholder خالی است */}
         <DynamicInput
-          name={data?.DisplayName || "File Name"}
+          name={data?.DisplayName || t("AttachFile.Labels.FileName")}
           type="text"
           value={fileName}
           placeholder=""
@@ -142,24 +159,26 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
         <button
           type="button"
           onClick={handleToggleUploadHandler}
-          className="flex items-center px-2 py-1 bg-blue-500 text-white font-semibold rounded transition duration-300 hover:bg-blue-700 mt-5"
-          title="Upload file"
+          className="inline-flex items-center gap-2 px-2 py-1 bg-blue-500 text-white font-semibold rounded transition duration-300 hover:bg-blue-700 mt-5"
+          title={t("AttachFile.Titles.UploadFile")}
         >
-          <FaUpload size={16} className="mr-1" />
-          Upload
+          <FaUpload size={16} />
+          {t("AttachFile.Buttons.Upload")}
         </button>
 
         <button
           type="button"
           onClick={handleShowFile}
-          className={`flex items-center px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 mt-5 ${
-            previewUrl ? "hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"
+          className={`inline-flex items-center gap-2 px-2 py-1 bg-purple-500 text-white font-semibold rounded transition duration-300 mt-5 ${
+            previewUrl
+              ? "hover:bg-purple-700"
+              : "bg-gray-400 cursor-not-allowed"
           }`}
           disabled={!previewUrl}
-          title="View file"
+          title={t("AttachFile.Titles.ViewFile")}
         >
-          <FaEye size={16} className="mr-1" />
-          View
+          <FaEye size={16} />
+          {t("AttachFile.Buttons.View")}
         </button>
       </div>
 
@@ -172,14 +191,22 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
             onUploadSuccess={handleUploadSuccess}
             onPreviewUrlChange={(url) => setPreviewUrl(url)}
             externalPreviewUrl={null}
-            allowedExtensions={["jpg", "jpeg", "png", "doc", "docx", "xlsx", "xls"]}
+            allowedExtensions={[
+              "jpg",
+              "jpeg",
+              "png",
+              "doc",
+              "docx",
+              "xlsx",
+              "xls",
+            ]}
           />
           <button
             type="button"
             onClick={handleToggleUploadHandler}
             className="mt-2 px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-700 transition duration-300"
           >
-            Cancel
+            {t("AttachFile.Buttons.Cancel")}
           </button>
         </div>
       )}
@@ -193,7 +220,15 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
             onUploadSuccess={() => {}}
             onPreviewUrlChange={(url) => setPreviewUrl(url)}
             externalPreviewUrl={previewUrl}
-            allowedExtensions={["jpg", "jpeg", "png", "doc", "docx", "xlsx", "xls"]}
+            allowedExtensions={[
+              "jpg",
+              "jpeg",
+              "png",
+              "doc",
+              "docx",
+              "xlsx",
+              "xls",
+            ]}
           />
         </div>
       )}
@@ -210,15 +245,17 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({ data, onMetaChange }) =
             className="w-[300px] h-[300px] object-cover mx-auto rounded-lg shadow-lg cursor-pointer transition-transform transform hover:scale-105"
             onClick={(e) => {
               e.stopPropagation();
-              if (window.confirm("Do you want to delete the uploaded file?")) {
+              if (window.confirm(t("AttachFile.Messages.DeleteConfirm"))) {
                 handleReset();
                 setIsModalOpen(false);
               }
             }}
-            title="Click to delete the file"
+            title={t("AttachFile.Titles.ClickToDelete")}
           />
         ) : (
-          <p className="text-gray-500 text-center">No file available to display.</p>
+          <p className="text-gray-500 text-center">
+            {t("AttachFile.Messages.NoFileToDisplay")}
+          </p>
         )}
       </DynamicModal>
     </div>

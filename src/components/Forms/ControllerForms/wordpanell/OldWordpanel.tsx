@@ -3,6 +3,7 @@ import mammoth from "mammoth";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
 import fileService from "../../../../services/api.servicesFile";
+import { useTranslation } from "react-i18next";
 
 interface WordPanelOldProps {
   data?: any;
@@ -10,7 +11,12 @@ interface WordPanelOldProps {
   onNew?: () => void;
 }
 
-const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }) => {
+const WordPanelOld: React.FC<WordPanelOldProps> = ({
+  data,
+  onMetaChange,
+  onNew,
+}) => {
+  const { t } = useTranslation();
   const [content, setContent] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [editorValue, setEditorValue] = useState<string>("");
@@ -21,28 +27,34 @@ const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }
   // اگر مقدار metaType1 فقط آیدی فایل است، فایل را بگیر و نمایش بده
   useEffect(() => {
     const isGuid = (str: string) =>
-      !!str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(str);
+      !!str &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+        str
+      );
 
     if (data?.metaType1 && isGuid(data.metaType1)) {
       setLoading(true);
-      fileService.getFile(data.metaType1).then(async (fileRes) => {
-        setFileName(fileRes.data.FileName || "");
-        const path = {
-          FileName: fileRes.data.FileIQ + fileRes.data.FileType,
-          FolderName: fileRes.data.FolderName,
-          cacheBust: Date.now(),
-        };
-        const downloadRes = await fileService.download(path);
-        const blob = new Blob([new Uint8Array(downloadRes.data)], {
-          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
-        const arrayBuffer = await blob.arrayBuffer();
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        const plain = result.value.replace(/<[^>]*>?/gm, "");
-        setEditorValue(plain);
-        setContent(result.value);
-        setLoading(false);
-      }).catch(() => setLoading(false));
+      fileService
+        .getFile(data.metaType1)
+        .then(async (fileRes) => {
+          setFileName(fileRes.data.FileName || "");
+          const path = {
+            FileName: fileRes.data.FileIQ + fileRes.data.FileType,
+            FolderName: fileRes.data.FolderName,
+            cacheBust: Date.now(),
+          };
+          const downloadRes = await fileService.download(path);
+          const blob = new Blob([new Uint8Array(downloadRes.data)], {
+            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          });
+          const arrayBuffer = await blob.arrayBuffer();
+          const result = await mammoth.convertToHtml({ arrayBuffer });
+          const plain = result.value.replace(/<[^>]*>?/gm, "");
+          setEditorValue(plain);
+          setContent(result.value);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
     } else if (data?.metaType1) {
       // فرض بر این است که متن خام ذخیره شده (بسیار نادر!)
       setEditorValue(data.metaType1);
@@ -77,10 +89,16 @@ const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }
             onMetaChange({ metaType1: text, fileName: file.name });
           }
         } else {
-          setContent("<p style='color:red'>فرمت فایل مناسب نیست</p>");
+          setContent(
+            `<p style='color:red'>${t("wordpanel.Old.Messages.BadFormat")}</p>`
+          );
         }
       } catch (err) {
-        setContent("<p style='color:red'>خطا در نمایش فایل ورد</p>");
+        setContent(
+          `<p style='color:red'>${t(
+            "wordpanel.Old.Messages.DocxRenderError"
+          )}</p>`
+        );
       }
     };
     reader.readAsArrayBuffer(file);
@@ -88,9 +106,9 @@ const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }
 
   // ذخیره docx
   const handleDownload = async () => {
-    const paragraphs = editorValue.split(/\r?\n/).map((line) =>
-      new Paragraph({ children: [new TextRun(line)] })
-    );
+    const paragraphs = editorValue
+      .split(/\r?\n/)
+      .map((line) => new Paragraph({ children: [new TextRun(line)] }));
     const doc = new Document({ sections: [{ children: paragraphs }] });
     const blob = await Packer.toBlob(doc);
     saveAs(blob, fileName || "edited.docx");
@@ -100,9 +118,7 @@ const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setEditorValue(value);
-    setContent(
-      value.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;")
-    );
+    setContent(value.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;"));
     if (onMetaChange) {
       onMetaChange({ metaType1: value, fileName });
     }
@@ -118,10 +134,12 @@ const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }
         style={{ marginBottom: 18 }}
       />
       <div style={{ marginBottom: 8, color: "#888" }}>
-        {fileName && `نام فایل: ${fileName}`}
+        {fileName && `${t("wordpanel.Old.Labels.FileNamePrefix")} ${fileName}`}
       </div>
       {loading ? (
-        <div style={{ color: "#4f46e5", margin: "20px 0", fontWeight: "bold" }}>در حال بارگذاری فایل ...</div>
+        <div style={{ color: "#4f46e5", margin: "20px 0", fontWeight: "bold" }}>
+          {t("wordpanel.Old.Messages.LoadingFile")}
+        </div>
       ) : (
         <>
           <textarea
@@ -153,7 +171,7 @@ const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }
               onClick={handleDownload}
               disabled={!editorValue}
             >
-              دانلود ورد ویرایش‌شده
+              {t("wordpanel.Old.Buttons.DownloadEditedDocx")}
             </button>
             {onNew && (
               <button
@@ -172,7 +190,6 @@ const WordPanelOld: React.FC<WordPanelOldProps> = ({ data, onMetaChange, onNew }
               </button>
             )}
           </div>
-
         </>
       )}
     </div>

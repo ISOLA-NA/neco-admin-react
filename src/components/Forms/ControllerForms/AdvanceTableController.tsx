@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import { useApi } from "../../../context/ApiContext";
+import { useTranslation } from "react-i18next";
 
 interface AdvanceTableProps {
   /** فراخوانی می‌شود وقتی metaType1 یا metaType2 تغییر کند */
@@ -14,6 +15,8 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({
   onMetaChange,
   data = {},
 }) => {
+  const { t } = useTranslation();
+
   const { getAllEntityType } = useApi();
 
   /* ---------- option list ---------- */
@@ -48,8 +51,14 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({
 
   /* ---------- sync props→state (فقط هنگام تفاوت) ---------- */
   useEffect(() => {
-    setSelectedForm((p) => (p === (data.metaType1 ?? "") ? p : data.metaType1 ?? ""));
-    setIsGalleryMode((p) => p === (String(data.metaType2) === "1") ? p : String(data.metaType2) === "1");
+    setSelectedForm((p) =>
+      p === (data.metaType1 ?? "") ? p : data.metaType1 ?? ""
+    );
+    setIsGalleryMode((p) =>
+      p === (String(data.metaType2) === "1")
+        ? p
+        : String(data.metaType2) === "1"
+    );
   }, [data.metaType1, data.metaType2]);
 
   /* ---------- propagate meta up (فقط هنگام تغییر واقعی) ---------- */
@@ -74,7 +83,7 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({
       <div className="flex flex-col gap-4 w-64">
         <DynamicSelector
           name="Show Form"
-          label="Show Form"
+          label={t("AdvanceTable.Labels.ShowForm")}
           options={formOptions}
           selectedValue={selectedForm}
           onChange={(e) => setSelectedForm(e.target.value)}
@@ -88,7 +97,10 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({
             checked={isGalleryMode}
             onChange={(e) => setIsGalleryMode(e.target.checked)}
           />
-          <span className="text-gray-700 font-medium">Gallery mode</span>
+          <span className="text-gray-700 font-medium">
+            {" "}
+            {t("AdvanceTable.Labels.GalleryMode")}
+          </span>
         </label>
       </div>
     </div>
