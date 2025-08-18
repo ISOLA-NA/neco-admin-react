@@ -102,7 +102,7 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
             </>
           ) : (
             <span className="text-gray-400">
-              {t("Forms.NoWordfileselected")}
+              {t("Forms.NoWordFileSelected")}
             </span>
           )}
         </div>
@@ -156,7 +156,7 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
             </>
           ) : (
             <span className="text-gray-400">
-              {t("Forms.NoExcellfileselected")}
+              {t("Forms.NoExcelFileSelected")}
             </span>
           )}
         </div>
