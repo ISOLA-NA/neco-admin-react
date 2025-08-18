@@ -1,0 +1,39 @@
+{
+  "DateTimeSelector": {
+    "DateTimeFormatLabel": "Date and Time Format:",
+    "DateOnly": "Date Only",
+    "DateAndTime": "Date & Time",
+    "DefaultValueLabel": "Default Value:",
+    "None": "None",
+    "TodaysDate": "Today's Date",
+    "IsDynamic": "Is Dynamic",
+    "SelectDatePlaceholder": "Select Date",
+    "SelectTimePlaceholder": "Select Time",
+    "ModalSelectDateTitle": "Select a Date",
+    "ModalSelectTimeTitle": "Select a Time",
+    "NoTimeSelected": "No Time Selected",
+    "SaveTimeButton": "Save Time",
+    "SelectDateButton": "Select Date",
+    "HoursShort": "HH",
+    "MinutesShort": "MM",
+    "SecondsShort": "SS",
+
+    "SelectedDatePrefix": "Selected date:",
+    "MonthLabel": "Month",
+    "YearLabel": "Year",
+    "Months": {
+      "Farvardin": "Farvardin",
+      "Ordibehesht": "Ordibehesht",
+      "Khordad": "Khordad",
+      "Tir": "Tir",
+      "Mordad": "Mordad",
+      "Shahrivar": "Shahrivar",
+      "Mehr": "Mehr",
+      "Aban": "Aban",
+      "Azar": "Azar",
+      "Dey": "Dey",
+      "Bahman": "Bahman",
+      "Esfand": "Esfand"
+    }
+  }
+}

@@ -34,6 +34,8 @@ import enDynamicConfirm from "./components/locales/en/DynamicConfirm.json";
 import enTextController from "./components/locales/en/Forms/TextController.json";
 import enChoiceController from "./components/locales/en/Forms/ChoiceController.json";
 import enNumberController from "./components/locales/en/Forms/NumberController.json";
+import enDateTimeEnglish from "./components/locales/en/Forms/DateTimeEnglish.json";
+import enLookUp from "./components/locales/en/Forms/LookUp.json";
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
 import faLogin from "./components/locales/fa/login.json";
@@ -66,6 +68,8 @@ import faDynamicConfirm from "./components/locales/fa/DynamicConfirm.json";
 import faTextController from "./components/locales/fa/Forms/TextController.json";
 import faChoiceController from "./components/locales/fa/Forms/ChoiceController.json";
 import faNumberController from "./components/locales/fa/Forms/NumberController.json";
+import faDateTimeEnglish from "./components/locales/fa/Forms/DateTimeEnglish.json";
+import faLookUp from "./components/locales/fa/Forms/LookUp.json";
 
 const resources = {
   en: {
@@ -101,6 +105,8 @@ const resources = {
       ...enTextController,
       ...enChoiceController,
       ...enNumberController,
+      ...enDateTimeEnglish,
+      ...enLookUp
     },
   },
   fa: {
@@ -136,6 +142,8 @@ const resources = {
       ...faTextController,
       ...faChoiceController,
       ...faNumberController,
+      ...faDateTimeEnglish,
+      ...faLookUp
     },
   },
 };

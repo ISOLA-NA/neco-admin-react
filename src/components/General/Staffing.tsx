@@ -315,7 +315,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             isChecked={staffingData.isHaveAddressbar}
             onChange={() => handleSwitcher("isHaveAddressbar")}
             leftLabel=""
-            rightLabel={t("Staffing.AccessToNewProjects")}
+            rightLabel={t("Staffing.ShowCommandBar")}
           />
         </TwoColumnLayout>
 

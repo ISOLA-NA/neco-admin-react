@@ -1,0 +1,23 @@
+{
+  "LookUp": {
+    "GetInformationFrom": "Get information from",
+    "WhatColumnToDisplay": "What Column To Display",
+    "Modes": "Modes",
+    "DefaultProjects": "Default Projects",
+
+    "DisplayChoicesUsing": "Display choices using:",
+    "DropDownMenu": "Drop-Down Menu",
+    "RadioButtons": "Radio Buttons",
+    "CheckboxesAllowMultiple": "Checkboxes (allow multiple selections)",
+
+    "RemoveSameName": "Remove Same Name",
+    "OldLookup": "Old Lookup",
+
+    "Columns": {
+      "SrcField": "Src Field",
+      "Operation": "Operation",
+      "FilterText": "Filter Text",
+      "DesField": "Des Field"
+    }
+  }
+}

@@ -216,7 +216,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             />
           </div>
         </div>
-
+        <div>
+          <span>ورژن 1</span>
+        </div>
         {/* Toggle Switcher */}
         <div className="flex justify-center items-center mt-20">
           <DynamicSwitcher

@@ -14,7 +14,7 @@ const httpClientFile = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
+  // withCredentials: true,
 });
 
 // اضافه کردن interceptor برای افزودن هدر Authorization

@@ -8,6 +8,7 @@ import { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
+import { useTranslation } from "react-i18next";
 
 interface PersianCalendarPickerProps {
   onMetaChange: (meta: {
@@ -28,6 +29,8 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
   onMetaChange,
   data,
 }) => {
+
+  const { t } = useTranslation();
   // State برای مقادیر اصلی و موقت تاریخ و زمان
   const [initKey, setInitKey] = useState<string>("");
   const [userTouched, setUserTouched] = useState(false);
@@ -267,7 +270,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
     {/* انتخاب فرمت */}
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        فرمت تاریخ و زمان:
+       {t("DateTimeSelector.DateTimeFormatLabel")}
       </label>
       <div className="flex gap-6">
         <label className="inline-flex items-center gap-2">
@@ -279,7 +282,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
             onChange={() => handleFormatChange("dateOnly")}
             className="form-radio text-blue-600 h-4 w-4"
           />
-          <span className="text-gray-700">فقط تاریخ</span>
+          <span className="text-gray-700">{t("DateTimeSelector.DateOnly")}</span>
         </label>
         <label className="inline-flex items-center gap-2">
           <input
@@ -290,7 +293,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
             onChange={() => handleFormatChange("dateTime")}
             className="form-radio text-blue-600 h-4 w-4"
           />
-          <span className="text-gray-700">تاریخ و ساعت</span>
+         <span className="text-gray-700">{t("DateTimeSelector.DateAndTime")}</span>
         </label>
       </div>
     </div>
@@ -298,7 +301,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
     {/* انتخاب مقدار پیش‌فرض */}
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        مقدار پیش‌فرض:
+       {t("DateTimeSelector.DefaultValueLabel")}
       </label>
       <div className="space-y-4">
         <label className="flex items-center gap-2">
@@ -310,7 +313,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
             onChange={() => handleDefaultValueChange("none")}
             className="form-radio text-blue-600 h-4 w-4"
           />
-          <span className="text-gray-700">هیچ‌کدام</span>
+          <span className="text-gray-700">{t("DateTimeSelector.None")}</span>
         </label>
 
         <div className="flex items-center gap-2">
@@ -323,7 +326,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
               onChange={() => handleDefaultValueChange("today")}
               className="form-radio text-blue-600 h-4 w-4"
             />
-            <span className="text-gray-700">امروز</span>
+            <span className="text-gray-700">{t("DateTimeSelector.TodaysDate")}</span>
           </label>
 
           <label className="flex items-center gap-1">
@@ -335,7 +338,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
               disabled={defaultValue !== "today"}
               className="form-checkbox text-blue-600 h-4 w-4"
             />
-            <span className="text-gray-700">داینامیک</span>
+            <span className="text-gray-700">{t("DateTimeSelector.IsDynamic")}</span>
           </label>
         </div>
       </div>
@@ -363,7 +366,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
               setIsDateModalOpen(true);
               handleDefaultValueChange("selected");
             }}
-            placeholder="تاریخ را انتخاب کنید"
+            placeholder={t("DateTimeSelector.SelectDatePlaceholder")}
             className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
                        cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             readOnly
@@ -391,7 +394,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
               : ""
           }
           onClick={() => setIsTimeModalOpen(true)}
-          placeholder="ساعت را انتخاب کنید"
+         placeholder={t("DateTimeSelector.SelectTimePlaceholder")}
           className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
                      cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           readOnly
@@ -430,7 +433,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
           className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
                      focus:outline-none focus:ring-2 focus:ring-green-500"
         >
-          انتخاب تاریخ
+         {t("DateTimeSelector.SelectDateButton")}
         </button>
       </div>
     </DynamicModal>
@@ -448,7 +451,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
     >
       <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
         <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
-          انتخاب ساعت
+        {t("DateTimeSelector.ModalSelectTimeTitle")}
         </h2>
         {tempSelectedTime.hours ||
         tempSelectedTime.minutes ||
@@ -461,14 +464,14 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
         ) : (
           <div className="mb-4 text-center">
             <span className="text-lg font-medium text-gray-500">
-              ساعت انتخاب نشده
+              {t("DateTimeSelector.NoTimeSelected")}
             </span>
           </div>
         )}
         <div className="flex justify-center gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-              HH
+             {t("DateTimeSelector.HoursShort")}
             </label>
             <input
               type="text"
@@ -486,7 +489,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-              MM
+              {t("DateTimeSelector.SecondsShort")}
             </label>
             <input
               type="text"
@@ -504,7 +507,7 @@ const PersianCalendarPicker: React.FC<PersianCalendarPickerProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-              SS
+             {t("DateTimeSelector.SaveTimeButton")}
             </label>
             <input
               type="text"

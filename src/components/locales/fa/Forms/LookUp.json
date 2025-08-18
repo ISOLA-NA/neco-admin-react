@@ -1,0 +1,23 @@
+{
+  "LookUp": {
+    "GetInformationFrom": "دریافت اطلاعات از",
+    "WhatColumnToDisplay": "نمایش کدام ستون",
+    "Modes": "حالت‌ها",
+    "DefaultProjects": "پروژه‌های پیش‌فرض",
+
+    "DisplayChoicesUsing": "نمایش گزینه‌ها به این صورت:",
+    "DropDownMenu": "منوی کشویی",
+    "RadioButtons": "دکمه‌های رادیویی",
+    "CheckboxesAllowMultiple": "چک‌باکس‌ها (انتخاب چندگانه)",
+
+    "RemoveSameName": "حذف نام‌های تکراری",
+    "OldLookup": "جستجوی قدیمی",
+
+    "Columns": {
+      "SrcField": "فیلد مبدا",
+      "Operation": "عملیات",
+      "FilterText": "متن فیلتر",
+      "DesField": "فیلد مقصد"
+    }
+  }
+}

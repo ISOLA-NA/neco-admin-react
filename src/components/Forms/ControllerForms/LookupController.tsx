@@ -8,6 +8,7 @@ import AppServices from "../../../services/api.services";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
+import { useTranslation } from "react-i18next";
 
 /* ──────────────── Types ──────────────── */
 interface LookUpProps {
@@ -40,6 +41,7 @@ const LookUp: React.FC<LookUpProps> = ({
   onMetaExtraChange,
 }) => {
   /* helpers */
+  const { t } = useTranslation();
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
   const genId = () =>
     typeof crypto?.randomUUID === "function"
@@ -76,17 +78,17 @@ const LookUp: React.FC<LookUpProps> = ({
     let parsed: any[] = [];
     try {
       parsed = JSON.parse(data.metaType4 || "[]");
-    } catch {}
+    } catch { }
 
     setTableData(
       Array.isArray(parsed)
         ? parsed.map((it) => ({
-            ID: String(it.ID ?? genId()),
-            SrcFieldID: it.SrcFieldID || "",
-            FilterOpration: it.FilterOpration || "",
-            FilterText: it.FilterText || "",
-            DesFieldID: it.DesFieldID || "",
-          }))
+          ID: String(it.ID ?? genId()),
+          SrcFieldID: it.SrcFieldID || "",
+          FilterOpration: it.FilterOpration || "",
+          FilterText: it.FilterText || "",
+          DesFieldID: it.DesFieldID || "",
+        }))
         : []
     );
 
@@ -205,38 +207,42 @@ const LookUp: React.FC<LookUpProps> = ({
 
   /* ─── AG‑Grid columns ─── */
   const columnDefs = useMemo(
-    () => [
-      {
-        headerName: "Src Field",
-        field: "SrcFieldID",
-        editable: true,
-        cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
-        valueFormatter: (p: any) =>
-          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
-      },
-      {
-        headerName: "Operation",
-        field: "FilterOpration",
-        editable: true,
-        cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: operationList.map((o) => o.value) },
-        valueFormatter: (p: any) =>
-          operationList.find((o) => o.value === p.value)?.label || p.value,
-      },
-      { headerName: "Filter Text", field: "FilterText", editable: true },
-      {
-        headerName: "Des Field",
-        field: "DesFieldID",
-        editable: true,
-        cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
-        valueFormatter: (p: any) =>
-          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
-      },
-    ],
-    [fields, operationList]
-  );
+  () => [
+    {
+      headerName: t("LookUp.Columns.SrcField"),
+      field: "SrcFieldID",
+      editable: true,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: { values: fields.map((f) => String(f.ID)) },
+      valueFormatter: (p: any) =>
+        fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
+    },
+    {
+      headerName: t("LookUp.Columns.Operation"),
+      field: "FilterOpration",
+      editable: true,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: { values: operationList.map((o) => o.value) },
+      valueFormatter: (p: any) =>
+        operationList.find((o) => o.value === p.value)?.label || p.value,
+    },
+    {
+      headerName: t("LookUp.Columns.FilterText"),
+      field: "FilterText",
+      editable: true,
+    },
+    {
+      headerName: t("LookUp.Columns.DesField"),
+      field: "DesFieldID",
+      editable: true,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: { values: fields.map((f) => String(f.ID)) },
+      valueFormatter: (p: any) =>
+        fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
+    },
+  ],
+  [t, fields, operationList]
+);
 
   /* ─── Render ─── */
   return (
@@ -246,7 +252,7 @@ const LookUp: React.FC<LookUpProps> = ({
         <div className="flex flex-col space-y-6 w-1/2">
           <DynamicSelector
             name="getInformationFrom"
-            label="Get information from"
+            label={t("LookUp.GetInformationFrom")}
             options={entities.map((e) => ({
               value: String(e.ID),
               label: e.Name,
@@ -257,7 +263,7 @@ const LookUp: React.FC<LookUpProps> = ({
 
           <DynamicSelector
             name="displayColumn"
-            label="What Column To Display"
+            label={t("LookUp.WhatColumnToDisplay")}
             options={fields.map((f) => ({
               value: String(f.ID),
               label: f.DisplayName,
@@ -268,7 +274,7 @@ const LookUp: React.FC<LookUpProps> = ({
 
           <DynamicSelector
             name="modes"
-            label="Modes"
+            label={t("LookUp.Modes")}
             options={modesList}
             selectedValue={meta.LookupMode}
             onChange={(e) => pushMeta({ LookupMode: e.target.value })}
@@ -280,7 +286,7 @@ const LookUp: React.FC<LookUpProps> = ({
             data={{ metaType5: meta.metaType5 || undefined }}
             metaFieldKey="metaType5"
             onMetaChange={(o) => pushMeta(o)}
-            label="Default Projects"
+            label={t("LookUp.DefaultProjects")}
             fullWidth
           />
         </div>
@@ -289,23 +295,26 @@ const LookUp: React.FC<LookUpProps> = ({
         <div className="flex flex-col space-y-6 w-1/2">
           {/* --- نحوهٔ نمایش --- */}
           <div className="space-y-2">
-            <label className="block font-medium">Display choices using:</label>
-            {["drop", "radio", "check"].map((t) => (
-              <label key={t} className="flex items-center gap-2">
+            <label className="block font-medium">{t("LookUp.DisplayChoicesUsing")}</label>
+            {(["drop", "radio", "check"] as const).map((typeKey) => (
+              <label key={typeKey} className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="displayType"
-                  value={t}
-                  checked={meta.metaType3 === t}
-                  onChange={() => pushMeta({ metaType3: t })}
+                  value={typeKey}
+                  checked={meta.metaType3 === typeKey}
+                  onChange={() => pushMeta({ metaType3: typeKey })}
                 />
-                {t === "drop"
-                  ? "Drop‑Down Menu"
-                  : t === "radio"
-                  ? "Radio Buttons"
-                  : "Checkboxes (allow multiple selections)"}
+                <span>
+                  {typeKey === "drop"
+                    ? t("LookUp.DropDownMenu")
+                    : typeKey === "radio"
+                      ? t("LookUp.RadioButtons")
+                      : t("LookUp.CheckboxesAllowMultiple")}
+                </span>
               </label>
             ))}
+
           </div>
 
           {/* --- چک‌باکس‌ها --- */}
@@ -318,7 +327,7 @@ const LookUp: React.FC<LookUpProps> = ({
                   toggleCheck("removeSameName", e.target.checked)
                 }
               />
-              Remove Same Name
+              {t("LookUp.RemoveSameName")}
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -326,7 +335,7 @@ const LookUp: React.FC<LookUpProps> = ({
                 checked={oldLookup}
                 onChange={(e) => toggleCheck("oldLookup", e.target.checked)}
               />
-              Old Lookup
+             {t("LookUp.OldLookup")}
             </label>
           </div>
         </div>
@@ -345,7 +354,7 @@ const LookUp: React.FC<LookUpProps> = ({
           showEditIcon={false}
           showDeleteIcon={false}
           showDuplicateIcon={false}
-          onRowDoubleClick={() => {}}
+          onRowDoubleClick={() => { }}
         />
       </div>
     </div>

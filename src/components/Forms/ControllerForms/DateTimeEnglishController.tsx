@@ -3,6 +3,7 @@ import { FaCalendarAlt, FaClock } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DynamicModal from "../../utilities/DynamicModal";
+import { useTranslation } from "react-i18next";
 
 interface DateTimeSelectorProps {
   onMetaChange: (meta: {
@@ -23,6 +24,9 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   onMetaChange,
   data,
 }) => {
+
+  const { t } = useTranslation();
+
   const [initKey, setInitKey] = useState<string>("");
   const [userTouched, setUserTouched] = useState(false);
 
@@ -220,273 +224,274 @@ const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
   }, [isTimeModalOpen, selectedTime]);
 
   // رندر کامل:
- return (
-  <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
-    {/* انتخاب فرمت */}
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Date and Time Format:
-      </label>
-      <div className="flex gap-6">
-        <label className="inline-flex items-center gap-2">
-          <input
-            type="radio"
-            name="format"
-            value="dateOnly"
-            checked={format === "dateOnly"}
-            onChange={() => handleFormatChange("dateOnly")}
-            className="form-radio text-blue-600 h-4 w-4"
-          />
-          <span className="text-gray-700">Date Only</span>
+  return (
+    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg space-y-8">
+      {/* انتخاب فرمت */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {t("DateTimeSelector.DateTimeFormatLabel")}
         </label>
-        <label className="inline-flex items-center gap-2">
-          <input
-            type="radio"
-            name="format"
-            value="dateTime"
-            checked={format === "dateTime"}
-            onChange={() => handleFormatChange("dateTime")}
-            className="form-radio text-blue-600 h-4 w-4"
-          />
-          <span className="text-gray-700">Date & Time</span>
-        </label>
+        <div className="flex gap-6">
+          <label className="inline-flex items-center gap-2">
+            <input
+              type="radio"
+              name="format"
+              value="dateOnly"
+              checked={format === "dateOnly"}
+              onChange={() => handleFormatChange("dateOnly")}
+              className="form-radio text-blue-600 h-4 w-4"
+            />
+            <span className="text-gray-700">{t("DateTimeSelector.DateOnly")}</span>
+          </label>
+          <label className="inline-flex items-center gap-2">
+            <input
+              type="radio"
+              name="format"
+              value="dateTime"
+              checked={format === "dateTime"}
+              onChange={() => handleFormatChange("dateTime")}
+              className="form-radio text-blue-600 h-4 w-4"
+            />
+            <span className="text-gray-700">{t("DateTimeSelector.DateAndTime")}</span>
+          </label>
+        </div>
       </div>
-    </div>
 
-    {/* انتخاب مقدار پیش‌فرض */}
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Default Value:
-      </label>
-      <div className="space-y-4">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="defaultValue"
-            value="none"
-            checked={defaultValue === "none"}
-            onChange={() => handleDefaultValueChange("none")}
-            className="form-radio text-blue-600 h-4 w-4"
-          />
-          <span className="text-gray-700">None</span>
+      {/* انتخاب مقدار پیش‌فرض */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          {t("DateTimeSelector.DefaultValueLabel")}
         </label>
-
-        <div className="flex items-center gap-2">
+        <div className="space-y-4">
           <label className="flex items-center gap-2">
             <input
               type="radio"
               name="defaultValue"
-              value="today"
-              checked={defaultValue === "today"}
-              onChange={() => handleDefaultValueChange("today")}
+              value="none"
+              checked={defaultValue === "none"}
+              onChange={() => handleDefaultValueChange("none")}
               className="form-radio text-blue-600 h-4 w-4"
             />
-            <span className="text-gray-700">Today's Date</span>
+            <span className="text-gray-700">{t("DateTimeSelector.None")}</span>
           </label>
 
-          {/* چک‌باکس Is Dynamic */}
-          <label className="flex items-center gap-1">
-            <input
-              type="checkbox"
-              name="isDynamic"
-              checked={isDynamic}
-              onChange={handleDynamicChange}
-              disabled={defaultValue !== "today"}
-              className="form-checkbox text-blue-600 h-4 w-4"
-            />
-            <span className="text-gray-700">Is Dynamic</span>
-          </label>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="defaultValue"
+                value="today"
+                checked={defaultValue === "today"}
+                onChange={() => handleDefaultValueChange("today")}
+                className="form-radio text-blue-600 h-4 w-4"
+              />
+              <span className="text-gray-700">{t("DateTimeSelector.TodaysDate")}</span>
+            </label>
+
+            {/* چک‌باکس Is Dynamic */}
+            <label className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                name="isDynamic"
+                checked={isDynamic}
+                onChange={handleDynamicChange}
+                disabled={defaultValue !== "today"}
+                className="form-checkbox text-blue-600 h-4 w-4"
+              />
+              <span className="text-gray-700">{t("DateTimeSelector.IsDynamic")}</span>
+            </label>
+          </div>
         </div>
       </div>
-    </div>
 
-    {/* انتخاب تاریخ و زمان */}
-    <div className="flex items-center gap-6">
-      <label className="flex items-center gap-2">
-        <input
-          type="radio"
-          name="dateOption"
-          value="dateOption1"
-          className="form-radio text-blue-600 h-4 w-4"
-          checked={defaultValue === "selected"}
-          onChange={() => {
-            setIsDateModalOpen(true);
-            handleDefaultValueChange("selected");
-          }}
-        />
-        <div className="relative w-64">
+      {/* انتخاب تاریخ و زمان */}
+      <div className="flex items-center gap-6">
+        <label className="flex items-center gap-2">
           <input
-            type="button"
-            value={selectedDate ? formatDate(selectedDate) : ""}
-            onClick={() => {
+            type="radio"
+            name="dateOption"
+            value="dateOption1"
+            className="form-radio text-blue-600 h-4 w-4"
+            checked={defaultValue === "selected"}
+            onChange={() => {
               setIsDateModalOpen(true);
               handleDefaultValueChange("selected");
             }}
-            placeholder="Select Date"
-            className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
+          />
+          <div className="relative w-64">
+            <input
+              type="button"
+              value={selectedDate ? formatDate(selectedDate) : ""}
+              onClick={() => {
+                setIsDateModalOpen(true);
+                handleDefaultValueChange("selected");
+              }}
+              placeholder={t("DateTimeSelector.SelectDatePlaceholder")}
+              className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
                        cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            readOnly
-          />
-          <FaCalendarAlt
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-            onClick={() => {
-              setIsDateModalOpen(true);
-              handleDefaultValueChange("selected");
-            }}
-          />
-        </div>
-      </label>
+              readOnly
+            />
+            <FaCalendarAlt
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+              onClick={() => {
+                setIsDateModalOpen(true);
+                handleDefaultValueChange("selected");
+              }}
+            />
+          </div>
+        </label>
 
-      {/* ورودی زمان */}
-      <div className="relative w-48">
-        <input
-          type="text"
-          value={
-            selectedTime.hours || selectedTime.minutes || selectedTime.seconds
-              ? `${selectedTime.hours.padStart(2, "0")}:${selectedTime.minutes.padStart(
+        {/* ورودی زمان */}
+        <div className="relative w-48">
+          <input
+            type="text"
+            value={
+              selectedTime.hours || selectedTime.minutes || selectedTime.seconds
+                ? `${selectedTime.hours.padStart(2, "0")}:${selectedTime.minutes.padStart(
                   2,
                   "0"
                 )}:${selectedTime.seconds.padStart(2, "0")}`
-              : ""
-          }
-          onClick={() => setIsTimeModalOpen(true)}
-          placeholder="Select Time"
-          className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
+                : ""
+            }
+            onClick={() => setIsTimeModalOpen(true)}
+            placeholder={t("DateTimeSelector.SelectTimePlaceholder")}
+            className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm
                      cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          readOnly
-        />
-        <FaClock
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-          onClick={() => setIsTimeModalOpen(true)}
-        />
+            readOnly
+          />
+          <FaClock
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+            onClick={() => setIsTimeModalOpen(true)}
+          />
+        </div>
       </div>
+
+      {/* مودال تاریخ */}
+      <DynamicModal
+        isOpen={isDateModalOpen}
+        onClose={() => {
+          if (tempSelectedDate) {
+            setSelectedDate(tempSelectedDate);
+            setDefaultValue("selected");
+            setUserTouched(true);
+          }
+          setIsDateModalOpen(false);
+        }}
+      >
+        <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
+            {/* {t("DateTimeSelector.ModalSelectDateTitle")} */}
+          </h2>
+          {tempSelectedDate && (
+            <div className="mb-4 text-center">
+              <span className="text-lg font-medium text-pink-600">
+                {formatDate(tempSelectedDate)}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-center mt-6">
+            <DatePicker selected={tempSelectedDate} onChange={handleDateChange} inline />
+          </div>
+          <div className="flex justify-center mt-6">
+            <button
+              type="button"
+              onClick={handleSelectDate}
+              className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
+                       focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              {t("DateTimeSelector.ModalSelectDateTitle")}
+            </button>
+          </div>
+        </div>
+      </DynamicModal>
+
+      {/* مودال زمان */}
+      <DynamicModal
+        isOpen={isTimeModalOpen}
+        onClose={() => {
+          if (tempSelectedTime) {
+            setSelectedTime(tempSelectedTime);
+            setUserTouched(true);
+          }
+          setIsTimeModalOpen(false);
+        }}
+      >
+        <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
+            {t("DateTimeSelector.ModalSelectTimeTitle")}
+          </h2>
+          {tempSelectedTime.hours || tempSelectedTime.minutes || tempSelectedTime.seconds ? (
+            <div className="mb-4 text-center">
+              <span className="text-lg font-medium text-pink-600">
+                {formatTime(tempSelectedTime)}
+              </span>
+            </div>
+          ) : (
+            <div className="mb-4 text-center">
+              <span className="text-lg font-medium text-gray-500">{t("DateTimeSelector.NoTimeSelected")}</span>
+            </div>
+          )}
+
+          <div className="flex justify-center gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+                {t("DateTimeSelector.HoursShort")}
+              </label>
+              <input
+                type="text"
+                name="hours"
+                value={tempSelectedTime.hours}
+                onChange={handleTimeInputChange}
+                maxLength={2}
+                className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+                {t("DateTimeSelector.MinutesShort")}
+              </label>
+
+              <input
+                type="text"
+                name="minutes"
+                value={tempSelectedTime.minutes}
+                onChange={handleTimeInputChange}
+                maxLength={2}
+                className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+                {t("DateTimeSelector.SecondsShort")}
+              </label>
+              <input
+                type="text"
+                name="seconds"
+                value={tempSelectedTime.seconds}
+                onChange={handleTimeInputChange}
+                maxLength={2}
+                className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-6">
+            <button
+              type="button"
+              onClick={handleTimeChange}
+              className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
+                       focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              {t("DateTimeSelector.SaveTimeButton")}
+            </button>
+          </div>
+        </div>
+      </DynamicModal>
     </div>
-
-    {/* مودال تاریخ */}
-    <DynamicModal
-      isOpen={isDateModalOpen}
-      onClose={() => {
-        if (tempSelectedDate) {
-          setSelectedDate(tempSelectedDate);
-          setDefaultValue("selected");
-          setUserTouched(true);
-        }
-        setIsDateModalOpen(false);
-      }}
-    >
-      <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
-          Select a Date
-        </h2>
-        {tempSelectedDate && (
-          <div className="mb-4 text-center">
-            <span className="text-lg font-medium text-pink-600">
-              {formatDate(tempSelectedDate)}
-            </span>
-          </div>
-        )}
-        <div className="flex justify-center mt-6">
-          <DatePicker selected={tempSelectedDate} onChange={handleDateChange} inline />
-        </div>
-        <div className="flex justify-center mt-6">
-          <button
-            type="button"
-            onClick={handleSelectDate}
-            className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
-                       focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            Select Date
-          </button>
-        </div>
-      </div>
-    </DynamicModal>
-
-    {/* مودال زمان */}
-    <DynamicModal
-      isOpen={isTimeModalOpen}
-      onClose={() => {
-        if (tempSelectedTime) {
-          setSelectedTime(tempSelectedTime);
-          setUserTouched(true);
-        }
-        setIsTimeModalOpen(false);
-      }}
-    >
-      <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">
-          Select a Time
-        </h2>
-        {tempSelectedTime.hours || tempSelectedTime.minutes || tempSelectedTime.seconds ? (
-          <div className="mb-4 text-center">
-            <span className="text-lg font-medium text-pink-600">
-              {formatTime(tempSelectedTime)}
-            </span>
-          </div>
-        ) : (
-          <div className="mb-4 text-center">
-            <span className="text-lg font-medium text-gray-500">No Time Selected</span>
-          </div>
-        )}
-
-        <div className="flex justify-center gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-              HH
-            </label>
-            <input
-              type="text"
-              name="hours"
-              value={tempSelectedTime.hours}
-              onChange={handleTimeInputChange}
-              maxLength={2}
-              className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-              MM
-            </label>
-            <input
-              type="text"
-              name="minutes"
-              value={tempSelectedTime.minutes}
-              onChange={handleTimeInputChange}
-              maxLength={2}
-              className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-              SS
-            </label>
-            <input
-              type="text"
-              name="seconds"
-              value={tempSelectedTime.seconds}
-              onChange={handleTimeInputChange}
-              maxLength={2}
-              className="w-16 mx-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-center mt-6">
-          <button
-            type="button"
-            onClick={handleTimeChange}
-            className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700
-                       focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            Save Time
-          </button>
-        </div>
-      </div>
-    </DynamicModal>
-  </div>
-);
+  );
 
 };
 
