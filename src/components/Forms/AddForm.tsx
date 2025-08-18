@@ -730,7 +730,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
           {/* Count In Reject */}
           <div className="flex items-center md:col-span-2">
-            <input
+            {/* <input
               type="checkbox"
               id="countInReject"
               name="countInReject"
@@ -743,27 +743,26 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               className="ml-3 text-gray-700 font-medium"
             >
               {t("AddForms.CountInReject")}
+            </label> */}
+            <input
+              type="checkbox"
+              id="readOnly"
+              name="readOnly"
+              checked={formData.readOnly}
+              onChange={(e) => handleChange("readOnly", e.target.checked)}
+              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="readOnly"
+              className="ml-3 text-gray-700 font-medium"
+            >
+              {t("AddForms.ReadOnly")}
             </label>
           </div>
 
           {/* Read Only / Show in Tab / Program Meta Column Name */}
           <div className="flex flex-wrap md:col-span-2 gap-4 items-center">
-            <div className="flex items-center translate-y-[10px]">
-              <input
-                type="checkbox"
-                id="readOnly"
-                name="readOnly"
-                checked={formData.readOnly}
-                onChange={(e) => handleChange("readOnly", e.target.checked)}
-                className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="readOnly"
-                className="ml-3 text-gray-700 font-medium"
-              >
-                {t("AddForms.ReadOnly")}
-              </label>
-            </div>
+            <div className="flex items-center translate-y-[10px]"></div>
 
             <DynamicInput
               name={t("AddForms.ShowInTab")}
