@@ -43,7 +43,7 @@ interface MappedProject {
 
 const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   ({ selectedRow }, ref) => {
-    const { t } = useTranslation();
+    const { t , i18n } = useTranslation();
     const api = useApi();
     const { handleSaveApprovalFlow } = useAddEditDelete();
 
@@ -429,6 +429,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                     }}
                     /** ← این خط رو اضافه کن **/
                     isLoading={isLoadingBoxTemplates}
+                    direction={i18n.dir()}
                   />
                 </div>
               </div>

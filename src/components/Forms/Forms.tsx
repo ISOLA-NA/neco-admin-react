@@ -145,7 +145,7 @@ async function fetchFileNameById(fileId: string) {
  * کامپوننت اصلی: FormsCommand1
  */
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
-  const { t } = useTranslation();
+  const { t , i18n  } = useTranslation();
   const { handleSaveForm } = useAddEditDelete();
   const api = useApi();
 
@@ -932,6 +932,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 showSearch
                 isEditMode={isEditMode}
                 isLoading={isLoadingFields}
+                direction={i18n.dir()}
               />
             </div>
           </div>
