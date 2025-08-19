@@ -2,6 +2,7 @@ import React, { useState, useLayoutEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Info from "./Info";
 import Account from "./account";
+import { useTranslation } from "react-i18next";
 
 interface SidebarDrawerProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ const detectRTL = (): boolean => {
 };
 
 const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"info" | "account">("info");
   const [isRTL, setIsRTL] = useState<boolean>(detectRTL);
 
@@ -66,7 +68,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout
             <button
               onClick={onClose}
               className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} text-white text-xl font-bold`}
-              aria-label="Close Drawer"
+              aria-label={t("sideDrawer.Aria.CloseDrawer")}
             >
               &times;
             </button>
@@ -79,7 +81,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout
                   activeTab === 'info' ? 'bg-white text-black' : 'bg-transparent text-white'
                 }`}
               >
-                Info
+                {t("sideDrawer.Tabs.Info")}
               </button>
               <button
                 onClick={() => setActiveTab('account')}
@@ -87,13 +89,13 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout
                   activeTab === 'account' ? 'bg-white text-black' : 'bg-transparent text-white'
                 }`}
               >
-                Account
+                {t("sideDrawer.Tabs.Account")}
               </button>
               <button
                 onClick={onLogout}
                 className="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300"
               >
-                Logout
+                {t("sideDrawer.Buttons.Logout")}
               </button>
             </div>
           </motion.div>

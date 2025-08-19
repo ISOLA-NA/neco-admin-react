@@ -1,0 +1,14 @@
+{
+  "sideDrawer": {
+    "Tabs": {
+      "Info": "Info",
+      "Account": "Account"
+    },
+    "Buttons": {
+      "Logout": "Logout"
+    },
+    "Aria": {
+      "CloseDrawer": "Close Drawer"
+    }
+  }
+}

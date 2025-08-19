@@ -65,7 +65,7 @@ const Account: React.FC = () => {
   // در ابتدا از یک مقدار پیش‌فرض خالی برای ID استفاده می‌کنیم تا بعد از دریافت از API مقداردهی شود.
   const [updated, setUpdated] = useState({
     IsVisible: true,
-    LastModified: null, 
+    LastModified: null,
     ID: "", // مقدار پیش‌فرض خالی، تا بعد از دریافت از API مقداردهی شود.
     ModifiedById: null,
     Username: "",
@@ -175,7 +175,7 @@ const Account: React.FC = () => {
       alert("ایمیل وارد شده صحیح نیست!");
       return;
     }
-    
+
     // ساخت payload آپدیت به همراه منطق Code و ID از اطلاعات دریافتی (userInfo)
     const updateUser: EditProfileUserInterface = {
       ...updated,
@@ -185,7 +185,7 @@ const Account: React.FC = () => {
     };
 
     console.log("Sending updated data:", updateUser);
-    
+
     projectService
       .editProfileUser(updateUser)
       .then((res: any) => {
@@ -212,7 +212,7 @@ const Account: React.FC = () => {
       <FileUploadHandler
         selectedFileId={updated.UserImageId}
         resetCounter={0}
-        onReset={() => {}}
+        onReset={() => { }}
         onPreviewUrlChange={setPreviewUrl}
         hideUploader={true}
       />
@@ -272,7 +272,7 @@ const Account: React.FC = () => {
                     name="Username"
                     value={updated.Username}
                     disabled
-                    placeholder={t("account.Placeholders.Username")} 
+                    placeholder={t("account.Placeholders.Username")}
                     className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
@@ -304,19 +304,20 @@ const Account: React.FC = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={handleChangePassword}
-                    className="flex items-center border rounded px-3 py-2 hover:bg-gray-100"
+                    className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100"
                   >
                     <FaLock size={16} />
-                    <span className="ml-2">{t("account.Buttons.ChangePassword")}</span>
+                    <span>{t("account.Buttons.ChangePassword")}</span>
                   </button>
                   <button
                     onClick={editAccount}
-                    className="flex items-center border rounded px-3 py-2 hover:bg-gray-100"
+                    className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100"
                   >
                     <IoIosRefresh size={16} />
-                    <span className="ml-2">{t("account.Buttons.Update")}</span>
+                    <span>{t("account.Buttons.Update")}</span>
                   </button>
                 </div>
+
                 <div>
                   <label className="block mb-1">{t("account.Fields.LastName")}</label>
                   <input
@@ -358,20 +359,21 @@ const Account: React.FC = () => {
               <div className="flex justify-end gap-4">
                 <button
                   onClick={handleSwitchAccount}
-                  className="flex items-center border rounded px-3 py-2 hover:bg-gray-100"
+                  className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100"
                 >
                   <HiOutlineSwitchHorizontal size={16} />
-                  <span className="ml-2">{t("account.Buttons.SwitchAccount")}</span>
+                  <span>{t("account.Buttons.SwitchAccount")}</span>
                 </button>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center border rounded px-3 py-2 hover:bg-gray-100 text-red-600"
+                  className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100 text-red-600"
                 >
                   <RiLogoutCircleLine size={16} />
-                  <span className="ml-2">{t("account.Buttons.SignOut")}</span>
+                  <span>{t("account.Buttons.SignOut")}</span>
                 </button>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -380,17 +382,16 @@ const Account: React.FC = () => {
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
             <p className="font-semibold mb-2">{t("account.Side.Superintendent")}</p>
             <p className="text-sm text-gray-600">
-              این قسمت می‌تواند اطلاعات مربوط به Superintendent را نشان دهد...
+
             </p>
           </div>
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
-            <p className="font-semibold mb-2">Admins</p>
+            <p className="font-semibold mb-2">{t("account.Side.Admins")}</p>
             <p className="text-sm text-gray-600">
-              این قسمت می‌تواند اطلاعات مربوط به Adminها را نشان دهد...
             </p>
           </div>
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
-            <p className="font-semibold mb-2">Change Active Ribbon</p>
+            <p className="font-semibold mb-2">{t("account.Side.ChangeActiveRibbon")}</p>
             <select
               value={activeRibbon}
               onChange={(e) => setActiveRibbon(e.target.value)}

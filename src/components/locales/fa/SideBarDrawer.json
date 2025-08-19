@@ -1,0 +1,14 @@
+{
+  "sideDrawer": {
+    "Tabs": {
+      "Info": "اطلاعات",
+      "Account": "حساب کاربری"
+    },
+    "Buttons": {
+      "Logout": "خروج"
+    },
+    "Aria": {
+      "CloseDrawer": "بستن پنجره کناری"
+    }
+  }
+}
