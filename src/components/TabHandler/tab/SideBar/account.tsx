@@ -5,6 +5,7 @@ import { FaLock } from "react-icons/fa";
 import { IoIosRefresh } from "react-icons/io";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { RiLogoutCircleLine } from "react-icons/ri";
+import { useTranslation } from "react-i18next";
 
 // استفاده از getIdByUserToken از api.servicesFile
 import projectServiceFile from "../../../../services/api.servicesFile";
@@ -58,6 +59,9 @@ interface UserToken {
 }
 
 const Account: React.FC = () => {
+
+  const { t } = useTranslation();
+
   // در ابتدا از یک مقدار پیش‌فرض خالی برای ID استفاده می‌کنیم تا بعد از دریافت از API مقداردهی شود.
   const [updated, setUpdated] = useState({
     IsVisible: true,
@@ -202,7 +206,7 @@ const Account: React.FC = () => {
 
   return (
     <div className="container mx-auto mt-6 px-4">
-      <h2 className="text-2xl font-bold mb-8">Account Information</h2>
+      <h2 className="text-2xl font-bold mb-8">{t("account.Titles.AccountInformation")}</h2>
 
       {/* استفاده از FileUploadHandler جهت دانلود عکس پروفایل */}
       <FileUploadHandler
@@ -217,7 +221,7 @@ const Account: React.FC = () => {
         {/* ستون سمت چپ: User Information */}
         <div className="w-full md:w-2/3">
           <div className="border rounded shadow p-4 h-[600px]">
-            <h4 className="text-xl font-semibold mb-4">User Information</h4>
+            <h4 className="text-xl font-semibold mb-4">{t("account.Titles.UserInformation")}</h4>
 
             {/* بخش آواتار و اطلاعات کاربر */}
             <div className="flex items-center gap-4 mb-4">
@@ -229,12 +233,12 @@ const Account: React.FC = () => {
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                  <p className="text-xs text-gray-500">Loading...</p>
+                  <p className="text-xs text-gray-500">{t("account.Messages.Loading")}</p>
                 </div>
               )}
               <div>
                 <p className="text-lg font-medium">
-                  {userInfo ? userInfo.Name : "User Name"}
+                  {userInfo ? userInfo.Name : t("account.Placeholders.UserName")}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {userNames.filter((uname) => uname && uname.trim() !== "").length > 0 ? (
@@ -249,7 +253,7 @@ const Account: React.FC = () => {
                         </div>
                       ))
                   ) : (
-                    <p className="text-sm text-gray-600">Loading user names...</p>
+                    <p className="text-sm text-gray-600">{t("account.Messages.LoadingUserNames")}</p>
                   )}
                 </div>
               </div>
@@ -262,29 +266,29 @@ const Account: React.FC = () => {
               {/* ستون فرم سمت چپ */}
               <div className="space-y-4">
                 <div>
-                  <label className="block mb-1">Username</label>
+                  <label className="block mb-1">{t("account.Fields.Username")}</label>
                   <input
                     type="text"
                     name="Username"
                     value={updated.Username}
                     disabled
-                    placeholder="Username"
+                    placeholder={t("account.Placeholders.Username")} 
                     className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">Name</label>
+                  <label className="block mb-1">{t("account.Fields.Name")}</label>
                   <input
                     type="text"
                     name="Name"
                     value={updated.Name}
                     onChange={handleChange}
-                    placeholder="Name"
+                    placeholder={t("account.Placeholders.Name")}
                     className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">Mobile</label>
+                  <label className="block mb-1">{t("account.Fields.Mobile")}</label>
                   <input
                     type="text"
                     name="Mobile"
@@ -303,46 +307,46 @@ const Account: React.FC = () => {
                     className="flex items-center border rounded px-3 py-2 hover:bg-gray-100"
                   >
                     <FaLock size={16} />
-                    <span className="ml-2">Change Password</span>
+                    <span className="ml-2">{t("account.Buttons.ChangePassword")}</span>
                   </button>
                   <button
                     onClick={editAccount}
                     className="flex items-center border rounded px-3 py-2 hover:bg-gray-100"
                   >
                     <IoIosRefresh size={16} />
-                    <span className="ml-2">Update</span>
+                    <span className="ml-2">{t("account.Buttons.Update")}</span>
                   </button>
                 </div>
                 <div>
-                  <label className="block mb-1">Last Name</label>
+                  <label className="block mb-1">{t("account.Fields.LastName")}</label>
                   <input
                     type="text"
                     name="Family"
                     value={updated.Family}
                     onChange={handleChange}
-                    placeholder="Last Name"
+                    placeholder={t("account.Placeholders.LastName")}
                     className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">WebSite</label>
+                  <label className="block mb-1">{t("account.Fields.Website")}</label>
                   <input
                     type="text"
                     name="Website"
                     value={updated.Website}
                     onChange={handleChange}
-                    placeholder="Website"
+                    placeholder={t("account.Placeholders.Website")}
                     className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">Email</label>
+                  <label className="block mb-1">{t("account.Fields.Email")}</label>
                   <input
                     type="text"
                     name="Email"
                     value={updated.Email}
                     onChange={handleChange}
-                    placeholder="Email"
+                    placeholder={t("account.Placeholders.Email")}
                     className="border px-2 py-1 w-full rounded text-sm"
                   />
                 </div>
@@ -357,14 +361,14 @@ const Account: React.FC = () => {
                   className="flex items-center border rounded px-3 py-2 hover:bg-gray-100"
                 >
                   <HiOutlineSwitchHorizontal size={16} />
-                  <span className="ml-2">Switch Account</span>
+                  <span className="ml-2">{t("account.Buttons.SwitchAccount")}</span>
                 </button>
                 <button
                   onClick={handleSignOut}
                   className="flex items-center border rounded px-3 py-2 hover:bg-gray-100 text-red-600"
                 >
                   <RiLogoutCircleLine size={16} />
-                  <span className="ml-2">Sign Out</span>
+                  <span className="ml-2">{t("account.Buttons.SignOut")}</span>
                 </button>
               </div>
             </div>
@@ -374,7 +378,7 @@ const Account: React.FC = () => {
         {/* ستون سمت راست: سه باکس با ارتفاع مساوی */}
         <div className="w-full md:w-1/3 flex flex-col gap-4 h-[600px]">
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
-            <p className="font-semibold mb-2">Superintendent</p>
+            <p className="font-semibold mb-2">{t("account.Side.Superintendent")}</p>
             <p className="text-sm text-gray-600">
               این قسمت می‌تواند اطلاعات مربوط به Superintendent را نشان دهد...
             </p>

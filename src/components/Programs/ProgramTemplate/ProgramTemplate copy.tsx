@@ -250,10 +250,6 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         nProgramTemplateName: programTemplates.find(
           (p) => String(p.ID) === String(item.nProgramTemplateID)
         )?.Name,
-        // نام تمپلیت زیرمجموعه براساس subProgramID
-        subProgramTemplateName: programTemplates.find(
-          (p) => String(p.ID) === String((item as any).subProgramID)
-        )?.Name,
       }));
     }, [programTemplateField, roles, wfTemplates, forms, programTemplates]);
 
@@ -296,13 +292,6 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         flex: 3,
         minWidth: 150,
       },
-      // ستون جدید جهت نمایش Sub Program Template
-      {
-        headerName: "Sub Program Template",
-        field: "subProgramTemplateName",
-        flex: 3,
-        minWidth: 150,
-      },
       {
         headerName: "Program Duration",
         field: "WFDuration",
@@ -311,7 +300,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       },
       {
         headerName: "Program Execution Budget",
-        field: "PCostSubAct",
+        field: "PCostAprov",
         flex: 1,
         minWidth: 80,
       },

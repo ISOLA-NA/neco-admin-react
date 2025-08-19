@@ -56,6 +56,8 @@ import enCalculatedField from "./components/locales/en/Forms/Calculatedfield.jso
 import enExcelCalculator from "./components/locales/en/Forms/Excelcalculator.json";
 import enTab from "./components/locales/en/Forms/Tabcontroller.json";
 import enMap from "./components/locales/en/Forms/Map.json";
+import enInfo from "./components/locales/en/Info.json";
+import enAccount from "./components/locales/en/Account.json";
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
 import faLogin from "./components/locales/fa/login.json";
@@ -110,6 +112,8 @@ import faCalculatedField from "./components/locales/fa/Forms/Calculatedfield.jso
 import faExcelCalculator from "./components/locales/fa/Forms/Excelcalculator.json";
 import faTab from "./components/locales/fa/Forms/Tabcontroller.json";
 import faMap from "./components/locales/fa/Forms/Map.json";
+import faInfo from "./components/locales/fa/Info.json";
+import faAccount from "./components/locales/fa/Account.json";
 
 const resources = {
   en: {
@@ -167,6 +171,8 @@ const resources = {
       ...enExcelCalculator,
       ...enTab,
       ...enMap,
+      ...enInfo,
+      ...enAccount,
     },
   },
   fa: {
@@ -224,6 +230,8 @@ const resources = {
       ...faExcelCalculator,
       ...faTab,
       ...faMap,
+      ...faInfo,
+      ...faAccount,
     },
   },
 };

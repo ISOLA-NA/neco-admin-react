@@ -42,6 +42,7 @@ interface DataTableProps {
 
   isEditMode?: boolean;
   direction?: "rtl" | "ltr";
+  resetSearchKey?: number;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -86,6 +87,12 @@ const DataTable: React.FC<DataTableProps> = ({
     setOriginalRowData(mappedData);
     setFilteredRowData(mappedData);
   }, [rowData]);
+
+  // وقتی rowData عوض شد (مثلاً بعد از Add یا Edit)، سرچ را پاک کن
+useEffect(() => {
+  setSearchText("");
+}, [rowData]);
+
 
   // useEffect برای اسکرول به بالای جدول هنگام تغییر داده‌ها
   useEffect(() => {

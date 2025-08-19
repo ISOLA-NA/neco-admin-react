@@ -1,0 +1,30 @@
+{
+  "info": {
+    "Titles": {
+      "Information": "Information",
+      "AboutProduct": "About Product",
+      "ProductInformation": "Product Information:"
+    },
+    "Labels": {
+      "LicensedTo": "Licensed To :",
+      "Address": "Address :",
+      "Website": "Website :",
+      "ActivationDate": "Activation Date :",
+      "LatestVersionInstalled": "Latest Version Installed :",
+      "ProductTypeActivated": "ProductTypeActivated"
+    },
+    "Product": {
+      "MainTitle": "Organization Project Management System",
+      "Description": "This Collaborative platform is a Project Processes Management System which defines, executes and control all processes dynamically based on Rolling wave planning of project activities. This platform is methodology independent and can support any project management approaches such as conventional or agile ones."
+    },
+    "Nejabat": {
+      "Name": "Gh. Nejabat",
+      "Description": "Gh. Nejabat Having been conferred a national award from the president appreciation of his efforts to help reconstruct the country in 1996 and also ranked 24 by ICIS in the Top Power Players in global petrochemical industry in 2007, have positioned Mr. Gholam Hossein Nejabat among the most honorable managers who has played significant role in the development of the petrochemical projects in the country. His thoughts and approaches for successful management of projects are adopted in this product."
+    },
+    "Company": {
+      "Name": "Neco industries Management Co .",
+      "Website": "www.necopm.com",
+      "Product": "Organizational Project Management System"
+    }
+  }
+}

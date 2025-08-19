@@ -1,0 +1,51 @@
+{
+  "account": {
+    "Titles": {
+      "AccountInformation": "Account Information",
+      "UserInformation": "User Information"
+    },
+    "Fields": {
+      "Username": "Username",
+      "Name": "Name",
+      "LastName": "Last Name",
+      "Mobile": "Mobile",
+      "Website": "Website",
+      "Email": "Email"
+    },
+    "Placeholders": {
+      "UserName": "User Name",
+      "Username": "Username",
+      "Name": "Name",
+      "LastName": "Last Name",
+      "Mobile": "Mobile",
+      "Website": "Website",
+      "Email": "Email"
+    },
+    "Buttons": {
+      "ChangePassword": "Change Password",
+      "Update": "Update",
+      "SwitchAccount": "Switch Account",
+      "SignOut": "Sign Out"
+    },
+    "Messages": {
+      "Loading": "Loading...",
+      "LoadingUserNames": "Loading user names...",
+      "UpdateSuccess": "Profile updated successfully.",
+      "UpdateError": "Error updating profile."
+    },
+    "Validation": {
+      "InvalidMobile": "The mobile number is not valid!",
+      "InvalidEmail": "The email address is not valid!"
+    },
+    "Side": {
+      "Superintendent": "Superintendent",
+      "Admins": "Admins",
+      "ChangeActiveRibbon": "Change Active Ribbon"
+    },
+    "Ribbon": {
+      "Home": "Home",
+      "Dashboard": "Dashboard",
+      "Profile": "Profile"
+    }
+  }
+}

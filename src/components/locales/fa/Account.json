@@ -1,0 +1,51 @@
+{
+  "account": {
+    "Titles": {
+      "AccountInformation": "اطلاعات حساب کاربری",
+      "UserInformation": "اطلاعات کاربر"
+    },
+    "Fields": {
+      "Username": "نام کاربری",
+      "Name": "نام",
+      "LastName": "نام خانوادگی",
+      "Mobile": "موبایل",
+      "Website": "وب‌سایت",
+      "Email": "ایمیل"
+    },
+    "Placeholders": {
+      "UserName": "نام کاربر",
+      "Username": "نام کاربری",
+      "Name": "نام",
+      "LastName": "نام خانوادگی",
+      "Mobile": "شماره موبایل",
+      "Website": "وب‌سایت",
+      "Email": "ایمیل"
+    },
+    "Buttons": {
+      "ChangePassword": "تغییر رمز",
+      "Update": "به‌روزرسانی",
+      "SwitchAccount": "تغییر حساب",
+      "SignOut": "خروج"
+    },
+    "Messages": {
+      "Loading": "در حال بارگذاری...",
+      "LoadingUserNames": "در حال بارگذاری نام‌ها...",
+      "UpdateSuccess": "اطلاعات با موفقیت به‌روزرسانی شد.",
+      "UpdateError": "خطا در به‌روزرسانی اطلاعات."
+    },
+    "Validation": {
+      "InvalidMobile": "شماره تلفن وارد شده صحیح نیست!",
+      "InvalidEmail": "ایمیل وارد شده صحیح نیست!"
+    },
+    "Side": {
+      "Superintendent": "سرپرست",
+      "Admins": "مدیران",
+      "ChangeActiveRibbon": "تغییر ریبُن فعال"
+    },
+    "Ribbon": {
+      "Home": "خانه",
+      "Dashboard": "داشبورد",
+      "Profile": "پروفایل"
+    }
+  }
+}

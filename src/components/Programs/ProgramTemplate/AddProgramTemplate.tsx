@@ -43,7 +43,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
     weight1: "0",
     weight2: "",
     weight3: "",
-    programtemplate: "",
+    programtemplate: "", // ⚠️ این فیلد حالا نماینده subProgramID است
     approvalToExecutionWeight: "0.2",
     wfW2: "",
     wfW3: "",
@@ -286,8 +286,9 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
           ParrentIC: null,
           PredecessorForItemStr: "",
           PredecessorForSubStr: "",
+          // والد همین تمپلیت جاری
           nProgramTemplateID: selectedRow?.ID,
-          // ارسال رشته GUID یا null به جای Number(...)
+          // پست مسئول (guid/شناسه) بدون تبدیل عدد
           nPostId: formData.responsiblepost ? formData.responsiblepost : null,
           nPostTypeId: null,
           nWFTemplateID: formData.approvalFlow
@@ -300,7 +301,10 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
           nProgramTypeID: formData.programtype
             ? Number(formData.programtype)
             : null,
-          subProgramID: null,
+          // مقدار زیر برنامه از سلکت Program Template
+          subProgramID: formData.programtemplate
+            ? Number(formData.programtemplate)
+            : null,
           nEntityTypeID: formData.formname ? Number(formData.formname) : null,
           IsInheritMetaColumns: null,
           IsInheritMetaValues: null,
@@ -353,6 +357,7 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
           ActDuration: Number(formData.duration) || 0,
           Left: Number(formData.start) || 0,
           Top: Number(formData.finish) || 0,
+          // والد ثابت: همین تمپلیت جاری
           nProgramTemplateID: selectedRow?.ID,
           nPostId: formData.responsiblepost ? formData.responsiblepost : null,
           nWFTemplateID: formData.approvalFlow
@@ -365,6 +370,10 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
             ? Number(formData.programtype)
             : null,
           nEntityTypeID: formData.formname ? Number(formData.formname) : null,
+          // مقدار زیر برنامه از سلکت Program Template
+          subProgramID: formData.programtemplate
+            ? Number(formData.programtemplate)
+            : null,
           PCostAct: Number(formData.activityBudget1) || 0,
           PCostAprov: Number(formData.approvalBudget1) || 0,
           PCostSubAct: Number(formData.programExecutionBudget) || 0,
@@ -426,8 +435,9 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
         weight1: editingRow.Weight1 ? String(editingRow.Weight1) : "0",
         weight2: editingRow.Weight2 ? String(editingRow.Weight2) : "",
         weight3: editingRow.Weight3 ? String(editingRow.Weight3) : "",
-        programtemplate: editingRow.nProgramTemplateID
-          ? String(editingRow.nProgramTemplateID)
+        // مقدار اولیه سلکت Program Template از subProgramID (نه nProgramTemplateID)
+        programtemplate: editingRow.subProgramID
+          ? String(editingRow.subProgramID)
           : "",
         approvalToExecutionWeight: editingRow.WeightWF
           ? String(editingRow.WeightWF)
@@ -611,13 +621,14 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
               onChange={handleChange}
               className="w-full h-12 rounded-md"
             />
-            {/* Program Template */}
+            {/* Program Template (در واقع subProgramID) */}
             <DynamicSelector
               label={t("AddProgramTemplate.ProgramTemplate")}
               options={programTemplateOptions}
               selectedValue={formData.programtemplate}
               onChange={handleChange}
               className="w-full h-12 rounded-md"
+              name="programtemplate"
             />
             {/* Activity Type */}
             <DynamicSelector

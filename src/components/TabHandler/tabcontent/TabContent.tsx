@@ -133,6 +133,8 @@ const TabContent: FC<TabContentProps> = ({
   const [nameInput, setNameInput] = useState<string>("");
   const [descriptionInput, setDescriptionInput] = useState<string>("");
 
+  const [resetSearchKey, setResetSearchKey] = useState(0);
+
   // توابع تغییر اندازه‌ی پنل
   const togglePanelSize = () => {
     setIsRightMaximized(false);
@@ -433,6 +435,7 @@ const TabContent: FC<TabContentProps> = ({
       }
 
       await fetchData();
+      setResetSearchKey(k => k + 1);
       setIsPanelOpen(false);
       setIsAdding(false);
       resetInputs();
@@ -592,6 +595,7 @@ const TabContent: FC<TabContentProps> = ({
                 });
             showAlert("success", null, "", t("Alerts.Updated.Category"));
             await fetchData();
+            setResetSearchKey(k => k + 1);
           }
           break;
       }
@@ -1013,7 +1017,7 @@ const TabContent: FC<TabContentProps> = ({
             columnDefs={columnDefs}
             rowData={fetchedRowData}
             onRowDoubleClick={handleDoubleClick}
-            setSelectedRowData={handleRowClickLocal} // این تابع باید selectedRow رو ست کنه
+            setSelectedRowData={handleRowClickLocal}
             showDuplicateIcon={showDuplicateIcon}
             showEditIcon={false}
             showAddIcon={showAddIcon}
@@ -1024,6 +1028,8 @@ const TabContent: FC<TabContentProps> = ({
             onDuplicate={handleDuplicateClick}
             isLoading={isLoading}
             direction={i18n.dir()}
+            resetSearchKey={resetSearchKey}
+
           />
         </div>
       </div>
