@@ -60,3 +60,17 @@ body {
   right: 1rem !important;
   z-index: 9999 !important;
 }
+
+@font-face {
+  font-family: 'Yekan';
+  src: url('./assets/yekan-font/yekan-regular.eot');
+  src: url('./assets/yekan-font/yekan-regular.eot?#iefix') format('yekan-regular.eot'),
+       url('./assets/yekan-font/yekan-regular.woff') format('woff'),
+       url('./assets/yekan-font/yekan-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  font-family: 'Yekan','Roboto', sans-serif;
+}
