@@ -1,12 +1,31 @@
 {
-    "ProgramTemplate": {
-      "ProgramName": "نام برنامه",
-      "Duration": "مدت زمان",
+  "ProgramTemplate": {
+    "ProgramName": "نام برنامه",
+    "Duration": "مدت زمان",
+    "ActivityBudget": "بودجه فعالیت",
+    "AfBudget": "بودجه AF",
+    "Type": "نوع",
+    "RelatedProjects": "پروژه‌های مرتبط",
+    "MetaData": "اطلاعات متا",
+
+    "Columns": {
+      "Order": "ترتیب",
+      "ActivityName": "نام فعالیت",
+      "Code": "کد",
+      "ActivityDuration": "مدت فعالیت",
+      "Start": "شروع",
+      "End": "پایان",
+      "ResponsiblePost": "پست مسئول",
+      "ApprovalFlow": "جریان تأیید",
+      "ActivityType": "نوع فعالیت",
+      "FormName": "نام فرم",
+      "Weight": "وزن",
       "ActivityBudget": "بودجه فعالیت",
-      "AfBudget": "بودجه AF",
-      "Type": "نوع",
-      "RelatedProjects": "پروژه‌های مرتبط",
-      "MetaData": "اطلاعات متا"
+      "ProgramTemplate": "الگوی برنامه",
+      "SubProgramTemplate": "الگوی زیر‌برنامه",
+      "ProgramDuration": "مدت برنامه",
+      "ProgramExecutionBudget": "بودجه اجرای برنامه",
+      "ProgramToPlan": "نسبت برنامه به طرح"
     }
   }
-  
+}

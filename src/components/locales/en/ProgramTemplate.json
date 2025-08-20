@@ -1,12 +1,31 @@
 {
-    "ProgramTemplate": {
-      "ProgramName": "Program Name",
-      "Duration": "Duration",
+  "ProgramTemplate": {
+    "ProgramName": "Program Name",
+    "Duration": "Duration",
+    "ActivityBudget": "Activity Budget",
+    "AfBudget": "Af Budget",
+    "Type": "Type",
+    "RelatedProjects": "Related Projects",
+    "MetaData": "Meta Data",
+
+    "Columns": {
+      "Order": "Order",
+      "ActivityName": "Activity Name",
+      "Code": "Code",
+      "ActivityDuration": "Duration",
+      "Start": "Start",
+      "End": "End",
+      "ResponsiblePost": "Responsible Post",
+      "ApprovalFlow": "Approval Flow",
+      "ActivityType": "Activity Type",
+      "FormName": "Form Name",
+      "Weight": "Weight",
       "ActivityBudget": "Activity Budget",
-      "AfBudget": "Af Budget",
-      "Type": "Type",
-      "RelatedProjects": "Related Projects",
-      "MetaData": "Meta Data"
+      "ProgramTemplate": "Program Template",
+      "SubProgramTemplate": "Sub Program Template",
+      "ProgramDuration": "Program Duration",
+      "ProgramExecutionBudget": "Program Execution Budget",
+      "ProgramToPlan": "Program to plan"
     }
   }
-  
+}

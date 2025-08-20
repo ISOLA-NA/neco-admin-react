@@ -78,7 +78,7 @@ interface ApprovalFlowsTabProps {
 
 const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
   ({ editData, boxTemplates = [] }, ref) => {
-    const { t } = useTranslation();
+    const { t , i18n} = useTranslation();
     const api = useApi();
 
     const [allRoles, setAllRoles] = useState<Role[]>([]);
@@ -1053,6 +1053,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                             );
                           },
                         }}
+                          direction={i18n.dir()}
                       />
                     )}
                   </div>
