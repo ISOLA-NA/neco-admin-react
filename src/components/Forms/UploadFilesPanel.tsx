@@ -126,7 +126,7 @@ const UploadFilesPanel: React.FC<UploadFilesPanelProps> = ({
         >
           {excelLoading && <FiLoader className="animate-spin" size={18} />}
           {excelFileName
-            ? t("Forms.ChaneExcelFile")
+            ? t("Forms.ChangeExcelFile")
             : t("Forms.UploadExcelFile")}
         </button>
 
