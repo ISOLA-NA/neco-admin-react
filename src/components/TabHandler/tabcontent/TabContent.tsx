@@ -6,6 +6,8 @@ import React, {
   MouseEvent,
   useCallback,
   FC,
+  useMemo
+  // 
 } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import PanelHeader from "../tabcontent/PanelHeader";
@@ -36,6 +38,7 @@ import { FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import { useSubTabDefinitions } from "../../../context/SubTabDefinitionsContext";
 import { useTranslation } from "react-i18next";
+import DynamicSelector from "../../utilities/DynamicSelector copy";
 
 interface TabContentProps {
   component: React.LazyExoticComponent<React.ComponentType<any>> | null;
@@ -270,7 +273,7 @@ const TabContent: FC<TabContentProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [activeSubTab]);
+  }, [activeSubTab, selectedCategoryType]);
 
   // تغییر نوع Category
   const handleCategoryTypeChange = (
@@ -278,9 +281,9 @@ const TabContent: FC<TabContentProps> = ({
   ) => {
     const newType = e.target.value as "cata" | "catb";
     setSelectedCategoryType(newType);
-    if (activeSubTab === "Categories") {
-      fetchData();
-    }
+    // if (activeSubTab === "Categories") {
+    //   fetchData();
+    // }
   };
 
   // هر زمان که activeSubTab تغییر کند، دوباره داده‌ها را می‌گیریم
@@ -290,6 +293,7 @@ const TabContent: FC<TabContentProps> = ({
       fetchData();
     }
   }, [activeSubTab, fetchData]);
+  
 
   // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
@@ -895,6 +899,15 @@ const TabContent: FC<TabContentProps> = ({
     showAlert("warning", null, "Warning", "Name cannot be empty");
   };
 
+  const categoryOptions = useMemo(
+  () => [
+    { value: "cata", label: "Category A" },
+    { value: "catb", label: "Category B" },
+  ],
+  []
+);
+
+
   return (
     <div
       ref={containerRef}
@@ -937,16 +950,17 @@ const TabContent: FC<TabContentProps> = ({
 
         {activeSubTab === "Categories" && (
           <div className="mb-4 p-2">
-            <select
-              className="w-full p-2 border rounded shadow-sm"
-              value={selectedCategoryType}
+            <DynamicSelector
+              name="categoryType"
+              label={t("Category.CategoryType")}
+              options={categoryOptions}
+              selectedValue={selectedCategoryType}
               onChange={handleCategoryTypeChange}
-            >
-              <option value="cata">Category A</option>
-              <option value="catb">Category B</option>
-            </select>
+              className="w-full"
+            />
           </div>
         )}
+
 
         <div className="h-full p-4 overflow-auto relative">
           {/* اگر تب Ribbons باشد، فرم ساده‌اش همیشه در همین قسمت نمایش داده می‌شود */}
