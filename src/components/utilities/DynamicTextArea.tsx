@@ -18,7 +18,7 @@ interface CustomTextareaProps {
   rightIcon?: ReactNode;
   /** الزامی بودن فیلد */
   required?: boolean;
-  /** کلاس‌های اضافی */
+  /** کلاس‌های اضافی برای کانتینر */
   className?: string;
   /** وضعیت خطا */
   error?: boolean;
@@ -26,6 +26,8 @@ interface CustomTextareaProps {
   errorMessage?: string;
   /** غیرفعال کردن فیلد */
   disabled?: boolean;
+  /** کلاس سفارشی برای لیبل (برای هماهنگی با چک‌باکس‌ها در AddColumnForm) */
+  labelClassName?: string;
 }
 
 const CustomTextarea: React.FC<CustomTextareaProps> = ({
@@ -41,16 +43,30 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
   error = false,
   errorMessage = "",
   disabled = false,
+  labelClassName,
 }) => {
   return (
     <div className={classNames("w-full", className)}>
-      {/* برچسب بالای تکست اریا */}
-      <label htmlFor={name} className="block text-xs text-gray-600 mb-1">
+      {/* برچسب بالای تکست‌اریا */}
+      <label
+        htmlFor={name}
+        className={classNames(
+          "block mb-1",
+          labelClassName
+            ? labelClassName // اگر خواستید مثل چک‌باکس‌ها: "text-gray-700 font-medium"
+            : "text-xs text-gray-600"
+        )}
+      >
         {name}
         {required && <span className="text-red-500"> *</span>}
       </label>
 
-      <div className={classNames("relative", disabled ? "opacity-50 cursor-not-allowed" : "")}>
+      <div
+        className={classNames(
+          "relative",
+          disabled ? "opacity-50 cursor-not-allowed" : ""
+        )}
+      >
         {leftIcon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-purple-600">
             {leftIcon}

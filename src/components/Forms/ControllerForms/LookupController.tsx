@@ -1,10 +1,8 @@
 // src/components/ControllerForms/LookUp.tsx
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
-
 import { useApi } from "../../../context/ApiContext";
 import AppServices from "../../../services/api.services";
-
 import DynamicSelector from "../../utilities/DynamicSelector";
 import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
@@ -24,6 +22,8 @@ interface LookUpProps {
   };
   onMetaChange?: (updated: any) => void;
   onMetaExtraChange?: (updated: { metaType4: string }) => void;
+  /** 🔑 سیگنال ریست از والد هنگام تغییر Type of Information */
+  resetKey?: number | string;
 }
 
 interface TableRow {
@@ -39,6 +39,7 @@ const LookUp: React.FC<LookUpProps> = ({
   data = {},
   onMetaChange,
   onMetaExtraChange,
+  resetKey,
 }) => {
   /* helpers */
   const { t } = useTranslation();
@@ -50,6 +51,7 @@ const LookUp: React.FC<LookUpProps> = ({
 
   /* refs */
   const initialModeRef = useRef(true);
+  const resetMountedRef = useRef(false);
 
   /* state */
   const [meta, setMeta] = useState({
@@ -205,6 +207,26 @@ const LookUp: React.FC<LookUpProps> = ({
     onMetaExtraChange?.({ metaType4: json });
   };
 
+  /* ─── با تغییر resetKey از والد، metaType5 داخلی را هم خالی کن ─── */
+  useEffect(() => {
+    if (!resetMountedRef.current) {
+      resetMountedRef.current = true;
+      return; // روی mount اولیه کاری نکن (برای حالت Edit)
+    }
+    setMeta((p) => {
+      if (!p.metaType5) return p;
+      const next = { ...p, metaType5: "" };
+      onMetaChange?.({
+        ...data,
+        ...next,
+        CountInReject: removeSameName,
+        BoolMeta1: oldLookup,
+      });
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]);
+
   /* ─── AG‑Grid columns ─── */
   const columnDefs = useMemo(
   () => [
@@ -281,6 +303,8 @@ const LookUp: React.FC<LookUpProps> = ({
           />
 
           <PostPickerList
+            key={`pp-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`}
+            resetKey={resetKey}
             sourceType="projects"
             initialMetaType={meta.metaType5}
             data={{ metaType5: meta.metaType5 || undefined }}

@@ -21,6 +21,8 @@ interface PostPickerListProps {
   onMetaChange?: (metaUpdated: { [key: string]: string }) => void;
   label?: string;
   emptyText?: string;
+  /** 🔑 هر بار که این مقدار تغییر کند (بعد از mount)، انتخاب‌ها پاک می‌شوند */
+  resetKey?: number | string;
 }
 
 const PostPickerList: React.FC<PostPickerListProps> = ({
@@ -32,6 +34,7 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
   onMetaChange,
   label,
   emptyText,
+  resetKey,
 }) => {
   const { t } = useTranslation();
   const finalLabel = label || t("PostPickerList.Labels.DefaultValues");
@@ -97,6 +100,21 @@ const PostPickerList: React.FC<PostPickerListProps> = ({
     prevJoinedRef.current = joined;
     onMetaChange({ [metaFieldKey]: joined });
   }, [selected, metaFieldKey, onMetaChange]);
+
+  /* ---------- reset by resetKey (after first mount only) ---------- */
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return; // روی mount اولیه پاک نکن (برای حالت ویرایش)
+    }
+    // پاک‌سازی انتخاب‌ها و اطلاع به والد
+    setSelected([]);
+    prevJoinedRef.current = "";
+    prevInitRef.current = "";
+    onMetaChange?.({ [metaFieldKey]: "" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]);
 
   /* ---------- handlers ---------- */
   const addItems = useCallback((items: SelectedItem[]) => {

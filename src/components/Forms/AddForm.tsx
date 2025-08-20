@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useApi } from "../../context/ApiContext";
 import { useTranslation } from "react-i18next";
+
+// UI utilities
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import DynamicSelector from "../utilities/DynamicSelector";
+
+// Controllers
 import Component1 from "./ControllerForms/TextController";
 import Component2 from "./ControllerForms/RichTextController";
 import Component3 from "./ControllerForms/ChoiceController";
@@ -36,6 +40,7 @@ import Component30 from "./ControllerForms/SectionController";
 import Component31 from "./ControllerForms/SubSectionController";
 import Component32 from "./ControllerForms/MePostSelectorController";
 import Component33 from "./ControllerForms/AdvanceWf";
+
 import apiService from "../../services/api.services";
 
 // Mapping of column types
@@ -50,7 +55,7 @@ const columnTypeMapping: { [key: string]: number } = {
   component8: 19,
   component9: 34,
   component10: 35,
-  component11: 17,
+  component11: 17, // (reserved)
   component12: 30,
   component13: 6,
   component14: 9,
@@ -148,7 +153,7 @@ const typeOfInformationOptions = [
 
 interface AddColumnFormProps {
   onClose: () => void;
-  onSave?: (newField: { ID: number; Name: string }) => void; // ✅ اینو اضافه کن
+  onSave?: (newField: { ID: number; Name: string }) => void;
   isEdit?: boolean;
   existingData?: any;
   entityTypeId?: string; // مقدار nEntityTypeID از selectedRow
@@ -241,29 +246,54 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     metaType4: "",
   });
 
+  const DEFAULT_META_CORE: MetaCore = {
+    metaType1: "",
+    metaType2: null,
+    metaType3: "drop",
+    LookupMode: "",
+    oldLookup: false,
+    metaType5: null,
+    metaTypeJson: null,
+  };
+
+  const DEFAULT_META_EXTRA = {
+    metaType4: "[]",
+  };
+
+  // --- Helpers برای نرمال‌سازی مقادیر ---
+  const toStr = (v: any, empty = "") => (v != null ? String(v) : empty);
+  const toStrOrNull = (v: any) =>
+    v != null && String(v).trim() !== "" ? String(v) : null;
+
+  // 🔑 کلید ریست برای کنترلرها و PostPickerList
+  const [controllerResetKey, setControllerResetKey] = useState(0);
+
   useEffect(() => {
     if (isEdit && existingData) {
       setFormData(getInitialFormData());
 
-      // مقداردهی اولیه metaCore
+      // مقداردهی اولیه metaCore (ایمن و نرمال)
       setMetaCore({
-        metaType1: existingData.metaType1 || "",
-        metaType2: existingData.metaType2 || null,
-        metaType3: existingData.metaType3 || null,
-        LookupMode:
-          existingData.LookupMode !== undefined &&
-          existingData.LookupMode !== null
-            ? String(existingData.LookupMode)
-            : "",
-
-        oldLookup: existingData.BoolMeta1 || false,
-        metaType5: existingData.metaType5 || null,
-        metaTypeJson: existingData.metaTypeJson || null,
+        metaType1: toStr(existingData.metaType1, ""),
+        metaType2: toStrOrNull(existingData.metaType2),
+        metaType3: toStr(existingData.metaType3, "drop"),
+        LookupMode: toStr(existingData.LookupMode, ""),
+        oldLookup: !!existingData.BoolMeta1,
+        metaType5: toStrOrNull(existingData.metaType5),
+        metaTypeJson:
+          typeof existingData.metaTypeJson === "string" &&
+          existingData.metaTypeJson.trim() !== ""
+            ? existingData.metaTypeJson
+            : null,
       });
 
-      // مقداردهی اولیه metaExtra
+      // مقداردهی اولیه metaExtra (اگر کنترلرهایی که جدول دارند اجرا شوند)
       setMetaExtra({
-        metaType4: existingData.metaType4 || "",
+        metaType4:
+          typeof existingData.metaType4 === "string" &&
+          existingData.metaType4.trim() !== ""
+            ? existingData.metaType4
+            : "[]",
       });
 
       setErrors({});
@@ -289,23 +319,33 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         countInReject: false,
       });
 
-      setMetaCore({
-        metaType1: "",
-        metaType2: null,
-        metaType3: null,
-        LookupMode: null,
-        oldLookup: false,
-        metaType5: null,
-        metaTypeJson: null,
-      });
-
-      setMetaExtra({
-        metaType4: "",
-      });
-
+      setMetaCore(DEFAULT_META_CORE);
+      setMetaExtra(DEFAULT_META_EXTRA);
       setErrors({});
     }
   }, [isEdit, existingData]);
+
+  // ریست متاها هنگام تغییر نوع کنترلر (برای جلوگیری از نشت state)
+  useEffect(() => {
+    if (!isEdit) {
+      setMetaCore(DEFAULT_META_CORE);
+      setMetaExtra(DEFAULT_META_EXTRA);
+
+      // در صورت نیاز برخی فیلدهای عمومی را هم ریست کن
+      setFormData((prev) => ({
+        ...prev,
+        command: "",
+        countInReject: false,
+        rightToLeft: false,
+        readOnly: false,
+        showInTab: "",
+      }));
+
+      // 🔁 هر بار نوع اطلاعات عوض شد، کلید ریست را افزایش بده
+      setControllerResetKey((k) => k + 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.typeOfInformation]);
 
   // تغییر مقادیر فرم
   const handleChange = (field: keyof typeof formData, value: any) => {
@@ -341,6 +381,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
     const metaType5Value = metaCore.metaType5 || null;
 
+    // از mutation مستقیم state جلوگیری کنیم
+    let metaCoreForSubmit: MetaCore = {
+      ...metaCore,
+      LookupMode: metaCore.LookupMode ?? "",
+    };
+
     if (
       formData.typeOfInformation === "component26" &&
       metaCore.metaType1 &&
@@ -357,9 +403,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       try {
         const res = await apiService.insertEntityType(combinedEntityType);
         if (res?.ID) {
-          metaCore.metaTypeJson = JSON.stringify({
-            CombinedEntityType: res.ID,
-          });
+          metaCoreForSubmit = {
+            ...metaCoreForSubmit,
+            metaTypeJson: JSON.stringify({ CombinedEntityType: res.ID }),
+          };
         }
       } catch (error) {
         console.error("❌ خطا در ایجاد EntityType ترکیبی:", error);
@@ -369,9 +416,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       }
     }
 
-    console.log("✅ شروع handleSubmit");
+    // اطمینان از معتبر بودن metaType4:
+    const normalizedMetaType4 =
+      metaExtra.metaType4 != null ? String(metaExtra.metaType4) : "[]";
 
-    // ✅ ساخت payload بعد از set کردن metaTypeJson
+    // ✅ ساخت payload
     const payload: any = {
       DisplayName: formData.formName,
       IsShowGrid: formData.showInListView,
@@ -384,8 +433,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ColumnType: columnTypeMapping[formData.typeOfInformation],
       Code: formData.command || null,
       Description: formData.description,
-      ...metaCore,
-      metaType4: metaExtra.metaType4,
+      ...metaCoreForSubmit,
+      metaType4: normalizedMetaType4,
       metaType5: metaType5Value,
       PrintCode: formData.printCode,
       IsForceReadOnly: formData.readOnly,
@@ -412,9 +461,6 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       LastModified: currentTimestamp,
       IsGlobal: true,
     };
-
-    console.log("🧾 مقدار IsGlobal:", payload.IsGlobal);
-    console.log("✅ ارسال به API");
 
     try {
       let newId = 0;
@@ -444,33 +490,52 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     }
   };
 
-  // ✅ ✅ اینو همینجا اضافه کن:
+  // این متد را کنترلرها برای metaType4 (JSON جدول‌ها) صدا می‌زنند
   const handleMetaExtraChange = (updated: { metaType4: string }) => {
     setMetaExtra((prev) => ({
       ...prev,
-      ...updated,
+      metaType4: updated.metaType4 ?? prev.metaType4,
     }));
   };
 
-  // رندر کنترلر داینامیک (مثلاً Lookup, SeqnialNumber, ...)
+  // نوع‌هایی که ProgramMetaColumnName ندارد
+  const hiddenTypesForProgramMeta = [
+    "component9",  // Lookup RealValue
+    "component7",  // Lookup
+    "component26", // Advance Lookup AdvanceTable
+    "component19", // Advance Table
+    "component10", // Lookup AdvanceTable
+    "component18", // Seqnial Number
+    "component16", // Table
+  ];
+
+  // رندر کنترلر داینامیک
   const renderSelectedComponent = () => {
     const SelectedComponent = componentMapping[formData.typeOfInformation];
     if (!SelectedComponent) return null;
 
     return (
       <SelectedComponent
-        // ۱) همان onMetaChange که قبلاً داشتی
+        key={`${formData.typeOfInformation}-${controllerResetKey}`} // برای remount شدن حتی در بازگشت به همان نوع
+        resetKey={controllerResetKey} // 🔑 سیگنال ریست برای کنترلرها و PostPickerList
         onMetaChange={(updated: any) => {
           setMetaCore((prev) => ({
             ...prev,
             metaType1: updated.metaType1 ?? prev.metaType1,
             metaType2: updated.metaType2 ?? prev.metaType2,
             metaType3: updated.metaType3 ?? prev.metaType3,
-            LookupMode: updated.LookupMode ?? prev.LookupMode,
+            LookupMode:
+              updated.LookupMode !== undefined
+                ? updated.LookupMode
+                : prev.LookupMode,
             metaType5: updated.metaType5 ?? prev.metaType5,
             metaTypeJson: updated.metaTypeJson ?? prev.metaTypeJson,
-            oldLookup: updated.BoolMeta1 ?? prev.oldLookup,
+            oldLookup:
+              updated.BoolMeta1 !== undefined
+                ? !!updated.BoolMeta1
+                : prev.oldLookup,
           }));
+          // همگام‌سازی فیلد بولی countInReject در صورت وجود در خروجی کنترلر
           setFormData((prev) => ({
             ...prev,
             countInReject:
@@ -479,36 +544,23 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 : prev.countInReject,
           }));
         }}
-        // ۲) اینجا تمام فیلدهای metaCore + metaExtra رو پاس می‌دیم
         data={{
           ...metaCore,
-          // metaCore شامل: metaType1, metaType2, metaType3, LookupMode, metaType5, metaTypeJson, oldLookup
-          metaType4: metaExtra.metaType4, // اضافه می‌کنیم
-          BoolMeta1: metaCore.oldLookup, // برای تیک اولیه‌ی Old Lookup
+          metaType4: metaExtra.metaType4,
+          BoolMeta1: metaCore.oldLookup,
           CountInReject: formData.countInReject,
-          isEdit: isEdit, // برای تیک اولیه‌ی CountInReject
+          isEdit: isEdit,
         }}
         onMetaExtraChange={handleMetaExtraChange}
       />
     );
   };
 
-  const hiddenTypesForProgramMeta = [
-    "component9", // Lookup RealValue
-    "component7", // Lookup
-    "component26", // Advance Lookup AdvanceTable
-    "component19", // Advance Table
-    "component10", // Lookup AdvanceTable
-    "component18", // Seqnial Number
-    "component16", // Table
-  ];
-
   return (
     <div className="flex items-center justify-center">
       <style>{`
-      /* در RTL، فاصله‌ی labelهایی که ml-3 دارند از راست اعمال شود */
-      [dir="rtl"] label.ml-3 { margin-right: .75rem; margin-left: 0; }
-    `}</style>
+        [dir="rtl"] label.ml-3 { margin-right: .75rem; margin-left: 0; }
+      `}</style>
 
       {isLoading && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
@@ -532,6 +584,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             value={formData.formName}
             onChange={(e) => handleChange("formName", e.target.value)}
             required={true}
+            labelClassName="text-gray-700 font-medium"
           />
           {errors.formName && (
             <p className="text-red-500 md:col-span-2">{errors.formName}</p>
@@ -543,6 +596,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             type="number"
             value={formData.order}
             onChange={(e) => handleChange("order", e.target.value)}
+            labelClassName="text-gray-700 font-medium"
           />
 
           {/* Description */}
@@ -551,6 +605,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             className="md:col-span-1 -mt-3"
+            labelClassName="text-gray-700 font-medium"
           />
 
           {/* Command */}
@@ -562,6 +617,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             label={t("AddForms.Command")}
             allowCustom={true}
             className="md:col-span-1 -mt-3"
+            labelClassName="text-gray-700 font-medium"
           />
 
           {/* Required in Workflow */}
@@ -574,10 +630,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label
-              htmlFor="isRequiredInWf"
-              className="ml-3 text-gray-700 font-medium"
-            >
+            <label htmlFor="isRequiredInWf" className="ml-3 text-gray-700 font-medium">
               {t("AddForms.IsRequiredInWf")}
             </label>
           </div>
@@ -588,6 +641,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             value={formData.printCode}
             onChange={(e) => handleChange("printCode", e.target.value)}
             className="-mt-3"
+            labelClassName="text-gray-700 font-medium"
           />
 
           {/* Editable in Workflow, Workflow Box, Show in Alert */}
@@ -621,6 +675,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   handleChange("allowedWfBoxName", e.target.value)
                 }
                 className="flex-1"
+                labelClassName="text-gray-700 font-medium"
               />
 
               <div className="flex items-center translate-y-[10px]">
@@ -634,10 +689,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label
-                  htmlFor="showInAlert"
-                  className="ml-3 text-gray-700 font-medium"
-                >
+                <label htmlFor="showInAlert" className="ml-3 text-gray-700 font-medium">
                   {t("AddForms.ShowInAlert")}
                 </label>
               </div>
@@ -653,6 +705,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             label={t("AddForms.TypeOfInformation")}
             className="md:col-span-2"
             disabled={isEdit}
+            labelClassName="text-gray-700 font-medium"
           />
 
           {/* checkbox row */}
@@ -666,10 +719,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("required", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="required"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="required" className="ml-3 text-gray-700 font-medium">
                 {t("AddForms.Required")}
               </label>
             </div>
@@ -683,10 +733,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("mainColumns", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="mainColumns"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="mainColumns" className="ml-3 text-gray-700 font-medium">
                 {t("AddForms.MainColumns")}
               </label>
             </div>
@@ -702,10 +749,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 }
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="showInListView"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="showInListView" className="ml-3 text-gray-700 font-medium">
                 {t("AddForms.ShowInList")}
               </label>
             </div>
@@ -719,31 +763,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("rightToLeft", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label
-                htmlFor="rightToLeft"
-                className="ml-3 text-gray-700 font-medium"
-              >
+              <label htmlFor="rightToLeft" className="ml-3 text-gray-700 font-medium">
                 {t("AddForms.RightToLeft")}
               </label>
             </div>
           </div>
 
-          {/* Count In Reject */}
+          {/* Count In Reject + ReadOnly */}
           <div className="flex items-center md:col-span-2">
-            {/* <input
-              type="checkbox"
-              id="countInReject"
-              name="countInReject"
-              checked={formData.countInReject}
-              onChange={(e) => handleChange("countInReject", e.target.checked)}
-              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-            />
-            <label
-              htmlFor="countInReject"
-              className="ml-3 text-gray-700 font-medium"
-            >
-              {t("AddForms.CountInReject")}
-            </label> */}
             <input
               type="checkbox"
               id="readOnly"
@@ -752,10 +779,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("readOnly", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label
-              htmlFor="readOnly"
-              className="ml-3 text-gray-700 font-medium"
-            >
+            <label htmlFor="readOnly" className="ml-3 text-gray-700 font-medium">
               {t("AddForms.ReadOnly")}
             </label>
           </div>
@@ -771,11 +795,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("showInTab", e.target.value)}
               placeholder=""
               className="flex-1"
+              labelClassName="text-gray-700 font-medium"
             />
 
-            {!hiddenTypesForProgramMeta.includes(
-              formData.typeOfInformation
-            ) && (
+            {!hiddenTypesForProgramMeta.includes(formData.typeOfInformation) && (
               <DynamicInput
                 name={t("AddForms.ProgramMetaColumnName")}
                 type="text"
@@ -783,10 +806,11 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) =>
                   setMetaExtra((prev) => ({
                     ...prev,
-                    metaType4: e.target.value,
+                    metaType4: e.target.value, // متن ساده، نه JSON
                   }))
                 }
                 className="flex-1"
+                labelClassName="text-gray-700 font-medium"
               />
             )}
           </div>
@@ -822,6 +846,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 });
                 setDynamicMeta({});
                 setErrors({});
+                setMetaCore(DEFAULT_META_CORE);
+                setMetaExtra(DEFAULT_META_EXTRA);
                 onClose();
               }}
             >

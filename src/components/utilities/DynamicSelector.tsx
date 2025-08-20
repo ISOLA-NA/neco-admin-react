@@ -30,6 +30,9 @@ interface DynamicSelectorProps {
   onClear?: () => void;
   placeholder?: string;
   noOptionsText?: string;
+
+  /** کلاس سفارشی برای لیبل (برای هماهنگی با چک‌باکس‌ها در AddColumnForm) */
+  labelClassName?: string;
 }
 
 const DynamicSelector: React.FC<DynamicSelectorProps> = ({
@@ -55,6 +58,9 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   onClear,
   placeholder,
   noOptionsText,
+
+  /** کلاس لیبل */
+  labelClassName,
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -77,7 +83,8 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
     if (!searchable || !searchQuery.trim()) return options;
     const q = searchQuery.trim().toLowerCase();
     return options.filter(
-      (o) => o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q)
+      (o) =>
+        o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q)
     );
   }, [options, searchable, searchQuery]);
 
@@ -87,7 +94,9 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
       setTimeout(() => {
         // فوکوس روی سرچ یا لیست بعد از باز شدن
         if (searchable && listRef.current) {
-          const input = listRef.current.querySelector("input[data-role='search']") as HTMLInputElement | null;
+          const input = listRef.current.querySelector(
+            "input[data-role='search']"
+          ) as HTMLInputElement | null;
           input?.focus();
         }
       }, 0);
@@ -136,7 +145,10 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   // بستن با کلیک بیرون
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setOpen(false);
         setActiveIndex(-1);
       }
@@ -154,14 +166,20 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
         setOpen(true);
         setTimeout(() => {
           if (searchable) {
-            const input = listRef.current?.querySelector("input[data-role='search']") as HTMLInputElement | null;
+            const input = listRef.current?.querySelector(
+              "input[data-role='search']"
+            ) as HTMLInputElement | null;
             input?.focus();
           } else {
             listRef.current?.focus();
           }
         }, 0);
       }
-    } else if ((e.key === "Backspace" || e.key === "Delete") && clearable && selectedValue) {
+    } else if (
+      (e.key === "Backspace" || e.key === "Delete") &&
+      clearable &&
+      selectedValue
+    ) {
       e.preventDefault();
       handleClear(e.nativeEvent);
     }
@@ -197,7 +215,10 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   // اسکرول خودکار به آیتم فعال
   useEffect(() => {
     if (!open || activeIndex < 0) return;
-    const el = listRef.current?.querySelector<HTMLDivElement>(`[data-index="${activeIndex}"]`);
+    const el =
+      listRef.current?.querySelector<HTMLDivElement>(
+        `[data-index="${activeIndex}"]`
+      );
     el?.scrollIntoView({ block: "nearest" });
   }, [activeIndex, open]);
 
@@ -205,16 +226,31 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
   const triggerPadding = classNames(
     leftIcon ? "ltr:pl-8 rtl:pr-8" : "ltr:pl-2 rtl:pr-2",
     // جا برای caret و clear
-    clearable && selectedValue && !disabled ? "ltr:pr-10 rtl:pl-10" : "ltr:pr-8 rtl:pl-8"
+    clearable && selectedValue && !disabled
+      ? "ltr:pr-10 rtl:pl-10"
+      : "ltr:pr-8 rtl:pl-8"
   );
 
   return (
     <div
       ref={containerRef}
-      className={classNames("relative flex flex-col gap-1", className, disabled ? "opacity-75 cursor-not-allowed" : "")}
+      className={classNames(
+        "relative flex flex-col gap-1",
+        className,
+        disabled ? "opacity-75 cursor-not-allowed" : ""
+      )}
     >
       {label && (
-        <label htmlFor={name} className="block text-xs text-gray-600 mb-1" title={label}>
+        <label
+          htmlFor={name}
+          className={classNames(
+            "block mb-1",
+            labelClassName
+              ? labelClassName // اگر خواستید مثل چک‌باکس‌ها: "text-gray-700 font-medium"
+              : "text-xs text-gray-600"
+          )}
+          title={label}
+        >
           {label}
         </label>
       )}
@@ -256,11 +292,23 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                 type="button"
                 onClick={handleClear}
                 className="absolute top-1/2 transform -translate-y-1/2 ltr:right-7 rtl:left-7 rounded hover:bg-gray-100 p-1"
-                aria-label={t("Clear selection", { defaultValue: "Clear selection" })}
+                aria-label={t("Clear selection", {
+                  defaultValue: "Clear selection",
+                })}
                 title={t("Clear", { defaultValue: "Clear" })}
               >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
+                <svg
+                  className="w-3.5 h-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 6l12 12M18 6L6 18"
+                  />
                 </svg>
               </button>
             )}
@@ -273,7 +321,12 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
 
@@ -281,7 +334,9 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
             <div
               id={name ? `${name}-listbox` : undefined}
               role="listbox"
-              aria-activedescendant={activeIndex >= 0 ? `${name}-opt-${activeIndex}` : undefined}
+              aria-activedescendant={
+                activeIndex >= 0 ? `${name}-opt-${activeIndex}` : undefined
+              }
               tabIndex={-1}
               ref={listRef}
               onKeyDown={onListKeyDown}
@@ -313,7 +368,9 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                   <input
                     type="text"
                     className="w-full text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                    placeholder={t("Type custom value...", { defaultValue: "Type custom value..." })}
+                    placeholder={t("Type custom value...", {
+                      defaultValue: "Type custom value...",
+                    })}
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -329,7 +386,10 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                       className="mt-2 w-full text-xs border border-purple-500 text-purple-700 rounded px-2 py-1 hover:bg-purple-50"
                       title={t("Add", { defaultValue: "Add" })}
                     >
-                      {t('Add "{{value}}"', { defaultValue: 'Add "{{value}}"', value: customInput })}
+                      {t('Add "{{value}}"', {
+                        defaultValue: 'Add "{{value}}"',
+                        value: customInput,
+                      })}
                     </button>
                   )}
                 </div>
@@ -338,7 +398,8 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
               {/* گزینه‌ها */}
               {filteredOptions.length === 0 ? (
                 <div className="px-3 py-2 text-xs text-gray-500">
-                  {noOptionsText || t("No results", { defaultValue: "No results" })}
+                  {noOptionsText ||
+                    t("No results", { defaultValue: "No results" })}
                 </div>
               ) : (
                 filteredOptions.map((option, idx) => {
@@ -365,8 +426,18 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
                         {option.label}
                       </span>
                       {isSelected && (
-                        <svg className="w-4 h-4 ltr:ml-auto rtl:mr-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        <svg
+                          className="w-4 h-4 ltr:ml-auto rtl:mr-auto"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
                         </svg>
                       )}
                     </div>
@@ -378,9 +449,25 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
 
           {loading && (
             <div className="absolute top-1/2 transform -translate-y-1/2 ltr:right-2 rtl:left-2">
-              <svg className="animate-spin h-4 w-4 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              <svg
+                className="animate-spin h-4 w-4 text-purple-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
               </svg>
             </div>
           )}
@@ -402,7 +489,9 @@ const DynamicSelector: React.FC<DynamicSelectorProps> = ({
         )}
       </div>
 
-      {error && errorMessage && <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>}
+      {error && errorMessage && (
+        <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>
+      )}
     </div>
   );
 };

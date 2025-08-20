@@ -9,6 +9,8 @@ interface DynamicInputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
   errorMessage?: string;
   loading?: boolean;
+  /** کلاس سفارشی برای لیبل (برای هماهنگ‌کردن با چک‌باکس‌ها در AddColumnForm) */
+  labelClassName?: string;
 }
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
@@ -29,6 +31,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   min,
   max,
   step,
+  labelClassName, // ← دریافت کلاس سفارشی لیبل
   ...others
 }) => {
   // برچسبی که نمایش داده می‌شود: اگر label باشد، آن را نمایش بده، وگرنه از name استفاده کن
@@ -40,7 +43,12 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
         <label
           htmlFor={name}
           title={labelText}
-          className="block text-xs text-gray-600 mb-1 truncate whitespace-nowrap overflow-hidden"
+          className={classNames(
+            "block mb-1", // ساختار لیبل
+            labelClassName
+              ? labelClassName // اگر کلاس سفارشی آمد، همان را اعمال کن (برای شباهت با چک‌باکس‌ها)
+              : "text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden" // حالت پیش‌فرض قبلی
+          )}
         >
           {labelText}
           {required && <span className="text-red-500"> *</span>}

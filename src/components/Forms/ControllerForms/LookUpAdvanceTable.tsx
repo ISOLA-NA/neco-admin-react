@@ -22,6 +22,8 @@ interface LookUpAdvanceTableProps {
   };
   onMetaChange?: (updated: any) => void;
   onMetaExtraChange?: (updated: { metaType4: string }) => void;
+  /** 🔑 سیگنال ریست از والد هنگام تغییر Type of Information */
+  resetKey?: number | string;
 }
 
 interface TableRow {
@@ -36,6 +38,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   data = {},
   onMetaChange,
   onMetaExtraChange,
+  resetKey,
 }) => {
   const { t } = useTranslation();
   // ─── Helpers ─────────────────────────────────────────────
@@ -45,6 +48,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
 
   // ─── Refs ────────────────────────────────────────────────
   const initialModeRef = useRef(true);
+  const resetMountedRef = useRef(false);
 
   // ─── State ───────────────────────────────────────────────
   const [meta, setMeta] = useState({
@@ -209,6 +213,26 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     onMetaExtraChange?.({ metaType4: json });
   };
 
+  // ─── با تغییر resetKey از والد، metaType5 را هم خالی کن (بعد از mount) ───
+  useEffect(() => {
+    if (!resetMountedRef.current) {
+      resetMountedRef.current = true;
+      return;
+    }
+    setMeta((p) => {
+      if (!p.metaType5) return p;
+      const next = { ...p, metaType5: "" };
+      onMetaChange?.({
+        ...data,
+        ...next,
+        CountInReject: removeSameName,
+        BoolMeta1: oldLookup,
+      });
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]);
+
   // ─── AG‑Grid columnDefs ────────────────────────────────────
   const columnDefs = useMemo(
     () => [
@@ -276,6 +300,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           />
 
           <PostPickerList
+            key={`pp-luat-${meta.metaType1}|${meta.metaType2}|${resetKey ?? 0}`}
+            resetKey={resetKey}
             sourceType="projects"
             initialMetaType={meta.metaType5}
             data={{ metaType5: meta.metaType5 || undefined }}

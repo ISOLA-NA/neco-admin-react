@@ -203,6 +203,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             selectedValue={i18n.language}
             onChange={handleLanguageChange}
             label=""
+            clearable={false}
+            searchable={false}
           />
         </div>
 
