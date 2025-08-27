@@ -1,10 +1,10 @@
 {
     "ChoiceController": {
-      "DisplayChoicesUsing": "نمایش گزینه‌ها به این صورت:",
+      "DisplayChoicesUsing": "نمایش گزینه ها با استفاده از",
       "DropDownMenu": "منوی کشویی",
       "RadioButtons": "دکمه‌های رادیویی",
-      "CheckBox": "چک‌باکس",
-      "TypeEachChoiceOnSeparateLine": "هر گزینه را در یک خط جداگانه بنویسید:",
+      "CheckBox": "گزینه انتخابی",
+      "TypeEachChoiceOnSeparateLine": "هر گزینه را در یک خط وارد کنید ",
       "EnterEachChoiceOnNewLine": "هر گزینه را در یک خط جدید وارد کنید",
       "DefaultValueLabel": "مقدار پیش‌فرض:",
       "EnterDefaultValue": "مقدار پیش‌فرض را وارد کنید",

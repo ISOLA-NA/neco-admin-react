@@ -1,7 +1,7 @@
 {
     "LookupUmage": {
       "Form": {
-        "GetInformationFrom": "دریافت اطلاعات از",
+        "GetInformationFrom": "دریافت اطلاعات از فرم",
         "WhatColumnToDisplay": "کدام ستون نمایش داده شود",
         "RemoveSameName": "حذف نام‌های تکراری"
       },

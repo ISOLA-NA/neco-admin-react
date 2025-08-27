@@ -1,12 +1,12 @@
 {
   "DateTimeSelector": {
-    "DateTimeFormatLabel": "قالب تاریخ و زمان:",
+    "DateTimeFormatLabel": "فرمت تاریخ و زمان",
     "DateOnly": "فقط تاریخ",
     "DateAndTime": "تاریخ و زمان",
     "DefaultValueLabel": "مقدار پیش‌فرض:",
-    "None": "هیچ‌کدام",
+    "None": "بدون مقدار",
     "TodaysDate": "تاریخ امروز",
-    "IsDynamic": "داینامیک باشد",
+    "IsDynamic": "پویا",
     "SelectDatePlaceholder": "انتخاب تاریخ",
     "SelectTimePlaceholder": "انتخاب زمان",
     "ModalSelectDateTitle": "انتخاب تاریخ",

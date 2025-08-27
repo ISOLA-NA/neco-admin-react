@@ -1,8 +1,8 @@
 {
     "TableController": {
       "Labels": {
-        "FixRow": "قفل‌کردن ردیف",
-        "FixRowValue": "مقدار ردیفِ قفل‌شده",
+        "FixRow": "ردیف ثابت",
+        "FixRowValue": "مقدار ردیف ثابت",
         "ColumnTitles": "عناوین ستون‌ها"
       },
       "Placeholders": {

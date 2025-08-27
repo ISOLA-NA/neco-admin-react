@@ -1,7 +1,7 @@
 {
     "LookUpAdvanceTable": {
       "Form": {
-        "GetInformationFrom": "دریافت اطلاعات از",
+        "GetInformationFrom": "دریافت اطلاعات از فرم",
         "WhatColumnToDisplay": "کدام ستون نمایش داده شود",
         "DefaultProjects": "پروژه‌های پیش‌فرض"
       },

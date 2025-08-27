@@ -1,11 +1,11 @@
 {
     "LookUpRealValue": {
       "Form": {
-        "GetInformationFrom": "دریافت اطلاعات از",
+        "GetInformationFrom": "دریافت اطلاعات از فرم",
         "WhatColumnToDisplay": "کدام ستون نمایش داده شود",
         "Modes": "حالت‌ها",
         "DefaultProjects": "پروژه‌های پیش‌فرض",
-        "OldLookup": "جستجوی قدیمی"
+        "OldLookup": "ارجاع به داده قدیمی"
       },
       "Columns": {
         "SrcField": "فیلد مبدأ",

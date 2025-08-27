@@ -1,8 +1,8 @@
 {
     "AdvanceLookupAdvanceTable": {
       "Form": {
-        "ForFirstFormGetInformationFrom": "برای فرم اول، دریافت اطلاعات از",
-        "ForSecondFormGetInformationFrom": "برای فرم دوم، دریافت اطلاعات از",
+        "ForFirstFormGetInformationFrom": "برای فرم اول، دریافت اطلاعات از فرم",
+        "ForSecondFormGetInformationFrom": "برای فرم دوم، دریافت اطلاعات از فرم",
         "LookupMode": "حالت جست‌وجو (Lookup)",
         "ShowColumnsOfFirstForm": "ستون‌های فرم اول به شکل زیر نمایش داده شوند"
       },

@@ -2,16 +2,16 @@
     "SeqenialNumber": {
       "Labels": {
         "Command": "دستور",
-        "NumberOfDigit": "تعداد رقم",
-        "SeparatorCharacter": "کاراکتر جداکننده",
+        "NumberOfDigit": "تعداد ارقام",
+        "SeparatorCharacter": "جداکننده",
         "CountOfConst": "تعداد ثابت",
         "CountInReject": "شمارش در رد شده‌ها",
         "Modes": "حالت‌ها"
       },
       "Placeholders": {
         "Command": "دستور",
-        "NumberOfDigit": "تعداد رقم",
-        "SeparatorCharacter": "کاراکتر جداکننده",
+        "NumberOfDigit": "تعداد ارقام",
+        "SeparatorCharacter": "جداکننده",
         "CountOfConst": "تعداد ثابت"
       },
       "Options": {

@@ -1,7 +1,7 @@
 {
   "LookUp": {
-    "GetInformationFrom": "دریافت اطلاعات از",
-    "WhatColumnToDisplay": "نمایش کدام ستون",
+    "GetInformationFrom": "دریافت اطلاعات از فرم",
+    "WhatColumnToDisplay": "کدام ستون نمایش داده شود",
     "Modes": "حالت‌ها",
     "DefaultProjects": "پروژه‌های پیش‌فرض",
 
@@ -11,7 +11,7 @@
     "CheckboxesAllowMultiple": "چک‌باکس‌ها (انتخاب چندگانه)",
 
     "RemoveSameName": "حذف نام‌های تکراری",
-    "OldLookup": "جستجوی قدیمی",
+    "OldLookup": "ارجاع به داده قدیمی",
 
     "Columns": {
       "SrcField": "فیلد مبدا",
