@@ -459,11 +459,10 @@ const Accordion3: React.FC<Accordion3Props> = ({
   };
 
   const handleSelectCommand = (cmd: string) => {
-    // ⭐ NEW
-    console.log("🎯 Windows Cmd selected:", cmd); // ⭐ NEW
-    setWindowsAppCommand(cmd); // ⭐ NEW
-    setFormData((prev) => ({ ...prev, Command: cmd })); // ⭐ NEW  ← اگر می‌خواهید همراه رکورد ذخیره شود
-    setCommandModalOpen(false); // ⭐ NEW  ← بستن مودال
+    console.log("🎯 Windows Cmd selected:", cmd); 
+    setWindowsAppCommand(cmd); 
+    setFormData((prev) => ({ ...prev, Command: cmd })); 
+    setCommandModalOpen(false);
   };
 
   return (
