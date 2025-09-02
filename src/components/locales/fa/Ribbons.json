@@ -1,14 +1,16 @@
 {
-    "Ribbons": {
-      "Name": "نام",
-      "WindowsWebCommand": "دستور وب ویندوز",
-      "WindowsAppCommand": "دستور برنامه ویندوز",
-      "Description": "توضیحات",
-      "Order": "ترتیب",
-      "Size": "اندازه :",
-      "Large": "بزرگ",
-      "Medium": "متوسط",
-      "Small": "کوچک"
-    }
+  "Ribbons": {
+    "Name": "نام",
+    "WindowsWebCommand": "دستور وب ویندوز",
+    "WindowsAppCommand": "دستور برنامه ویندوز",
+    "Description": "توضیحات",
+    "Order": "ترتیب",
+    "Size": "اندازه :",
+    "Large": "بزرگ",
+    "Medium": "متوسط",
+    "Small": "کوچک",
+    "MobileAppCommand": "دستور برنامه موبایل",
+    "HelpText": "متن راهنما",
+    "KeyTip": "راهنمای کلید"
   }
-  
+}

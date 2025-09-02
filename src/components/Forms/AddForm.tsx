@@ -116,41 +116,6 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component33: Component33,
 };
 
-const typeOfInformationOptions = [
-  { value: "component1", label: "Text" },
-  { value: "component2", label: "RichText" },
-  { value: "component3", label: "Choice" },
-  { value: "component4", label: "Number" },
-  { value: "component5", label: "Date Time" },
-  { value: "component6", label: "Persian Date" },
-  { value: "component7", label: "Lookup" },
-  { value: "component27", label: "Hyper Link" },
-  { value: "component8", label: "Post PickerList" },
-  { value: "component9", label: "Lookup RealValue" },
-  { value: "component10", label: "Lookup AdvanceTable" },
-  { value: "component26", label: "Advance Lookup AdvanceTable" },
-  { value: "component29", label: "Title" },
-  { value: "component30", label: "Section" },
-  { value: "component31", label: "SubSection" },
-  { value: "component12", label: "Lookup Image" },
-  { value: "component28", label: "Select User In Post" },
-  { value: "component13", label: "Yes No" },
-  { value: "component14", label: "Attach File" },
-  { value: "component15", label: "Picture Box" },
-  { value: "component16", label: "Table" },
-  { value: "component17", label: "Pfi Lookup" },
-  { value: "component32", label: "MePostSelector" },
-  { value: "component18", label: "Seqnial Number" },
-  { value: "component19", label: "Advance Table" },
-  { value: "component33", label: "Advance wf" },
-  { value: "component20", label: "Word Panel" },
-  { value: "component21", label: "Excecl Panel" },
-  { value: "component22", label: "Calculated Field" },
-  { value: "component23", label: "Excel Calculator" },
-  { value: "component24", label: "Tab" },
-  { value: "component25", label: "Map" },
-];
-
 interface AddColumnFormProps {
   onClose: () => void;
   onSave?: (newField: { ID: number; Name: string }) => void;
@@ -178,6 +143,41 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 }) => {
   const { t } = useTranslation();
   const { insertEntityField, updateEntityField } = useApi();
+
+  const typeOfInformationOptions = [
+  { value: "component1", label: t("ColumnTypes.Text") },
+  { value: "component2", label: t("ColumnTypes.RichText") },
+  { value: "component3", label: t("ColumnTypes.Choice") },
+  { value: "component4", label: t("ColumnTypes.Number") },
+  { value: "component5", label: t("ColumnTypes.DateTime") },
+  { value: "component6", label: t("ColumnTypes.PersianDate") },
+  { value: "component7", label: t("ColumnTypes.Lookup") },
+  { value: "component27", label: t("ColumnTypes.HyperLink") },
+  { value: "component8", label: t("ColumnTypes.PostPickerList") },
+  { value: "component9", label: t("ColumnTypes.LookupRealValue") },
+  { value: "component10", label: t("ColumnTypes.LookupAdvanceTable") },
+  { value: "component26", label: t("ColumnTypes.AdvanceLookupAdvanceTable") },
+  { value: "component29", label: t("ColumnTypes.Title") },
+  { value: "component30", label: t("ColumnTypes.Section") },
+  { value: "component31", label: t("ColumnTypes.SubSection") },
+  { value: "component12", label: t("ColumnTypes.LookupImage") },
+  { value: "component28", label: t("ColumnTypes.SelectUserInPost") },
+  { value: "component13", label: t("ColumnTypes.YesNo") },
+  { value: "component14", label: t("ColumnTypes.AttachFile") },
+  { value: "component15", label: t("ColumnTypes.PictureBox") },
+  { value: "component16", label: t("ColumnTypes.Table") },
+  { value: "component17", label: t("ColumnTypes.PfiLookup") },
+  { value: "component32", label: t("ColumnTypes.MePostSelector") },
+  { value: "component18", label: t("ColumnTypes.SeqnialNumber") },
+  { value: "component19", label: t("ColumnTypes.AdvanceTable") },
+  { value: "component33", label: t("ColumnTypes.Advancewf") },
+  { value: "component20", label: t("ColumnTypes.WordPanel") },
+  { value: "component21", label: t("ColumnTypes.ExceclPanel") },
+  { value: "component22", label: t("ColumnTypes.CalculatedField") },
+  { value: "component23", label: t("ColumnTypes.ExcelCalculator") },
+  { value: "component24", label: t("ColumnTypes.Tab") },
+  { value: "component25", label: t("ColumnTypes.Map") },
+];
 
   // گزینه‌های Command با امکان انتخاب دلخواه
   const initialCommandOptions = [
@@ -249,7 +249,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const DEFAULT_META_CORE: MetaCore = {
     metaType1: "",
     metaType2: null,
-    metaType3: "drop",
+    metaType3: "",
     LookupMode: "",
     oldLookup: false,
     metaType5: null,
@@ -257,7 +257,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   };
 
   const DEFAULT_META_EXTRA = {
-    metaType4: "[]",
+    metaType4: "",
   };
 
   // --- Helpers برای نرمال‌سازی مقادیر ---

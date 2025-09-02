@@ -1,14 +1,16 @@
 {
-    "Ribbons": {
-      "Name": "Name",
-      "WindowsWebCommand": "Windows web Command",
-      "WindowsAppCommand": "Windows app Command",
-      "Description": "Description",
-      "Order": "Order",
-      "Size": "Size :",
-      "Large": "Large",
-      "Medium": "Medium",
-      "Small": "Small"
-    }
+  "Ribbons": {
+    "Name": "Name",
+    "WindowsWebCommand": "Windows web Command",
+    "WindowsAppCommand": "Windows app Command",
+    "Description": "Description",
+    "Order": "Order",
+    "Size": "Size :",
+    "Large": "Large",
+    "Medium": "Medium",
+    "Small": "Small",
+    "MobileAppCommand": "Mobile app Command",
+    "HelpText": "Help Text",
+    "KeyTip": "Key Tip"
   }
-  
+}

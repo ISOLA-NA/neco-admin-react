@@ -40,6 +40,9 @@ interface RowData3 {
   LastModified?: string | null;
   ModifiedById?: string | null;
   IconImageId?: string | null;
+  CommandMobile?: string;
+  HelpText?: string;
+  KeyTip?: string;
 }
 
 const Accordion3: React.FC<Accordion3Props> = ({
@@ -68,6 +71,9 @@ const Accordion3: React.FC<Accordion3Props> = ({
     Description: "",
     Order: 0,
     CommandWeb: "",
+    CommandMobile: "",
+    HelpText: "",
+    KeyTip: "",
   });
 
   // کنترل عکس و preview
@@ -244,6 +250,9 @@ const Accordion3: React.FC<Accordion3Props> = ({
       ModifiedById: null,
       IconImageId: null,
       CommandWeb: "",
+      CommandMobile: "",
+      HelpText: "",
+      KeyTip: "",
     };
     setSelectedRow(null);
     setFormData(newRow);
@@ -321,16 +330,26 @@ const Accordion3: React.FC<Accordion3Props> = ({
         LastModified: null,
         ModifiedById: formData.ModifiedById || null,
         IconImageId: iconImageId || null,
-        CommandMobile: "",
-        HelpText: "",
-        KeyTip: "",
+        CommandMobile: formData.CommandMobile || "",
+        HelpText: formData.HelpText || "",
+        KeyTip: formData.KeyTip || "",
         Size: formData.Order || 0,
+
       };
       showAlert("success", null, "", t("Alerts.Added.MenuItem"));
 
       await AppServices.insertMenuItem(newMenuItem);
       await loadRowData();
-      setFormData({ Name: "", Command: "", Description: "", Order: 0 });
+      setFormData({
+        Name: "",
+        Command: "",
+        Description: "",
+        Order: 0,
+        CommandWeb: "",
+        CommandMobile: "",
+        HelpText: "",
+        KeyTip: "",
+      });
       setWindowsAppCommand("");
       setSelectedSize("0");
       setIconImageId(null);
@@ -343,8 +362,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -367,12 +386,23 @@ const Accordion3: React.FC<Accordion3Props> = ({
         LastModified: formData.LastModified || null,
         ModifiedById: formData.ModifiedById || null,
         IconImageId: formData.IconImageId || null,
+        CommandMobile: formData.CommandMobile || "",
+        HelpText: formData.HelpText || "",
+        KeyTip: formData.KeyTip || "",
+        Size: formData.Order || 0,
+
+      };
+      showAlert("success", null, "", t("Alerts.Updated.MenuTab"));
+      setFormData({
+        Name: "",
+        Command: "",
+        Description: "",
+        Order: 0,
+        CommandWeb: "",
         CommandMobile: "",
         HelpText: "",
         KeyTip: "",
-        Size: formData.Order || 0,
-      };
-      showAlert("success", null, "", t("Alerts.Updated.MenuTab"));
+      });
       await AppServices.updateMenuItem(updatedMenuItem);
       await loadRowData();
       setIsEditing(false);
@@ -384,8 +414,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
@@ -399,7 +429,17 @@ const Accordion3: React.FC<Accordion3Props> = ({
       await AppServices.deleteMenuItem(selectedRow.ID);
       await loadRowData();
       setSelectedRow(null);
-      setFormData({ Name: "", Command: "", Description: "", Order: 0 });
+      setFormData({
+        Name: "",
+        Command: "",
+        Description: "",
+        Order: 0,
+        CommandWeb: "",
+        CommandMobile: "",
+        HelpText: "",
+        KeyTip: "",
+      });
+
       setIsEditing(false);
       setIsAdding(false);
       setSelectedSize("0");
@@ -498,129 +538,162 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
                 {/* The form */}
                 <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
-                  <div className="grid grid-cols-1 gap-6">
-                    <DynamicInput
-                      name={t("Ribbons.Name")}
-                      type="text"
-                      value={formData.Name || ""}
-                      placeholder="Name"
-                      onChange={(e) =>
-                        handleInputChange("Name", e.target.value)
-                      }
-                      className="mt-2"
-                    />
+                  {/* دو ستونه دقیق و هم‌راستا */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Row 1: Name | Description */}
+                    <div>
+                      <DynamicInput
+                        name={t("Ribbons.Name")}
+                        type="text"
+                        value={formData.Name || ""}
+                        placeholder="Name"
+                        onChange={(e) => handleInputChange("Name", e.target.value)}
+                      />
+                    </div>
 
-                    <DynamicInput
-                      name={t("Ribbons.WindowsWebCommand")}
-                      type="text"
-                      value={formData.CommandWeb || ""}
-                      placeholder=""
-                      onChange={(e) =>
-                        handleInputChange("CommandWeb", e.target.value)
-                      }
-                      className="mt-2"
-                    />
+                    <div>
+                      <DynamicInput
+                        name={t("Ribbons.Description")}
+                        type="text"
+                        value={formData.Description || ""}
+                        placeholder="Description"
+                        onChange={(e) =>
+                          handleInputChange("Description", e.target.value)
+                        }
+                      />
+                    </div>
 
-                    {/* Windows App Command + modal */}
-                    <div className="flex flex-col gap-1">
-                      <span>{t("Ribbons.WindowsAppCommand")}</span>
-                      <div className="flex items-center gap-2">
+                    {/* Row 2: Order | Help Text */}
+                    <div>
+                      <DynamicInput
+                        name={t("Ribbons.Order")}
+                        type="number"
+                        value={formData.Order || 0}
+                        placeholder="Order"
+                        onChange={(e) =>
+                          handleInputChange(
+                            "Order",
+                            parseInt(e.target.value, 10) || 0
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <DynamicInput
+                        name={t("Ribbons.HelpText")}
+                        type="text"
+                        value={formData.HelpText || ""}
+                        placeholder=""
+                        onChange={(e) => handleInputChange("HelpText", e.target.value)}
+                      />
+                    </div>
+
+                    {/* Row 3: Windows App Command (+cmd) | Windows Web Command */}
+                    <div>
+                      {/* Windows App Command + cmd button (کوچیک و هم‌تراز پایین اینپوت) */}
+                      <div className="grid grid-cols-[1fr_auto] items-end gap-3">
                         <DynamicInput
-                          name=""
+                          name={t("Ribbons.WindowsAppCommand")}
                           type="text"
-                          value={windowsAppCommand}
+                          value={formData.Command || ""}
                           placeholder=""
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setWindowsAppCommand(val);
-                            setFormData((prev) => ({ ...prev, Command: val }));
-                          }}
-                          className="flex-1"
+                          onChange={(e) => handleInputChange("Command", e.target.value)}
+                          className="w-full"
                         />
                         <button
                           type="button"
                           title="انتخاب Command"
                           onClick={() => setCommandModalOpen(true)}
-                          className="h-9 px-4 bg-purple-600 hover:bg-purple-800 text-white rounded font-bold flex items-center justify-center"
+                          className="h-9 px-3 text-sm leading-none bg-purple-600 hover:bg-purple-800 text-white rounded-md font-medium shrink-0 self-end"
                         >
                           cmd
                         </button>
+
                       </div>
                     </div>
 
-                    <DynamicInput
-                      name={t("Ribbons.Description")}
-                      type="text"
-                      value={formData.Description || ""}
-                      placeholder="Description"
-                      onChange={(e) =>
-                        handleInputChange("Description", e.target.value)
-                      }
-                      className="mt-2"
-                    />
+                    <div>
+                      <DynamicInput
+                        name={t("Ribbons.WindowsWebCommand")}
+                        type="text"
+                        value={formData.CommandWeb || ""}
+                        placeholder=""
+                        onChange={(e) => handleInputChange("CommandWeb", e.target.value)}
+                      />
+                    </div>
 
-                    <DynamicInput
-                      name={t("Ribbons.Order")}
-                      type="number"
-                      value={formData.Order || 0}
-                      placeholder="Order"
-                      onChange={(e) =>
-                        handleInputChange(
-                          "Order",
-                          parseInt(e.target.value, 10) || 0
-                        )
-                      }
-                      className="mt-2"
-                    />
+                    {/* Row 4: Mobile App Command | Key Tip */}
+                    <div>
+                      <DynamicInput
+                        name={t("Ribbons.MobileAppCommand")}
+                        type="text"
+                        value={formData.CommandMobile || ""}
+                        placeholder=""
+                        onChange={(e) =>
+                          handleInputChange("CommandMobile", e.target.value)
+                        }
+                      />
+                    </div>
 
-                    {/* Size radios and File Upload side by side */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                      <div className="flex flex-wrap items-center gap-4">
-                        <span className="text-lg font-medium">
-                          {" "}
-                          {t("Ribbons.Size")}
-                        </span>
-                        {/* Inline radios */}
-                        <label className="flex items-center text-lg">
-                          <input
-                            type="radio"
-                            name="size"
-                            value="0"
-                            checked={selectedSize === "0"}
-                            onChange={() => handleRadioChange("0")}
-                          />
-                          {t("Ribbons.Large")}
-                        </label>
-                        <label className="flex items-center text-lg">
-                          <input
-                            type="radio"
-                            name="size"
-                            value="1"
-                            checked={selectedSize === "1"}
-                            onChange={() => handleRadioChange("1")}
-                          />
-                          {t("Ribbons.Medium")}
-                        </label>
-                        <label className="flex items-center text-lg">
-                          <input
-                            type="radio"
-                            name="size"
-                            value="2"
-                            checked={selectedSize === "2"}
-                            onChange={() => handleRadioChange("2")}
-                          />
-                          {t("Ribbons.Small")}
-                        </label>
-                      </div>
-                      <div className="w-full sm:w-96">
-                        <FileUploadHandler
-                          selectedFileId={iconImageId}
-                          onUploadSuccess={handleUploadSuccess}
-                          resetCounter={resetCounter}
-                          onReset={() => setResetCounter((prev) => prev + 1)}
-                          isEditMode={isEditing}
+                    <div>
+                      <DynamicInput
+                        name={t("Ribbons.KeyTip")}
+                        type="text"
+                        value={formData.KeyTip || ""}
+                        placeholder=""
+                        onChange={(e) => handleInputChange("KeyTip", e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Size radios and File Upload side by side */}
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span className="text-lg font-medium">
+                        {" "}
+                        {t("Ribbons.Size")}
+                      </span>
+                      {/* Inline radios */}
+                      <label className="flex items-center text-lg">
+                        <input
+                          type="radio"
+                          name="size"
+                          value="0"
+                          checked={selectedSize === "0"}
+                          onChange={() => handleRadioChange("0")}
                         />
-                      </div>
+                        {t("Ribbons.Large")}
+                      </label>
+                      <label className="flex items-center text-lg">
+                        <input
+                          type="radio"
+                          name="size"
+                          value="1"
+                          checked={selectedSize === "1"}
+                          onChange={() => handleRadioChange("1")}
+                        />
+                        {t("Ribbons.Medium")}
+                      </label>
+                      <label className="flex items-center text-lg">
+                        <input
+                          type="radio"
+                          name="size"
+                          value="2"
+                          checked={selectedSize === "2"}
+                          onChange={() => handleRadioChange("2")}
+                        />
+                        {t("Ribbons.Small")}
+                      </label>
+                    </div>
+                    <div className="w-full sm:w-96">
+                      <FileUploadHandler
+                        selectedFileId={iconImageId}
+                        onUploadSuccess={handleUploadSuccess}
+                        resetCounter={resetCounter}
+                        onReset={() => setResetCounter((prev) => prev + 1)}
+                        isEditMode={isEditing}
+                      />
                     </div>
                   </div>
 
@@ -653,9 +726,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                       onClick={handleDeleteClick}
                       isDisabled={!selectedRow}
                       variant="orgRed"
-                      size="md"
                     />
-
                     {/* New - آبی سازمانی */}
                     <DynamicButton
                       text={t("Global.New")}
@@ -670,8 +741,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
               </>
             ) : (
               <p className="text-gray-500">
-                Please select a Menu Group in Accordion2 so the Menu Items will
-                be displayed.
+                Please select a Menu Group in Accordion2 so the Menu Items will be displayed.
               </p>
             )}
           </div>
@@ -719,6 +789,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
       </div>
     </>
   );
+
+
 };
 
 export default Accordion3;

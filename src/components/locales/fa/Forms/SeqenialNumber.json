@@ -1,7 +1,7 @@
 {
     "SeqenialNumber": {
       "Labels": {
-        "Command": "دستور",
+        "Command": "فرمان / دستور",
         "NumberOfDigit": "تعداد ارقام",
         "SeparatorCharacter": "جداکننده",
         "CountOfConst": "تعداد ثابت",
@@ -9,7 +9,7 @@
         "Modes": "حالت‌ها"
       },
       "Placeholders": {
-        "Command": "دستور",
+        "Command": "فرمان / دستور",
         "NumberOfDigit": "تعداد ارقام",
         "SeparatorCharacter": "جداکننده",
         "CountOfConst": "تعداد ثابت"

@@ -1,7 +1,7 @@
 {
     "NumberController": {
-      "MinValuePlaceholder": "حداقل مقدار",
-      "MaxValuePlaceholder": "حداکثر مقدار",
+      "MinValuePlaceholder": "مقدار حداقل",
+      "MaxValuePlaceholder": "مقدار حداکثر",
       "DefaultValuePlaceholder": "مقدار پیش‌فرض",
       "MaxValueLabel": "مقدار حداکثر",
       "MaximumValuePlaceholder": "مقدار حداقل"
