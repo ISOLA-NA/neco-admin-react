@@ -14,6 +14,7 @@ import CtrLookup from "./ControllerForms/LookupController";
 import CtrLookupRealValue from "./ControllerForms/LookupRealValueController";
 import CtrLookupAdvanceTable from "./ControllerForms/LookUpAdvanceTable";
 import CtrAvanceLookupAdvanceTable from "./ControllerForms/AdvanceLookupAdvanceTable";
+import CtrLookUpImgRealValue from "./ControllerForms/LookupImageRealValue";
 import CtrLookupImage from "./ControllerForms/LookupImage";
 import CtrSwitch from "./ControllerForms/YesNoController";
 import CtrHyperLink from "./ControllerForms/HyperLinkController";
@@ -61,7 +62,8 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   CtrPictureBox,
   CtrWordPanel,
   CtrExcelPanel,
-  CtrTitle
+  CtrTitle,
+  CtrLookUpImgRealValue
 };
 
 const FormG: React.FC<FormGProps> = ({

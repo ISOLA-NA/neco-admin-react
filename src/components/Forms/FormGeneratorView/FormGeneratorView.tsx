@@ -42,6 +42,7 @@ const SectionView = React.lazy(() => import("./SectionView"));
 const SubSectionView = React.lazy(() => import("./SubSectionView"));
 const MePostSelectorView = React.lazy(() => import("./MePostSelectorView"));
 const AdvanceWfView = React.lazy(() => import("./AdvanceWfView"));
+const LookupImageRealValue = React.lazy(() => import("./LookUpImageRealValueView"));
 
 // ---------------- type → component map ----------------
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
@@ -77,6 +78,7 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   13: SubSectionView,
   18: MePostSelectorView,
   23: AdvanceWfView,
+  37:LookupImageRealValue
 };
 
 interface FormGeneratorViewProps {

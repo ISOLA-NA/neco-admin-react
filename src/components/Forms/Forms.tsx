@@ -87,6 +87,7 @@ const columnTypeMapping: { [key: string]: number } = {
   component32: 14,
   component33: 18,
   component34: 23,
+  component35: 37,
 };
 
 const typeOfInformationOptions = [
@@ -123,6 +124,8 @@ const typeOfInformationOptions = [
   { value: "component32", label: "New Line" },
   { value: "component33", label: "Mepost Selector" },
   { value: "component34", label: "Advance WF" },
+  { value: "component35", label: "LookupImage RealValue" },
+  
 ];
 
 /**

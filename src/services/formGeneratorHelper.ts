@@ -972,6 +972,28 @@ export function initEntity(entity: Entity): Rule {
       };
       return rule;
     }
+    case 37: {
+      rule.entityField = field;
+      rule.entityValue = value;
+      rule.type = "LookUpImgRealValue";
+      rule.name = "CtrLookUpImgRealValue";
+      rule.label = field.DisplayName;
+      rule.value = value.Value;
+      rule.disabled = field.IsForceReadOnly;
+      rule.setting = {
+        metaType4: field.metaType4,
+        metaType3: field.metaType3,
+        metaType2: field.metaType2,
+        metaType1: field.metaType1,
+        IsRequire: field.IsRequire,
+        IsRtl: field.IsRTL,
+        ID: value.ID,
+        entityFieldId: value.nEntityFieldID,
+        entityId: value.nEntityID,
+        entityTypeId: field.nEntityTypeID,
+      };
+      return rule;
+    }
     default: {
       rule.entityField = field;
       rule.entityValue = value;

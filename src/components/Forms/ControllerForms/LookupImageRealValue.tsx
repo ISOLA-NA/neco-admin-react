@@ -16,13 +16,13 @@ interface LookupUmageProps {
   data?: {
     metaType1?: string | null;
     metaType2?: string | null;
-    metaType4?: string;       // Program Meta (نمایش/ورودیِ کاربر، دست نمی‌زنیم)
-    metaTypeJson?: string;    // ✅ JSON جدول فیلترها
-    CountInReject?: boolean;  // ✅ مقدار چک‌باکس
-    removeSameName?: boolean; // سازگاری قدیمی
+    metaType4?: string;       // Program Meta (فقط ورودی/نمایش کاربر - دست نزن)
+    metaTypeJson?: string;    // ✅ JSON جدول فیلترها (منبع/مقصد تنها)
+    CountInReject?: boolean;  // ✅ مقدار چک‌باکس Remove same name
+    removeSameName?: boolean; // سازگاری با نسخه‌های قدیمی
   };
   onMetaChange?: (updatedMeta: any) => void;
-  // توجه: عمداً onMetaExtraChange استفاده نمی‌شود تا metaType4 دست‌کاری نشود
+  // توجه: عمداً onMetaExtraChange استفاده نمی‌شود تا Program Meta پر/تغییر نشود
   onMetaExtraChange?: (updated: { metaType4: string }) => void;
 }
 
@@ -37,30 +37,34 @@ interface TableRow {
 const genId = () =>
   typeof crypto?.randomUUID === "function" ? crypto.randomUUID() : uuidv4();
 
-const LookupUmage: React.FC<LookupUmageProps> = ({ data = {}, onMetaChange }) => {
+const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
+  data = {},
+  onMetaChange,
+}) => {
   const { t } = useTranslation();
 
   /* ---------------- state ---------------- */
   const [meta, setMeta] = useState({
-    metaType1: data?.metaType1 ? String(data.metaType1) : "",
-    metaType2: data?.metaType2 ? String(data.metaType2) : "",
+    metaType1: data.metaType1 ? String(data.metaType1) : "",
+    metaType2: data.metaType2 ? String(data.metaType2) : "",
   });
 
-  const [removeSameName, setRemoveSameName] = useState<boolean>(
-    (data as any)?.CountInReject ?? data?.removeSameName ?? false
+  const [removeSameName, setRemoveSameName] = useState(
+    (data as any)?.CountInReject ?? data.removeSameName ?? false
   );
 
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
-  // فقط metaTypeJson مبناست؛ metaType4 را نمی‌خوانیم/نمی‌نویسیم
+  // مرجعِ آخرین JSON جدول (فقط metaTypeJson؛ نه metaType4)
   const prevJsonRef = useRef<string | undefined>(data?.metaTypeJson);
 
-  /* -------- sync props → state -------- */
+  /* -------- sync props → state (فقط در صورت تفاوت) -------- */
   useEffect(() => {
     const nextMeta = {
       metaType1: data?.metaType1 ? String(data.metaType1) : "",
       metaType2: data?.metaType2 ? String(data.metaType2) : "",
     };
+
     setMeta((prev) =>
       prev.metaType1 === nextMeta.metaType1 && prev.metaType2 === nextMeta.metaType2
         ? prev
@@ -69,10 +73,12 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data = {}, onMetaChange }) =>
 
     const incomingRemove =
       (data as any)?.CountInReject ?? data?.removeSameName ?? false;
+
     setRemoveSameName((prev) =>
       prev === !!incomingRemove ? prev : !!incomingRemove
     );
 
+    // ✅ تنها منبعِ جدول، metaTypeJson است
     const incomingJson =
       typeof data?.metaTypeJson === "string" && data.metaTypeJson.trim() !== ""
         ? data.metaTypeJson
@@ -100,31 +106,41 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data = {}, onMetaChange }) =>
         setTableData([]);
       }
     }
-  }, [data?.metaType1, data?.metaType2, data?.metaTypeJson, data?.CountInReject, data?.removeSameName]);
+  }, [
+    data?.metaType1,
+    data?.metaType2,
+    data?.metaTypeJson,  // ← فقط این
+    data?.CountInReject,
+    data?.removeSameName,
+  ]);
 
   /* -------- propagate changes to parent -------- */
   const pushUp = (metaPatch?: Partial<typeof meta>, overrideTable?: TableRow[]) =>
     onMetaChange?.({
       ...(metaPatch ? { ...meta, ...metaPatch } : meta),
-      metaTypeJson: JSON.stringify(overrideTable ?? tableData), // ✅ فقط این
-      CountInReject: removeSameName,                             // ✅
+      metaTypeJson: JSON.stringify(overrideTable ?? tableData), // ✅ فقط این فیلد
+      CountInReject: removeSameName,                             // ✅ چک‌باکس
     });
 
+  // هر زمان جدول یا چک‌باکس تغییر کند، مقادیر بالا داده شود
   useEffect(() => {
     const json = JSON.stringify(tableData);
     onMetaChange?.({
       ...meta,
-      metaTypeJson: json,           // ✅ جدول
-      CountInReject: removeSameName // ✅ چک‌باکس
+      metaTypeJson: json,
+      CountInReject: removeSameName,
     });
-    // ⚠️ onMetaExtraChange عمداً صدا زده نمی‌شود تا metaType4 دست‌کاری نشود
+    // ⛔️ onMetaExtraChange را عمداً صدا نمی‌زنیم تا Program Meta دست‌نخورده بماند
   }, [tableData, removeSameName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* -------- dynamic lists -------- */
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
+
   const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
   const [fields, setFields] = useState<EntityField[]>([]);
-  const [operationList, setOperationList] = useState<{ value: string; label: string }[]>([]);
+  const [operationList, setOperationList] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   useEffect(() => {
     getAllEntityType()
@@ -221,7 +237,10 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data = {}, onMetaChange }) =>
           <DynamicSelector
             name="getInformationFrom"
             label={t("LookupUmage.Form.GetInformationFrom")}
-            options={entityTypes.map((ent) => ({ value: String(ent.ID), label: ent.Name }))}
+            options={entityTypes.map((ent) => ({
+              value: String(ent.ID),
+              label: ent.Name,
+            }))}
             selectedValue={meta.metaType1}
             onChange={(e) =>
               setMeta((prev) => {
@@ -235,7 +254,10 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data = {}, onMetaChange }) =>
           <DynamicSelector
             name="displayColumn"
             label={t("LookupUmage.Form.WhatColumnToDisplay")}
-            options={fields.map((f) => ({ value: String(f.ID), label: f.DisplayName }))}
+            options={fields.map((f) => ({
+              value: String(f.ID),
+              label: f.DisplayName,
+            }))}
             selectedValue={meta.metaType2}
             onChange={(e) =>
               setMeta((prev) => {
@@ -279,4 +301,4 @@ const LookupUmage: React.FC<LookupUmageProps> = ({ data = {}, onMetaChange }) =>
   );
 };
 
-export default LookupUmage;
+export default LookupUmageRealValue;
