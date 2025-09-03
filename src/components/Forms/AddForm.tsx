@@ -125,6 +125,10 @@ interface AddColumnFormProps {
   isEdit?: boolean;
   existingData?: any;
   entityTypeId?: string; // مقدار nEntityTypeID از selectedRow
+
+  /* ✅ اضافه شد: برای اینکه LookUp بتواند فیلدهای فرمِ جاری را در DesField نشان دهد */
+  srcFields?: Array<{ ID: string | number; DisplayName: string }>;
+  srcEntityTypeId?: string | number;
 }
 
 interface MetaCore {
@@ -143,6 +147,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   isEdit = false,
   existingData = null,
   entityTypeId,
+
+  /* ✅ پراپ‌های جدید دریافتی از FormsCommand1 */
+  srcFields,
+  srcEntityTypeId,
 }) => {
   const { t } = useTranslation();
   const { insertEntityField, updateEntityField } = useApi();
@@ -544,6 +552,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       BoolMeta1: metaCore.oldLookup,
       CountInReject: formData.countInReject,
       isEdit: isEdit,
+      /* ✅ این مقدار برای fallback در LookUp */
+      currentEntityTypeId:
+        (entityTypeId && !isNaN(Number(entityTypeId))) ? Number(entityTypeId) : null,
     },
   };
 
@@ -553,7 +564,16 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       ? { onMetaExtraChange: handleMetaExtraChange }
       : {};
 
-  return <SelectedComponent {...baseProps} {...maybeExtra} />;
+  /* ✅ اگر کنترلر Lookup است، فیلدهای فرمِ جاری و entityTypeId را هم پاس بده */
+  const maybeLookupBridge =
+    formData.typeOfInformation === "component7"
+      ? {
+          srcFields: Array.isArray(srcFields) ? srcFields : undefined,
+          srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
+        }
+      : {};
+
+  return <SelectedComponent {...baseProps} {...maybeExtra} {...maybeLookupBridge} />;
 };
 
 

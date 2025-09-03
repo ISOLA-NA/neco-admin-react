@@ -1,3 +1,4 @@
+// src/components/ControllerForms/LookUp/LookUpAdvanceTable.tsx
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -18,19 +19,27 @@ interface LookUpAdvanceTableProps {
     LookupMode?: string | number | null;
     CountInReject?: boolean;
     BoolMeta1?: boolean;
+    /** (اختیاری) ID نوع انتیتی فرم فعلی برای تأمین DesField وقتی srcFields پاس نشده */
+    currentEntityTypeId?: string | number | null;
   };
   onMetaChange?: (updated: any) => void;
   onMetaExtraChange?: (updated: { metaType4: string }) => void;
   /** 🔑 سیگنال ریست از والد هنگام تغییر Type of Information */
   resetKey?: number | string;
+
+  /** ✅ فهرست فیلدهای فرم فعلی (برای ستون DesField). اگر پاس شود، از همین استفاده می‌کنیم. */
+  srcFields?: Array<{ ID: string | number; DisplayName: string }>;
+
+  /** ✅ اگر srcFields پاس نشد، از این ID (یا data.currentEntityTypeId) برای واکشی فیلدهای فرم فعلی استفاده می‌کنیم */
+  srcEntityTypeId?: string | number;
 }
 
 interface TableRow {
   ID: string;
-  SrcFieldID: string;
+  SrcFieldID: string;   // از فیلدهای EntityType منبع
   FilterOpration: string;
   FilterText: string;
-  DesFieldID: string;
+  DesFieldID: string;   // از فیلدهای فرم فعلی (baseFields)
 }
 
 const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
@@ -38,6 +47,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   onMetaChange,
   onMetaExtraChange,
   resetKey,
+  srcFields,
+  srcEntityTypeId,
 }) => {
   const { t } = useTranslation();
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
@@ -46,6 +57,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
 
   const initialModeRef = useRef(true);
   const resetMountedRef = useRef(false);
+  const baseFieldsLockedRef = useRef(false);
 
   const [meta, setMeta] = useState({
     metaType1: "",
@@ -59,10 +71,11 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   const [oldLookup, setOldLookup] = useState(false);
 
   const [entities, setEntities] = useState<{ ID: any; Name: string }[]>([]);
-  const [fields, setFields] = useState<any[]>([]);
-  const [modesList, setModesList] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [fields, setFields] = useState<any[]>([]);      // ⭐ from GetInformationFrom
+  const [baseFields, setBaseFields] = useState<any[]>([]); // ⭐ fields of current form (DesField)
+  const [modesList, setModesList] = useState<{ value: string; label: string }[]>(
+    []
+  );
   const [operationList, setOperationList] = useState<
     { value: string; label: string }[]
   >([]);
@@ -78,10 +91,10 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       Array.isArray(rows)
         ? rows.map((item) => ({
             ID: String(item.ID ?? genId()),
-            SrcFieldID: item.SrcFieldID || "",
+            SrcFieldID: item.SrcFieldID ? String(item.SrcFieldID) : "",
             FilterOpration: item.FilterOpration || "",
             FilterText: item.FilterText || "",
-            DesFieldID: item.DesFieldID || "",
+            DesFieldID: item.DesFieldID ? String(item.DesFieldID) : "",
           }))
         : []
     );
@@ -127,7 +140,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         )
       )
       .catch(console.error);
-  }, []);
+  }, [getAllEntityType]);
 
   // restore LookupMode
   useEffect(() => {
@@ -152,6 +165,38 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     }
   }, [meta.metaType1, getEntityFieldByEntityTypeId]);
 
+  /* ─── ثابت‌سازی baseFields از srcFields (اگر پاس داده شده) ─── */
+  useEffect(() => {
+    if (baseFieldsLockedRef.current) return;
+    if (Array.isArray(srcFields) && srcFields.length > 0) {
+      setBaseFields(srcFields);
+      baseFieldsLockedRef.current = true;
+    }
+  }, [srcFields]);
+
+  /* ─── اگر srcFields نبود، با srcEntityTypeId یا currentEntityTypeId واکشی کن ─── */
+  useEffect(() => {
+    if (baseFieldsLockedRef.current) return;
+    const rawId =
+      (typeof srcEntityTypeId !== "undefined" ? srcEntityTypeId : null) ??
+      (typeof data.currentEntityTypeId !== "undefined"
+        ? (data.currentEntityTypeId as any)
+        : null);
+    const idNum = rawId != null ? Number(rawId) : NaN;
+    if (!isNaN(idNum) && idNum > 0) {
+      getEntityFieldByEntityTypeId(idNum)
+        .then((r) => {
+          const arr = Array.isArray(r) ? r : [];
+          // ⛔️ اگر خالی بود، عمداً baseFields را خالی نگه می‌داریم
+          if (arr.length > 0) {
+            setBaseFields(arr);
+            baseFieldsLockedRef.current = true;
+          }
+        })
+        .catch(console.error);
+    }
+  }, [srcEntityTypeId, data.currentEntityTypeId, getEntityFieldByEntityTypeId]);
+
   const pushMeta = (patch: Partial<typeof meta>) => {
     const next = { ...meta, ...patch };
     setMeta(next);
@@ -174,30 +219,46 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     });
   };
 
-  const handleAddRow = () => {
-    const newRow: TableRow = {
-      ID: genId(),
-      SrcFieldID: "",
-      FilterOpration: "",
-      FilterText: "",
-      DesFieldID: "",
-    };
-    const next = [...tableData, newRow];
-    setTableData(next);
-
-    const json = JSON.stringify(next);
+  const pushTable = (rows: TableRow[]) => {
+    setTableData(rows);
+    const json = JSON.stringify(rows);
     setMeta((prev) => ({ ...prev, metaType4: json }));
     onMetaExtraChange?.({ metaType4: json });
   };
 
+  // ✅ وقتی هر دو فیلد «GetInformationFrom» و «WhatColumnToDisplay» خالی‌اند
+  const bothEmpty =
+    meta.metaType1.trim() === "" && meta.metaType2.trim() === "";
+  // ✅ اگر جدول FormsCommand1 (baseFields) خالی باشد، DesField هم باید خالی باشد
+  const noDesOptions = bothEmpty || baseFields.length === 0;
+
+  const handleAddRow = () => {
+    const defaultDes = noDesOptions ? "" : (baseFields[0]?.ID ?? "");
+    const defaultSrc = bothEmpty ? "" : (fields[0]?.ID ?? "");
+    const newRow: TableRow = {
+      ID: genId(),
+      SrcFieldID: defaultSrc ? String(defaultSrc) : "",
+      FilterOpration: "",
+      FilterText: "",
+      DesFieldID: defaultDes ? String(defaultDes) : "",
+    };
+    pushTable([...tableData, newRow]);
+  };
+
   const handleCellValueChanged = (e: any) => {
     const updated = e.data as TableRow;
-    const next = tableData.map((r) => (r.ID === updated.ID ? updated : r));
-    setTableData(next);
-
-    const json = JSON.stringify(next);
-    setMeta((prev) => ({ ...prev, metaType4: json }));
-    onMetaExtraChange?.({ metaType4: json });
+    const next = tableData.map((r) =>
+      r.ID === updated.ID
+        ? {
+            ...updated,
+            SrcFieldID:
+              updated.SrcFieldID != null ? String(updated.SrcFieldID) : "",
+            DesFieldID:
+              updated.DesFieldID != null ? String(updated.DesFieldID) : "",
+          }
+        : r
+    );
+    pushTable(next);
   };
 
   // --- FIX: ریست PostPickerList روی تغییر selectها ---
@@ -241,23 +302,89 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey]);
 
-  const ppKey = useMemo(
-    () => `${meta.metaType1}|${meta.metaType2}|${resetKey ?? 0}`,
-    [meta.metaType1, meta.metaType2, resetKey]
+  /* ─── Maps & signatures ─── */
+  const fieldsMap = useMemo(
+    () => new Map(fields.map((f: any) => [String(f.ID), f.DisplayName])),
+    [fields]
   );
+  const baseFieldsMap = useMemo(
+    () => new Map(baseFields.map((f: any) => [String(f.ID), f.DisplayName])),
+    [baseFields]
+  );
+  const fieldsSig = useMemo(
+    () => fields.map((f: any) => String(f.ID)).join("|"),
+    [fields]
+  );
+  const baseFieldsSig = useMemo(
+    () => baseFields.map((f: any) => String(f.ID)).join("|"),
+    [baseFields]
+  );
+
+  /* ─── نرمالایز SrcField پس از تغییر fields ─── */
+  useEffect(() => {
+    if (!fields.length || bothEmpty) return;
+    const valid = new Set(Array.from(fieldsMap.keys()));
+    let changed = false;
+    const updated = tableData.map((r) => {
+      const val = String(r.SrcFieldID || "");
+      if (val && !valid.has(val)) {
+        changed = true;
+        return { ...r, SrcFieldID: fields[0] ? String(fields[0].ID) : "" };
+      }
+      return r;
+    });
+    if (changed) pushTable(updated);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fieldsSig, bothEmpty]);
+
+  /* ─── نرمالایز DesField:
+        1) اگر baseFields خالی شد، همه DesFieldID ها را خالی کن.
+        2) اگر baseFields موجود بود و مقدار نامعتبر بود، به اولین مقدار برگردان. */
+  useEffect(() => {
+    if (baseFields.length === 0) {
+      const changed = tableData.some((r) => r.DesFieldID);
+      if (changed) {
+        const cleared = tableData.map((r) => ({ ...r, DesFieldID: "" }));
+        pushTable(cleared);
+      }
+      return;
+    }
+    if (!noDesOptions) {
+      const valid = new Set(Array.from(baseFieldsMap.keys()));
+      let changed = false;
+      const updated = tableData.map((r) => {
+        const val = String(r.DesFieldID || "");
+        if (val && !valid.has(val)) {
+          changed = true;
+          return {
+            ...r,
+            DesFieldID: baseFields[0] ? String(baseFields[0].ID) : "",
+          };
+        }
+        return r;
+      });
+      if (changed) pushTable(updated);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseFieldsSig, noDesOptions]);
 
   // columns
   const columnDefs = useMemo(
     () => [
       {
-        headerName: t("LookUpAdvanceTable.Columns.SrcField"),
-        field: "SrcFieldID",
+        headerName: t("LookUpAdvanceTable.Columns.DesField"),
+        field: "DesFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
+        cellEditorParams: () => ({
+          values: noDesOptions ? [] : Array.from(baseFieldsMap.keys()),
+        }),
         valueFormatter: (p: any) =>
-          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
+          noDesOptions
+            ? ""
+            : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
       },
+     
       {
         headerName: t("LookUpAdvanceTable.Columns.Operation"),
         field: "FilterOpration",
@@ -265,24 +392,34 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         cellEditor: "agSelectCellEditor",
         cellEditorParams: { values: operationList.map((o) => o.value) },
         valueFormatter: (p: any) =>
-          operationList.find((o) => o.value === p.value)?.label || p.value,
+          operationList.find((o) => o.value === String(p.value))?.label ||
+          String(p.value ?? ""),
       },
       {
         headerName: t("LookUpAdvanceTable.Columns.FilterText"),
         field: "FilterText",
         editable: true,
       },
-      {
-        headerName: t("LookUpAdvanceTable.Columns.DesField"),
-        field: "DesFieldID",
+       {
+        headerName: t("LookUpAdvanceTable.Columns.SrcField"),
+        field: "SrcFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: fields.map((f) => String(f.ID)) },
+        cellEditorParams: () => ({
+          values: bothEmpty ? [] : Array.from(fieldsMap.keys()),
+        }),
         valueFormatter: (p: any) =>
-          fields.find((f) => String(f.ID) === p.value)?.DisplayName || p.value,
+          bothEmpty
+            ? ""
+            : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
       },
     ],
-    [t, fields, operationList]
+    [t, fieldsMap, baseFieldsMap, operationList, bothEmpty, noDesOptions]
+  );
+
+  const ppKey = useMemo(
+    () => `${meta.metaType1}|${meta.metaType2}|${resetKey ?? 0}`,
+    [meta.metaType1, meta.metaType2, resetKey]
   );
 
   return (
@@ -338,6 +475,11 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           showDeleteIcon={false}
           showDuplicateIcon={false}
           onRowDoubleClick={() => {}}
+          gridOptions={{
+            singleClickEdit: true,
+            rowSelection: "single",
+            stopEditingWhenCellsLoseFocus: true,
+          }}
         />
       </div>
     </div>

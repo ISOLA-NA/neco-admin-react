@@ -125,7 +125,6 @@ const typeOfInformationOptions = [
   { value: "component33", label: "Mepost Selector" },
   { value: "component34", label: "Advance WF" },
   { value: "component35", label: "LookupImage RealValue" },
-  
 ];
 
 /**
@@ -978,6 +977,12 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             refreshEntityFields();
             handleAddModalClose();
           }}
+          /* 🔗 این دو پراپ را اضافه کردیم تا LookUp بتواند فیلدهای فرمِ جاری را در DesField نشان بدهد */
+          srcFields={entityFields.map((f: any) => ({
+            ID: f.ID,
+            DisplayName: f.DisplayName ?? f.Name ?? "",
+          }))}
+          srcEntityTypeId={formData.ID}
         />
       </DynamicModal>
 
