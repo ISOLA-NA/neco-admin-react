@@ -551,36 +551,46 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
       Odp: {
-        endpoint: api.getAllOdpWithExtra,
-        columnDefs: [
-          {
-            headerName: t("DataTable.Headers.Name"),
-            field: "Name",
-            filter: "agTextColumnFilter",
-          },
-          {
-            headerName: t("DataTable.Headers.Address"),
-            field: "Address",
-            filter: "agTextColumnFilter",
-          },
-          {
-            headerName: t("DataTable.Headers.WFTemplateName"),
-            field: "WFTemplateName",
-            filter: "agTextColumnFilter",
-          },
-          {
-            headerName: t("DataTable.Headers.EntityTypeName"),
-            field: "EntityTypeName",
-            filter: "agTextColumnFilter",
-          },
-        ],
-        iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: false,
-        },
+  endpoint: async () => {
+    const data = await api.getAllOdpWithExtra();
+    console.log("ODP list sample:", data[0]);
+    // اطمینان از وجود PersianName به‌صورت رشتهٔ خالی (نه null/undefined)
+    return data.map((r: any) => ({ ...r, PersianName: r.PersianName ?? "" }));
+  },
+  columnDefs: withPersianName(
+    [
+      {
+        headerName: t("DataTable.Headers.Name"),
+        field: "Name",
+        filter: "agTextColumnFilter",
       },
+      // PersianName اینجا خودکار و دقیقاً بعد از Name درج می‌شود (ستون دوم)
+      {
+        headerName: t("DataTable.Headers.Address"),
+        field: "Address",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: t("DataTable.Headers.WFTemplateName"),
+        field: "WFTemplateName",
+        filter: "agTextColumnFilter",
+      },
+      {
+        headerName: t("DataTable.Headers.EntityTypeName"),
+        field: "EntityTypeName",
+        filter: "agTextColumnFilter",
+      },
+    ],
+    t("DataTable.Headers.PersianName")
+  ),
+  iconVisibility: {
+    showAdd: true,
+    showEdit: true,
+    showDelete: true,
+    showDuplicate: false,
+  },
+},
+
       Procedures: {
         endpoint: api.getAllEntityCollection,
         columnDefs: [

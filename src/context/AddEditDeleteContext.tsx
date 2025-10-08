@@ -162,6 +162,7 @@ interface ProgramTypeData {
 interface OdpData {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Address: string;
   EntityTypeName: string;
   IsVisible: boolean;
@@ -679,6 +680,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       const odp: OdpWithExtra = {
         ID: data.ID || 0,
         Name: data.Name,
+        PersianName: data.PersianName, 
         Address: data.Address,
         EntityTypeName: data.EntityTypeName,
         IsVisible: data.IsVisible,

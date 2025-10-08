@@ -420,6 +420,7 @@ export interface ProgramType {
 export interface OdpWithExtra {
   ID: number;
   Name: string;
+  PersianName?: string;
   Address: string;
   EntityTypeName: string;
   IsVisible: boolean;
