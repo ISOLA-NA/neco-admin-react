@@ -32,6 +32,7 @@ interface Accordion3Props {
 interface RowData3 {
   ID: number;
   Name: string;
+  PersianName?: string; // ← اضافه شد (بدون null)
   Command: string;
   CommandWeb: string;
   Description: string;
@@ -45,13 +46,14 @@ interface RowData3 {
   KeyTip?: string;
 }
 
+
 const Accordion3: React.FC<Accordion3Props> = ({
   selectedMenuGroupId,
   onRowDoubleClick,
   isOpen,
   toggleAccordion,
 }) => {
-  const { t , i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [rowData, setRowData] = useState<RowData3[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData3 | null>(null);
@@ -67,6 +69,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
   // state فرم
   const [formData, setFormData] = useState<Partial<RowData3>>({
     Name: "",
+    PersianName: "", // ← اضافه شد
     Command: "",
     Description: "",
     Order: 0,
@@ -86,6 +89,9 @@ const Accordion3: React.FC<Accordion3Props> = ({
   const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
+
+  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+
 
   // ستون‌های جدول
   const columnDefs = [
@@ -163,11 +169,13 @@ const Accordion3: React.FC<Accordion3Props> = ({
   // سرچ
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
+    const q = searchText.toLowerCase();
     return rowData.filter(
       (row) =>
-        row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
-        row.Command.toLowerCase().includes(searchText.toLowerCase()) ||
-        row.Description.toLowerCase().includes(searchText.toLowerCase())
+        (row.Name || "").toLowerCase().includes(q) ||
+        (row.PersianName || "").toLowerCase().includes(q) || // ← اضافه شد
+        (row.Command || "").toLowerCase().includes(q) ||
+        (row.Description || "").toLowerCase().includes(q)
     );
   }, [searchText, rowData]);
 
@@ -175,6 +183,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
   const handleRowClick = (row: RowData3) => {
     const sanitizedRow: RowData3 = {
       ...row,
+      PersianName: row.PersianName ?? "",
       ModifiedById: row.ModifiedById === "" ? null : row.ModifiedById,
       IconImageId: row.IconImageId === "" ? null : row.IconImageId,
     };
@@ -198,6 +207,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       ...row,
       ID: 0,
       Name: `${row.Name} (Copy)`,
+      PersianName: row.PersianName ?? "", // ← اضافه شد
       ModifiedById: null,
       IconImageId: null,
     };
@@ -214,6 +224,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
   const handleEdit = (row: RowData3) => {
     setSelectedRow(row); // همان ردیف
     setFormData(row); // داده‌های فرم
+    setFormData({ ...row, PersianName: row.PersianName ?? "" });
     setWindowsAppCommand(row.Command || ""); // هم‌زمان ورودی WindowsAppCommand
     setSelectedSize(String(row.Order ?? 0)); // سایز
     setIconImageId(row.IconImageId ?? null); // آیکن
@@ -242,6 +253,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     const newRow: RowData3 = {
       ID: 0,
       Name: "",
+      PersianName: "",
       Command: "",
       Description: "",
       Order: 0,
@@ -308,8 +320,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   // اعتبارسنجی فرم
   const validateForm = (): boolean => {
-    if (!formData.Name) {
-      setErrorConfirmOpen(true);
+    const nameTrim = (formData.Name || "").trim();
+    const pNameTrim = (formData.PersianName || "").trim();
+
+    if (!nameTrim && pNameTrim) {
+      showAlert("warning", null, "Warning", "Please fill Name");
+      return false;
+    }
+    if (!nameTrim) {
+      setErrorConfirmOpen(true); // پیام عمومی “Name is required.”
       return false;
     }
     return true;
@@ -321,6 +340,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       const newMenuItem: MenuItem = {
         ID: 0,
         Name: formData.Name!,
+        PersianName: (formData.PersianName || "").trim(),
         Command: formData.Command || "",
         CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
@@ -377,6 +397,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       const updatedMenuItem: MenuItem = {
         ID: formData.ID!,
         Name: formData.Name!,
+        PersianName: (formData.PersianName || "").trim(),
         Command: formData.Command || "",
         CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
@@ -395,6 +416,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       showAlert("success", null, "", t("Alerts.Updated.MenuTab"));
       setFormData({
         Name: "",
+        PersianName: "",
         Command: "",
         Description: "",
         Order: 0,
@@ -459,11 +481,71 @@ const Accordion3: React.FC<Accordion3Props> = ({
   };
 
   const handleSelectCommand = (cmd: string) => {
-    console.log("🎯 Windows Cmd selected:", cmd); 
-    setWindowsAppCommand(cmd); 
-    setFormData((prev) => ({ ...prev, Command: cmd })); 
+    console.log("🎯 Windows Cmd selected:", cmd);
+    setWindowsAppCommand(cmd);
+    setFormData((prev) => ({ ...prev, Command: cmd }));
     setCommandModalOpen(false);
   };
+
+  const baseDefs = subTabDefinitions["MenuItem"]?.columnDefs || [];
+
+  const columnDefsWithFa = useMemo(() => {
+    const defs = Array.isArray(baseDefs) ? [...baseDefs] : [];
+    const hasFa = defs.some((c: any) => (c.field ?? "").toString() === "PersianName");
+    if (hasFa) return defs;
+
+    const faCol = {
+      headerName: "PersianName",
+      field: "PersianName",
+      sortable: true,
+      filter: true,
+      resizable: true,
+    };
+
+    const nameIdx = defs.findIndex(
+      (c: any) => (c.field ?? "").toString().toLowerCase() === "name"
+    );
+    if (nameIdx === -1) return [...defs, faCol];
+
+    const before = defs.slice(0, nameIdx + 1);
+    const after = defs.slice(nameIdx + 1);
+    return [...before, faCol, ...after];
+  }, [baseDefs]);
+
+  const actionsCol = {
+    headerName: "Actions",
+    field: "operations",
+    sortable: false,
+    filter: false,
+    width: 150,
+    cellRendererFramework: (params: any) => (
+      <div className="flex space-x-2">
+        <button
+          className="text-yellow-600 hover:text-yellow-800 transition"
+          onClick={() => handleDuplicate(params.data)}
+          title="Duplicate"
+        >
+          <FiCopy size={20} />
+        </button>
+        <button
+          className="text-blue-600 hover:text-blue-800 transition"
+          onClick={() => handleEdit(params.data)}
+          title="Edit"
+        >
+          <FiEdit size={20} />
+        </button>
+        <button
+          className="text-red-600 hover:text-red-800 transition"
+          onClick={() => handleDelete(params.data)}
+          title="Delete"
+        >
+          <FiTrash2 size={20} />
+        </button>
+      </div>
+    ),
+  };
+
+
 
   return (
     <>
@@ -522,7 +604,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                 >
                   <DataTable
                     direction={i18n.dir()}
-                    columnDefs={columnDefs}
+                    columnDefs={columnDefsWithFa}
                     rowData={filteredRowData}
                     onRowClick={handleRowClick}
                     onRowDoubleClick={(data) => handleRowDoubleClick(data)}
@@ -541,14 +623,43 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   {/* دو ستونه دقیق و هم‌راستا */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Row 1: Name | Description */}
+                    {/* Row 1: Name/PersianName + EN/FA | Description */}
                     <div>
-                      <DynamicInput
-                        name={t("Ribbons.Name")}
-                        type="text"
-                        value={formData.Name || ""}
-                        placeholder="Name"
-                        onChange={(e) => handleInputChange("Name", e.target.value)}
-                      />
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <DynamicInput
+                            name={isFaMode ? "PersianName" : t("Ribbons.Name")}
+                            type="text"
+                            value={isFaMode ? (formData.PersianName ?? "") : (formData.Name ?? "")}
+                            placeholder={isFaMode ? "Persian name" : "Name"}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setFormData((prev) =>
+                                isFaMode ? { ...prev, PersianName: v } : { ...prev, Name: v }
+                              );
+                            }}
+                            required={!isFaMode}
+                          />
+                        </div>
+
+                        {/* دکمه EN/FA با استایل گرادیانی */}
+                        <button
+                          type="button"
+                          onClick={() => setIsFaMode((p) => !p)}
+                          className={[
+                            "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+                            "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                            "text-white font-semibold tracking-wide",
+                            "shadow-md shadow-pink-200/50",
+                            "transition-all duration-200",
+                            "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                            "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                          ].join(" ")}
+                          title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                        >
+                          {isFaMode ? "FA" : "EN"}
+                        </button>
+                      </div>
                     </div>
 
                     <div>
@@ -557,9 +668,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                         type="text"
                         value={formData.Description || ""}
                         placeholder="Description"
-                        onChange={(e) =>
-                          handleInputChange("Description", e.target.value)
-                        }
+                        onChange={(e) => handleInputChange("Description", e.target.value)}
                       />
                     </div>
 

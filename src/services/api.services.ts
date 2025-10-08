@@ -203,6 +203,7 @@ export interface MenuTab {
   ID: number;
   ModifiedById?: string | null;
   Name: string;
+  PersianName: string;
   Order: number;
   Description: string;
   nMenuId: number;
@@ -216,6 +217,7 @@ export interface MenuGroup {
   ID: number;
   ModifiedById: string | null;
   Name: string;
+  PersianName: string;
   Order: number;
   Description: string;
   nMenuTabId: number;
@@ -258,6 +260,7 @@ export interface MenuItem {
   ID: number;
   ModifiedById: string | null;
   Name: string;
+  PersianName: string
   Description: string;
   Order: number;
   IconImageId: string | null;
