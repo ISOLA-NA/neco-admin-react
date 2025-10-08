@@ -98,7 +98,6 @@ export interface ProgramTemplateItem {
   ID?: number;
   ModifiedById?: string | null;
   Name: string;
-
   MetaColumnName?: string;
   Duration: string;
   nProgramTypeID: number | null;
@@ -133,6 +132,7 @@ export interface WfTemplateItem {
 export interface AFBtnItem {
   ID?: number; // در Insert ممکن است خالی باشد
   Name: string;
+  PersianName?: string;
   Tooltip?: string;
   StateText?: string;
   Order?: number;
