@@ -96,70 +96,71 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     }, [api]);
 
     useEffect(() => {
-      if (selectedRow) {
-        // مقداردهی اولیه داده‌های فرم
-        setApprovalFlowData({
-          ID: selectedRow.ID,
-          Name: selectedRow.Name || "",
-          PersianName: selectedRow.PersianName ?? "",
-          Describtion: selectedRow.Describtion || "",
-          IsGlobal:
-            typeof selectedRow.IsGlobal === "boolean"
-              ? selectedRow.IsGlobal
-              : true,
+  // هر بار که ردیف تغییر می‌کند، حالت ورودی را روی EN بگذار
+  setIsFaMode(false);
 
-          IsVisible: selectedRow.IsVisible || true,
-          MaxDuration: selectedRow.MaxDuration || 0,
-          PCost: selectedRow.PCost || 0,
-          ProjectsStr: selectedRow.ProjectsStr || "",
-          SubApprovalFlows: selectedRow.SubApprovalFlows || [],
-        });
+  if (selectedRow) {
+    // مقداردهی فرم با ایمنی در برابر null/undefined
+    setApprovalFlowData({
+      ID: selectedRow.ID,
+      Name: selectedRow.Name ?? "",
+      PersianName: selectedRow.PersianName ?? "", // ← همیشه string
+      Describtion: selectedRow.Describtion ?? "",
+      IsGlobal:
+        typeof selectedRow.IsGlobal === "boolean"
+          ? selectedRow.IsGlobal
+          : true,
+      IsVisible:
+        typeof selectedRow.IsVisible === "boolean"
+          ? selectedRow.IsVisible
+          : true, // ← بجای selectedRow.IsVisible || true
+      MaxDuration: selectedRow.MaxDuration ?? 0,
+      PCost: selectedRow.PCost ?? 0,
+      ProjectsStr: selectedRow.ProjectsStr ?? "",
+      SubApprovalFlows: selectedRow.SubApprovalFlows ?? [],
+    });
 
-        if (selectedRow.ID) {
-          // قبل از فراخوانی API، لودینگ را فعال کن
-          setIsLoadingBoxTemplates(true);
-
-          // دریافت لیست BoxTemplateها
-          api
-            .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
-            .then((data) => {
-              setBoxTemplates(data);
-            })
-            .catch((err) => {
-              console.error("Error fetching BoxTemplates:", err);
-              showAlert(
-                "error",
-                null,
-                "Error",
-                "An error occurred while fetching BoxTemplates"
-              );
-              setBoxTemplates([]);
-            })
-            .finally(() => {
-              // در هر صورت (موفق یا خطا)، لودینگ را غیرفعال کن
-              setIsLoadingBoxTemplates(false);
-            });
-        } else {
-          // اگر ID نداشتیم، آرایه را خالی کن
+    if (selectedRow.ID) {
+      setIsLoadingBoxTemplates(true);
+      api
+        .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
+        .then((data) => {
+          // نرمال‌سازی PersianName برای جدول (ستون دوم)
+          const normalized = (Array.isArray(data) ? data : []).map((b: any) => ({
+            ...b,
+            PersianName: b?.PersianName ?? "", // ← همیشه string
+          }));
+          setBoxTemplates(normalized);
+        })
+        .catch((err) => {
+          console.error("Error fetching BoxTemplates:", err);
+          showAlert("error", null, "Error", "An error occurred while fetching BoxTemplates");
           setBoxTemplates([]);
-        }
-      } else {
-        // حالت جدید یا عدم انتخاب ردیف: بازنشانی فرم و جدول
-        setApprovalFlowData({
-          ID: 0,
-          Name: "",
-          PersianName: "",
-          Describtion: "",
-          IsGlobal: true,
-          IsVisible: true,
-          MaxDuration: 0,
-          PCost: 0,
-          ProjectsStr: "",
-          SubApprovalFlows: [],
+        })
+        .finally(() => {
+          setIsLoadingBoxTemplates(false);
         });
-        setBoxTemplates([]);
-      }
-    }, [selectedRow, api]);
+    } else {
+      setBoxTemplates([]);
+    }
+  } else {
+    // حالت جدید/عدم انتخاب: ریست کامل فرم و جدول
+    setApprovalFlowData({
+      ID: 0,
+      Name: "",
+      PersianName: "",
+      Describtion: "",
+      IsGlobal: true,
+      IsVisible: true,
+      MaxDuration: 0,
+      PCost: 0,
+      ProjectsStr: "",
+      SubApprovalFlows: [],
+    });
+    setBoxTemplates([]);
+  }
+}, [selectedRow, api]);
+
 
     // صادر کردن متدها از طریق ref
     useImperativeHandle(ref, () => ({
@@ -268,43 +269,45 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     };
 
     /* ───────── ستون‌های BoxTemplate با flex/minWidth ───────── */
-    const boxTemplateColumnDefs = [
-      {
-        headerName: t("AddApprovalFlows.Name", { defaultValue: "Name" }),
-        field: "Name",
-        filter: "agTextColumnFilter",
-        sortable: true,
-        flex: 1.2,
-        minWidth: 160
-      },
-      {
-        headerName: t("AddApprovalFlows.Predecessor", { defaultValue: "Predecessor" }),
-        field: "PredecessorStr",
-        filter: "agTextColumnFilter",
-        sortable: true,
-        flex: 2,
-        minWidth: 220,
-        valueGetter: (params: any) => {
-          const raw = params?.data?.PredecessorStr;
-          if (!raw) return "";
-          const ids = String(raw)
-            .split("|")
-            .filter(Boolean);
+   const boxTemplateColumnDefs = [
+  {
+    headerName: t("AddApprovalFlows.Name", { defaultValue: "Name" }),
+    field: "Name",
+    filter: "agTextColumnFilter",
+    sortable: true,
+    flex: 1,
+    minWidth: 140,
+  },
+  {
+    headerName: t("DataTable.Headers.PersianName", { defaultValue: "PersianName" }),
+    field: "PersianName",
+    filter: "agTextColumnFilter",
+    sortable: true,
+    flex: 1,
+    minWidth: 140,
+  },
+  {
+    headerName: t("AddApprovalFlows.Predecessor", { defaultValue: "Predecessor" }),
+    field: "PredecessorStr",
+    filter: "agTextColumnFilter",
+    sortable: true,
+    flex: 2,
+    minWidth: 220,
+    valueGetter: (params: any) => {
+      const raw = params?.data?.PredecessorStr;
+      if (!raw) return "";
+      const ids = String(raw).split("|").filter(Boolean);
+      if (!Array.isArray(boxTemplates) || boxTemplates.length === 0) return ids.join(" - ");
+      return ids
+        .map((id: string) => {
+          const found = boxTemplates.find((b: any) => String(b?.ID) === id);
+          return found?.Name ?? id;
+        })
+        .join(" - ");
+    },
+  },
+];
 
-          // اگر boxTemplates هنوز نیامده باشد
-          if (!Array.isArray(boxTemplates) || boxTemplates.length === 0) {
-            return ids.join(" - ");
-          }
-
-          return ids
-            .map((id: string) => {
-              const found = boxTemplates.find((b: any) => String(b?.ID) === id);
-              return found?.Name ?? id;
-            })
-            .join(" - ");
-        }
-      }
-    ];
 
     const handleBoxTemplateEdit = (box: BoxTemplate) => {
       setSelectedSubRowData(box);
@@ -342,7 +345,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         const newList = await api.getAllBoxTemplatesByWfTemplateId(
           approvalFlowData.ID
         );
-        setBoxTemplates(newList);
+        // setBoxTemplates(newList);
+        const normalized = (Array.isArray(newList) ? newList : []).map((b: any) => ({
+       ...b,
+      PersianName: b?.PersianName ?? "",
+     }));
+     setBoxTemplates(normalized);
         // showAlert("success", null, "Success", "Edited Successfully");
       } catch (error) {
         console.error("Error reloading boxTemplates:", error);

@@ -532,6 +532,7 @@ export interface CategoryItem {
 export interface BoxTemplate {
   ID: number;
   Name: string;
+  PersianName: string;
   IsStage: boolean;
   ActionMode: number;
   PredecessorStr: string;
