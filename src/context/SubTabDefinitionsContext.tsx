@@ -98,6 +98,32 @@ export const SubTabDefinitionsProvider: React.FC<{
     fetchInitialData();
   }, [api]);
 
+
+  // یک هلسپر DRY برای جاگذاری PersianName بعد از Name
+  const withPersianName = (defs: ColDef[], header: string = "PersianName"): ColDef[] => {
+    const arr = Array.isArray(defs) ? [...defs] : [];
+    const hasFa = arr.some(c => (c.field ?? "").toString() === "PersianName");
+    if (hasFa) return arr;
+
+    const faCol: ColDef = {
+      headerName: header,
+      field: "PersianName",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+    };
+
+    const nameIdx = arr.findIndex(
+      (c) => (c.field ?? "").toString().toLowerCase() === "name"
+    );
+    if (nameIdx === -1) return [...arr, faCol];
+
+    const before = arr.slice(0, nameIdx + 1);
+    const after = arr.slice(nameIdx + 1);
+    return [...before, faCol, ...after];
+  };
+
+
   const subTabDefinitions = useMemo(() => {
     return {
       Configurations: {
@@ -609,40 +635,20 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
       Forms: {
-        endpoint: api.getTableTransmittal,
-        columnDefs: [
-          {
-            headerName: t("DataTable.Headers.Name"),
-            field: "Name",
-            filter: "agTextColumnFilter",
-            sortable: true,
-          },
-          {
-            headerName: t("DataTable.Headers.Transmittal"),
-            field: "IsDoc", // Using Name field for Transmittal
-            filter: "agTextColumnFilter",
-            sortable: true,
-          },
-          {
-            headerName: t("DataTable.Headers.CatA"),
-            field: "EntityCateAName",
-            filter: "agTextColumnFilter",
-            sortable: true,
-          },
-          {
-            headerName: t("DataTable.Headers.CatB"),
-            field: "EntityCateBName",
-            filter: "agTextColumnFilter",
-            sortable: true,
-          },
-        ],
-        iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: true,
+        endpoint: async () => {
+          const data = await api.getTableTransmittal();
+          return data.map((r: any) => ({ ...r, PersianName: r.PersianName ?? "" }));
         },
-      },
+        columnDefs: withPersianName([
+          { headerName: t("DataTable.Headers.Name"), field: "Name", filter: "agTextColumnFilter", sortable: true },
+          { headerName: t("DataTable.Headers.Transmittal"), field: "IsDoc", filter: "agTextColumnFilter", sortable: true },
+          { headerName: t("DataTable.Headers.CatA"), field: "EntityCateAName", filter: "agTextColumnFilter", sortable: true },
+          { headerName: t("DataTable.Headers.CatB"), field: "EntityCateBName", filter: "agTextColumnFilter", sortable: true },
+        ], t("DataTable.Headers.PersianName")),
+        iconVisibility: { showAdd: true, showEdit: true, showDelete: true, showDuplicate: true },
+      }
+      ,
+
       Categories: {
         endpoint: (params?: { categoryType: "cata" | "catb" }) =>
           params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),

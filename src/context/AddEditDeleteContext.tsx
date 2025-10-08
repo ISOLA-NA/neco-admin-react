@@ -239,6 +239,7 @@ interface ApprovalFlowData {
 interface FormData {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Code: string;
   IsDoc: boolean;
   IsMegaForm: boolean;
@@ -870,6 +871,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       const formRequest: EntityType = {
         ID: data.ID || 0,
         Name: data.Name,
+        PersianName: data.PersianName || "",
         Code: data.Code || "",
         IsDoc: data.IsDoc,
         IsMegaForm: data.IsMegaForm,

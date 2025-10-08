@@ -16,6 +16,8 @@
       },
       "Headers": {
         "Name": "Name",
+        "PersianName": "Persian Name",
+        "PersianColumnName": "Persian ColumnName",
         "ProgramTemplateShort": "Prg. Template",
         "DefaultRibbon": "Default Ribbon",
         "Username": "Username",

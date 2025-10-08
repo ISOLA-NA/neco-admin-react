@@ -497,6 +497,7 @@ export interface AccessProject {
 export interface EntityType {
   ID: number;
   Name: string;
+  PersianName: string;
   Code: string;
   IsDoc: boolean;
   IsGlobal: boolean;
