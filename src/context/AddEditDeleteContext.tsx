@@ -226,6 +226,7 @@ interface ProjectsAccessData {
 interface ApprovalFlowData {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Describtion: string;
   IsGlobal: boolean;
   IsVisible: boolean;
@@ -837,6 +838,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       const approvalFlow: WfTemplateItem = {
         ID: data.ID,
         Name: data.Name,
+        PersianName: (data.PersianName ?? "").trim(), 
         Describtion: data.Describtion,
         IsGlobal: data.IsGlobal,
         IsVisible: data.IsVisible,

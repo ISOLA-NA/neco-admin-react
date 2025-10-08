@@ -119,6 +119,7 @@ export interface EntityTypeItem {
 export interface WfTemplateItem {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Describtion: string;
   IsGlobal: boolean;
   IsVisible: boolean;

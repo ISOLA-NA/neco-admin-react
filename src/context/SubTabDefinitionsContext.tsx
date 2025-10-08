@@ -619,14 +619,18 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
       ApprovalFlows: {
-        endpoint: api.getAllWfTemplate,
-        columnDefs: [
+        endpoint: async () => {
+          const data = await api.getAllWfTemplate();
+          return data.map((r: any) => ({ ...r, PersianName: r.PersianName ?? "" }));
+        },
+        columnDefs: withPersianName([
           {
             headerName: t("DataTable.Headers.AFName"),
             field: "Name",
             filter: "agTextColumnFilter",
           },
-        ],
+          // ← اینجا چیزی اضافه نکن؛ هلسپر خودش PersianName را بلافاصله بعد از Name درج می‌کند
+        ], t("DataTable.Headers.PersianName")),
         iconVisibility: {
           showAdd: true,
           showEdit: true,
