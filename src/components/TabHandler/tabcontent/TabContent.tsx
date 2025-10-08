@@ -138,6 +138,10 @@ const TabContent: FC<TabContentProps> = ({
 
   const [resetSearchKey, setResetSearchKey] = useState(0);
 
+  const [persianNameInput, setPersianNameInput] = useState<string>("");
+  const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name) | true=FA(PersianName)
+
+
   // توابع تغییر اندازه‌ی پنل
   const togglePanelSize = () => {
     setIsRightMaximized(false);
@@ -293,7 +297,7 @@ const TabContent: FC<TabContentProps> = ({
       fetchData();
     }
   }, [activeSubTab, fetchData]);
-  
+
 
   // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
@@ -320,14 +324,27 @@ const TabContent: FC<TabContentProps> = ({
             showAlert("success", null, "", t("Alerts.Added.User"));
           }
           break;
-        case "Ribbons":
+        case "Ribbons": {
+          const nameTrim = (nameInput || "").trim();
+          const pNameTrim = (persianNameInput || "").trim();
+
+          if (!nameTrim) {
+            // اگر Name خالی باشد، همان پیام انگلیسی:
+            showAlert("warning", null, "Warning", "Please fill Name");
+            return;
+          }
+
           await api.insertMenu({
-            Name: nameInput,
+            Name: nameTrim,
+            PersianName: pNameTrim || null,
             Description: descriptionInput,
             IsVisible: true,
           });
+
           showAlert("success", null, "", t("Alerts.Added.Ribbon"));
           break;
+        }
+
         case "Roles":
           if (roleRef.current) {
             const result = await roleRef.current.save();
@@ -491,6 +508,7 @@ const TabContent: FC<TabContentProps> = ({
             await api.updateMenu({
               ID: selectedRow.ID,
               Name: nameInput,
+              PersianName: persianNameInput,
               Description: descriptionInput,
               IsVisible: selectedRow.IsVisible,
             });
@@ -900,12 +918,12 @@ const TabContent: FC<TabContentProps> = ({
   };
 
   const categoryOptions = useMemo(
-  () => [
-    { value: "cata", label: "Category A" },
-    { value: "catb", label: "Category B" },
-  ],
-  []
-);
+    () => [
+      { value: "cata", label: "Category A" },
+      { value: "catb", label: "Category B" },
+    ],
+    []
+  );
 
 
   return (
@@ -963,18 +981,45 @@ const TabContent: FC<TabContentProps> = ({
 
 
         <div className="h-full p-4 overflow-auto relative">
-          {/* اگر تب Ribbons باشد، فرم ساده‌اش همیشه در همین قسمت نمایش داده می‌شود */}
+          {/* ----- RIBBONS: Form + Table ----- */}
           {activeSubTab === "Ribbons" && (
             <div className="mt-4 w-full p-4 bg-white rounded-md shadow-md">
+              {/* اینپوت پویا + سوئیچر EN/FA */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DynamicInput
-                  name={t("Ribbons.Name")}
-                  type="text"
-                  value={nameInput}
-                  placeholder="Enter name"
-                  onChange={handleNameChange}
-                  required
-                />
+                <div className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <DynamicInput
+                      name={isFaMode ? "PersianName" : t("Ribbons.Name")}
+                      type="text"
+                      value={isFaMode ? persianNameInput : nameInput}
+                      placeholder={isFaMode ? "Persian name" : "Enter name"}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        if (isFaMode) setPersianNameInput(e.target.value);
+                        else setNameInput(e.target.value);
+                      }}
+                      required={!isFaMode}
+                    />
+                  </div>
+
+                  {/* دکمه صورتی-بنفش EN/FA */}
+                  <button
+                    type="button"
+                    onClick={() => setIsFaMode((p) => !p)}
+                    className={[
+                      "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+                      "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                      "text-white font-semibold tracking-wide",
+                      "shadow-md shadow-pink-200/50",
+                      "transition-all duration-200",
+                      "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                      "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                    ].join(" ")}
+                    title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                  >
+                    {isFaMode ? "FA" : "EN"}
+                  </button>
+                </div>
+
                 <DynamicInput
                   name={t("Ribbons.Description")}
                   type="text"
@@ -984,18 +1029,17 @@ const TabContent: FC<TabContentProps> = ({
                 />
               </div>
 
+              {/* اکشن‌ها */}
               <div className="flex items-center gap-4 mt-6 justify-center">
-                {/* Save - سبز سازمانی */}
                 <DynamicButton
                   text="Save"
                   leftIcon={<FaSave />}
                   onClick={handleInsert}
-                  isDisabled={!nameInput.trim()}
+                  isDisabled={!isAdding}         
                   variant="orgGreen"
                   size="md"
                 />
 
-                {/* Update - زرد سازمانی */}
                 <DynamicButton
                   text="Update"
                   leftIcon={<FaEdit />}
@@ -1005,16 +1049,20 @@ const TabContent: FC<TabContentProps> = ({
                   size="md"
                 />
 
-                {/* New - آبی سازمانی (فقط پاک کردن فیلدها) */}
                 <DynamicButton
                   text="New"
                   leftIcon={<FaPlus />}
-                  onClick={handleNewClickRibbons}
+                  onClick={() => {
+                    setIsAdding(true);             // ← ورود به حالت Add
+                    setNameInput("");
+                    setPersianNameInput("");
+                    setDescriptionInput("");
+                    setIsFaMode(false);
+                  }}
                   variant="orgBlue"
                   size="md"
                 />
 
-                {/* Delete - قرمز سازمانی */}
                 <DynamicButton
                   text="Delete"
                   leftIcon={<FaTrash />}
@@ -1027,25 +1075,61 @@ const TabContent: FC<TabContentProps> = ({
             </div>
           )}
 
-          <DataTable
-            columnDefs={columnDefs}
-            rowData={fetchedRowData}
-            onRowDoubleClick={handleDoubleClick}
-            setSelectedRowData={handleRowClickLocal}
-            showDuplicateIcon={showDuplicateIcon}
-            showEditIcon={false}
-            showAddIcon={showAddIcon}
-            showDeleteIcon={showDeleteIcon}
-            onEdit={handleEditFromLeft}
-            onAdd={handleAddClick}
-            onDelete={handleDeleteClick}
-            onDuplicate={handleDuplicateClick}
-            isLoading={isLoading}
-            direction={i18n.dir()}
-            resetSearchKey={resetSearchKey}
+          {/* فقط یک IIFE که جدول را برمی‌گرداند */}
+          {(() => {
+            const addPersianCol =
+              activeSubTab === "Ribbons" &&
+              Array.isArray(columnDefs) &&
+              !columnDefs.some((c: any) => c.field === "PersianName");
 
-          />
+            const cols = addPersianCol
+              ? [
+                ...columnDefs,
+                {
+                  headerName: "PersianName",
+                  field: "PersianName",
+                  sortable: true,
+                  filter: true,
+                  resizable: true,
+                },
+              ]
+              : columnDefs;
+
+            return (
+              <DataTable
+                columnDefs={cols}
+                rowData={fetchedRowData}
+                onRowDoubleClick={(data: any) => {
+                  handleDoubleClick(data);
+                  if (activeSubTab === "Ribbons") {
+                    setPersianNameInput(data?.PersianName || "");
+                  }
+                }}
+                setSelectedRowData={(data: any) => {
+                  handleRowClickLocal(data);
+                  if (activeSubTab === "Ribbons") {
+                    setPersianNameInput(data?.PersianName || "");
+                  }
+                }}
+                showDuplicateIcon={showDuplicateIcon}
+                showEditIcon={false}
+                showAddIcon={showAddIcon}
+                showDeleteIcon={showDeleteIcon}
+                onEdit={handleEditFromLeft}
+                onAdd={handleAddClick}
+                onDelete={handleDeleteClick}
+                onDuplicate={handleDuplicateClick}
+                isLoading={isLoading}
+                direction={i18n.dir()}
+                resetSearchKey={resetSearchKey}
+              />
+            );
+          })()}
         </div>
+
+
+
+
       </div>
 
       {/* میله درگ کردن */}

@@ -9,6 +9,8 @@ import AppServices, {
   ProjectWithCalendar,
   ProjectNode,
 } from "../../../../services/api.services";
+import { useTranslation } from "react-i18next";
+
 
 interface Props {
   isOpen: boolean;
@@ -21,6 +23,8 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
   onClose,
   onSelect,
 }) => {
+
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -32,6 +36,10 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
   // انتخاب‌ها
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+
+
+
+
 
   // بارگیری اولیه
   useEffect(() => {
@@ -58,13 +66,13 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
 
   // ستون‌های جدول‌ها
   const formCols = [
-    { headerName: "Name", field: "Name", flex: 1 },
-    { headerName: "CateA", field: "EntityCateAName", flex: 1 },
-    { headerName: "CateB", field: "EntityCateBName", flex: 1 },
+    { headerName: t("DataTable.Headers.Name"), field: "Name", flex: 1 },
+    { headerName: t("DataTable.Headers.CatA"), field: "EntityCateAName", flex: 1 },
+    { headerName: t("DataTable.Headers.CatB"), field: "EntityCateBName", flex: 1 }
   ];
   const progTypeCols = [
-    { headerName: "Name", field: "Name", flex: 1 },
-    { headerName: "Description", field: "Describtion", flex: 1 },
+    { headerName: t("DataTable.Headers.Name"),field:"Name",flex: 1 },
+    { headerName: t("DataTable.Headers.Description"), field: "Describtion", flex: 1 } 
   ];
 
   // فرمان نهایی
@@ -77,7 +85,7 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
     return `NecoPM:\\cmd\\prg?id=${selectedRow.ID}`;
   };
 
-  console.log("rrrrrrrrrr",selectedRow)
+  console.log("rrrrrrrrrr", selectedRow)
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
@@ -88,11 +96,10 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
             (t, i) => (
               <button
                 key={i}
-                className={`px-4 py-1 rounded-t ${
-                  activeTab === i
-                    ? "bg-blue-100 border-b-2 border-blue-600 font-bold"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`px-4 py-1 rounded-t ${activeTab === i
+                  ? "bg-blue-100 border-b-2 border-blue-600 font-bold"
+                  : "hover:bg-gray-100"
+                  }`}
                 onClick={() => {
                   setActiveTab(i);
                   setSelectedRow(null);
@@ -124,6 +131,7 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
               showDeleteIcon={false}
               showDuplicateIcon={false}
               domLayout="normal"
+              direction={i18n.dir()}
             />
           )}
 
@@ -170,6 +178,7 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
               showDeleteIcon={false}
               showDuplicateIcon={false}
               domLayout="normal"
+              direction={i18n.dir()}
             />
           )}
         </div>
@@ -178,11 +187,10 @@ const WindowsCommandSelectorModal: React.FC<Props> = ({
         <div className="flex justify-center gap-4 mt-4">
           <button
             disabled={!selectedRow}
-            className={`px-8 py-2 rounded font-bold transition ${
-              selectedRow
-                ? "bg-orange-500 text-white hover:bg-orange-600"
-                : "bg-orange-300 text-gray-100 cursor-not-allowed"
-            }`}
+            className={`px-8 py-2 rounded font-bold transition ${selectedRow
+              ? "bg-orange-500 text-white hover:bg-orange-600"
+              : "bg-orange-300 text-gray-100 cursor-not-allowed"
+              }`}
             onClick={() => {
               const cmd = buildCmd();
               onSelect(cmd);

@@ -52,6 +52,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
 
+  const { t, i18n } = useTranslation();
+
   // فرم: ذخیره داده‌های فرم
   const [formData, setFormData] = useState<FormDataType>({
     ID: 0,
@@ -66,8 +68,6 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
-
-  const { t } = useTranslation();
 
   // حالت جستجو
   const [searchText, setSearchText] = useState<string>("");
@@ -336,6 +336,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
             ref={tableContainerRef}
           >
             <DataTable
+              direction={i18n.dir()}
               columnDefs={columnDefs}
               rowData={filteredRowData}
               onRowDoubleClick={handleRowDoubleClick}

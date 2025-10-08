@@ -192,6 +192,7 @@ export interface Menu {
   ID?: number; // Optional for creation
   ModifiedById?: string; // Optional, set by backend or current user
   Name: string;
+  PersianName: string;
   Description: string;
   IsVisible?: boolean; // Optional, default to true or as per your logic
   LastModified?: string; // Optional, set by backend

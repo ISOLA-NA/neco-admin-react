@@ -40,14 +40,14 @@ const Accordion2: React.FC<Accordion2Props> = ({
   isOpen,
   toggleAccordion,
 }) => {
-  const { t } = useTranslation();
-
+  
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [rowData, setRowData] = useState<RowData2[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData2 | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
+  const { t , i18n } = useTranslation();
 
   // Form state
   const [formData, setFormData] = useState<Partial<RowData2>>({
@@ -355,6 +355,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                 ref={tableContainerRef}
               >
                 <DataTable
+                  direction={i18n.dir()}
                   columnDefs={columnDefs}
                   rowData={filteredRowData}
                   onRowDoubleClick={handleRowDoubleClick}

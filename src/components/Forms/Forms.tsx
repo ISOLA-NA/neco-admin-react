@@ -113,7 +113,7 @@ const typeOfInformationOptions = [
   { value: "component18", label: "Seqnial Number" },
   { value: "component19", label: "Advance Table" },
   { value: "component20", label: "Word Panel" },
-  { value: "component21", label: "Excecl Panel" },
+  { value: "component21", label: "Excel Panel" },
   { value: "component22", label: "Calculated Field" },
   { value: "component23", label: "Excel Calculator" },
   { value: "component24", label: "Tab" },

@@ -51,7 +51,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
   isOpen,
   toggleAccordion,
 }) => {
-  const { t } = useTranslation();
+  const { t , i18n} = useTranslation();
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [rowData, setRowData] = useState<RowData3[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData3 | null>(null);
@@ -521,6 +521,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   }}
                 >
                   <DataTable
+                    direction={i18n.dir()}
                     columnDefs={columnDefs}
                     rowData={filteredRowData}
                     onRowClick={handleRowClick}
