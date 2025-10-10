@@ -1,0 +1,20 @@
+/* src/components/Forms/FORMGENERATORVIEW/FormGeneratorView.css */
+
+/* فقط روی بلاک‌های FieldDirection اثر می‌گذارد */
+.field-dir[dir="rtl"] {
+    text-align: start; /* تراز منطقی (start/end) */
+  }
+  
+  .field-dir[dir="rtl"] input,
+  .field-dir[dir="rtl"] textarea,
+  .field-dir[dir="rtl"] select {
+    text-align: right; /* بیشتر ورودی‌ها در RTL باید راست‌چین باشند */
+  }
+  
+  /* اگر داخل کنترل‌ها کلاس‌های tailwind مثل ml-3 استفاده شده */
+  .field-dir[dir="rtl"] .ml-3 { margin-right: .75rem; margin-left: 0; }
+  .field-dir[dir="ltr"] .mr-3 { margin-left: .75rem; margin-right: 0; }
+  
+  /* جلوگیری از نشت استایل/جهت به بیرون */
+  .field-dir { isolation: isolate; }
+  

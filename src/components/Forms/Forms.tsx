@@ -14,7 +14,7 @@ import DynamicModal from "../utilities/DynamicModal";
 import TableSelector from "../General/Configuration/TableSelector";
 import DataTable from "../TableDynamic/DataTable";
 import AddColumnForm from "./AddForm";
-import FormGeneratorView from "./FormGeneratorView/FormGeneratorView";
+import FormGeneratorView from "./FormGeneratorView/FORMgENERATORvIEW/FormGeneratorView";
 import UploadFilesPanel from "./UploadFilesPanel";
 import DynamicSwitcher from "../utilities/DynamicSwitcher";
 
@@ -147,7 +147,7 @@ async function fetchFileNameById(fileId: string) {
  * کامپوننت اصلی: FormsCommand1
  */
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
-  const { t , i18n  } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { handleSaveForm } = useAddEditDelete();
   const api = useApi();
 

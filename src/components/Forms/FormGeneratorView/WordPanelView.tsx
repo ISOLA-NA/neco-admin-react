@@ -1,3 +1,4 @@
+// src/components/WordPanelView.tsx
 import React, { useState, useEffect } from "react";
 import fileService from "../../../services/api.servicesFile";
 import { useTranslation } from "react-i18next";
@@ -8,9 +9,11 @@ interface WordPanelViewProps {
     metaType4?: string;
     fileName?: string;
   };
+  /** از FormGeneratorView پاس داده می‌شود؛ فقط همین کنترل RTL/LTR شود */
+  rtl?: boolean;
 }
 
-const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
+const WordPanelView: React.FC<WordPanelViewProps> = ({ data, rtl = false }) => {
   const { t } = useTranslation();
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data?.metaType4 || null
@@ -65,17 +68,46 @@ const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-300">
-      <div className="mb-4 text-xl font-bold text-gray-800">
-        {data?.DisplayName || ""}
+    <div
+      dir={rtl ? "rtl" : "ltr"}
+      className="flex flex-col p-6 bg-white rounded-lg border border-gray-300"
+      style={{
+        unicodeBidi: "plaintext",
+        textAlign: rtl ? "right" : "left",
+      }}
+    >
+      {/* عنوان پانل */}
+      {!!data?.DisplayName && (
+        <div className="mb-4 text-xl font-bold text-gray-800">
+          {data.DisplayName}
+        </div>
+      )}
+
+      {/* نام فایل (اختیاری) */}
+      {fileName && (
+        <div className="mb-3 text-sm text-gray-600">
+          {t("wordpanel.View.CurrentFile")}: {fileName}
+        </div>
+      )}
+
+      {/* دکمه دانلود */}
+      <div>
+        <button
+          type="button"
+          onClick={handleDownloadFile}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+        >
+          {t("wordpanel.View.ButtonShowDocument")}
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={handleDownloadFile}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-      >
-        {t("wordpanel.View.ButtonShowDocument")}
-      </button>
+
+      {/* اصلاحات جزئی فاصله‌ها در حالت RTL (فقط همین کنترل) */}
+      <style>
+        {`
+          [dir="rtl"] .ml-2 { margin-right: .5rem; margin-left: 0; }
+          [dir="rtl"] .mr-2 { margin-left: .5rem; margin-right: 0; }
+        `}
+      </style>
     </div>
   );
 };

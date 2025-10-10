@@ -96,7 +96,7 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-500 text-white px-2 py-1 rounded-md hover:bg-indigo-600 flex items-center"
+          className="postpicker-add-btn bg-indigo-500 text-white px-2 py-1 rounded-md hover:bg-indigo-600 flex items-center"
           title="Add"
         >
           <FaPlus className="mr-1" /> {t("PostPickerList.Buttons.Add")}
@@ -146,6 +146,20 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
           />
         </div>
       </DynamicModal>
+
+      {/* ======= استایل مخصوص راست‌چین ======= */}
+      <style>
+        {`
+          [dir="rtl"] .postpicker-add-btn {
+            flex-direction: row-reverse !important;
+          }
+
+          [dir="rtl"] .postpicker-add-btn svg {
+            margin-left: 0 !important;
+            margin-right: 0.4rem !important;
+          }
+        `}
+      </style>
     </div>
   );
 };

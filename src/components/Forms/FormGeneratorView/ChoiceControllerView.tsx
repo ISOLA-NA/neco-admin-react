@@ -13,7 +13,9 @@ interface ChoiceControllerViewProps {
   };
 }
 
-const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => {
+const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({
+  data,
+}) => {
   if (!data) return null;
 
   const options = data.metaType3
@@ -33,14 +35,16 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
   switch (data.metaType2) {
     case "drop":
       content = (
-        <DynamicSelector
-          name="choiceView"
-          options={options}
-          selectedValue={data.metaType1 || ""}
-          onChange={() => {}}
-          label={displayName}
-          disabled={true}
-        />
+        <div className="ds-rtl-fix">
+          <DynamicSelector
+            name="choiceView"
+            options={options}
+            selectedValue={data.metaType1 || ""}
+            onChange={() => {}}
+            label={displayName}
+            disabled={true}
+          />
+        </div>
       );
       break;
 
@@ -53,7 +57,7 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
           <div className="option-list radio-list">
             <DynamicRadioGroup
               options={options}
-              title=""                 // عنوان داخلی را پنهان می‌کنیم؛ عنوان بیرونی را داریم
+              title="" // عنوان داخلی را پنهان می‌کنیم؛ عنوان بیرونی را داریم
               name="choiceView"
               selectedValue={data.metaType1 || ""}
               onChange={() => {}}
@@ -159,6 +163,33 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
           [dir="rtl"] .choice-controller-view .option-list span {
             margin-right: 0 !important;
           }
+
+          /* ==== RTL fix for DynamicSelector trigger (button + svg chevron) ==== */
+
+/* خودِ دکمه‌ی تریگر: جا برای فلش در سمت start بده و متن رو راست‌چین کن */
+.field-dir[dir="rtl"] .choice-controller-view .ds-rtl-fix
+  button[aria-haspopup="listbox"] {
+  /* سمت شروع در RTL = چپ؛ سمت پایان = راست */
+  padding-inline-start: 2.5rem !important;  /* فضای فلش */
+  padding-inline-end: .75rem !important;
+  text-align: right !important;
+  box-sizing: border-box;
+}
+
+/* متن داخل تریگر (span) هم راست‌چین شود و روی فلش نیفتد */
+.field-dir[dir="rtl"] .choice-controller-view .ds-rtl-fix
+  button[aria-haspopup="listbox"] > span {
+  text-align: right !important;
+  display: block;               /* برای احترام به text-align */
+}
+
+/* خودِ فلش (svg absolute) را بیا سمت start (چپ در RTL) */
+.field-dir[dir="rtl"] .choice-controller-view .ds-rtl-fix
+  button[aria-haspopup="listbox"] > svg {
+  inset-inline-start: .5rem !important;
+  inset-inline-end: auto !important;
+}
+
         `}
       </style>
 

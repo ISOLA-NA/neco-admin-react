@@ -1,4 +1,4 @@
-// src/components/FormGeneratorView.tsx
+// src/components/Forms/FORMGENERATORVIEW/FormGeneratorView.tsx
 import React, {
   Suspense,
   useState,
@@ -6,47 +6,71 @@ import React, {
   useEffect,
   MouseEvent as ReactMouseEvent,
 } from "react";
-import { EntityField } from "../../../services/api.services";
 import { FiMaximize, FiMinimize } from "react-icons/fi";
+import { EntityField } from "../../../../services/api.services";
+import FieldDirection from "./FieldDirection";
+import "./FormGeneratorView.css";
 
-// ---------------- Lazy imports ----------------
-const CtrTextBoxView = React.lazy(() => import("./CtrTextBoxView"));
-const RichTextControllerView = React.lazy(() => import("./RichTextControllerView"));
-const ChoiceControllerView = React.lazy(() => import("./ChoiceControllerView"));
-const NumberControllerView = React.lazy(() => import("./NumberControllerView"));
-const DateTimeSelectorView = React.lazy(() => import("./DateTimeSelectorView"));
-const PersianCalendarPickerView = React.lazy(() => import("./PersianCalendarPickerView"));
-const LookUpFormsView = React.lazy(() => import("./LookUpFormsView"));
-const LookUpRealValueView = React.lazy(() => import("./LookUpRealValueView"));
-const LookUpAdvanceTableView = React.lazy(() => import("./LookUpAdvanceTableView"));
-const LookUpImageView = React.lazy(() => import("./LookUpImageView"));
-const AdvanceLookupAdvanceTableView = React.lazy(() => import("./AdvanceLookupAdvanceTableView"));
-const HyperLinkView = React.lazy(() => import("./HyperLinkView"));
-const YesNoView = React.lazy(() => import("./YesNoView"));
-const SelectUserInPostView = React.lazy(() => import("./SelectUserInPostView"));
-const AttachFileView = React.lazy(() => import("./AttachFileView"));
-const PictureBoxView = React.lazy(() => import("./PictureBoxView"));
-const PostPickerListView = React.lazy(() => import("./PostPickerListView"));
-const TableControllerView = React.lazy(() => import("./TableControllerView"));
-const PfiLookUpView = React.lazy(() => import("./PfiLookUpView"));
-const SeqenialNumberView = React.lazy(() => import("./SeqenialNumberView"));
-const AdvanceTableControllerView = React.lazy(() => import("./AdvanceTableControllerView"));
-const WordPanelView = React.lazy(() => import("./WordPanelView"));
-const ExcellPanelView = React.lazy(() => import("./ExcellPanelView"));
-const CalculatedFieldView = React.lazy(() => import("./CalculatedFieldView"));
-const ExcellCalculatorView = React.lazy(() => import("./ExcellCalculatorView"));
-const TabView = React.lazy(() => import("./TabView"));
-const MapView = React.lazy(() => import("./MapView"));
-const TitleView = React.lazy(() => import("./TitleView"));
-const SectionView = React.lazy(() => import("./SectionView"));
-const SubSectionView = React.lazy(() => import("./SubSectionView"));
-const MePostSelectorView = React.lazy(() => import("./MePostSelectorView"));
-const AdvanceWfView = React.lazy(() => import("./AdvanceWfView"));
-const LookupImageRealValue = React.lazy(() => import("./LookUpImageRealValueView"));
+// ---------------- Lazy imports (نام‌ها با لیست شما هماهنگ شده) ----------------
+const CTextBoxView = React.lazy(() => import("../CtrTextBoxView"));
+const RichTextControllerView = React.lazy(
+  () => import("../RichTextControllerView")
+);
+const ChoiceControllerView = React.lazy(
+  () => import("../ChoiceControllerView")
+);
+const NumberControllerView = React.lazy(
+  () => import("../NumberControllerView")
+);
+const DateTimeSelectorView = React.lazy(
+  () => import("../DateTimeSelectorView")
+);
+const PersianCalendarPickerView = React.lazy(
+  () => import("../PersianCalendarPickerView")
+);
+const LookUpFormsView = React.lazy(() => import("../LookUpFormsView"));
+const LookUpRealValueView = React.lazy(() => import("../LookUpRealValueView"));
+const LookUpAdvanceTableView = React.lazy(
+  () => import("../LookUpAdvanceTableView")
+);
+const LookUpImageView = React.lazy(() => import("../LookUpImageView"));
+const AdvanceLookupAdvanceTableView = React.lazy(
+  () => import("../AdvanceLookupAdvanceTableView")
+);
+const HyperLinkView = React.lazy(() => import("../HyperLinkView"));
+const YesNoView = React.lazy(() => import("../YesNoView"));
+const SelectUserInPostView = React.lazy(
+  () => import("../SelectUserInPostView")
+);
+const AttachFileView = React.lazy(() => import("../AttachFileView"));
+const PictureBoxView = React.lazy(() => import("../PictureBoxView"));
+const PostPickerListView = React.lazy(() => import("../PostPickerListView"));
+const TableControllerView = React.lazy(() => import("../TableControllerView"));
+const PfiLookUpView = React.lazy(() => import("../PfiLookUpView"));
+const SeqenialNumberView = React.lazy(() => import("../SeqenialNumberView"));
+const AdvanceTableControllerView = React.lazy(
+  () => import("../AdvanceTableControllerView")
+);
+const WordPanelView = React.lazy(() => import("../WordPanelView"));
+const ExcellPanelView = React.lazy(() => import("../ExcellPanelView"));
+const CalculatedFieldView = React.lazy(() => import("../CalculatedFieldView"));
+const ExcellCalculatorView = React.lazy(
+  () => import("../ExcellCalculatorView")
+);
+const TabView = React.lazy(() => import("../TabView"));
+const MapView = React.lazy(() => import("../MapView"));
+const TitleView = React.lazy(() => import("../TitleView"));
+const SectionView = React.lazy(() => import("../SectionView"));
+const SubSectionView = React.lazy(() => import("../SubSectionView"));
+const MePostSelectorView = React.lazy(() => import("../MePostSelectorView"));
+const AdvanceWfView = React.lazy(() => import("../AdvanceWfView"));
+const LookUpImageRealValueView = React.lazy(
+  () => import("../../FormGeneratorView/LookupImageRealValueView")
+);
 
 // ---------------- type → component map ----------------
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
-  15: CtrTextBoxView,
+  15: CTextBoxView,
   1: RichTextControllerView,
   2: ChoiceControllerView,
   3: NumberControllerView,
@@ -78,7 +102,7 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   13: SubSectionView,
   18: MePostSelectorView,
   23: AdvanceWfView,
-  37:LookupImageRealValue
+  37: LookUpImageRealValueView,
 };
 
 interface FormGeneratorViewProps {
@@ -189,7 +213,11 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
               className="text-gray-600 hover:text-gray-800 focus:outline-none"
               title={isMaximized ? "Restore" : "Maximize"}
             >
-              {isMaximized ? <FiMinimize size={20} /> : <FiMaximize size={20} />}
+              {isMaximized ? (
+                <FiMinimize size={20} />
+              ) : (
+                <FiMaximize size={20} />
+              )}
             </button>
 
             {/* Close */}
@@ -218,14 +246,27 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto" style={{ maxHeight: "calc(100% - 4rem)" }}>
+        <div
+          className="p-6 overflow-y-auto"
+          style={{ maxHeight: "calc(100% - 4rem)" }}
+        >
           {entityFields.map((field, index) => {
             const ViewComponent = viewComponentMapping[field.ColumnType];
             if (!ViewComponent) return null;
+
+            const isRtl = !!(field as any).IsRTL; // ← تیک RightToLeft هر فیلد
+
             return (
               <div key={index} className="mb-4">
                 <Suspense fallback={<div>Loading...</div>}>
-                  <ViewComponent data={field} selectedRow={selectedRow} />
+                  <FieldDirection rtl={isRtl}>
+                    <ViewComponent
+                      data={field}
+                      selectedRow={selectedRow}
+                      // اگر بعضی Viewها پاپ‌آپ/Portal دارند و نیاز به دانستن جهت دارند:
+                      rtl={isRtl}
+                    />
+                  </FieldDirection>
                 </Suspense>
               </div>
             );

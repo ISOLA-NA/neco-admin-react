@@ -9,6 +9,8 @@ interface TableControllerViewProps {
     metaType3?: string; // داده‌های جدول به صورت JSON؛ مثلاً: [{"a1":"11","a2":"22","a3":"23"},{"a1":"44","a2":"55","a3":"66"}]
     DisplayName?: string;
   };
+  /** از FormGeneratorView پاس می‌شود؛ فقط همین کنترل را RTL/LTR می‌کنیم */
+  rtl?: boolean;
 }
 
 // تابع کمکی برای تولید هدرهای جدول
@@ -43,7 +45,10 @@ const getHeadersFromMeta = (meta: string) => {
   }
 };
 
-const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
+const TableControllerView: React.FC<TableControllerViewProps> = ({
+  data,
+  rtl = false,
+}) => {
   const { t } = useTranslation();
   // metaType1 برای ذخیره‌سازی معمولاً بدون newline است؛ اما برای نمایش، اگر newline داشته باشد، همان استفاده شود.
   // در صورتی که metaType1 شامل newline نباشد، برای نمایش آن را به صورت multiline تبدیل می‌کنیم.
@@ -108,13 +113,20 @@ const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
   }, [tableDataForShow, headers]);
 
   return (
-    <div className="p-4 bg-white rounded-lg border border-gray-300">
+    <div
+      dir={rtl ? "rtl" : "ltr"}
+      className="p-4 bg-white rounded-lg border border-gray-300"
+      style={{ unicodeBidi: "plaintext" }}
+    >
       {data?.DisplayName && (
-        <div className="mb-2 text-sm font-medium text-gray-700">
+        <div
+          className="mb-2 text-sm font-medium text-gray-700"
+          style={{ textAlign: rtl ? "right" : "left" }}
+        >
           {data.DisplayName}
         </div>
       )}
-      <div className="ag-theme-quartz h-40">
+      <div className={`ag-theme-quartz ${rtl ? "ag-rtl" : ""} h-40`}>
         <DataTable
           columnDefs={columns}
           rowData={tableDataForShow}
@@ -132,8 +144,29 @@ const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
           showAddNew={false}
           isLoading={false}
           domLayout="autoHeight"
+          /* اگر DataTable شما prop جهت را پشتیبانی می‌کند (الگوی قبلی‌تان نشان می‌داد): */
+          direction={rtl ? "rtl" : "ltr"}
+          /* در صورت نیاز، می‌توانید defaultColDef هم بدهید:
+          defaultColDef={{ cellClass: rtl ? 'ag-rtl-cell' : undefined }}
+          */
         />
       </div>
+
+      {/* فقط برای همین کنترل: راست‌چین کردن هدر و سلول‌ها در حالت RTL */}
+      <style>
+        {`
+          .ag-rtl .ag-header-cell-label {
+            justify-content: flex-end;
+            text-align: right;
+          }
+          .ag-rtl .ag-cell {
+            text-align: right;
+          }
+          .ag-rtl .ag-cell input {
+            text-align: right;
+          }
+        `}
+      </style>
     </div>
   );
 };

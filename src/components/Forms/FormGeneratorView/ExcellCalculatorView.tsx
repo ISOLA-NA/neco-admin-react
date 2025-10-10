@@ -6,27 +6,33 @@ interface ExcellCalculatorViewProps {
   data?: {
     DisplayName?: string;
   };
-  /** در صورت نیاز می‌تونی جهت رو مشخص کنی؛ اگر ندی از والد ارث می‌بره */
-  dir?: "ltr" | "rtl";
+  /** از FormGeneratorView پاس داده می‌شود؛ فقط همین کنترل RTL/LTR شود */
+  rtl?: boolean;
 }
 
 const ExcellCalculatorView: React.FC<ExcellCalculatorViewProps> = ({
   data,
-  dir,
+  rtl = false,
 }) => {
   const { t } = useTranslation();
+
   return (
     <div
-      dir={dir}
-      className="flex flex-col gap-4 p-6 bg-white rounded-lg border border-gray-300 items-center justify-center"
+      dir={rtl ? "rtl" : "ltr"}
+      className="flex flex-col gap-4 p-6 bg-white rounded-lg border border-gray-300"
+      style={{
+        unicodeBidi: "plaintext",
+        textAlign: rtl ? "right" : "left",
+      }}
     >
+      {/* عنوان پنل */}
       {data?.DisplayName && (
-        <div className="text-xl font-bold text-gray-800">
+        <div className="text-xl font-bold text-gray-800 mb-4">
           {data.DisplayName}
         </div>
       )}
 
-      {/* به‌جای space-x-4 از gap-4 استفاده شده تا در RTL/LTR یکسان عمل کند */}
+      {/* دکمه‌ها در جهت منطقی */}
       <div className="flex items-center gap-4">
         <button
           type="button"
@@ -41,6 +47,14 @@ const ExcellCalculatorView: React.FC<ExcellCalculatorViewProps> = ({
           {t("excelcalculator.Buttons.Show")}
         </button>
       </div>
+
+      {/* اصلاح جزئی فاصله‌ها در حالت RTL (فقط همین کنترل) */}
+      <style>
+        {`
+          [dir="rtl"] .ml-2 { margin-right: .5rem; margin-left: 0; }
+          [dir="rtl"] .mr-2 { margin-left: .5rem; margin-right: 0; }
+        `}
+      </style>
     </div>
   );
 };

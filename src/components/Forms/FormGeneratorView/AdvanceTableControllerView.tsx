@@ -5,11 +5,14 @@ import DataTable from "../../TableDynamic/DataTable";
 interface AdvanceTableControllerViewProps {
   initialRows?: any[];
   data?: { DisplayName?: string };
+  /** از FormGeneratorView پاس می‌شود؛ فقط همین کنترل RTL/LTR شود */
+  rtl?: boolean;
 }
 
 const AdvanceTableControllerView: React.FC<AdvanceTableControllerViewProps> = ({
   initialRows = [],
   data,
+  rtl = false,
 }) => {
   const [rowData, setRowData] = useState<any[]>(initialRows);
   const [selectedRow, setSelectedRow] = useState<any>(null);
@@ -25,14 +28,12 @@ const AdvanceTableControllerView: React.FC<AdvanceTableControllerViewProps> = ({
   ];
 
   const handleAdd = () => {
-    // اضافه کردن یک ردیف جدید با مقدار خالی
     const newRow = { ID: crypto.randomUUID(), Name: "" };
     setRowData((prev) => [...prev, newRow]);
   };
 
   const handleEdit = () => {
     if (!selectedRow) return;
-    // نمونه: مقدار ردیف انتخاب‌شده را ویرایش می‌کنیم
     const updatedRows = rowData.map((row) =>
       row.ID === selectedRow.ID ? { ...row, Name: row.Name + " (Edited)" } : row
     );
@@ -47,39 +48,60 @@ const AdvanceTableControllerView: React.FC<AdvanceTableControllerViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div
+      dir={rtl ? "rtl" : "ltr"}
+      className="flex flex-col gap-4 p-4"
+      style={{ unicodeBidi: "plaintext" }}
+    >
       {/* نمایش DisplayName با فونت کوچک */}
       {data?.DisplayName && (
-        <div className="text-sm font-medium text-gray-800 mb-2">
+        <div
+          className="text-sm font-medium text-gray-800 mb-2"
+          style={{ textAlign: rtl ? "right" : "left" }}
+        >
           {data.DisplayName}
         </div>
       )}
 
       {/* جدول با دکمه‌های داخلی خود DataTable */}
-      <div className="ag-theme-quartz h-60">
+      <div className={`ag-theme-quartz ${rtl ? "ag-rtl" : ""} h-60`}>
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
           onRowDoubleClick={() => {}}
-          // برای اینکه دکمه‌های داخلی بدانند کدام ردیف انتخاب است
           setSelectedRowData={setSelectedRow}
-          // نمایش آیکن‌های داخلی جدول
           showAddIcon={true}
           showEditIcon={true}
           showDeleteIcon={true}
-          showDuplicateIcon={false} // در صورت نیاز می‌توانید true کنید و onDuplicate اضافه کنید
-          // اتصال هندلرها به دکمه‌های داخلی
+          showDuplicateIcon={false}
           onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onDuplicate={() => {}}
-          // سایر تنظیمات
           domLayout="autoHeight"
           showSearch={false}
           showAddNew={false}
           isLoading={false}
+          /* اگر DataTable شما از prop جهت پشتیبانی می‌کند */
+          direction={rtl ? "rtl" : "ltr"}
         />
       </div>
+
+      {/* فقط برای همین کنترل: راست‌چین کردن هدر و سلول‌ها در حالت RTL */}
+      <style>
+        {`
+          .ag-rtl .ag-header-cell-label {
+            justify-content: flex-end;
+            text-align: right;
+          }
+          .ag-rtl .ag-cell {
+            text-align: right;
+          }
+          .ag-rtl .ag-cell input {
+            text-align: right;
+          }
+        `}
+      </style>
     </div>
   );
 };
