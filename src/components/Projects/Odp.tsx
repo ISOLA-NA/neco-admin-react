@@ -95,7 +95,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   const [loadingFormTemplates, setLoadingFormTemplates] = useState(false);
   const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
 
-
   useEffect(() => {
     if (!isEditMode) return;
     const fetchFormTemplates = async () => {
@@ -287,7 +286,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         return false;
       }
       if (!OdpData.Address.trim()) {
-        showAlert("warning", null, "", t("ODP.Alerts.Messages.AddressRequired"));
+        showAlert(
+          "warning",
+          null,
+          "",
+          t("ODP.Alerts.Messages.AddressRequired")
+        );
         return false;
       }
 
@@ -359,7 +363,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         label: item.Name,
       }))}
       selectedValue={OdpData.nEntityTypeID?.toString() ?? ""}
-      onChange={() => { }}
+      onChange={() => {}}
       label="Form Template"
       disabled
       loading={loadingFormTemplates}
@@ -376,7 +380,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         label: item.Name,
       }))}
       selectedValue={OdpData.nWFTemplateID?.toString() ?? ""}
-      onChange={() => { }}
+      onChange={() => {}}
       label="Approval Flow Template"
       disabled
       loading={loadingApprovalFlows}
@@ -391,35 +395,42 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     <>
       <TwoColumnLayout>
         {/* Name / PersianName + سوئیچر */}
-        <div className="flex items-end gap-2">
+        {/* Name / PersianName + سوئیچر */}
+        {/* Name / PersianName + سوئیچر */}
+        <div className="flex items-end gap-2 mb-4">
+          {" "}
+          {/* ← فاصله را به کانتینر دادیم */}
           <div className="flex-1">
             <DynamicInput
               name={isFaMode ? "PersianName" : t("ODP.ODPName")}
               type="text"
-              value={isFaMode ? (OdpData.PersianName ?? "") : OdpData.Name}
+              value={isFaMode ? OdpData.PersianName ?? "" : OdpData.Name}
               placeholder=""
-              onChange={(e: { target: { value: string | number | boolean | null } }) =>
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange(isFaMode ? "PersianName" : "Name", e.target.value)
               }
-              required={!isFaMode} // وقتی EN است، الزام دارد
-              className="mb-4"
+              required={!isFaMode}
+              className="mb-0"
+              labelClassName="text-gray-700 font-medium"
             />
           </div>
-
-          {/* دکمه EN/FA گرادیانی */}
+          {/* دکمه EN/FA */}
           <button
             type="button"
             onClick={() => setIsFaMode((p) => !p)}
             className={[
-              "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+              "shrink-0 inline-flex items-center justify-center",
+              "h-8 px-3 rounded-lg self-end mb-1" /* ← هم‌راستاسازی با ته اینپوت */,
               "bg-gradient-to-r from-fuchsia-500 to-pink-500",
-              "text-white font-semibold tracking-wide",
-              "shadow-md shadow-pink-200/50",
+              "text-white text-xs font-semibold tracking-wide",
+              "shadow shadow-pink-200/50",
               "transition-all duration-200",
-              "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+              "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-md hover:scale-[1.01]",
               "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
             ].join(" ")}
-            title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+            title={
+              isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"
+            }
           >
             {isFaMode ? "FA" : "EN"}
           </button>
