@@ -198,6 +198,10 @@ interface ApiContextType {
   getApprovalCheckList: () => Promise<ApprovalChecklist[]>;
 
   getEntityFieldById: (id: number) => Promise<EntityField>;
+
+  duplicateMenu: (id: number) => Promise<Menu>;
+  duplicateWfTemplate: (id: number) => Promise<WfTemplateItem>;
+  duplicateOdp: (id: number) => Promise<OdpWithExtra>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -358,7 +362,9 @@ export const APIProvider: React.FC<{ children: React.ReactNode }> = ({
     getApprovalCheckList: AppServices.getApprovalCheckList.bind(AppServices),
     getEntityFieldById: AppServices.getEntityFieldById.bind(AppServices),
 
-    
+    duplicateMenu: AppServices.duplicateMenu.bind(AppServices),
+    duplicateWfTemplate: AppServices.duplicateWfTemplate.bind(AppServices),
+    duplicateOdp: AppServices.duplicateOdp.bind(AppServices),
   };
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

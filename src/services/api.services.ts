@@ -3,7 +3,6 @@
 import httpClient from "./api.config";
 import { apiConst } from "./api.constant";
 
-
 // ================== اینترفیس‌ها ==================
 
 // نمونه از AppSetting
@@ -694,7 +693,7 @@ export interface ProjectNode {
 
 export interface AlertingWfTemplateItem {
   ID?: number;
-  Duration: number;            // ← قبلاً string بود، حالا number
+  Duration: number; // ← قبلاً string بود، حالا number
   SensitivityWFTemp: number;
   SensitiveItemWFTemp: number;
   WFState: number;
@@ -707,7 +706,6 @@ export interface AlertingWfTemplateItem {
   LastModified?: string;
   ModifiedById?: string;
 }
-
 
 // ساخت یک کلاس برای متدهای API
 class ApiService {
@@ -928,6 +926,13 @@ class ApiService {
    */
   async deleteMenu(id: number): Promise<void> {
     await httpClient.post(apiConst.deleteMenu, { ID: id });
+  }
+
+  async duplicateMenu(id: number): Promise<Menu> {
+    const response = await httpClient.post<Menu>(apiConst.duplicateMenu, {
+      ID: id,
+    });
+    return response.data;
   }
 
   async getAllMenuTab(menuId: number): Promise<MenuTab[]> {
@@ -1271,6 +1276,14 @@ class ApiService {
     await httpClient.post(apiConst.deleteOdp, { ID: id });
   }
 
+  async duplicateOdp(id: number): Promise<OdpWithExtra> {
+    const response = await httpClient.post<OdpWithExtra>(
+      apiConst.duplicateOdp,
+      { ID: id }
+    );
+    return response.data;
+  }
+
   async getAllEntityCollection(): Promise<EntityCollection[]> {
     const response = await httpClient.post<EntityCollection[]>(
       apiConst.getAllEntityCollection
@@ -1379,6 +1392,14 @@ class ApiService {
     const response = await httpClient.post<WfTemplateItem>(
       apiConst.editApprovalFlow,
       data
+    );
+    return response.data;
+  }
+
+  async duplicateWfTemplate(id: number): Promise<WfTemplateItem> {
+    const response = await httpClient.post<WfTemplateItem>(
+      apiConst.duplicateWfTemplate,
+      { ID: id }
     );
     return response.data;
   }
@@ -1596,7 +1617,7 @@ class ApiService {
 
   async getPrjRoot(gid: number): Promise<ProjectNode[]> {
     const res = await httpClient.post<any[]>(apiConst.getPrjRoot, { gid });
-    return res.data.map(d => ({
+    return res.data.map((d) => ({
       ID: d.ID,
       Name: d.Name,
       // فرض می‌کنیم سرور این فیلد را دقیقاً با همین نام می‌فرستد:
@@ -1610,11 +1631,8 @@ class ApiService {
    * body: { subProgramID }
    */
   async getPrjChildren(id: number): Promise<ProjectNode[]> {
-    const res = await httpClient.post<any[]>(
-      apiConst.getPrjChildren,
-      { id }
-    );
-    return res.data.map(d => ({
+    const res = await httpClient.post<any[]>(apiConst.getPrjChildren, { id });
+    return res.data.map((d) => ({
       ID: d.ID,
       Name: d.Name,
       // سرور در payload لول‌های بعدی هم subProgramID می‌فرستد:
@@ -1665,9 +1683,6 @@ class ApiService {
     );
     return response.data;
   }
-
-
-
 }
 
 // یک خروجی برای استفاده در Context

@@ -23,6 +23,31 @@ import {
 import { useTranslation } from "react-i18next"; // ← طبق سبک خواسته‌شده
 import type { ColDef } from "ag-grid-community"; // ← تایپ دقیق ستون‌ها
 
+const COPY_SUFFIX = "-COPY";
+
+const withCopySuffix = (name?: string) => {
+  const base = (name ?? "").trim() || "Item";
+  return base.endsWith(COPY_SUFFIX) ? base : `${base}${COPY_SUFFIX}`;
+};
+
+const detectIdKey = (obj: any) => {
+  if (!obj || typeof obj !== "object") return "ID";
+  const candidates = [
+    "ID",
+    "Id",
+    "MenuID",
+    "WfTemplateID",
+    "EntityTypeID",
+    "OdpID",
+  ];
+  return candidates.find((k) => k in obj) || "ID";
+};
+
+const findNewItem = (before: any[], after: any[]) => {
+  const beforeIds = new Set(before.map((x) => x?.ID ?? x?.Id));
+  return after.find((x) => !beforeIds.has(x?.ID ?? x?.Id));
+};
+
 interface SubTabDefinition {
   endpoint?: (params?: any) => Promise<any[]>;
   columnDefs: ColDef[]; // ← به جای any[]
@@ -32,11 +57,19 @@ interface SubTabDefinition {
     showDelete: boolean;
     showDuplicate: boolean;
   };
+  duplicateAction?: (row: any) => Promise<any | void>; // API دوپلیکیت همان تب
+  updater?: (item: any) => Promise<any>; // متد آپدیت همان تب
+  nameField?: string;
 }
 
 interface SubTabDefinitionsContextType {
   subTabDefinitions: Record<string, SubTabDefinition>;
   fetchDataForSubTab: (subTabName: string, params?: any) => Promise<any[]>;
+  duplicateForSubTab: (
+    subTabName: string,
+    row: any,
+    params?: any
+  ) => Promise<any[]>;
 }
 
 const SubTabDefinitionsContext = createContext<SubTabDefinitionsContextType>(
@@ -165,6 +198,24 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+      // Ribbons: {
+      //   endpoint: api.getAllMenu,
+      //   columnDefs: [
+      //     {
+      //       headerName: t("DataTable.Headers.Name"),
+      //       field: "Name",
+      //       filter: "agTextColumnFilter",
+      //     },
+      //   ],
+      //   duplicateAction: (row) => api.duplicateMenu(row.ID),
+      //   iconVisibility: {
+      //     showAdd: true,
+      //     showEdit: true,
+      //     showDelete: true,
+      //     showDuplicate: true,
+      //   },
+      // },
+      // Ribbons
       Ribbons: {
         endpoint: api.getAllMenu,
         columnDefs: [
@@ -178,9 +229,13 @@ export const SubTabDefinitionsProvider: React.FC<{
           showAdd: true,
           showEdit: true,
           showDelete: true,
-          showDuplicate: false,
+          showDuplicate: true, // ← فعال
         },
+        duplicateAction: (row) => api.duplicateMenu(row.ID),
+        updater: (item) => api.updateMenu(item), // ← بعد از duplicate نام را با -copy آپدیت می‌کنیم
+        nameField: "Name",
       },
+
       Users: {
         endpoint: api.getAllUsers,
         columnDefs: [
@@ -524,6 +579,39 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+      // Odp: {
+      //   endpoint: api.getAllOdpWithExtra,
+      //   columnDefs: [
+      //     {
+      //       headerName: t("DataTable.Headers.Name"),
+      //       field: "Name",
+      //       filter: "agTextColumnFilter",
+      //     },
+      //     {
+      //       headerName: t("DataTable.Headers.Address"),
+      //       field: "Address",
+      //       filter: "agTextColumnFilter",
+      //     },
+      //     {
+      //       headerName: t("DataTable.Headers.WFTemplateName"),
+      //       field: "WFTemplateName",
+      //       filter: "agTextColumnFilter",
+      //     },
+      //     {
+      //       headerName: t("DataTable.Headers.EntityTypeName"),
+      //       field: "EntityTypeName",
+      //       filter: "agTextColumnFilter",
+      //     },
+      //   ],
+      //   duplicateAction: (row) => api.duplicateOdp(row.ID),
+      //   iconVisibility: {
+      //     showAdd: true,
+      //     showEdit: true,
+      //     showDelete: true,
+      //     showDuplicate: true,
+      //   },
+      // },
+      // Odp
       Odp: {
         endpoint: api.getAllOdpWithExtra,
         columnDefs: [
@@ -552,9 +640,13 @@ export const SubTabDefinitionsProvider: React.FC<{
           showAdd: true,
           showEdit: true,
           showDelete: true,
-          showDuplicate: false,
+          showDuplicate: true,
         },
+        duplicateAction: (row) => api.duplicateOdp(row.ID),
+        updater: (item) => api.updateOdp(item), // ← نام را با "-copy" نهایی می‌کنیم
+        nameField: "Name",
       },
+
       Procedures: {
         endpoint: api.getAllEntityCollection,
         columnDefs: [
@@ -592,6 +684,24 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+      // ApprovalFlows: {
+      //   endpoint: api.getAllWfTemplate,
+      //   columnDefs: [
+      //     {
+      //       headerName: t("DataTable.Headers.AFName"),
+      //       field: "Name",
+      //       filter: "agTextColumnFilter",
+      //     },
+      //   ],
+      //   duplicateAction: (row) => api.duplicateWfTemplate(row.ID),
+      //   iconVisibility: {
+      //     showAdd: true,
+      //     showEdit: true,
+      //     showDelete: true,
+      //     showDuplicate: false,
+      //   },
+      // },
+      // ApprovalFlows
       ApprovalFlows: {
         endpoint: api.getAllWfTemplate,
         columnDefs: [
@@ -605,9 +715,50 @@ export const SubTabDefinitionsProvider: React.FC<{
           showAdd: true,
           showEdit: true,
           showDelete: true,
-          showDuplicate: false,
+          showDuplicate: true, // ← از false به true
         },
+        duplicateAction: (row) => api.duplicateWfTemplate(row.ID),
+        updater: (item) => api.editApprovalFlow(item), // ← آپدیت تمپلیت جدید با نام "-copy"
+        nameField: "Name",
       },
+
+      // Forms: {
+      //   endpoint: api.getTableTransmittal,
+      //   columnDefs: [
+      //     {
+      //       headerName: t("DataTable.Headers.Name"),
+      //       field: "Name",
+      //       filter: "agTextColumnFilter",
+      //       sortable: true,
+      //     },
+      //     {
+      //       headerName: t("DataTable.Headers.Transmittal"),
+      //       field: "IsDoc", // Using Name field for Transmittal
+      //       filter: "agTextColumnFilter",
+      //       sortable: true,
+      //     },
+      //     {
+      //       headerName: t("DataTable.Headers.CatA"),
+      //       field: "EntityCateAName",
+      //       filter: "agTextColumnFilter",
+      //       sortable: true,
+      //     },
+      //     {
+      //       headerName: t("DataTable.Headers.CatB"),
+      //       field: "EntityCateBName",
+      //       filter: "agTextColumnFilter",
+      //       sortable: true,
+      //     },
+      //   ],
+      //   iconVisibility: {
+      //     showAdd: true,
+      //     showEdit: true,
+      //     showDelete: true,
+      //     showDuplicate: true,
+      //   },
+      //   duplicateAction: (row) => api.duplicateEntityType(row.ID),
+      // },
+      // Forms
       Forms: {
         endpoint: api.getTableTransmittal,
         columnDefs: [
@@ -619,7 +770,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           },
           {
             headerName: t("DataTable.Headers.Transmittal"),
-            field: "IsDoc", // Using Name field for Transmittal
+            field: "IsDoc",
             filter: "agTextColumnFilter",
             sortable: true,
           },
@@ -642,7 +793,11 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDelete: true,
           showDuplicate: true,
         },
+        duplicateAction: (row) => api.duplicateEntityType(row.ID),
+        updater: (item) => api.updateEntityType(item), // ← نامِ کپی را با "-copy" ذخیره می‌کنیم
+        nameField: "Name",
       },
+
       Categories: {
         endpoint: (params?: { categoryType: "cata" | "catb" }) =>
           params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),
@@ -773,9 +928,71 @@ export const SubTabDefinitionsProvider: React.FC<{
     return await definition.endpoint(params);
   };
 
+  const duplicateForSubTab = async (
+    subTabName: string,
+    row: any,
+    params?: any
+  ) => {
+    const def = subTabDefinitions[subTabName];
+    if (!def) return await fetchDataForSubTab(subTabName, params);
+
+    if (!def.duplicateAction) {
+      return await fetchDataForSubTab(subTabName, params);
+    }
+
+    try {
+      // قبل از کپی
+      const before = await fetchDataForSubTab(subTabName, params);
+
+      // کپی
+      const newItemRaw: any = await def.duplicateAction(row);
+
+      // بعد از کپی
+      const after = await fetchDataForSubTab(subTabName, params);
+
+      // آیتم جدید را به‌دست بیاور (یا از خروجی API، یا با اختلاف قبل/بعد)
+      let newItem =
+        newItemRaw && typeof newItemRaw === "object"
+          ? newItemRaw.data ??
+            newItemRaw.Data ??
+            newItemRaw.value ??
+            newItemRaw.Value ??
+            newItemRaw
+          : undefined;
+
+      if (!newItem || typeof newItem !== "object") {
+        newItem = findNewItem(before, after);
+      }
+      if (!newItem) return after;
+
+      // فقط برای تب Forms: Name فعلی + "-COPY"
+      if (subTabName === "Forms" && def.updater) {
+        const nameKey = def.nameField ?? "Name";
+        const idKey = detectIdKey(newItem);
+
+        const baseName = (row?.[nameKey] ?? newItem?.[nameKey] ?? "").trim();
+        const targetName = withCopySuffix(baseName);
+
+        // پِی‌لود: اطلاعات اصلی + آیتم جدید (برای داشتن ID جدید) + نام جدید
+        const payload = {
+          ...(row || {}),
+          ...(newItem || {}),
+          [idKey]: newItem[idKey],
+          [nameKey]: targetName,
+        };
+
+        await def.updater(payload);
+      }
+    } catch (err) {
+      console.error(`Duplicate failed for ${subTabName}:`, err);
+    }
+
+    return await fetchDataForSubTab(subTabName, params);
+  };
+
   return (
     <SubTabDefinitionsContext.Provider
-      value={{ subTabDefinitions, fetchDataForSubTab }}
+      value={{ subTabDefinitions, fetchDataForSubTab, duplicateForSubTab }}
     >
       {children}
     </SubTabDefinitionsContext.Provider>

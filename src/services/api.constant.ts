@@ -129,11 +129,21 @@ export const apiConst = Object.freeze({
   getPrjRoot: "api/Program/GetByPrjLevel",
   getPrjChildren: "api/ProgramField/GetAllByPrgId",
 
-    // Alerting WF Template
+  // Alerting WF Template
   insertAlertingWfTemplate: "api/AlertingWfTemplate/Insert",
   updateAlertingWfTemplate: "api/AlertingWfTemplate/Update",
   deleteAlertingWfTemplate: "api/AlertingWfTemplate/Delete",
   getAllAlertingWfTemplate: "api/AlertingWfTemplate/GetAll",
 
-  getAllAlertingWfTemplateByWFBoxTemplateId: "api/AlertingWfTemplate/GetAllByWFBoxTemplateId",
+  getAllAlertingWfTemplateByWFBoxTemplateId:
+    "api/AlertingWfTemplate/GetAllByWFBoxTemplateId",
+
+  // api/Menu/
+  duplicateMenu: "api/Menu/Duplicate",
+
+  // api/WFTemplate/
+  duplicateWfTemplate: "api/WFTemplate/Duplicate",
+
+  // api/KnowledgeType/
+  duplicateOdp: "api/KnowledgeType/Duplicate",
 });

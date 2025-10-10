@@ -6,8 +6,8 @@ import React, {
   MouseEvent,
   useCallback,
   FC,
-  useMemo
-  // 
+  useMemo,
+  //
 } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import PanelHeader from "../tabcontent/PanelHeader";
@@ -82,7 +82,7 @@ const TabContent: FC<TabContentProps> = ({
 
   const api = useApi();
   const { t } = useTranslation();
-  const { fetchDataForSubTab } = useSubTabDefinitions();
+  const { fetchDataForSubTab, duplicateForSubTab } = useSubTabDefinitions();
   const [panelWidth, setPanelWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -121,7 +121,7 @@ const TabContent: FC<TabContentProps> = ({
   );
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState<() => void>(() => { });
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
 
   // وضعیت نمایش پنل راست
   // const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -275,6 +275,51 @@ const TabContent: FC<TabContentProps> = ({
     }
   }, [activeSubTab, selectedCategoryType]);
 
+  const handleDuplicateClick = () => {
+    const row = pendingSelectedRow || selectedRow;
+    if (!row) {
+      showAlert(
+        "warning",
+        null,
+        "Warning",
+        "Please select a row to duplicate."
+      );
+      return;
+    }
+
+    setConfirmVariant("edit"); // ظاهر دیالوگ
+    setConfirmTitle(
+      t("DynamicConfirm.Confirmations.Duplicate.Title") || "Duplicate"
+    );
+    setConfirmMessage(
+      t("DynamicConfirm.Confirmations.Duplicate.Message") ||
+        "Are you sure you want to duplicate this item?"
+    );
+
+    setConfirmAction(() => async () => {
+      try {
+        await duplicateForSubTab(activeSubTab, row);
+        showAlert(
+          "success",
+          null,
+          "",
+          t("Alerts.Duplicated.Success") || "Item duplicated successfully."
+        );
+        await fetchData(); // ← همین تب را رفرش کن
+      } catch (err) {
+        console.error("Duplicate failed:", err);
+        showAlert(
+          "error",
+          null,
+          t("Alerts.Titles.Error"),
+          t("Alerts.Duplicated.Failed") || "Failed to duplicate item."
+        );
+      }
+    });
+
+    setConfirmOpen(true);
+  };
+
   // تغییر نوع Category
   const handleCategoryTypeChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -293,7 +338,6 @@ const TabContent: FC<TabContentProps> = ({
       fetchData();
     }
   }, [activeSubTab, fetchData]);
-  
 
   // متد درج (Save در حالت Adding)
   const handleInsert = async () => {
@@ -439,7 +483,7 @@ const TabContent: FC<TabContentProps> = ({
       }
 
       await fetchData();
-      setResetSearchKey(k => k + 1);
+      setResetSearchKey((k) => k + 1);
       setIsPanelOpen(false);
       setIsAdding(false);
       resetInputs();
@@ -449,9 +493,9 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          // "خطایی در فرآیند ذخیره دستور رخ داده است.";
-          "";
+            data?.message ||
+            // "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            "";
       showAlert("error", null, t("Alerts.Titles.Error"), message);
     }
   };
@@ -590,16 +634,16 @@ const TabContent: FC<TabContentProps> = ({
             const result =
               selectedCategoryType === "cata"
                 ? await api.updateCatA({
-                  ...categoriesRef.current.getData(),
-                  categoryType: selectedCategoryType,
-                })
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  })
                 : await api.updateCatB({
-                  ...categoriesRef.current.getData(),
-                  categoryType: selectedCategoryType,
-                });
+                    ...categoriesRef.current.getData(),
+                    categoryType: selectedCategoryType,
+                  });
             showAlert("success", null, "", t("Alerts.Updated.Category"));
             await fetchData();
-            setResetSearchKey(k => k + 1);
+            setResetSearchKey((k) => k + 1);
           }
           break;
       }
@@ -613,8 +657,8 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     }
   };
@@ -794,25 +838,6 @@ const TabContent: FC<TabContentProps> = ({
     setConfirmOpen(true);
   };
 
-  const handleDuplicateClick = () => {
-    if (selectedRow) {
-      onDuplicate();
-      if (activeSubTab === "Ribbons") {
-        setNameInput(selectedRow.Name);
-        setDescriptionInput(selectedRow.Description);
-        setIsAdding(true);
-        setIsPanelOpen(true);
-      }
-    } else {
-      showAlert(
-        "warning",
-        null,
-        "Warning",
-        "Please select a row to duplicate."
-      );
-    }
-  };
-
   // تابع محلی برای Edit (بازکردن پنل راست در حالت ویرایش)
   const handleEditFromLeft = () => {
     setIsAdding(false);
@@ -900,13 +925,12 @@ const TabContent: FC<TabContentProps> = ({
   };
 
   const categoryOptions = useMemo(
-  () => [
-    { value: "cata", label: "Category A" },
-    { value: "catb", label: "Category B" },
-  ],
-  []
-);
-
+    () => [
+      { value: "cata", label: "Category A" },
+      { value: "catb", label: "Category B" },
+    ],
+    []
+  );
 
   return (
     <div
@@ -960,7 +984,6 @@ const TabContent: FC<TabContentProps> = ({
             />
           </div>
         )}
-
 
         <div className="h-full p-4 overflow-auto relative">
           {/* اگر تب Ribbons باشد، فرم ساده‌اش همیشه در همین قسمت نمایش داده می‌شود */}
@@ -1043,7 +1066,6 @@ const TabContent: FC<TabContentProps> = ({
             isLoading={isLoading}
             direction={i18n.dir()}
             resetSearchKey={resetSearchKey}
-
           />
         </div>
       </div>
@@ -1060,8 +1082,9 @@ const TabContent: FC<TabContentProps> = ({
       {/* پنل راست */}
       {isPanelOpen && (
         <div
-          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
-            }`}
+          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
+            isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
+          }`}
           style={{
             transition: "opacity 0.1s ease-out",
             backgroundColor: "#f3f4f6",
@@ -1081,48 +1104,48 @@ const TabContent: FC<TabContentProps> = ({
               activeSubTab !== "ProjectsAccess" && (
                 <PanelHeader
                   isExpanded={false}
-                  toggleExpand={() => { }}
+                  toggleExpand={() => {}}
                   onSave={
                     isAdding &&
-                      (activeSubTab === "Configurations" ||
-                        activeSubTab === "Commands" ||
-                        activeSubTab === "Users" ||
-                        activeSubTab === "Ribbons" ||
-                        activeSubTab === "Roles" ||
-                        activeSubTab === "RoleGroups" ||
-                        activeSubTab === "Enterprises" ||
-                        activeSubTab === "Staffing" ||
-                        activeSubTab === "ProgramTemplate" ||
-                        activeSubTab === "ProgramTypes" ||
-                        activeSubTab === "Odp" ||
-                        activeSubTab === "Procedures" ||
-                        activeSubTab === "Calendars" ||
-                        activeSubTab === "ProjectsAccess" ||
-                        activeSubTab === "ApprovalFlows" ||
-                        activeSubTab === "Forms" ||
-                        activeSubTab === "Categories")
+                    (activeSubTab === "Configurations" ||
+                      activeSubTab === "Commands" ||
+                      activeSubTab === "Users" ||
+                      activeSubTab === "Ribbons" ||
+                      activeSubTab === "Roles" ||
+                      activeSubTab === "RoleGroups" ||
+                      activeSubTab === "Enterprises" ||
+                      activeSubTab === "Staffing" ||
+                      activeSubTab === "ProgramTemplate" ||
+                      activeSubTab === "ProgramTypes" ||
+                      activeSubTab === "Odp" ||
+                      activeSubTab === "Procedures" ||
+                      activeSubTab === "Calendars" ||
+                      activeSubTab === "ProjectsAccess" ||
+                      activeSubTab === "ApprovalFlows" ||
+                      activeSubTab === "Forms" ||
+                      activeSubTab === "Categories")
                       ? handleInsert
                       : undefined
                   }
                   onUpdate={
                     !isAdding &&
-                      (activeSubTab === "Configurations" ||
-                        activeSubTab === "Commands" ||
-                        activeSubTab === "Users" ||
-                        activeSubTab === "Ribbons" ||
-                        activeSubTab === "Roles" ||
-                        activeSubTab === "Enterprises" ||
-                        activeSubTab === "RoleGroups" ||
-                        activeSubTab === "Staffing" ||
-                        activeSubTab === "ProgramTemplate" ||
-                        activeSubTab === "ProgramTypes" ||
-                        activeSubTab === "Odp" ||
-                        activeSubTab === "Procedures" ||
-                        activeSubTab === "Calendars" ||
-                        activeSubTab === "ProjectsAccess" ||
-                        activeSubTab === "ApprovalFlows" ||
-                        activeSubTab === "Forms" ||
-                        activeSubTab === "Categories")
+                    (activeSubTab === "Configurations" ||
+                      activeSubTab === "Commands" ||
+                      activeSubTab === "Users" ||
+                      activeSubTab === "Ribbons" ||
+                      activeSubTab === "Roles" ||
+                      activeSubTab === "Enterprises" ||
+                      activeSubTab === "RoleGroups" ||
+                      activeSubTab === "Staffing" ||
+                      activeSubTab === "ProgramTemplate" ||
+                      activeSubTab === "ProgramTypes" ||
+                      activeSubTab === "Odp" ||
+                      activeSubTab === "Procedures" ||
+                      activeSubTab === "Calendars" ||
+                      activeSubTab === "ProjectsAccess" ||
+                      activeSubTab === "ApprovalFlows" ||
+                      activeSubTab === "Forms" ||
+                      activeSubTab === "Categories")
                       ? handleUpdate
                       : undefined
                   }
@@ -1156,8 +1179,8 @@ const TabContent: FC<TabContentProps> = ({
                         isAdding
                           ? "add-mode"
                           : selectedRow
-                            ? selectedRow.ID
-                            : "no-selection"
+                          ? selectedRow.ID
+                          : "no-selection"
                       }
                       selectedRow={isAdding ? null : selectedRow}
                       ref={getActiveRef()}
