@@ -33,6 +33,7 @@ interface ApprovalFlowProps {
 }
 
 interface ApprovalFlowData extends WfTemplateItem {
+  PersianName?: string;
   SubApprovalFlows: any[];
 }
 
@@ -43,13 +44,14 @@ interface MappedProject {
 
 const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   ({ selectedRow }, ref) => {
-    const { t , i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const api = useApi();
     const { handleSaveApprovalFlow } = useAddEditDelete();
 
     const [approvalFlowData, setApprovalFlowData] = useState<ApprovalFlowData>({
       ID: 0,
       Name: "",
+      PersianName: "",
       Describtion: "",
       IsGlobal: true,
       IsVisible: true,
@@ -72,6 +74,8 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     // id ساب‌آیتمی که قصد حذفش رو داریم
     const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
+    const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name), true=FA(PersianName)
+
     // دریافت پروژه‌ها
     useEffect(() => {
       const fetchProjects = async () => {
@@ -92,98 +96,104 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     }, [api]);
 
     useEffect(() => {
-      if (selectedRow) {
-        // مقداردهی اولیه داده‌های فرم
-        setApprovalFlowData({
-          ID: selectedRow.ID,
-          Name: selectedRow.Name || "",
-          Describtion: selectedRow.Describtion || "",
-          IsGlobal:
-            typeof selectedRow.IsGlobal === "boolean"
-              ? selectedRow.IsGlobal
-              : true,
+  // هر بار که ردیف تغییر می‌کند، حالت ورودی را روی EN بگذار
+  setIsFaMode(false);
 
-          IsVisible: selectedRow.IsVisible || true,
-          MaxDuration: selectedRow.MaxDuration || 0,
-          PCost: selectedRow.PCost || 0,
-          ProjectsStr: selectedRow.ProjectsStr || "",
-          SubApprovalFlows: selectedRow.SubApprovalFlows || [],
-        });
+  if (selectedRow) {
+    // مقداردهی فرم با ایمنی در برابر null/undefined
+    setApprovalFlowData({
+      ID: selectedRow.ID,
+      Name: selectedRow.Name ?? "",
+      PersianName: selectedRow.PersianName ?? "", // ← همیشه string
+      Describtion: selectedRow.Describtion ?? "",
+      IsGlobal:
+        typeof selectedRow.IsGlobal === "boolean"
+          ? selectedRow.IsGlobal
+          : true,
+      IsVisible:
+        typeof selectedRow.IsVisible === "boolean"
+          ? selectedRow.IsVisible
+          : true, // ← بجای selectedRow.IsVisible || true
+      MaxDuration: selectedRow.MaxDuration ?? 0,
+      PCost: selectedRow.PCost ?? 0,
+      ProjectsStr: selectedRow.ProjectsStr ?? "",
+      SubApprovalFlows: selectedRow.SubApprovalFlows ?? [],
+    });
 
-        if (selectedRow.ID) {
-          // قبل از فراخوانی API، لودینگ را فعال کن
-          setIsLoadingBoxTemplates(true);
-
-          // دریافت لیست BoxTemplateها
-          api
-            .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
-            .then((data) => {
-              setBoxTemplates(data);
-            })
-            .catch((err) => {
-              console.error("Error fetching BoxTemplates:", err);
-              showAlert(
-                "error",
-                null,
-                "Error",
-                "An error occurred while fetching BoxTemplates"
-              );
-              setBoxTemplates([]);
-            })
-            .finally(() => {
-              // در هر صورت (موفق یا خطا)، لودینگ را غیرفعال کن
-              setIsLoadingBoxTemplates(false);
-            });
-        } else {
-          // اگر ID نداشتیم، آرایه را خالی کن
+    if (selectedRow.ID) {
+      setIsLoadingBoxTemplates(true);
+      api
+        .getAllBoxTemplatesByWfTemplateId(selectedRow.ID)
+        .then((data) => {
+          // نرمال‌سازی PersianName برای جدول (ستون دوم)
+          const normalized = (Array.isArray(data) ? data : []).map((b: any) => ({
+            ...b,
+            PersianName: b?.PersianName ?? "", // ← همیشه string
+          }));
+          setBoxTemplates(normalized);
+        })
+        .catch((err) => {
+          console.error("Error fetching BoxTemplates:", err);
+          showAlert("error", null, "Error", "An error occurred while fetching BoxTemplates");
           setBoxTemplates([]);
-        }
-      } else {
-        // حالت جدید یا عدم انتخاب ردیف: بازنشانی فرم و جدول
-        setApprovalFlowData({
-          ID: 0,
-          Name: "",
-          Describtion: "",
-          IsGlobal: true,
-          IsVisible: true,
-          MaxDuration: 0,
-          PCost: 0,
-          ProjectsStr: "",
-          SubApprovalFlows: [],
+        })
+        .finally(() => {
+          setIsLoadingBoxTemplates(false);
         });
-        setBoxTemplates([]);
-      }
-    }, [selectedRow, api]);
+    } else {
+      setBoxTemplates([]);
+    }
+  } else {
+    // حالت جدید/عدم انتخاب: ریست کامل فرم و جدول
+    setApprovalFlowData({
+      ID: 0,
+      Name: "",
+      PersianName: "",
+      Describtion: "",
+      IsGlobal: true,
+      IsVisible: true,
+      MaxDuration: 0,
+      PCost: 0,
+      ProjectsStr: "",
+      SubApprovalFlows: [],
+    });
+    setBoxTemplates([]);
+  }
+}, [selectedRow, api]);
+
 
     // صادر کردن متدها از طریق ref
     useImperativeHandle(ref, () => ({
       checkNameFilled: () => {
-        return approvalFlowData.Name.trim().length > 0;
+        const nameTrim = (approvalFlowData.Name || "").trim();
+        const pNameTrim = (approvalFlowData.PersianName || "").trim();
+        if (!nameTrim && pNameTrim) {
+          showAlert("warning", null, "Warning", "Please fill Name");
+          return false;
+        }
+        return nameTrim.length > 0;
       },
       save: async () => {
-        // اعتبارسنجی از طریق checkNameFilled
         if (!ref.current?.checkNameFilled()) {
           showAlert("warning", null, "Warning", "Name cannot be empty");
           return false;
         }
         try {
-          const result = await handleSaveApprovalFlow(approvalFlowData);
-          // if (result) {
-          //   showAlert("success", null, "Success", "Edited Successfully");
-          // }
+          // ارسال PersianName به صورت string trim‌شده (بدون null)
+          const payload: ApprovalFlowData = {
+            ...approvalFlowData,
+            PersianName: (approvalFlowData.PersianName ?? "").trim(), // ← کلید تغییر
+          };
+          const result = await handleSaveApprovalFlow(payload);
           return result !== null;
         } catch (error) {
           console.error("Error saving approval flow:", error);
-          showAlert(
-            "error",
-            null,
-            "Error",
-            "An error occurred while editing the item"
-          );
+          showAlert("error", null, "Error", "An error occurred while editing the item");
           return false;
         }
       },
     }));
+
 
     const handleChange = (
       field: keyof ApprovalFlowData,
@@ -259,14 +269,22 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     };
 
     /* ───────── ستون‌های BoxTemplate با flex/minWidth ───────── */
-    const boxTemplateColumnDefs = [
+   const boxTemplateColumnDefs = [
   {
     headerName: t("AddApprovalFlows.Name", { defaultValue: "Name" }),
     field: "Name",
     filter: "agTextColumnFilter",
     sortable: true,
-    flex: 1.2,
-    minWidth: 160
+    flex: 1,
+    minWidth: 140,
+  },
+  {
+    headerName: t("DataTable.Headers.PersianName", { defaultValue: "PersianName" }),
+    field: "PersianName",
+    filter: "agTextColumnFilter",
+    sortable: true,
+    flex: 1,
+    minWidth: 140,
   },
   {
     headerName: t("AddApprovalFlows.Predecessor", { defaultValue: "Predecessor" }),
@@ -278,24 +296,18 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     valueGetter: (params: any) => {
       const raw = params?.data?.PredecessorStr;
       if (!raw) return "";
-      const ids = String(raw)
-        .split("|")
-        .filter(Boolean);
-
-      // اگر boxTemplates هنوز نیامده باشد
-      if (!Array.isArray(boxTemplates) || boxTemplates.length === 0) {
-        return ids.join(" - ");
-      }
-
+      const ids = String(raw).split("|").filter(Boolean);
+      if (!Array.isArray(boxTemplates) || boxTemplates.length === 0) return ids.join(" - ");
       return ids
         .map((id: string) => {
           const found = boxTemplates.find((b: any) => String(b?.ID) === id);
           return found?.Name ?? id;
         })
         .join(" - ");
-    }
-  }
+    },
+  },
 ];
+
 
     const handleBoxTemplateEdit = (box: BoxTemplate) => {
       setSelectedSubRowData(box);
@@ -333,7 +345,12 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
         const newList = await api.getAllBoxTemplatesByWfTemplateId(
           approvalFlowData.ID
         );
-        setBoxTemplates(newList);
+        // setBoxTemplates(newList);
+        const normalized = (Array.isArray(newList) ? newList : []).map((b: any) => ({
+       ...b,
+      PersianName: b?.PersianName ?? "",
+     }));
+     setBoxTemplates(normalized);
         // showAlert("success", null, "Success", "Edited Successfully");
       } catch (error) {
         console.error("Error reloading boxTemplates:", error);
@@ -350,15 +367,40 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
       <>
         <TwoColumnLayout>
           <TwoColumnLayout.Item span={1}>
-            <DynamicInput
-              name={t("ApprovalFlows.ApprovalFlowName")}
-              type="text"
-              value={approvalFlowData.Name}
-              placeholder=""
-              onChange={(e) => handleChange("Name", e.target.value)}
-              required={true}
-            />
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <DynamicInput
+                  name={isFaMode ? "PersianName" : t("ApprovalFlows.ApprovalFlowName")}
+                  type="text"
+                  value={isFaMode ? (approvalFlowData.PersianName ?? "") : (approvalFlowData.Name ?? "")}
+                  placeholder=""
+                  onChange={(e) =>
+                    handleChange(isFaMode ? "PersianName" : "Name", e.target.value)
+                  }
+                  required={!isFaMode}
+                />
+              </div>
+
+              {/* دکمه EN/FA با استایل گرادیانی */}
+              {/* <button
+                type="button"
+                onClick={() => setIsFaMode((p) => !p)}
+                className={[
+                  "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+                  "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                  "text-white font-semibold tracking-wide",
+                  "shadow-md shadow-pink-200/50",
+                  "transition-all duration-200",
+                  "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                  "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                ].join(" ")}
+                title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+              >
+                {isFaMode ? "FA" : "EN"}
+              </button> */}
+            </div>
           </TwoColumnLayout.Item>
+
 
           <TwoColumnLayout.Item span={1}>
             <CustomTextarea

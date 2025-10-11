@@ -42,6 +42,8 @@ import Component32 from "./ControllerForms/MePostSelectorController";
 import Component33 from "./ControllerForms/AdvanceWf";
 import Component34 from "./ControllerForms/LookupImageRealValue";
 
+import { showAlert } from "../utilities/Alert/DynamicAlert";
+
 import apiService from "../../services/api.services";
 
 // Mapping of column types
@@ -79,7 +81,7 @@ const columnTypeMapping: { [key: string]: number } = {
   component31: 13,
   component32: 18,
   component33: 23,
-  component34:37
+  component34: 37,
 };
 
 // Mapping of component keys to components
@@ -116,7 +118,7 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component31: Component31,
   component32: Component32,
   component33: Component33,
-  component34:Component34
+  component34: Component34,
 };
 
 interface AddColumnFormProps {
@@ -152,44 +154,44 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   srcFields,
   srcEntityTypeId,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { insertEntityField, updateEntityField } = useApi();
 
   const typeOfInformationOptions = [
-  { value: "component1", label: t("ColumnTypes.Text") },
-  { value: "component2", label: t("ColumnTypes.RichText") },
-  { value: "component3", label: t("ColumnTypes.Choice") },
-  { value: "component4", label: t("ColumnTypes.Number") },
-  { value: "component5", label: t("ColumnTypes.DateTime") },
-  { value: "component6", label: t("ColumnTypes.PersianDate") },
-  { value: "component7", label: t("ColumnTypes.Lookup") },
-  { value: "component27", label: t("ColumnTypes.HyperLink") },
-  { value: "component8", label: t("ColumnTypes.PostPickerList") },
-  { value: "component9", label: t("ColumnTypes.LookupRealValue") },
-  { value: "component10", label: t("ColumnTypes.LookupAdvanceTable") },
-  { value: "component26", label: t("ColumnTypes.AdvanceLookupAdvanceTable") },
-  { value: "component29", label: t("ColumnTypes.Title") },
-  { value: "component30", label: t("ColumnTypes.Section") },
-  { value: "component31", label: t("ColumnTypes.SubSection") },
-  { value: "component12", label: t("ColumnTypes.LookupImage") },
-  { value: "component28", label: t("ColumnTypes.SelectUserInPost") },
-  { value: "component13", label: t("ColumnTypes.YesNo") },
-  { value: "component14", label: t("ColumnTypes.AttachFile") },
-  { value: "component15", label: t("ColumnTypes.PictureBox") },
-  { value: "component16", label: t("ColumnTypes.Table") },
-  { value: "component17", label: t("ColumnTypes.PfiLookup") },
-  { value: "component32", label: t("ColumnTypes.MePostSelector") },
-  { value: "component18", label: t("ColumnTypes.SeqnialNumber") },
-  { value: "component19", label: t("ColumnTypes.AdvanceTable") },
-  { value: "component33", label: t("ColumnTypes.Advancewf") },
-  { value: "component20", label: t("ColumnTypes.WordPanel") },
-  { value: "component21", label: t("ColumnTypes.ExceclPanel") },
-  { value: "component22", label: t("ColumnTypes.CalculatedField") },
-  { value: "component23", label: t("ColumnTypes.ExcelCalculator") },
-  { value: "component24", label: t("ColumnTypes.Tab") },
-  { value: "component25", label: t("ColumnTypes.Map") },
-  { value: "component34", label: t("ColumnTypes.LookUpRealValueImg") },
-];
+    { value: "component1", label: t("ColumnTypes.Text") },
+    { value: "component2", label: t("ColumnTypes.RichText") },
+    { value: "component3", label: t("ColumnTypes.Choice") },
+    { value: "component4", label: t("ColumnTypes.Number") },
+    { value: "component5", label: t("ColumnTypes.DateTime") },
+    { value: "component6", label: t("ColumnTypes.PersianDate") },
+    { value: "component7", label: t("ColumnTypes.Lookup") },
+    { value: "component27", label: t("ColumnTypes.HyperLink") },
+    { value: "component8", label: t("ColumnTypes.PostPickerList") },
+    { value: "component9", label: t("ColumnTypes.LookupRealValue") },
+    { value: "component10", label: t("ColumnTypes.LookupAdvanceTable") },
+    { value: "component26", label: t("ColumnTypes.AdvanceLookupAdvanceTable") },
+    { value: "component29", label: t("ColumnTypes.Title") },
+    { value: "component30", label: t("ColumnTypes.Section") },
+    { value: "component31", label: t("ColumnTypes.SubSection") },
+    { value: "component12", label: t("ColumnTypes.LookupImage") },
+    { value: "component28", label: t("ColumnTypes.SelectUserInPost") },
+    { value: "component13", label: t("ColumnTypes.YesNo") },
+    { value: "component14", label: t("ColumnTypes.AttachFile") },
+    { value: "component15", label: t("ColumnTypes.PictureBox") },
+    { value: "component16", label: t("ColumnTypes.Table") },
+    { value: "component17", label: t("ColumnTypes.PfiLookup") },
+    { value: "component32", label: t("ColumnTypes.MePostSelector") },
+    { value: "component18", label: t("ColumnTypes.SeqnialNumber") },
+    { value: "component19", label: t("ColumnTypes.AdvanceTable") },
+    { value: "component33", label: t("ColumnTypes.Advancewf") },
+    { value: "component20", label: t("ColumnTypes.WordPanel") },
+    { value: "component21", label: t("ColumnTypes.ExceclPanel") },
+    { value: "component22", label: t("ColumnTypes.CalculatedField") },
+    { value: "component23", label: t("ColumnTypes.ExcelCalculator") },
+    { value: "component24", label: t("ColumnTypes.Tab") },
+    { value: "component25", label: t("ColumnTypes.Map") },
+    { value: "component34", label: t("ColumnTypes.LookUpRealValueImg") },
+  ];
 
   // گزینه‌های Command با امکان انتخاب دلخواه
   const initialCommandOptions = [
@@ -215,6 +217,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   // استخراج اطلاعات اصلی فرم
   const getInitialFormData = () => ({
     formName: existingData ? existingData.DisplayName : "",
+    PersianName: existingData ? existingData.PersianName || "" : "",
     order: existingData ? String(existingData.orderValue) : "",
     description: existingData ? existingData.Description : "",
     command: existingData ? existingData.Code : "",
@@ -243,6 +246,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const [dynamicMeta, setDynamicMeta] = useState<any>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
 
   const [metaCore, setMetaCore] = useState<MetaCore>({
     metaType1: "",
@@ -312,6 +316,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     } else {
       setFormData({
         formName: "",
+        PersianName: "",
         order: "",
         description: "",
         command: "",
@@ -399,6 +404,20 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       LookupMode: metaCore.LookupMode ?? "",
     };
 
+    const nameTrim = (formData.formName || "").trim();
+    const pNameTrim = (formData.PersianName || "").trim();
+
+    if (!nameTrim && pNameTrim) {
+      setErrors({ formName: "Please fill English Column Name." });
+      setIsLoading(false);
+      return;
+    }
+    if (!nameTrim) {
+      setErrors({ formName: "Column Name is required." });
+      setIsLoading(false);
+      return;
+    }
+
     if (
       formData.typeOfInformation === "component26" &&
       metaCore.metaType1 &&
@@ -435,6 +454,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     // ✅ ساخت payload
     const payload: any = {
       DisplayName: formData.formName,
+      PersianName: (formData.PersianName || "").trim(),
       IsShowGrid: formData.showInListView,
       IsEditableInWF: formData.isEditableInWf,
       WFBOXName: formData.allowedWfBoxName,
@@ -512,8 +532,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
   // نوع‌هایی که ProgramMetaColumnName ندارد
   const hiddenTypesForProgramMeta = [
-    "component9",  // Lookup RealValue
-    "component7",  // Lookup
+    "component9", // Lookup RealValue
+    "component7", // Lookup
     "component26", // Advance Lookup AdvanceTable
     "component19", // Advance Table
     "component10", // Lookup AdvanceTable
@@ -523,59 +543,74 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
   // رندر کنترلر داینامیک
   const renderSelectedComponent = () => {
-  const SelectedComponent = componentMapping[formData.typeOfInformation];
-  if (!SelectedComponent) return null;
+    const SelectedComponent = componentMapping[formData.typeOfInformation];
+    if (!SelectedComponent) return null;
 
-  const baseProps: any = {
-    key: `${formData.typeOfInformation}-${controllerResetKey}`,
-    resetKey: controllerResetKey,
-    onMetaChange: (updated: any) => {
-      setMetaCore((prev) => ({
-        ...prev,
-        metaType1: updated.metaType1 ?? prev.metaType1,
-        metaType2: updated.metaType2 ?? prev.metaType2,
-        metaType3: updated.metaType3 ?? prev.metaType3,
-        LookupMode: updated.LookupMode !== undefined ? updated.LookupMode : prev.LookupMode,
-        metaType5: updated.metaType5 ?? prev.metaType5,
-        metaTypeJson: updated.metaTypeJson ?? prev.metaTypeJson, // ✅ فقط JSON جدول
-        oldLookup: updated.BoolMeta1 !== undefined ? !!updated.BoolMeta1 : prev.oldLookup,
-      }));
-      setFormData((prev) => ({
-        ...prev,
-        countInReject:
-          typeof updated.CountInReject === "boolean" ? updated.CountInReject : prev.countInReject,
-      }));
-    },
-    data: {
-      ...metaCore,
-      metaType4: metaExtra.metaType4,   // Program Meta را فقط نشان بده
-      BoolMeta1: metaCore.oldLookup,
-      CountInReject: formData.countInReject,
-      isEdit: isEdit,
-      /* ✅ این مقدار برای fallback در LookUp */
-      currentEntityTypeId:
-        (entityTypeId && !isNaN(Number(entityTypeId))) ? Number(entityTypeId) : null,
-    },
+    const baseProps: any = {
+      key: `${formData.typeOfInformation}-${controllerResetKey}`,
+      resetKey: controllerResetKey,
+      onMetaChange: (updated: any) => {
+        setMetaCore((prev) => ({
+          ...prev,
+          metaType1: updated.metaType1 ?? prev.metaType1,
+          metaType2: updated.metaType2 ?? prev.metaType2,
+          metaType3: updated.metaType3 ?? prev.metaType3,
+          LookupMode:
+            updated.LookupMode !== undefined
+              ? updated.LookupMode
+              : prev.LookupMode,
+          metaType5: updated.metaType5 ?? prev.metaType5,
+          metaTypeJson: updated.metaTypeJson ?? prev.metaTypeJson, // ✅ فقط JSON جدول
+          oldLookup:
+            updated.BoolMeta1 !== undefined
+              ? !!updated.BoolMeta1
+              : prev.oldLookup,
+        }));
+        setFormData((prev) => ({
+          ...prev,
+          countInReject:
+            typeof updated.CountInReject === "boolean"
+              ? updated.CountInReject
+              : prev.countInReject,
+        }));
+      },
+      data: {
+        ...metaCore,
+        metaType4: metaExtra.metaType4, // Program Meta را فقط نشان بده
+        BoolMeta1: metaCore.oldLookup,
+        CountInReject: formData.countInReject,
+        isEdit: isEdit,
+        /* ✅ این مقدار برای fallback در LookUp */
+        currentEntityTypeId:
+          entityTypeId && !isNaN(Number(entityTypeId))
+            ? Number(entityTypeId)
+            : null,
+      },
+    };
+
+    // ⛔️ برای component34 عمداً onMetaExtraChange را پاس نده
+    const maybeExtra =
+      formData.typeOfInformation !== "component34"
+        ? { onMetaExtraChange: handleMetaExtraChange }
+        : {};
+
+    /* ✅ اگر کنترلر Lookup است، فیلدهای فرمِ جاری و entityTypeId را هم پاس بده */
+    const maybeLookupBridge =
+      formData.typeOfInformation === "component7"
+        ? {
+            srcFields: Array.isArray(srcFields) ? srcFields : undefined,
+            srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
+          }
+        : {};
+
+    return (
+      <SelectedComponent
+        {...baseProps}
+        {...maybeExtra}
+        {...maybeLookupBridge}
+      />
+    );
   };
-
-  // ⛔️ برای component34 عمداً onMetaExtraChange را پاس نده
-  const maybeExtra =
-    formData.typeOfInformation !== "component34"
-      ? { onMetaExtraChange: handleMetaExtraChange }
-      : {};
-
-  /* ✅ اگر کنترلر Lookup است، فیلدهای فرمِ جاری و entityTypeId را هم پاس بده */
-  const maybeLookupBridge =
-    formData.typeOfInformation === "component7"
-      ? {
-          srcFields: Array.isArray(srcFields) ? srcFields : undefined,
-          srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
-        }
-      : {};
-
-  return <SelectedComponent {...baseProps} {...maybeExtra} {...maybeLookupBridge} />;
-};
-
 
   return (
     <div className="flex items-center justify-center">
@@ -598,27 +633,74 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
           onSubmit={handleSubmit}
         >
-          {/* Column Name */}
-          <DynamicInput
-            name={t("AddForms.ColumnName")}
-            type="text"
-            value={formData.formName}
-            onChange={(e) => handleChange("formName", e.target.value)}
-            required={true}
-            labelClassName="text-gray-700 font-medium"
-          />
-          {errors.formName && (
-            <p className="text-red-500 md:col-span-2">{errors.formName}</p>
-          )}
+          {/* Column Name (EN/FA) */}
+          {/* Column Name (EN/FA) */}
+          <div className="md:col-span-1">
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <DynamicInput
+                  name={isFaMode ? "PersianName" : t("AddForms.ColumnName")}
+                  type="text"
+                  value={
+                    isFaMode
+                      ? formData.PersianName || ""
+                      : formData.formName || ""
+                  }
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setFormData((prev) =>
+                      isFaMode
+                        ? { ...prev, PersianName: v }
+                        : { ...prev, formName: v }
+                    );
+                  }}
+                  labelClassName="text-gray-700 font-medium"
+                />
+              </div>
 
-          {/* Order */}
-          <DynamicInput
-            name={t("AddForms.Order")}
-            type="number"
-            value={formData.order}
-            onChange={(e) => handleChange("order", e.target.value)}
-            labelClassName="text-gray-700 font-medium"
-          />
+              {/* <button
+                type="button"
+                onClick={() => setIsFaMode((p) => !p)}
+                className={[
+                  "shrink-0 inline-flex items-center justify-center",
+                  "h-8 px-3 rounded-lg self-end mb-[2px]", // ← کوچک‌تر + هم‌ترازی ته
+                  "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                  "text-white text-xs font-semibold tracking-wide", // ← فونت کوچک‌تر
+                  "shadow shadow-pink-200/50",
+                  "transition-all duration-200",
+                  "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-md hover:scale-[1.01]",
+                  "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                ].join(" ")}
+                title={
+                  isFaMode
+                    ? "Switch to EN (formName)"
+                    : "Switch to FA (PersianName)"
+                }
+              >
+                {isFaMode ? "FA" : "EN"}
+              </button> */}
+            </div>
+
+            {/* خطای اعتبارسنجی با ارتفاع ثابت */}
+            <p
+              className={`mt-1 text-xs ${
+                errors.formName ? "text-red-500" : "invisible"
+              } h-4`}
+            >
+              {errors.formName || "placeholder"}
+            </p>
+          </div>
+          <div className="md:col-span-1">
+            <DynamicInput
+              name={t("AddForms.Order")}
+              type="number"
+              value={formData.order}
+              onChange={(e) => handleChange("order", e.target.value)}
+              labelClassName="text-gray-700 font-medium"
+            />
+            {/* فضای کمکی برای هم‌ارتفاع‌شدن با Column Name */}
+            <p className="mt-1 text-xs invisible h-4">placeholder</p>
+          </div>
 
           {/* Description */}
           <CustomTextarea
@@ -651,7 +733,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label htmlFor="isRequiredInWf" className="ml-3 text-gray-700 font-medium">
+            <label
+              htmlFor="isRequiredInWf"
+              className="ml-3 text-gray-700 font-medium"
+            >
               {t("AddForms.IsRequiredInWf")}
             </label>
           </div>
@@ -710,7 +795,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   }
                   className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
                 />
-                <label htmlFor="showInAlert" className="ml-3 text-gray-700 font-medium">
+                <label
+                  htmlFor="showInAlert"
+                  className="ml-3 text-gray-700 font-medium"
+                >
                   {t("AddForms.ShowInAlert")}
                 </label>
               </div>
@@ -740,7 +828,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("required", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="required" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="required"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 {t("AddForms.Required")}
               </label>
             </div>
@@ -754,7 +845,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("mainColumns", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="mainColumns" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="mainColumns"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 {t("AddForms.MainColumns")}
               </label>
             </div>
@@ -770,7 +864,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 }
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="showInListView" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="showInListView"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 {t("AddForms.ShowInList")}
               </label>
             </div>
@@ -784,7 +881,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onChange={(e) => handleChange("rightToLeft", e.target.checked)}
                 className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
               />
-              <label htmlFor="rightToLeft" className="ml-3 text-gray-700 font-medium">
+              <label
+                htmlFor="rightToLeft"
+                className="ml-3 text-gray-700 font-medium"
+              >
                 {t("AddForms.RightToLeft")}
               </label>
             </div>
@@ -800,7 +900,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onChange={(e) => handleChange("readOnly", e.target.checked)}
               className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
             />
-            <label htmlFor="readOnly" className="ml-3 text-gray-700 font-medium">
+            <label
+              htmlFor="readOnly"
+              className="ml-3 text-gray-700 font-medium"
+            >
               {t("AddForms.ReadOnly")}
             </label>
           </div>
@@ -819,7 +922,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               labelClassName="text-gray-700 font-medium"
             />
 
-            {!hiddenTypesForProgramMeta.includes(formData.typeOfInformation) && (
+            {!hiddenTypesForProgramMeta.includes(
+              formData.typeOfInformation
+            ) && (
               <DynamicInput
                 name={t("AddForms.ProgramMetaColumnName")}
                 type="text"
@@ -847,6 +952,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
               onClick={() => {
                 setFormData({
                   formName: "",
+                  PersianName: "",
                   order: "",
                   description: "",
                   command: "",

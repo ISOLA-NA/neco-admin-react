@@ -97,7 +97,6 @@ export interface ProgramTemplateItem {
   ID?: number;
   ModifiedById?: string | null;
   Name: string;
-
   MetaColumnName?: string;
   Duration: string;
   nProgramTypeID: number | null;
@@ -119,6 +118,7 @@ export interface EntityTypeItem {
 export interface WfTemplateItem {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Describtion: string;
   IsGlobal: boolean;
   IsVisible: boolean;
@@ -132,6 +132,7 @@ export interface WfTemplateItem {
 export interface AFBtnItem {
   ID?: number; // در Insert ممکن است خالی باشد
   Name: string;
+  PersianName?: string;
   Tooltip?: string;
   StateText?: string;
   Order?: number;
@@ -191,6 +192,7 @@ export interface Menu {
   ID?: number; // Optional for creation
   ModifiedById?: string; // Optional, set by backend or current user
   Name: string;
+  PersianName: string;
   Description: string;
   IsVisible?: boolean; // Optional, default to true or as per your logic
   LastModified?: string; // Optional, set by backend
@@ -201,6 +203,7 @@ export interface MenuTab {
   ID: number;
   ModifiedById?: string | null;
   Name: string;
+  PersianName: string;
   Order: number;
   Description: string;
   nMenuId: number;
@@ -214,6 +217,7 @@ export interface MenuGroup {
   ID: number;
   ModifiedById: string | null;
   Name: string;
+  PersianName: string;
   Order: number;
   Description: string;
   nMenuTabId: number;
@@ -256,6 +260,7 @@ export interface MenuItem {
   ID: number;
   ModifiedById: string | null;
   Name: string;
+  PersianName: string
   Description: string;
   Order: number;
   IconImageId: string | null;
@@ -414,6 +419,7 @@ export interface ProgramType {
 export interface OdpWithExtra {
   ID: number;
   Name: string;
+  PersianName?: string;
   Address: string;
   EntityTypeName: string;
   IsVisible: boolean;
@@ -492,6 +498,7 @@ export interface AccessProject {
 export interface EntityType {
   ID: number;
   Name: string;
+  PersianName: string;
   Code: string;
   IsDoc: boolean;
   IsGlobal: boolean;
@@ -525,6 +532,7 @@ export interface CategoryItem {
 export interface BoxTemplate {
   ID: number;
   Name: string;
+  PersianName: string;
   IsStage: boolean;
   ActionMode: number;
   PredecessorStr: string;

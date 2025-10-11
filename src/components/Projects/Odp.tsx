@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 export interface IODP {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Description: string;
   Address: string;
   nProgramTemplateID: number | null;
@@ -78,6 +79,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   // State for ODP data
   const [OdpData, setOdpData] = useState<IODP>({
     Name: "",
+    PersianName: "",
     Description: "",
     Address: "",
     nProgramTemplateID: null,
@@ -91,6 +93,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   // --- Form Template Data (from API)
   const [formTemplates, setFormTemplates] = useState<ItemType[]>([]);
   const [loadingFormTemplates, setLoadingFormTemplates] = useState(false);
+  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -207,6 +210,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       setOdpData({
         ID: selectedRow.ID,
         Name: selectedRow.Name,
+        PersianName: selectedRow.PersianName ?? "",
         Description: selectedRow.Description,
         Address: selectedRow.Address,
         nProgramTemplateID: selectedRow.nProgramTemplateID,
@@ -222,6 +226,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     } else {
       setOdpData({
         Name: "",
+        PersianName: "",
         Description: "",
         Address: "",
         nProgramTemplateID: null,
@@ -281,7 +286,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         return false;
       }
       if (!OdpData.Address.trim()) {
-        showAlert("warning", null,"", t("ODP.Alerts.Messages.AddressRequired"));
+        showAlert(
+          "warning",
+          null,
+          "",
+          t("ODP.Alerts.Messages.AddressRequired")
+        );
         return false;
       }
 
@@ -296,6 +306,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         ...restOdp,
         ModifiedById:
           OdpData.ModifiedById != null ? String(OdpData.ModifiedById) : null,
+        PersianName: (OdpData.PersianName ?? "").trim(),
         ProjectsStr: finalRelateProjectsStr,
         LastModified: new Date().toISOString(),
         IsVisible: OdpData.IsVisible ?? true,
@@ -312,6 +323,8 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         // showAlert("success", null, "Success", "ODP updated successfully.");/
       } else {
         await api.insertOdp(dataToSave);
+        console.log("ODP payload about to save:", dataToSave);
+
         // showAlert("success", null, "Success", "ODP added successfully.");
       }
       return true;
@@ -381,17 +394,46 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   return (
     <>
       <TwoColumnLayout>
-        <DynamicInput
-          name={t("ODP.ODPName")}
-          type="text"
-          value={OdpData.Name}
-          placeholder=""
-          onChange={(e: {
-            target: { value: string | number | boolean | null };
-          }) => handleChange("Name", e.target.value)}
-          required={true}
-          className="mb-4"
-        />
+        {/* Name / PersianName + سوئیچر */}
+        {/* Name / PersianName + سوئیچر */}
+        {/* Name / PersianName + سوئیچر */}
+        <div className="flex items-end gap-2 mb-4">
+          {" "}
+          {/* ← فاصله را به کانتینر دادیم */}
+          <div className="flex-1">
+            <DynamicInput
+              name={isFaMode ? "PersianName" : t("ODP.ODPName")}
+              type="text"
+              value={isFaMode ? OdpData.PersianName ?? "" : OdpData.Name}
+              placeholder=""
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange(isFaMode ? "PersianName" : "Name", e.target.value)
+              }
+              required={!isFaMode}
+              className="mb-0"
+              labelClassName="text-gray-700 font-medium"
+            />
+          </div>
+          {/* <button
+            type="button"
+            onClick={() => setIsFaMode((p) => !p)}
+            className={[
+              "shrink-0 inline-flex items-center justify-center",
+              "h-8 px-3 rounded-lg self-end mb-1" ,
+              "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+              "text-white text-xs font-semibold tracking-wide",
+              "shadow shadow-pink-200/50",
+              "transition-all duration-200",
+              "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-md hover:scale-[1.01]",
+              "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+            ].join(" ")}
+            title={
+              isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"
+            }
+          >
+            {isFaMode ? "FA" : "EN"}
+          </button> */}
+        </div>
 
         <CustomTextarea
           name={t("ODP.Description")}

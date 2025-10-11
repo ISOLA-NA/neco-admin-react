@@ -48,6 +48,32 @@ const genId = () =>
 const toStr = (v: any, fallback = "") =>
   v === undefined || v === null ? fallback : String(v);
 
+const shallowEqualMeta = (a: any, b: any) => {
+  return (
+    a.metaType1 === b.metaType1 &&
+    a.metaType2 === b.metaType2 &&
+    a.metaType3 === b.metaType3 &&
+    a.metaType4 === b.metaType4 &&
+    a.metaType5 === b.metaType5 &&
+    a.LookupMode === b.LookupMode
+  );
+};
+
+const rowsEqual = (a: TableRow[], b: TableRow[]) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const ra = a[i], rb = b[i];
+    if (
+      ra.ID !== rb.ID ||
+      ra.SrcFieldID !== rb.SrcFieldID ||
+      ra.FilterOpration !== rb.FilterOpration ||
+      ra.FilterText !== rb.FilterText ||
+      ra.DesFieldID !== rb.DesFieldID
+    ) return false;
+  }
+  return true;
+};
+
 const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   data = {},
   onMetaChange,
@@ -60,10 +86,9 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
   const initialModeRef = useRef(true);
-  const resetMountedRef = useRef(false);
   const baseFieldsLockedRef = useRef(false);
 
-  // ✅ مقداردهی اولیه meta از props تا در اولین رندر نیز مقدار داشته باشیم
+  // ✅ مقداردهی اولیه از props
   const [meta, setMeta] = useState(() => ({
     metaType1: toStr(data.metaType1),
     metaType2: toStr(data.metaType2),
@@ -86,38 +111,53 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   >([]);
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
-  // ─── Sync from props.data ───
+  // ─── Sync from props.data (فقط در صورت تغییر واقعی) ───
   useEffect(() => {
-    let rows: any[] = [];
-    try {
-      rows = JSON.parse(data.metaType4 || "[]");
-    } catch {
-      rows = [];
-    }
-    setTableData(
-      Array.isArray(rows)
-        ? rows.map((item) => ({
-            ID: toStr(item.ID, genId()),
-            SrcFieldID: toStr(item.SrcFieldID),
-            FilterOpration: toStr(item.FilterOpration),
-            FilterText: toStr(item.FilterText),
-            DesFieldID: toStr(item.DesFieldID),
-          }))
-        : []
-    );
-
-    setMeta({
+    // هدف: قطع حلقه‌های غیرضروری
+    const nextMeta = {
       metaType1: toStr(data.metaType1),
       metaType2: toStr(data.metaType2),
       metaType3: data.metaType3 || "drop",
       metaType4: data.metaType4 || "[]",
       metaType5: toStr(data.metaType5),
       LookupMode: toStr(data.LookupMode),
-    });
-    setRemoveSameName(!!data.CountInReject);
-    setOldLookup(!!data.BoolMeta1);
+    };
 
-    initialModeRef.current = true;
+    // جدول
+    let parsed: any[] = [];
+    try {
+      parsed = JSON.parse(nextMeta.metaType4 || "[]");
+    } catch {
+      parsed = [];
+    }
+    const nextRows: TableRow[] = Array.isArray(parsed)
+      ? parsed.map((item) => ({
+          ID: toStr(item.ID, genId()),
+          SrcFieldID: toStr(item.SrcFieldID),
+          FilterOpration: toStr(item.FilterOpration),
+          FilterText: toStr(item.FilterText),
+          DesFieldID: toStr(item.DesFieldID),
+        }))
+      : [];
+
+    // فقط وقتی تغییر واقعی داریم، state را آپدیت کن
+    const metaChanged = !shallowEqualMeta(meta, nextMeta);
+    const rowsChanged = !rowsEqual(tableData, nextRows);
+
+    if (metaChanged) setMeta(nextMeta);
+    if (rowsChanged) setTableData(nextRows);
+
+    // CountInReject / BoolMeta1
+    if (removeSameName !== !!data.CountInReject)
+      setRemoveSameName(!!data.CountInReject);
+    if (oldLookup !== !!data.BoolMeta1)
+      setOldLookup(!!data.BoolMeta1);
+
+    if (metaChanged) {
+      // اجازه بده اثر LookupMode فقط یک‌بار اعمال شود
+      initialModeRef.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   // ─── Load entities & enums once ───
@@ -154,7 +194,10 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     if (initialModeRef.current && modesList.length > 0 && data.LookupMode != null) {
       const mv = String(data.LookupMode);
       if (modesList.some((m) => m.value === mv)) {
-        setMeta((prev) => ({ ...prev, LookupMode: mv }));
+        setMeta((prev) => {
+          if (prev.LookupMode === mv) return prev;
+          return { ...prev, LookupMode: mv };
+        });
       }
       initialModeRef.current = false;
     }
@@ -194,7 +237,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       getEntityFieldByEntityTypeId(idNum)
         .then((r) => {
           const arr = Array.isArray(r) ? r : [];
-          // ⛔️ اگر خالی بود، عمداً baseFields را خالی نگه می‌داریم
           if (arr.length > 0) {
             setBaseFields(arr);
             baseFieldsLockedRef.current = true;
@@ -207,6 +249,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   // ─── Helpers to push meta/table ───
   const pushMeta = (patch: Partial<typeof meta>) => {
     const next = { ...meta, ...patch };
+    if (shallowEqualMeta(meta, next)) return; // ✋ تغییر واقعی نداریم
     setMeta(next);
     onMetaChange?.({
       ...data,
@@ -217,8 +260,13 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   };
 
   const toggleCheckbox = (key: "removeSameName" | "oldLookup", val: boolean) => {
-    if (key === "removeSameName") setRemoveSameName(val);
-    else setOldLookup(val);
+    if (key === "removeSameName") {
+      if (removeSameName === val) return;
+      setRemoveSameName(val);
+    } else {
+      if (oldLookup === val) return;
+      setOldLookup(val);
+    }
     onMetaChange?.({
       ...data,
       ...meta,
@@ -228,8 +276,10 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   };
 
   const pushTable = (rows: TableRow[]) => {
+    if (rowsEqual(tableData, rows)) return; // ✋ تغییر واقعی نداریم
     setTableData(rows);
     const json = JSON.stringify(rows);
+    if (meta.metaType4 === json) return;
     setMeta((prev) => ({ ...prev, metaType4: json }));
     onMetaExtraChange?.({ metaType4: json });
   };
@@ -267,47 +317,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     );
     pushTable(next);
   };
-
-  // --- ریست PostPickerList روی تغییر selectها (بدون وابسته کردن key به metaType5) ---
-  const prevSigRef = useRef<string>("");
-  useEffect(() => {
-    const sig = `${meta.metaType1}|${meta.metaType2}`;
-    if (prevSigRef.current && prevSigRef.current !== sig) {
-      setMeta((p) => {
-        if (!p.metaType5) return p;
-        const next = { ...p, metaType5: "" };
-        onMetaChange?.({
-          ...data,
-          ...next,
-          CountInReject: removeSameName,
-          BoolMeta1: oldLookup,
-        });
-        return next;
-      });
-    }
-    prevSigRef.current = sig;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meta.metaType1, meta.metaType2]);
-
-  // 🔁 با تغییر resetKey از والد، metaType5 را هم خالی کن (بعد از mount)
-  useEffect(() => {
-    if (!resetMountedRef.current) {
-      resetMountedRef.current = true;
-      return;
-    }
-    setMeta((p) => {
-      if (!p.metaType5) return p;
-      const next = { ...p, metaType5: "" };
-      onMetaChange?.({
-        ...data,
-        ...next,
-        CountInReject: removeSameName,
-        BoolMeta1: oldLookup,
-      });
-      return next;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resetKey]);
 
   /* ─── Maps & signatures ─── */
   const fieldsMap = useMemo(
@@ -461,7 +470,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             resetKey={resetKey}
             sourceType="projects"
             initialMetaType={meta.metaType5}
-            data={{ metaType5: meta.metaType5 || undefined }}
             metaFieldKey="metaType5"
             onMetaChange={(o) => pushMeta(o)}
             label={t("LookUpAdvanceTable.Form.DefaultProjects")}

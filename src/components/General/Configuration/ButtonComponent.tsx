@@ -9,8 +9,9 @@ import FileUploadHandler, {
 import { useApi } from "../../../context/ApiContext";
 import { AFBtnItem } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
-import { useTranslation } from "react-i18next";
+import { useTranslation, } from "react-i18next";
 import { FaPlus, FaPencilAlt, FaTrash, FaUndo } from "react-icons/fa";
+import i18n from "../../../i18n";
 
 interface ButtonComponentProps {
   columnDefs: { headerName: string; field: string }[];
@@ -45,6 +46,11 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
   const [selectedRow, setSelectedRow] = useState<AFBtnItem | null>(null);
   const [isRowClicked, setIsRowClicked] = useState<boolean>(false);
+
+  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+  const [persianNameValue, setPersianNameValue] = useState(""); // ← اضافه شد
+
+  const isRTL = i18n.dir() === "rtl";
 
   // فایل آپلودی
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
@@ -86,7 +92,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmHideCancel, setConfirmHideCancel] = useState<boolean>(false);
   // تابع اکشنی که بعد از زدن دکمه "Confirm" اجرا می‌شود
-  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => {});
+  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => { });
 
   // تابع کمکی برای بازکردن DynamicConfirm
   const openConfirm = (
@@ -166,6 +172,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     setStateTextValue("");
     setTooltipValue("");
     setOrderValue("");
+    setPersianNameValue("");
     setSelectedState(RadioOptionsState[0].value);
     setSelectedCommand(RadioOptionsCommand[0].value);
     setSelectedFileId(null);
@@ -191,10 +198,24 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       stateTextValue
     );
 
+    const nameTrim = nameValue.trim();
+    const pNameTrim = persianNameValue.trim();
+
+    if (!nameTrim && pNameTrim) {
+      openConfirm("notice", "Warning", "Please fill Name.", true);
+      return;
+    }
+    if (!nameTrim) {
+      openConfirm("notice", "Warning", "Name cannot be empty!", true);
+      return;
+    }
+
+
     try {
       const newAFBtn: AFBtnItem = {
         ID: 0,
         Name: generatedName,
+        PersianName: (persianNameValue || "").trim(),
         Tooltip: tooltipValue,
         StateText: stateTextValue,
         Order: parseInt(orderValue || "0"),
@@ -231,6 +252,18 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       stateTextValue
     );
 
+    const nameTrim = nameValue.trim();
+    const pNameTrim = persianNameValue.trim();
+    if (!nameTrim && pNameTrim) {
+      openConfirm("notice", "Warning", "Please fill Name.", true);
+      return;
+    }
+    if (!nameTrim) {
+      openConfirm("notice", "Warning", "Name cannot be empty!", true);
+      return;
+    }
+
+
     // ابتدا یک Confirm برای ویرایش با پیام تایید نمایش داده می‌شود
     openConfirm(
       "edit",
@@ -242,6 +275,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           const updatedAFBtn: AFBtnItem = {
             ID: selectedRow.ID,
             Name: generatedName,
+            PersianName: (persianNameValue || "").trim(),
             Tooltip: tooltipValue,
             StateText: stateTextValue,
             Order: parseInt(orderValue || "0"),
@@ -400,6 +434,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
     // پر کردن فرم
     setNameValue(data.Name || "");
+    setPersianNameValue(data.PersianName ?? ""); // ← اضافه شد
+
     setStateTextValue(data.StateText || "");
     setTooltipValue(data.Tooltip || "");
     setOrderValue(data.Order?.toString() || "");
@@ -440,6 +476,31 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
   };
 
+  // ستون‌های ورودی از والد رو با PersianName غنی کنیم
+  const columnDefsWithFa = React.useMemo(() => {
+    const defs = Array.isArray(columnDefs) ? [...columnDefs] : [];
+    const hasFa = defs.some((c) => (c.field ?? "").toString() === "PersianName");
+    if (hasFa) return defs;
+
+    const faCol = {
+      headerName: "PersianName",
+      field: "PersianName",
+      sortable: true,
+      filter: true,
+      resizable: true,
+    };
+
+    const nameIdx = defs.findIndex(
+      (c) => (c.field ?? "").toString().toLowerCase() === "name"
+    );
+    if (nameIdx === -1) return [...defs, faCol];
+
+    const before = defs.slice(0, nameIdx + 1);
+    const after = defs.slice(nameIdx + 1);
+    return [...before, faCol, ...after];
+  }, [columnDefs]);
+
+
   return (
     <>
       {/* استایل داخلی برای همهٔ رادیوباتن‌ها در حالت RTL */}
@@ -450,7 +511,11 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       `}</style>
 
       {/* ظرف کلی: بدون min-h-screen تا فاصله‌ی اضافی ته کارت ایجاد نشود */}
-      <div className="w-full h-full flex flex-col bg-white rounded-lg rtl">
+      <div
+        dir={isRTL ? "rtl" : "ltr"}
+        className={`w-full h-full flex flex-col bg-white rounded-lg ${isRTL ? "rtl" : ""}`}
+      >
+
         {/* لایهٔ اسکرول: محتوا + فوتر استیکی هر دو داخل این هستند */}
         <div className="flex-1 overflow-y-auto">
           {/* پدینگ افقی ثابت برای کل محتوا */}
@@ -468,11 +533,14 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
             {/* ✅ جدول آیتم‌ها */}
             <div
+              dir={isRTL ? "rtl" : "ltr"}
               className="w-full overflow-hidden mb-4"
               style={{ height: "400px", overflowY: "auto" }}
             >
               <DataTable
-                columnDefs={columnDefs}
+                key={isRTL ? "rtl" : "ltr"}
+                direction={i18n.dir()}
+                columnDefs={columnDefsWithFa}
                 rowData={rowData}
                 onRowDoubleClick={handleRowDoubleClickLocal}
                 setSelectedRowData={handleRowClickLocal}
@@ -480,93 +548,76 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                 showEditIcon={false}
                 showDeleteIcon={false}
                 showAddIcon={false}
-                onAdd={() => {}}
-                onEdit={() => {}}
-                onDelete={() => {}}
-                onDuplicate={() => {}}
+                onAdd={() => { }}
+                onEdit={() => { }}
+                onDelete={() => { }}
+                onDuplicate={() => { }}
                 domLayout="normal"
               />
             </div>
 
             {/* ✅ فرم ورودی‌ها */}
-            <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* ▶︎ فیلدهای متنی + رادیوها ◀︎ */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* فیلدهای متنی */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Name / PersianName + سوئیچر */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
                   <DynamicInput
-                    name={t("Configuration.Name")}
+                    name={isFaMode ? "PersianName" : t("Configuration.Name")}
                     type="text"
-                    value={nameValue}
-                    onChange={(e) => setNameValue(e.target.value)}
+                    value={isFaMode ? persianNameValue : nameValue}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (isFaMode) setPersianNameValue(v);
+                      else setNameValue(v);
+                    }}
                     className="w-full"
-                  />
-                  <DynamicInput
-                    name={t("Configuration.StateText")}
-                    type="text"
-                    value={stateTextValue}
-                    onChange={(e) => setStateTextValue(e.target.value)}
-                    className="w-full"
-                  />
-                  <DynamicInput
-                    name={t("Configuration.Tooltip")}
-                    type="text"
-                    value={tooltipValue}
-                    onChange={(e) => setTooltipValue(e.target.value)}
-                    className="w-full"
-                  />
-                  <DynamicInput
-                    name={t("Configuration.Order")}
-                    type="text"
-                    value={orderValue}
-                    onChange={(e) => setOrderValue(e.target.value)}
-                    className="w-full"
+                    required={!isFaMode}
                   />
                 </div>
 
-                {/* گروه‌های رادیویی */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* State */}
-                  <DynamicRadioGroup
-                    key={`state-${
-                      isRowClicked ? "controlled" : "uncontrolled"
-                    }`}
-                    className="flex flex-col gap-2"
-                    title={t("Configuration.State")}
-                    name="stateGroup"
-                    options={RadioOptionsState}
-                    selectedValue={selectedState}
-                    onChange={(val) => setSelectedState(val)}
-                    isRowClicked={isRowClicked}
-                  />
-
-                  {/* Command */}
-                  <DynamicRadioGroup
-                    key={`command-${
-                      isRowClicked ? "controlled" : "uncontrolled"
-                    }`}
-                    className="flex flex-col gap-2"
-                    title={t("Configuration.Command")}
-                    name="commandGroup"
-                    options={RadioOptionsCommand}
-                    selectedValue={selectedCommand}
-                    onChange={(val) => setSelectedCommand(val)}
-                    isRowClicked={isRowClicked}
-                  />
-                </div>
+                {/* دکمه EN/FA با استایل گرادیانی */}
+                {/* <button
+                  type="button"
+                  onClick={() => setIsFaMode((p) => !p)}
+                  className={[
+                    "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+                    "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                    "text-white font-semibold tracking-wide",
+                    "shadow-md shadow-pink-200/50",
+                    "transition-all duration-200",
+                    "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                    "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                  ].join(" ")}
+                  title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                >
+                  {isFaMode ? "FA" : "EN"}
+                </button> */}
               </div>
 
-              {/* ▶︎ آپلود فایل ◀︎ */}
-              <div className="lg:col-span-1 flex flex-col items-start">
-                <FileUploadHandler
-                  selectedFileId={selectedFileId}
-                  onUploadSuccess={handleUploadSuccess}
-                  resetCounter={resetCounter}
-                  onReset={handleReset}
-                  isEditMode={selectedRow !== null}
-                />
-              </div>
+              {/* بقیه فیلدها مثل قبل */}
+              <DynamicInput
+                name={t("Configuration.StateText")}
+                type="text"
+                value={stateTextValue}
+                onChange={(e) => setStateTextValue(e.target.value)}
+                className="w-full"
+              />
+              <DynamicInput
+                name={t("Configuration.Tooltip")}
+                type="text"
+                value={tooltipValue}
+                onChange={(e) => setTooltipValue(e.target.value)}
+                className="w-full"
+              />
+              <DynamicInput
+                name={t("Configuration.Order")}
+                type="text"
+                value={orderValue}
+                onChange={(e) => setOrderValue(e.target.value)}
+                className="w-full"
+              />
             </div>
+
 
             {/* ✅ پیش‌نمایش تصویر آپلودشده */}
             {selectedFileId && !imageError && (

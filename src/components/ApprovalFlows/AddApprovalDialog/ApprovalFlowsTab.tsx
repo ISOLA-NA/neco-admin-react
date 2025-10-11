@@ -46,6 +46,7 @@ export interface TableRow {
 
 export interface ApprovalFlowsTabData {
   nameValue: string;
+  persianNameValue: string;
   minAcceptValue: string;
   minRejectValue: string;
   actDurationValue: string;
@@ -78,7 +79,7 @@ interface ApprovalFlowsTabProps {
 
 const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
   ({ editData, boxTemplates = [] }, ref) => {
-    const { t , i18n} = useTranslation();
+    const { t, i18n } = useTranslation();
     const api = useApi();
 
     const [allRoles, setAllRoles] = useState<Role[]>([]);
@@ -138,71 +139,52 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+    const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name), true=FA(PersianName)
+    const [pNameValue, setPNameValue] = useState<string>(""); // PersianName
+
+
     // داخل ApprovalFlowsTab.tsx، کنار validateMinFields:
     const validateForm = (): boolean => {
-      // 1) نام
-      if (!nameValue.trim()) {
-        showAlert("error", null, "", t("AddApprovalFlows.NameRequired"));
+  const nameTrim = (nameValue || "").trim();
+  const pNameTrim = (pNameValue || "").trim();
 
+  if (!nameTrim && pNameTrim) {
+    showAlert("warning", null, "", t("AddApprovalFlows.PleaseFillName") || "Please fill Name");
+    return false;
+  }
+  if (!nameTrim) {
+    showAlert("error", null, "", t("AddApprovalFlows.NameRequired"));
+    return false;
+  }
+
+  // ادامه‌ی اعتبارسنجی فعلی‌ات …
+  if (!isStage) {
+    if (!acceptChecked && !rejectChecked) {
+      showAlert("error", null, "", t("AddApprovalFlows.SelectMinAcceptOrMinReject"));
+      return false;
+    }
+    if (acceptChecked) {
+      const v = Number(minAcceptValue);
+      if (!Number.isFinite(v) || v <= 0) {
+        showAlert("error", null, "", t("AddApprovalFlows.InvalidMinAccept"));
         return false;
       }
-
-      // 2) فقط وقتی استیج نیست، بقیه الزامات را بررسی کن
-      if (!isStage) {
-        // حداقل یکی از مین‌ها انتخاب شده باشد
-        if (!acceptChecked && !rejectChecked) {
-          showAlert(
-            "error",
-            null,
-            "",
-            t("AddApprovalFlows.SelectMinAcceptOrMinReject")
-          );
-          return false;
-        }
-
-        // اگر Accept تیک خورد، عدد معتبر > 0 باشد
-        if (acceptChecked) {
-          const v = Number(minAcceptValue);
-          if (!Number.isFinite(v) || v <= 0) {
-            showAlert(
-              "error",
-              null,
-              "",
-              t("AddApprovalFlows.InvalidMinAccept")
-            );
-            return false;
-          }
-        }
-
-        // اگر Reject تیک خورد، عدد معتبر > 0 باشد
-        if (rejectChecked) {
-          const v = Number(minRejectValue);
-          if (!Number.isFinite(v) || v <= 0) {
-            showAlert(
-              "error",
-              null,
-              "",
-              t("AddApprovalFlows.InvalidMinReject")
-            );
-            return false;
-          }
-        }
-
-        // 3) جدول Approval Context خالی نباشد
-        if (tableData.length === 0) {
-          showAlert(
-            "error",
-            null,
-            "",
-            t("AddApprovalFlows.ApprovalContextMustHaveOneRow")
-          );
-
-          return false;
-        }
+    }
+    if (rejectChecked) {
+      const v = Number(minRejectValue);
+      if (!Number.isFinite(v) || v <= 0) {
+        showAlert("error", null, "", t("AddApprovalFlows.InvalidMinReject"));
+        return false;
       }
+    }
+    if (tableData.length === 0) {
+      showAlert("error", null, "", t("AddApprovalFlows.ApprovalContextMustHaveOneRow"));
+      return false;
+    }
+  }
+  return true;
+};
 
-      return true;
-    };
 
     // گرفتن لیست نقش‌ها
     useEffect(() => {
@@ -353,9 +335,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         rows.map((r) =>
           r.id === params.data.id
             ? {
-                ...r,
-                [field]: newValue,
-              }
+              ...r,
+              [field]: newValue,
+            }
             : r
         )
       );
@@ -461,6 +443,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     useEffect(() => {
       if (editData) {
         setNameValue(editData.Name || "");
+        setPNameValue(editData.PersianName ?? "");
         setActDurationValue(String(editData.MaxDuration || ""));
         setOrderValue(editData.Order ? editData.Order.toString() : "");
         setMinAcceptValue(
@@ -549,6 +532,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       } else {
         // حالت افزودن BoxTemplate جدید
         setNameValue("");
+        setPNameValue("");
         setMinAcceptValue("1");
         setMinRejectValue("");
         setActDurationValue("");
@@ -643,20 +627,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
-                ...r,
-                nPostID: selectedStaticPost
-                  ? selectedStaticPost.ID.toString()
-                  : "",
-                cost1: Number(cost1) || 0,
-                cost2: Number(cost2) || 0,
-                cost3: Number(cost3) || 0,
-                weight1: Number(weight1) || 0,
-                weight2: Number(weight2) || 0,
-                weight3: Number(weight3) || 0,
-                required: requiredChecked,
-                veto: vetoChecked,
-                code: Number(codeValue) || 0,
-              }
+              ...r,
+              nPostID: selectedStaticPost
+                ? selectedStaticPost.ID.toString()
+                : "",
+              cost1: Number(cost1) || 0,
+              cost2: Number(cost2) || 0,
+              cost3: Number(cost3) || 0,
+              weight1: Number(weight1) || 0,
+              weight2: Number(weight2) || 0,
+              weight3: Number(weight3) || 0,
+              required: requiredChecked,
+              veto: vetoChecked,
+              code: Number(codeValue) || 0,
+            }
             : r
         );
         setTableData(updated);
@@ -775,6 +759,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     useImperativeHandle(ref, () => ({
       getFormData: () => ({
         nameValue,
+        persianNameValue: (pNameValue ?? "").trim(),
         minAcceptValue,
         minRejectValue,
         actDurationValue,
@@ -803,14 +788,31 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       <div className="flex flex-col md:flex-row h-full relative">
         <main className="flex-1 p-4 bg-white overflow-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 items-center">
-            <DynamicInput
-              name={t("AddApprovalFlows.Name")}
-              type="text"
-              value={nameValue}
-              onChange={(e) => setNameValue(e.target.value)}
-              className="w-full"
-            />
+            {/* Name / PersianName با دکمه کوچک داخل اینپوت */}
+            <div className="sm:col-span-1 relative">
+              <DynamicInput
+                name={isFaMode ? "PersianName" : t("AddApprovalFlows.Name")}
+                type="text"
+                value={isFaMode ? (pNameValue ?? "") : (nameValue ?? "")}
+                onChange={(e) => (isFaMode ? setPNameValue(e.target.value) : setNameValue(e.target.value))}
+                required={!isFaMode}
+                className="w-full"                  // ← استایل فعلی‌ات
+              />
 
+              {/* چیپ EN/FA داخل خود اینپوت */}
+              {/* <button
+                type="button"
+                onClick={() => setIsFaMode((p) => !p)}
+                title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                className="absolute right-2 top-[38px] -translate-y-1/2 h-6 px-2 rounded-md text-[10px] font-semibold
+                 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-sm
+                 transition-transform active:scale-95 z-10"
+              >
+                {isFaMode ? "FA" : "EN"}
+              </button> */}
+            </div>
+
+            {/* بقیه فیلدها مثل قبل... */}
             {!isStage && (
               <div>
                 <label className="flex items-center text-sm text-gray-700 mb-1 gap-2">
@@ -868,6 +870,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             />
           </div>
 
+
           <div className="mt-6">
             <label className="flex items-center text-sm text-gray-700 gap-2">
               <input
@@ -898,11 +901,10 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 <button
                   type="button"
                   onClick={handleDeleteRow}
-                  className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${
-                    selectedRow
-                      ? "bg-red-500 hover:bg-red-600 text-white"
-                      : "bg-red-300 text-white cursor-not-allowed"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded transition-colors ${selectedRow
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-red-300 text-white cursor-not-allowed"
+                    }`}
                   disabled={!selectedRow}
                 >
                   <FaTimes className="text-white" /> {t("Global.Delete")}
@@ -1053,7 +1055,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                             );
                           },
                         }}
-                          direction={i18n.dir()}
+                        direction={i18n.dir()}
                       />
                     )}
                   </div>
@@ -1122,12 +1124,12 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                 { headerName: "Tooltip", field: "Tooltip" },
               ],
               rowData: btnList,
-              onRowDoubleClick: () => {},
-              onRowClick: () => {},
-              onSelectButtonClick: () => {},
+              onRowDoubleClick: () => { },
+              onRowClick: () => { },
+              onSelectButtonClick: () => { },
               isSelectDisabled: false,
-              onClose: () => {},
-              onSelectFromButton: () => {},
+              onClose: () => { },
+              onSelectFromButton: () => { },
             }}
           />
         </aside>

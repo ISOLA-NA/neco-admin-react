@@ -162,6 +162,7 @@ interface ProgramTypeData {
 interface OdpData {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Address: string;
   EntityTypeName: string;
   IsVisible: boolean;
@@ -226,6 +227,7 @@ interface ProjectsAccessData {
 interface ApprovalFlowData {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Describtion: string;
   IsGlobal: boolean;
   IsVisible: boolean;
@@ -239,6 +241,7 @@ interface ApprovalFlowData {
 interface FormData {
   ID?: number;
   Name: string;
+  PersianName?: string;
   Code: string;
   IsDoc: boolean;
   IsMegaForm: boolean;
@@ -677,6 +680,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       const odp: OdpWithExtra = {
         ID: data.ID || 0,
         Name: data.Name,
+        PersianName: data.PersianName, 
         Address: data.Address,
         EntityTypeName: data.EntityTypeName,
         IsVisible: data.IsVisible,
@@ -836,6 +840,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       const approvalFlow: WfTemplateItem = {
         ID: data.ID,
         Name: data.Name,
+        PersianName: (data.PersianName ?? "").trim(), 
         Describtion: data.Describtion,
         IsGlobal: data.IsGlobal,
         IsVisible: data.IsVisible,
@@ -870,6 +875,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
       const formRequest: EntityType = {
         ID: data.ID || 0,
         Name: data.Name,
+        PersianName: data.PersianName || "",
         Code: data.Code || "",
         IsDoc: data.IsDoc,
         IsMegaForm: data.IsMegaForm,

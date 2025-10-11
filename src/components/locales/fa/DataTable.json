@@ -16,6 +16,8 @@
       },
       "Headers": {
         "Name": "نام",
+        "PersianName": "نام فارسی",
+        "PersianColumnName": "نام ستون فارسی",
         "ProgramTemplateShort": "قالب برنامه",
         "DefaultRibbon": "ریبون پیش‌فرض",
         "Username": "نام‌کاربری",

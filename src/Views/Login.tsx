@@ -62,9 +62,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       "Saturday",
     ];
     const d = new Date();
-    const seq = `${d.getUTCFullYear()}-${
-      d.getUTCMonth() + 1
-    }-${d.getUTCDate()}-${d.getUTCHours()}-${weekDays[d.getUTCDay()]}`;
+    const seq = `${d.getUTCFullYear()}-${d.getUTCMonth() + 1
+      }-${d.getUTCDate()}-${d.getUTCHours()}-${weekDays[d.getUTCDay()]}`;
     return CryptoJS.SHA512(CryptoJS.enc.Utf8.parse(seq)).toString(
       CryptoJS.enc.Hex
     );
@@ -171,9 +170,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         typeof error?.response?.data === "string"
           ? error.response.data
           : error?.response?.data?.value?.message ||
-            error?.response?.data?.message ||
-            error.message ||
-            t("alert.genericError");
+          error?.response?.data?.message ||
+          error.message ||
+          t("alert.genericError");
       showAlert("error", null, t("alert.errorTitle"), message);
     } finally {
       setLoading(false);
@@ -269,9 +268,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
               <button
                 type="submit"
-                className={`w-full mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base flex items-center justify-center ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`w-full mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base flex items-center justify-center ${loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 disabled={loading}
               >
                 {loading && (
@@ -313,9 +311,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
               <button
                 type="submit"
-                className={`w-full flex items-center justify-center gap-2 mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`w-full flex items-center justify-center gap-2 mt-9 bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-300 text-sm sm:text-base ${loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 disabled={loading}
               >
                 {loading && (
@@ -345,6 +342,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </>
           )}
         </form>
+        {/* نسخه: زیر دکمه لاگین */}
+        <div className="mt-4 flex justify-start">
+          <span className="border border-purple-500 rounded px-2 py-0.5 text-sm text-purple-800 font-mono font-bold tracking-wide">
+            {__APP_VERSION_LABEL__}
+          </span>
+        </div>
       </div>
     </div>
   );

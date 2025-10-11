@@ -24,6 +24,7 @@ interface Accordion2Props {
 interface RowData2 {
   ID: number;
   Name: string;
+  PersianName?: string | null; // ← اضافه شد
   Description: string;
   Order: number;
   nMenuTabId: number;
@@ -33,6 +34,7 @@ interface RowData2 {
   IconImageId?: string | null;
 }
 
+
 const Accordion2: React.FC<Accordion2Props> = ({
   selectedMenuTabId,
   onRowClick,
@@ -40,7 +42,6 @@ const Accordion2: React.FC<Accordion2Props> = ({
   isOpen,
   toggleAccordion,
 }) => {
-  const { t } = useTranslation();
 
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [rowData, setRowData] = useState<RowData2[]>([]);
@@ -48,15 +49,18 @@ const Accordion2: React.FC<Accordion2Props> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
+  const { t, i18n } = useTranslation();
 
   // Form state
   const [formData, setFormData] = useState<Partial<RowData2>>({
     ID: 0,
     Name: "",
+    PersianName: "", // ← اضافه شد
     Description: "",
     Order: 0,
     IconImageId: null,
   });
+
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isAdding, setIsAdding] = useState<boolean>(false);
 
@@ -76,6 +80,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
 
   // Column definitions from subTabDefinitions (if exists)
   const columnDefs = subTabDefinitions["MenuGroup"]?.columnDefs || [];
+  const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name), true=FA(PersianName)
+
 
   // Load data function
   const loadRowData = async () => {
@@ -112,13 +118,16 @@ const Accordion2: React.FC<Accordion2Props> = ({
   // Filter rows by search text (بر اساس نام، توضیحات یا ترتیب)
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
+    const q = searchText.toLowerCase();
     return rowData.filter(
       (row) =>
-        row.Name.toLowerCase().includes(searchText.toLowerCase()) ||
-        row.Description.toLowerCase().includes(searchText.toLowerCase()) ||
+        (row.Name || "").toLowerCase().includes(q) ||
+        (row.PersianName || "").toLowerCase().includes(q) || // ← اضافه شد
+        (row.Description || "").toLowerCase().includes(q) ||
         row.Order.toString().includes(searchText)
     );
   }, [searchText, rowData]);
+
 
   // Update form when a row is selected (suppress if needed)
   const handleSetSelectedRowData = (row: RowData2 | null) => {
@@ -145,6 +154,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
     setFormData({
       ID: newId,
       Name: "",
+      PersianName: "", // ← اضافه شد
       Description: "",
       Order: 0,
       IconImageId: null,
@@ -157,11 +167,20 @@ const Accordion2: React.FC<Accordion2Props> = ({
 
   // Validate form: ensure Name is not empty
   const validateForm = (): boolean => {
-    if (!formData.Name || formData.Name.trim() === "") {
-      return false;
-    }
-    return true;
-  };
+  const nameTrim = (formData.Name || "").trim();
+  const pNameTrim = (formData.PersianName || "").trim();
+
+  if (!nameTrim && pNameTrim) {
+    showAlert("warning", null, "Warning", "Please fill Name");
+    return false;
+  }
+  if (!nameTrim) {
+    showAlert("error", null, "Error", "Name cannot be empty");
+    return false;
+  }
+  return true;
+};
+
 
   // When user clicks "Save" in add mode
   const handleInsert = () => {
@@ -188,6 +207,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
       const newMenuGroup: MenuGroup = {
         ID: formData.ID!,
         Name: formData.Name!,
+        PersianName: (formData.PersianName || "").trim(),
         Description: formData.Description || "",
         Order: formData.Order || 0,
         nMenuTabId: selectedMenuTabId!,
@@ -209,6 +229,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
       setFormData({
         ID: newId,
         Name: "",
+        PersianName: "",
         Description: "",
         Order: 0,
       });
@@ -224,8 +245,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
@@ -238,6 +259,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
       const updatedMenuGroup: MenuGroup = {
         ID: formData.ID!,
         Name: formData.Name!,
+        PersianName: (formData.PersianName || "").trim(), 
         Description: formData.Description || "",
         Order: formData.Order || 0,
         nMenuTabId: formData.nMenuTabId || selectedMenuTabId!,
@@ -258,8 +280,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
@@ -278,7 +300,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
       onRowClick(null);
       setIsEditing(false);
       setIsAdding(false);
-      setFormData({ ID: 0, Name: "", Description: "", Order: 0 });
+      setFormData({ ID: 0, Name: "",PersianName:"", Description: "", Order: 0 });
       // After a short delay, allow selection again
       setTimeout(() => {
         setSuppressSelection(false);
@@ -295,7 +317,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
   const handleFormCancel = () => {
     setIsEditing(false);
     setIsAdding(false);
-    setFormData({ ID: 0, Name: "", Description: "", Order: 0 });
+    setFormData({ ID: 0, Name: "",PersianName:"", Description: "", Order: 0 });
     setSelectedRow(null);
     onRowClick(null);
   };
@@ -307,6 +329,32 @@ const Accordion2: React.FC<Accordion2Props> = ({
       IconImageId: insertModel.ID || null,
     }));
   };
+
+
+  const columnDefsWithFa = useMemo(() => {
+    const defs = Array.isArray(columnDefs) ? [...columnDefs] : [];
+    const hasFa = defs.some((c: any) => (c.field ?? "").toString() === "PersianName");
+    if (hasFa) return defs;
+
+    const faCol = {
+      headerName: "PersianName",
+      field: "PersianName",
+      sortable: true,
+      filter: true,
+      resizable: true,
+    };
+
+    const nameIdx = defs.findIndex(
+      (c: any) => (c.field ?? "").toString().toLowerCase() === "name"
+    );
+
+    if (nameIdx === -1) return [...defs, faCol];
+
+    const before = defs.slice(0, nameIdx + 1);
+    const after = defs.slice(nameIdx + 1);
+    return [...before, faCol, ...after];
+  }, [columnDefs]);
+
 
   return (
     <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
@@ -355,7 +403,8 @@ const Accordion2: React.FC<Accordion2Props> = ({
                 ref={tableContainerRef}
               >
                 <DataTable
-                  columnDefs={columnDefs}
+                  direction={i18n.dir()}
+                  columnDefs={columnDefsWithFa}
                   rowData={filteredRowData}
                   onRowDoubleClick={handleRowDoubleClick}
                   setSelectedRowData={handleSetSelectedRowData}
@@ -364,7 +413,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                   showAddIcon={false}
                   showDeleteIcon={false}
                   showViewIcon={false}
-                  onView={() => {}}
+                  onView={() => { }}
                   onAdd={handleNew}
                   onEdit={() => {
                     if (selectedRow) {
@@ -373,7 +422,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     }
                   }}
                   onDelete={handleDeleteClick}
-                  onDuplicate={() => {}}
+                  onDuplicate={() => { }}
                   isLoading={isLoading}
                   showSearch={false}
                   domLayout="normal"
@@ -383,27 +432,55 @@ const Accordion2: React.FC<Accordion2Props> = ({
               {/* Form always visible */}
               <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
                 <div className="flex gap-4">
-                  <DynamicInput
-                    name={t("Ribbons.Name")}
-                    type="text"
-                    value={formData.Name || ""}
-                    placeholder="Name"
-                    onChange={(e) =>
-                      setFormData({ ...formData, Name: e.target.value })
-                    }
-                    className="mt-2 flex-1"
-                  />
+                  {/* Name / PersianName + سوئیچر */}
+                  <div className="flex items-end gap-2 flex-1">
+                    <div className="flex-1">
+                      <DynamicInput
+                        name={isFaMode ? "PersianName" : t("Ribbons.Name")}
+                        type="text"
+                        value={isFaMode ? (formData.PersianName ?? "") : (formData.Name ?? "")}
+                        placeholder={isFaMode ? "Persian name" : "Name"}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setFormData((prev) =>
+                            isFaMode ? { ...prev, PersianName: v } : { ...prev, Name: v }
+                          );
+                        }}
+                        className="mt-2 flex-1"
+                        required={!isFaMode}
+                      />
+                    </div>
+
+                    {/* دکمه صورتی-بنفش EN/FA */}
+                    {/* <button
+                      type="button"
+                      onClick={() => setIsFaMode((p) => !p)}
+                      className={[
+                        "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+                        "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                        "text-white font-semibold tracking-wide",
+                        "shadow-md shadow-pink-200/50",
+                        "transition-all duration-200",
+                        "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                        "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                      ].join(" ")}
+                      title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                    >
+                      {isFaMode ? "FA" : "EN"}
+                    </button> */}
+                  </div>
+
+                  {/* Description */}
                   <DynamicInput
                     name={t("Ribbons.Description")}
                     type="text"
                     value={formData.Description || ""}
                     placeholder="Description"
-                    onChange={(e) =>
-                      setFormData({ ...formData, Description: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
                     className="mt-2 flex-1"
                   />
                 </div>
+
                 <div className="mt-4">
                   <DynamicInput
                     name={t("Ribbons.Order")}

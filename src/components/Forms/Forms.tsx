@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 interface IFormData {
   ID: string;
   Name: string;
+  PersianName?: string;
   Code: string;
   IsDoc: boolean;
   IsMegaForm: boolean;
@@ -113,7 +114,7 @@ const typeOfInformationOptions = [
   { value: "component18", label: "Seqnial Number" },
   { value: "component19", label: "Advance Table" },
   { value: "component20", label: "Word Panel" },
-  { value: "component21", label: "Excecl Panel" },
+  { value: "component21", label: "Excel Panel" },
   { value: "component22", label: "Calculated Field" },
   { value: "component23", label: "Excel Calculator" },
   { value: "component24", label: "Tab" },
@@ -161,6 +162,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const [formData, setFormData] = useState<IFormData>({
     ID: "",
     Name: "",
+    PersianName: "",
     Code: "",
     IsDoc: false,
     IsMegaForm: false,
@@ -178,6 +180,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   // نام فایل‌های ورد و اکسل (جهت نمایش و دانلود)
   const [wordFileName, setWordFileName] = useState<string>("");
   const [excelFileName, setExcelFileName] = useState<string>("");
+
+  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+
 
   // داده‌های پروژه (جهت انتخاب پروژه)
   const [projectData, setProjectData] = useState<
@@ -290,6 +295,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         setFormData({
           ID: selectedRow.ID || "",
           Name: selectedRow.Name || "",
+          PersianName: selectedRow.PersianName ?? "",
           Code: selectedRow.Code || "",
           IsDoc: !!selectedRow.IsDoc,
           IsMegaForm: !!selectedRow.IsMegaForm,
@@ -327,6 +333,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         setFormData({
           ID: "",
           Name: "",
+          PersianName: "",
           Code: "",
           IsDoc: false,
           IsMegaForm: false,
@@ -382,25 +389,110 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
    */
   const refreshEntityFields = useCallback(async () => {
     const parsedId = Number(formData.ID);
-
     if (!parsedId || isNaN(parsedId)) {
       setEntityFields([]);
       return;
     }
 
     setIsLoadingFields(true);
-
     try {
       const fields = await api.getEntityFieldByEntityTypeId(parsedId);
-      console.log("🎯 Entity fields fetched:", fields);
-      setEntityFields(fields);
+      const normalized = (fields || []).map((f: any) => ({
+        ...f,
+        PersianName: f.PersianName ?? "", // ← تضمین وجود property
+      }));
+      setEntityFields(normalized);
     } catch (error) {
       console.error("❌ Error fetching entity fields:", error);
       setEntityFields([]);
     } finally {
-      setIsLoadingFields(false); // ← بارگذاری پایان
+      setIsLoadingFields(false);
     }
   }, [api, formData.ID]);
+
+
+  const newColumnDefs = React.useMemo(() => ([
+    {
+      headerName: t("Forms.Columns.Order"),
+      field: "orderValue",
+      editable: true,
+      sortable: true,
+      filter: true,
+      flex: 0.6,
+      minWidth: 90,
+    },
+    {
+      headerName: t("Forms.Columns.ColumnName"),
+      field: "DisplayName",
+      editable: true,
+      sortable: true,
+      filter: true,
+      flex: 2,
+      minWidth: 180,
+    },
+    // ستون سوم: Persian ColumnName
+    {
+      headerName: t("DataTable.Headers.PersianColumnName") || "Persian ColumnName",
+      field: "PersianName",
+      editable: true,
+      sortable: true,
+      filter: true,
+      flex: 2,
+      minWidth: 180,
+    },
+    // Type
+    {
+      headerName: t("Forms.Columns.Type"),
+      field: "ColumnType",
+      editable: false,
+      sortable: true,
+      filter: true,
+      flex: 1.3,
+      minWidth: 150,
+      valueGetter: (params: any) => {
+        const opt = typeOfInformationOptions.find(
+          (o) => columnTypeMapping[o.value] === params.data.ColumnType
+        );
+        return opt ? opt.label : params.data.ColumnType;
+      },
+    },
+    // Command
+    {
+      headerName: t("Forms.Columns.Command"),
+      field: "Code",
+      editable: true,
+      sortable: true,
+      filter: true,
+      flex: 1,
+      minWidth: 130,
+    },
+    // چک‌باکس‌ها
+    ...[
+      { headerNameKey: "ShowInList", field: "IsShowGrid" },
+      { headerNameKey: "Required", field: "IsRequire" },
+      { headerNameKey: "MainColumn", field: "IsMainColumn" },
+      { headerNameKey: "IsRtl", field: "IsRTL" },
+      { headerNameKey: "CountInReject", field: "CountInReject" },
+    ].map((c) => ({
+      headerName: t(`Forms.Columns.${c.headerNameKey}`),
+      field: c.field,
+      editable: true,
+      sortable: true,
+      filter: true,
+      flex: 0.9,
+      minWidth: 110,
+      cellRendererFramework: (p: any) => (
+        <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
+      ),
+      cellEditor: "agCheckboxCellEditor",
+      cellEditorParams: {
+        checkboxTrueValue: true,
+        checkboxFalseValue: false,
+      },
+    })),
+  ]), [t]);
+
+
 
   useEffect(() => {
     refreshEntityFields();
@@ -619,39 +711,63 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
    * تا تغییرات در جدول نمایش داده شود
    * ولی فراخوانی آپدیت سرور انجام نمی‌دهیم.
    */
-  const handleCellValueChanged = (params: any) => {
-    if (!params?.data || !params.colDef?.field) return;
+  const handleCellValueChanged = async (params: any) => {
+  if (!params?.data || !params.colDef?.field) return;
 
-    const updatedFieldName = params.colDef.field;
-    const updatedFieldValue = params.newValue;
+  const updatedFieldName = params.colDef.field;
+  const updatedFieldValue = params.newValue;
 
-    const updatedData = {
-      ...params.data,
-      [updatedFieldName]: updatedFieldValue,
-    };
+  const updatedData = { ...params.data, [updatedFieldName]: updatedFieldValue };
 
-    const rowIndex = entityFields.findIndex((f) => f.ID === updatedData.ID);
-    if (rowIndex !== -1) {
-      const newFields = [...entityFields];
-      newFields[rowIndex] = updatedData;
-      setEntityFields(newFields);
-    }
-    setSelectedRowData(updatedData);
-  };
+  // به‌روزرسانی در state
+  const rowIndex = entityFields.findIndex((f) => f.ID === updatedData.ID);
+  if (rowIndex !== -1) {
+    const newFields = [...entityFields];
+    newFields[rowIndex] = updatedData;
+    setEntityFields(newFields);
+  }
+  setSelectedRowData(updatedData);
+
+  // ← اختیاری: ارسال به سرور
+  try {
+    // مثال: اگر API شما updateEntityField دارد
+    // await api.updateEntityField(updatedData);
+  } catch (e) {
+    console.error(e);
+    showAlert("error", undefined, "Error", "Failed to update on server.");
+  }
+};
+
 
   /**
    * متد اصلی ذخیره فرم (برای فراخوانی از والد، چون این کامپوننت با forwardRef فرستاده شده)
    */
   useImperativeHandle(ref, () => ({
+
     save: async () => {
       try {
         const payload = {
           ...formData,
           ID: formData.ID ? Number(formData.ID) : 0,
+          PersianName: (formData.PersianName || "").trim(),
           ModifiedById: formData.ModifiedById
             ? formData.ModifiedById.toString()
             : null,
         };
+
+        const nameTrim = (formData.Name || "").trim();
+        const pNameTrim = (formData.PersianName || "").trim();
+
+        if (!nameTrim && pNameTrim) {
+          showAlert("warning", undefined, "Warning", "Please fill Name.");
+          return false;
+        }
+        if (!nameTrim) {
+          showAlert("error", undefined, "Error", "Name cannot be empty.");
+          return false;
+        }
+
+        console.log("FORMS SAVE payload =>", payload);
 
         await handleSaveForm(payload);
 
@@ -665,88 +781,16 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     },
   }));
 
-  /**
-   * ستون‌های DataTable برای نمایش فیلدهای انتیتی
-   */
-  /* ───────── ستون‌ها: newColumnDefs با flex/minWidth ───────── */
-  const newColumnDefs = [
-    {
-      headerName: t("Forms.Columns.Order"),
-      field: "orderValue",
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 0.6,
-      minWidth: 90,
-    },
-    {
-      headerName: t("Forms.Columns.ColumnName"),
-      field: "DisplayName",
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 2,
-      minWidth: 180,
-    },
-    {
-      headerName: t("Forms.Columns.Type"),
-      field: "ColumnType",
-      editable: false,
-      sortable: true,
-      filter: true,
-      flex: 1.3,
-      minWidth: 150,
-      valueGetter: (params: any) => {
-        const opt = typeOfInformationOptions.find(
-          (o) => columnTypeMapping[o.value] === params.data.ColumnType
-        );
-        return opt ? opt.label : params.data.ColumnType;
-      },
-    },
-    {
-      headerName: t("Forms.Columns.Command"),
-      field: "Code",
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 1,
-      minWidth: 130,
-    },
-    ...[
-      { headerNameKey: "ShowInList", field: "IsShowGrid" },
-      { headerNameKey: "Required", field: "IsRequire" },
-      { headerNameKey: "MainColumn", field: "IsMainColumn" },
-      { headerNameKey: "IsRtl", field: "IsRTL" },
-      { headerNameKey: "CountInReject", field: "CountInReject" },
-    ].map((c) => ({
-      headerName: t(`Forms.Columns.${c.headerNameKey}`),
-      field: c.field,
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 0.9,
-      minWidth: 110,
-      cellRendererFramework: (p: any) => (
-        <input
-          type="checkbox"
-          checked={!!p.value}
-          readOnly
-          style={{ margin: 0 }}
-        />
-      ),
-      cellEditor: "agCheckboxCellEditor",
-      cellEditorParams: {
-        checkboxTrueValue: true,
-        checkboxFalseValue: false,
-      },
-    })),
-  ];
+  
 
   return (
     <div style={{ width: "100%", boxSizing: "border-box" }}>
+
+
+
       <TwoColumnLayout>
         {/* Name Field */}
-        <TwoColumnLayout.Item span={1}>
+        {/* <TwoColumnLayout.Item span={1}>
           <DynamicInput
             name={t("Forms.Name")}
             type="text"
@@ -754,7 +798,43 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             onChange={(e) => handleChange("Name", e.target.value)}
             required
           />
+        </TwoColumnLayout.Item> */}
+
+        <TwoColumnLayout.Item span={1}>
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <DynamicInput
+                name={isFaMode ? "PersianName" : t("Forms.Name")}
+                type="text"
+                value={isFaMode ? (formData.PersianName ?? "") : formData.Name}
+                onChange={(e) =>
+                  handleChange(isFaMode ? "PersianName" : "Name", e.target.value)
+                }
+                required={!isFaMode}
+              />
+            </div>
+
+            {/* دکمه EN/FA با استایل گرادیانی */}
+            {/* <button
+              type="button"
+              onClick={() => setIsFaMode((p) => !p)}
+              className={[
+                "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+                "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                "text-white font-semibold tracking-wide",
+                "shadow-md shadow-pink-200/50",
+                "transition-all duration-200",
+                "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+              ].join(" ")}
+              title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+            >
+              {isFaMode ? "FA" : "EN"}
+            </button> */}
+          </div>
         </TwoColumnLayout.Item>
+
+
 
         {/* Command Field */}
         <TwoColumnLayout.Item span={1}>
@@ -898,11 +978,11 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                   selectedRowData
                     ? handleEditClick(selectedRowData)
                     : showAlert(
-                        "error",
-                        undefined,
-                        "Error",
-                        "No row is selected!"
-                      )
+                      "error",
+                      undefined,
+                      "Error",
+                      "No row is selected!"
+                    )
                 }
                 onDelete={async () => {
                   if (!selectedRowData) {
@@ -948,15 +1028,15 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           rowData={
             currentSelector === "A"
               ? catAOptions.map((opt) => ({
-                  value: opt.value,
-                  label: opt.label,
-                }))
+                value: opt.value,
+                label: opt.label,
+              }))
               : currentSelector === "B"
-              ? catBOptions.map((opt) => ({
+                ? catBOptions.map((opt) => ({
                   value: opt.value,
                   label: opt.label,
                 }))
-              : []
+                : []
           }
           onRowClick={handleRowClick}
           onRowDoubleClick={handleSelectButtonClick}

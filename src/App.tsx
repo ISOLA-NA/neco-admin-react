@@ -23,6 +23,9 @@ import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "./App.css";
+import "react-quill/dist/quill.snow.css";
+import "react-quill/dist/quill.snow.css";
+import "quill-better-table/dist/quill-better-table.css";
 
 // تابع چک لاگین
 const isUserAuthenticated = () => {
