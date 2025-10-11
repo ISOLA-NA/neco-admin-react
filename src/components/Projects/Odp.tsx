@@ -414,7 +414,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
               labelClassName="text-gray-700 font-medium"
             />
           </div>
-          {/* <button
+          <button
             type="button"
             onClick={() => setIsFaMode((p) => !p)}
             className={[
@@ -432,7 +432,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
             }
           >
             {isFaMode ? "FA" : "EN"}
-          </button> */}
+          </button>
         </div>
 
         <CustomTextarea

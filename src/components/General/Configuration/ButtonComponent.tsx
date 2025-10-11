@@ -576,7 +576,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                 </div>
 
                 {/* دکمه EN/FA با استایل گرادیانی */}
-                {/* <button
+                <button
                   type="button"
                   onClick={() => setIsFaMode((p) => !p)}
                   className={[
@@ -591,7 +591,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                   title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
                 >
                   {isFaMode ? "FA" : "EN"}
-                </button> */}
+                </button>
               </div>
 
               {/* بقیه فیلدها مثل قبل */}
