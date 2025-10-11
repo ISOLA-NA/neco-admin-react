@@ -53,4 +53,7 @@ export const subTabComponents: {
     () => import("../../../components/Projects/Procedures")
   ),
   Calendars: React.lazy(() => import("../../../components/Projects/Calendars")),
+  UpdateAddress: React.lazy(() => import("../../../components/Projects/UpdateAddress")),
+  
+
 };

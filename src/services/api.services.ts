@@ -716,7 +716,20 @@ export interface AlertingWfTemplateItem {
   ModifiedById?: string;
 }
 
+/** ====== مخصوص Update Address ====== */
+export interface AddressNode {
+  ID: number;              // شناسه همان آیتم
+  Name: string;            // اسم همان لِول
+  Address: string;         // آدرسی که باید در اینپوت سمت راست بنشیند
+  ChildProgramID: number;  // برای گرفتن بچه‌ها، این مقدار را به API با key=id می‌فرستیم
+  IsVisible: boolean;
+}
 
+export interface UpdateAddressResponse {
+  isHaveError: boolean;
+  isSuccess: boolean;
+  Msg: string;
+}
 // ساخت یک کلاس برای متدهای API
 class ApiService {
   // ------------------------------------
@@ -1674,6 +1687,31 @@ class ApiService {
     return response.data;
   }
 
+  async getAddressesByPrjLevel(gid: string): Promise<AddressNode[]> {
+    const res = await httpClient.post<AddressNode[]>(
+      apiConst.getAddressesByPrjLevel,
+      { gid }
+    );
+    return res.data;
+  }
+
+  // گرفتن بچه‌های هر نود با id = ChildProgramID
+  async getChildren(id: number): Promise<AddressNode[]> {
+    const res = await httpClient.post<AddressNode[]>(
+      apiConst.getChildren,
+      { id }
+    );
+    return res.data;
+  }
+
+  async updateAddress(id: number, str: string): Promise<UpdateAddressResponse> {
+    // طبق فیدلر: بدنه باید { id, str } باشد
+    const res = await httpClient.post<UpdateAddressResponse>(
+      apiConst.updateAddress,
+      { id, str }
+    );
+    return res.data;
+  }
 
 
 }

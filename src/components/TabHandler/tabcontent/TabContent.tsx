@@ -39,6 +39,11 @@ import DynamicConfirm from "../../utilities/DynamicConfirm";
 import { useSubTabDefinitions } from "../../../context/SubTabDefinitionsContext";
 import { useTranslation } from "react-i18next";
 import DynamicSelector from "../../utilities/DynamicSelector copy";
+// برای حالت خاصِ UpdateAddress
+import { UpdateAddressProvider } from "../../Projects/UpdateAddress/UpdateAddressContext";
+import UpdateAddressLeft from "../../Projects/UpdateAddress/UpdateAddressLeft";
+import UpdateAddressRight from "../../Projects/UpdateAddress/UpdateAddressRight";
+
 
 interface TabContentProps {
   component: React.LazyExoticComponent<React.ComponentType<any>> | null;
@@ -140,6 +145,9 @@ const TabContent: FC<TabContentProps> = ({
 
   const [persianNameInput, setPersianNameInput] = useState<string>("");
   const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name) | true=FA(PersianName)
+
+  const [uaSelection, setUaSelection] = useState<{ gid?: string; id?: number; address?: string } | null>(null);
+
 
 
   // توابع تغییر اندازه‌ی پنل
@@ -278,6 +286,51 @@ const TabContent: FC<TabContentProps> = ({
       setIsLoading(false);
     }
   }, [activeSubTab, selectedCategoryType]);
+
+  const handleDuplicateClick = () => {
+    const row = pendingSelectedRow || selectedRow;
+    if (!row) {
+      showAlert(
+        "warning",
+        null,
+        "Warning",
+        "Please select a row to duplicate."
+      );
+      return;
+    }
+
+    setConfirmVariant("edit"); // ظاهر دیالوگ
+    setConfirmTitle(
+      t("DynamicConfirm.Confirmations.Duplicate.Title") || "Duplicate"
+    );
+    setConfirmMessage(
+      t("DynamicConfirm.Confirmations.Duplicate.Message") ||
+      "Are you sure you want to duplicate this item?"
+    );
+
+    setConfirmAction(() => async () => {
+      try {
+        await duplicateForSubTab(activeSubTab, row);
+        showAlert(
+          "success",
+          null,
+          "",
+          t("Alerts.Duplicated.Success") || "Item duplicated successfully."
+        );
+        await fetchData(); // ← همین تب را رفرش کن
+      } catch (err) {
+        console.error("Duplicate failed:", err);
+        showAlert(
+          "error",
+          null,
+          t("Alerts.Titles.Error"),
+          t("Alerts.Duplicated.Failed") || "Failed to duplicate item."
+        );
+      }
+    });
+
+    setConfirmOpen(true);
+  };
 
   // تغییر نوع Category
   const handleCategoryTypeChange = (
@@ -812,24 +865,11 @@ const TabContent: FC<TabContentProps> = ({
     setConfirmOpen(true);
   };
 
-  const handleDuplicateClick = () => {
-    if (selectedRow) {
-      onDuplicate();
-      if (activeSubTab === "Ribbons") {
-        setNameInput(selectedRow.Name);
-        setDescriptionInput(selectedRow.Description);
-        setIsAdding(true);
-        setIsPanelOpen(true);
-      }
-    } else {
-      showAlert(
-        "warning",
-        null,
-        "Warning",
-        "Please select a row to duplicate."
-      );
-    }
-  };
+
+  useEffect(() => {
+    if (activeSubTab === "UpdateAddress") setIsPanelOpen(true);
+  }, [activeSubTab]);
+
 
   // تابع محلی برای Edit (بازکردن پنل راست در حالت ویرایش)
   const handleEditFromLeft = () => {
@@ -927,334 +967,341 @@ const TabContent: FC<TabContentProps> = ({
 
 
   return (
-    <div
-      ref={containerRef}
-      className="flex-1 overflow-hidden mt-2 border border-gray-300 rounded-lg mb-6 flex relative"
-      style={{ height: "100%" }}
-    >
-      {/* Confirm برای حذف یا ویرایش */}
-      <DynamicConfirm
-        isOpen={confirmOpen}
-        variant={confirmVariant}
-        title={confirmTitle}
-        message={confirmMessage}
-        onConfirm={handleConfirm}
-        onClose={() => setConfirmOpen(false)}
-      />
+    <UpdateAddressProvider>
 
-      {/* پنل چپ */}
       <div
-        className="flex flex-col overflow-auto bg-gray-100 box-border"
-        style={{
-          flex: `0 0 calc(${panelWidth}% - 1px)`,
-          transition: isDragging ? "none" : "flex-basis 0.1s ease-out",
-          backgroundColor: "#f3f4f6",
-        }}
+        ref={containerRef}
+        className="flex-1 overflow-hidden mt-2 border border-gray-300 rounded-lg mb-6 flex relative"
+        style={{ height: "100%" }}
       >
-        <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100 w-full">
-          <div className="font-bold text-gray-700 text-sm"> </div>
-          {/* <div className="font-bold text-gray-700 text-sm">{activeSubTab}</div> */}
-          <button
-            onClick={togglePanelSize}
-            className="text-gray-700 hover:text-gray-900 transition"
-          >
-            {isMaximized ? (
-              <FiMinimize2 size={18} />
-            ) : (
-              <FiMaximize2 size={18} />
-            )}
-          </button>
-        </div>
+        {/* Confirm برای حذف یا ویرایش */}
+        <DynamicConfirm
+          isOpen={confirmOpen}
+          variant={confirmVariant}
+          title={confirmTitle}
+          message={confirmMessage}
+          onConfirm={handleConfirm}
+          onClose={() => setConfirmOpen(false)}
+        />
 
-        {activeSubTab === "Categories" && (
-          <div className="mb-4 p-2">
-            <DynamicSelector
-              name="categoryType"
-              label={t("Category.CategoryType")}
-              options={categoryOptions}
-              selectedValue={selectedCategoryType}
-              onChange={handleCategoryTypeChange}
-              className="w-full"
-            />
+        <div
+          className="flex flex-col overflow-auto bg-gray-100 box-border"
+          style={{
+            flex: `0 0 calc(${panelWidth}% - 1px)`,
+            transition: isDragging ? "none" : "flex-basis 0.1s ease-out",
+            backgroundColor: "#f3f4f6",
+          }}
+        >
+          {/* هدر کوچک پنل چپ */}
+          <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100 w-full">
+            <div className="font-bold text-gray-700 text-sm"> </div>
+            <button
+              onClick={togglePanelSize}
+              className="text-gray-700 hover:text-gray-900 transition"
+              title={isMaximized ? "Minimize" : "Maximize"}
+            >
+              {isMaximized ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+            </button>
           </div>
-        )}
 
-
-        <div className="h-full p-4 overflow-auto relative">
-          {/* ----- RIBBONS: Form + Table ----- */}
-          {activeSubTab === "Ribbons" && (
-            <div className="mt-4 w-full p-4 bg-white rounded-md shadow-md">
-              {/* اینپوت پویا + سوئیچر EN/FA */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-end gap-2">
-                  <div className="flex-1">
-                    <DynamicInput
-                      name={isFaMode ? "PersianName" : t("Ribbons.Name")}
-                      type="text"
-                      value={isFaMode ? persianNameInput : nameInput}
-                      placeholder={isFaMode ? "Persian name" : "Enter name"}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        if (isFaMode) setPersianNameInput(e.target.value);
-                        else setNameInput(e.target.value);
-                      }}
-                      required={!isFaMode}
-                    />
-                  </div>
-
-                  {/* دکمه صورتی-بنفش EN/FA */}
-                  <button
-                    type="button"
-                    onClick={() => setIsFaMode((p) => !p)}
-                    className={[
-                      "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
-                      "bg-gradient-to-r from-fuchsia-500 to-pink-500",
-                      "text-white font-semibold tracking-wide",
-                      "shadow-md shadow-pink-200/50",
-                      "transition-all duration-200",
-                      "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
-                      "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
-                    ].join(" ")}
-                    title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
-                  >
-                    {isFaMode ? "FA" : "EN"}
-                  </button>
-                </div>
-
-                <DynamicInput
-                  name={t("Ribbons.Description")}
-                  type="text"
-                  value={descriptionInput}
-                  placeholder="Enter description"
-                  onChange={handleDescriptionChange}
-                />
-              </div>
-
-              {/* اکشن‌ها */}
-              <div className="flex items-center gap-4 mt-6 justify-center">
-                <DynamicButton
-                  text="Save"
-                  leftIcon={<FaSave />}
-                  onClick={handleInsert}
-                  isDisabled={!isAdding}         
-                  variant="orgGreen"
-                  size="md"
-                />
-
-                <DynamicButton
-                  text="Update"
-                  leftIcon={<FaEdit />}
-                  onClick={handleUpdate}
-                  isDisabled={!selectedRow}
-                  variant="orgYellow"
-                  size="md"
-                />
-
-                <DynamicButton
-                  text="New"
-                  leftIcon={<FaPlus />}
-                  onClick={() => {
-                    setIsAdding(true);             // ← ورود به حالت Add
-                    setNameInput("");
-                    setPersianNameInput("");
-                    setDescriptionInput("");
-                    setIsFaMode(false);
-                  }}
-                  variant="orgBlue"
-                  size="md"
-                />
-
-                <DynamicButton
-                  text="Delete"
-                  leftIcon={<FaTrash />}
-                  onClick={handleDeleteClick}
-                  isDisabled={!selectedRow}
-                  variant="orgRed"
-                  size="md"
-                />
-              </div>
+          {/* سوییچر نوع Category فقط در تب Categories */}
+          {activeSubTab === "Categories" && (
+            <div className="mb-4 p-2">
+              <DynamicSelector
+                name="categoryType"
+                label={t("Category.CategoryType")}
+                options={categoryOptions}
+                selectedValue={selectedCategoryType}
+                onChange={handleCategoryTypeChange}
+                className="w-full"
+              />
             </div>
           )}
 
-          {/* فقط یک IIFE که جدول را برمی‌گرداند */}
-          {(() => {
-            const addPersianCol =
-              activeSubTab === "Ribbons" &&
-              Array.isArray(columnDefs) &&
-              !columnDefs.some((c: any) => c.field === "PersianName");
+          {/* محتوای اصلی پنل چپ */}
+          <div className="h-full p-4 overflow-auto relative">
+            {/* حالت ویژه: UpdateAddress — بدون جدول، فقط سلکت پروژه + درخت */}
+            {activeSubTab === "UpdateAddress" ? (
+              <UpdateAddressLeft onPick={(payload) => setUaSelection(payload)} />
+            ) : (
+              <>
+                {/* فرم کامل Ribbons (بالا) */}
+                {activeSubTab === "Ribbons" && (
+                  <div className="mt-4 w-full p-4 bg-white rounded-md shadow-md">
+                    {/* ورودی‌های فرم */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Name / PersianName با سوئیچر حالت */}
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <DynamicInput
+                            name={isFaMode ? "PersianName" : t("Ribbons.Name")}
+                            type="text"
+                            value={isFaMode ? persianNameInput : nameInput}
+                            placeholder={isFaMode ? "Persian name" : "Enter name"}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              if (isFaMode) setPersianNameInput(e.target.value);
+                              else setNameInput(e.target.value);
+                            }}
+                            required={!isFaMode}
+                          />
+                        </div>
 
-            const cols = addPersianCol
-              ? [
-                ...columnDefs,
-                {
-                  headerName: "PersianName",
-                  field: "PersianName",
-                  sortable: true,
-                  filter: true,
-                  resizable: true,
-                },
-              ]
-              : columnDefs;
+                        {/* دکمهٔ EN/FA (اختیاری) */}
+                        {/* <button
+                          type="button"
+                          onClick={() => setIsFaMode((p) => !p)}
+                          className={[
+                            "shrink-0 inline-flex items-center justify-center h-10 px-3 rounded-lg",
+                            "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                            "text-white text-xs font-semibold tracking-wide",
+                            "shadow-md shadow-pink-200/50",
+                            "transition-all duration-200",
+                            "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                            "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                          ].join(" ")}
+                          title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                        >
+                          {isFaMode ? "FA" : "EN"}
+                        </button> */}
+                      </div>
 
-            return (
-              <DataTable
-                columnDefs={cols}
-                rowData={fetchedRowData}
-                onRowDoubleClick={(data: any) => {
-                  handleDoubleClick(data);
-                  if (activeSubTab === "Ribbons") {
-                    setPersianNameInput(data?.PersianName || "");
-                  }
-                }}
-                setSelectedRowData={(data: any) => {
-                  handleRowClickLocal(data);
-                  if (activeSubTab === "Ribbons") {
-                    setPersianNameInput(data?.PersianName || "");
-                  }
-                }}
-                showDuplicateIcon={showDuplicateIcon}
-                showEditIcon={false}
-                showAddIcon={showAddIcon}
-                showDeleteIcon={showDeleteIcon}
-                onEdit={handleEditFromLeft}
-                onAdd={handleAddClick}
-                onDelete={handleDeleteClick}
-                onDuplicate={handleDuplicateClick}
-                isLoading={isLoading}
-                direction={i18n.dir()}
-                resetSearchKey={resetSearchKey}
-              />
-            );
-          })()}
-        </div>
+                      {/* Description */}
+                      <DynamicInput
+                        name={t("Ribbons.Description")}
+                        type="text"
+                        value={descriptionInput}
+                        placeholder="Enter description"
+                        onChange={handleDescriptionChange}
+                      />
+                    </div>
 
+                    {/* اکشن‌های فرم */}
+                    <div className="flex items-center gap-4 mt-6 justify-center">
+                      <DynamicButton
+                        text="Save"
+                        leftIcon={<FaSave />}
+                        onClick={handleInsert}
+                        isDisabled={!isAdding}
+                        variant="orgGreen"
+                        size="md"
+                      />
+                      <DynamicButton
+                        text="Update"
+                        leftIcon={<FaEdit />}
+                        onClick={handleUpdate}
+                        isDisabled={!selectedRow}
+                        variant="orgYellow"
+                        size="md"
+                      />
+                      <DynamicButton
+                        text="New"
+                        leftIcon={<FaPlus />}
+                        onClick={() => {
+                          setIsAdding(true);
+                          setNameInput("");
+                          setPersianNameInput("");
+                          setDescriptionInput("");
+                          setIsFaMode(false);
+                        }}
+                        variant="orgBlue"
+                        size="md"
+                      />
+                      <DynamicButton
+                        text="Delete"
+                        leftIcon={<FaTrash />}
+                        onClick={handleDeleteClick}
+                        isDisabled={!selectedRow}
+                        variant="orgRed"
+                        size="md"
+                      />
+                    </div>
+                  </div>
+                )}
 
+                {/* جدول دیتا برای همهٔ تب‌ها (شامل Ribbons هم می‌تونه پایین فرم بیاد) */}
+                {(() => {
+                  const addPersianCol =
+                    activeSubTab === "Ribbons" &&
+                    Array.isArray(columnDefs) &&
+                    !columnDefs.some((c: any) => c.field === "PersianName");
 
+                  const cols = addPersianCol
+                    ? [
+                      ...columnDefs,
+                      {
+                        headerName: "PersianName",
+                        field: "PersianName",
+                        sortable: true,
+                        filter: true,
+                        resizable: true,
+                      },
+                    ]
+                    : columnDefs;
 
-      </div>
-
-      {/* میله درگ کردن */}
-      <div
-        onMouseDown={startDragging}
-        className="flex items-center justify-center cursor-ew-resize w-2"
-        style={{ userSelect: "none", cursor: "col-resize", zIndex: 30 }}
-      >
-        <div className="h-full w-1 bg-[#dd4bae] rounded"></div>
-      </div>
-
-      {/* پنل راست */}
-      {isPanelOpen && (
-        <div
-          className={`flex-1 transition-opacity duration-100 bg-gray-100 ${isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
-            }`}
-          style={{
-            transition: "opacity 0.1s ease-out",
-            backgroundColor: "#f3f4f6",
-            display: "flex",
-            flexDirection: "column",
-            overflowX: panelWidth <= 30 ? "auto" : "hidden",
-            maxWidth: panelWidth <= 30 ? "100%" : "100%",
-          }}
-        >
-          <div
-            className="h-full p-4 flex flex-col"
-            style={{
-              minWidth: panelWidth <= 30 ? "300px" : "auto",
-            }}
-          >
-            {activeSubTab !== "Ribbons" &&
-              activeSubTab !== "ProjectsAccess" && (
-                <PanelHeader
-                  isExpanded={false}
-                  toggleExpand={() => { }}
-                  onSave={
-                    isAdding &&
-                      (activeSubTab === "Configurations" ||
-                        activeSubTab === "Commands" ||
-                        activeSubTab === "Users" ||
-                        activeSubTab === "Ribbons" ||
-                        activeSubTab === "Roles" ||
-                        activeSubTab === "RoleGroups" ||
-                        activeSubTab === "Enterprises" ||
-                        activeSubTab === "Staffing" ||
-                        activeSubTab === "ProgramTemplate" ||
-                        activeSubTab === "ProgramTypes" ||
-                        activeSubTab === "Odp" ||
-                        activeSubTab === "Procedures" ||
-                        activeSubTab === "Calendars" ||
-                        activeSubTab === "ProjectsAccess" ||
-                        activeSubTab === "ApprovalFlows" ||
-                        activeSubTab === "Forms" ||
-                        activeSubTab === "Categories")
-                      ? handleInsert
-                      : undefined
-                  }
-                  onUpdate={
-                    !isAdding &&
-                      (activeSubTab === "Configurations" ||
-                        activeSubTab === "Commands" ||
-                        activeSubTab === "Users" ||
-                        activeSubTab === "Ribbons" ||
-                        activeSubTab === "Roles" ||
-                        activeSubTab === "Enterprises" ||
-                        activeSubTab === "RoleGroups" ||
-                        activeSubTab === "Staffing" ||
-                        activeSubTab === "ProgramTemplate" ||
-                        activeSubTab === "ProgramTypes" ||
-                        activeSubTab === "Odp" ||
-                        activeSubTab === "Procedures" ||
-                        activeSubTab === "Calendars" ||
-                        activeSubTab === "ProjectsAccess" ||
-                        activeSubTab === "ApprovalFlows" ||
-                        activeSubTab === "Forms" ||
-                        activeSubTab === "Categories")
-                      ? handleUpdate
-                      : undefined
-                  }
-                  onClose={handleClose}
-                  onTogglePanelSizeFromRight={togglePanelSizeFromRight}
-                  isRightMaximized={isRightMaximized}
-                  onCheckCanSave={() => checkNameNonEmpty()}
-                  onCheckCanUpdate={() => checkNameNonEmpty()}
-                  onShowEmptyNameWarning={showNameEmptyWarning}
-                />
-              )}
-
-            {/* محتوای تب‌ها در پنل راست */}
-            {activeSubTab === "ProjectsAccess" && (
-              <Suspense fallback={<div>Loading Projects Access...</div>}>
-                <ProjectAccess
-                  ref={projectAccessRef}
-                  selectedProject={selectedRow}
-                  onAddFromLeft={handleAddClick}
-                  onEditFromLeft={handleEditFromLeft}
-                />
-              </Suspense>
-            )}
-
-            {activeSubTab !== "ProjectsAccess" && Component && (
-              <div className="mt-5 flex-grow overflow-y-auto">
-                <div style={{ minWidth: "600px" }}>
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <Component
-                      key={
-                        isAdding
-                          ? "add-mode"
-                          : selectedRow
-                            ? selectedRow.ID
-                            : "no-selection"
-                      }
-                      selectedRow={isAdding ? null : selectedRow}
-                      ref={getActiveRef()}
-                      selectedCategoryType={selectedCategoryType}
+                  return (
+                    <DataTable
+                      columnDefs={cols}
+                      rowData={fetchedRowData}
+                      onRowDoubleClick={(data: any) => {
+                        handleDoubleClick(data);
+                        if (activeSubTab === "Ribbons") {
+                          setPersianNameInput(data?.PersianName || "");
+                        }
+                      }}
+                      setSelectedRowData={(data: any) => {
+                        handleRowClickLocal(data);
+                        if (activeSubTab === "Ribbons") {
+                          setPersianNameInput(data?.PersianName || "");
+                        }
+                      }}
+                      showDuplicateIcon={showDuplicateIcon}
+                      showEditIcon={false}
+                      showAddIcon={showAddIcon}
+                      showDeleteIcon={showDeleteIcon}
+                      onEdit={handleEditFromLeft}
+                      onAdd={handleAddClick}
+                      onDelete={handleDeleteClick}
+                      onDuplicate={handleDuplicateClick}
+                      isLoading={isLoading}
+                      direction={i18n.dir()}
+                      resetSearchKey={resetSearchKey}
                     />
-                  </Suspense>
-                </div>
-              </div>
+                  );
+                })()}
+              </>
             )}
           </div>
         </div>
-      )}
-    </div>
+
+
+        {/* میله درگ کردن */}
+        <div
+          onMouseDown={startDragging}
+          className="flex items-center justify-center cursor-ew-resize w-2"
+          style={{ userSelect: "none", cursor: "col-resize", zIndex: 30 }}
+        >
+          <div className="h-full w-1 bg-[#dd4bae] rounded"></div>
+        </div>
+        {isPanelOpen && (
+          <div
+            className={`flex-1 transition-opacity duration-100 bg-gray-100 ${isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
+              }`}
+            style={{
+              transition: "opacity 0.1s ease-out",
+              backgroundColor: "#f3f4f6",
+              display: "flex",
+              flexDirection: "column",
+              overflowX: panelWidth <= 30 ? "auto" : "hidden",
+              maxWidth: panelWidth <= 30 ? "100%" : "100%",
+            }}
+          >
+            <div
+              className="h-full p-4 flex flex-col"
+              style={{ minWidth: panelWidth <= 30 ? "300px" : "auto" }}
+            >
+              {/* PanelHeader را برای UpdateAddress و ProjectsAccess و Ribbons نشان نده */}
+              {activeSubTab !== "Ribbons" &&
+                activeSubTab !== "ProjectsAccess" &&
+                activeSubTab !== "UpdateAddress" && (
+                  <PanelHeader
+                    isExpanded={false}
+                    toggleExpand={() => { }}
+                    onSave={
+                      isAdding &&
+                        (activeSubTab === "Configurations" ||
+                          activeSubTab === "Commands" ||
+                          activeSubTab === "Users" ||
+                          activeSubTab === "Ribbons" ||
+                          activeSubTab === "Roles" ||
+                          activeSubTab === "RoleGroups" ||
+                          activeSubTab === "Enterprises" ||
+                          activeSubTab === "Staffing" ||
+                          activeSubTab === "ProgramTemplate" ||
+                          activeSubTab === "ProgramTypes" ||
+                          activeSubTab === "Odp" ||
+                          activeSubTab === "Procedures" ||
+                          activeSubTab === "Calendars" ||
+                          activeSubTab === "ProjectsAccess" ||
+                          activeSubTab === "ApprovalFlows" ||
+                          activeSubTab === "Forms" ||
+                          activeSubTab === "Categories")
+                        ? handleInsert
+                        : undefined
+                    }
+                    onUpdate={
+                      !isAdding &&
+                        (activeSubTab === "Configurations" ||
+                          activeSubTab === "Commands" ||
+                          activeSubTab === "Users" ||
+                          activeSubTab === "Ribbons" ||
+                          activeSubTab === "Roles" ||
+                          activeSubTab === "Enterprises" ||
+                          activeSubTab === "RoleGroups" ||
+                          activeSubTab === "Staffing" ||
+                          activeSubTab === "ProgramTemplate" ||
+                          activeSubTab === "ProgramTypes" ||
+                          activeSubTab === "Odp" ||
+                          activeSubTab === "Procedures" ||
+                          activeSubTab === "Calendars" ||
+                          activeSubTab === "ProjectsAccess" ||
+                          activeSubTab === "ApprovalFlows" ||
+                          activeSubTab === "Forms" ||
+                          activeSubTab === "Categories")
+                        ? handleUpdate
+                        : undefined
+                    }
+                    onClose={handleClose}
+                    onTogglePanelSizeFromRight={togglePanelSizeFromRight}
+                    isRightMaximized={isRightMaximized}
+                    onCheckCanSave={() => checkNameNonEmpty()}
+                    onCheckCanUpdate={() => checkNameNonEmpty()}
+                    onShowEmptyNameWarning={showNameEmptyWarning}
+                  />
+                )}
+
+              {/* محتوای پنل راست */}
+              {activeSubTab === "UpdateAddress" ? (
+                // فقط اینپوت تمام‌عرض + دکمه Edit
+                <div className="mt-2 flex-grow overflow-y-auto">
+                  <UpdateAddressRight />
+                </div>
+              ) : activeSubTab === "ProjectsAccess" ? (
+                <Suspense fallback={<div>Loading Projects Access...</div>}>
+                  <ProjectAccess
+                    ref={projectAccessRef}
+                    selectedProject={selectedRow}
+                    onAddFromLeft={handleAddClick}
+                    onEditFromLeft={handleEditFromLeft}
+                  />
+                </Suspense>
+              ) : (
+                Component && (
+                  <div className="mt-5 flex-grow overflow-y-auto">
+                    <div style={{ minWidth: "600px" }}>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <Component
+                          key={
+                            isAdding
+                              ? "add-mode"
+                              : selectedRow
+                                ? selectedRow.ID
+                                : "no-selection"
+                          }
+                          selectedRow={isAdding ? null : selectedRow}
+                          ref={getActiveRef()}
+                          selectedCategoryType={selectedCategoryType}
+                        />
+                      </Suspense>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </UpdateAddressProvider>
   );
 };
 

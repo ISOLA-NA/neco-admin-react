@@ -135,5 +135,20 @@ export const apiConst = Object.freeze({
   deleteAlertingWfTemplate: "api/AlertingWfTemplate/Delete",
   getAllAlertingWfTemplate: "api/AlertingWfTemplate/GetAll",
 
-  getAllAlertingWfTemplateByWFBoxTemplateId: "api/AlertingWfTemplate/GetAllByWFBoxTemplateId",
+  getAllAlertingWfTemplateByWFBoxTemplateId:
+    "api/AlertingWfTemplate/GetAllByWFBoxTemplateId",
+
+  // api/Menu/
+  duplicateMenu: "api/Menu/Duplicate",
+
+  // api/WFTemplate/
+  duplicateWfTemplate: "api/WFTemplate/Duplicate",
+
+  // api/KnowledgeType/
+  duplicateOdp: "api/KnowledgeType/Duplicate",
+
+  getAddressesByPrjLevel: "api/Program/GetAddressesByPrjLevel",
+  getChildren: "api/Program/GetChildren",
+  updateAddress: "api/Program/UdateAddress",
+
 });

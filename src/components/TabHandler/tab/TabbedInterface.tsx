@@ -107,6 +107,7 @@ const mainTabsData: Record<MainTabKey, MainTabDefinition> = {
           "Odp",
           "Procedures",
           "Calendars",
+          "UpdateAddress",
         ],
       },
     ],
@@ -235,6 +236,9 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     setActiveSubTab(subKey);
     setSelectedRow(null);
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+    if (subKey === "UpdateAddress") {
+    setIsSidePanelOpen(true);
+  }
   };
 
   // CRUD actions

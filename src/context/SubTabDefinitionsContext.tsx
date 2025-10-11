@@ -551,45 +551,45 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
       Odp: {
-  endpoint: async () => {
-    const data = await api.getAllOdpWithExtra();
-    console.log("ODP list sample:", data[0]);
-    // اطمینان از وجود PersianName به‌صورت رشتهٔ خالی (نه null/undefined)
-    return data.map((r: any) => ({ ...r, PersianName: r.PersianName ?? "" }));
-  },
-  columnDefs: withPersianName(
-    [
-      {
-        headerName: t("DataTable.Headers.Name"),
-        field: "Name",
-        filter: "agTextColumnFilter",
+        endpoint: async () => {
+          const data = await api.getAllOdpWithExtra();
+          console.log("ODP list sample:", data[0]);
+          // اطمینان از وجود PersianName به‌صورت رشتهٔ خالی (نه null/undefined)
+          return data.map((r: any) => ({ ...r, PersianName: r.PersianName ?? "" }));
+        },
+        columnDefs: withPersianName(
+          [
+            {
+              headerName: t("DataTable.Headers.Name"),
+              field: "Name",
+              filter: "agTextColumnFilter",
+            },
+            // PersianName اینجا خودکار و دقیقاً بعد از Name درج می‌شود (ستون دوم)
+            {
+              headerName: t("DataTable.Headers.Address"),
+              field: "Address",
+              filter: "agTextColumnFilter",
+            },
+            {
+              headerName: t("DataTable.Headers.WFTemplateName"),
+              field: "WFTemplateName",
+              filter: "agTextColumnFilter",
+            },
+            {
+              headerName: t("DataTable.Headers.EntityTypeName"),
+              field: "EntityTypeName",
+              filter: "agTextColumnFilter",
+            },
+          ],
+          t("DataTable.Headers.PersianName")
+        ),
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
       },
-      // PersianName اینجا خودکار و دقیقاً بعد از Name درج می‌شود (ستون دوم)
-      {
-        headerName: t("DataTable.Headers.Address"),
-        field: "Address",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: t("DataTable.Headers.WFTemplateName"),
-        field: "WFTemplateName",
-        filter: "agTextColumnFilter",
-      },
-      {
-        headerName: t("DataTable.Headers.EntityTypeName"),
-        field: "EntityTypeName",
-        filter: "agTextColumnFilter",
-      },
-    ],
-    t("DataTable.Headers.PersianName")
-  ),
-  iconVisibility: {
-    showAdd: true,
-    showEdit: true,
-    showDelete: true,
-    showDuplicate: false,
-  },
-},
 
       Procedures: {
         endpoint: api.getAllEntityCollection,
@@ -768,6 +768,20 @@ export const SubTabDefinitionsProvider: React.FC<{
           showDuplicate: false,
         },
       },
+      // ... داخل useMemo برگردان subTabDefinitions
+      UpdateAddress: {
+        // چپْ جدول نمی‌خواهیم؛ دیتایی هم لازم نیست
+        endpoint: async () => [],
+        columnDefs: [],
+
+        // همه آیکون‌ها در لیست چپ مخفی
+        iconVisibility: {
+          showAdd: false,
+          showEdit: false,
+          showDelete: false,
+          showDuplicate: false,
+        },
+      },
 
       // Add other sub-tabs here
     } as Record<string, SubTabDefinition>;
@@ -791,6 +805,68 @@ export const SubTabDefinitionsProvider: React.FC<{
     const definition = subTabDefinitions[subTabName];
     if (!definition || !definition.endpoint) return [];
     return await definition.endpoint(params);
+  };
+
+  const duplicateForSubTab = async (
+    subTabName: string,
+    row: any,
+    params?: any
+  ) => {
+    const def = subTabDefinitions[subTabName];
+    if (!def) return await fetchDataForSubTab(subTabName, params);
+
+    if (!def.duplicateAction) {
+      return await fetchDataForSubTab(subTabName, params);
+    }
+
+    try {
+      // قبل از کپی
+      const before = await fetchDataForSubTab(subTabName, params);
+
+      // کپی
+      const newItemRaw: any = await def.duplicateAction(row);
+
+      // بعد از کپی
+      const after = await fetchDataForSubTab(subTabName, params);
+
+      // آیتم جدید را به‌دست بیاور (یا از خروجی API، یا با اختلاف قبل/بعد)
+      let newItem =
+        newItemRaw && typeof newItemRaw === "object"
+          ? newItemRaw.data ??
+          newItemRaw.Data ??
+          newItemRaw.value ??
+          newItemRaw.Value ??
+          newItemRaw
+          : undefined;
+
+      if (!newItem || typeof newItem !== "object") {
+        newItem = findNewItem(before, after);
+      }
+      if (!newItem) return after;
+
+      // فقط برای تب Forms: Name فعلی + "-COPY"
+      if (subTabName === "Forms" && def.updater) {
+        const nameKey = def.nameField ?? "Name";
+        const idKey = detectIdKey(newItem);
+
+        const baseName = (row?.[nameKey] ?? newItem?.[nameKey] ?? "").trim();
+        const targetName = withCopySuffix(baseName);
+
+        // پِی‌لود: اطلاعات اصلی + آیتم جدید (برای داشتن ID جدید) + نام جدید
+        const payload = {
+          ...(row || {}),
+          ...(newItem || {}),
+          [idKey]: newItem[idKey],
+          [nameKey]: targetName,
+        };
+
+        await def.updater(payload);
+      }
+    } catch (err) {
+      console.error(`Duplicate failed for ${subTabName}:`, err);
+    }
+
+    return await fetchDataForSubTab(subTabName, params);
   };
 
   return (

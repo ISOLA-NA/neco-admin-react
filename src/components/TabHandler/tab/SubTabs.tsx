@@ -40,6 +40,7 @@ const subtabIcons: { [key: string]: string } = {
   Odp: "/images/project/ODP.png",
   Procedures: "/images/project/proc.png",
   Calendars: "/images/project/calendar.png",
+  UpdateAddress: "/images/project/update-address.png",
 };
 
 const SubTabs: React.FC<SubTabsProps> = ({
