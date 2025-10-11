@@ -800,7 +800,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
               />
 
               {/* چیپ EN/FA داخل خود اینپوت */}
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setIsFaMode((p) => !p)}
                 title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
@@ -809,7 +809,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
                  transition-transform active:scale-95 z-10"
               >
                 {isFaMode ? "FA" : "EN"}
-              </button>
+              </button> */}
             </div>
 
             {/* بقیه فیلدها مثل قبل... */}

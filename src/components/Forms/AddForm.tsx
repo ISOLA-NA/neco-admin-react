@@ -658,7 +658,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 />
               </div>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setIsFaMode((p) => !p)}
                 className={[
@@ -678,7 +678,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 }
               >
                 {isFaMode ? "FA" : "EN"}
-              </button>
+              </button> */}
             </div>
 
             {/* خطای اعتبارسنجی با ارتفاع ثابت */}

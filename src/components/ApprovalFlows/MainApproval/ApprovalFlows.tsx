@@ -382,7 +382,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
               </div>
 
               {/* دکمه EN/FA با استایل گرادیانی */}
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setIsFaMode((p) => !p)}
                 className={[
@@ -397,7 +397,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
                 title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
               >
                 {isFaMode ? "FA" : "EN"}
-              </button>
+              </button> */}
             </div>
           </TwoColumnLayout.Item>
 

@@ -452,7 +452,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     </div>
 
                     {/* دکمه صورتی-بنفش EN/FA */}
-                    <button
+                    {/* <button
                       type="button"
                       onClick={() => setIsFaMode((p) => !p)}
                       className={[
@@ -467,7 +467,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                       title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
                     >
                       {isFaMode ? "FA" : "EN"}
-                    </button>
+                    </button> */}
                   </div>
 
                   {/* Description */}

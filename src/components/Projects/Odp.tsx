@@ -414,13 +414,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
               labelClassName="text-gray-700 font-medium"
             />
           </div>
-          {/* دکمه EN/FA */}
-          <button
+          {/* <button
             type="button"
             onClick={() => setIsFaMode((p) => !p)}
             className={[
               "shrink-0 inline-flex items-center justify-center",
-              "h-8 px-3 rounded-lg self-end mb-1" /* ← هم‌راستاسازی با ته اینپوت */,
+              "h-8 px-3 rounded-lg self-end mb-1" ,
               "bg-gradient-to-r from-fuchsia-500 to-pink-500",
               "text-white text-xs font-semibold tracking-wide",
               "shadow shadow-pink-200/50",
@@ -433,7 +432,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
             }
           >
             {isFaMode ? "FA" : "EN"}
-          </button>
+          </button> */}
         </div>
 
         <CustomTextarea

@@ -643,7 +643,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                         </div>
 
                         {/* دکمه EN/FA با استایل گرادیانی */}
-                        <button
+                        {/* <button
                           type="button"
                           onClick={() => setIsFaMode((p) => !p)}
                           className={[
@@ -658,7 +658,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                           title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
                         >
                           {isFaMode ? "FA" : "EN"}
-                        </button>
+                        </button> */}
                       </div>
                     </div>
 
