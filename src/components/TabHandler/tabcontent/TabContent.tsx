@@ -1047,7 +1047,7 @@ const TabContent: FC<TabContentProps> = ({
                         </div>
 
                         {/* دکمهٔ EN/FA (اختیاری) */}
-                        {/* <button
+                        <button
                           type="button"
                           onClick={() => setIsFaMode((p) => !p)}
                           className={[
@@ -1062,7 +1062,7 @@ const TabContent: FC<TabContentProps> = ({
                           title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
                         >
                           {isFaMode ? "FA" : "EN"}
-                        </button> */}
+                        </button>
                       </div>
 
                       {/* Description */}
