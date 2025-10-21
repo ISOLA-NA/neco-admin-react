@@ -41,6 +41,9 @@ import Component31 from "./ControllerForms/SubSectionController";
 import Component32 from "./ControllerForms/MePostSelectorController";
 import Component33 from "./ControllerForms/AdvanceWf";
 import Component34 from "./ControllerForms/LookupImageRealValue";
+import InventoryController from "./ControllerForms/InventoryController";
+import InventoryFieldController from "./ControllerForms/InventoryFieldController";
+
 
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 
@@ -82,6 +85,9 @@ const columnTypeMapping: { [key: string]: number } = {
   component32: 18,
   component33: 23,
   component34: 37,
+  component36: 38, // Inventory
+  component37: 39, // InventoryField
+
 };
 
 // Mapping of component keys to components
@@ -119,6 +125,9 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component32: Component32,
   component33: Component33,
   component34: Component34,
+  component36: InventoryController,
+  component37: InventoryFieldController,
+
 };
 
 interface AddColumnFormProps {
@@ -191,6 +200,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     { value: "component24", label: t("ColumnTypes.Tab") },
     { value: "component25", label: t("ColumnTypes.Map") },
     { value: "component34", label: t("ColumnTypes.LookUpRealValueImg") },
+    { value: "component36", label: t("ColumnTypes.Inventory") || "Inventory" },
+    { value: "component37", label: t("ColumnTypes.InventoryField") || "Inventory Field" },
   ];
 
   // گزینه‌های Command با امکان انتخاب دلخواه
@@ -228,8 +239,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInAlert: existingData ? existingData.ShowInAlert : false,
     typeOfInformation: existingData
       ? Object.keys(columnTypeMapping).find(
-          (key) => columnTypeMapping[key] === existingData.ColumnType
-        ) || "component1"
+        (key) => columnTypeMapping[key] === existingData.ColumnType
+      ) || "component1"
       : "component1",
     required: existingData ? existingData.IsRequire : false,
     mainColumns: existingData ? existingData.IsMainColumn : false,
@@ -298,7 +309,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         metaType5: toStrOrNull(existingData.metaType5),
         metaTypeJson:
           typeof existingData.metaTypeJson === "string" &&
-          existingData.metaTypeJson.trim() !== ""
+            existingData.metaTypeJson.trim() !== ""
             ? existingData.metaTypeJson
             : null,
       });
@@ -307,7 +318,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       setMetaExtra({
         metaType4:
           typeof existingData.metaType4 === "string" &&
-          existingData.metaType4.trim() !== ""
+            existingData.metaType4.trim() !== ""
             ? existingData.metaType4
             : "",
       });
@@ -391,8 +402,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
     const lookupModeValue =
       metaCore.LookupMode === undefined ||
-      metaCore.LookupMode === null ||
-      metaCore.LookupMode === ""
+        metaCore.LookupMode === null ||
+        metaCore.LookupMode === ""
         ? null
         : Number(metaCore.LookupMode);
 
@@ -598,9 +609,9 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     const maybeLookupBridge =
       formData.typeOfInformation === "component7"
         ? {
-            srcFields: Array.isArray(srcFields) ? srcFields : undefined,
-            srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
-          }
+          srcFields: Array.isArray(srcFields) ? srcFields : undefined,
+          srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
+        }
         : {};
 
     return (
@@ -683,9 +694,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
             {/* خطای اعتبارسنجی با ارتفاع ثابت */}
             <p
-              className={`mt-1 text-xs ${
-                errors.formName ? "text-red-500" : "invisible"
-              } h-4`}
+              className={`mt-1 text-xs ${errors.formName ? "text-red-500" : "invisible"
+                } h-4`}
             >
               {errors.formName || "placeholder"}
             </p>
@@ -925,20 +935,20 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             {!hiddenTypesForProgramMeta.includes(
               formData.typeOfInformation
             ) && (
-              <DynamicInput
-                name={t("AddForms.ProgramMetaColumnName")}
-                type="text"
-                value={metaExtra.metaType4}
-                onChange={(e) =>
-                  setMetaExtra((prev) => ({
-                    ...prev,
-                    metaType4: e.target.value, // متن ساده، نه JSON
-                  }))
-                }
-                className="flex-1"
-                labelClassName="text-gray-700 font-medium"
-              />
-            )}
+                <DynamicInput
+                  name={t("AddForms.ProgramMetaColumnName")}
+                  type="text"
+                  value={metaExtra.metaType4}
+                  onChange={(e) =>
+                    setMetaExtra((prev) => ({
+                      ...prev,
+                      metaType4: e.target.value, // متن ساده، نه JSON
+                    }))
+                  }
+                  className="flex-1"
+                  labelClassName="text-gray-700 font-medium"
+                />
+              )}
           </div>
 
           {/* Dynamic controller */}
@@ -983,9 +993,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
             <button
               type="submit"
-              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               disabled={isLoading}
             >
               {isLoading
@@ -993,8 +1002,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   ? t("AddForms.Updating")
                   : t("AddForms.Adding")
                 : isEdit
-                ? t("AddForms.UpdateColumn")
-                : t("AddForms.AddColumn")}
+                  ? t("AddForms.UpdateColumn")
+                  : t("AddForms.AddColumn")}
             </button>
           </div>
         </form>

@@ -1,0 +1,33 @@
+{
+  "GetFrom": "Get from",
+  "SetFieldAsName": "Set field as name",
+  "Modes": "Modes",
+  "WFBoxName": "WFBox Name",
+  "Reserve": "reserve",
+  "DefaultProjects": "Default Projects",
+
+  "InventorySum": "inventory sum",
+  "Inventory1": "inventory 1",
+  "Inventory2": "inventory 2",
+  "Inventory3": "inventory 3",
+  "Inventory4": "inventory 4",
+  "Inventory5": "inventory 5",
+
+  "Unit1Name": "unit 1 name",
+  "Unit2Name": "unit 2 name",
+  "Unit3Name": "unit 3 name",
+  "Unit4Name": "unit 4 name",
+  "Unit5Name": "unit 5 name",
+
+  "Unit1Ratio": "unit 1 ratio",
+  "Unit2Ratio": "unit 2 ratio",
+  "Unit3Ratio": "unit 3 ratio",
+  "Unit4Ratio": "unit 4 ratio",
+  "Unit5Ratio": "unit 5 ratio",
+
+  "Action": {
+    "Additive": "Additive",
+    "Reducer": "Reducer",
+    "Updater": "Updater"
+  }
+}

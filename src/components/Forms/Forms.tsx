@@ -89,6 +89,9 @@ const columnTypeMapping: { [key: string]: number } = {
   component33: 18,
   component34: 23,
   component35: 37,
+  component36: 38, // Inventory
+  component37: 39, // InventoryField
+
 };
 
 const typeOfInformationOptions = [
@@ -126,6 +129,8 @@ const typeOfInformationOptions = [
   { value: "component33", label: "Mepost Selector" },
   { value: "component34", label: "Advance WF" },
   { value: "component35", label: "LookupImage RealValue" },
+  { value: "component36", label: "Inventory" },
+  { value: "component37", label: "Inventory Field" },
 ];
 
 /**
@@ -712,31 +717,31 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
    * ولی فراخوانی آپدیت سرور انجام نمی‌دهیم.
    */
   const handleCellValueChanged = async (params: any) => {
-  if (!params?.data || !params.colDef?.field) return;
+    if (!params?.data || !params.colDef?.field) return;
 
-  const updatedFieldName = params.colDef.field;
-  const updatedFieldValue = params.newValue;
+    const updatedFieldName = params.colDef.field;
+    const updatedFieldValue = params.newValue;
 
-  const updatedData = { ...params.data, [updatedFieldName]: updatedFieldValue };
+    const updatedData = { ...params.data, [updatedFieldName]: updatedFieldValue };
 
-  // به‌روزرسانی در state
-  const rowIndex = entityFields.findIndex((f) => f.ID === updatedData.ID);
-  if (rowIndex !== -1) {
-    const newFields = [...entityFields];
-    newFields[rowIndex] = updatedData;
-    setEntityFields(newFields);
-  }
-  setSelectedRowData(updatedData);
+    // به‌روزرسانی در state
+    const rowIndex = entityFields.findIndex((f) => f.ID === updatedData.ID);
+    if (rowIndex !== -1) {
+      const newFields = [...entityFields];
+      newFields[rowIndex] = updatedData;
+      setEntityFields(newFields);
+    }
+    setSelectedRowData(updatedData);
 
-  // ← اختیاری: ارسال به سرور
-  try {
-    // مثال: اگر API شما updateEntityField دارد
-    // await api.updateEntityField(updatedData);
-  } catch (e) {
-    console.error(e);
-    showAlert("error", undefined, "Error", "Failed to update on server.");
-  }
-};
+    // ← اختیاری: ارسال به سرور
+    try {
+      // مثال: اگر API شما updateEntityField دارد
+      // await api.updateEntityField(updatedData);
+    } catch (e) {
+      console.error(e);
+      showAlert("error", undefined, "Error", "Failed to update on server.");
+    }
+  };
 
 
   /**
@@ -781,7 +786,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     },
   }));
 
-  
+
 
   return (
     <div style={{ width: "100%", boxSizing: "border-box" }}>
@@ -1046,18 +1051,18 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       </DynamicModal>
 
       {/* Add/Edit Field Modal */}
-      <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose}>
+      <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose} >
         <AddColumnForm
           key={addModalKey}
           existingData={editingData}
           isEdit={!!editingData}
           entityTypeId={formData.ID}
           onClose={handleAddModalClose}
+          
           onSave={() => {
             refreshEntityFields();
             handleAddModalClose();
           }}
-          /* 🔗 این دو پراپ را اضافه کردیم تا LookUp بتواند فیلدهای فرمِ جاری را در DesField نشان بدهد */
           srcFields={entityFields.map((f: any) => ({
             ID: f.ID,
             DisplayName: f.DisplayName ?? f.Name ?? "",

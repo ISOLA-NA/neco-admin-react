@@ -52,9 +52,9 @@ export function initEntity(entity: Entity): Rule {
         value.Value == null
           ? ""
           : value.Value.replace(/\n/g, "\\n")
-              .replace(/\r/g, "\\r")
-              .replace(/\t/g, "\\t")
-              .replace(/\f/g, "\\f");
+            .replace(/\r/g, "\\r")
+            .replace(/\t/g, "\\t")
+            .replace(/\f/g, "\\f");
       rule.setting = {
         metaType4: field.metaType4,
         metaType3: field.metaType3,
@@ -994,6 +994,72 @@ export function initEntity(entity: Entity): Rule {
       };
       return rule;
     }
+
+    case 38: {
+      rule.entityField = field;
+      rule.entityValue = value;
+      rule.type = "Inventory";
+      rule.name = "CtrInventory";
+      rule.label = field.DisplayName;
+      rule.title = field.DisplayName;
+      rule.disabled = field.IsForceReadOnly;
+      let items: any[] = [];
+      try {
+        const headers = (field.metaType1 || "").replace("\r", "").split("\n");
+        let row = `{`;
+        for (let key in headers) {
+          row += `"${headers[key].replace("\n", "").replace("\r", "")}": "" ,`;
+        }
+        row = row.substring(0, row.length - 1) + "}";
+        items.push(JSON.parse(row));
+      } catch (_err) {
+      }
+      rule.items = items;                
+      rule.data = field.metaType3 || "";  
+      if (value.Value && value.Value.length > 0) {
+        rule.data = value.Value;
+      }
+      rule.setting = {
+        metaType4: field.metaType4,
+        metaType3: field.metaType3,
+        metaType2: field.metaType2, 
+        metaType1: field.metaType1, 
+        IsRequire: field.IsRequire,
+        IsRtl: field.IsRTL,
+        ID: value.ID,
+        entityFieldId: value.nEntityFieldID,
+        entityId: value.nEntityID,
+        entityTypeId: field.nEntityTypeID,
+        RowCount: field.metaType2, 
+      };
+      return rule;
+    }
+
+    case 39: {
+      rule.entityField = field;
+      rule.entityValue = value;
+      rule.type = "InventoryField";
+      rule.name = "CtrInventoryField";
+      rule.label = field.DisplayName;
+      rule.title = field.DisplayName;
+      rule.placeholder = field.DisplayName;
+      rule.disabled = field.IsForceReadOnly;
+      rule.value = value.Value == null ? field.metaType1 : value.Value;
+      rule.setting = {
+        metaType4: field.metaType4, 
+        metaType3: field.metaType3, 
+        metaType2: field.metaType2, 
+        metaType1: field.metaType1, 
+        IsRequire: field.IsRequire,
+        IsRtl: field.IsRTL,
+        ID: value.ID,
+        entityFieldId: value.nEntityFieldID,
+        entityId: value.nEntityID,
+        entityTypeId: field.nEntityTypeID,
+      };
+      return rule;
+    }
+
     default: {
       rule.entityField = field;
       rule.entityValue = value;

@@ -5,7 +5,7 @@ interface DynamicModalProps {
   onClose: () => void;
   children: React.ReactNode;
   modalClassName?: string;
-  size?: "normal" | "large"; // ← اضافه شد
+  size?: "normal" | "large";
 }
 
 const DynamicModal: React.FC<DynamicModalProps> = ({
@@ -13,45 +13,38 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
   onClose,
   children,
   modalClassName,
-  size = "normal", // مقدار پیش‌فرض
+  size = "normal",
 }) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
-    if (isOpen && dialog) {
-      dialog.showModal();
-    } else if (dialog) {
-      dialog.close();
-    }
+    if (isOpen && dialog) dialog.showModal();
+    else if (dialog) dialog.close();
   }, [isOpen]);
 
-  const handleClose = () => {
-    onClose();
-  };
+  const handleClose = () => onClose();
 
   const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    if (e.target === dialogRef.current) {
-      handleClose();
-    }
+    if (e.target === dialogRef.current) handleClose();
   };
 
-  // کلاس عرض بر اساس سایز
+  // عرض: large ≈ دو برابر، ولی از viewport تجاوز نکند
   const widthClass =
     size === "large"
-      ? "w-full max-w-5xl" // عرض زیاد (دو برابر معمولی)
-      : "w-full max-w-2xl"; // عرض معمولی
+      ? "w-full max-w-[min(1600px,95vw)]"  // ~2x
+      : "w-full max-w-2xl";
 
   return (
     <dialog
       ref={dialogRef}
-      className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm transition-opacity duration-300"
+      className="modal fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity duration-300"
       onClick={handleDialogClick}
     >
       <div
-        className={`modal-box bg-white rounded-lg p-6 relative overflow-y-auto max-h-[80vh] transition-transform duration-300 ease-in-out transform scale-95 sm:scale-100 shadow-lg
-        ${modalClassName ? modalClassName : widthClass}
-        `}
+        className={`modal-box bg-white rounded-lg p-6 relative shadow-lg
+        ${modalClassName ? modalClassName : widthClass}`}
+        // parent را بدون overflow می‌گذاریم تا دکمه‌ی × ثابت بماند
       >
         <button
           type="button"
@@ -62,7 +55,11 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
         >
           ✕
         </button>
-        <div className="mt-2">{children}</div>
+
+        {/* ظرف اسکرول محتوا (افقی + عمودی) */}
+        <div className="mt-2 max-h-[80vh] max-w-full overflow-y-auto overflow-x-auto">
+          {children}
+        </div>
       </div>
     </dialog>
   );
