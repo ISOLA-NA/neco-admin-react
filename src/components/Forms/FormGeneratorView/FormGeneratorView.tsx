@@ -43,6 +43,9 @@ const SubSectionView = React.lazy(() => import("./SubSectionView"));
 const MePostSelectorView = React.lazy(() => import("./MePostSelectorView"));
 const AdvanceWfView = React.lazy(() => import("./AdvanceWfView"));
 const LookupImageRealValue = React.lazy(() => import("./LookUpImageRealValueView"));
+const InventoryView = React.lazy(() => import("./InventoryView"));
+const InventoryFieldView = React.lazy(() => import("./InventoryFieldView"));
+
 
 // ---------------- type → component map ----------------
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
@@ -78,7 +81,9 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   13: SubSectionView,
   18: MePostSelectorView,
   23: AdvanceWfView,
-  37:LookupImageRealValue
+  37: LookupImageRealValue,
+  38: InventoryView,      
+  39: InventoryFieldView,
 };
 
 interface FormGeneratorViewProps {
@@ -159,18 +164,17 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
       aria-modal="true"
     >
       <div
-        className={`bg-white rounded-lg w-full transition-all duration-200 shadow-xl ${
-          isMaximized ? "max-w-7xl h-[90vh]" : "max-w-2xl h-[80vh]"
-        }`}
+        className={`bg-white rounded-lg w-full transition-all duration-200 shadow-xl ${isMaximized ? "max-w-7xl h-[90vh]" : "max-w-2xl h-[80vh]"
+          }`}
         style={
           isMaximized
             ? {}
             : {
-                position: "fixed",
-                left: "50%",
-                top: "50%",
-                transform: `translate(calc(-50% + ${dragOffset.x}px), calc(-50% + ${dragOffset.y}px))`,
-              }
+              position: "fixed",
+              left: "50%",
+              top: "50%",
+              transform: `translate(calc(-50% + ${dragOffset.x}px), calc(-50% + ${dragOffset.y}px))`,
+            }
         }
       >
         {/* Header */}
