@@ -32,6 +32,12 @@
     "CalculatedField": "Calculated Field",
     "ExcelCalculator": "Excel Calculator",
     "Tab": "Tab",
-    "Map": "Map"
+    "Map": "Map",
+    "Inventory": "Inventory",
+    "InventoryField": "Inventory Field",
+    "SrcField": "Src Field",
+    "Operation": "Operation",
+    "FilterText": "Filter Text",
+    "DesField": "Des Field"
   }
 }

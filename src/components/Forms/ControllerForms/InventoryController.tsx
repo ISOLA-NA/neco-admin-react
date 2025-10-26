@@ -8,7 +8,6 @@ import PostPickerList from "./PostPickerList/PostPickerList";
 import DataTable from "../../TableDynamic/DataTable";
 import { useTranslation } from "react-i18next";
 
-
 /* ───────── Types ───────── */
 interface InventoryProps {
   data?: {
@@ -32,6 +31,9 @@ interface InventoryProps {
   /** optional: form fields to use for DesField column in grid */
   srcFields?: Array<{ ID: string | number; DisplayName: string }>;
   srcEntityTypeId?: string | number;
+
+  /** inline validation errors to show inside dialog */
+  externalErrors?: string[];
 }
 
 interface TableRow {
@@ -93,8 +95,9 @@ const InventoryController: React.FC<InventoryProps> = ({
   resetKey,
   srcFields,
   srcEntityTypeId,
+  externalErrors,
 }) => {
-  const { t } = useTranslation("Inventory");
+  const { t, i18n } = useTranslation(["Inventory", "ColumnTypes"]);
 
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
@@ -130,9 +133,9 @@ const InventoryController: React.FC<InventoryProps> = ({
     { value: string; label: string }[]
   >([]);
 
-  /* sync from props */
+  /* sync from props (robust init) */
   useEffect(() => {
-    // grid rows
+    // parse and set grid rows
     let parsedTbl: any[] = [];
     try {
       parsedTbl = JSON.parse(data.metaType4 || "[]");
@@ -142,30 +145,42 @@ const InventoryController: React.FC<InventoryProps> = ({
     setTableData(
       Array.isArray(parsedTbl)
         ? parsedTbl.map((it) => ({
-            ID: toStr(it.ID, genId()),
-            DesFieldID: it.DesFieldID != null ? toStr(it.DesFieldID) : "",
-            FilterOpration: toStr(it.FilterOpration),
-            FilterText: toStr(it.FilterText),
-            SrcFieldID: it.SrcFieldID != null ? toStr(it.SrcFieldID) : "",
-          }))
+          ID: toStr(it.ID, genId()),
+          DesFieldID: it.DesFieldID != null ? toStr(it.DesFieldID) : "",
+          FilterOpration: toStr(it.FilterOpration),
+          FilterText: toStr(it.FilterText),
+          SrcFieldID: it.SrcFieldID != null ? toStr(it.SrcFieldID) : "",
+        }))
         : []
     );
 
+    // meta + metaJson bootstrap
+    const j = parseJson(data.metaTypeJson);
+    const initialMeta2 =
+      data.metaType2 != null
+        ? toStr(data.metaType2)
+        : j?.NameEntityFieldID != null
+          ? toStr(j.NameEntityFieldID)
+          : "";
+
     setMeta({
       metaType1: toStr(data.metaType1),
-      metaType2: toStr(data.metaType2),
+      metaType2: initialMeta2,
       metaType3: toStr(data.metaType3),
       metaType4: data.metaType4 || "[]",
       metaType5: toStr(data.metaType5),
       LookupMode: toStr(data.LookupMode),
     });
 
-    const j = parseJson(data.metaTypeJson);
     setMetaJson({
       Unit1Ratio: 1,
       Action: 0,
       ...j,
-      NameEntityFieldID: data.metaType2 ?? j?.NameEntityFieldID ?? "",
+      // mirror also here for consistency
+      NameEntityFieldID:
+        j?.NameEntityFieldID != null
+          ? j.NameEntityFieldID
+          : initialMeta2 || undefined,
     });
 
     initialModeRef.current = true;
@@ -244,20 +259,36 @@ const InventoryController: React.FC<InventoryProps> = ({
     }
   }, [srcEntityTypeId, data.currentEntityTypeId, getEntityFieldByEntityTypeId]);
 
-  /* keep metaType2 valid vs fields, and mirror to NameEntityFieldID */
+  /* ✅ keep metaType2 VALID but NEVER clobber a good value:
+     - after fields load, if current metaType2 isn't among options,
+       try NameEntityFieldID from metaJson; otherwise fallback to first field. */
   useEffect(() => {
     if (!fields.length) return;
-    setMeta((prev) => {
-      if (prev.metaType2 && !fields.some((f) => String(f.ID) === prev.metaType2)) {
-        const nextVal = fields[0] ? String(fields[0].ID) : "";
-        const next = { ...prev, metaType2: nextVal };
-        const j: MetaJson = { ...metaJson, NameEntityFieldID: nextVal };
-        setMetaJson(j);
-        pushAll({ ...data, ...next }, j);
-        return next;
-      }
-      return prev;
-    });
+    const current = toStr(meta.metaType2);
+    const exists = fields.some((f: any) => String(f.ID) === current);
+    if (exists) return;
+
+    const fromJson = toStr(metaJson.NameEntityFieldID);
+    const existsFromJson = fields.some((f: any) => String(f.ID) === fromJson);
+
+    const nextVal = existsFromJson
+      ? fromJson
+      : fields[0]
+        ? String(fields[0].ID)
+        : "";
+
+    if (nextVal !== current) {
+      setMeta((prev) => ({ ...prev, metaType2: nextVal }));
+      // keep json mirror in sync
+      setMetaJson((prev) => ({ ...prev, NameEntityFieldID: nextVal }));
+      // notify parent as well
+      onMetaChange?.({
+        ...data,
+        ...meta,
+        metaType2: nextVal,
+        metaTypeJson: JSON.stringify({ ...metaJson, NameEntityFieldID: nextVal }),
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
@@ -279,12 +310,12 @@ const InventoryController: React.FC<InventoryProps> = ({
 
   const pushJson = (partial: Partial<MetaJson>) => {
     const nextJson = { ...metaJson, ...partial };
+    setMetaJson(nextJson);
     onMetaChange?.({
       ...data,
       ...meta,
       metaTypeJson: JSON.stringify(nextJson),
     });
-    setMetaJson(nextJson);
   };
 
   // grid serialization
@@ -318,10 +349,10 @@ const InventoryController: React.FC<InventoryProps> = ({
     const next = tableData.map((r) =>
       r.ID === upd.ID
         ? {
-            ...upd,
-            DesFieldID: upd.DesFieldID != null ? String(upd.DesFieldID) : "",
-            SrcFieldID: upd.SrcFieldID != null ? String(upd.SrcFieldID) : "",
-          }
+          ...upd,
+          DesFieldID: upd.DesFieldID != null ? String(upd.DesFieldID) : "",
+          SrcFieldID: upd.SrcFieldID != null ? String(upd.SrcFieldID) : "",
+        }
         : r
     );
     emitTableData(next);
@@ -391,10 +422,13 @@ const InventoryController: React.FC<InventoryProps> = ({
   }, [baseFieldsSig, noDesOptions]);
 
   /* grid columns */
+  // ⚠️ بدون تغییر JSON، هر دو مسیر را امتحان می‌کنیم:
+  // 1) ColumnTypes:ColumnTypes.X   (داخل فایل، آبجکت ColumnTypes)
+  // 2) ColumnTypes:X               (اگر ساختار فایل تخت باشد)
   const columnDefs = useMemo(
     () => [
       {
-        headerName: t("LookUp.Columns.DesField"),
+        headerName: t(["ColumnTypes:ColumnTypes.DesField", "ColumnTypes:DesField"]),
         field: "DesFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
@@ -407,7 +441,7 @@ const InventoryController: React.FC<InventoryProps> = ({
             : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
       },
       {
-        headerName: t("LookUp.Columns.Operation"),
+        headerName: t(["ColumnTypes:ColumnTypes.Operation", "ColumnTypes:Operation"]),
         field: "FilterOpration",
         editable: true,
         cellEditor: "agSelectCellEditor",
@@ -419,12 +453,12 @@ const InventoryController: React.FC<InventoryProps> = ({
           String(p.value ?? ""),
       },
       {
-        headerName: t("LookUp.Columns.FilterText"),
+        headerName: t(["ColumnTypes:ColumnTypes.FilterText", "ColumnTypes:FilterText"]),
         field: "FilterText",
         editable: true,
       },
       {
-        headerName: t("LookUp.Columns.SrcField"),
+        headerName: t(["ColumnTypes:ColumnTypes.SrcField", "ColumnTypes:SrcField"]),
         field: "SrcFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
@@ -437,7 +471,15 @@ const InventoryController: React.FC<InventoryProps> = ({
             : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
       },
     ],
-    [t, fieldsMap, baseFieldsMap, operationList, bothEmpty, noDesOptions]
+    [
+      t,
+      i18n.language, // ✅ با تغییر زبان ستون‌ها دوباره ساخته می‌شن
+      fieldsMap,
+      baseFieldsMap,
+      operationList,
+      bothEmpty,
+      noDesOptions,
+    ]
   );
 
   const selectorOptions = fields.map((f) => ({
@@ -446,258 +488,272 @@ const InventoryController: React.FC<InventoryProps> = ({
   }));
 
   /* ───────── Render ───────── */
- return (
-  <div className="w-full min-w-0" data-inventory-form>
-    <div className="flex flex-col gap-4">
-      {/* Row 1: Get from | Set field as name */}
-      <div className="grid grid-cols-2 gap-4 min-w-0">
-        <DynamicSelector
-          name="getFrom"
-          label={t("GetFrom")}
-          options={entities.map((e) => ({ value: String(e.ID), label: e.Name }))}
-          selectedValue={meta.metaType1}
-          onChange={(e) => pushMeta({ metaType1: e.target.value })}
-        />
-        <DynamicSelector
-          name="setFieldAsName"
-          label={t("SetFieldAsName")}
-          options={selectorOptions}
-          selectedValue={meta.metaType2}
-          onChange={(e) => {
-            const v = e.target.value;
-            setMeta((p) => ({ ...p, metaType2: v }));
-            pushJson({ NameEntityFieldID: v });
-          }}
-        />
-      </div>
+  return (
+    <div className="w-full min-w-0" data-inventory-form>
+      <div className="flex flex-col gap-4">
+        {/* Row 1: Get from | Set field as name */}
+        <div className="grid grid-cols-2 gap-4 min-w-0">
+          <DynamicSelector
+            name="getFrom"
+            label={t("GetFrom")}
+            options={entities.map((e) => ({ value: String(e.ID), label: e.Name }))}
+            selectedValue={meta.metaType1}
+            onChange={(e) => pushMeta({ metaType1: e.target.value /* keep meta2; normalize happens after fields load */ })}
+          />
+          <DynamicSelector
+            name="setFieldAsName"
+            label={t("SetFieldAsName")}
+            options={selectorOptions}
+            selectedValue={meta.metaType2}
+            onChange={(e) => {
+              const v = e.target.value;
+              // update both meta and json mirror
+              pushMeta({ metaType2: v });
+              pushJson({ NameEntityFieldID: v });
+            }}
+          />
+        </div>
 
-      {/* Two-column body */}
-      <div className="grid grid-cols-2 gap-6 min-w-0">
-        {/* LEFT column (Inventories) */}
-        <div className="flex flex-col gap-3 min-w-0">
-          {/* L1: inventory sum | inventory 1 | inventory 2 */}
-          <div className="grid grid-cols-3 gap-3 min-w-0">
-            <DynamicSelector
-              name="inventorySum"
-              label={t("InventorySum")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.InventorySumEntityFieldID)}
-              onChange={(e) => pushJson({ InventorySumEntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="inventory1"
-              label={t("Inventory1")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Inventory1EntityFieldID)}
-              onChange={(e) => pushJson({ Inventory1EntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="inventory2"
-              label={t("Inventory2")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Inventory2EntityFieldID)}
-              onChange={(e) => pushJson({ Inventory2EntityFieldID: e.target.value })}
-            />
-          </div>
+        {/* Two-column body */}
+        <div className="grid grid-cols-2 gap-6 min-w-0">
+          {/* LEFT column (Inventories) */}
+          <div className="flex flex-col gap-3 min-w-0">
+            {/* L1: inventory sum | inventory 1 | inventory 2 */}
+            <div className="grid grid-cols-3 gap-3 min-w-0">
+              <DynamicSelector
+                name="inventorySum"
+                label={t("InventorySum")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.InventorySumEntityFieldID)}
+                onChange={(e) => pushJson({ InventorySumEntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="inventory1"
+                label={t("Inventory1")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Inventory1EntityFieldID)}
+                onChange={(e) => pushJson({ Inventory1EntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="inventory2"
+                label={t("Inventory2")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Inventory2EntityFieldID)}
+                onChange={(e) => pushJson({ Inventory2EntityFieldID: e.target.value })}
+              />
+            </div>
 
-          {/* L2: inventory 3 | inventory 4 | inventory 5 */}
-          <div className="grid grid-cols-3 gap-3 min-w-0">
-            <DynamicSelector
-              name="inventory3"
-              label={t("Inventory3")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Inventory3EntityFieldID)}
-              onChange={(e) => pushJson({ Inventory3EntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="inventory4"
-              label={t("Inventory4")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Inventory4EntityFieldID)}
-              onChange={(e) => pushJson({ Inventory4EntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="inventory5"
-              label={t("Inventory5")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Inventory5EntityFieldID)}
-              onChange={(e) => pushJson({ Inventory5EntityFieldID: e.target.value })}
-            />
-          </div>
+            {/* L2: inventory 3 | inventory 4 | inventory 5 */}
+            <div className="grid grid-cols-3 gap-3 min-w-0">
+              <DynamicSelector
+                name="inventory3"
+                label={t("Inventory3")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Inventory3EntityFieldID)}
+                onChange={(e) => pushJson({ Inventory3EntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="inventory4"
+                label={t("Inventory4")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Inventory4EntityFieldID)}
+                onChange={(e) => pushJson({ Inventory4EntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="inventory5"
+                label={t("Inventory5")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Inventory5EntityFieldID)}
+                onChange={(e) => pushJson({ Inventory5EntityFieldID: e.target.value })}
+              />
+            </div>
 
-          {/* L3: reserve | Action radios (horiz) */}
-          <div className="grid grid-cols-3 gap-3 min-w-0 items-end">
-            <DynamicSelector
-              name="reserve"
-              label={t("Reserve")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.ReserveEntityFieldID)}
-              onChange={(e) => pushJson({ ReserveEntityFieldID: e.target.value })}
-            />
-            <div className="col-span-2 min-w-0">
-              <div className="flex items-center gap-1 pt-6">
-                {[
-                  { txt: "Additive", val: 0 as 0 },
-                  { txt: "Reducer",  val: 1 as 1 },
-                  { txt: "Updater",  val: 2 as 2 },
-                ].map((o) => (
-                  <label key={o.val} className="inline-flex items-center gap-1 text-xs">
-                    <input
-                      type="radio"
-                      className="h-3 w-3"
-                      name="inventoryAction"
-                      value={o.val}
-                      checked={(metaJson.Action ?? 0) === o.val}
-                      onChange={() => pushJson({ Action: o.val })}
-                    />
-                    <span>{o.txt}</span>
-                  </label>
-                ))}
+            {/* L3: reserve | Action radios (horiz) */}
+            <div className="grid grid-cols-3 gap-3 min-w-0 items-end">
+              <DynamicSelector
+                name="reserve"
+                label={t("Reserve")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.ReserveEntityFieldID)}
+                onChange={(e) => pushJson({ ReserveEntityFieldID: e.target.value })}
+              />
+              <div className="col-span-2 min-w-0">
+                <div className="flex items-center gap-1 pt-6">
+                  {[
+                    { txt: "Additive", val: 0 as 0 },
+                    { txt: "Reducer", val: 1 as 1 },
+                    { txt: "Updater", val: 2 as 2 },
+                  ].map((o) => (
+                    <label key={o.val} className="inline-flex items-center gap-1 text-xs">
+                      <input
+                        type="radio"
+                        className="h-3 w-3"
+                        name="inventoryAction"
+                        value={o.val}
+                        checked={(metaJson.Action ?? 0) === o.val}
+                        onChange={() => pushJson({ Action: o.val })}
+                      />
+                      <span>{o.txt}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
+            </div>
+          </div>
+
+          {/* RIGHT column (Units) — سه‌تایی‌ها */}
+          <div className="flex flex-col gap-3 min-w-0 pr-2">
+            {/* U1: unit 1 name | unit 2 name | unit 3 name */}
+            <div className="grid grid-cols-3 gap-3 min-w-0">
+              <DynamicSelector
+                name="unit1name"
+                label={t("Unit1Name")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit1EntityFieldID)}
+                onChange={(e) => pushJson({ Unit1EntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="unit2name"
+                label={t("Unit2Name")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit2EntityFieldID)}
+                onChange={(e) => pushJson({ Unit2EntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="unit3name"
+                label={t("Unit3Name")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit3EntityFieldID)}
+                onChange={(e) => pushJson({ Unit3EntityFieldID: e.target.value })}
+              />
+            </div>
+
+            {/* U2: unit 4 name | unit 5 name | unit 2 ratio */}
+            <div className="grid grid-cols-3 gap-3 min-w-0">
+              <DynamicSelector
+                name="unit4name"
+                label={t("Unit4Name")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit4EntityFieldID)}
+                onChange={(e) => pushJson({ Unit4EntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="unit5name"
+                label={t("Unit5Name")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit5EntityFieldID)}
+                onChange={(e) => pushJson({ Unit5EntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="unit2ratio"
+                label={t("Unit2Ratio")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit2RatioEntityFieldID)}
+                onChange={(e) => pushJson({ Unit2RatioEntityFieldID: e.target.value })}
+              />
+            </div>
+
+            {/* U3: unit 3 ratio | unit 4 ratio | unit 5 ratio */}
+            <div className="grid grid-cols-3 gap-3 min-w-0">
+              <DynamicSelector
+                name="unit3ratio"
+                label={t("Unit3Ratio")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit3RatioEntityFieldID)}
+                onChange={(e) => pushJson({ Unit3RatioEntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="unit4ratio"
+                label={t("Unit4Ratio")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit4RatioEntityFieldID)}
+                onChange={(e) => pushJson({ Unit4RatioEntityFieldID: e.target.value })}
+              />
+              <DynamicSelector
+                name="unit5ratio"
+                label={t("Unit5Ratio")}
+                options={selectorOptions}
+                selectedValue={toStr(metaJson.Unit5RatioEntityFieldID)}
+                onChange={(e) => pushJson({ Unit5RatioEntityFieldID: e.target.value })}
+              />
             </div>
           </div>
         </div>
 
-        {/* RIGHT column (Units) — سه‌تایی‌ها */}
-        <div className="flex flex-col gap-3 min-w-0 pr-2">
-          {/* U1: unit 1 name | unit 2 name | unit 3 name */}
-          <div className="grid grid-cols-3 gap-3 min-w-0">
-            <DynamicSelector
-              name="unit1name"
-              label={t("Unit1Name")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit1EntityFieldID)}
-              onChange={(e) => pushJson({ Unit1EntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="unit2name"
-              label={t("Unit2Name")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit2EntityFieldID)}
-              onChange={(e) => pushJson({ Unit2EntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="unit3name"
-              label={t("Unit3Name")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit3EntityFieldID)}
-              onChange={(e) => pushJson({ Unit3EntityFieldID: e.target.value })}
-            />
-          </div>
-
-          {/* U2: unit 4 name | unit 5 name | unit 2 ratio */}
-          <div className="grid grid-cols-3 gap-3 min-w-0">
-            <DynamicSelector
-              name="unit4name"
-              label={t("Unit4Name")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit4EntityFieldID)}
-              onChange={(e) => pushJson({ Unit4EntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="unit5name"
-              label={t("Unit5Name")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit5EntityFieldID)}
-              onChange={(e) => pushJson({ Unit5EntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="unit2ratio"
-              label={t("Unit2Ratio")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit2RatioEntityFieldID)}
-              onChange={(e) => pushJson({ Unit2RatioEntityFieldID: e.target.value })}
-            />
-          </div>
-
-          {/* U3: unit 3 ratio | unit 4 ratio | unit 5 ratio */}
-          <div className="grid grid-cols-3 gap-3 min-w-0">
-            <DynamicSelector
-              name="unit3ratio"
-              label={t("Unit3Ratio")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit3RatioEntityFieldID)}
-              onChange={(e) => pushJson({ Unit3RatioEntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="unit4ratio"
-              label={t("Unit4Ratio")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit4RatioEntityFieldID)}
-              onChange={(e) => pushJson({ Unit4RatioEntityFieldID: e.target.value })}
-            />
-            <DynamicSelector
-              name="unit5ratio"
-              label={t("Unit5Ratio")}
-              options={selectorOptions}
-              selectedValue={toStr(metaJson.Unit5RatioEntityFieldID)}
-              onChange={(e) => pushJson({ Unit5RatioEntityFieldID: e.target.value })}
+        {/* Row: Modes (left) | WFBoxName (right) */}
+        <div className="grid grid-cols-2 gap-6 min-w-0 items-end">
+          <DynamicSelector
+            name="modes"
+            label={t("Modes")}
+            options={modesList}
+            selectedValue={meta.LookupMode}
+            onChange={(e) => pushMeta({ LookupMode: e.target.value })}
+          />
+          <div className="min-w-0">
+            <label className="block text-sm font-medium">{t("WFBoxName")}</label>
+            <input
+              className="w-full rounded border px-2 py-1"
+              value={metaJson.InventorWfBoxName ?? ""}
+              onChange={(e) => pushJson({ InventorWfBoxName: e.target.value })}
             />
           </div>
         </div>
-      </div>
 
-      {/* Row: Modes (left) | WFBoxName (right) */}
-      <div className="grid grid-cols-2 gap-6 min-w-0 items-end">
-        <DynamicSelector
-          name="modes"
-          label={t("Modes")}
-          options={modesList}
-          selectedValue={meta.LookupMode}
-          onChange={(e) => pushMeta({ LookupMode: e.target.value })}
-        />
+        {/* Row: PostPickerList (full width, its own row) */}
         <div className="min-w-0">
-          <label className="block text-sm font-medium">{t("WFBoxName")}</label>
-          <input
-            className="w-full rounded border px-2 py-1"
-            value={metaJson.InventorWfBoxName ?? ""}
-            onChange={(e) => pushJson({ InventorWfBoxName: e.target.value })}
+          <PostPickerList
+            key={`pp-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`}
+            resetKey={resetKey}
+            sourceType="projects"
+            initialMetaType={meta.metaType5}
+            data={{ metaType5: meta.metaType5 || undefined }}
+            metaFieldKey="metaType5"
+            // propagate up so AddColumnForm sees updated metaType5
+            onMetaChange={(o) => {
+              const next = { ...meta, ...o };
+              pushMeta(next);
+            }}
+            label={t("DefaultProjects")}
+            fullWidth
           />
         </div>
-      </div>
 
-      {/* Row: PostPickerList (full width, its own row) */}
-      <div className="min-w-0">
-        <PostPickerList
-          key={`pp-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`}
-          resetKey={resetKey}
-          sourceType="projects"
-          initialMetaType={meta.metaType5}
-          data={{ metaType5: meta.metaType5 || undefined }}
-          metaFieldKey="metaType5"
-          onMetaChange={(o) => setMeta((p) => ({ ...p, ...o }))}
-          label={t("DefaultProjects")}
-          fullWidth
-        />
-      </div>
-
-      {/* Table */}
-      <div className="mt-2" style={{ height: 300, overflowY: "auto" }}>
-        <DataTable
-          key={`dt-${fieldsSig}-${baseFieldsSig}-${noDesOptions ? "noDes" : "hasDes"}-${bothEmpty ? "srcEmpty" : "srcHas"}`}
-          columnDefs={columnDefs}
-          rowData={tableData}
-          showAddIcon
-          onAdd={addRow}
-          onCellValueChanged={onCellChange}
-          domLayout="normal"
-          showSearch={false}
-          showEditIcon={false}
-          showDeleteIcon={false}
-          showDuplicateIcon={false}
-          onRowDoubleClick={() => {}}
-          gridOptions={{
-            singleClickEdit: true,
-            rowSelection: "single",
-            stopEditingWhenCellsLoseFocus: true,
-          }}
-        />
+        {/* Table */}
+        <div className="mt-2" style={{ height: 300, overflowY: "auto" }}>
+          <DataTable
+            key={`dt-${i18n.language}-${fieldsSig}-${baseFieldsSig}-${noDesOptions ? "noDes" : "hasDes"}-${bothEmpty ? "srcEmpty" : "srcHas"}`}
+            columnDefs={columnDefs}
+            rowData={tableData}
+            showAddIcon
+            onAdd={addRow}
+            onCellValueChanged={onCellChange}
+            domLayout="normal"
+            showSearch={false}
+            showEditIcon={false}
+            showDeleteIcon={false}
+            showDuplicateIcon={false}
+            onRowDoubleClick={() => { }}
+            gridOptions={{
+              singleClickEdit: true,
+              rowSelection: "single",
+              stopEditingWhenCellsLoseFocus: true,
+            }}
+          />
+        </div>
+        {/* Inline errors inside the dialog */}
+        {externalErrors && externalErrors.length > 0 && (
+          <div className="mb-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm">
+            <p className="font-medium text-red-700">Please fix the following:</p>
+            <ul className="mt-1 list-disc pl-5 text-red-600">
+              {externalErrors.map((e, i) => (
+                <li key={i}>{e}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
-  </div>
-);
-
-
+  );
 };
 
 export default InventoryController;

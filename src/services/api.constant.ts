@@ -102,6 +102,7 @@ export const apiConst = Object.freeze({
   insertEntityField: "api/EntityField/Insert",
   updateEntityField: "api/EntityField/Update",
   deleteEntityField: "api/EntityField/Delete",
+  // getTableTransmittal: "api/EntityType/GetAll",
   getTableTransmittal: "api/EntityType/GetAllComplete",
   insertEntityType: "api/EntityType/Insert",
   deleteEntityType: "api/EntityType/Delete",

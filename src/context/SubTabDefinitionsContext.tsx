@@ -114,7 +114,7 @@ export const SubTabDefinitionsProvider: React.FC<{
     };
 
     const nameIdx = arr.findIndex(
-      (c) => (c.field ?? "").toString().toLowerCase() === "name"
+      (c) => (c.field ?? "").toString().toLowerCase() === "persianname"
     );
     if (nameIdx === -1) return [...arr, faCol];
 
@@ -557,11 +557,15 @@ export const SubTabDefinitionsProvider: React.FC<{
           // اطمینان از وجود PersianName به‌صورت رشتهٔ خالی (نه null/undefined)
           return data.map((r: any) => ({ ...r, PersianName: r.PersianName ?? "" }));
         },
-        columnDefs: withPersianName(
-          [
+        columnDefs:          [
             {
               headerName: t("DataTable.Headers.Name"),
               field: "Name",
+              filter: "agTextColumnFilter",
+            },
+             {
+              headerName: t("DataTable.Headers.Name"),
+              field: "PersianName",
               filter: "agTextColumnFilter",
             },
             // PersianName اینجا خودکار و دقیقاً بعد از Name درج می‌شود (ستون دوم)
@@ -581,8 +585,7 @@ export const SubTabDefinitionsProvider: React.FC<{
               filter: "agTextColumnFilter",
             },
           ],
-          t("DataTable.Headers.PersianName")
-        ),
+    
         iconVisibility: {
           showAdd: true,
           showEdit: true,
@@ -650,18 +653,24 @@ export const SubTabDefinitionsProvider: React.FC<{
       },
       Forms: {
         endpoint: async () => {
-          const data = await api.getTableTransmittal();
-          return data.map((r: any) => ({ ...r, PersianName: r.PersianName ?? "" }));
+         return await api.getTableTransmittal();
+          // return data.map((r: any) => ({
+          //   // نرمال‌سازی نام‌ها
+          //   Name: r.Name ?? r.name ?? r.EntityTypeName ?? "",
+          //   PersianName: r.PersianName ?? r.persianName ?? "",
+          //   ...r,
+          // }));
         },
-        columnDefs: withPersianName([
-          { headerName: t("DataTable.Headers.Name"), field: "Name", filter: "agTextColumnFilter", sortable: true },
-          { headerName: t("DataTable.Headers.Transmittal"), field: "IsDoc", filter: "agTextColumnFilter", sortable: true },
-          { headerName: t("DataTable.Headers.CatA"), field: "EntityCateAName", filter: "agTextColumnFilter", sortable: true },
-          { headerName: t("DataTable.Headers.CatB"), field: "EntityCateBName", filter: "agTextColumnFilter", sortable: true },
-        ], t("DataTable.Headers.PersianName")),
+        columnDefs: 
+          [
+            { headerName: t("DataTable.Headers.Name"), field: "Name", filter: "agTextColumnFilter", sortable: true },
+            { headerName: t("DataTable.Headers.PersianName"), field: "PersianName", filter: "agTextColumnFilter", sortable: true },
+            { headerName: t("DataTable.Headers.Transmittal"), field: "IsDoc", filter: "agTextColumnFilter", sortable: true },
+            { headerName: t("DataTable.Headers.CatA"), field: "EntityCateAName", filter: "agTextColumnFilter", sortable: true },
+            { headerName: t("DataTable.Headers.CatB"), field: "EntityCateBName", filter: "agTextColumnFilter", sortable: true },
+          ],
         iconVisibility: { showAdd: true, showEdit: true, showDelete: true, showDuplicate: true },
-      }
-      ,
+      },
 
       Categories: {
         endpoint: (params?: { categoryType: "cata" | "catb" }) =>

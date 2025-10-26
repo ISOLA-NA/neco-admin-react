@@ -258,6 +258,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+  const [inventoryErrors, setInventoryErrors] = useState<string[]>([]);
 
   const [metaCore, setMetaCore] = useState<MetaCore>({
     metaType1: "",
@@ -372,6 +373,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       // 🔁 هر بار نوع اطلاعات عوض شد، کلید ریست را افزایش بده
       setControllerResetKey((k) => k + 1);
     }
+    setInventoryErrors([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.typeOfInformation]);
 
@@ -461,6 +463,52 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     // اطمینان از معتبر بودن metaType4:
     const normalizedMetaType4 =
       metaExtra.metaType4 != null ? String(metaExtra.metaType4) : "[]";
+
+
+    // ... داخل handleSubmit، درست بعد از چک‌های nameTrim / pNameTrim
+    // ✅ ولیدیشن Inventory (نمایش خطاها داخل خود دیالوگ کنترلر)
+if (formData.typeOfInformation === "component36") {
+  let j: any = {};
+  try {
+    j = metaCore.metaTypeJson ? JSON.parse(metaCore.metaTypeJson) : {};
+  } catch {
+    j = {};
+  }
+
+  const isEmpty = (v: any) =>
+    v == null || String(v).trim() === "" || String(v) === "0";
+
+  const missingMsgs: string[] = [];
+  // مورد نیازها: inventorysum - reserve - inventory1 - wfboxname
+  if (isEmpty(j.InventorySumEntityFieldID)) {
+    missingMsgs.push("Inventory Sum is required.");
+  }
+  if (isEmpty(j.ReserveEntityFieldID)) {
+    missingMsgs.push("Reserve is required.");
+  }
+  if (isEmpty(j.Inventory1EntityFieldID)) {
+    missingMsgs.push("Inventory 1 is required.");
+  }
+  if (isEmpty(j.InventorWfBoxName)) {
+    missingMsgs.push("WF Box Name is required.");
+  }
+
+  // اطمینان از SetFieldAsName (از metaCore.metaType2 یا از metaTypeJson)
+  const setFieldAsName = metaCore.metaType2 ?? j.NameEntityFieldID;
+  if (isEmpty(setFieldAsName)) {
+    missingMsgs.push("Set Field As Name is required.");
+  }
+
+  if (missingMsgs.length) {
+    setInventoryErrors(missingMsgs); // نمایش داخل خود کنترلر
+    setIsLoading(false);
+    return; // از submit خارج شو
+  } else {
+    setInventoryErrors([]);
+  }
+}
+
+
 
     // ✅ ساخت payload
     const payload: any = {
@@ -614,11 +662,18 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         }
         : {};
 
+    const maybeInventoryErrors =
+      formData.typeOfInformation === "component36"
+        ? { externalErrors: inventoryErrors }
+        : {};
+
+
     return (
       <SelectedComponent
         {...baseProps}
         {...maybeExtra}
         {...maybeLookupBridge}
+        {...maybeInventoryErrors}
       />
     );
   };
@@ -985,6 +1040,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 setErrors({});
                 setMetaCore(DEFAULT_META_CORE);
                 setMetaExtra(DEFAULT_META_EXTRA);
+                setInventoryErrors([]);
                 onClose();
               }}
             >
