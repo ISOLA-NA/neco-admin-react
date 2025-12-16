@@ -20,7 +20,7 @@ const httpClientFile = axios.create({
 // اضافه کردن interceptor برای افزودن هدر Authorization
 httpClientFile.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("admin_token");
     if (token) {
       // اطمینان از اینکه headers تعریف شده است
       config.headers = config.headers || {};
@@ -39,7 +39,11 @@ httpClientFile.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // در صورت دریافت خطای 401، توکن را حذف کرده و به صفحه لاگین هدایت کنید
-      Cookies.remove("token");
+      // Cookies.remove("token");
+      // window.location.href = "/login";
+      Cookies.remove("admin_token", { path: "/" });
+      Cookies.remove("userId", { path: "/" });
+      Cookies.remove("authenticated", { path: "/" });
       window.location.href = "/login";
     }
     return Promise.reject(error);

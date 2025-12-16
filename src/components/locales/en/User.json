@@ -3,7 +3,7 @@
       "Code": "Code",
       "Username": "Username",
       "Name": "Name",
-      "Family": "Family",
+      "Family": "LastName",
       "Password": "Password",
       "ConfirmPassword":"Confirm Password",
       "ChangePassword": "Change Password",

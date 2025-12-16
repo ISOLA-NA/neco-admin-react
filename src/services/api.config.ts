@@ -36,7 +36,7 @@ function buildAcceptLanguage(lngRaw: string | undefined): string {
 httpClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Authorization
-    const token = Cookies.get("token");
+    const token = Cookies.get("admin_token");
     if (token) {
       config.headers = config.headers || {};
       (config.headers as any)["Authorization"] = `Bearer ${token}`;
@@ -66,7 +66,11 @@ httpClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      Cookies.remove("token");
+      // Cookies.remove("token");
+      // window.location.href = "/login";
+      Cookies.remove("admin_token", { path: "/" });
+      Cookies.remove("userId", { path: "/" });
+      Cookies.remove("authenticated", { path: "/" });
       window.location.href = "/login";
     }
     return Promise.reject(error);

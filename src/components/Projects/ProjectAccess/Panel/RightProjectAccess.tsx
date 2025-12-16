@@ -22,7 +22,7 @@ const RightProjectAccess: React.FC<RightProps> = ({
   const READ_MODE = 1;
   const WRITE_MODE = 2;
 
-  const isRead = selectedRow.AccessMode === READ_MODE;
+  const isRead = selectedRow.AccessMode === WRITE_MODE;
   const modeLabel = isRead
     ? t("ProjectAccess.Read", { defaultValue: "Read" })
     : t("ProjectAccess.Write", { defaultValue: "Write" });

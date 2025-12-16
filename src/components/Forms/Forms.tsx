@@ -55,7 +55,7 @@ interface FormsCommand1Props {
 
 const columnTypeMapping: { [key: string]: number } = {
   component1: 15,
-  component2: 1,
+  component2: 40,
   component3: 2,
   component4: 3,
   component5: 4,

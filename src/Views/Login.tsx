@@ -104,16 +104,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         }
 
         const { MyUser } = response;
-        Cookies.set("token", `${MyUser.TTKK}:${MyUser.Username}`, {
+        // Cookies.set("token", `${MyUser.TTKK}:${MyUser.Username}`, {
+        //   expires: defaultTokenHours / 24,
+        // });
+        Cookies.set("admin_token", `${MyUser.TTKK}:${MyUser.Username}`, {
           expires: defaultTokenHours / 24,
-        });
-        Cookies.set("userId", MyUser.ID.toString(), {
-          expires: defaultTokenHours / 24,
+          path: "/",
         });
 
+        // Cookies.set("userId", MyUser.ID.toString(), {
+        //   expires: defaultTokenHours / 24,
+        // });
+
         if (MyUser.userType === 6 || MyUser.userType === 8) {
+          // Cookies.set("authenticated", "true", {
+          //   expires: defaultTokenHours / 24,
+          // });
+
           Cookies.set("authenticated", "true", {
             expires: defaultTokenHours / 24,
+            path: "/",
           });
           onLogin();
           showAlert(

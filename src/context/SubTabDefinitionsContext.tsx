@@ -61,7 +61,7 @@ export const SubTabDefinitionsProvider: React.FC<{
   const [allRoles, setAllRoles] = useState<any[]>([]);
 
   useEffect(() => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("admin_token");
     if (!token) return;
 
     const fetchInitialData = async () => {
@@ -808,7 +808,7 @@ export const SubTabDefinitionsProvider: React.FC<{
   ]);
 
   const fetchDataForSubTab = async (subTabName: string, params?: any) => {
-    const token = Cookies.get("token");
+    const token = Cookies.get("admin_token");
     if (!token) return [];
 
     const definition = subTabDefinitions[subTabName];

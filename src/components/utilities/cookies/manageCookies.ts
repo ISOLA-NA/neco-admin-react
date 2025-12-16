@@ -4,14 +4,14 @@ export const setCookie = (
   ttkk: string,
   timeExpire: Date = new Date(new Date().getTime() + 60 * 60 * 1000)
 ) => {
-  Cookies.set("token", ttkk, { expires: timeExpire });
+  Cookies.set("admin_token", ttkk, { expires: timeExpire, path: "/" });
 };
 
-export const getCookie = (ttkk: string = "token") => {
-    return Cookies.get(ttkk) || null;
-  };
-  
-
-export const removeCookie = (ttkk: string = "token") => {
-  Cookies.remove(ttkk);
+export const getCookie = (ttkk: string = "admin_token") => {
+  return Cookies.get(ttkk) || null;
 };
+
+export const removeCookie = (ttkk: string = "admin_token") => {
+  Cookies.remove(ttkk, { path: "/" });
+};
+

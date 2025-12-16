@@ -4,7 +4,7 @@ import { Rule } from "../../services/formGeneratorHelper";
 
 // وارد کردن کامپوننت‌های داینامیک
 import CtrTextBox from "./ControllerForms/TextController";
-import CtrTextArea from "./ControllerForms/RichTextController";
+import CtrRichText from "./ControllerForms/RichTextController";
 import CtrRadio from "./ControllerForms/ChoiceController";
 import CtrInputNumber from "./ControllerForms/NumberController";
 import CtrSelect from "./ControllerForms/ChoiceController";
@@ -39,7 +39,7 @@ interface FormGProps {
 
 const componentMapping: { [key: string]: React.FC<any> } = {
   CtrTextBox,
-  CtrTextArea,
+  CtrRichText,
   CtrRadio,
   CtrInputNumber,
   CtrSelect,

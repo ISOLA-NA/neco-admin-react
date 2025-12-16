@@ -19,6 +19,8 @@ interface LookUpAdvanceTableProps {
     LookupMode?: string | number | null;
     CountInReject?: boolean;
     BoolMeta1?: boolean;
+    /** JSON متا؛ اینجا هم access و هم CombinedEntityType می‌آیند */
+    metaTypeJson?: string | null;
     /** (اختیاری) ID نوع انتیتی فرم فعلی برای تأمین DesField وقتی srcFields پاس نشده */
     currentEntityTypeId?: string | number | null;
   };
@@ -74,6 +76,34 @@ const rowsEqual = (a: TableRow[], b: TableRow[]) => {
   return true;
 };
 
+/* ─────────────────────────────
+   دسترسی‌ها (چک‌باکس‌ها)
+   ───────────────────────────── */
+
+const ACCESS_FLAGS = [
+  { key: "AddByActor", labelKey: "AdvanceLookupAdvanceTable.Access.AddByActor" },
+  { key: "EditByActor", labelKey: "AdvanceLookupAdvanceTable.Access.EditByActor" },
+  { key: "DeleteByActor", labelKey: "AdvanceLookupAdvanceTable.Access.DeleteByActor" },
+  { key: "AddByApproval", labelKey: "AdvanceLookupAdvanceTable.Access.AddByApproval" },
+  { key: "EditByApproval", labelKey: "AdvanceLookupAdvanceTable.Access.EditByApproval" },
+  { key: "DeleteByApproval", labelKey: "AdvanceLookupAdvanceTable.Access.DeleteByApproval" }
+];
+
+const buildAccessString = (accessState: Record<string, boolean>) =>
+  ACCESS_FLAGS.filter(a => accessState[a.key])
+    .map(a => a.key + "-")
+    .join("");
+
+const parseMetaJson = (metaTypeJson?: string | null): any => {
+  if (!metaTypeJson) return {};
+  try {
+    const obj = JSON.parse(metaTypeJson);
+    return typeof obj === "object" && obj !== null ? obj : {};
+  } catch {
+    return {};
+  }
+};
+
 const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   data = {},
   onMetaChange,
@@ -111,9 +141,65 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   >([]);
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
+  /* ───── metaTypeJson + access ───── */
+  const [metaJsonObj, setMetaJsonObj] = useState<any>(() =>
+    parseMetaJson(data.metaTypeJson)
+  );
+
+  const [accessState, setAccessState] = useState<Record<string, boolean>>(() => {
+    const accessStr =
+      typeof metaJsonObj?.access === "string" ? metaJsonObj.access : "";
+    const st: Record<string, boolean> = {};
+    ACCESS_FLAGS.forEach((f) => {
+      st[f.key] = accessStr.includes(f.key + "-");
+    });
+    return st;
+  });
+
+  const emitMetaChange = (nextMeta: any, nextMetaJsonObj?: any) => {
+    const jsonObj = nextMetaJsonObj ?? metaJsonObj ?? {};
+    const metaTypeJsonStr = JSON.stringify(jsonObj);
+    onMetaChange?.({
+      ...data,
+      ...nextMeta,
+      CountInReject: removeSameName,
+      BoolMeta1: oldLookup,
+      metaTypeJson: metaTypeJsonStr,
+    });
+  };
+
+  const updateAccess = (key: string, checked: boolean) => {
+    const newAccessState = { ...accessState, [key]: checked };
+    setAccessState(newAccessState);
+
+    const accessStr = buildAccessString(newAccessState);
+    const newMetaJson = { ...(metaJsonObj || {}), access: accessStr };
+    setMetaJsonObj(newMetaJson);
+
+    emitMetaChange(meta, newMetaJson);
+  };
+
+  const renderAccessCheckboxes = () => (
+    <div className="grid grid-cols-2 gap-3 p-3 rounded-lg shadow-sm border border-gray-200">
+      {ACCESS_FLAGS.map((item) => (
+        <label
+          key={item.key}
+          className="flex items-center gap-2 text-sm font-medium text-gray-700"
+        >
+          <input
+            type="checkbox"
+            checked={!!accessState[item.key]}
+            onChange={(e) => updateAccess(item.key, e.target.checked)}
+            className="h-4 w-4 accent-pink-500 cursor-pointer"
+          />
+          <span>{t(item.labelKey)}</span>
+        </label>
+      ))}
+    </div>
+  );
+
   // ─── Sync from props.data (فقط در صورت تغییر واقعی) ───
   useEffect(() => {
-    // هدف: قطع حلقه‌های غیرضروری
     const nextMeta = {
       metaType1: toStr(data.metaType1),
       metaType2: toStr(data.metaType2),
@@ -140,7 +226,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         }))
       : [];
 
-    // فقط وقتی تغییر واقعی داریم، state را آپدیت کن
     const metaChanged = !shallowEqualMeta(meta, nextMeta);
     const rowsChanged = !rowsEqual(tableData, nextRows);
 
@@ -150,13 +235,22 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // CountInReject / BoolMeta1
     if (removeSameName !== !!data.CountInReject)
       setRemoveSameName(!!data.CountInReject);
-    if (oldLookup !== !!data.BoolMeta1)
-      setOldLookup(!!data.BoolMeta1);
+    if (oldLookup !== !!data.BoolMeta1) setOldLookup(!!data.BoolMeta1);
 
     if (metaChanged) {
-      // اجازه بده اثر LookupMode فقط یک‌بار اعمال شود
       initialModeRef.current = true;
     }
+
+    // sync metaTypeJson + access
+    const mj = parseMetaJson(data.metaTypeJson);
+    setMetaJsonObj(mj);
+    const accessStr = typeof mj?.access === "string" ? mj.access : "";
+    const nextAccess: Record<string, boolean> = {};
+    ACCESS_FLAGS.forEach((f) => {
+      nextAccess[f.key] = accessStr.includes(f.key + "-");
+    });
+    setAccessState(nextAccess);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
@@ -191,7 +285,11 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
 
   // ─── After modesList loads, apply initial LookupMode once ───
   useEffect(() => {
-    if (initialModeRef.current && modesList.length > 0 && data.LookupMode != null) {
+    if (
+      initialModeRef.current &&
+      modesList.length > 0 &&
+      data.LookupMode != null
+    ) {
       const mv = String(data.LookupMode);
       if (modesList.some((m) => m.value === mv)) {
         setMeta((prev) => {
@@ -249,17 +347,15 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   // ─── Helpers to push meta/table ───
   const pushMeta = (patch: Partial<typeof meta>) => {
     const next = { ...meta, ...patch };
-    if (shallowEqualMeta(meta, next)) return; // ✋ تغییر واقعی نداریم
+    if (shallowEqualMeta(meta, next)) return;
     setMeta(next);
-    onMetaChange?.({
-      ...data,
-      ...next,
-      CountInReject: removeSameName,
-      BoolMeta1: oldLookup,
-    });
+    emitMetaChange(next);
   };
 
-  const toggleCheckbox = (key: "removeSameName" | "oldLookup", val: boolean) => {
+  const toggleCheckbox = (
+    key: "removeSameName" | "oldLookup",
+    val: boolean
+  ) => {
     if (key === "removeSameName") {
       if (removeSameName === val) return;
       setRemoveSameName(val);
@@ -267,21 +363,18 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       if (oldLookup === val) return;
       setOldLookup(val);
     }
-    onMetaChange?.({
-      ...data,
-      ...meta,
-      CountInReject: key === "removeSameName" ? val : removeSameName,
-      BoolMeta1: key === "oldLookup" ? val : oldLookup,
-    });
+    emitMetaChange(meta);
   };
 
   const pushTable = (rows: TableRow[]) => {
-    if (rowsEqual(tableData, rows)) return; // ✋ تغییر واقعی نداریم
+    if (rowsEqual(tableData, rows)) return;
     setTableData(rows);
     const json = JSON.stringify(rows);
     if (meta.metaType4 === json) return;
-    setMeta((prev) => ({ ...prev, metaType4: json }));
+    const next = { ...meta, metaType4: json };
+    setMeta(next);
     onMetaExtraChange?.({ metaType4: json });
+    emitMetaChange(next);
   };
 
   // ✅ وقتی هر دو فیلد «GetInformationFrom» و «WhatColumnToDisplay» خالی‌اند
@@ -290,8 +383,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   const noDesOptions = bothEmpty || baseFields.length === 0;
 
   const handleAddRow = () => {
-    const defaultDes = noDesOptions ? "" : (baseFields[0]?.ID ?? "");
-    const defaultSrc = bothEmpty ? "" : (fields[0]?.ID ?? "");
+    const defaultDes = noDesOptions ? "" : baseFields[0]?.ID ?? "";
+    const defaultSrc = bothEmpty ? "" : fields[0]?.ID ?? "";
     const newRow: TableRow = {
       ID: genId(),
       SrcFieldID: defaultSrc ? String(defaultSrc) : "",
@@ -353,9 +446,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldsSig, bothEmpty]);
 
-  /* ─── نرمالایز DesField:
-        1) اگر baseFields خالی شد، همه DesFieldID ها را خالی کن.
-        2) اگر baseFields موجود بود و مقدار نامعتبر بود، به اولین مقدار برگردان. */
+  /* ─── نرمالایز DesField ─── */
   useEffect(() => {
     if (baseFields.length === 0) {
       const changed = tableData.some((r) => r.DesFieldID);
@@ -398,7 +489,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         valueFormatter: (p: any) =>
           noDesOptions
             ? ""
-            : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+            : baseFieldsMap.get(String(p.value)) ?? String(p.value ?? ""),
       },
       {
         headerName: t("LookUpAdvanceTable.Columns.Operation"),
@@ -426,7 +517,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         valueFormatter: (p: any) =>
           bothEmpty
             ? ""
-            : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+            : fieldsMap.get(String(p.value)) ?? String(p.value ?? ""),
       },
     ],
     [t, fieldsMap, baseFieldsMap, operationList, bothEmpty, noDesOptions]
@@ -435,7 +526,9 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   // ✅ کلید PostPickerList فقط به سیگنال‌های ساختاری وابسته است؛ نه به metaType5
   const ppKey = useMemo(
     () =>
-      `pp-adv-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`,
+      `pp-adv-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${
+        resetKey ?? 0
+      }`,
     [meta.metaType1, meta.metaType2, meta.LookupMode, resetKey]
   );
 
@@ -477,6 +570,9 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           />
         </div>
       </div>
+
+      {/* ✅ چک‌باکس‌های دسترسی که در metaTypeJson.access ذخیره می‌شوند */}
+      {renderAccessCheckboxes()}
 
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
         <DataTable

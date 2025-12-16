@@ -18,6 +18,8 @@ import { useAddEditDelete } from "../../../context/AddEditDeleteContext";
 
 import projectServiceFile from "../../../services/api.servicesFile";
 import FileUploadHandler from "../../../services/FileUploadHandler";
+import { logout } from "../../../services/auth.services";
+
 
 interface IconVisibility {
   showAdd: boolean;
@@ -237,8 +239,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
     setSelectedRow(null);
     subTabsRef.current?.scrollTo({ left: 0, behavior: "smooth" });
     if (subKey === "UpdateAddress") {
-    setIsSidePanelOpen(true);
-  }
+      setIsSidePanelOpen(true);
+    }
   };
 
   // CRUD actions
@@ -276,11 +278,16 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
   };
 
   // Logout
+  // const handleLogoutClick = () => {
+  //   onLogout();
+  //   showAlert("success", "", t("Global.LogOut"));
+  //   navigate("/login");
+  //   setIsDrawerOpen(false);
+  // };
+
+
   const handleLogoutClick = () => {
-    onLogout();
-    showAlert("success", "", t("Global.LogOut"));
-    navigate("/login");
-    setIsDrawerOpen(false);
+    logout();;
   };
 
   // Prevent background scroll when drawer is open
@@ -300,9 +307,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
       />
 
       <div
-        className={`w-full h-screen flex flex-col bg-gray-100 overflow-hidden ${
-          isDrawerOpen ? "filter blur-sm" : ""
-        }`}
+        className={`w-full h-screen flex flex-col bg-gray-100 overflow-hidden ${isDrawerOpen ? "filter blur-sm" : ""
+          }`}
       >
         <Header
           username={headerUsername}
@@ -316,7 +322,7 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
             <FileUploadHandler
               selectedFileId={userInfo.UserImageId}
               resetCounter={0}
-              onReset={() => {}}
+              onReset={() => { }}
               onPreviewUrlChange={setAvatarUrl}
               hideUploader
             />
@@ -325,9 +331,8 @@ const TabbedInterface: React.FC<TabbedInterfaceProps> = ({ onLogout }) => {
 
         {/* Collapsible Main & Sub Tabs */}
         <div
-          className={`transition-all duration-300 ease-in-out overflow-hidden ${
-            collapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
-          }`}
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${collapsed ? "max-h-0 opacity-0" : "max-h-[500px] opacity-100"
+            }`}
         >
           <MainTabs
             tabs={mainTabs}

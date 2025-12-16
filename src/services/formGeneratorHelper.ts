@@ -1060,6 +1060,31 @@ export function initEntity(entity: Entity): Rule {
       return rule;
     }
 
+    case 40: {
+      rule.entityField = field;
+      rule.entityValue = value;
+      rule.type = "RichText";
+      rule.name = "CtrRichText";
+      rule.label = field.DisplayName;
+      rule.title = field.DisplayName;
+      rule.placeholder = field.DisplayName;
+      rule.disabled = field.IsForceReadOnly;
+      rule.value = value.Value == null ? field.metaType1 : value.Value;
+      rule.setting = {
+        metaType4: field.metaType4, 
+        metaType3: field.metaType3, 
+        metaType2: field.metaType2, 
+        metaType1: field.metaType1, 
+        IsRequire: field.IsRequire,
+        IsRtl: field.IsRTL,
+        ID: value.ID,
+        entityFieldId: value.nEntityFieldID,
+        entityId: value.nEntityID,
+        entityTypeId: field.nEntityTypeID,
+      };
+      return rule;
+    }
+
     default: {
       rule.entityField = field;
       rule.entityValue = value;

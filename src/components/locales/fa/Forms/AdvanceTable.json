@@ -1,9 +1,16 @@
 {
-    "AdvanceTable": {
-      "Labels": {
-        "ShowForm": "نمایش فرم",
-        "GalleryMode": "حالت گالری"
-      }
+  "AdvanceTable": {
+    "Labels": {
+      "ShowForm": "نمایش فرم",
+      "GalleryMode": "حالت گالری"
+    },
+    "Access": {
+      "AddByActor": "افزودن توسط کاربر",
+      "EditByActor": "ویرایش توسط کاربر",
+      "DeleteByActor": "حذف توسط کاربر",
+      "AddByApproval": "افزودن با تأیید",
+      "EditByApproval": "ویرایش با تأیید",
+      "DeleteByApproval": "حذف با تأیید"
     }
   }
-  
+}

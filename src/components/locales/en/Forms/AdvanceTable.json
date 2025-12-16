@@ -1,9 +1,16 @@
 {
-    "AdvanceTable": {
-      "Labels": {
-        "ShowForm": "Show Form",
-        "GalleryMode": "Gallery mode"
-      }
+  "AdvanceTable": {
+    "Labels": {
+      "ShowForm": "Show Form",
+      "GalleryMode": "Gallery mode"
+    },
+    "Access": {
+      "AddByActor": "Add access by actor",
+      "EditByActor": "Edit access by actor",
+      "DeleteByActor": "Delete access by actor",
+      "AddByApproval": "Add access by approval",
+      "EditByApproval": "Edit access by approval",
+      "DeleteByApproval": "Delete access by approval"
     }
   }
-  
+}

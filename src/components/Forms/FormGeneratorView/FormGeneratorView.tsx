@@ -42,7 +42,7 @@ const SectionView = React.lazy(() => import("./SectionView"));
 const SubSectionView = React.lazy(() => import("./SubSectionView"));
 const MePostSelectorView = React.lazy(() => import("./MePostSelectorView"));
 const AdvanceWfView = React.lazy(() => import("./AdvanceWfView"));
-const LookupImageRealValue = React.lazy(() => import("./LookUpImageRealValueView"));
+const LookupImageRealValue = React.lazy(() => import("./LookupImageRealValueView"));
 const InventoryView = React.lazy(() => import("./InventoryView"));
 const InventoryFieldView = React.lazy(() => import("./InventoryFieldView"));
 
@@ -50,7 +50,7 @@ const InventoryFieldView = React.lazy(() => import("./InventoryFieldView"));
 // ---------------- type → component map ----------------
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
-  1: RichTextControllerView,
+  40: RichTextControllerView,
   2: ChoiceControllerView,
   3: NumberControllerView,
   4: DateTimeSelectorView,

@@ -1,17 +1,24 @@
 {
-    "AdvanceLookupAdvanceTable": {
-      "Form": {
-        "ForFirstFormGetInformationFrom": "برای فرم اول، دریافت اطلاعات از فرم",
-        "ForSecondFormGetInformationFrom": "برای فرم دوم، دریافت اطلاعات از فرم",
-        "LookupMode": "حالت جست‌وجو (Lookup)",
-        "ShowColumnsOfFirstForm": "ستون‌های فرم اول به شکل زیر نمایش داده شوند"
-      },
-      "Columns": {
-        "SrcField": "فیلد مبدأ",
-        "Operation": "عملیات",
-        "FilterText": "متن فیلتر",
-        "DesField": "فیلد مقصد"
-      }
+  "AdvanceLookupAdvanceTable": {
+    "Form": {
+      "ForFirstFormGetInformationFrom": "برای فرم اول، دریافت اطلاعات از فرم",
+      "ForSecondFormGetInformationFrom": "برای فرم دوم، دریافت اطلاعات از فرم",
+      "LookupMode": "حالت جست‌وجو (Lookup)",
+      "ShowColumnsOfFirstForm": "ستون‌های فرم اول به شکل زیر نمایش داده شوند"
+    },
+    "Columns": {
+      "SrcField": "فیلد مبدأ",
+      "Operation": "عملیات",
+      "FilterText": "متن فیلتر",
+      "DesField": "فیلد مقصد"
+    },
+    "Access": {
+      "AddByActor": "افزودن توسط کاربر",
+      "EditByActor": "ویرایش توسط کاربر",
+      "DeleteByActor": "حذف توسط کاربر",
+      "AddByApproval": "افزودن با تأیید",
+      "EditByApproval": "ویرایش با تأیید",
+      "DeleteByApproval": "حذف با تأیید"
     }
   }
-  
+}

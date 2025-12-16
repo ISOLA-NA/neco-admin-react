@@ -134,6 +134,10 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     setRowToDelete(null);
   };
 
+  const handleStartEdit = (r: AccessProject) => {
+    onEditStart(r);
+  };
+
   /* --------------------------- UI --------------------------- */
   return (
     <>
@@ -194,13 +198,11 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
                   <tr
                     key={r.ID}
                     onClick={() => handleSelectRow(r)}
-                    className={`cursor-pointer ${
-                      selectedRowId === r.ID
-                        ? `${
-                            isRtl ? "border-r-4" : "border-l-4"
-                          } border-blue-400 bg-blue-50`
-                        : "hover:bg-gray-50"
-                    }`}
+                    className={`cursor-pointer ${selectedRowId === r.ID
+                      ? `${isRtl ? "border-r-4" : "border-l-4"
+                      } border-blue-400 bg-blue-50`
+                      : "hover:bg-gray-50"
+                      }`}
                   >
                     <td className="p-2 truncate max-w-[200px]">
                       {r.PostName || rolesMap[r.nPostID.trim().toLowerCase()]}
@@ -224,6 +226,15 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
                           <span>
                             {t("Global.Delete", { defaultValue: "Delete" })}
                           </span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartEdit(r);
+                          }}
+                          className="px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 text-[0.8rem]"
+                        >
+                          Edit
                         </button>
                       </div>
                     </td>

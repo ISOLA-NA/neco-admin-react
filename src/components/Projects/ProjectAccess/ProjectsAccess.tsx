@@ -38,23 +38,23 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
         nPostID: "",
         PostName: "",
         AccessMode: 1,
-        CreateLetter: false,
-        CreateMeeting: false,
-        CreateIssue: false,
-        CreateKnowledge: false,
-        CreateAlert: false,
-        AlowToAllTask: false,
-        AlowToEditRequest: false,
-        AlowToWordPrint: false,
-        Show_Approval: false,
-        Show_Comment: false,
-        Show_CheckList: false,
-        Show_Procedure: false,
-        Show_Logs: false,
-        Show_Lessons: false,
-        Show_Related: false,
-        Show_Assignment: false,
-        AllowToDownloadGroup: false,
+        CreateLetter: true,
+        CreateMeeting: true,
+        CreateIssue: true,
+        CreateKnowledge: true,
+        CreateAlert: true,
+        AlowToAllTask: true,
+        AlowToEditRequest: true,
+        AlowToWordPrint: true,
+        Show_Approval: true,
+        Show_Comment: true,
+        Show_CheckList: true,
+        Show_Procedure: true,
+        Show_Logs: true,
+        Show_Lessons: true,
+        Show_Related: true,
+        Show_Assignment: true,
+        AllowToDownloadGroup: true,
       }),
       [selectedProject]
     );
@@ -93,14 +93,15 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
             : t("ProjectAccess.Updated", { defaultValue: "Updated" }),
           isNew
             ? t("ProjectAccess.AccessCreated", {
-                defaultValue: "Access created.",
-              })
+              defaultValue: "Access created.",
+            })
             : t("ProjectAccess.AccessUpdated", {
-                defaultValue: "Access updated.",
-              })
+              defaultValue: "Access updated.",
+            })
         );
-        setCurrentAccess(result);
-        setEditMode("edit"); // پس از ذخیره در حالت ویرایش
+        // setCurrentAccess(result);
+        setCurrentAccess(blankAccess());
+        setEditMode("add");
         setRefreshTrigger((p) => p + 1);
       } catch {
         showAlert(
