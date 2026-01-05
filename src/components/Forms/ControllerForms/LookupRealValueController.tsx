@@ -57,7 +57,10 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
   srcFields,
   srcEntityTypeId,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
+  const uiDir = i18n.dir() as "rtl" | "ltr";
+
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
   const initialModeRef = useRef(true);
@@ -88,6 +91,47 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
   const [operationList, setOperationList] = useState<
     { value: string; label: string }[]
   >([]);
+
+  /* ─── Ellipsis styles (طبق تصویر 1 برای انگلیسی + طبق تصویر 3 برای فارسی) ─── */
+  const ellipsisCellStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl", // ✅ مهم: در RTL، direction باید rtl بماند تا ellipsis درست شود
+          unicodeBidi: "plaintext", // ✅ باعث می‌شود انگلیسی بهم نریزد
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
+
+  const ellipsisHeaderStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
 
   // ─── Sync from props.data ───
   useEffect(() => {
@@ -265,13 +309,17 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
 
   const handleCellValueChanged = (e: any) => {
     const updated = e.data as TableRow;
-    const next = tableData.map((r) => (r.ID === updated.ID
-      ? {
-          ...updated,
-          DesFieldID: updated.DesFieldID != null ? String(updated.DesFieldID) : "",
-          SrcFieldID: updated.SrcFieldID != null ? String(updated.SrcFieldID) : "",
-        }
-      : r));
+    const next = tableData.map((r) =>
+      r.ID === updated.ID
+        ? {
+            ...updated,
+            DesFieldID:
+              updated.DesFieldID != null ? String(updated.DesFieldID) : "",
+            SrcFieldID:
+              updated.SrcFieldID != null ? String(updated.SrcFieldID) : "",
+          }
+        : r
+    );
     pushTable(next);
   };
 
@@ -356,6 +404,8 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
           noDesOptions
             ? ""
             : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUpRealValue.Columns.Operation"),
@@ -368,11 +418,15 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
         valueFormatter: (p: any) =>
           operationList.find((o) => o.value === String(p.value))?.label ||
           String(p.value ?? ""),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUpRealValue.Columns.FilterText"),
         field: "FilterText",
         editable: true,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUpRealValue.Columns.SrcField"),
@@ -386,13 +440,27 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
           bothEmpty
             ? ""
             : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
     ],
-    [t, fieldsMap, baseFieldsMap, operationList, bothEmpty, noDesOptions]
+    [
+      t,
+      fieldsMap,
+      baseFieldsMap,
+      operationList,
+      bothEmpty,
+      noDesOptions,
+      ellipsisCellStyle,
+      ellipsisHeaderStyle,
+    ]
   );
 
   return (
-    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
+    <div
+      dir={uiDir}
+      className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg"
+    >
       <div className="flex gap-8">
         {/* Left side */}
         <div className="flex flex-col space-y-6 w-1/2">
@@ -469,6 +537,7 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
             rowSelection: "single",
             stopEditingWhenCellsLoseFocus: true,
           }}
+          direction={uiDir}
         />
       </div>
     </div>

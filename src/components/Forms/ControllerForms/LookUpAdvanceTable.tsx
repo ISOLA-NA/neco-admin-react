@@ -58,8 +58,12 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   srcFields,
   srcEntityTypeId,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation(); // ✅ i18n هم گرفته شد
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
+
+  // ✅ جهت واقعی UI
+  const uiDir = i18n.dir() as "rtl" | "ltr";
+  const isRtl = uiDir === "rtl";
 
   // ─── Refs ────────────────────────────────────────────────
   const initialModeRef = useRef(true);
@@ -330,6 +334,49 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseFieldsSig, noDesOptions]);
 
+  // ─────────────────────────────────────────────────────────
+  // ✅ Ellipsis styles (طبق تصویر 1 برای انگلیسی + طبق تصویر 3 برای فارسی)
+  // ─────────────────────────────────────────────────────────
+  const ellipsisCellStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl", // ✅ مهم: در RTL، direction باید rtl بماند تا ellipsis درست شود
+          unicodeBidi: "plaintext", // ✅ باعث می‌شود انگلیسی بهم نریزد
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
+
+  const ellipsisHeaderStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
+
   // ─── AG-Grid columnDefs ────────────────────────────────────
   const columnDefs = useMemo(
     () => [
@@ -345,6 +392,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           noDesOptions
             ? ""
             : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUpAdvanceTable.Columns.Operation"),
@@ -357,11 +406,15 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         valueFormatter: (p: any) =>
           operationList.find((o) => o.value === String(p.value))?.label ||
           String(p.value ?? ""),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUpAdvanceTable.Columns.FilterText"),
         field: "FilterText",
         editable: true,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUpAdvanceTable.Columns.SrcField"),
@@ -375,14 +428,28 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           bothEmpty
             ? ""
             : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
     ],
-    [t, fieldsMap, baseFieldsMap, operationList, bothEmpty, noDesOptions]
+    [
+      t,
+      fieldsMap,
+      baseFieldsMap,
+      operationList,
+      bothEmpty,
+      noDesOptions,
+      ellipsisCellStyle,
+      ellipsisHeaderStyle,
+    ]
   );
 
   // ─── Render ────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
+    <div
+      dir={uiDir} // ✅ خیلی مهم
+      className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg"
+    >
       <div className="flex gap-8">
         <div className="flex flex-col space-y-6 w-1/2">
           {/* Get Information From */}
@@ -443,6 +510,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             rowSelection: "single",
             stopEditingWhenCellsLoseFocus: true,
           }}
+          direction={uiDir} // ✅ این هم مهم‌ترین اصلاح
         />
       </div>
     </div>

@@ -14,31 +14,33 @@ import { useTranslation } from "react-i18next";
 
 interface LookupUmageProps {
   data?: {
-    metaType1?: string | number | null; // GetInformationFrom (EntityType ID)
-    metaType2?: string | number | null; // WhatColumnToDisplay (Field ID inside source entity)
-    metaType4?: string;                 // Program Meta (فقط ورودی/نمایش کاربر - دست نزن)
-    metaTypeJson?: string;              // ✅ تنها منبع/مقصد جدول فیلترها
-    CountInReject?: boolean;            // ✅ مقدار چک‌باکس Remove same name
-    removeSameName?: boolean;           // سازگاری با نسخه‌های قدیمی
-    /** (اختیاری) ID نوع انتیتی فرم فعلی برای تأمین فهرست DesField وقتی srcFields پاس نشده */
+    metaType1?: string | number | null; // GetInformationFrom
+    metaType2?: string | number | null; // WhatColumnToDisplay
+
+    // ✅ فقط اینجا جدول ذخیره می‌شود
+    metaType4?: string; // ✅ JSON جدول
+
+    CountInReject?: boolean;
+    removeSameName?: boolean;
+
     currentEntityTypeId?: string | number | null;
   };
+
   onMetaChange?: (updatedMeta: any) => void;
-  // توجه: عمداً onMetaExtraChange استفاده نمی‌شود تا Program Meta پر/تغییر نشود
+
+  // ✅ جدول را از این مسیر می‌فرستیم
   onMetaExtraChange?: (updated: { metaType4: string }) => void;
 
-  /** ✅ اگر فهرست فیلدهای فرم فعلی را از والد دارید، برای ستون DesField پاس بدهید */
   srcFields?: Array<{ ID: string | number; DisplayName: string }>;
-  /** ✅ اگر srcFields پاس ندهید، از این ID (یا data.currentEntityTypeId) برای واکشی فیلدهای فرم فعلی استفاده می‌شود */
   srcEntityTypeId?: string | number;
 }
 
 interface TableRow {
   ID: string;
-  SrcFieldID: string;     // فیلد از EntityType منبع (fields)
+  SrcFieldID: string;
   FilterOpration: string;
   FilterText: string;
-  DesFieldID: string;     // فیلد از فرم فعلی (baseFields)
+  DesFieldID: string;
 }
 
 const genId = () =>
@@ -47,10 +49,13 @@ const genId = () =>
 const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
   data = {},
   onMetaChange,
+  onMetaExtraChange,
   srcFields,
   srcEntityTypeId,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
+  const uiDir = i18n.dir() as "rtl" | "ltr";
 
   /* ---------------- state ---------------- */
   const [meta, setMeta] = useState({
@@ -64,16 +69,14 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
 
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
-  // فقط metaTypeJson مبناست؛ metaType4 را نمی‌خوانیم/نمی‌نویسیم
-  const prevJsonRef = useRef<string | undefined>(data?.metaTypeJson);
+  // ✅ فقط metaType4 مبناست
+  const prevMeta4Ref = useRef<string | undefined>(data?.metaType4);
 
   /* -------- dynamic lists -------- */
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
   const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
 
-  // ⭐️ fields: فهرست فیلدهای EntityType منبع (وابسته به metaType1)
   const [fields, setFields] = useState<EntityField[]>([]);
-  // ⭐️ baseFields: فهرست فیلدهای فرم فعلی (برای ستون DesField)
   const [baseFields, setBaseFields] = useState<
     Array<{ ID: string | number; DisplayName: string }>
   >([]);
@@ -83,7 +86,48 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
     { value: string; label: string }[]
   >([]);
 
-  /* -------- sync props → state (فقط در صورت تفاوت) -------- */
+  /* ─── Ellipsis styles ─── */
+  const ellipsisCellStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
+
+  const ellipsisHeaderStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
+
+  /* -------- sync props → state -------- */
   useEffect(() => {
     const nextMeta = {
       metaType1: data?.metaType1 != null ? String(data.metaType1) : "",
@@ -103,16 +147,17 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
       prev === !!incomingRemove ? prev : !!incomingRemove
     );
 
-    // ✅ تنها منبعِ جدول، metaTypeJson است
-    const incomingJson =
-      typeof data?.metaTypeJson === "string" && data.metaTypeJson.trim() !== ""
-        ? data.metaTypeJson
+    // ✅ جدول فقط از metaType4
+    const incomingMeta4 =
+      typeof data?.metaType4 === "string" && data.metaType4.trim() !== ""
+        ? data.metaType4
         : "[]";
 
-    if (prevJsonRef.current !== incomingJson) {
-      prevJsonRef.current = incomingJson;
+    if (prevMeta4Ref.current !== incomingMeta4) {
+      prevMeta4Ref.current = incomingMeta4;
+
       try {
-        const parsed = JSON.parse(incomingJson);
+        const parsed = JSON.parse(incomingMeta4);
         if (Array.isArray(parsed)) {
           const mapped = parsed.map((item: any) => ({
             ID: String(item.ID ?? genId()),
@@ -135,12 +180,12 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
   }, [
     data?.metaType1,
     data?.metaType2,
-    data?.metaTypeJson, // ← فقط این
+    data?.metaType4, // ✅ فقط این
     (data as any)?.CountInReject,
     (data as any)?.removeSameName,
   ]);
 
-  /* -------- load static lists -------- */
+  /* -------- load lists -------- */
   useEffect(() => {
     getAllEntityType()
       .then((res) => setEntityTypes(Array.isArray(res) ? res : []))
@@ -160,7 +205,7 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
       .catch(console.error);
   }, []);
 
-  /* -------- load fields for source entity (metaType1) -------- */
+  /* -------- load fields for source entity -------- */
   useEffect(() => {
     const id = Number(meta.metaType1);
     if (!isNaN(id) && id > 0) {
@@ -181,7 +226,7 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
     }
   }, [srcFields]);
 
-  /* -------- otherwise fetch baseFields via srcEntityTypeId or data.currentEntityTypeId -------- */
+  /* -------- otherwise fetch baseFields -------- */
   useEffect(() => {
     if (baseFieldsLockedRef.current) return;
     const rawId =
@@ -194,7 +239,6 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
       getEntityFieldByEntityTypeId(idNum)
         .then((r) => {
           const arr = Array.isArray(r) ? r : [];
-          // ⛔️ اگر خالی بود، عمداً baseFields را خالی می‌گذاریم تا DesField هم خالی باشد
           if (arr.length > 0) {
             setBaseFields(arr.map((f: any) => ({ ID: f.ID, DisplayName: f.DisplayName })));
             baseFieldsLockedRef.current = true;
@@ -204,23 +248,30 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
     }
   }, [srcEntityTypeId, data?.currentEntityTypeId, getEntityFieldByEntityTypeId]);
 
-  /* -------- propagate changes to parent -------- */
-  const pushUp = (metaPatch?: Partial<typeof meta>, overrideTable?: TableRow[]) =>
+  /* -------- propagate meta + checkbox -------- */
+  const pushMetaUp = (patch?: Partial<typeof meta>) => {
+    const next = patch ? { ...meta, ...patch } : meta;
     onMetaChange?.({
-      ...(metaPatch ? { ...meta, ...metaPatch } : meta),
-      metaTypeJson: JSON.stringify(overrideTable ?? tableData), // ✅ فقط این فیلد
-      CountInReject: removeSameName,                             // ✅ چک‌باکس
+      ...next,
+      CountInReject: removeSameName,
     });
+  };
 
-  // هر زمان جدول یا چک‌باکس تغییر کند، مقادیر بالا داده شود
+  // checkbox changes
   useEffect(() => {
     onMetaChange?.({
       ...meta,
-      metaTypeJson: JSON.stringify(tableData),
       CountInReject: removeSameName,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableData, removeSameName]);
+  }, [removeSameName]);
+
+  // ✅ table changes => metaType4 فقط
+  useEffect(() => {
+    const json = JSON.stringify(tableData);
+    onMetaExtraChange?.({ metaType4: json });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableData]);
 
   /* -------- maps & signatures -------- */
   const fieldsMap = useMemo(
@@ -231,25 +282,16 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
     () => new Map(baseFields.map((f: any) => [String(f.ID), f.DisplayName])),
     [baseFields]
   );
-  const fieldsSig = useMemo(
-    () => fields.map((f: any) => String(f.ID)).join("|"),
-    [fields]
-  );
-  const baseFieldsSig = useMemo(
-    () => baseFields.map((f: any) => String(f.ID)).join("|"),
-    [baseFields]
-  );
+  const fieldsSig = useMemo(() => fields.map((f: any) => String(f.ID)).join("|"), [fields]);
+  const baseFieldsSig = useMemo(() => baseFields.map((f: any) => String(f.ID)).join("|"), [baseFields]);
 
   /* -------- emptiness rules -------- */
-  // ✅ اگر هر دو خالی‌اند، سلکت‌های SrcField/DesField باید خالی باشند
   const bothEmpty =
     (meta.metaType1 ?? "").toString().trim() === "" &&
     (meta.metaType2 ?? "").toString().trim() === "";
-  // ✅ اگر جدول FormsCommand1 (baseFields) خالی باشد، DesField باید خالی باشد
   const noDesOptions = bothEmpty || baseFields.length === 0;
 
   /* -------- normalize when lists change -------- */
-  // SrcField normalization (only when we actually have src options)
   useEffect(() => {
     if (!fields.length || bothEmpty) return;
     const valid = new Set(Array.from(fieldsMap.keys()));
@@ -262,23 +304,16 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
       }
       return r;
     });
-    if (changed) {
-      setTableData(updated);
-      pushUp(undefined, updated);
-    }
+    if (changed) setTableData(updated);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldsSig, bothEmpty]);
 
-  // DesField normalization:
-  // 1) اگر baseFields خالی شد، همه DesFieldID ها را خالی کن.
-  // 2) اگر baseFields موجود بود و مقدار نامعتبر بود، به اولین مقدار برگردان.
   useEffect(() => {
     if (baseFields.length === 0) {
       const changed = tableData.some((r) => r.DesFieldID);
       if (changed) {
         const cleared = tableData.map((r) => ({ ...r, DesFieldID: "" }));
         setTableData(cleared);
-        pushUp(undefined, cleared);
       }
       return;
     }
@@ -296,10 +331,7 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
         }
         return r;
       });
-      if (changed) {
-        setTableData(updated);
-        pushUp(undefined, updated);
-      }
+      if (changed) setTableData(updated);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseFieldsSig, noDesOptions]);
@@ -307,7 +339,7 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
   /* -------- DataTable columns -------- */
   const columnDefs = useMemo(
     () => [
-       {
+      {
         headerName: t("LookupUmage.Columns.DesField"),
         field: "DesFieldID",
         editable: true,
@@ -319,6 +351,8 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
           noDesOptions
             ? ""
             : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookupUmage.Columns.Operation"),
@@ -328,11 +362,15 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
         cellEditorParams: { values: operationList.map((o) => o.value) },
         valueFormatter: (p: any) =>
           operationList.find((o) => o.value === p.value)?.label || p.value,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookupUmage.Columns.FilterText"),
         field: "FilterText",
         editable: true,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookupUmage.Columns.SrcField"),
@@ -346,12 +384,23 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
           bothEmpty
             ? ""
             : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
     ],
-    [t, fieldsMap, baseFieldsMap, operationList, bothEmpty, noDesOptions]
+    [
+      t,
+      fieldsMap,
+      baseFieldsMap,
+      operationList,
+      bothEmpty,
+      noDesOptions,
+      ellipsisCellStyle,
+      ellipsisHeaderStyle,
+    ]
   );
 
-  /* -------- table row ops -------- */
+  /* -------- table ops -------- */
   const addRow = () => {
     const defaultSrc = bothEmpty ? "" : (fields[0]?.ID ?? "");
     const defaultDes = noDesOptions ? "" : (baseFields[0]?.ID ?? "");
@@ -362,30 +411,30 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
       FilterText: "",
       DesFieldID: defaultDes ? String(defaultDes) : "",
     };
-    const next = [...tableData, newRow];
-    setTableData(next);
-    pushUp(undefined, next);
+    setTableData((prev) => [...prev, newRow]);
   };
 
   const handleCellValueChanged = (e: any) => {
     const upd = e.data as TableRow;
-    const next = tableData.map((r) =>
-      r.ID === upd.ID
-        ? {
-            ...upd,
-            SrcFieldID: upd.SrcFieldID != null ? String(upd.SrcFieldID) : "",
-            DesFieldID: upd.DesFieldID != null ? String(upd.DesFieldID) : "",
-          }
-        : r
+    setTableData((prev) =>
+      prev.map((r) =>
+        r.ID === upd.ID
+          ? {
+              ...upd,
+              SrcFieldID: upd.SrcFieldID != null ? String(upd.SrcFieldID) : "",
+              DesFieldID: upd.DesFieldID != null ? String(upd.DesFieldID) : "",
+            }
+          : r
+      )
     );
-    setTableData(next);
-    pushUp(undefined, next);
   };
 
   /* ---------------- render ---------------- */
   return (
-    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
-      {/* تنظیمات بالایی */}
+    <div
+      dir={uiDir}
+      className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg"
+    >
       <div className="flex gap-8">
         <div className="flex flex-col w-1/2 space-y-6">
           <DynamicSelector
@@ -399,7 +448,7 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
             onChange={(e) =>
               setMeta((prev) => {
                 const next = { ...prev, metaType1: e.target.value };
-                pushUp(next);
+                pushMetaUp(next);
                 return next;
               })
             }
@@ -416,7 +465,7 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
             onChange={(e) =>
               setMeta((prev) => {
                 const next = { ...prev, metaType2: e.target.value };
-                pushUp(next);
+                pushMetaUp(next);
                 return next;
               })
             }
@@ -438,9 +487,8 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
         </div>
       </div>
 
-      {/* جدول پایین */}
       <DataTable
-        key={`dt-luimg-${fieldsSig}-${baseFieldsSig}-${noDesOptions ? "noDes" : "hasDes"}-${bothEmpty ? "srcEmpty" : "srcHas"}`}
+        key={`dt-luimg-rv-${fieldsSig}-${baseFieldsSig}-${noDesOptions ? "noDes" : "hasDes"}-${bothEmpty ? "srcEmpty" : "srcHas"}`}
         columnDefs={columnDefs}
         rowData={tableData}
         domLayout="autoHeight"
@@ -456,6 +504,8 @@ const LookupUmageRealValue: React.FC<LookupUmageProps> = ({
           rowSelection: "single",
           stopEditingWhenCellsLoseFocus: true,
         }}
+        direction={uiDir}
+        onRowDoubleClick={() => {}}
       />
     </div>
   );

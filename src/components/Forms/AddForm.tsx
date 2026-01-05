@@ -44,7 +44,6 @@ import Component34 from "./ControllerForms/LookupImageRealValue";
 import InventoryController from "./ControllerForms/InventoryController";
 import InventoryFieldController from "./ControllerForms/InventoryFieldController";
 
-
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 
 import apiService from "../../services/api.services";
@@ -87,7 +86,6 @@ const columnTypeMapping: { [key: string]: number } = {
   component34: 37,
   component36: 38, // Inventory
   component37: 39, // InventoryField
-
 };
 
 // Mapping of component keys to components
@@ -127,7 +125,6 @@ const componentMapping: { [key: string]: React.FC<any> } = {
   component34: Component34,
   component36: InventoryController,
   component37: InventoryFieldController,
-
 };
 
 interface AddColumnFormProps {
@@ -201,7 +198,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     { value: "component25", label: t("ColumnTypes.Map") },
     { value: "component34", label: t("ColumnTypes.LookUpRealValueImg") },
     { value: "component36", label: t("ColumnTypes.Inventory") || "Inventory" },
-    { value: "component37", label: t("ColumnTypes.InventoryField") || "Inventory Field" },
+    {
+      value: "component37",
+      label: t("ColumnTypes.InventoryField") || "Inventory Field",
+    },
   ];
 
   // گزینه‌های Command با امکان انتخاب دلخواه
@@ -239,8 +239,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInAlert: existingData ? existingData.ShowInAlert : false,
     typeOfInformation: existingData
       ? Object.keys(columnTypeMapping).find(
-        (key) => columnTypeMapping[key] === existingData.ColumnType
-      ) || "component1"
+          (key) => columnTypeMapping[key] === existingData.ColumnType
+        ) || "component1"
       : "component1",
     required: existingData ? existingData.IsRequire : false,
     mainColumns: existingData ? existingData.IsMainColumn : false,
@@ -270,8 +270,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     metaTypeJson: null,
   });
 
-  const [metaExtra, setMetaExtra] = useState({
+  // ✅ metaExtra را توسعه دادیم تا metaTypeJson هم (برای Add) نگه‌داری شود
+  const [metaExtra, setMetaExtra] = useState<{
+    metaType4: string;
+    metaTypeJson: string | null;
+  }>({
     metaType4: "",
+    metaTypeJson: null,
   });
 
   const DEFAULT_META_CORE: MetaCore = {
@@ -286,12 +291,56 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
   const DEFAULT_META_EXTRA = {
     metaType4: "",
+    metaTypeJson: null as string | null,
   };
 
   // --- Helpers برای نرمال‌سازی مقادیر ---
   const toStr = (v: any, empty = "") => (v != null ? String(v) : empty);
   const toStrOrNull = (v: any) =>
     v != null && String(v).trim() !== "" ? String(v) : null;
+
+  // ✅ Helpers برای metaTypeJson (FIX Add)
+  const safeParseJson = (v: any) => {
+    if (!v) return {};
+    if (typeof v === "object") return v ?? {};
+    try {
+      const o = JSON.parse(String(v));
+      return typeof o === "object" && o !== null ? o : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const isEmptyMetaJsonStr = (v: any) => {
+    if (v === undefined || v === null) return true;
+    if (typeof v === "object") {
+      try {
+        return Object.keys(v || {}).length === 0;
+      } catch {
+        return true;
+      }
+    }
+    const s = String(v).trim();
+    return s === "" || s === "{}";
+  };
+
+  const normalizeMetaJsonToStringOrNull = (v: any): string | null => {
+    if (v === undefined || v === null) return null;
+    if (typeof v === "string") {
+      const s = v.trim();
+      return s ? s : null;
+    }
+    if (typeof v === "object") {
+      try {
+        const s = JSON.stringify(v);
+        return s && s !== "{}" ? s : null;
+      } catch {
+        return null;
+      }
+    }
+    const s = String(v).trim();
+    return s ? s : null;
+  };
 
   // 🔑 کلید ریست برای کنترلرها و PostPickerList
   const [controllerResetKey, setControllerResetKey] = useState(0);
@@ -310,18 +359,24 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         metaType5: toStrOrNull(existingData.metaType5),
         metaTypeJson:
           typeof existingData.metaTypeJson === "string" &&
-            existingData.metaTypeJson.trim() !== ""
+          existingData.metaTypeJson.trim() !== ""
             ? existingData.metaTypeJson
             : null,
       });
 
-      // مقداردهی اولیه metaExtra (اگر کنترلرهایی که جدول دارند اجرا شوند)
+      // مقداردهی اولیه metaExtra
       setMetaExtra({
         metaType4:
           typeof existingData.metaType4 === "string" &&
-            existingData.metaType4.trim() !== ""
+          existingData.metaType4.trim() !== ""
             ? existingData.metaType4
             : "",
+        // ✅ اگر لازم شد (برای همخوانی)، این هم نگه می‌داریم
+        metaTypeJson:
+          typeof existingData.metaTypeJson === "string" &&
+          existingData.metaTypeJson.trim() !== ""
+            ? existingData.metaTypeJson
+            : null,
       });
 
       setErrors({});
@@ -404,8 +459,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
     const lookupModeValue =
       metaCore.LookupMode === undefined ||
-        metaCore.LookupMode === null ||
-        metaCore.LookupMode === ""
+      metaCore.LookupMode === null ||
+      metaCore.LookupMode === ""
         ? null
         : Number(metaCore.LookupMode);
 
@@ -431,6 +486,20 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       return;
     }
 
+    // ✅ FIX: در Add اگر metaTypeJson از onMetaExtraChange آمده باشد، اینجا قبل از هر کاری جمعش کن
+    // (حتی اگر metaCore.metaTypeJson به‌خاطر setState لحظه‌ای هنوز آپدیت نشده باشد)
+    const finalMetaTypeJson =
+      !isEmptyMetaJsonStr(metaCoreForSubmit.metaTypeJson)
+        ? metaCoreForSubmit.metaTypeJson
+        : !isEmptyMetaJsonStr(metaExtra.metaTypeJson)
+        ? metaExtra.metaTypeJson
+        : metaCoreForSubmit.metaTypeJson;
+
+    metaCoreForSubmit = {
+      ...metaCoreForSubmit,
+      metaTypeJson: normalizeMetaJsonToStringOrNull(finalMetaTypeJson),
+    };
+
     if (
       formData.typeOfInformation === "component26" &&
       metaCore.metaType1 &&
@@ -447,9 +516,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       try {
         const res = await apiService.insertEntityType(combinedEntityType);
         if (res?.ID) {
+          // ✅ FIX: overwrite نکن؛ merge کن تا access/allowed پاک نشود
+          const baseObj = safeParseJson(metaCoreForSubmit.metaTypeJson);
+          const nextObj = { ...baseObj, CombinedEntityType: res.ID };
+
           metaCoreForSubmit = {
             ...metaCoreForSubmit,
-            metaTypeJson: JSON.stringify({ CombinedEntityType: res.ID }),
+            metaTypeJson: JSON.stringify(nextObj),
           };
         }
       } catch (error) {
@@ -464,51 +537,50 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     const normalizedMetaType4 =
       metaExtra.metaType4 != null ? String(metaExtra.metaType4) : "[]";
 
-
-    // ... داخل handleSubmit، درست بعد از چک‌های nameTrim / pNameTrim
     // ✅ ولیدیشن Inventory (نمایش خطاها داخل خود دیالوگ کنترلر)
-if (formData.typeOfInformation === "component36") {
-  let j: any = {};
-  try {
-    j = metaCore.metaTypeJson ? JSON.parse(metaCore.metaTypeJson) : {};
-  } catch {
-    j = {};
-  }
+    if (formData.typeOfInformation === "component36") {
+      let j: any = {};
+      try {
+        // ✅ از metaCoreForSubmit استفاده کن (که fallback هم دارد)
+        j = metaCoreForSubmit.metaTypeJson
+          ? JSON.parse(metaCoreForSubmit.metaTypeJson)
+          : {};
+      } catch {
+        j = {};
+      }
 
-  const isEmpty = (v: any) =>
-    v == null || String(v).trim() === "" || String(v) === "0";
+      const isEmpty = (v: any) =>
+        v == null || String(v).trim() === "" || String(v) === "0";
 
-  const missingMsgs: string[] = [];
-  // مورد نیازها: inventorysum - reserve - inventory1 - wfboxname
-  if (isEmpty(j.InventorySumEntityFieldID)) {
-    missingMsgs.push("Inventory Sum is required.");
-  }
-  if (isEmpty(j.ReserveEntityFieldID)) {
-    missingMsgs.push("Reserve is required.");
-  }
-  if (isEmpty(j.Inventory1EntityFieldID)) {
-    missingMsgs.push("Inventory 1 is required.");
-  }
-  if (isEmpty(j.InventorWfBoxName)) {
-    missingMsgs.push("WF Box Name is required.");
-  }
+      const missingMsgs: string[] = [];
+      // مورد نیازها: inventorysum - reserve - inventory1 - wfboxname
+      if (isEmpty(j.InventorySumEntityFieldID)) {
+        missingMsgs.push("Inventory Sum is required.");
+      }
+      if (isEmpty(j.ReserveEntityFieldID)) {
+        missingMsgs.push("Reserve is required.");
+      }
+      if (isEmpty(j.Inventory1EntityFieldID)) {
+        missingMsgs.push("Inventory 1 is required.");
+      }
+      if (isEmpty(j.InventorWfBoxName)) {
+        missingMsgs.push("WF Box Name is required.");
+      }
 
-  // اطمینان از SetFieldAsName (از metaCore.metaType2 یا از metaTypeJson)
-  const setFieldAsName = metaCore.metaType2 ?? j.NameEntityFieldID;
-  if (isEmpty(setFieldAsName)) {
-    missingMsgs.push("Set Field As Name is required.");
-  }
+      // اطمینان از SetFieldAsName (از metaCore.metaType2 یا از metaTypeJson)
+      const setFieldAsName = metaCoreForSubmit.metaType2 ?? j.NameEntityFieldID;
+      if (isEmpty(setFieldAsName)) {
+        missingMsgs.push("Set Field As Name is required.");
+      }
 
-  if (missingMsgs.length) {
-    setInventoryErrors(missingMsgs); // نمایش داخل خود کنترلر
-    setIsLoading(false);
-    return; // از submit خارج شو
-  } else {
-    setInventoryErrors([]);
-  }
-}
-
-
+      if (missingMsgs.length) {
+        setInventoryErrors(missingMsgs); // نمایش داخل خود کنترلر
+        setIsLoading(false);
+        return; // از submit خارج شو
+      } else {
+        setInventoryErrors([]);
+      }
+    }
 
     // ✅ ساخت payload
     const payload: any = {
@@ -581,12 +653,25 @@ if (formData.typeOfInformation === "component36") {
     }
   };
 
-  // این متد را کنترلرها برای metaType4 (JSON جدول‌ها) صدا می‌زنند
-  const handleMetaExtraChange = (updated: { metaType4: string }) => {
-    setMetaExtra((prev) => ({
-      ...prev,
-      metaType4: updated.metaType4 ?? prev.metaType4,
-    }));
+  // این متد را کنترلرها برای metaType4 (JSON جدول‌ها) و همچنین (در بعضی کنترلرها) metaTypeJson صدا می‌زنند
+  const handleMetaExtraChange = (updated: any) => {
+    setMetaExtra((prev) => {
+      const nextMetaType4 =
+        updated?.metaType4 !== undefined ? updated.metaType4 : prev.metaType4;
+
+      const rawJson =
+        updated?.metaTypeJson !== undefined
+          ? updated.metaTypeJson
+          : prev.metaTypeJson;
+
+      const nextJson = normalizeMetaJsonToStringOrNull(rawJson);
+
+      return {
+        ...prev,
+        metaType4: nextMetaType4 ?? prev.metaType4,
+        metaTypeJson: nextJson ?? prev.metaTypeJson,
+      };
+    });
   };
 
   // نوع‌هایی که ProgramMetaColumnName ندارد
@@ -598,6 +683,7 @@ if (formData.typeOfInformation === "component36") {
     "component10", // Lookup AdvanceTable
     "component18", // Seqnial Number
     "component16", // Table
+    "component34", 
   ];
 
   // رندر کنترلر داینامیک
@@ -609,22 +695,34 @@ if (formData.typeOfInformation === "component36") {
       key: `${formData.typeOfInformation}-${controllerResetKey}`,
       resetKey: controllerResetKey,
       onMetaChange: (updated: any) => {
-        setMetaCore((prev) => ({
-          ...prev,
-          metaType1: updated.metaType1 ?? prev.metaType1,
-          metaType2: updated.metaType2 ?? prev.metaType2,
-          metaType3: updated.metaType3 ?? prev.metaType3,
-          LookupMode:
-            updated.LookupMode !== undefined
-              ? updated.LookupMode
-              : prev.LookupMode,
-          metaType5: updated.metaType5 ?? prev.metaType5,
-          metaTypeJson: updated.metaTypeJson ?? prev.metaTypeJson, // ✅ فقط JSON جدول
-          oldLookup:
-            updated.BoolMeta1 !== undefined
-              ? !!updated.BoolMeta1
-              : prev.oldLookup,
-        }));
+        setMetaCore((prev) => {
+          // ✅ FIX: metaTypeJson خالی ("{}" / "" / null) حق overwrite ندارد
+          const incomingJson =
+            updated?.metaTypeJson !== undefined ? updated.metaTypeJson : undefined;
+
+          const canTakeJson =
+            incomingJson !== undefined && !isEmptyMetaJsonStr(incomingJson);
+
+          const normalizedIncomingJson = canTakeJson
+            ? normalizeMetaJsonToStringOrNull(incomingJson)
+            : null;
+
+          return {
+            ...prev,
+            metaType1: updated.metaType1 ?? prev.metaType1,
+            metaType2: updated.metaType2 ?? prev.metaType2,
+            metaType3: updated.metaType3 ?? prev.metaType3,
+            LookupMode:
+              updated.LookupMode !== undefined ? updated.LookupMode : prev.LookupMode,
+            metaType5: updated.metaType5 ?? prev.metaType5,
+            metaTypeJson: canTakeJson
+              ? (normalizedIncomingJson ?? prev.metaTypeJson)
+              : prev.metaTypeJson,
+            oldLookup:
+              updated.BoolMeta1 !== undefined ? !!updated.BoolMeta1 : prev.oldLookup,
+          };
+        });
+
         setFormData((prev) => ({
           ...prev,
           countInReject:
@@ -649,24 +747,23 @@ if (formData.typeOfInformation === "component36") {
 
     // ⛔️ برای component34 عمداً onMetaExtraChange را پاس نده
     const maybeExtra =
-      formData.typeOfInformation !== "component34"
-        ? { onMetaExtraChange: handleMetaExtraChange }
-        : {};
+  formData.typeOfInformation === "component34"
+    ? { onMetaExtraChange: handleMetaExtraChange }
+    : { onMetaExtraChange: handleMetaExtraChange }; // (عملاً همه)
 
     /* ✅ اگر کنترلر Lookup است، فیلدهای فرمِ جاری و entityTypeId را هم پاس بده */
     const maybeLookupBridge =
       formData.typeOfInformation === "component7"
         ? {
-          srcFields: Array.isArray(srcFields) ? srcFields : undefined,
-          srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
-        }
+            srcFields: Array.isArray(srcFields) ? srcFields : undefined,
+            srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
+          }
         : {};
 
     const maybeInventoryErrors =
       formData.typeOfInformation === "component36"
         ? { externalErrors: inventoryErrors }
         : {};
-
 
     return (
       <SelectedComponent
@@ -700,7 +797,6 @@ if (formData.typeOfInformation === "component36") {
           onSubmit={handleSubmit}
         >
           {/* Column Name (EN/FA) */}
-          {/* Column Name (EN/FA) */}
           <div className="md:col-span-1">
             <div className="flex items-end gap-2">
               <div className="flex-1">
@@ -729,9 +825,9 @@ if (formData.typeOfInformation === "component36") {
                 onClick={() => setIsFaMode((p) => !p)}
                 className={[
                   "shrink-0 inline-flex items-center justify-center",
-                  "h-8 px-3 rounded-lg self-end mb-[2px]", // ← کوچک‌تر + هم‌ترازی ته
+                  "h-8 px-3 rounded-lg self-end mb-[2px]",
                   "bg-gradient-to-r from-fuchsia-500 to-pink-500",
-                  "text-white text-xs font-semibold tracking-wide", // ← فونت کوچک‌تر
+                  "text-white text-xs font-semibold tracking-wide",
                   "shadow shadow-pink-200/50",
                   "transition-all duration-200",
                   "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-md hover:scale-[1.01]",
@@ -749,12 +845,14 @@ if (formData.typeOfInformation === "component36") {
 
             {/* خطای اعتبارسنجی با ارتفاع ثابت */}
             <p
-              className={`mt-1 text-xs ${errors.formName ? "text-red-500" : "invisible"
-                } h-4`}
+              className={`mt-1 text-xs ${
+                errors.formName ? "text-red-500" : "invisible"
+              } h-4`}
             >
               {errors.formName || "placeholder"}
             </p>
           </div>
+
           <div className="md:col-span-1">
             <DynamicInput
               name={t("AddForms.Order")}
@@ -987,23 +1085,21 @@ if (formData.typeOfInformation === "component36") {
               labelClassName="text-gray-700 font-medium"
             />
 
-            {!hiddenTypesForProgramMeta.includes(
-              formData.typeOfInformation
-            ) && (
-                <DynamicInput
-                  name={t("AddForms.ProgramMetaColumnName")}
-                  type="text"
-                  value={metaExtra.metaType4}
-                  onChange={(e) =>
-                    setMetaExtra((prev) => ({
-                      ...prev,
-                      metaType4: e.target.value, // متن ساده، نه JSON
-                    }))
-                  }
-                  className="flex-1"
-                  labelClassName="text-gray-700 font-medium"
-                />
-              )}
+            {!hiddenTypesForProgramMeta.includes(formData.typeOfInformation) && (
+              <DynamicInput
+                name={t("AddForms.ProgramMetaColumnName")}
+                type="text"
+                value={metaExtra.metaType4}
+                onChange={(e) =>
+                  setMetaExtra((prev) => ({
+                    ...prev,
+                    metaType4: e.target.value, // متن ساده، نه JSON
+                  }))
+                }
+                className="flex-1"
+                labelClassName="text-gray-700 font-medium"
+              />
+            )}
           </div>
 
           {/* Dynamic controller */}
@@ -1049,8 +1145,9 @@ if (formData.typeOfInformation === "component36") {
 
             <button
               type="submit"
-              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${isLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               disabled={isLoading}
             >
               {isLoading
@@ -1058,8 +1155,8 @@ if (formData.typeOfInformation === "component36") {
                   ? t("AddForms.Updating")
                   : t("AddForms.Adding")
                 : isEdit
-                  ? t("AddForms.UpdateColumn")
-                  : t("AddForms.AddColumn")}
+                ? t("AddForms.UpdateColumn")
+                : t("AddForms.AddColumn")}
             </button>
           </div>
         </form>

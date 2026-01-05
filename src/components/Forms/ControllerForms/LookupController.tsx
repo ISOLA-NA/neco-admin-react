@@ -13,9 +13,9 @@ interface LookUpProps {
   data?: {
     metaType1?: string | number | null; // EntityType منبع
     metaType2?: string | number | null; // ستونی که نمایش داده می‌شود
-    metaType3?: string;                 // drop | radio | check
-    metaType4?: string;                 // JSON جدول نگاشت
-    metaType5?: string;                 // پروژه‌های پیش‌فرض
+    metaType3?: string; // drop | radio | check
+    metaType4?: string; // JSON جدول نگاشت
+    metaType5?: string; // پروژه‌های پیش‌فرض
     LookupMode?: string | number | null;
     CountInReject?: boolean;
     BoolMeta1?: boolean;
@@ -58,7 +58,10 @@ const LookUp: React.FC<LookUpProps> = ({
   srcFields,
   srcEntityTypeId,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
+  const uiDir = i18n.dir() as "rtl" | "ltr";
+
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
   // refs
@@ -91,6 +94,47 @@ const LookUp: React.FC<LookUpProps> = ({
   const [operationList, setOperationList] = useState<
     { value: string; label: string }[]
   >([]);
+
+  /* ─── Ellipsis styles (طبق تصویر 1 برای انگلیسی + طبق تصویر 3 برای فارسی) ─── */
+  const ellipsisCellStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl", // ✅ مهم: در RTL، direction باید rtl بماند تا ellipsis درست شود
+          unicodeBidi: "plaintext", // ✅ باعث می‌شود انگلیسی بهم نریزد
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
+
+  const ellipsisHeaderStyle = useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
 
   /* ─── sync from props.data (edit) ─── */
   useEffect(() => {
@@ -199,11 +243,6 @@ const LookUp: React.FC<LookUpProps> = ({
         .catch(console.error);
     }
   }, [srcEntityTypeId, data.currentEntityTypeId, getEntityFieldByEntityTypeId]);
-
-  /* ⛔️ حذف fallback قدیمی:
-     قبلاً اگر هنوز قفل نشده و fields (پویا) می‌آمد، baseFields = fields می‌شد.
-     طبق نیاز جدید، هرگز از fields به‌عنوان پایه DesField استفاده نمی‌کنیم. */
-  // (هیچ fallback دیگری وجود ندارد)
 
   /* ─── sync metaType2 با fields ─── */
   useEffect(() => {
@@ -323,9 +362,7 @@ const LookUp: React.FC<LookUpProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldsSig, bothEmpty]);
 
-  /* ─── نرمالایز DesField:
-        1) اگر baseFields خالی شد، همه DesFieldID ها را خالی کن.
-        2) اگر تغییر کرد و مقدار نامعتبر بود، به اولین مقدار معتبر برگردان (وقتی خالی نیست). */
+  /* ─── نرمالایز DesField ─── */
   useEffect(() => {
     if (baseFields.length === 0) {
       const changed = tableData.some((r) => r.DesFieldID);
@@ -354,12 +391,7 @@ const LookUp: React.FC<LookUpProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseFieldsSig, noDesOptions]);
 
-  /* ─── ستون‌ها ───
-     ✅ وقتی getInformationFrom و WhatColumnToDisplay هر دو خالی‌اند، یا
-       جدول FormsCommand1 (baseFields) خالی است:
-       - سلکت آپشن‌های DesField باید خالی باشد
-       - مقدار نمایشی DesField نیز خالی برگردد
-     ✅ برای SrcField فقط شرط bothEmpty اعمال می‌شود. */
+  /* ─── ستون‌ها ─── */
   const columnDefs = useMemo(
     () => [
       {
@@ -374,6 +406,8 @@ const LookUp: React.FC<LookUpProps> = ({
           noDesOptions
             ? ""
             : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUp.Columns.Operation"),
@@ -386,11 +420,15 @@ const LookUp: React.FC<LookUpProps> = ({
         valueFormatter: (p: any) =>
           operationList.find((o) => o.value === String(p.value))?.label ||
           String(p.value ?? ""),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUp.Columns.FilterText"),
         field: "FilterText",
         editable: true,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
       {
         headerName: t("LookUp.Columns.SrcField"),
@@ -404,14 +442,28 @@ const LookUp: React.FC<LookUpProps> = ({
           bothEmpty
             ? ""
             : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
     ],
-    [t, fieldsMap, baseFieldsMap, operationList, bothEmpty, noDesOptions]
+    [
+      t,
+      fieldsMap,
+      baseFieldsMap,
+      operationList,
+      bothEmpty,
+      noDesOptions,
+      ellipsisCellStyle,
+      ellipsisHeaderStyle,
+    ]
   );
 
   /* ─── Render ─── */
   return (
-    <div className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg">
+    <div
+      dir={uiDir}
+      className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg"
+    >
       <div className="flex gap-8">
         {/* ===== ستون چپ ===== */}
         <div className="flex flex-col space-y-6 w-1/2">
@@ -421,7 +473,6 @@ const LookUp: React.FC<LookUpProps> = ({
             options={entities.map((e) => ({ value: String(e.ID), label: e.Name }))}
             selectedValue={meta.metaType1}
             onChange={(e) => {
-              // تغییر منبع فقط روی فیلدهای پویا اثر دارد؛ baseFields ثابت می‌ماند
               pushMeta({ metaType1: e.target.value });
             }}
           />
@@ -520,6 +571,7 @@ const LookUp: React.FC<LookUpProps> = ({
             rowSelection: "single",
             stopEditingWhenCellsLoseFocus: true,
           }}
+          direction={uiDir}
         />
       </div>
     </div>

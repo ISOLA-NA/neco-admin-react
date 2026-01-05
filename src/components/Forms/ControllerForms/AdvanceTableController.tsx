@@ -1,6 +1,7 @@
 // src/components/ControllerForms/AdvanceTable.tsx
 import React, { useEffect, useRef, useState } from "react";
 import DynamicSelector from "../../utilities/DynamicSelector";
+import DynamicInput from "../../utilities/DynamicInput";
 import { useApi } from "../../../context/ApiContext";
 import { useTranslation } from "react-i18next";
 
@@ -9,12 +10,14 @@ interface AdvanceTableProps {
     metaType1: string;
     metaType2: string;
     metaType3?: string;
+    metaTypeJson?: string; // ✅ اضافه شد
   }) => void;
 
   data?: {
     metaType1?: string;
     metaType2?: string | number;
     metaType3?: string;
+    metaTypeJson?: string | null; // ✅ اضافه شد
   };
 }
 
@@ -35,15 +38,30 @@ const buildMetaType3 = (state: Record<string, boolean>) =>
     .map((x) => x.key + "-")
     .join("");
 
+const parseMetaJson = (metaTypeJson?: string | null): any => {
+  if (!metaTypeJson) return {};
+  try {
+    const obj = JSON.parse(metaTypeJson);
+    return typeof obj === "object" && obj !== null ? obj : {};
+  } catch {
+    return {};
+  }
+};
+
+const onlyDigits = (s: string) => s.replace(/[^\d]/g, "");
+
 /* --------------------------------------------------- */
 
-const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data = {} }) => {
+const AdvanceTable: React.FC<AdvanceTableProps> = ({
+  onMetaChange,
+  data = {},
+}) => {
   const { t } = useTranslation();
   const { getAllEntityType } = useApi();
 
-  const [formOptions, setFormOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [formOptions, setFormOptions] = useState<{ value: string; label: string }[]>(
+    []
+  );
 
   const [selectedForm, setSelectedForm] = useState<string>(data.metaType1 ?? "");
 
@@ -63,6 +81,61 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data = {} }) 
     initialAccess
   );
 
+  /* ------------------------------
+     ✅ metaTypeJson برای AllowedAddedRows...
+  ------------------------------*/
+  const [metaJsonObj, setMetaJsonObj] = useState<any>(() =>
+    parseMetaJson(data.metaTypeJson)
+  );
+
+  const [allowedByActor, setAllowedByActor] = useState<string>(() => {
+    const mj = parseMetaJson(data.metaTypeJson);
+    const v = mj?.AllowedAddedRowsByActor;
+    return v === 0 || v ? String(v) : "";
+  });
+
+  const [allowedByApproval, setAllowedByApproval] = useState<string>(() => {
+    const mj = parseMetaJson(data.metaTypeJson);
+    const v = mj?.AllowedAddedRowsByApproval;
+    return v === 0 || v ? String(v) : "";
+  });
+
+  const patchMetaJson = (patch: (prev: any) => any) => {
+    const prev = metaJsonObj ?? {};
+    const next = patch({ ...prev });
+    setMetaJsonObj(next);
+
+    if (onMetaChange) {
+      onMetaChange({
+        metaType1: selectedForm,
+        metaType2: isGalleryMode ? "1" : "0",
+        metaType3: buildMetaType3(accessState),
+        metaTypeJson: JSON.stringify(next),
+      });
+    }
+  };
+
+  const updateAllowedRows = (kind: "actor" | "approval", raw: string) => {
+    const cleaned = onlyDigits(raw);
+
+    if (kind === "actor") setAllowedByActor(cleaned);
+    else setAllowedByApproval(cleaned);
+
+    patchMetaJson((prev) => {
+      const next = { ...prev };
+
+      if (kind === "actor") {
+        if (cleaned === "") delete next.AllowedAddedRowsByActor;
+        else next.AllowedAddedRowsByActor = Number(cleaned);
+      } else {
+        if (cleaned === "") delete next.AllowedAddedRowsByApproval;
+        else next.AllowedAddedRowsByApproval = Number(cleaned);
+      }
+
+      return next;
+    });
+  };
+
   const toggleAccess = (key: string, checked: boolean) => {
     const next = { ...accessState, [key]: checked };
     setAccessState(next);
@@ -74,6 +147,7 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data = {} }) 
         metaType1: selectedForm,
         metaType2: isGalleryMode ? "1" : "0",
         metaType3: meta3,
+        metaTypeJson: JSON.stringify(metaJsonObj ?? {}),
       });
     }
   };
@@ -106,7 +180,16 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data = {} }) 
     });
     setAccessState(next);
 
-  }, [data.metaType1, data.metaType2, data.metaType3]);
+    const mj = parseMetaJson(data.metaTypeJson);
+    setMetaJsonObj(mj);
+
+    const a1 = mj?.AllowedAddedRowsByActor;
+    setAllowedByActor(a1 === 0 || a1 ? String(a1) : "");
+
+    const a2 = mj?.AllowedAddedRowsByApproval;
+    setAllowedByApproval(a2 === 0 || a2 ? String(a2) : "");
+
+  }, [data.metaType1, data.metaType2, data.metaType3, data.metaTypeJson]);
 
   const prevMetaString = useRef("");
   useEffect(() => {
@@ -116,6 +199,7 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data = {} }) 
       metaType1: selectedForm,
       metaType2: isGalleryMode ? "1" : "0",
       metaType3: buildMetaType3(accessState),
+      metaTypeJson: JSON.stringify(metaJsonObj ?? {}),
     };
 
     const s = JSON.stringify(meta);
@@ -124,15 +208,44 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data = {} }) 
       onMetaChange(meta);
     }
 
-  }, [selectedForm, isGalleryMode, accessState]);
+  }, [selectedForm, isGalleryMode, accessState, metaJsonObj]);
 
   /* ------------------------------ */
 
+  // ✅ Actor ها چپ، Approval ها راست
+  const LEFT_KEYS = ["AddByActor", "EditByActor", "DeleteByActor"];
+  const RIGHT_KEYS = ["AddByApproval", "EditByApproval", "DeleteByApproval"];
+
+  const leftItems = ACCESS_FLAGS.filter((x) => LEFT_KEYS.includes(x.key));
+  const rightItems = ACCESS_FLAGS.filter((x) => RIGHT_KEYS.includes(x.key));
+
+  const renderItem = (item: { key: string; labelKey: string }) => {
+    const fullText = t(item.labelKey);
+    return (
+      <label
+        key={item.key}
+        className="flex items-center gap-2 text-[11px] font-normal text-gray-700 min-w-0"
+        title={fullText}
+      >
+        <input
+          type="checkbox"
+          checked={!!accessState[item.key]}
+          onChange={(e) => toggleAccess(item.key, e.target.checked)}
+          className="h-4 w-4 accent-pink-500 cursor-pointer"
+        />
+        <span className="min-w-0 truncate">{fullText}</span>
+      </label>
+    );
+  };
+
+  const actorLabel = "Allowed added numbers of rows by actor:";
+  const approvalLabel = "Allowed added numbers of rows by approval:";
+
   return (
     <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex flex-col gap-6">
-
-      <div className="flex justify-center">
-        <div className="flex flex-col gap-4 w-64">
+      {/* ✅ Show Form + Gallery mode چسبیده سمت چپ */}
+      <div className="flex justify-start">
+        <div className="flex flex-col gap-2 w-64">
           <DynamicSelector
             name="Show Form"
             label={t("AdvanceTable.Labels.ShowForm")}
@@ -155,22 +268,57 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({ onMetaChange, data = {} }) 
           </label>
         </div>
       </div>
-      {/* 🔥 چک‌باکس‌های جدید دسترسی */}
-      <div className="grid grid-cols-2 gap-3 shadow-sm border border-gray-200 p-3 rounded-lg">
-        {ACCESS_FLAGS.map((item) => (
-          <label
-            key={item.key}
-            className="flex items-center gap-2 text-gray-700 text-sm font-medium"
-          >
-            <input
-              type="checkbox"
-              checked={accessState[item.key]}
-              onChange={(e) => toggleAccess(item.key, e.target.checked)}
-              className="h-4 w-4 accent-pink-500 cursor-pointer"
-            />
-            {t(item.labelKey)}
-          </label>
-        ))}
+
+      {/* 🔥 چک‌باکس‌های جدید + اینپوت‌های عددی */}
+      <div className="w-full flex flex-col md:flex-row gap-2 md:gap-3 items-stretch">
+        {/* ✅ چک‌باکس‌ها */}
+        <div className="shadow-sm border border-gray-200 p-3 rounded-lg flex-1 h-full min-h-[124px]">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-3">
+            <div className="flex flex-col gap-3 min-w-0">
+              {leftItems.map(renderItem)}
+            </div>
+            <div className="flex flex-col gap-3 min-w-0">
+              {rightItems.map(renderItem)}
+            </div>
+          </div>
+        </div>
+
+        {/* ✅ ورودی‌ها */}
+        <div className="shadow-sm border border-gray-200 p-3 rounded-lg h-full min-h-[124px] flex items-stretch">
+          <div className="w-full md:w-[180px] lg:w-[170px] flex flex-col h-full justify-between gap-2">
+            <div className="flex flex-col justify-start" title={actorLabel}>
+              <DynamicInput
+                name="AllowedAddedRowsByActor"
+                type="number"
+                value={allowedByActor}
+                onChange={(e) => updateAllowedRows("actor", e.target.value)}
+                label={actorLabel}
+                labelClassName="text-[11px] font-normal text-gray-700 truncate whitespace-nowrap overflow-hidden mb-0.5"
+                placeholder="actor"
+                min={0}
+                step={1}
+                className="w-full"
+                style={{ height: 30 }}
+              />
+            </div>
+
+            <div className="flex flex-col justify-start" title={approvalLabel}>
+              <DynamicInput
+                name="AllowedAddedRowsByApproval"
+                type="number"
+                value={allowedByApproval}
+                onChange={(e) => updateAllowedRows("approval", e.target.value)}
+                label={approvalLabel}
+                labelClassName="text-[11px] font-normal text-gray-700 truncate whitespace-nowrap overflow-hidden mb-0.5"
+                placeholder="approval"
+                min={0}
+                step={1}
+                className="w-full"
+                style={{ height: 30 }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
