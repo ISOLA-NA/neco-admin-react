@@ -683,6 +683,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     "component10", // Lookup AdvanceTable
     "component18", // Seqnial Number
     "component16", // Table
+    "component12", // Table
     "component34", 
   ];
 
