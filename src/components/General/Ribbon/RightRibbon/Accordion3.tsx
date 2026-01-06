@@ -90,7 +90,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
 
-  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+  const [isFaMode, setIsFaMode] = useState(true); // EN=false, FA=true
 
 
   // ستون‌های جدول
@@ -195,6 +195,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setIconImageId(sanitizedRow.IconImageId ?? null); // عکس آیکن
     setIsEditing(true);
     setIsAdding(false);
+    setIsFaMode(true);
   };
 
   const handleRowDoubleClick = (row: RowData3) => {
@@ -271,6 +272,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
     setSelectedSize("0");
     setIconImageId(null);
     setIsAdding(true);
+    setIsFaMode(true);
     setIsEditing(false);
     setResetCounter((prev) => prev + 1);
     setWindowsAppCommand("");
@@ -323,24 +325,24 @@ const Accordion3: React.FC<Accordion3Props> = ({
     const nameTrim = (formData.Name || "").trim();
     const pNameTrim = (formData.PersianName || "").trim();
 
-    if (!nameTrim && pNameTrim) {
-      showAlert("warning", null, "Warning", "Please fill Name");
-      return false;
-    }
-    if (!nameTrim) {
-      setErrorConfirmOpen(true); // پیام عمومی “Name is required.”
+    // ✅ فقط اگر هر دو خالی بودن خطا بده
+    if (!nameTrim && !pNameTrim) {
+      showAlert("warning", null, "Warning", "Name یا PersianName را وارد کنید");
       return false;
     }
     return true;
   };
+
+  const nameTrim = (formData.Name || "").trim();
+  const pNameTrim = (formData.PersianName || "").trim();
 
   // تأیید نهایی Insert
   const confirmInsert = async () => {
     try {
       const newMenuItem: MenuItem = {
         ID: 0,
-        Name: formData.Name!,
-        PersianName: (formData.PersianName || "").trim(),
+        Name: nameTrim || pNameTrim,     // ✅ fallback
+        PersianName: pNameTrim || null,  // ✅ null اگر خالی بود
         Command: formData.Command || "",
         CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
@@ -362,6 +364,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       await loadRowData();
       setFormData({
         Name: "",
+        PersianName: "",
         Command: "",
         Description: "",
         Order: 0,
@@ -373,7 +376,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
       setWindowsAppCommand("");
       setSelectedSize("0");
       setIconImageId(null);
-      setIsAdding(false);
+      setIsAdding(true);
+      setIsFaMode(true);
       setResetCounter((prev) => prev + 1);
     } catch (error: any) {
       console.error("Error inserting MenuItem:", error);
@@ -394,10 +398,14 @@ const Accordion3: React.FC<Accordion3Props> = ({
   const confirmUpdate = async () => {
     if (!selectedRow) return;
     try {
+
+      const nameTrim = (formData.Name || "").trim();
+      const pNameTrim = (formData.PersianName || "").trim();
+
       const updatedMenuItem: MenuItem = {
         ID: formData.ID!,
-        Name: formData.Name!,
-        PersianName: (formData.PersianName || "").trim(),
+        Name: nameTrim || pNameTrim,
+        PersianName: pNameTrim || null,
         Command: formData.Command || "",
         CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
@@ -623,22 +631,21 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   {/* دو ستونه دقیق و هم‌راستا */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Row 1: Name | Description */}
-                    {/* Row 1: Name/PersianName + EN/FA | Description */}
                     <div>
                       <div className="flex items-end gap-2">
                         <div className="flex-1">
                           <DynamicInput
-                            name={isFaMode ? "PersianName" : t("Ribbons.Name")}
+                            name={!isFaMode ? t("Forms.PersianName") : t("Forms.Name")}
                             type="text"
-                            value={isFaMode ? (formData.PersianName ?? "") : (formData.Name ?? "")}
-                            placeholder={isFaMode ? "Persian name" : "Name"}
+                            value={!isFaMode ? (formData.PersianName ?? "") : (formData.Name ?? "")}
+                            placeholder={!isFaMode ? t("Forms.PersianName") : t("Forms.Name")}
                             onChange={(e) => {
                               const v = e.target.value;
                               setFormData((prev) =>
-                                isFaMode ? { ...prev, PersianName: v } : { ...prev, Name: v }
+                                !isFaMode ? { ...prev, PersianName: v } : { ...prev, Name: v }
                               );
                             }}
-                            required={!isFaMode}
+                          // required={isFaMode} // وقتی FA هستی داری Name می‌زنی، پس Name اجباریه
                           />
                         </div>
 
@@ -655,13 +662,16 @@ const Accordion3: React.FC<Accordion3Props> = ({
                             "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
                             "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
                           ].join(" ")}
-                          title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                          title={
+                            isFaMode
+                              ? t("Forms.SwitchToEN", { field: t("Forms.PersianName") })
+                              : t("Forms.SwitchToFA", { field: t("Forms.Name") })
+                          }
                         >
                           {isFaMode ? "FA" : "EN"}
                         </button>
                       </div>
                     </div>
-
                     <div>
                       <DynamicInput
                         name={t("Ribbons.Description")}

@@ -53,7 +53,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
-  const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name), true=FA(PersianName)
+  const [isFaMode, setIsFaMode] = useState(true); // false=EN(Name), true=FA(PersianName)
 
 
   const { t, i18n } = useTranslation();
@@ -159,7 +159,8 @@ const Accordion1: React.FC<Accordion1Props> = ({
       IconImageId: null,
     });
     setIconImageId(null);
-    onRowClick(null);
+    setIsFaMode(true); // ✅ همیشه بعد از Add روی Name (FA) بمون
+
   };
 
   // بررسی صحت فرم: اگر Name خالی باشد، دیالوگ خطا نمایش داده می‌شود
@@ -167,19 +168,15 @@ const Accordion1: React.FC<Accordion1Props> = ({
     const nameTrim = (formData.Name || "").trim();
     const pNameTrim = (formData.PersianName || "").trim();
 
-    // فقط PersianName پر است ولی Name خالی است
-    if (!nameTrim && pNameTrim) {
-      showAlert("warning", null, "Warning", "Please fill Name");
+    // ✅ فقط اگر هر دو خالی بودن خطا بده
+    if (!nameTrim && !pNameTrim) {
+      showAlert("warning", null, "Warning", "Name یا PersianName را وارد کنید");
       return false;
     }
 
-    // Name خالی است (کلاً) → همان پاپ‌آپ خطا
-    if (!nameTrim) {
-      setErrorConfirmOpen(true);
-      return false;
-    }
     return true;
   };
+
 
 
   // هنگام کلیک روی دکمه Save
@@ -201,13 +198,17 @@ const Accordion1: React.FC<Accordion1Props> = ({
     setConfirmDeleteOpen(true);
   };
 
+  const nameTrim = (formData.Name || "").trim();
+  const pNameTrim = (formData.PersianName || "").trim();
+
+
   // عملیات insert پس از تایید دیالوگ
   const confirmInsert = async () => {
     try {
       const newMenuTab: MenuTab = {
         ID: formData.ID!,
-        Name: formData.Name!,
-        PersianName: (formData.PersianName || "").trim() || null,
+        Name: nameTrim || pNameTrim,           // ✅ اگر Name خالی بود از PersianName پر کن
+        PersianName: pNameTrim || null,
         Description: formData.Description || "",
         Order: formData.Order === "" ? 0 : (formData.Order as number),
         nMenuId: selectedMenuId!,
@@ -230,12 +231,16 @@ const Accordion1: React.FC<Accordion1Props> = ({
       setFormData({
         ID: newId,
         Name: "",
+        PersianName: "",
         Description: "",
         Order: "",
+        IconImageId: null,
       });
       setSelectedRow(null);
       setIconImageId(null);
       onRowClick(null);
+      setIsFaMode(true); // ✅ بعد از Add همیشه روی Name (FA) بمان
+
     } catch (error: any) {
       console.error("Error inserting MenuTab:", error);
       const data = error.response?.data;
@@ -257,7 +262,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
       const updatedMenuTab: MenuTab = {
         ID: formData.ID!,
         Name: formData.Name!,
-        PersianName: (formData.PersianName || "").trim() || null, 
+        PersianName: (formData.PersianName || "").trim() || null,
         Description: formData.Description || "",
         Order: formData.Order === "" ? 0 : (formData.Order as number),
         nMenuId: selectedMenuId!,
@@ -316,38 +321,38 @@ const Accordion1: React.FC<Accordion1Props> = ({
     }));
   };
 
-const columnDefsWithFa = useMemo(() => {
-  const defs = Array.isArray(columnDefs) ? [...columnDefs] : [];
+  const columnDefsWithFa = useMemo(() => {
+    const defs = Array.isArray(columnDefs) ? [...columnDefs] : [];
 
-  // اگر PersianName از قبل هست، همون رو برگردون
-  const hasFa = defs.some((c: any) => (c.field ?? "").toString() === "PersianName");
-  if (hasFa) return defs;
+    // اگر PersianName از قبل هست، همون رو برگردون
+    const hasFa = defs.some((c: any) => (c.field ?? "").toString() === "PersianName");
+    if (hasFa) return defs;
 
-  // ستون جدید PersianName
-  const faCol = {
-    headerName: "PersianName",
-    field: "PersianName",
-    sortable: true,
-    filter: true,
-    resizable: true,
-  };
+    // ستون جدید PersianName
+    const faCol = {
+      headerName: "PersianName",
+      field: "PersianName",
+      sortable: true,
+      filter: true,
+      resizable: true,
+    };
 
-  // محل قرارگیری: بلافاصله بعد از Name (با حساسیت کمتر به حروف)
-  const nameIdx = defs.findIndex(
-    (c: any) => (c.field ?? "").toString().toLowerCase() === "name"
-  );
+    // محل قرارگیری: بلافاصله بعد از Name (با حساسیت کمتر به حروف)
+    const nameIdx = defs.findIndex(
+      (c: any) => (c.field ?? "").toString().toLowerCase() === "name"
+    );
 
-  if (nameIdx === -1) {
-    // اگر Name پیدا نشد، PersianName را اول لیست نذار؛
-    // می‌تونیم آخر اضافه کنیم یا اول—اینجا بعد از همه اضافه می‌کنیم.
-    return [...defs, faCol];
-  }
+    if (nameIdx === -1) {
+      // اگر Name پیدا نشد، PersianName را اول لیست نذار؛
+      // می‌تونیم آخر اضافه کنیم یا اول—اینجا بعد از همه اضافه می‌کنیم.
+      return [...defs, faCol];
+    }
 
-  // درج بعد از Name
-  const before = defs.slice(0, nameIdx + 1);
-  const after = defs.slice(nameIdx + 1);
-  return [...before, faCol, ...after];
-}, [columnDefs]);
+    // درج بعد از Name
+    const before = defs.slice(0, nameIdx + 1);
+    const after = defs.slice(nameIdx + 1);
+    return [...before, faCol, ...after];
+  }, [columnDefs]);
 
 
   return (
@@ -416,20 +421,21 @@ const columnDefsWithFa = useMemo(() => {
           <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
             <div className="flex gap-4">
               {/* Name / PersianName + سوئیچر */}
+              {/* Name / PersianName + سوئیچر */}
               <div className="flex items-end gap-2 flex-1">
                 <div className="flex-1">
                   <DynamicInput
-                    name={isFaMode ? "PersianName" : t("Ribbons.Name")}
+                    name={!isFaMode ? t("Forms.PersianName") : t("Forms.Name")}
                     type="text"
-                    value={isFaMode ? (formData.PersianName ?? "") : formData.Name}
-                    placeholder={isFaMode ? "Persian name" : "Enter name"}
+                    value={!isFaMode ? (formData.PersianName ?? "") : formData.Name}
+                    placeholder={!isFaMode ? t("Forms.PersianName") : t("Forms.Name")}
                     onChange={(e) => {
                       const v = e.target.value;
                       setFormData((prev) =>
-                        isFaMode ? { ...prev, PersianName: v } : { ...prev, Name: v }
+                        !isFaMode ? { ...prev, PersianName: v } : { ...prev, Name: v }
                       );
                     }}
-                    required={!isFaMode}
+                  // required={isFaMode} // وقتی FA هستی داری Name می‌زنی و Name اجباریه
                   />
                 </div>
 
@@ -446,7 +452,11 @@ const columnDefsWithFa = useMemo(() => {
                     "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
                     "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
                   ].join(" ")}
-                  title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                  title={
+                    isFaMode
+                      ? t("Forms.SwitchToEN", { field: t("Forms.PersianName") })
+                      : t("Forms.SwitchToFA", { field: t("Forms.Name") })
+                  }
                 >
                   {isFaMode ? "FA" : "EN"}
                 </button>

@@ -144,7 +144,7 @@ const TabContent: FC<TabContentProps> = ({
   const [resetSearchKey, setResetSearchKey] = useState(0);
 
   const [persianNameInput, setPersianNameInput] = useState<string>("");
-  const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name) | true=FA(PersianName)
+  const [isFaMode, setIsFaMode] = useState(true); // false=EN(Name) | true=FA(PersianName)
 
   const [uaSelection, setUaSelection] = useState<{ gid?: string; id?: number; address?: string } | null>(null);
 
@@ -381,14 +381,14 @@ const TabContent: FC<TabContentProps> = ({
           const nameTrim = (nameInput || "").trim();
           const pNameTrim = (persianNameInput || "").trim();
 
-          if (!nameTrim) {
-            // اگر Name خالی باشد، همان پیام انگلیسی:
-            showAlert("warning", null, "Warning", "Please fill Name");
+          // ✅ فقط اگر هر دو خالی بودن خطا بده
+          if (!nameTrim && !pNameTrim) {
+            showAlert("warning", null, "Warning", "Name یا PersianName را وارد کنید");
             return;
           }
 
           await api.insertMenu({
-            Name: nameTrim,
+            Name: nameTrim || pNameTrim,      // ✅ اگر Name خالی بود از PersianName پر کن
             PersianName: pNameTrim || null,
             Description: descriptionInput,
             IsVisible: true,
@@ -397,7 +397,6 @@ const TabContent: FC<TabContentProps> = ({
           showAlert("success", null, "", t("Alerts.Added.Ribbon"));
           break;
         }
-
         case "Roles":
           if (roleRef.current) {
             const result = await roleRef.current.save();
@@ -510,9 +509,21 @@ const TabContent: FC<TabContentProps> = ({
 
       await fetchData();
       setResetSearchKey(k => k + 1);
-      setIsPanelOpen(false);
-      setIsAdding(false);
+
+      // اگر Ribbons هستیم فرم سمت چپه، لازم نیست پنل راست رو ببندی
+      if (activeSubTab !== "Ribbons") {
+        setIsPanelOpen(false);
+      }
+
+      // ✅ برای Ribbons بعد از Add آماده Add بعدی بمون
+      if (activeSubTab === "Ribbons") {
+        setIsAdding(true);   // Save فعال بمونه
+      } else {
+        setIsAdding(false);
+      }
+
       resetInputs();
+
     } catch (error: any) {
       const data = error.response?.data;
       const message =
@@ -525,6 +536,17 @@ const TabContent: FC<TabContentProps> = ({
       showAlert("error", null, t("Alerts.Titles.Error"), message);
     }
   };
+
+  useEffect(() => {
+    if (activeSubTab === "Ribbons") {
+      setIsFaMode(true); // ✅ پیشفرض EN => نمایش PersianName
+      setNameInput("");
+      setPersianNameInput("");
+      setDescriptionInput("");
+      setIsAdding(true); // ✅ آماده Add
+    }
+  }, [activeSubTab]);
+
 
   const handleUpdate = async () => {
     try {
@@ -558,17 +580,27 @@ const TabContent: FC<TabContentProps> = ({
           break;
         case "Ribbons":
           if (selectedRow) {
+            const nameTrim = (nameInput || "").trim();
+            const pNameTrim = (persianNameInput || "").trim();
+
+            if (!nameTrim && !pNameTrim) {
+              showAlert("warning", null, "Warning", "Name یا PersianName را وارد کنید");
+              return;
+            }
+
             await api.updateMenu({
               ID: selectedRow.ID,
-              Name: nameInput,
-              PersianName: persianNameInput,
+              Name: nameTrim || pNameTrim,     // ✅ fallback
+              PersianName: pNameTrim || null,
               Description: descriptionInput,
               IsVisible: selectedRow.IsVisible,
             });
+
             showAlert("success", null, "", t("Alerts.Updated.Ribbon"));
             await fetchData();
           }
           break;
+
         case "Roles":
           if (selectedRow && roleRef.current) {
             await roleRef.current.save();
@@ -675,7 +707,16 @@ const TabContent: FC<TabContentProps> = ({
           break;
       }
       setIsPanelOpen(false);
+
+      // ✅ برای Ribbons بعد از Add آماده‌ی Add بعدی بمون
+      if (activeSubTab === "Ribbons") {
+        setIsAdding(true);   // Save فعال بمونه
+      } else {
+        setIsAdding(false);
+      }
+
       resetInputs();
+
     } catch (error: any) {
       // console.error("Error updating:", error);
       // showAlert("error", null, "Error", "Failed to update data.");
@@ -700,7 +741,9 @@ const TabContent: FC<TabContentProps> = ({
   // ریست کردن مقادیر ورودی (برای تب Ribbons نمونه)
   const resetInputs = () => {
     setNameInput("");
+    setPersianNameInput("");
     setDescriptionInput("");
+    setIsFaMode(true); // پیش‌فرض EN (نمایش PersianName)
   };
 
   // رویدادهای کلیک روی ردیف
@@ -939,8 +982,11 @@ const TabContent: FC<TabContentProps> = ({
   // در تب‌های دیگر، اگر تابعی با نام checkNameFilled وجود داشت، آن را چک می‌کنیم؛ در غیر اینصورت true می‌دهیم.
   const checkNameNonEmpty = () => {
     if (activeSubTab === "Ribbons") {
-      return nameInput.trim().length > 0;
+      const nameTrim = (nameInput || "").trim();
+      const pNameTrim = (persianNameInput || "").trim();
+      return !!(nameTrim || pNameTrim);
     }
+
     const activeRef = getActiveRef();
     if (
       activeRef &&
@@ -1034,19 +1080,19 @@ const TabContent: FC<TabContentProps> = ({
                       <div className="flex items-end gap-2">
                         <div className="flex-1">
                           <DynamicInput
-                            name={isFaMode ? "PersianName" : t("Ribbons.Name")}
+                            name={isFaMode ? t("Ribbons.Name") : t("Forms.PersianName")}
                             type="text"
-                            value={isFaMode ? persianNameInput : nameInput}
-                            placeholder={isFaMode ? "Persian name" : "Enter name"}
+                            value={isFaMode ? nameInput : persianNameInput}
+                            placeholder={isFaMode ? t("Ribbons.Name") : t("Forms.PersianName")}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              if (isFaMode) setPersianNameInput(e.target.value);
-                              else setNameInput(e.target.value);
+                              if (isFaMode) setNameInput(e.target.value);
+                              else setPersianNameInput(e.target.value);
                             }}
-                            required={!isFaMode}
+                          // ✅ required رو حذف کن تا ستاره نیاد
                           />
                         </div>
 
-                        {/* دکمهٔ EN/FA (اختیاری) */}
+                        {/* دکمهٔ EN/FA */}
                         <button
                           type="button"
                           onClick={() => setIsFaMode((p) => !p)}
@@ -1059,7 +1105,11 @@ const TabContent: FC<TabContentProps> = ({
                             "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
                             "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
                           ].join(" ")}
-                          title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                          title={
+                            isFaMode
+                              ? t("Forms.SwitchToEN", { field: t("Forms.PersianName") })
+                              : t("Forms.SwitchToFA", { field: t("Forms.Name") })
+                          }
                         >
                           {isFaMode ? "FA" : "EN"}
                         </button>

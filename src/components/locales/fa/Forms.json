@@ -1,6 +1,9 @@
 {
   "Forms": {
     "Name": "نام فرم",
+    "PersianName": "نام فارسی",
+    "SwitchToEN": "رفتن به EN ({{field}})",
+    "SwitchToFA": "رفتن به FA ({{field}})",
     "Command": "کامند",
     "CategoryA": "دسته‌بندی A",
     "CategoryB": "دسته‌بندی B",
@@ -13,7 +16,6 @@
     "ChangeExcelFile": "تغییر فایل اکسل",
     "NoWordFileSelected": "هیچ فایل وردی انتخاب نشده است",
     "NoExcelFileSelected": "هیچ فایل اکسل انتخاب نشده است",
-
     "Columns": {
       "Order": "ترتیب",
       "ColumnName": "نام ستون",

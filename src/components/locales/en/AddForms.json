@@ -2,6 +2,8 @@
   "AddForms": {
     "EditColumn": "Edit Column",
     "AddNewColumn": "Add New Column",
+    "SwitchToEN": "Switch to EN ({{field}})",
+    "SwitchToFA": "Switch to FA ({{field}})",
     "Order": "Order",
     "ColumnName": "Column Name",
     "Description": "Description",

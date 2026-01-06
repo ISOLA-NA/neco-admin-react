@@ -186,7 +186,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const [wordFileName, setWordFileName] = useState<string>("");
   const [excelFileName, setExcelFileName] = useState<string>("");
 
-  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+  const [isFaMode, setIsFaMode] = useState(true); // EN=false, FA=true
 
 
   // داده‌های پروژه (جهت انتخاب پروژه)
@@ -749,41 +749,78 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
    */
   useImperativeHandle(ref, () => ({
 
+    // save: async () => {
+    //   try {
+        
+    //     const payload = {
+    //       ...formData,
+    //       ID: formData.ID ? Number(formData.ID) : 0,
+    //       PersianName: (formData.PersianName || "").trim(),
+    //       ModifiedById: formData.ModifiedById
+    //         ? formData.ModifiedById.toString()
+    //         : null,
+    //     };
+
+    //     const nameTrim = (formData.Name || "").trim();
+    //     const pNameTrim = (formData.PersianName || "").trim();
+
+    //     // ✅ فقط اگر هر دو خالی باشند خطا
+    //     if (!nameTrim && !pNameTrim) {
+    //       showAlert("warning", undefined, "Warning", "Name یا PersianName را وارد کنید");
+    //       return false;
+    //     }
+
+    //     console.log("FORMS SAVE payload =>", payload);
+
+    //     await handleSaveForm(payload);
+
+    //     // showAlert("success", undefined, "Success", "Form saved successfully!");
+    //     return true; // ✅ فرم با موفقیت ذخیره شد
+    //   } catch (error) {
+    //     console.error("Error saving form:", error);
+    //     // showAlert("error", undefined, "Error", "Failed to save form.");
+    //     return false; // ❌ ذخیره با خطا مواجه شد
+    //   }
+    // },
+
     save: async () => {
-      try {
-        const payload = {
-          ...formData,
-          ID: formData.ID ? Number(formData.ID) : 0,
-          PersianName: (formData.PersianName || "").trim(),
-          ModifiedById: formData.ModifiedById
-            ? formData.ModifiedById.toString()
-            : null,
-        };
+  try {
+    const nameTrim = (formData.Name || "").trim();
+    const pNameTrim = (formData.PersianName || "").trim();
 
-        const nameTrim = (formData.Name || "").trim();
-        const pNameTrim = (formData.PersianName || "").trim();
+    // ✅ فقط اگر هر دو خالی باشند خطا
+    if (!nameTrim && !pNameTrim) {
+      showAlert("warning", undefined, "Warning", "Name یا PersianName را وارد کنید");
+      return false;
+    }
 
-        if (!nameTrim && pNameTrim) {
-          showAlert("warning", undefined, "Warning", "Please fill Name.");
-          return false;
-        }
-        if (!nameTrim) {
-          showAlert("error", undefined, "Error", "Name cannot be empty.");
-          return false;
-        }
+    const finalName = nameTrim || pNameTrim;        // ✅ fallback
+    const finalPersianName = pNameTrim || null;     // ✅ null اگر خالی
 
-        console.log("FORMS SAVE payload =>", payload);
+    const payload = {
+      ...formData,
+      ID: formData.ID ? Number(formData.ID) : 0,
+      Name: finalName,
+      PersianName: finalPersianName,
+      ModifiedById: formData.ModifiedById
+        ? formData.ModifiedById.toString()
+        : null,
+    };
 
-        await handleSaveForm(payload);
+    console.log("FORMS SAVE payload =>", payload);
 
-        // showAlert("success", undefined, "Success", "Form saved successfully!");
-        return true; // ✅ فرم با موفقیت ذخیره شد
-      } catch (error) {
-        console.error("Error saving form:", error);
-        // showAlert("error", undefined, "Error", "Failed to save form.");
-        return false; // ❌ ذخیره با خطا مواجه شد
-      }
-    },
+    await handleSaveForm(payload);
+
+    // ✅ اختیاری: بعد Save روی FA بمان
+    setIsFaMode(true);
+
+    return true;
+  } catch (error) {
+    console.error("Error saving form:", error);
+    return false;
+  }
+},
+
   }));
 
 
@@ -809,13 +846,13 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <DynamicInput
-                name={isFaMode ? "PersianName" : t("Forms.Name")}
+                name={!isFaMode ? t("Forms.PersianName") : t("Forms.Name")}
                 type="text"
-                value={isFaMode ? (formData.PersianName ?? "") : formData.Name}
+                value={!isFaMode ? (formData.PersianName ?? "") : formData.Name}
                 onChange={(e) =>
-                  handleChange(isFaMode ? "PersianName" : "Name", e.target.value)
+                  handleChange(!isFaMode ? "PersianName" : "Name", e.target.value)
                 }
-                required={!isFaMode}
+              // required={isFaMode}
               />
             </div>
 
@@ -832,7 +869,11 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
                 "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
                 "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
               ].join(" ")}
-              title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+              title={
+                isFaMode
+                  ? t("Forms.SwitchToEN", { field: t("Forms.PersianName") })
+                  : t("Forms.SwitchToFA", { field: t("Forms.Name") })
+              }
             >
               {isFaMode ? "FA" : "EN"}
             </button>
@@ -1058,7 +1099,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           isEdit={!!editingData}
           entityTypeId={formData.ID}
           onClose={handleAddModalClose}
-          
+
           onSave={() => {
             refreshEntityFields();
             handleAddModalClose();

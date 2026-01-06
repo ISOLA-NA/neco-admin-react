@@ -239,8 +239,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInAlert: existingData ? existingData.ShowInAlert : false,
     typeOfInformation: existingData
       ? Object.keys(columnTypeMapping).find(
-          (key) => columnTypeMapping[key] === existingData.ColumnType
-        ) || "component1"
+        (key) => columnTypeMapping[key] === existingData.ColumnType
+      ) || "component1"
       : "component1",
     required: existingData ? existingData.IsRequire : false,
     mainColumns: existingData ? existingData.IsMainColumn : false,
@@ -257,7 +257,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   const [dynamicMeta, setDynamicMeta] = useState<any>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+  const [isFaMode, setIsFaMode] = useState(true); // EN=false, FA=true
   const [inventoryErrors, setInventoryErrors] = useState<string[]>([]);
 
   const [metaCore, setMetaCore] = useState<MetaCore>({
@@ -359,7 +359,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         metaType5: toStrOrNull(existingData.metaType5),
         metaTypeJson:
           typeof existingData.metaTypeJson === "string" &&
-          existingData.metaTypeJson.trim() !== ""
+            existingData.metaTypeJson.trim() !== ""
             ? existingData.metaTypeJson
             : null,
       });
@@ -368,13 +368,13 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       setMetaExtra({
         metaType4:
           typeof existingData.metaType4 === "string" &&
-          existingData.metaType4.trim() !== ""
+            existingData.metaType4.trim() !== ""
             ? existingData.metaType4
             : "",
         // ✅ اگر لازم شد (برای همخوانی)، این هم نگه می‌داریم
         metaTypeJson:
           typeof existingData.metaTypeJson === "string" &&
-          existingData.metaTypeJson.trim() !== ""
+            existingData.metaTypeJson.trim() !== ""
             ? existingData.metaTypeJson
             : null,
       });
@@ -449,8 +449,12 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     setIsLoading(true);
     setErrors({});
 
-    if (!formData.formName.trim()) {
-      setErrors({ formName: "Column Name is required." });
+    const nameTrim = (formData.formName || "").trim();
+    const pNameTrim = (formData.PersianName || "").trim();
+
+    // ✅ فقط اگر هر دو خالی بودن خطا بده
+    if (!nameTrim && !pNameTrim) {
+      setErrors({ formName: "Please fill Name or PersianName." });
       setIsLoading(false);
       return;
     }
@@ -459,8 +463,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
     const lookupModeValue =
       metaCore.LookupMode === undefined ||
-      metaCore.LookupMode === null ||
-      metaCore.LookupMode === ""
+        metaCore.LookupMode === null ||
+        metaCore.LookupMode === ""
         ? null
         : Number(metaCore.LookupMode);
 
@@ -472,28 +476,14 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       LookupMode: metaCore.LookupMode ?? "",
     };
 
-    const nameTrim = (formData.formName || "").trim();
-    const pNameTrim = (formData.PersianName || "").trim();
-
-    if (!nameTrim && pNameTrim) {
-      setErrors({ formName: "Please fill English Column Name." });
-      setIsLoading(false);
-      return;
-    }
-    if (!nameTrim) {
-      setErrors({ formName: "Column Name is required." });
-      setIsLoading(false);
-      return;
-    }
-
     // ✅ FIX: در Add اگر metaTypeJson از onMetaExtraChange آمده باشد، اینجا قبل از هر کاری جمعش کن
     // (حتی اگر metaCore.metaTypeJson به‌خاطر setState لحظه‌ای هنوز آپدیت نشده باشد)
     const finalMetaTypeJson =
       !isEmptyMetaJsonStr(metaCoreForSubmit.metaTypeJson)
         ? metaCoreForSubmit.metaTypeJson
         : !isEmptyMetaJsonStr(metaExtra.metaTypeJson)
-        ? metaExtra.metaTypeJson
-        : metaCoreForSubmit.metaTypeJson;
+          ? metaExtra.metaTypeJson
+          : metaCoreForSubmit.metaTypeJson;
 
     metaCoreForSubmit = {
       ...metaCoreForSubmit,
@@ -584,7 +574,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
     // ✅ ساخت payload
     const payload: any = {
-      DisplayName: formData.formName,
+      DisplayName: (formData.formName || "").trim(),
       PersianName: (formData.PersianName || "").trim(),
       IsShowGrid: formData.showInListView,
       IsEditableInWF: formData.isEditableInWf,
@@ -640,7 +630,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
       const newField = {
         ID: newId,
-        Name: formData.formName,
+        Name: (formData.formName || "").trim() || (formData.PersianName || "").trim(),
       };
 
       if (onSave) onSave(newField);
@@ -684,7 +674,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     "component18", // Seqnial Number
     "component16", // Table
     "component12", // Table
-    "component34", 
+    "component34",
   ];
 
   // رندر کنترلر داینامیک
@@ -748,17 +738,17 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
     // ⛔️ برای component34 عمداً onMetaExtraChange را پاس نده
     const maybeExtra =
-  formData.typeOfInformation === "component34"
-    ? { onMetaExtraChange: handleMetaExtraChange }
-    : { onMetaExtraChange: handleMetaExtraChange }; // (عملاً همه)
+      formData.typeOfInformation === "component34"
+        ? { onMetaExtraChange: handleMetaExtraChange }
+        : { onMetaExtraChange: handleMetaExtraChange }; // (عملاً همه)
 
     /* ✅ اگر کنترلر Lookup است، فیلدهای فرمِ جاری و entityTypeId را هم پاس بده */
     const maybeLookupBridge =
       formData.typeOfInformation === "component7"
         ? {
-            srcFields: Array.isArray(srcFields) ? srcFields : undefined,
-            srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
-          }
+          srcFields: Array.isArray(srcFields) ? srcFields : undefined,
+          srcEntityTypeId: (srcEntityTypeId ?? entityTypeId) as any,
+        }
         : {};
 
     const maybeInventoryErrors =
@@ -798,26 +788,22 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
           onSubmit={handleSubmit}
         >
           {/* Column Name (EN/FA) */}
+          {/* Column Name (EN/FA) — طبق خواسته شما: EN => PersianName | FA => formName */}
           <div className="md:col-span-1">
             <div className="flex items-end gap-2">
               <div className="flex-1">
                 <DynamicInput
-                  name={isFaMode ? "PersianName" : t("AddForms.ColumnName")}
+                  name={!isFaMode ? t("Forms.PersianName") : t("AddForms.ColumnName")}
                   type="text"
-                  value={
-                    isFaMode
-                      ? formData.PersianName || ""
-                      : formData.formName || ""
-                  }
+                  value={!isFaMode ? (formData.PersianName || "") : (formData.formName || "")}
                   onChange={(e) => {
                     const v = e.target.value;
                     setFormData((prev) =>
-                      isFaMode
-                        ? { ...prev, PersianName: v }
-                        : { ...prev, formName: v }
+                      !isFaMode ? { ...prev, PersianName: v } : { ...prev, formName: v }
                     );
                   }}
                   labelClassName="text-gray-700 font-medium"
+                // required={isFaMode} // وقتی FA هستی داری formName می‌زنی، پس همون اجباریه
                 />
               </div>
 
@@ -836,8 +822,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 ].join(" ")}
                 title={
                   isFaMode
-                    ? "Switch to EN (formName)"
-                    : "Switch to FA (PersianName)"
+                    ? t("AddForms.SwitchToEN", { field: t("Forms.PersianName") })
+                    : t("AddForms.SwitchToFA", { field: t("AddForms.ColumnName") })
                 }
               >
                 {isFaMode ? "FA" : "EN"}
@@ -845,15 +831,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             </div>
 
             {/* خطای اعتبارسنجی با ارتفاع ثابت */}
-            <p
-              className={`mt-1 text-xs ${
-                errors.formName ? "text-red-500" : "invisible"
-              } h-4`}
-            >
+            <p className={`mt-1 text-xs ${errors.formName ? "text-red-500" : "invisible"} h-4`}>
               {errors.formName || "placeholder"}
             </p>
           </div>
-
           <div className="md:col-span-1">
             <DynamicInput
               name={t("AddForms.Order")}
@@ -1146,9 +1127,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
 
             <button
               type="submit"
-              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               disabled={isLoading}
             >
               {isLoading
@@ -1156,8 +1136,8 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   ? t("AddForms.Updating")
                   : t("AddForms.Adding")
                 : isEdit
-                ? t("AddForms.UpdateColumn")
-                : t("AddForms.AddColumn")}
+                  ? t("AddForms.UpdateColumn")
+                  : t("AddForms.AddColumn")}
             </button>
           </div>
         </form>

@@ -1,6 +1,9 @@
 {
   "Forms": {
     "Name": "Name",
+    "PersianName": "Persian Name",
+    "SwitchToEN": "Switch to EN ({{field}})",
+    "SwitchToFA": "Switch to FA ({{field}})",
     "Command": "Command",
     "CategoryA": "Category A",
     "CategoryB": "Category B",

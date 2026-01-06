@@ -139,51 +139,52 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       useState<boolean>(false);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-    const [isFaMode, setIsFaMode] = useState(false); // false=EN(Name), true=FA(PersianName)
+    const [isFaMode, setIsFaMode] = useState(true); // ✅ پیش‌فرض FA => Name
+    // false=EN(Name), true=FA(PersianName)
     const [pNameValue, setPNameValue] = useState<string>(""); // PersianName
 
 
     // داخل ApprovalFlowsTab.tsx، کنار validateMinFields:
+
     const validateForm = (): boolean => {
-  const nameTrim = (nameValue || "").trim();
-  const pNameTrim = (pNameValue || "").trim();
+      const nameTrim = (nameValue || "").trim();
+      const pNameTrim = (pNameValue || "").trim();
 
-  if (!nameTrim && pNameTrim) {
-    showAlert("warning", null, "", t("AddApprovalFlows.PleaseFillName") || "Please fill Name");
-    return false;
-  }
-  if (!nameTrim) {
-    showAlert("error", null, "", t("AddApprovalFlows.NameRequired"));
-    return false;
-  }
-
-  // ادامه‌ی اعتبارسنجی فعلی‌ات …
-  if (!isStage) {
-    if (!acceptChecked && !rejectChecked) {
-      showAlert("error", null, "", t("AddApprovalFlows.SelectMinAcceptOrMinReject"));
-      return false;
-    }
-    if (acceptChecked) {
-      const v = Number(minAcceptValue);
-      if (!Number.isFinite(v) || v <= 0) {
-        showAlert("error", null, "", t("AddApprovalFlows.InvalidMinAccept"));
+      // ✅ فقط اگر هر دو خالی بودن خطا بده
+      if (!nameTrim && !pNameTrim) {
+        showAlert("error", null, "", "Name یا PersianName را وارد کنید");
         return false;
       }
-    }
-    if (rejectChecked) {
-      const v = Number(minRejectValue);
-      if (!Number.isFinite(v) || v <= 0) {
-        showAlert("error", null, "", t("AddApprovalFlows.InvalidMinReject"));
-        return false;
+
+      // ادامه‌ی اعتبارسنجی‌های قبلی شما (MinAccept/MinReject/...) بدون تغییر
+      if (!isStage) {
+        if (!acceptChecked && !rejectChecked) {
+          showAlert("error", null, "", t("AddApprovalFlows.SelectMinAcceptOrMinReject"));
+          return false;
+        }
+        if (acceptChecked) {
+          const v = Number(minAcceptValue);
+          if (!Number.isFinite(v) || v <= 0) {
+            showAlert("error", null, "", t("AddApprovalFlows.InvalidMinAccept"));
+            return false;
+          }
+        }
+        if (rejectChecked) {
+          const v = Number(minRejectValue);
+          if (!Number.isFinite(v) || v <= 0) {
+            showAlert("error", null, "", t("AddApprovalFlows.InvalidMinReject"));
+            return false;
+          }
+        }
+        if (tableData.length === 0) {
+          showAlert("error", null, "", t("AddApprovalFlows.ApprovalContextMustHaveOneRow"));
+          return false;
+        }
       }
-    }
-    if (tableData.length === 0) {
-      showAlert("error", null, "", t("AddApprovalFlows.ApprovalContextMustHaveOneRow"));
-      return false;
-    }
-  }
-  return true;
-};
+
+      return true;
+    };
+
 
 
     // گرفتن لیست نقش‌ها
@@ -441,6 +442,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 
     // مقداردهی اولیه در صورت editData
     useEffect(() => {
+      setIsFaMode(true);
       if (editData) {
         setNameValue(editData.Name || "");
         setPNameValue(editData.PersianName ?? "");
@@ -791,25 +793,34 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
             {/* Name / PersianName با دکمه کوچک داخل اینپوت */}
             <div className="sm:col-span-1 relative">
               <DynamicInput
-                name={isFaMode ? "PersianName" : t("AddApprovalFlows.Name")}
+                name={
+                  isFaMode
+                    ? t("AddApprovalFlows.Name", { defaultValue: "Name" })
+                    : t("Forms.PersianName", { defaultValue: "PersianName" })
+                }
                 type="text"
-                value={isFaMode ? (pNameValue ?? "") : (nameValue ?? "")}
-                onChange={(e) => (isFaMode ? setPNameValue(e.target.value) : setNameValue(e.target.value))}
-                required={!isFaMode}
-                className="w-full"                  // ← استایل فعلی‌ات
+                value={isFaMode ? (nameValue ?? "") : (pNameValue ?? "")}
+                onChange={(e) =>
+                  isFaMode ? setNameValue(e.target.value) : setPNameValue(e.target.value)
+                }
+                className="w-full"
               />
 
-              {/* چیپ EN/FA داخل خود اینپوت */}
               <button
                 type="button"
                 onClick={() => setIsFaMode((p) => !p)}
-                title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
+                title={
+                  isFaMode
+                    ? t("AddForms.SwitchToEN", { defaultValue: "Switch to EN (PersianName)" })
+                    : t("AddForms.SwitchToFA", { defaultValue: "Switch to FA (Name)" })
+                }
                 className="absolute right-2 top-[38px] -translate-y-1/2 h-6 px-2 rounded-md text-[10px] font-semibold
-                 bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-sm
-                 transition-transform active:scale-95 z-10"
+    bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-sm
+    transition-transform active:scale-95 z-10"
               >
                 {isFaMode ? "FA" : "EN"}
               </button>
+
             </div>
 
             {/* بقیه فیلدها مثل قبل... */}
