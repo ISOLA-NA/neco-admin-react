@@ -93,7 +93,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   // --- Form Template Data (from API)
   const [formTemplates, setFormTemplates] = useState<ItemType[]>([]);
   const [loadingFormTemplates, setLoadingFormTemplates] = useState(false);
-  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
+  const [isFaMode, setIsFaMode] = useState(true); // EN=false, FA=true
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -281,35 +281,44 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   // --- Save Function (with correct type for API) ---
   const save = async (): Promise<boolean> => {
     try {
-      if (!OdpData.Name.trim()) {
-        showAlert("warning", null, "", t("ODP.Alerts.Messages.NameRequired"));
-        return false;
-      }
-      if (!OdpData.Address.trim()) {
-        showAlert(
-          "warning",
-          null,
-          "",
-          t("ODP.Alerts.Messages.AddressRequired")
-        );
+      const nameTrim = (OdpData.Name || "").trim();
+      const pNameTrim = (OdpData.PersianName || "").trim();
+
+      // ✅ فقط اگر هر دو خالی باشند خطا
+      if (!nameTrim && !pNameTrim) {
+        showAlert("warning", null, "", "Name یا PersianName را وارد کنید");
         return false;
       }
 
+      // ✅ Address همچنان اجباری
+      if (!OdpData.Address.trim()) {
+        showAlert("warning", null, "", t("ODP.Alerts.Messages.AddressRequired"));
+        return false;
+      }
+
+      // ✅ fallback
+      const finalName = nameTrim || pNameTrim;
+      const finalPersianName = pNameTrim || null;
+
       const finalRelateProjectsStr =
-        selectedProjectIds.join("|") +
-        (selectedProjectIds.length > 0 ? "|" : "");
+        selectedProjectIds.join("|") + (selectedProjectIds.length > 0 ? "|" : "");
 
       const { ID, ...restOdp } = OdpData;
 
       const dataToSave: OdpWithExtra = {
         ID: isEditMode ? selectedRow!.ID! : 0,
         ...restOdp,
+
+        // ✅ override with final values
+        Name: finalName,
+        PersianName: finalPersianName,
         ModifiedById:
           OdpData.ModifiedById != null ? String(OdpData.ModifiedById) : null,
-        PersianName: (OdpData.PersianName ?? "").trim(),
         ProjectsStr: finalRelateProjectsStr,
         LastModified: new Date().toISOString(),
         IsVisible: OdpData.IsVisible ?? true,
+
+        // extra fields
         EntityTypeName: "",
         ProgramTemplateIDName: "",
         WFTemplateName: "",
@@ -320,19 +329,21 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 
       if (isEditMode && typeof dataToSave.ID === "number") {
         await api.updateOdp(dataToSave);
-        // showAlert("success", null, "Success", "ODP updated successfully.");/
       } else {
         await api.insertOdp(dataToSave);
         console.log("ODP payload about to save:", dataToSave);
-
-        // showAlert("success", null, "Success", "ODP added successfully.");
       }
+
+      // ✅ اختیاری: بعد save روی FA بماند
+      setIsFaMode(true);
+
       return true;
     } catch (error) {
       showAlert("error", null, "Error", "Saving ODP failed.");
       return false;
     }
   };
+
 
   useImperativeHandle(ref, () => ({
     save,
@@ -363,7 +374,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         label: item.Name,
       }))}
       selectedValue={OdpData.nEntityTypeID?.toString() ?? ""}
-      onChange={() => {}}
+      onChange={() => { }}
       label="Form Template"
       disabled
       loading={loadingFormTemplates}
@@ -380,7 +391,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         label: item.Name,
       }))}
       selectedValue={OdpData.nWFTemplateID?.toString() ?? ""}
-      onChange={() => {}}
+      onChange={() => { }}
       label="Approval Flow Template"
       disabled
       loading={loadingApprovalFlows}
@@ -402,14 +413,13 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           {/* ← فاصله را به کانتینر دادیم */}
           <div className="flex-1">
             <DynamicInput
-              name={isFaMode ? "PersianName" : t("ODP.ODPName")}
+              name={isFaMode ? t("ODP.ODPName") : "PersianName"}
               type="text"
-              value={isFaMode ? OdpData.PersianName ?? "" : OdpData.Name}
+              value={isFaMode ? (OdpData.Name ?? "") : (OdpData.PersianName ?? "")}
               placeholder=""
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange(isFaMode ? "PersianName" : "Name", e.target.value)
+                handleChange(isFaMode ? "Name" : "PersianName", e.target.value)
               }
-              required={!isFaMode}
               className="mb-0"
               labelClassName="text-gray-700 font-medium"
             />
@@ -419,7 +429,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
             onClick={() => setIsFaMode((p) => !p)}
             className={[
               "shrink-0 inline-flex items-center justify-center",
-              "h-8 px-3 rounded-lg self-end mb-1" ,
+              "h-8 px-3 rounded-lg self-end mb-1",
               "bg-gradient-to-r from-fuchsia-500 to-pink-500",
               "text-white text-xs font-semibold tracking-wide",
               "shadow shadow-pink-200/50",
@@ -427,9 +437,8 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
               "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-md hover:scale-[1.01]",
               "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
             ].join(" ")}
-            title={
-              isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"
-            }
+           title={isFaMode ? "Switch to EN (PersianName)" : "Switch to FA (Name)"}
+
           >
             {isFaMode ? "FA" : "EN"}
           </button>
