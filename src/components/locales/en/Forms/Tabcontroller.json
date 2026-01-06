@@ -1,9 +1,11 @@
 {
     "tabcontroller": {
       "Placeholders": {
-        "EnterEachTab": "Type each tab on a separate line",
-        "Tab":"Tab"
-      }
+      "EnterEachTab": "Type each tab on a separate line",
+      "Tab": "Tab",
+      "EnterEachTabFa": "Type each tab on a separate line for Persian names",
+      "TabFa": "Persian Tabs"
+    }
     }
   }
   

@@ -6,8 +6,11 @@
         "ColumnTitles": "عناوین ستون‌ها"
       },
       "Placeholders": {
-        "EnterEachHeaderOnNewLine": "هر عنوان ستون را در یک خط بنویسید"
-      },
+      "EnterEachTab": "هر تب را در یک خط جداگانه بنویسید",
+      "Tab": "تب‌ها",
+      "EnterEachTabFa": "برای نام‌های فارسی، هر تب را در یک خط جداگانه بنویسید",
+      "TabFa": "تب‌های فارسی"
+    },
       "Buttons": {
         "DefVal": "مقادیر پیش‌فرض",
         "AddNew": "افزودن ردیف",
