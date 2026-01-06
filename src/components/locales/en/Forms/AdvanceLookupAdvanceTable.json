@@ -4,7 +4,8 @@
       "ForFirstFormGetInformationFrom": "For first form, Get information from",
       "ForSecondFormGetInformationFrom": "For second form, Get information from",
       "LookupMode": "Lookup Mode",
-      "ShowColumnsOfFirstForm": "Show columns of first form as below"
+      "ShowColumnsOfFirstForm": "Show columns of first form as below",
+      "DefaultProjects": "Default projects"
     },
     "Columns": {
       "SrcField": "Src Field",
@@ -19,6 +20,23 @@
       "AddByApproval": "Add access by approval",
       "EditByApproval": "Edit access by approval",
       "DeleteByApproval": "Delete access by approval"
+    },
+    "Limits": {
+      "AllowedAddedRowsByActor": "Allowed added numbers of rows by actor:",
+      "AllowedAddedRowsByApproval": "Allowed added numbers of rows by approval:"
+    },
+    "Actions": {
+      "Add": "Add",
+      "Clear": "Clear",
+      "Remove": "Remove",
+      "Select": "Select"
+    },
+    "Messages": {
+      "NoDefaultValuesSelected": "No default values selected",
+      "SelectFirstFormFirst": "Select first form first"
+    },
+    "Table": {
+      "ColumnHeader": "Column"
     }
   }
 }

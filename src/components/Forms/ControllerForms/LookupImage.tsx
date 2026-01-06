@@ -78,6 +78,11 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
   // ✅ مبنا فقط metaType4 است
   const prevMeta4Ref = useRef<string | undefined>(data?.metaType4);
 
+  // ✅ برای Delete: ردیف انتخاب‌شده جدول
+  const [selectedTableRow, setSelectedTableRow] = useState<any>(null);
+  // ✅ برای ریست انتخاب بعد از Add/Delete (اگر DataTable انتخاب قبلی را نگه دارد)
+  const [tableGridKey, setTableGridKey] = useState<number>(0);
+
   /* -------- dynamic lists -------- */
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
   const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
@@ -151,9 +156,7 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
     const incomingRemove =
       (data as any)?.CountInReject ?? (data as any)?.removeSameName ?? false;
 
-    setRemoveSameName((prev) =>
-      prev === !!incomingRemove ? prev : !!incomingRemove
-    );
+    setRemoveSameName((prev) => (prev === !!incomingRemove ? prev : !!incomingRemove));
 
     // ✅ جدول فقط از metaType4
     const incomingMeta4 =
@@ -290,8 +293,14 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
     () => new Map(baseFields.map((f: any) => [String(f.ID), f.DisplayName])),
     [baseFields]
   );
-  const fieldsSig = useMemo(() => fields.map((f: any) => String(f.ID)).join("|"), [fields]);
-  const baseFieldsSig = useMemo(() => baseFields.map((f: any) => String(f.ID)).join("|"), [baseFields]);
+  const fieldsSig = useMemo(
+    () => fields.map((f: any) => String(f.ID)).join("|"),
+    [fields]
+  );
+  const baseFieldsSig = useMemo(
+    () => baseFields.map((f: any) => String(f.ID)).join("|"),
+    [baseFields]
+  );
 
   /* -------- emptiness rules -------- */
   const bothEmpty =
@@ -346,20 +355,29 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
   }, [baseFieldsSig, noDesOptions]);
 
   /* -------- DataTable columns -------- */
+  // ✅ اصلاحات:
+  // 1) Src اول، Des آخر
+  // 2) برای اینکه در Edit مقدارها درست دیده شوند: formatValue + valueParser
   const columnDefs = useMemo(
     () => [
       {
-        headerName: t("LookupUmage.Columns.DesField"),
-        field: "DesFieldID",
+        headerName: t("LookupUmage.Columns.SrcField"),
+        field: "SrcFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: () => ({
-          values: noDesOptions ? [] : Array.from(baseFieldsMap.keys()),
-        }),
+        cellEditorParams: () => {
+          const values = bothEmpty ? [] : Array.from(fieldsMap.keys());
+          return {
+            values,
+            formatValue: (value: any) => {
+              const key = String(value ?? "");
+              return fieldsMap.get(key) ?? key;
+            },
+          };
+        },
         valueFormatter: (p: any) =>
-          noDesOptions
-            ? ""
-            : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+          bothEmpty ? "" : fieldsMap.get(String(p.value)) ?? String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -368,9 +386,17 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
         field: "FilterOpration",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: operationList.map((o) => o.value) },
+        cellEditorParams: {
+          values: operationList.map((o) => o.value),
+          formatValue: (value: any) => {
+            const v = String(value ?? "");
+            return operationList.find((o) => o.value === v)?.label ?? v;
+          },
+        },
         valueFormatter: (p: any) =>
-          operationList.find((o) => o.value === p.value)?.label || p.value,
+          operationList.find((o) => o.value === String(p.value))?.label ||
+          String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -378,19 +404,30 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
         headerName: t("LookupUmage.Columns.FilterText"),
         field: "FilterText",
         editable: true,
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
       {
-        headerName: t("LookupUmage.Columns.SrcField"),
-        field: "SrcFieldID",
+        headerName: t("LookupUmage.Columns.DesField"),
+        field: "DesFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: () => ({
-          values: bothEmpty ? [] : Array.from(fieldsMap.keys()),
-        }),
+        cellEditorParams: () => {
+          const values = noDesOptions ? [] : Array.from(baseFieldsMap.keys());
+          return {
+            values,
+            formatValue: (value: any) => {
+              const key = String(value ?? "");
+              return baseFieldsMap.get(key) ?? key;
+            },
+          };
+        },
         valueFormatter: (p: any) =>
-          bothEmpty ? "" : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+          noDesOptions
+            ? ""
+            : baseFieldsMap.get(String(p.value)) ?? String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -408,17 +445,28 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
   );
 
   /* -------- table row ops -------- */
+  // ✅ Add: خالی اضافه شود
   const addRow = () => {
-    const defaultSrc = bothEmpty ? "" : (fields[0]?.ID ?? "");
-    const defaultDes = noDesOptions ? "" : (baseFields[0]?.ID ?? "");
     const newRow: TableRow = {
       ID: genId(),
-      SrcFieldID: defaultSrc ? String(defaultSrc) : "",
+      SrcFieldID: "",
       FilterOpration: "",
       FilterText: "",
-      DesFieldID: defaultDes ? String(defaultDes) : "",
+      DesFieldID: "",
     };
-    setTableData([...tableData, newRow]);
+    setTableData((prev) => [...prev, newRow]);
+    setSelectedTableRow(null);
+    setTableGridKey((k) => k + 1);
+  };
+
+  // ✅ Delete: حذف ردیف انتخاب شده
+  const deleteRow = () => {
+    const id = selectedTableRow?.ID ? String(selectedTableRow.ID) : "";
+    if (!id) return;
+
+    setTableData((prev) => prev.filter((r) => String(r.ID) !== id));
+    setSelectedTableRow(null);
+    setTableGridKey((k) => k + 1);
   };
 
   const handleCellValueChanged = (e: any) => {
@@ -496,16 +544,20 @@ const LookupUmage: React.FC<LookupUmageProps> = ({
 
       {/* جدول پایین */}
       <DataTable
-        key={`dt-umage-${fieldsSig}-${baseFieldsSig}-${noDesOptions ? "noDes" : "hasDes"}-${bothEmpty ? "srcEmpty" : "srcHas"}`}
+        key={`dt-umage-${tableGridKey}-${fieldsSig}-${baseFieldsSig}-${
+          noDesOptions ? "noDes" : "hasDes"
+        }-${bothEmpty ? "srcEmpty" : "srcHas"}`}
         columnDefs={columnDefs}
         rowData={tableData}
         domLayout="autoHeight"
         showAddIcon
+        showDeleteIcon
         showEditIcon={false}
-        showDeleteIcon={false}
         showDuplicateIcon={false}
         showSearch={false}
         onAdd={addRow}
+        onDelete={deleteRow}
+        setSelectedRowData={setSelectedTableRow}
         onCellValueChanged={handleCellValueChanged}
         gridOptions={{
           singleClickEdit: true,

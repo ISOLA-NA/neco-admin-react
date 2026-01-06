@@ -4,7 +4,8 @@
       "ForFirstFormGetInformationFrom": "برای فرم اول، دریافت اطلاعات از فرم",
       "ForSecondFormGetInformationFrom": "برای فرم دوم، دریافت اطلاعات از فرم",
       "LookupMode": "حالت جست‌وجو (Lookup)",
-      "ShowColumnsOfFirstForm": "ستون‌های فرم اول به شکل زیر نمایش داده شوند"
+      "ShowColumnsOfFirstForm": "ستون‌های فرم اول به شکل زیر نمایش داده شوند",
+      "DefaultProjects": "پروژه‌های پیش‌فرض"
     },
     "Columns": {
       "SrcField": "فیلد مبدأ",
@@ -19,6 +20,23 @@
       "AddByApproval": "افزودن با تأیید",
       "EditByApproval": "ویرایش با تأیید",
       "DeleteByApproval": "حذف با تأیید"
+    },
+    "Limits": {
+      "AllowedAddedRowsByActor": "تعداد مجاز اضافه‌کردن ردیف توسط کاربر:",
+      "AllowedAddedRowsByApproval": "تعداد مجاز اضافه‌کردن ردیف با تأیید:"
+    },
+    "Actions": {
+      "Add": "افزودن",
+      "Clear": "پاک کردن",
+      "Remove": "حذف",
+      "Select": "انتخاب"
+    },
+    "Messages": {
+      "NoDefaultValuesSelected": "هیچ مقدار پیش‌فرضی انتخاب نشده است",
+      "SelectFirstFormFirst": "ابتدا فرم اول را انتخاب کنید"
+    },
+    "Table": {
+      "ColumnHeader": "ستون"
     }
   }
 }

@@ -168,7 +168,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   srcEntityTypeId,
 }) => {
   const { t, i18n } = useTranslation();
-  const isRtl = i18n.dir() === "rtl";
+  const uiDir = i18n.dir() as "rtl" | "ltr";
+  const isRtl = uiDir === "rtl";
 
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
@@ -316,7 +317,10 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     });
 
     // ✅ FIX: اینجا metaType4 درست (همون nextMeta.metaType4) رو همزمان بفرست
-    pokeParentWithMetaJson(nextMeta?.metaType4 ?? meta?.metaType4 ?? "[]", metaTypeJsonStr);
+    pokeParentWithMetaJson(
+      nextMeta?.metaType4 ?? meta?.metaType4 ?? "[]",
+      metaTypeJsonStr
+    );
   };
 
   const patchMetaJson = (patch: (prev: any) => any) => {
@@ -398,8 +402,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       );
     };
 
-    const actorLabel = "Allowed added numbers of rows by actor:";
-    const approvalLabel = "Allowed added numbers of rows by approval:";
+    const actorLabel = t("AdvanceLookupAdvanceTable.Limits.AllowedAddedRowsByActor");
+    const approvalLabel = t("AdvanceLookupAdvanceTable.Limits.AllowedAddedRowsByApproval");
 
     return (
       <div className="w-full flex flex-col md:flex-row gap-2 md:gap-3 items-stretch">
@@ -420,7 +424,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
                 onChange={(e) => updateAllowedRows("actor", e.target.value)}
                 label={actorLabel}
                 labelClassName="text-[11px] font-normal text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis mb-0.5"
-                placeholder="actor"
+                placeholder=""
                 min={0}
                 step={1}
                 className="w-full"
@@ -436,7 +440,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
                 onChange={(e) => updateAllowedRows("approval", e.target.value)}
                 label={approvalLabel}
                 labelClassName="text-[11px] font-normal text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis mb-0.5"
-                placeholder="approval"
+                placeholder=""
                 min={0}
                 step={1}
                 className="w-full"
@@ -451,6 +455,27 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
 
   // ─── Sync from props.data (فقط در صورت تغییر واقعی) ───
   const prevIncomingMetaJsonStrRef = useRef<string | null>(null);
+
+  const isPlainEmptyObject = (o: any) =>
+    !o || (typeof o === "object" && !Array.isArray(o) && Object.keys(o).length === 0);
+
+  // اگر metaTypeJson ورودی “عملاً خالی” باشد (null, "", "{}", یا {})
+  const isEffectivelyEmptyMetaJson = (v: any) => {
+    if (v === undefined || v === null) return true;
+
+    if (typeof v === "object") return isPlainEmptyObject(v);
+
+    const s = String(v).trim();
+    if (!s) return true;
+    if (s === "{}") return true;
+
+    try {
+      const obj = JSON.parse(s);
+      return isPlainEmptyObject(obj);
+    } catch {
+      return false;
+    }
+  };
 
   useEffect(() => {
     const nextMeta = {
@@ -485,8 +510,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     if (metaChanged) setMeta(nextMeta);
     if (rowsChanged) setTableData(nextRows);
 
-    if (removeSameName !== !!data.CountInReject)
-      setRemoveSameName(!!data.CountInReject);
+    if (removeSameName !== !!data.CountInReject) setRemoveSameName(!!data.CountInReject);
     if (oldLookup !== !!data.BoolMeta1) setOldLookup(!!data.BoolMeta1);
 
     if (metaChanged) initialModeRef.current = true;
@@ -499,8 +523,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     const baseObj = incomingIsEmpty ? prevObj : { ...prevObj, ...incomingObj };
 
     if (!incomingIsEmpty) {
-      const incomingAccessStr =
-        typeof baseObj?.access === "string" ? baseObj.access : "";
+      const incomingAccessStr = typeof baseObj?.access === "string" ? baseObj.access : "";
       const nextAccess: Record<string, boolean> = {};
       ACCESS_FLAGS.forEach((f) => {
         nextAccess[f.key] = incomingAccessStr.includes(f.key + "-");
@@ -653,24 +676,43 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // ✅ parent باید metaType4 جدید رو بگیره
     onMetaExtraChange?.({ metaType4: json });
 
-    // ✅ emit هم با nextMeta صدا زده می‌شه، و چون pokeParentWithMetaJson الان metaType4 درست می‌فرسته
+    // ✅ emit هم با nextMeta صدا زده می‌شه
     emitMetaChange(next);
   };
 
   const firstEmpty = meta.metaType1.trim() === "";
   const noDesOptions = baseFields.length === 0;
 
+  // ✅ برای Delete: ردیف انتخاب‌شده جدول پایین
+  const [selectedTableRow, setSelectedTableRow] = useState<any>(null);
+
+  // ✅ برای ریست کردن انتخاب DataTable بعد از Add/Delete (remount)
+  const [tableGridKey, setTableGridKey] = useState<number>(0);
+
+  // ✅ FIX: هنگام Add، هیچ ستونی پیش‌فرض پر نشود (همه خالی)
   const handleAddRow = () => {
-    const defaultDes = noDesOptions ? "" : baseFields[0]?.ID ?? "";
-    const defaultSrc = firstEmpty ? "" : sourceFields[0]?.ID ?? "";
     const newRow: TableRow = {
       ID: genId(),
-      SrcFieldID: defaultSrc ? String(defaultSrc) : "",
+      SrcFieldID: "",
       FilterOpration: "",
       FilterText: "",
-      DesFieldID: defaultDes ? String(defaultDes) : "",
+      DesFieldID: "",
     };
     pushTable([...tableData, newRow]);
+    setSelectedTableRow(null);
+    setTableGridKey((k) => k + 1);
+  };
+
+  // ✅ Delete ردیف انتخاب‌شده (کنار Add)
+  const handleDeleteRow = () => {
+    const id = selectedTableRow?.ID ? String(selectedTableRow.ID) : "";
+    if (!id) return;
+
+    const next = tableData.filter((r) => String(r.ID) !== id);
+    pushTable(next);
+
+    setSelectedTableRow(null);
+    setTableGridKey((k) => k + 1);
   };
 
   const handleCellValueChanged = (e: any) => {
@@ -793,11 +835,12 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     pushMeta({ metaType3: "" });
   };
 
+  /* ─── Ellipsis styles (مثل بقیه کنترلرها) ─── */
   const ellipsisCellStyle = useMemo(() => {
     return isRtl
       ? ({
           textAlign: "right",
-          direction: "ltr",
+          direction: "rtl",
           unicodeBidi: "plaintext",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -817,7 +860,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     return isRtl
       ? ({
           textAlign: "right",
-          direction: "ltr",
+          direction: "rtl",
           unicodeBidi: "plaintext",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -836,53 +879,77 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   const columnDefs = useMemo(
     () => [
       {
-        headerName: t("LookUpAdvanceTable.Columns.SrcField"),
+        headerName: t("AdvanceLookupAdvanceTable.Columns.SrcField"),
         field: "SrcFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: () => ({
-          values: firstEmpty ? [] : Array.from(sourceFieldsMap.keys()),
-        }),
+        cellEditorParams: () => {
+          const values = firstEmpty ? [] : Array.from(sourceFieldsMap.keys());
+          return {
+            values,
+            formatValue: (value: any) => {
+              const key = String(value ?? "");
+              return sourceFieldsMap.get(key) ?? key;
+            },
+          };
+        },
         valueFormatter: (p: any) => {
           if (firstEmpty) return "";
           const key = String(p.value ?? "");
           const label = sourceFieldsMap.get(key);
           return label ? String(label) : "";
         },
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
       {
-        headerName: t("LookUpAdvanceTable.Columns.Operation"),
+        headerName: t("AdvanceLookupAdvanceTable.Columns.Operation"),
         field: "FilterOpration",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: { values: operationList.map((o) => o.value) },
+        cellEditorParams: {
+          values: operationList.map((o) => o.value),
+          formatValue: (value: any) => {
+            const v = String(value ?? "");
+            return operationList.find((o) => o.value === v)?.label ?? v;
+          },
+        },
         valueFormatter: (p: any) =>
           operationList.find((o) => o.value === String(p.value))?.label ||
           String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
       {
-        headerName: t("LookUpAdvanceTable.Columns.FilterText"),
+        headerName: t("AdvanceLookupAdvanceTable.Columns.FilterText"),
         field: "FilterText",
         editable: true,
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
       {
-        headerName: t("LookUpAdvanceTable.Columns.DesField"),
+        headerName: t("AdvanceLookupAdvanceTable.Columns.DesField"),
         field: "DesFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: () => ({
-          values: noDesOptions ? [] : Array.from(baseFieldsMap.keys()),
-        }),
+        cellEditorParams: () => {
+          const values = noDesOptions ? [] : Array.from(baseFieldsMap.keys());
+          return {
+            values,
+            formatValue: (value: any) => {
+              const key = String(value ?? "");
+              return baseFieldsMap.get(key) ?? key;
+            },
+          };
+        },
         valueFormatter: (p: any) =>
           noDesOptions
             ? ""
             : baseFieldsMap.get(String(p.value)) ?? String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -900,8 +967,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   );
 
   const ppKey = useMemo(
-    () =>
-      `pp-adv-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`,
+    () => `pp-adv-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`,
     [meta.metaType1, meta.metaType2, meta.LookupMode, resetKey]
   );
 
@@ -913,30 +979,9 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   const addBtnClass =
     "bg-indigo-500 text-white px-2 py-1 rounded-md hover:bg-indigo-600 flex items-center";
 
-  const isPlainEmptyObject = (o: any) =>
-    !o || (typeof o === "object" && !Array.isArray(o) && Object.keys(o).length === 0);
-
-  // اگر metaTypeJson ورودی “عملاً خالی” باشد (null, "", "{}", یا {})
-  const isEffectivelyEmptyMetaJson = (v: any) => {
-    if (v === undefined || v === null) return true;
-
-    if (typeof v === "object") return isPlainEmptyObject(v);
-
-    const s = String(v).trim();
-    if (!s) return true;
-    if (s === "{}") return true;
-
-    try {
-      const obj = JSON.parse(s);
-      return isPlainEmptyObject(obj);
-    } catch {
-      return false;
-    }
-  };
-
   return (
     <div
-      dir={i18n.dir()}
+      dir={uiDir}
       className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg"
     >
       <div className="flex flex-col gap-6">
@@ -944,7 +989,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           <DynamicSelector
             key={`first-${entitiesSig}`}
             name="firstFormGetInformationFrom"
-            label={"for first form, get information from"}
+            label={t("AdvanceLookupAdvanceTable.Form.ForFirstFormGetInformationFrom")}
             options={entities.map((e) => ({
               value: String(e.ID),
               label: e.Name,
@@ -958,7 +1003,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           <DynamicSelector
             key={`second-${entitiesSig}`}
             name="secondFormGetInformationFrom"
-            label={"for second form, get information from"}
+            label={t("AdvanceLookupAdvanceTable.Form.ForSecondFormGetInformationFrom")}
             options={entities.map((e) => ({
               value: String(e.ID),
               label: e.Name,
@@ -982,7 +1027,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
               initialMetaType={meta.metaType5}
               metaFieldKey="metaType5"
               onMetaChange={(o) => pushMeta(o)}
-              label={t("LookUpAdvanceTable.Form.DefaultProjects")}
+              label={t("AdvanceLookupAdvanceTable.Form.DefaultProjects")}
               fullWidth
             />
           </div>
@@ -994,17 +1039,26 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             >
               <div className="flex items-center justify-between mb-2">
                 <label className="text-gray-700 text-sm font-semibold">
-                  show columns of first form as below
+                  {t("AdvanceLookupAdvanceTable.Form.ShowColumnsOfFirstForm")}
                 </label>
 
                 <button
                   type="button"
                   onClick={openColumnsModal}
-                  className={addBtnClass}
+                  className={[
+                    addBtnClass,
+                    "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-500",
+                  ].join(" ")}
                   disabled={firstEmpty}
-                  title={firstEmpty ? "Select first form first" : ""}
+                  title={
+                    firstEmpty
+                      ? t("AdvanceLookupAdvanceTable.Messages.SelectFirstFormFirst")
+                      : ""
+                  }
+                  style={{ cursor: firstEmpty ? "not-allowed" : "pointer" }}
                 >
-                  <span className="mr-1 text-lg leading-none">+</span> Add
+                  <span className="mr-1 text-lg leading-none">+</span>
+                  {t("AdvanceLookupAdvanceTable.Actions.Add")}
                 </button>
               </div>
 
@@ -1029,26 +1083,29 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
                               pushMeta({ metaType3: toPipeIds(next) });
                             }}
                             className="text-red-500 ml-2 hover:text-red-700"
-                            title="Remove"
+                            title={t("AdvanceLookupAdvanceTable.Actions.Remove")}
                           >
                             ×
                           </button>
                         </div>
                       );
                     })}
+
                     {!!selectedFieldIds.length && (
                       <button
                         type="button"
                         onClick={clearSelectedColumns}
                         className="text-xs text-gray-400 hover:text-gray-700"
-                        title="Clear all"
+                        title={t("AdvanceLookupAdvanceTable.Actions.Clear")}
                       >
-                        Clear
+                        {t("AdvanceLookupAdvanceTable.Actions.Clear")}
                       </button>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No default values selected</p>
+                  <p className="text-gray-500">
+                    {t("AdvanceLookupAdvanceTable.Messages.NoDefaultValuesSelected")}
+                  </p>
                 )}
               </div>
             </div>
@@ -1060,15 +1117,18 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
 
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
         <DataTable
+          key={`adv-table-${tableGridKey}`}
           columnDefs={columnDefs}
           rowData={tableData}
           showAddIcon
+          showDeleteIcon
           onAdd={handleAddRow}
+          onDelete={handleDeleteRow}
+          setSelectedRowData={setSelectedTableRow}
           onCellValueChanged={handleCellValueChanged}
           domLayout="normal"
           showSearch={false}
           showEditIcon={false}
-          showDeleteIcon={false}
           showDuplicateIcon={false}
           onRowDoubleClick={() => {}}
           gridOptions={{
@@ -1076,21 +1136,21 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             rowSelection: "single",
             stopEditingWhenCellsLoseFocus: true,
           }}
-          direction={i18n.dir()}
+          direction={uiDir}
         />
       </div>
 
       <DynamicModal isOpen={columnsModalOpen} onClose={closeColumnsModal}>
         <div className="w-full">
           <div className="text-lg font-semibold mb-3">
-            show columns of first form as below
+            {t("AdvanceLookupAdvanceTable.Form.ShowColumnsOfFirstForm")}
           </div>
 
           <div style={{ height: 420 }}>
             <DataTable
               columnDefs={[
                 {
-                  headerName: "Column",
+                  headerName: t("AdvanceLookupAdvanceTable.Table.ColumnHeader"),
                   field: "DisplayName",
                   flex: 1,
                   minWidth: 180,
@@ -1111,7 +1171,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
               showDuplicateIcon={false}
               showViewIcon={false}
               isEditMode={true}
-              direction={i18n.dir()}
+              direction={uiDir}
             />
           </div>
 
@@ -1127,7 +1187,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
               disabled={!selectedFieldRow?.ID}
               onClick={handleSelectColumns}
             >
-              Select
+              {t("AdvanceLookupAdvanceTable.Actions.Select")}
             </button>
           </div>
         </div>

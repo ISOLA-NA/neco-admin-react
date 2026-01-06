@@ -26,6 +26,7 @@ import fileService from "../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "react-i18next";
 
+
 interface IFormData {
   ID: string;
   Name: string;
@@ -133,6 +134,7 @@ const typeOfInformationOptions = [
   { value: "component37", label: "Inventory Field" },
 ];
 
+
 /**
  * تابع کمکی برای واکشی نام فایل با استفاده از FileID
  */
@@ -154,6 +156,50 @@ async function fetchFileNameById(fileId: string) {
  */
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const { t, i18n } = useTranslation();
+
+  const uiDir = i18n.dir() as "rtl" | "ltr";
+const isRtl = uiDir === "rtl";
+
+const ellipsisCellStyle = React.useMemo(() => {
+  return isRtl
+    ? ({
+        textAlign: "right",
+        direction: "rtl",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties)
+    : ({
+        textAlign: "left",
+        direction: "ltr",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties);
+}, [isRtl]);
+
+const ellipsisHeaderStyle = React.useMemo(() => {
+  return isRtl
+    ? ({
+        textAlign: "right",
+        direction: "rtl",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties)
+    : ({
+        textAlign: "left",
+        direction: "ltr",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties);
+}, [isRtl]);
+
   const { handleSaveForm } = useAddEditDelete();
   const api = useApi();
 
@@ -415,8 +461,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     }
   }, [api, formData.ID]);
 
-
-  const newColumnDefs = React.useMemo(() => ([
+  const newColumnDefs = React.useMemo(
+  () => [
     {
       headerName: t("Forms.Columns.Order"),
       field: "orderValue",
@@ -425,6 +471,8 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       filter: true,
       flex: 0.6,
       minWidth: 90,
+      cellStyle: ellipsisCellStyle,
+      headerStyle: ellipsisHeaderStyle,
     },
     {
       headerName: t("Forms.Columns.ColumnName"),
@@ -434,8 +482,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       filter: true,
       flex: 2,
       minWidth: 180,
+      cellStyle: ellipsisCellStyle,
+      headerStyle: ellipsisHeaderStyle,
     },
-    // ستون سوم: Persian ColumnName
     {
       headerName: t("DataTable.Headers.PersianColumnName") || "Persian ColumnName",
       field: "PersianName",
@@ -444,8 +493,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       filter: true,
       flex: 2,
       minWidth: 180,
+      cellStyle: ellipsisCellStyle,
+      headerStyle: ellipsisHeaderStyle,
     },
-    // Type
     {
       headerName: t("Forms.Columns.Type"),
       field: "ColumnType",
@@ -460,8 +510,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         );
         return opt ? opt.label : params.data.ColumnType;
       },
+      cellStyle: ellipsisCellStyle,
+      headerStyle: ellipsisHeaderStyle,
     },
-    // Command
     {
       headerName: t("Forms.Columns.Command"),
       field: "Code",
@@ -470,8 +521,10 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       filter: true,
       flex: 1,
       minWidth: 130,
+      cellStyle: ellipsisCellStyle,
+      headerStyle: ellipsisHeaderStyle,
     },
-    // چک‌باکس‌ها
+
     ...[
       { headerNameKey: "ShowInList", field: "IsShowGrid" },
       { headerNameKey: "Required", field: "IsRequire" },
@@ -486,6 +539,19 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       filter: true,
       flex: 0.9,
       minWidth: 110,
+
+      // ✅ وسط‌چین + سازگار با RTL/LTR
+      cellStyle: {
+        ...ellipsisCellStyle,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      },
+      headerStyle: {
+        ...ellipsisHeaderStyle,
+        textAlign: "center",
+      },
+
       cellRendererFramework: (p: any) => (
         <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
       ),
@@ -495,8 +561,9 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         checkboxFalseValue: false,
       },
     })),
-  ]), [t]);
-
+  ],
+  [t, ellipsisCellStyle, ellipsisHeaderStyle]
+);
 
 
   useEffect(() => {
@@ -997,74 +1064,64 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
 
         {/* DataTable */}
         <TwoColumnLayout.Item span={2}>
-          <div className="overflow-x-auto pb-2">
-            <div className="h-[400px] min-w-full flex flex-col justify-end">
-              <DataTable
-                columnDefs={newColumnDefs}
-                rowData={entityFields}
-                setSelectedRowData={setSelectedRowData}
-                gridOptions={{
-                  singleClickEdit: true,
-                  rowSelection: "single",
-                  onGridReady: (p) => {
-                    p.api.sizeColumnsToFit();
-                    window.addEventListener("resize", () =>
-                      p.api.sizeColumnsToFit()
-                    );
-                  },
-                }}
-                onCellValueChanged={handleCellValueChanged}
-                showAddIcon
-                showEditIcon
-                showDeleteIcon
-                showViewIcon
-                showDuplicateIcon={false}
-                onAdd={handleAddClick}
-                onEdit={() =>
-                  selectedRowData
-                    ? handleEditClick(selectedRowData)
-                    : showAlert(
-                      "error",
-                      undefined,
-                      "Error",
-                      "No row is selected!"
-                    )
-                }
-                onDelete={async () => {
-                  if (!selectedRowData) {
-                    showAlert(
-                      "error",
-                      undefined,
-                      "Error",
-                      "No row selected for deletion"
-                    );
-                    return;
-                  }
-                  try {
-                    await api.deleteEntityField(selectedRowData.ID);
-                    showAlert(
-                      "success",
-                      undefined,
-                      "Success",
-                      "Deleted successfully"
-                    );
-                    setSelectedRowData(null);
-                    refreshEntityFields();
-                  } catch {
-                    showAlert("error", undefined, "Error", "Delete failed!");
-                  }
-                }}
-                onView={() => setViewModalOpen(true)}
-                onRowDoubleClick={(row) => handleEditClick(row)}
-                domLayout="normal"
-                showSearch
-                isEditMode={isEditMode}
-                isLoading={isLoadingFields}
-                direction={i18n.dir()}
-              />
-            </div>
-          </div>
-        </TwoColumnLayout.Item>
+  <div dir={uiDir} className="overflow-x-auto pb-2">
+    <div className="h-[400px] min-w-full flex flex-col justify-end">
+      <DataTable
+        columnDefs={newColumnDefs}
+        rowData={entityFields}
+        setSelectedRowData={setSelectedRowData}
+        gridOptions={{
+          singleClickEdit: true,
+          rowSelection: "single",
+
+          // ✅ مهم برای AG-Grid
+          enableRtl: uiDir === "rtl",
+
+          onGridReady: (p) => {
+            p.api.sizeColumnsToFit();
+            window.addEventListener("resize", () => p.api.sizeColumnsToFit());
+          },
+        }}
+        onCellValueChanged={handleCellValueChanged}
+        showAddIcon
+        showEditIcon
+        showDeleteIcon
+        showViewIcon
+        showDuplicateIcon={false}
+        onAdd={handleAddClick}
+        onEdit={() =>
+          selectedRowData
+            ? handleEditClick(selectedRowData)
+            : showAlert("error", undefined, "Error", "No row is selected!")
+        }
+        onDelete={async () => {
+          if (!selectedRowData) {
+            showAlert("error", undefined, "Error", "No row selected for deletion");
+            return;
+          }
+          try {
+            await api.deleteEntityField(selectedRowData.ID);
+            showAlert("success", undefined, "Success", "Deleted successfully");
+            setSelectedRowData(null);
+            refreshEntityFields();
+          } catch {
+            showAlert("error", undefined, "Error", "Delete failed!");
+          }
+        }}
+        onView={() => setViewModalOpen(true)}
+        onRowDoubleClick={(row) => handleEditClick(row)}
+        domLayout="normal"
+        showSearch
+        isEditMode={isEditMode}
+        isLoading={isLoadingFields}
+
+        // ✅ همون الگوی کنترلرها
+        direction={uiDir}
+      />
+    </div>
+  </div>
+</TwoColumnLayout.Item>
+
       </TwoColumnLayout>
 
       {/* Category A/B Modal */}

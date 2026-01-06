@@ -13,12 +13,12 @@ interface LookUpAdvanceTableProps {
   data?: {
     metaType1?: string | number | null; // EntityType منبع (GetInformationFrom)
     metaType2?: string | number | null; // ستونی که نمایش داده می‌شود (WhatColumnToDisplay)
-    metaType3?: string;                 // drop | radio | check (برای یکسانی نگه داشته شده)
-    metaType4?: string;                 // JSON جدول نگاشت
-    metaType5?: string;                 // پروژه‌های پیش‌فرض
+    metaType3?: string; // drop | radio | check (برای یکسانی نگه داشته شده)
+    metaType4?: string; // JSON جدول نگاشت
+    metaType5?: string; // پروژه‌های پیش‌فرض
     LookupMode?: string | number | null; // (UI ندارد)
-    CountInReject?: boolean;            // (UI ندارد)
-    BoolMeta1?: boolean;                // (UI ندارد)
+    CountInReject?: boolean; // (UI ندارد)
+    BoolMeta1?: boolean; // (UI ندارد)
     /** (اختیاری) ID نوع انتیتی فرم فعلی برای تأمین DesField وقتی srcFields پاس نشده */
     currentEntityTypeId?: string | number | null;
   };
@@ -90,6 +90,11 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   >([]);
 
   const [tableData, setTableData] = useState<TableRow[]>([]);
+
+  // ✅ برای Delete: ردیف انتخاب‌شده جدول
+  const [selectedTableRow, setSelectedTableRow] = useState<any>(null);
+  // ✅ برای ریست کردن انتخاب DataTable بعد از Add/Delete (remount)
+  const [tableGridKey, setTableGridKey] = useState<number>(0);
 
   // ─── Sync initial props.data on mount & when data changes ───
   useEffect(() => {
@@ -223,17 +228,30 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   // ✅ شرط: اگر جدول FormsCommand1 خالی باشد، DesField هم باید خالی باشد
   const noDesOptions = bothEmpty || baseFields.length === 0;
 
+  // ✅ Add: مثل کنترلر قبلی، ردیف خالی اضافه شود
   const handleAddRow = () => {
-    const defaultDes = noDesOptions ? "" : (baseFields[0]?.ID ?? "");
-    const defaultSrc = bothEmpty ? "" : (fields[0]?.ID ?? "");
     const newRow: TableRow = {
       ID: genId(),
-      DesFieldID: defaultDes ? String(defaultDes) : "",
+      DesFieldID: "",
       FilterOpration: "",
       FilterText: "",
-      SrcFieldID: defaultSrc ? String(defaultSrc) : "",
+      SrcFieldID: "",
     };
     pushTable([...tableData, newRow]);
+    setSelectedTableRow(null);
+    setTableGridKey((k) => k + 1);
+  };
+
+  // ✅ Delete: حذف ردیف انتخاب‌شده
+  const handleDeleteRow = () => {
+    const id = selectedTableRow?.ID ? String(selectedTableRow.ID) : "";
+    if (!id) return;
+
+    const next = tableData.filter((r) => String(r.ID) !== id);
+    pushTable(next);
+
+    setSelectedTableRow(null);
+    setTableGridKey((k) => k + 1);
   };
 
   const handleCellValueChanged = (e: any) => {
@@ -341,8 +359,8 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     return isRtl
       ? ({
           textAlign: "right",
-          direction: "rtl", // ✅ مهم: در RTL، direction باید rtl بماند تا ellipsis درست شود
-          unicodeBidi: "plaintext", // ✅ باعث می‌شود انگلیسی بهم نریزد
+          direction: "rtl",
+          unicodeBidi: "plaintext",
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
@@ -378,20 +396,30 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   }, [isRtl]);
 
   // ─── AG-Grid columnDefs ────────────────────────────────────
+  // ✅ طبق درخواست‌های اخیر شما:
+  // 1) Src اول باشد
+  // 2) Des آخر باشد
+  // 3) در حالت Edit هم لیبل‌ها درست نمایش داده شوند (formatValue + valueParser)
   const columnDefs = useMemo(
     () => [
       {
-        headerName: t("LookUpAdvanceTable.Columns.DesField"),
-        field: "DesFieldID",
+        headerName: t("LookUpAdvanceTable.Columns.SrcField"),
+        field: "SrcFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: () => ({
-          values: noDesOptions ? [] : Array.from(baseFieldsMap.keys()),
-        }),
+        cellEditorParams: () => {
+          const values = bothEmpty ? [] : Array.from(fieldsMap.keys());
+          return {
+            values,
+            formatValue: (value: any) => {
+              const key = String(value ?? "");
+              return fieldsMap.get(key) ?? key;
+            },
+          };
+        },
         valueFormatter: (p: any) =>
-          noDesOptions
-            ? ""
-            : (baseFieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+          bothEmpty ? "" : fieldsMap.get(String(p.value)) ?? String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -402,10 +430,15 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         cellEditor: "agSelectCellEditor",
         cellEditorParams: {
           values: operationList.map((o) => o.value),
+          formatValue: (value: any) => {
+            const v = String(value ?? "");
+            return operationList.find((o) => o.value === v)?.label ?? v;
+          },
         },
         valueFormatter: (p: any) =>
           operationList.find((o) => o.value === String(p.value))?.label ||
           String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -413,21 +446,30 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         headerName: t("LookUpAdvanceTable.Columns.FilterText"),
         field: "FilterText",
         editable: true,
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
       {
-        headerName: t("LookUpAdvanceTable.Columns.SrcField"),
-        field: "SrcFieldID",
+        headerName: t("LookUpAdvanceTable.Columns.DesField"),
+        field: "DesFieldID",
         editable: true,
         cellEditor: "agSelectCellEditor",
-        cellEditorParams: () => ({
-          values: bothEmpty ? [] : Array.from(fieldsMap.keys()),
-        }),
+        cellEditorParams: () => {
+          const values = noDesOptions ? [] : Array.from(baseFieldsMap.keys());
+          return {
+            values,
+            formatValue: (value: any) => {
+              const key = String(value ?? "");
+              return baseFieldsMap.get(key) ?? key;
+            },
+          };
+        },
         valueFormatter: (p: any) =>
-          bothEmpty
+          noDesOptions
             ? ""
-            : (fieldsMap.get(String(p.value)) ?? String(p.value ?? "")),
+            : baseFieldsMap.get(String(p.value)) ?? String(p.value ?? ""),
+        valueParser: (p: any) => String(p.newValue ?? ""),
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -476,7 +518,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             onChange={(e) => pushMeta({ metaType2: e.target.value })}
           />
 
-          {/* Default Projects (مثل دیگر کامپوننت‌ها) */}
+          {/* Default Projects */}
           <PostPickerList
             key={`pp-luat-${meta.metaType1}|${meta.metaType2}|${resetKey ?? 0}`}
             resetKey={resetKey}
@@ -493,16 +535,20 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
 
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
         <DataTable
-          key={`dt-luat-${fieldsSig}-${baseFieldsSig}-${noDesOptions ? "noDes" : "hasDes"}-${bothEmpty ? "srcEmpty" : "srcHas"}`}
+          key={`dt-luat-${tableGridKey}-${fieldsSig}-${baseFieldsSig}-${
+            noDesOptions ? "noDes" : "hasDes"
+          }-${bothEmpty ? "srcEmpty" : "srcHas"}`}
           columnDefs={columnDefs}
           rowData={tableData}
           showAddIcon
+          showDeleteIcon
           onAdd={handleAddRow}
+          onDelete={handleDeleteRow}
+          setSelectedRowData={setSelectedTableRow}
           onCellValueChanged={handleCellValueChanged}
           domLayout="normal"
           showSearch={false}
           showEditIcon={false}
-          showDeleteIcon={false}
           showDuplicateIcon={false}
           onRowDoubleClick={() => {}}
           gridOptions={{
