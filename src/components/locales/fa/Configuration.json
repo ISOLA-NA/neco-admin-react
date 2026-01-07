@@ -1,22 +1,34 @@
 {
-    "Configuration": {
-      "Name": "نام",
-      "Description": "توضیحات",
-      "ProgramTemplate": "قالب برنامه",
-      "DefaultRibbon": "منو پیش فرض",
-      "LessonLearnedForm": "قالب جریان آموزش",
-      "LessonLearnedAfTemplate": "قالب فرم آموزش",
-      "CommentFormTemplate": "قالب فرم نظر",
-      "ProcedureFormTemplate": "قالب فرم روند کار",
-      "DefaultActionButtons": "دکمه پیش فرض",
-      "LetterActionButtons": "دکمه نامه",
-      "MeetingActionButtons": "دکمه های جلسه",
-      "NoItemSelected": "موردی انتخاب نشده است",
-      "StateText": "متن وضعیت",
-      "Order": "ترتیب",
-      "Tooltip": "متن راهنما",
-      "State": "وضعیت :",
-      "Command": "کامند :"
-    }
+  "Configuration": {
+    "Name": "نام",
+    "Description": "توضیحات",
+    "ProgramTemplate": "قالب برنامه",
+    "DefaultRibbon": "منو پیش فرض",
+    "LessonLearnedForm": "قالب جریان آموزش",
+    "LessonLearnedAfTemplate": "قالب فرم آموزش",
+    "CommentFormTemplate": "قالب فرم نظر",
+    "ProcedureFormTemplate": "قالب فرم روند کار",
+    "DefaultActionButtons": "دکمه پیش فرض",
+    "LetterActionButtons": "دکمه نامه",
+    "MeetingActionButtons": "دکمه های جلسه",
+    "NoItemSelected": "موردی انتخاب نشده است",
+    "StateText": "متن وضعیت",
+    "Order": "ترتیب",
+    "Tooltip": "متن راهنما",
+    "State": "وضعیت :",
+    "Command": "کامند :",
+    "Image": "تصویر",
+    "GoToPreviousStateClient": "بازگشت به وضعیت قبل (کاربر)",
+    "GoToPreviousStateAdmin": "بازگشت به وضعیت قبل (ادمین)",
+    "Accept": "تایید",
+    "Reject": "رد",
+    "Close": "بستن",
+    "PersianName": "نام فارسی"
+  },
+  "Global": {
+    "Add": "افزودن",
+    "Edit": "ویرایش",
+    "New": "جدید",
+    "Delete": "حذف"
   }
-  
+}

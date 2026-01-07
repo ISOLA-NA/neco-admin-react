@@ -9,7 +9,7 @@ import FileUploadHandler, {
 import { useApi } from "../../../context/ApiContext";
 import { AFBtnItem } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
-import { useTranslation, } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { FaPlus, FaPencilAlt, FaTrash, FaUndo } from "react-icons/fa";
 import i18n from "../../../i18n";
 
@@ -37,18 +37,23 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const api = useApi();
 
   // ----- state های فرم -----
+  // ✅ پیش‌فرض هر دو accept
   const [selectedState, setSelectedState] = useState<string>("accept");
   const [selectedCommand, setSelectedCommand] = useState<string>("accept");
+
   const [nameValue, setNameValue] = useState("");
   const [stateTextValue, setStateTextValue] = useState("");
   const [tooltipValue, setTooltipValue] = useState("");
-  const [orderValue, setOrderValue] = useState("");
+  // ✅ پیش‌فرض Order مثل نمونه 1.0
+  const [orderValue, setOrderValue] = useState("1");
 
   const [selectedRow, setSelectedRow] = useState<AFBtnItem | null>(null);
   const [isRowClicked, setIsRowClicked] = useState<boolean>(false);
 
-  const [isFaMode, setIsFaMode] = useState(false); // EN=false, FA=true
-  const [persianNameValue, setPersianNameValue] = useState(""); // ← اضافه شد
+  // ✅ پیش‌فرض: دکمه fa باشد + همان input با دکمه سوییچ بین Name و PersianName تغییر کند (بدون input جدید)
+  // true => Name (FA), false => PersianName (EN)
+  const [isFaMode, setIsFaMode] = useState(true);
+  const [persianNameValue, setPersianNameValue] = useState("");
 
   const isRTL = i18n.dir() === "rtl";
 
@@ -71,16 +76,28 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
   // رادیوها
   const RadioOptionsState = [
-    { value: "accept", label: "Accept" },
-    { value: "reject", label: "Reject" },
-    { value: "close", label: "Close" },
+    { value: "accept", label: t("Configuration.Accept", "Accept") },
+    { value: "reject", label: t("Configuration.Reject", "Reject") },
+    { value: "close", label: t("Configuration.Close", "Close") },
   ];
   const RadioOptionsCommand = [
-    { value: "accept", label: "Accept" },
-    { value: "reject", label: "Reject" },
-    { value: "close", label: "Close" },
-    { value: "client", label: "Previous State Client" },
-    { value: "admin", label: "Previous State Admin" },
+    { value: "accept", label: t("Configuration.Accept", "Accept") },
+    { value: "reject", label: t("Configuration.Reject", "Reject") },
+    { value: "close", label: t("Configuration.Close", "Close") },
+    {
+      value: "client",
+      label: t(
+        "Configuration.GoToPreviousStateClient",
+        "GoToPreviousStateClient"
+      ),
+    },
+    {
+      value: "admin",
+      label: t(
+        "Configuration.GoToPreviousStateAdmin",
+        "GoToPreviousStateAdmin"
+      ),
+    },
   ];
 
   // ----- DynamicConfirm state -----
@@ -92,7 +109,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmHideCancel, setConfirmHideCancel] = useState<boolean>(false);
   // تابع اکشنی که بعد از زدن دکمه "Confirm" اجرا می‌شود
-  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => { });
+  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => {});
 
   // تابع کمکی برای بازکردن DynamicConfirm
   const openConfirm = (
@@ -124,26 +141,13 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   //       توابع اصلی CRUD
   // ==============================
 
-  // گرفتن کل داده‌ها از API
-  // const fetchAllAFBtn = async () => {
-  //   try {
-  //     const response = await api.getAllAfbtn();
-  //     setRowData(response);
-  //   } catch (error) {
-  //     console.error("Error fetching AFBtn data:", error);
-  //     openConfirm("error", "Error", "Failed to fetch data.", true);
-  //   }
-  // };
-
   const fetchAllAFBtn = async () => {
     try {
       const response = await api.getAllAfbtn();
 
-      /* 🔵 اگر می‌خواهید کل آرایه را یک‌بار ببینید */
       console.log("AFBtn raw response ➜", response);
 
       const decorated = response.map((item, idx) => {
-        /* 🔵 لاگ‌گرفتن از تک‌تک آیتم‌ها */
         console.log(`AFBtn item #${idx} ➜`, item);
 
         return {
@@ -171,54 +175,54 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     setNameValue("");
     setStateTextValue("");
     setTooltipValue("");
-    setOrderValue("");
+    setOrderValue("1");
     setPersianNameValue("");
-    setSelectedState(RadioOptionsState[0].value);
-    setSelectedCommand(RadioOptionsCommand[0].value);
+
+    // ✅ پیش‌فرض هر دو accept
+    setSelectedState("accept");
+    setSelectedCommand("accept");
+
     setSelectedFileId(null);
     setSelectedRow(null);
     setIsRowClicked(false);
+
     setResetCounter((prev) => prev + 1);
     setIsDeleteDisabled(true);
     setImageError(false);
-  }, [RadioOptionsState, RadioOptionsCommand]);
+
+    setIsFaMode(true); // ✅ پیش‌فرض FA (یعنی input = Name)
+  }, []);
 
   // =========================
   //      ADD
   // =========================
   const handleAddClick = async () => {
-    if (!nameValue.trim()) {
-      openConfirm("notice", "Warning", "Name cannot be empty!", true);
-      return;
-    }
-
-    const generatedName = buildDisplayName(
-      selectedState,
-      selectedCommand,
-      stateTextValue
-    );
-
     const nameTrim = nameValue.trim();
     const pNameTrim = persianNameValue.trim();
 
-    if (!nameTrim && pNameTrim) {
-      openConfirm("notice", "Warning", "Please fill Name.", true);
+    // ✅ اگر هر دو خالی بودند -> هشدار زرد
+    if (!nameTrim && !pNameTrim) {
+      openConfirm(
+        "notice",
+        t("Global.Warning", "Warning"),
+        t(
+          "Configuration.NameOrPersianNameRequired",
+          "Name or PersianName must be filled."
+        ),
+        true
+      );
       return;
     }
-    if (!nameTrim) {
-      openConfirm("notice", "Warning", "Name cannot be empty!", true);
-      return;
-    }
-
 
     try {
       const newAFBtn: AFBtnItem = {
         ID: 0,
-        Name: generatedName,
-        PersianName: (persianNameValue || "").trim(),
+        // ✅ اگر Name خالی بود، از PersianName برای Name استفاده کن
+        Name: nameTrim || pNameTrim,
+        PersianName: pNameTrim,
         Tooltip: tooltipValue,
         StateText: stateTextValue,
-        Order: parseInt(orderValue || "0"),
+        Order: parseFloat(orderValue || "1"),
         WFStateForDeemed: radioToWFStateForDeemed(selectedState),
         WFCommand: radioToWFCommand(selectedCommand),
         IconImageId: selectedFileId,
@@ -226,13 +230,18 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         LastModified: null,
         ModifiedById: null,
       };
+
+      console.log("INSERT AFBtn payload ➜", newAFBtn);
+
       await api.insertAFBtn(newAFBtn);
       openConfirm("add", "Success", "Item added successfully.", true);
+
       await fetchAllAFBtn();
       if (refreshButtons) refreshButtons();
       handleReset();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error inserting AFBtn:", error);
+      console.log("Insert error response ➜", error?.response?.data);
       openConfirm("error", "Error", "Failed to add item.", true);
     }
   };
@@ -246,25 +255,23 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       return;
     }
 
-    const generatedName = buildDisplayName(
-      selectedState,
-      selectedCommand,
-      stateTextValue
-    );
-
     const nameTrim = nameValue.trim();
     const pNameTrim = persianNameValue.trim();
-    if (!nameTrim && pNameTrim) {
-      openConfirm("notice", "Warning", "Please fill Name.", true);
-      return;
-    }
-    if (!nameTrim) {
-      openConfirm("notice", "Warning", "Name cannot be empty!", true);
+
+    // ✅ اگر هر دو خالی بودند -> هشدار زرد
+    if (!nameTrim && !pNameTrim) {
+      openConfirm(
+        "notice",
+        t("Global.Warning", "Warning"),
+        t(
+          "Configuration.NameOrPersianNameRequired",
+          "Name or PersianName must be filled."
+        ),
+        true
+      );
       return;
     }
 
-
-    // ابتدا یک Confirm برای ویرایش با پیام تایید نمایش داده می‌شود
     openConfirm(
       "edit",
       "Edit Confirmation",
@@ -274,11 +281,11 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         try {
           const updatedAFBtn: AFBtnItem = {
             ID: selectedRow.ID,
-            Name: generatedName,
-            PersianName: (persianNameValue || "").trim(),
+            Name: nameTrim || pNameTrim,
+            PersianName: pNameTrim,
             Tooltip: tooltipValue,
             StateText: stateTextValue,
-            Order: parseInt(orderValue || "0"),
+            Order: parseFloat(orderValue || "1"),
             WFStateForDeemed: radioToWFStateForDeemed(selectedState),
             WFCommand: radioToWFCommand(selectedCommand),
             IconImageId: selectedFileId,
@@ -286,17 +293,22 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
             LastModified: null,
             ModifiedById: null,
           };
+
+          console.log("UPDATE AFBtn payload ➜", updatedAFBtn);
+
           await api.updateAFBtn(updatedAFBtn);
-          // پس از موفقیت عملیات ویرایش، پیام تایید نمایش داده می‌شود که بعد از 3 ثانیه بسته می‌شود
+
           openConfirm("notice", "Success", "Item updated successfully.", true);
           setTimeout(() => {
             setConfirmOpen(false);
           }, 3000);
+
           await fetchAllAFBtn();
           if (refreshButtons) refreshButtons();
           handleReset();
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error updating AFBtn:", error);
+          console.log("Update error response ➜", error?.response?.data);
           openConfirm("error", "Error", "Failed to update item.", true);
         }
       }
@@ -312,7 +324,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       return;
     }
 
-    // Confirm حذف با دکمه Cancel نمایش داده می‌شود
     openConfirm(
       "delete",
       "Delete Confirmation",
@@ -320,13 +331,16 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       false,
       async () => {
         try {
+          console.log("DELETE AFBtn ID ➜", selectedRow.ID);
           await api.deleteAFBtn(selectedRow.ID);
+
           openConfirm("notice", "Success", "Item deleted successfully.", true);
           await fetchAllAFBtn();
           if (refreshButtons) refreshButtons();
           handleReset();
-        } catch (error) {
+        } catch (error: any) {
           console.error("Error deleting AFBtn:", error);
+          console.log("Delete error response ➜", error?.response?.data);
           openConfirm("error", "Error", "Failed to delete item.", true);
         }
       }
@@ -340,15 +354,27 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     handleReset();
   };
 
-  // آپلود موفقیت‌آمیز
-  const handleUploadSuccess = (insertModel: InsertModel) => {
-    const newFileId = insertModel.ID || null;
-    if (selectedRow) {
-      const updatedRow = { ...selectedRow, IconImageId: newFileId };
-      setSelectedRow(updatedRow);
-    }
-    setSelectedFileId(newFileId);
+  // =========================
+  //  Upload (مثل الگوی User2)
+  // =========================
+  const handleImageUploadSuccess = (insertModel: any) => {
+    console.log("Upload success insertModel ➜", insertModel);
+
+    const uploadedId = insertModel?.ID ?? insertModel?.Id ?? insertModel?.id ?? null;
+    console.log("Resolved uploaded image ID ➜", uploadedId);
+
+    setSelectedFileId(uploadedId);
+    setImageError(false);
+
+    // برای اینکه جدول/لیست هم آپدیت شود
     fetchAllAFBtn();
+  };
+
+  const handleResetUpload = () => {
+    console.log("Upload reset triggered");
+    setResetCounter((prev) => prev + 1);
+    setSelectedFileId(null);
+    setImageError(false);
   };
 
   useEffect(() => {
@@ -404,6 +430,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         return 1;
     }
   };
+
   const radioToWFCommand = (radioVal: string): number => {
     switch (radioVal) {
       case "accept":
@@ -434,26 +461,34 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
     // پر کردن فرم
     setNameValue(data.Name || "");
-    setPersianNameValue(data.PersianName ?? ""); // ← اضافه شد
+    setPersianNameValue(data.PersianName ?? "");
 
     setStateTextValue(data.StateText || "");
     setTooltipValue(data.Tooltip || "");
-    setOrderValue(data.Order?.toString() || "");
+    setOrderValue(
+      data.Order !== undefined && data.Order !== null
+        ? data.Order.toString()
+        : "1"
+    );
 
     if (data.WFStateForDeemed !== undefined) {
       setSelectedState(mapWFStateForDeemedToRadio(data.WFStateForDeemed));
     } else {
-      setSelectedState(RadioOptionsState[0].value);
+      setSelectedState("accept");
     }
+
     if (data.WFCommand !== undefined) {
       setSelectedCommand(mapWFCommandToRadio(data.WFCommand));
     } else {
-      setSelectedCommand(RadioOptionsCommand[0].value);
+      setSelectedCommand("accept");
     }
+
     if (data.IconImageId) {
+      console.log("Row has IconImageId ➜", data.IconImageId);
       setSelectedFileId(data.IconImageId);
       setImageError(false);
     } else {
+      console.log("Row has no IconImageId");
       setSelectedFileId(null);
       setImageError(false);
     }
@@ -464,13 +499,10 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     commandRadio: string,
     stateText: string
   ) => {
-    // تبدیل مقدار value رادیوها به برچسب نمایشی
     const stateLabel =
       RadioOptionsState.find((o) => o.value === stateRadio)?.label ?? "";
     const commandLabel =
       RadioOptionsCommand.find((o) => o.value === commandRadio)?.label ?? "";
-
-    // اگر StateText پر شده باشد بگذارید اولِ اسم بیاید، وگرنه همان stateLabel
     const base = stateText.trim() || stateLabel;
 
     return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
@@ -500,6 +532,10 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     return [...before, faCol, ...after];
   }, [columnDefs]);
 
+  // شمارنده‌ها (مثل عکس)
+  const nameCount = (nameValue || "").length;
+  const stateTextCount = (stateTextValue || "").length;
+  const tooltipCount = (tooltipValue || "").length;
 
   return (
     <>
@@ -513,9 +549,10 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       {/* ظرف کلی: بدون min-h-screen تا فاصله‌ی اضافی ته کارت ایجاد نشود */}
       <div
         dir={isRTL ? "rtl" : "ltr"}
-        className={`w-full h-full flex flex-col bg-white rounded-lg ${isRTL ? "rtl" : ""}`}
+        className={`w-full h-full flex flex-col bg-white rounded-lg ${
+          isRTL ? "rtl" : ""
+        }`}
       >
-
         {/* لایهٔ اسکرول: محتوا + فوتر استیکی هر دو داخل این هستند */}
         <div className="flex-1 overflow-y-auto">
           {/* پدینگ افقی ثابت برای کل محتوا */}
@@ -548,96 +585,242 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                 showEditIcon={false}
                 showDeleteIcon={false}
                 showAddIcon={false}
-                onAdd={() => { }}
-                onEdit={() => { }}
-                onDelete={() => { }}
-                onDuplicate={() => { }}
+                onAdd={() => {}}
+                onEdit={() => {}}
+                onDelete={() => {}}
+                onDuplicate={() => {}}
                 domLayout="normal"
               />
             </div>
 
-            {/* ✅ فرم ورودی‌ها */}
-            {/* Name / PersianName + سوئیچر */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-end gap-2">
-                <div className="flex-1">
-                  <DynamicInput
-                    name={isFaMode ? "PersianName" : t("Configuration.Name")}
-                    type="text"
-                    value={isFaMode ? persianNameValue : nameValue}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (isFaMode) setPersianNameValue(v);
-                      else setNameValue(v);
-                    }}
-                    className="w-full"
-                    required={!isFaMode}
-                  />
+            {/* ✅ فرم (چینش مطابق عکس: چپ Name/Tooltip/Order | راست StateText + State + Command + Image) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* ستون چپ */}
+              <div>
+                {/* ✅ فقط یک input: با سوییچ FA/EN همان input بین Name و PersianName عوض می‌شود */}
+                <div className="relative">
+                  <div className="flex items-end gap-3">
+                    <div className="flex-1">
+                      <DynamicInput
+                        name={
+                          isFaMode
+                            ? t("Configuration.Name")
+                            : t("Configuration.PersianName", "PersianName")
+                        }
+                        type="text"
+                        value={isFaMode ? nameValue : persianNameValue}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (isFaMode) setNameValue(v);
+                          else setPersianNameValue(v);
+                        }}
+                        className="w-full"
+                        required={false}
+                      />
+                    </div>
+
+                    {/* ✅ دکمه EN/FA وسط‌چین عمودی دقیق */}
+                    <div className="h-10 flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => setIsFaMode((p) => !p)}
+                        className={[
+                          "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
+                          "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                          "text-white font-semibold tracking-wide",
+                          "shadow-md shadow-pink-200/50",
+                          "transition-all duration-200",
+                          "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                          "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                        ].join(" ")}
+                        title={
+                          isFaMode
+                            ? "Switch to EN (PersianName)"
+                            : "Switch to FA (Name)"
+                        }
+                      >
+                        {isFaMode ? "FA" : "EN"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end text-xs mt-1">
+                    {nameCount} / 50
+                  </div>
                 </div>
 
-                {/* دکمه EN/FA با استایل گرادیانی */}
-                <button
-                  type="button"
-                  onClick={() => setIsFaMode((p) => !p)}
-                  className={[
-                    "shrink-0 inline-flex items-center justify-center h-10 px-4 rounded-xl",
-                    "bg-gradient-to-r from-fuchsia-500 to-pink-500",
-                    "text-white font-semibold tracking-wide",
-                    "shadow-md shadow-pink-200/50",
-                    "transition-all duration-200",
-                    "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
-                    "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
-                  ].join(" ")}
-                  title={isFaMode ? "Switch to EN (Name)" : "Switch to FA (PersianName)"}
-                >
-                  {isFaMode ? "FA" : "EN"}
-                </button>
+                {/* Tooltip */}
+                <div className="mt-4">
+                  <DynamicInput
+                    name={t("Configuration.Tooltip")}
+                    type="text"
+                    value={tooltipValue}
+                    onChange={(e) => setTooltipValue(e.target.value)}
+                    className="w-full"
+                  />
+                  <div className="flex justify-end text-xs mt-1">
+                    {tooltipCount} / 350
+                  </div>
+                </div>
+
+                {/* Order */}
+                <div className="mt-4">
+                  <DynamicInput
+                    name={t("Configuration.Order")}
+                    type="text"
+                    value={orderValue}
+                    onChange={(e) => setOrderValue(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
-              {/* بقیه فیلدها مثل قبل */}
-              <DynamicInput
-                name={t("Configuration.StateText")}
-                type="text"
-                value={stateTextValue}
-                onChange={(e) => setStateTextValue(e.target.value)}
-                className="w-full"
-              />
-              <DynamicInput
-                name={t("Configuration.Tooltip")}
-                type="text"
-                value={tooltipValue}
-                onChange={(e) => setTooltipValue(e.target.value)}
-                className="w-full"
-              />
-              <DynamicInput
-                name={t("Configuration.Order")}
-                type="text"
-                value={orderValue}
-                onChange={(e) => setOrderValue(e.target.value)}
-                className="w-full"
-              />
+              {/* ستون راست */}
+              <div>
+                {/* StateText */}
+                <div>
+                  <DynamicInput
+                    name={t("Configuration.StateText")}
+                    type="text"
+                    value={stateTextValue}
+                    onChange={(e) => setStateTextValue(e.target.value)}
+                    className="w-full"
+                  />
+                  <div className="flex justify-end text-xs mt-1">
+                    {stateTextCount} / 50
+                  </div>
+                </div>
+
+                {/* State: */}
+                <div className="mt-4">
+                  <div className="text-sm mb-2">{t("Configuration.State")}</div>
+
+                  <div className="flex items-center gap-10">
+                    {RadioOptionsState.map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="wfState"
+                          checked={selectedState === opt.value}
+                          onChange={() => setSelectedState(opt.value)}
+                        />
+                        <span className="text-sm">{opt.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Command: */}
+                <div className="mt-4">
+                  <div className="text-sm mb-2">{t("Configuration.Command")}</div>
+
+                  {/* accept/reject/close یک خط */}
+                  <div className="flex items-center gap-10 mb-2">
+                    {["accept", "reject", "close"].map((val) => {
+                      const opt = RadioOptionsCommand.find((x) => x.value === val);
+                      if (!opt) return null;
+                      return (
+                        <label key={val} className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="wfCommand"
+                            checked={selectedCommand === val}
+                            onChange={() => setSelectedCommand(val)}
+                          />
+                          <span className="text-sm">{opt.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {/* client/admin */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2">
+                    <div className="flex flex-col gap-2">
+                      {["client"].map((val) => {
+                        const opt = RadioOptionsCommand.find((x) => x.value === val);
+                        if (!opt) return null;
+                        return (
+                          <label key={val} className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="wfCommand"
+                              checked={selectedCommand === val}
+                              onChange={() => setSelectedCommand(val)}
+                            />
+                            <span className="text-sm">{opt.label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      {["admin"].map((val) => {
+                        const opt = RadioOptionsCommand.find((x) => x.value === val);
+                        if (!opt) return null;
+                        return (
+                          <label key={val} className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="wfCommand"
+                              checked={selectedCommand === val}
+                              onChange={() => setSelectedCommand(val)}
+                            />
+                            <span className="text-sm">{opt.label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Image: */}
+                <div className="mt-6">
+                  <div className="text-sm mb-2">
+                    {t("Configuration.Image", "Image")}:
+                  </div>
+
+                  {/* ✅ الگو مثل User2: پاس دادن selectedFileId + resetCounter + onReset + isEditMode */}
+                  <FileUploadHandler
+                    selectedFileId={selectedFileId}
+                    onUploadSuccess={handleImageUploadSuccess}
+                    resetCounter={resetCounter}
+                    onReset={handleResetUpload}
+                    isEditMode={!!selectedRow}
+                  />
+
+                  {selectedFileId && !imageError && (
+                    <div className="mt-3">
+                      <img
+                        src={`/api/getImage/${selectedFileId}`}
+                        alt="Selected"
+                        className="w-32 h-32 object-cover"
+                        onLoad={() => console.log("Preview image loaded ✅", selectedFileId)}
+                        onError={(e) => {
+                          console.log("Preview image error ❌", {
+                            selectedFileId,
+                            src: `/api/getImage/${selectedFileId}`,
+                            event: e,
+                          });
+                          setImageError(true);
+                        }}
+                      />
+                    </div>
+                  )}
+                  {selectedFileId && imageError && (
+                    <div className="mt-2 text-xs text-red-600">
+                      {/* Image preview failed to load. Check console logs. */}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-
-
-            {/* ✅ پیش‌نمایش تصویر آپلودشده */}
-            {selectedFileId && !imageError && (
-              <div className="mt-4">
-                <img
-                  src={`/api/getImage/${selectedFileId}`}
-                  alt="Selected"
-                  className="w-32 h-32 object-cover"
-                  onError={() => setImageError(true)}
-                />
-              </div>
-            )}
-            {/* <div className="h-2" /> */}
           </div>
 
+          {/* Footer Buttons */}
           <div className="bg-white/90 backdrop-blur mt-6 py-2">
             <div className="flex items-center justify-center gap-3">
-              {/* Add - سبز سازمانی */}
               <DynamicButton
-                text={t("Global.Add")}
+                text={t("Global.Add", "Add")}
                 onClick={handleAddClick}
                 isDisabled={isRowClicked}
                 size="md"
@@ -645,9 +828,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                 leftIcon={<FaPlus />}
               />
 
-              {/* Edit - آبی سازمانی */}
               <DynamicButton
-                text={t("Global.Edit")}
+                text={t("Global.Edit", "Edit")}
                 onClick={handleEditClick}
                 isDisabled={!selectedRow}
                 size="md"
@@ -655,18 +837,16 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                 leftIcon={<FaPencilAlt />}
               />
 
-              {/* New - زرد سازمانی */}
               <DynamicButton
-                text={t("Global.New")}
+                text={t("Global.New", "New")}
                 onClick={handleNewClick}
                 size="md"
                 variant="orgBlue"
                 leftIcon={<FaUndo />}
               />
 
-              {/* Delete - قرمز سازمانی */}
               <DynamicButton
-                text={t("Global.Delete")}
+                text={t("Global.Delete", "Delete")}
                 onClick={handleDeleteClick}
                 isDisabled={isDeleteDisabled}
                 size="md"
