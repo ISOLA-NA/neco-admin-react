@@ -1122,7 +1122,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                 onClose();
               }}
             >
-              {t("Global.Cancel")}
+              {t("AddForms.Cancel")}
             </button>
 
             <button

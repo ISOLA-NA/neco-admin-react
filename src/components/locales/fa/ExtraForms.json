@@ -1,0 +1,217 @@
+{
+  "DynamicConfirm": {
+    "Buttons": {
+      "Add": "افزودن",
+      "Edit": "ویرایش",
+      "Save": "ذخیره",
+      "Delete": "حذف",
+      "Duplicate": "کپی",
+      "Minimize": "کوچک‌کردن",
+      "Maximize": "بزرگ‌کردن",
+      "Close": "بستن",
+      "Cancel": "انصراف",
+      "Confirm": "تأیید",
+      "Ok": "باشه"
+    },
+    "Confirmations": {
+      "Save": {
+        "Title": "تأیید ذخیره",
+        "Message": "آیا از ذخیره مطمئن هستید؟"
+      },
+      "Update": {
+        "Title": "تأیید ویرایش",
+        "Message": "آیا از ویرایش مطمئن هستید؟"
+      },
+      "Delete": {
+        "Title": "تأیید حذف",
+        "Message": "آیا از انجام عملیات حذف مطمئن هستید؟"
+      },
+      "Default": {
+        "Title": "تأیید",
+        "Message": "آیا از انجام این عملیات مطمئن هستید؟"
+      },
+      "Duplicate": {
+        "Title": "تأیید کپی",
+        "Message": "آیا از کپی کردن این آیتم مطمئن هستید؟"
+      }
+    }
+  },
+  "Alerts": {
+    "Title": {
+      "Error": "خطا",
+      "Success": "موفقیت",
+      "Warning": "هشدار"
+    },
+    "Titles": {
+      "Error": "خطا",
+      "Success": "موفقیت",
+      "Warning": "هشدار"
+    },
+    "FileExtensionError": "فرمت فایل باید یکی از {extensions} باشد",
+    "Errors": {
+      "FileRecordInsertFailed": "خطا در ثبت اطلاعات فایل",
+      "FileUploadFailed": "آپلود فایل با خطا مواجه شد",
+      "FailedToSaveForm": "ذخیره فرم با خطا مواجه شد",
+      "FailedToSaveCommand": "ذخیره با خطا مواجه شد",
+      "FailedToUpdateServer": "به‌روزرسانی به سرور با خطا مواجه شد",
+      "NoRowSelectedForEdit": "ردیفی برای ویرایش انتخاب نشده است",
+      "FailedToFetchData": "دریافت داده‌ها با خطا مواجه شد",
+      "DuplicationFailedNoNewItem": "کپی ناموفق بود"
+    },
+    "Upload": {
+      "WordSuccess": "آپلود فایل ورد با موفقیت انجام شد",
+      "WordFailed": "آپلود فایل ورد با خطا مواجه شد",
+      "ExcelSuccess": "آپلود فایل اکسل با موفقیت انجام شد",
+      "ExcelFailed": "آپلود فایل اکسل با خطا مواجه شد"
+    },
+    "Download": {
+      "NoFileSelected": "فایلی برای دانلود انتخاب نشده است",
+      "Failed": "دانلود فایل با خطا مواجه شد"
+    },
+    "Warnings": {
+      "NameOrPersianNameRequired": "نام یا نام فارسی الزامی است",
+      "NameCannotBeEmpty": "نام نمی‌تواند خالی باشد"
+    },
+    "Deleted": {
+      "NoRowSelected": "ردیفی برای حذف انتخاب نشده است",
+      "Success": "حذف با موفقیت انجام شد",
+      "Failed": "حذف با خطا مواجه شد"
+    },
+    "Added": {
+      "Configuration": "پیکربندی با موفقیت اضافه شد",
+      "Command": "دستور با موفقیت اضافه شد",
+      "User": "کاربر با موفقیت اضافه شد",
+      "Ribbon": "ریبون با موفقیت اضافه شد",
+      "Role": "نقش با موفقیت اضافه شد",
+      "Enterprise": "شرکت با موفقیت اضافه شد",
+      "RoleGroup": "گروه نقش با موفقیت اضافه شد",
+      "Staffing": "تخصیص نیرو با موفقیت اضافه شد",
+      "ProgramTemplate": "قالب برنامه با موفقیت اضافه شد",
+      "ProgramType": "نوع برنامه با موفقیت اضافه شد",
+      "Odp": "Odp با موفقیت اضافه شد",
+      "Procedure": "روش‌نامه با موفقیت اضافه شد",
+      "Calendar": "تقویم با موفقیت اضافه شد",
+      "ProjectAccess": "دسترسی پروژه با موفقیت اضافه شد",
+      "ApprovalFlow": "جریان تأیید با موفقیت اضافه شد",
+      "Form": "فرم با موفقیت اضافه شد",
+      "Category": "دسته‌بندی با موفقیت اضافه شد"
+    },
+    "Updated": {
+      "Configuration": "پیکربندی با موفقیت به‌روزرسانی شد",
+      "Command": "دستور با موفقیت به‌روزرسانی شد",
+      "User": "کاربر با موفقیت به‌روزرسانی شد",
+      "Ribbon": "ریبون با موفقیت به‌روزرسانی شد",
+      "Role": "نقش با موفقیت به‌روزرسانی شد",
+      "Enterprise": "شرکت با موفقیت به‌روزرسانی شد",
+      "RoleGroup": "گروه نقش با موفقیت به‌روزرسانی شد",
+      "Staffing": "تخصیص نیرو با موفقیت به‌روزرسانی شد",
+      "ProgramTemplate": "قالب برنامه با موفقیت به‌روزرسانی شد",
+      "ProgramType": "نوع برنامه با موفقیت به‌روزرسانی شد",
+      "Odp": "Odp با موفقیت به‌روزرسانی شد",
+      "Procedure": "روش‌نامه با موفقیت به‌روزرسانی شد",
+      "Calendar": "تقویم با موفقیت به‌روزرسانی شد",
+      "ProjectsAccess": "دسترسی پروژه با موفقیت به‌روزرسانی شد",
+      "ApprovalFlow": "جریان تأیید با موفقیت به‌روزرسانی شد",
+      "Form": "فرم با موفقیت به‌روزرسانی شد",
+      "Category": "دسته‌بندی با موفقیت به‌روزرسانی شد"
+    },
+    "Duplicated": {
+      "NoRowSelected": "ردیفی برای کپی انتخاب نشده است",
+      "Success": "کپی با موفقیت انجام شد",
+      "Failed": "کپی با خطا مواجه شد"
+    }
+  },
+  "Forms": {
+    "Columns": {
+      "Order": "ترتیب",
+      "ColumnName": "نام ستون",
+      "Type": "نوع",
+      "Command": "دستور",
+      "ShowInList": "نمایش در لیست",
+      "Required": "الزامی",
+      "MainColumn": "ستون اصلی",
+      "IsRtl": "RTL",
+      "CountInReject": "شمارش در رد شده"
+    },
+    "PersianName": "نام فارسی",
+    "Name": "نام",
+    "Command": "دستور",
+    "CategoryA": "دسته A",
+    "CategoryB": "دسته B",
+    "Transmittal": "ارسال",
+    "IsMegaForm": "فرم بزرگ",
+    "SwitchToEN": "تغییر به انگلیسی ({field})",
+    "SwitchToFA": "تغییر به فارسی ({field})",
+    "RelatedProjects": "پروژه‌های مرتبط",
+    "NoWordFileSelected": "فایل وردی انتخاب نشده است",
+    "NoExcelFileSelected": "فایل اکسلی انتخاب نشده است",
+    "UploadWordFile": "آپلود فایل ورد",
+    "UploadExcelFile": "آپلود فایل اکسل"
+  },
+  "DataTable": {
+    "Headers": {
+      "Name": "نام",
+      "Description": "توضیحات",
+      "CatA": "دسته A",
+      "CatB": "دسته B",
+      "Transmittal": "ارسال",
+      "IsMegaForm": "فرم بزرگ",
+      "ProgramTemplateShort": "قالب برنامه",
+      "DefaultRibbon": "ریبون پیش‌فرض",
+      "Username": "نام کاربری",
+      "FirstName": "نام",
+      "LastName": "نام خانوادگی",
+      "UserType": "نوع کاربر",
+      "Website": "وب‌سایت",
+      "Mobile": "موبایل",
+      "Email": "ایمیل",
+      "PostCode": "کد پست",
+      "Grade": "گرید",
+      "Role": "نقش",
+      "User": "کاربر",
+      "Enterprise": "شرکت",
+      "Superior": "بالادست",
+      "Status": "وضعیت",
+      "ActStart": "شروع واقعی",
+      "Duration": "مدت",
+      "BudgetAct": "بودجه واقعی",
+      "BudgetAppr": "بودجه مصوب",
+      "Phase": "فاز",
+      "Calendar": "تقویم",
+      "IsIdea": "ایده",
+      "Project": "پروژه",
+      "Address": "آدرس",
+      "WFTemplateName": "نام گردش‌کار",
+      "EntityTypeName": "نام فرم",
+      "AFName": "نام گردش تایید",
+      "Command": "دستور",
+      "Order": "ترتیب",
+      "PersianColumnName": "نام فارسی ستون",
+      "ProjectName": "نام پروژه",
+      "PersianName": "نام فارسی",
+      "Yes": "بله",
+      "No": "خیر"
+    },
+    "Toolbar": {
+      "SearchPlaceholder": "جستجو..."
+    }
+  },
+  "Ribbons": {
+    "Name": "نام",
+    "Description": "توضیحات",
+    "DescriptionPlaceholder": "توضیحات را وارد کنید"
+  },
+  "Category": {
+    "CategoryType": "نوع دسته",
+    "CategoryA": "دسته A",
+    "CategoryB": "دسته B"
+  },
+  "General": {
+    "Loading": "در حال بارگذاری...",
+    "LoadingProjectsAccess": "در حال بارگذاری دسترسی‌های پروژه..."
+  },
+  "Global": {
+    "Global": "عمومی",
+    "Noitemisselected": "هیچ آیتمی انتخاب نشده است"
+  }
+}

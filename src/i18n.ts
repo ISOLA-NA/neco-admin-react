@@ -60,6 +60,8 @@ import enInfo from "./components/locales/en/Info.json";
 import enAccount from "./components/locales/en/Account.json";
 import enSidebarDrawer from "./components/locales/en/SideBarDrawer.json";
 import enColumnTypes from "./components/locales/en/ColumnTypes.json"
+import extraForms from "./components/locales/en/ExtraForms.json"
+
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
 import faLogin from "./components/locales/fa/login.json";
@@ -117,7 +119,8 @@ import faMap from "./components/locales/fa/Forms/Map.json";
 import faInfo from "./components/locales/fa/Info.json";
 import faAccount from "./components/locales/fa/Account.json";
 import faSidebarDrawer from "./components/locales/fa/SideBarDrawer.json";
-import faColumnTypes from "./components/locales/fa/ColumnTypes.json"
+import faColumnTypes from "./components/locales/fa/ColumnTypes.json";
+import faextraForms from "./components/locales/fa/ExtraForms.json"
 
 const resources = {
   en: {
@@ -178,7 +181,8 @@ const resources = {
       ...enInfo,
       ...enAccount,
       ...enSidebarDrawer,
-      ...enColumnTypes
+      ...enColumnTypes,
+      ...extraForms
     },
   },
   fa: {
@@ -239,7 +243,8 @@ const resources = {
       ...faInfo,
       ...faAccount,
       ...faSidebarDrawer,
-      ...faColumnTypes
+      ...faColumnTypes,
+      ...faextraForms
     },
   },
 };

@@ -5,7 +5,6 @@ import React, {
   useImperativeHandle,
   useCallback,
 } from "react";
-
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import DynamicSelector from "../utilities/DynamicSelector";
@@ -17,7 +16,6 @@ import AddColumnForm from "./AddForm";
 import FormGeneratorView from "./FormGeneratorView/FormGeneratorView";
 import UploadFilesPanel from "./UploadFilesPanel";
 import DynamicSwitcher from "../utilities/DynamicSwitcher";
-
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { useApi } from "../../context/ApiContext";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
@@ -25,8 +23,6 @@ import apiService from "../../services/api.services";
 import fileService from "../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "react-i18next";
-
-
 interface IFormData {
   ID: string;
   Name: string;
@@ -36,7 +32,7 @@ interface IFormData {
   IsMegaForm: boolean;
   IsVisible: boolean;
   LastModified: string;
-  ModifiedById: number | null;
+  ModifiedById: string | null;
   ProjectsStr: string;
   TemplateDocID: string | null;
   TemplateExcelID: string | null;
@@ -44,16 +40,13 @@ interface IFormData {
   nEntityCateBID: number | null;
   IsGlobal: boolean;
 }
-
 interface CategoryOption {
   value: string;
   label: string;
 }
-
 interface FormsCommand1Props {
   selectedRow: any;
 }
-
 const columnTypeMapping: { [key: string]: number } = {
   component1: 15,
   component2: 40,
@@ -62,11 +55,13 @@ const columnTypeMapping: { [key: string]: number } = {
   component5: 4,
   component6: 21,
   component7: 5,
+  component27: 7,
   component8: 19,
   component9: 34,
   component10: 35,
-  component11: 17,
+  component26: 36,
   component12: 30,
+  component28: 8,
   component13: 6,
   component14: 9,
   component15: 26,
@@ -80,9 +75,6 @@ const columnTypeMapping: { [key: string]: number } = {
   component23: 29,
   component24: 32,
   component25: 28,
-  component26: 36,
-  component27: 7,
-  component28: 8,
   component29: 11,
   component30: 12,
   component31: 13,
@@ -90,11 +82,9 @@ const columnTypeMapping: { [key: string]: number } = {
   component33: 18,
   component34: 23,
   component35: 37,
-  component36: 38, // Inventory
-  component37: 39, // InventoryField
-
+  component36: 38,
+  component37: 39,
 };
-
 const typeOfInformationOptions = [
   { value: "component1", label: "Text" },
   { value: "component2", label: "RichText" },
@@ -133,11 +123,6 @@ const typeOfInformationOptions = [
   { value: "component36", label: "Inventory" },
   { value: "component37", label: "Inventory Field" },
 ];
-
-
-/**
- * تابع کمکی برای واکشی نام فایل با استفاده از FileID
- */
 async function fetchFileNameById(fileId: string) {
   if (!fileId) return "";
   try {
@@ -150,66 +135,52 @@ async function fetchFileNameById(fileId: string) {
   }
   return "";
 }
-
-/**
- * کامپوننت اصلی: FormsCommand1
- */
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const { t, i18n } = useTranslation();
-
   const uiDir = i18n.dir() as "rtl" | "ltr";
-const isRtl = uiDir === "rtl";
-
-const ellipsisCellStyle = React.useMemo(() => {
-  return isRtl
-    ? ({
-        textAlign: "right",
-        direction: "rtl",
-        unicodeBidi: "plaintext",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      } as React.CSSProperties)
-    : ({
-        textAlign: "left",
-        direction: "ltr",
-        unicodeBidi: "plaintext",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      } as React.CSSProperties);
-}, [isRtl]);
-
-const ellipsisHeaderStyle = React.useMemo(() => {
-  return isRtl
-    ? ({
-        textAlign: "right",
-        direction: "rtl",
-        unicodeBidi: "plaintext",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      } as React.CSSProperties)
-    : ({
-        textAlign: "left",
-        direction: "ltr",
-        unicodeBidi: "plaintext",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      } as React.CSSProperties);
-}, [isRtl]);
-
+  const isRtl = uiDir === "rtl";
+  const ellipsisCellStyle = React.useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
+  const ellipsisHeaderStyle = React.useMemo(() => {
+    return isRtl
+      ? ({
+          textAlign: "right",
+          direction: "rtl",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties)
+      : ({
+          textAlign: "left",
+          direction: "ltr",
+          unicodeBidi: "plaintext",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        } as React.CSSProperties);
+  }, [isRtl]);
   const { handleSaveForm } = useAddEditDelete();
   const api = useApi();
-
-  // تشخیص حالت ویرایش یا جدید
   const isEditMode = Boolean(selectedRow?.ID);
-
-  // استیت شناسه کاربر
   const [userId, setUserId] = useState<string | null>(null);
-
-  // استیت اصلی فرم
   const [formData, setFormData] = useState<IFormData>({
     ID: "",
     Name: "",
@@ -227,44 +198,25 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     nEntityCateBID: null,
     IsGlobal: true,
   });
-
-  // نام فایل‌های ورد و اکسل (جهت نمایش و دانلود)
   const [wordFileName, setWordFileName] = useState<string>("");
   const [excelFileName, setExcelFileName] = useState<string>("");
-
-  const [isFaMode, setIsFaMode] = useState(true); // EN=false, FA=true
-
-
-  // داده‌های پروژه (جهت انتخاب پروژه)
+  const [isFaMode, setIsFaMode] = useState<boolean>(true);
   const [projectData, setProjectData] = useState<
     { ID: string; Name: string }[]
   >([]);
-
-  // استیت فیلدهای انتیتی
   const [entityFields, setEntityFields] = useState<any[]>([]);
-
-  // مدیریت نمایش مودال‌های مختلف
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [currentSelector, setCurrentSelector] = useState<"A" | "B" | null>(
     null
   );
   const [selectedRowData, setSelectedRowData] = useState<any>(null);
-
-  // مودال افزودن/ویرایش ستون
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [editingData, setEditingData] = useState<any>(null);
-
-  // مودال نمایش فرم جنریت شده
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-
-  // state برای Category A و B که از API گرفته می‌شود
+  const [viewModalOpen, setViewModalOpen] = useState<boolean>(false);
   const [catAOptions, setCatAOptions] = useState<CategoryOption[]>([]);
   const [catBOptions, setCatBOptions] = useState<CategoryOption[]>([]);
-
-  const [isLoadingFields, setIsLoadingFields] = useState<boolean>(false); // ← استیت جدید
-
-  const [addModalKey, setAddModalKey] = useState(0);
-
+  const [isLoadingFields, setIsLoadingFields] = useState<boolean>(false);
+  const [addModalKey, setAddModalKey] = useState<number>(0);
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -278,10 +230,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     };
     fetchUserId();
   }, []);
-
-  /**
-   * واکشی گزینه‌های Category A
-   */
   useEffect(() => {
     const fetchCatAOptions = async () => {
       try {
@@ -297,10 +245,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     };
     fetchCatAOptions();
   }, []);
-
-  /**
-   * واکشی گزینه‌های Category B
-   */
   useEffect(() => {
     const fetchCatBOptions = async () => {
       try {
@@ -316,10 +260,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     };
     fetchCatBOptions();
   }, []);
-
-  /**
-   * واکشی لیست پروژه‌ها
-   */
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -335,11 +275,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     };
     fetchProjects();
   }, [api]);
-
-  /**
-   * در صورت ویرایش، فرم را با داده‌های انتخاب‌شده به‌روزرسانی می‌کند
-   * و همچنین نام فایل‌های ورد و اکسل را می‌گیرد
-   */
   useEffect(() => {
     const updateFormDataAndFiles = async () => {
       if (selectedRow) {
@@ -352,7 +287,7 @@ const ellipsisHeaderStyle = React.useMemo(() => {
           IsMegaForm: !!selectedRow.IsMegaForm,
           IsVisible: !!selectedRow.IsVisible,
           LastModified: selectedRow.LastModified || new Date().toISOString(),
-          ModifiedById: selectedRow.ModifiedById || null,
+          ModifiedById: selectedRow.ModifiedById?.toString() || null,
           ProjectsStr: selectedRow.ProjectsStr || "",
           TemplateDocID: selectedRow.TemplateDocID || null,
           TemplateExcelID: selectedRow.TemplateExcelID || null,
@@ -361,18 +296,13 @@ const ellipsisHeaderStyle = React.useMemo(() => {
           IsGlobal:
             selectedRow.IsGlobal !== undefined ? selectedRow.IsGlobal : true,
         });
-
         console.log("rrrrrr", selectedRow.IsGlobal);
-
-        // واکشی نام فایل ورد
         if (selectedRow.TemplateDocID) {
           const name = await fetchFileNameById(selectedRow.TemplateDocID);
           setWordFileName(name);
         } else {
           setWordFileName("");
         }
-
-        // واکشی نام فایل اکسل
         if (selectedRow.TemplateExcelID) {
           const name = await fetchFileNameById(selectedRow.TemplateExcelID);
           setExcelFileName(name);
@@ -380,7 +310,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
           setExcelFileName("");
         }
       } else {
-        // اگر حالت جدید باشد
         setFormData({
           ID: "",
           Name: "",
@@ -404,10 +333,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     };
     updateFormDataAndFiles();
   }, [selectedRow]);
-
-  /**
-   * در صورت تغییر TemplateDocID، نام فایل ورد را مجدد می‌گیرد
-   */
   useEffect(() => {
     const getDocName = async () => {
       if (formData.TemplateDocID) {
@@ -419,10 +344,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     };
     getDocName();
   }, [formData.TemplateDocID]);
-
-  /**
-   * در صورت تغییر TemplateExcelID، نام فایل اکسل را مجدد می‌گیرد
-   */
   useEffect(() => {
     const getExcelName = async () => {
       if (formData.TemplateExcelID) {
@@ -434,23 +355,18 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     };
     getExcelName();
   }, [formData.TemplateExcelID]);
-
-  /**
-   * در صورت وجود ID فرم، فیلدهای انتیتی را واکشی می‌کند
-   */
   const refreshEntityFields = useCallback(async () => {
     const parsedId = Number(formData.ID);
     if (!parsedId || isNaN(parsedId)) {
       setEntityFields([]);
       return;
     }
-
     setIsLoadingFields(true);
     try {
       const fields = await api.getEntityFieldByEntityTypeId(parsedId);
       const normalized = (fields || []).map((f: any) => ({
         ...f,
-        PersianName: f.PersianName ?? "", // ← تضمین وجود property
+        PersianName: f.PersianName ?? "",
       }));
       setEntityFields(normalized);
     } catch (error) {
@@ -460,7 +376,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
       setIsLoadingFields(false);
     }
   }, [api, formData.ID]);
-
   const newColumnDefs = React.useMemo(
   () => [
     {
@@ -524,7 +439,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
       cellStyle: ellipsisCellStyle,
       headerStyle: ellipsisHeaderStyle,
     },
-
     ...[
       { headerNameKey: "ShowInList", field: "IsShowGrid" },
       { headerNameKey: "Required", field: "IsRequire" },
@@ -539,8 +453,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
       filter: true,
       flex: 0.9,
       minWidth: 110,
-
-      // ✅ وسط‌چین + سازگار با RTL/LTR
       cellStyle: {
         ...ellipsisCellStyle,
         display: "flex",
@@ -551,7 +463,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
         ...ellipsisHeaderStyle,
         textAlign: "center",
       },
-
       cellRendererFramework: (p: any) => (
         <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
       ),
@@ -564,75 +475,56 @@ const ellipsisHeaderStyle = React.useMemo(() => {
   ],
   [t, ellipsisCellStyle, ellipsisHeaderStyle]
 );
-
-
   useEffect(() => {
     refreshEntityFields();
   }, [refreshEntityFields]);
-
-  /**
-   * تابع هندل تغییر در فرم
-   */
   const handleChange = (field: keyof IFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-
-  /**
-   * بازکردن مدال انتخاب برای Category A یا B
-   */
   const handleOpenModal = (selector: "A" | "B") => {
     setCurrentSelector(selector);
     setSelectedRowData(null);
     setModalOpen(true);
   };
-
   const handleCloseModal = () => {
     setModalOpen(false);
     setCurrentSelector(null);
     setSelectedRowData(null);
   };
-
   const handleRowClick = (row: any) => {
     setSelectedRowData(row);
   };
-
   const handleSelectButtonClick = () => {
     if (selectedRowData && currentSelector) {
       if (currentSelector === "A") {
         handleChange(
           "nEntityCateAID",
-          selectedRowData.value ? parseInt(selectedRowData.value) : null
+          selectedRowData.value ? parseInt(selectedRowData.value, 10) : null
         );
       } else {
         handleChange(
           "nEntityCateBID",
-          selectedRowData.value ? parseInt(selectedRowData.value) : null
+          selectedRowData.value ? parseInt(selectedRowData.value, 10) : null
         );
       }
       handleCloseModal();
     }
   };
-
-  /**
-   * تابع کمکی آپلود فایل و ذخیره رکورد آن در دیتابیس
-   */
   const handleFileUpload = async (file: File, allowedExtensions: string[]) => {
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
     if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
       throw new Error(
-        `تنها فایل‌های با پسوند ${allowedExtensions.join(", ")} مجاز هستند.`
+        t("Alerts.FileExtensionError", { extensions: allowedExtensions.join(", ") })
       );
     }
     const ID = uuidv4();
     const FileIQ = uuidv4();
     const folderName = new Date().toISOString().split("T")[0];
     const generatedFileName = `${FileIQ}.${fileExtension}`;
-
     const formDataFile = new FormData();
     formDataFile.append("FileName", generatedFileName);
     formDataFile.append("FolderName", folderName);
     formDataFile.append("file", file);
-
     const uploadRes = await fileService.uploadFile(formDataFile);
     if (uploadRes && uploadRes.status === 200) {
       const { FileSize } = uploadRes.data;
@@ -651,77 +543,42 @@ const ellipsisHeaderStyle = React.useMemo(() => {
       if (insertRes && insertRes.status === 200) {
         return insertRes.data;
       }
-      throw new Error("خطا در درج رکورد فایل در دیتابیس.");
+      throw new Error(t("Alerts.Errors.FileRecordInsertFailed"));
     } else {
-      throw new Error("آپلود فایل با خطا مواجه شد.");
+      throw new Error(t("Alerts.Errors.FileUploadFailed"));
     }
   };
-
-  /**
-   * آپلود فایل ورد
-   */
   const handleWordUpload = async (file: File) => {
     try {
       const result = await handleFileUpload(file, ["doc", "docx"]);
       handleChange("TemplateDocID", result.ID);
       setWordFileName(result.FileName);
-      showAlert("success", undefined, "موفقیت", "فایل ورد با موفقیت آپلود شد.");
+      showAlert("success", undefined, t("Alerts.Titles.Success"), t("Alerts.Upload.WordSuccess"));
     } catch (error: any) {
-      showAlert(
-        "error",
-        undefined,
-        "خطا",
-        error.message || "آپلود فایل ورد با خطا مواجه شد."
-      );
+      showAlert("error", undefined, t("Alerts.Titles.Error"), error.message || t("Alerts.Upload.WordFailed"));
     }
   };
-
-  /**
-   * آپلود فایل اکسل
-   */
   const handleExcelUpload = async (file: File) => {
     try {
       const result = await handleFileUpload(file, ["xls", "xlsx"]);
       handleChange("TemplateExcelID", result.ID);
       setExcelFileName(result.FileName);
-      showAlert(
-        "success",
-        undefined,
-        "موفقیت",
-        "فایل اکسل با موفقیت آپلود شد."
-      );
+      showAlert("success", undefined, t("Alerts.Titles.Success"), t("Alerts.Upload.ExcelSuccess"));
     } catch (error: any) {
-      showAlert(
-        "error",
-        undefined,
-        "خطا",
-        error.message || "آپلود فایل اکسل با خطا مواجه شد."
-      );
+       showAlert("error", undefined, t("Alerts.Titles.Error"), error.message || t("Alerts.Upload.ExcelFailed"));
     }
   };
-
-  /**
-   * حذف فایل ورد
-   */
   const handleDeleteWord = () => {
     handleChange("TemplateDocID", null);
     setWordFileName("");
   };
-
-  /**
-   * حذف فایل اکسل
-   */
   const handleDeleteExcel = () => {
     handleChange("TemplateExcelID", null);
     setExcelFileName("");
   };
-
-  /**
-   * دانلود فایل (ورد یا اکسل)
-   */
   const handleDownloadFile = async (templateId: string | null) => {
     if (!templateId) {
-      showAlert("error", undefined, "خطا", "فایلی انتخاب نشده است.");
+      showAlert("error", undefined, t("Alerts.Download.NoFileSelected"));
       return;
     }
     try {
@@ -730,7 +587,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
         const { FileIQ, FileType, FolderName, FileName } = fileInfoRes.data;
         const model = { FileName: FileIQ + FileType, FolderName };
         const downloadRes = await fileService.download(model);
-
         const blob = new Blob([downloadRes.data], {
           type: "application/octet-stream",
         });
@@ -744,54 +600,36 @@ const ellipsisHeaderStyle = React.useMemo(() => {
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      showAlert("error", undefined, "خطا", "دانلود فایل با خطا مواجه شد.");
+      showAlert("error", undefined, t("Alerts.Download.Failed"));
     }
   };
-
   const handleDownloadWord = () => {
     handleDownloadFile(formData.TemplateDocID);
   };
-
   const handleDownloadExcel = () => {
     handleDownloadFile(formData.TemplateExcelID);
   };
-
-  /**
-   * رویدادهای افزودن، ویرایش و حذف فیلدهای انتیتی
-   */
   const handleAddClick = () => {
     setEditingData(null);
     setAddModalKey((k) => k + 1);
     setIsAddModalOpen(true);
   };
-
   const handleEditClick = (rowData: any) => {
     const dataToEdit = selectedRowData || rowData;
     setEditingData(dataToEdit);
     setAddModalKey((k) => k + 1);
     setIsAddModalOpen(true);
   };
-
   const handleAddModalClose = () => {
     setIsAddModalOpen(false);
     setEditingData(null);
     setSelectedRowData(null);
   };
-
-  /**
-   * در این متد فقط مقدار در state آپدیت می‌شود
-   * تا تغییرات در جدول نمایش داده شود
-   * ولی فراخوانی آپدیت سرور انجام نمی‌دهیم.
-   */
   const handleCellValueChanged = async (params: any) => {
     if (!params?.data || !params.colDef?.field) return;
-
     const updatedFieldName = params.colDef.field;
     const updatedFieldValue = params.newValue;
-
     const updatedData = { ...params.data, [updatedFieldName]: updatedFieldValue };
-
-    // به‌روزرسانی در state
     const rowIndex = entityFields.findIndex((f) => f.ID === updatedData.ID);
     if (rowIndex !== -1) {
       const newFields = [...entityFields];
@@ -799,116 +637,45 @@ const ellipsisHeaderStyle = React.useMemo(() => {
       setEntityFields(newFields);
     }
     setSelectedRowData(updatedData);
-
-    // ← اختیاری: ارسال به سرور
     try {
-      // مثال: اگر API شما updateEntityField دارد
       // await api.updateEntityField(updatedData);
     } catch (e) {
       console.error(e);
-      showAlert("error", undefined, "Error", "Failed to update on server.");
+      showAlert("error", undefined, t("Alerts.Errors.FailedToUpdateServer"));
     }
   };
-
-
-  /**
-   * متد اصلی ذخیره فرم (برای فراخوانی از والد، چون این کامپوننت با forwardRef فرستاده شده)
-   */
   useImperativeHandle(ref, () => ({
-
-    // save: async () => {
-    //   try {
-        
-    //     const payload = {
-    //       ...formData,
-    //       ID: formData.ID ? Number(formData.ID) : 0,
-    //       PersianName: (formData.PersianName || "").trim(),
-    //       ModifiedById: formData.ModifiedById
-    //         ? formData.ModifiedById.toString()
-    //         : null,
-    //     };
-
-    //     const nameTrim = (formData.Name || "").trim();
-    //     const pNameTrim = (formData.PersianName || "").trim();
-
-    //     // ✅ فقط اگر هر دو خالی باشند خطا
-    //     if (!nameTrim && !pNameTrim) {
-    //       showAlert("warning", undefined, "Warning", "Name یا PersianName را وارد کنید");
-    //       return false;
-    //     }
-
-    //     console.log("FORMS SAVE payload =>", payload);
-
-    //     await handleSaveForm(payload);
-
-    //     // showAlert("success", undefined, "Success", "Form saved successfully!");
-    //     return true; // ✅ فرم با موفقیت ذخیره شد
-    //   } catch (error) {
-    //     console.error("Error saving form:", error);
-    //     // showAlert("error", undefined, "Error", "Failed to save form.");
-    //     return false; // ❌ ذخیره با خطا مواجه شد
-    //   }
-    // },
-
     save: async () => {
-  try {
-    const nameTrim = (formData.Name || "").trim();
-    const pNameTrim = (formData.PersianName || "").trim();
-
-    // ✅ فقط اگر هر دو خالی باشند خطا
-    if (!nameTrim && !pNameTrim) {
-      showAlert("warning", undefined, "Warning", "Name یا PersianName را وارد کنید");
-      return false;
-    }
-
-    const finalName = nameTrim || pNameTrim;        // ✅ fallback
-    const finalPersianName = pNameTrim || null;     // ✅ null اگر خالی
-
-    const payload = {
-      ...formData,
-      ID: formData.ID ? Number(formData.ID) : 0,
-      Name: finalName,
-      PersianName: finalPersianName,
-      ModifiedById: formData.ModifiedById
-        ? formData.ModifiedById.toString()
-        : null,
-    };
-
-    console.log("FORMS SAVE payload =>", payload);
-
-    await handleSaveForm(payload);
-
-    // ✅ اختیاری: بعد Save روی FA بمان
-    setIsFaMode(true);
-
-    return true;
-  } catch (error) {
-    console.error("Error saving form:", error);
-    return false;
-  }
-},
-
+      try {
+        const nameTrim = (formData.Name || "").trim();
+        const pNameTrim = (formData.PersianName || "").trim();
+        if (!nameTrim && !pNameTrim) {
+          showAlert("warning", undefined, t("Alerts.Titles.Warning"), t("Alerts.Warnings.NameOrPersianNameRequired"));
+          return false;
+        }
+        const finalName = nameTrim || pNameTrim;
+        const finalPersianName = pNameTrim || null;
+        const payload = {
+          ...formData,
+          ID: formData.ID ? Number(formData.ID) : 0,
+          Name: finalName,
+          PersianName: finalPersianName,
+          ModifiedById: userId,
+        };
+        console.log("FORMS SAVE payload =>", payload);
+        await handleSaveForm(payload);
+        setIsFaMode(true);
+        return true;
+      } catch (error) {
+        console.error("Error saving form:", error);
+        showAlert("error", undefined, t("Alerts.Errors.FailedToSaveForm"));
+        return false;
+      }
+    },
   }));
-
-
-
   return (
     <div style={{ width: "100%", boxSizing: "border-box" }}>
-
-
-
       <TwoColumnLayout>
-        {/* Name Field */}
-        {/* <TwoColumnLayout.Item span={1}>
-          <DynamicInput
-            name={t("Forms.Name")}
-            type="text"
-            value={formData.Name}
-            onChange={(e) => handleChange("Name", e.target.value)}
-            required
-          />
-        </TwoColumnLayout.Item> */}
-
         <TwoColumnLayout.Item span={1}>
           <div className="flex items-end gap-2">
             <div className="flex-1">
@@ -919,11 +686,8 @@ const ellipsisHeaderStyle = React.useMemo(() => {
                 onChange={(e) =>
                   handleChange(!isFaMode ? "PersianName" : "Name", e.target.value)
                 }
-              // required={isFaMode}
               />
             </div>
-
-            {/* دکمه EN/FA با استایل گرادیانی */}
             <button
               type="button"
               onClick={() => setIsFaMode((p) => !p)}
@@ -946,10 +710,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
             </button>
           </div>
         </TwoColumnLayout.Item>
-
-
-
-        {/* Command Field */}
         <TwoColumnLayout.Item span={1}>
           <DynamicInput
             name={t("Forms.Command")}
@@ -958,8 +718,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
             onChange={(e) => handleChange("Code", e.target.value)}
           />
         </TwoColumnLayout.Item>
-
-        {/* Category A Selector */}
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
             options={catAOptions}
@@ -975,8 +733,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
             onButtonClick={() => handleOpenModal("A")}
           />
         </TwoColumnLayout.Item>
-
-        {/* Category B Selector */}
         <TwoColumnLayout.Item span={1}>
           <DynamicSelector
             options={catBOptions}
@@ -992,8 +748,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
             onButtonClick={() => handleOpenModal("B")}
           />
         </TwoColumnLayout.Item>
-
-        {/* IsDoc Switcher */}
         <TwoColumnLayout.Item span={1}>
           <DynamicSwitcher
             isChecked={formData.IsDoc}
@@ -1002,8 +756,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
             rightLabel=""
           />
         </TwoColumnLayout.Item>
-
-        {/* IsMegaForm Switcher */}
         <TwoColumnLayout.Item span={1}>
           <DynamicSwitcher
             isChecked={formData.IsMegaForm}
@@ -1017,10 +769,7 @@ const ellipsisHeaderStyle = React.useMemo(() => {
             disabled={isEditMode}
           />
         </TwoColumnLayout.Item>
-
-        {/* Upload panel + ListSelector */}
         <TwoColumnLayout.Item span={2} className="mt-5 flex items-start gap-4">
-          {/* UploadFilesPanel container (half width) */}
           <div className="w-1/2 flex flex-wrap items-center gap-2 min-w-0">
             <UploadFilesPanel
               onWordUpload={handleWordUpload}
@@ -1033,12 +782,10 @@ const ellipsisHeaderStyle = React.useMemo(() => {
               onDownloadExcel={handleDownloadExcel}
             />
           </div>
-
-          {/* ListSelector (half width) */}
           <div className="w-1/2">
             <ListSelector
               title={t("Forms.RelatedProjects")}
-              columnDefs={[{ field: "Name", headerName: "Project Name" }]}
+              columnDefs={[{ field: "Name", headerName: t("DataTable.Headers.ProjectName") }]}
               rowData={projectData}
               selectedIds={formData.ProjectsStr.split("|").filter(Boolean)}
               onSelectionChange={(ids) =>
@@ -1047,10 +794,9 @@ const ellipsisHeaderStyle = React.useMemo(() => {
               showSwitcher
               isGlobal={formData.IsGlobal}
               onGlobalChange={(val) => handleChange("IsGlobal", val)}
-              /* className="-mt-5" حذف شد */
               ModalContentComponent={TableSelector}
               modalContentProps={{
-                columnDefs: [{ headerName: "Project Name", field: "Name" }],
+                columnDefs: [{ headerName: t("DataTable.Headers.ProjectName"), field: "Name" }],
                 rowData: projectData,
                 selectedRow: selectedRowData,
                 onRowDoubleClick: handleSelectButtonClick,
@@ -1061,8 +807,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
             />
           </div>
         </TwoColumnLayout.Item>
-
-        {/* DataTable */}
         <TwoColumnLayout.Item span={2}>
   <div dir={uiDir} className="overflow-x-auto pb-2">
     <div className="h-[400px] min-w-full flex flex-col justify-end">
@@ -1073,10 +817,7 @@ const ellipsisHeaderStyle = React.useMemo(() => {
         gridOptions={{
           singleClickEdit: true,
           rowSelection: "single",
-
-          // ✅ مهم برای AG-Grid
           enableRtl: uiDir === "rtl",
-
           onGridReady: (p) => {
             p.api.sizeColumnsToFit();
             window.addEventListener("resize", () => p.api.sizeColumnsToFit());
@@ -1092,20 +833,20 @@ const ellipsisHeaderStyle = React.useMemo(() => {
         onEdit={() =>
           selectedRowData
             ? handleEditClick(selectedRowData)
-            : showAlert("error", undefined, "Error", "No row is selected!")
+            : showAlert("error", undefined,  t("Alerts.Errors.NoRowSelectedForEdit"))
         }
         onDelete={async () => {
           if (!selectedRowData) {
-            showAlert("error", undefined, "Error", "No row selected for deletion");
+            showAlert("error", undefined, t("Alerts.Deleted.NoRowSelected"));
             return;
           }
           try {
             await api.deleteEntityField(selectedRowData.ID);
-            showAlert("success", undefined, "Success", "Deleted successfully");
+            showAlert("success", undefined, t("Alerts.Deleted.Success"));
             setSelectedRowData(null);
             refreshEntityFields();
           } catch {
-            showAlert("error", undefined, "Error", "Delete failed!");
+            showAlert("error", undefined,  t("Alerts.Deleted.Failed"));
           }
         }}
         onView={() => setViewModalOpen(true)}
@@ -1114,20 +855,15 @@ const ellipsisHeaderStyle = React.useMemo(() => {
         showSearch
         isEditMode={isEditMode}
         isLoading={isLoadingFields}
-
-        // ✅ همون الگوی کنترلرها
         direction={uiDir}
       />
     </div>
   </div>
 </TwoColumnLayout.Item>
-
       </TwoColumnLayout>
-
-      {/* Category A/B Modal */}
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
-          columnDefs={[{ headerName: "Name", field: "label" }]}
+          columnDefs={[{ headerName: t("DataTable.Headers.Name"), field: "label" }]}
           rowData={
             currentSelector === "A"
               ? catAOptions.map((opt) => ({
@@ -1147,8 +883,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
           isSelectDisabled={!selectedRowData}
         />
       </DynamicModal>
-
-      {/* Add/Edit Field Modal */}
       <DynamicModal isOpen={isAddModalOpen} onClose={handleAddModalClose} >
         <AddColumnForm
           key={addModalKey}
@@ -1156,7 +890,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
           isEdit={!!editingData}
           entityTypeId={formData.ID}
           onClose={handleAddModalClose}
-
           onSave={() => {
             refreshEntityFields();
             handleAddModalClose();
@@ -1168,8 +901,6 @@ const ellipsisHeaderStyle = React.useMemo(() => {
           srcEntityTypeId={formData.ID}
         />
       </DynamicModal>
-
-      {/* Form Generator View Modal */}
       <FormGeneratorView
         isOpen={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
@@ -1179,6 +910,5 @@ const ellipsisHeaderStyle = React.useMemo(() => {
     </div>
   );
 });
-
 FormsCommand1.displayName = "FormsCommand1";
 export default FormsCommand1;

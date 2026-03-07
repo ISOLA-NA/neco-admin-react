@@ -1,0 +1,217 @@
+{
+  "DynamicConfirm": {
+    "Buttons": {
+      "Add": "Add",
+      "Edit": "Edit",
+      "Save": "Save",
+      "Delete": "Delete",
+      "Duplicate": "Duplicate",
+      "Minimize": "Minimize",
+      "Maximize": "Maximize",
+      "Close": "Close",
+      "Cancel": "Cancel",
+      "Confirm": "Confirm",
+      "Ok": "OK"
+    },
+    "Confirmations": {
+      "Save": {
+        "Title": "Confirm Save",
+        "Message": "Are you sure you want to save?"
+      },
+      "Update": {
+        "Title": "Confirm Update",
+        "Message": "Are you sure you want to update?"
+      },
+      "Delete": {
+        "Title": "Confirm Delete",
+        "Message": "Are you sure you want to delete?"
+      },
+      "Default": {
+        "Title": "Confirm",
+        "Message": "Are you sure you want to continue?"
+      },
+      "Duplicate": {
+        "Title": "Confirm Duplicate",
+        "Message": "Are you sure you want to duplicate this item?"
+      }
+    }
+  },
+  "Alerts": {
+    "Title": {
+      "Error": "Error",
+      "Success": "Success",
+      "Warning": "Warning"
+    },
+    "Titles": {
+      "Error": "Error",
+      "Success": "Success",
+      "Warning": "Warning"
+    },
+    "FileExtensionError": "File extension must be one of {extensions}",
+    "Errors": {
+      "FileRecordInsertFailed": "Failed to insert file record",
+      "FileUploadFailed": "File upload failed",
+      "FailedToSaveForm": "Failed to save form",
+      "FailedToSaveCommand": "Failed to save",
+      "FailedToUpdateServer": "Failed to update server",
+      "NoRowSelectedForEdit": "No row selected for edit",
+      "FailedToFetchData": "Failed to fetch data",
+      "DuplicationFailedNoNewItem": "Duplicate failed"
+    },
+    "Upload": {
+      "WordSuccess": "Word file uploaded successfully",
+      "WordFailed": "Word upload failed",
+      "ExcelSuccess": "Excel file uploaded successfully",
+      "ExcelFailed": "Excel upload failed"
+    },
+    "Download": {
+      "NoFileSelected": "No file selected to download",
+      "Failed": "Download failed"
+    },
+    "Warnings": {
+      "NameOrPersianNameRequired": "Name or Persian name is required",
+      "NameCannotBeEmpty": "Name cannot be empty"
+    },
+    "Deleted": {
+      "NoRowSelected": "No row selected for delete",
+      "Success": "Deleted successfully",
+      "Failed": "Delete failed"
+    },
+    "Added": {
+      "Configuration": "Configuration added successfully",
+      "Command": "Command added successfully",
+      "User": "User added successfully",
+      "Ribbon": "Ribbon added successfully",
+      "Role": "Role added successfully",
+      "Enterprise": "Enterprise added successfully",
+      "RoleGroup": "Role group added successfully",
+      "Staffing": "Staffing added successfully",
+      "ProgramTemplate": "Program template added successfully",
+      "ProgramType": "Program type added successfully",
+      "Odp": "ODP added successfully",
+      "Procedure": "Procedure added successfully",
+      "Calendar": "Calendar added successfully",
+      "ProjectAccess": "Project access added successfully",
+      "ApprovalFlow": "Approval flow added successfully",
+      "Form": "Form added successfully",
+      "Category": "Category added successfully"
+    },
+    "Updated": {
+      "Configuration": "Configuration updated successfully",
+      "Command": "Command updated successfully",
+      "User": "User updated successfully",
+      "Ribbon": "Ribbon updated successfully",
+      "Role": "Role updated successfully",
+      "Enterprise": "Enterprise updated successfully",
+      "RoleGroup": "Role group updated successfully",
+      "Staffing": "Staffing updated successfully",
+      "ProgramTemplate": "Program template updated successfully",
+      "ProgramType": "Program type updated successfully",
+      "Odp": "ODP updated successfully",
+      "Procedure": "Procedure updated successfully",
+      "Calendar": "Calendar updated successfully",
+      "ProjectsAccess": "Projects access updated successfully",
+      "ApprovalFlow": "Approval flow updated successfully",
+      "Form": "Form updated successfully",
+      "Category": "Category updated successfully"
+    },
+    "Duplicated": {
+      "NoRowSelected": "No row selected to duplicate",
+      "Success": "Duplicated successfully",
+      "Failed": "Duplicate failed"
+    }
+  },
+  "Forms": {
+    "Columns": {
+      "Order": "Order",
+      "ColumnName": "Column Name",
+      "Type": "Type",
+      "Command": "Command",
+      "ShowInList": "Show In List",
+      "Required": "Required",
+      "MainColumn": "Main Column",
+      "IsRtl": "RTL",
+      "CountInReject": "Count In Reject"
+    },
+    "PersianName": "Persian Name",
+    "Name": "Name",
+    "Command": "Command",
+    "CategoryA": "Category A",
+    "CategoryB": "Category B",
+    "Transmittal": "Transmittal",
+    "IsMegaForm": "Mega Form",
+    "SwitchToEN": "Switch to English ({field})",
+    "SwitchToFA": "Switch to Persian ({field})",
+    "RelatedProjects": "Related Projects",
+    "NoWordFileSelected": "No Word file selected",
+    "NoExcelFileSelected": "No Excel file selected",
+    "UploadWordFile": "Upload Word File",
+    "UploadExcelFile": "Upload Excel File"
+  },
+  "DataTable": {
+    "Headers": {
+      "Name": "Name",
+      "Description": "Description",
+      "CatA": "Category A",
+      "CatB": "Category B",
+      "Transmittal": "Transmittal",
+      "IsMegaForm": "Mega Form",
+      "ProgramTemplateShort": "Program Template",
+      "DefaultRibbon": "Default Ribbon",
+      "Username": "Username",
+      "FirstName": "First Name",
+      "LastName": "Last Name",
+      "UserType": "User Type",
+      "Website": "Website",
+      "Mobile": "Mobile",
+      "Email": "Email",
+      "PostCode": "Post Code",
+      "Grade": "Grade",
+      "Role": "Role",
+      "User": "User",
+      "Enterprise": "Enterprise",
+      "Superior": "Superior",
+      "Status": "Status",
+      "ActStart": "Actual Start",
+      "Duration": "Duration",
+      "BudgetAct": "Actual Budget",
+      "BudgetAppr": "Approved Budget",
+      "Phase": "Phase",
+      "Calendar": "Calendar",
+      "IsIdea": "Idea",
+      "Project": "Project",
+      "Address": "Address",
+      "WFTemplateName": "Workflow Template Name",
+      "EntityTypeName": "Form Name",
+      "AFName": "Approval Flow Name",
+      "Command": "Command",
+      "Order": "Order",
+      "PersianColumnName": "Persian Column Name",
+      "ProjectName": "Project Name",
+      "PersianName": "Persian Name",
+      "Yes": "Yes",
+      "No": "No"
+    },
+    "Toolbar": {
+      "SearchPlaceholder": "Search..."
+    }
+  },
+  "Ribbons": {
+    "Name": "Name",
+    "Description": "Description",
+    "DescriptionPlaceholder": "Enter description"
+  },
+  "Category": {
+    "CategoryType": "Category Type",
+    "CategoryA": "Category A",
+    "CategoryB": "Category B"
+  },
+  "General": {
+    "Loading": "Loading...",
+    "LoadingProjectsAccess": "Loading project access..."
+  },
+  "Global": {
+    "Global": "Global",
+    "Noitemisselected": "No item is selected"
+  }
+}
