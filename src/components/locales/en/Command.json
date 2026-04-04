@@ -1,20 +1,22 @@
 {
-    "CommandPage": {
-      "Name": "Name",
-      "Description": "Description",
-      "ViewMode": "View Mode",
-      "MainColumnIDName": "Main Column IDName",
-      "ColorColumn": "Color Column",
-      "GroupName": "Group Name",
-      "Query": "Query",
-      "HiddenColumns": "Hidden Columns",
-      "InvisibleColumns": "Invisible Columns",
-      "ApiColumns": "Api Columns",
-      "SpParameters": "Sp Parameters",
-      "ApiMode": "Api Mode",
-      "GridCommand": "Grid Command",
-      "ReportCommand": "Report Command",
-      "ProjectIntensive": "ProjectIntensive"
-    }
+  "CommandPage": {
+    "Name": "Name",
+    "Description": "Description",
+    "ViewMode": "View Mode",
+    "MainColumnIDName": "Main Column ID Name",
+    "ColorColumn": "Color Columns",
+    "GroupName": "Group Name",
+    "Query": "Query",
+    "HiddenColumns": "Hidden columns",
+    "InvisibleColumns": "Invisible columns",
+    "ApiColumns": "API columns",
+    "FileColumns": "File columns",
+    "ConditionalCommands": "Conditional commands (project based)",
+    "SpParameters": "SP parameters",
+    "ApiMode": "API Mode",
+    "GridCommand": "Grid Command",
+    "ReportCommand": "Report Command",
+    "ProjectIntensive": "Project Intensive",
+    "ShowDownloadGroupButton": "Show Download Group Button"
   }
-  
+}

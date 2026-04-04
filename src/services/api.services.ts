@@ -78,6 +78,7 @@ export interface ConfigurationItem {
   DefaultBtn?: string;
   LetterBtns?: string;
   MeetingBtns?: string;
+  MeetingBtnsForSecondForm?: string;  // ← جدید
   FirstIDProgramTemplate: number;
   SelMenuIDForMain: number;
   IsVisible: boolean;
@@ -169,6 +170,8 @@ export interface CommandItem {
   tabCmd?: string;
   QR?: string;
   ViewMode?: any; // می‌تواند string یا number باشد
+  FileColumns?: string;                // ← جدید
+  ConditionalCommands?: string;        // ← جدید
   DefaultColumns?: string | null;
   ReportParam?: string | null;
   ProjectIntensive?: boolean;

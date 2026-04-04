@@ -3,7 +3,8 @@
       "Form": {
         "GetInformationFrom": "Get information from",
         "WhatColumnToDisplay": "What Column To Display",
-        "DefaultProjects": "Default Projects"
+        "DefaultProjects": "Default Projects",
+        "Modes":"Modes"
       },
       "Columns": {
         "SrcField": "Src Field",

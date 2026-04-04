@@ -42,9 +42,15 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
         selectedRow?.ProjectIntensive === undefined
           ? true
           : selectedRow.ProjectIntensive,
+      ShowDownloadGroupButton:
+        selectedRow?.ShowDownloadGroupButton === undefined
+          ? false
+          : selectedRow.ShowDownloadGroupButton,
       ColorColumn: selectedRow?.ColorColumn || "",
       InvisibleColumns: selectedRow?.InvisibleColumns || "",
       ApiColumns: selectedRow?.ApiColumns || "",
+      FileColumns: selectedRow?.FileColumns || "",
+      ConditionalCommands: selectedRow?.ConditionalCommands || "",
       SpParam: selectedRow?.SpParam || "",
       CmdType:
         selectedRow?.CmdType !== undefined
@@ -52,7 +58,6 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           : "",
     });
 
-    // وضعیت برای ViewModes و ApiModes
     const [viewModes, setViewModes] = useState<
       { value: string; label: string }[]
     >([]);
@@ -67,7 +72,6 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
     const [, setErrorApiModes] = useState<string | null>(null);
     const { t } = useTranslation();
 
-    // به‌روزرسانی داده‌های فرم هنگام تغییر selectedRow
     useEffect(() => {
       setCommandData({
         id: selectedRow?.ID?.toString() || "",
@@ -88,9 +92,15 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           selectedRow?.ProjectIntensive === undefined
             ? true
             : selectedRow.ProjectIntensive,
+        ShowDownloadGroupButton:
+          selectedRow?.ShowDownloadGroupButton === undefined
+            ? false
+            : selectedRow.ShowDownloadGroupButton,
         ColorColumn: selectedRow?.ColorColumn || "",
         InvisibleColumns: selectedRow?.InvisibleColumns || "",
         ApiColumns: selectedRow?.ApiColumns || "",
+        FileColumns: selectedRow?.FileColumns || "",
+        ConditionalCommands: selectedRow?.ConditionalCommands || "",
         SpParam: selectedRow?.SpParam || "",
         CmdType:
           selectedRow?.CmdType !== undefined
@@ -99,10 +109,8 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       });
     }, [selectedRow]);
 
-    // فراخوانی API‌ها برای دریافت enums
     useEffect(() => {
       const fetchEnums = async () => {
-        // Fetch ViewMode
         setLoadingViewModes(true);
         setErrorViewModes(null);
         try {
@@ -116,15 +124,12 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
             })
           );
           setViewModes(viewModeOptions);
-          console.log("viewModeOptions", viewModeOptions);
         } catch (error) {
-          // console.error("Error fetching ViewMode enums:", error);
           setErrorViewModes("خطا در دریافت ViewMode");
         } finally {
           setLoadingViewModes(false);
         }
 
-        // Fetch CmdType (Api Mode)
         setLoadingApiModes(true);
         setErrorApiModes(null);
         try {
@@ -136,7 +141,6 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
             label: key,
           }));
           setApiModes(apiModeOptions);
-          console.log("apiModeOptions", apiModeOptions);
         } catch (error) {
           console.error("Error fetching CmdType enums:", error);
           setErrorApiModes("خطا در دریافت CmdType");
@@ -148,7 +152,6 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       fetchEnums();
     }, []);
 
-    // در صورتی که CmdType خالی باشد، مقدار پیش‌فرض (اولین گزینه) را تنظیم می‌کنیم
     useEffect(() => {
       if (!commandData.CmdType && apiModes.length > 0) {
         setCommandData((prev) => ({ ...prev, CmdType: apiModes[0].value }));
@@ -172,7 +175,6 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
       }
     };
 
-    // متد اصلی ذخیره (برای forwardRef)
     const save = async (): Promise<CommandItem | null> => {
       const dataToSave = {
         ...commandData,
@@ -198,9 +200,9 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           onChange={(e) => handleChange("Name", e.target.value)}
         />
 
-        {/* Describtion */}
+        {/* Description */}
         <CustomTextarea
-          name={t("CommandPage.Describtion")}
+          name={t("CommandPage.Description")}
           value={commandData.Describtion || ""}
           placeholder=""
           onChange={(e) => handleChange("Describtion", e.target.value)}
@@ -243,7 +245,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           onChange={(e) => handleChange("GroupName", e.target.value)}
         />
 
-        {/* QR */}
+        {/* Query */}
         <CustomTextarea
           name={t("CommandPage.Query")}
           value={commandData.QR || ""}
@@ -251,7 +253,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           onChange={(e) => handleChange("QR", e.target.value)}
         />
 
-        {/* DefaultColumns */}
+        {/* HiddenColumns */}
         <CustomTextarea
           name={t("CommandPage.HiddenColumns")}
           value={commandData.DefaultColumns || ""}
@@ -275,6 +277,22 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           onChange={(e) => handleChange("ApiColumns", e.target.value)}
         />
 
+        {/* FileColumns */}
+        <CustomTextarea
+          name={t("CommandPage.FileColumns")}
+          value={commandData.FileColumns || ""}
+          placeholder=""
+          onChange={(e) => handleChange("FileColumns", e.target.value)}
+        />
+
+        {/* ConditionalCommands */}
+        <CustomTextarea
+          name={t("CommandPage.ConditionalCommands")}
+          value={commandData.ConditionalCommands || ""}
+          placeholder=""
+          onChange={(e) => handleChange("ConditionalCommands", e.target.value)}
+        />
+
         {/* SpParam */}
         <CustomTextarea
           name={t("CommandPage.SpParameters")}
@@ -283,13 +301,13 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           onChange={(e) => handleChange("SpParam", e.target.value)}
         />
 
-        {/* Api Mode Selector */}
+        {/* Api Mode */}
         <DynamicSelector
           name={t("CommandPage.ApiMode")}
           options={apiModes}
           selectedValue={commandData.CmdType || ""}
           onChange={(e) => handleChange("CmdType", e.target.value)}
-          label="Api Mode"
+          label={t("CommandPage.ApiMode")}
           loading={loadingApiModes}
         />
 
@@ -311,7 +329,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
           onChange={(e) => handleChange("tabCmd", e.target.value)}
         />
 
-        {/* ProjectIntensive with DynamicSwitcher */}
+        {/* ProjectIntensive */}
         <div className="mt-4">
           <DynamicSwitcher
             isChecked={!!commandData.ProjectIntensive}
@@ -320,6 +338,21 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
             }
             leftLabel=""
             rightLabel={t("CommandPage.ProjectIntensive")}
+          />
+        </div>
+
+        {/* ShowDownloadGroupButton */}
+        <div className="mt-4">
+          <DynamicSwitcher
+            isChecked={!!commandData.ShowDownloadGroupButton}
+            onChange={() =>
+              handleChange(
+                "ShowDownloadGroupButton",
+                !commandData.ShowDownloadGroupButton
+              )
+            }
+            leftLabel=""
+            rightLabel={t("CommandPage.ShowDownloadGroupButton")}
           />
         </div>
       </TwoColumnLayout>

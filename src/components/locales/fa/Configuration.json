@@ -1,16 +1,18 @@
 {
   "Configuration": {
     "Name": "نام",
-    "Description": "توضیحات",
+    "Description": "شرح",
     "ProgramTemplate": "قالب برنامه",
-    "DefaultRibbon": "منو پیش فرض",
-    "LessonLearnedForm": "قالب جریان آموزش",
-    "LessonLearnedAfTemplate": "قالب فرم آموزش",
-    "CommentFormTemplate": "قالب فرم نظر",
-    "ProcedureFormTemplate": "قالب فرم روند کار",
-    "DefaultActionButtons": "دکمه پیش فرض",
-    "LetterActionButtons": "دکمه نامه",
-    "MeetingActionButtons": "دکمه های جلسه",
+    "DefaultRibbon": "منوی پیش فرض",
+    "LessonLearnedForm": "درس آموخته از قالب",
+    "LessonLearnedAfTemplate": "درس آموخته از قالب AF",
+    "CommentFormTemplate": "نظر از قالب",
+    "ProcedureFormTemplate": "رویه از قالب",
+    "DefaultActionButtons": "دکمه های پیش فرض",
+    "LetterActionButtons": "دکمه های عمل نامه",
+    "MeetingActionButtons": "دکمه های عمل جلسه",
+    "MeetingActionButtonsFirstForm": "دکمه های عمل جلسه برای فرم اول",
+    "MeetingActionButtonsSecondForm": "دکمه های عمل جلسه برای فرم دوم",
     "NoItemSelected": "موردی انتخاب نشده است",
     "StateText": "متن وضعیت",
     "Order": "ترتیب",
@@ -30,5 +32,13 @@
     "Edit": "ویرایش",
     "New": "جدید",
     "Delete": "حذف"
+  },
+"DataTable": {
+  "Headers": {
+    "Name": "نام",
+    "Description": "شرح",
+    "ProgramTemplateShorts": "قالب برنامه",  
+    "DefaultRibbon": "منوی پیش فرض"          
   }
+}
 }

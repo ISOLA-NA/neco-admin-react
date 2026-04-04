@@ -13,34 +13,31 @@ interface LookUpAdvanceTableProps {
   data?: {
     metaType1?: string | number | null; // EntityType منبع (GetInformationFrom)
     metaType2?: string | number | null; // ستونی که نمایش داده می‌شود (WhatColumnToDisplay)
-    metaType3?: string; // drop | radio | check (برای یکسانی نگه داشته شده)
+    metaType3?: string; // drop | radio | check
     metaType4?: string; // JSON جدول نگاشت
     metaType5?: string; // پروژه‌های پیش‌فرض
-    LookupMode?: string | number | null; // (UI ندارد)
-    CountInReject?: boolean; // (UI ندارد)
-    BoolMeta1?: boolean; // (UI ندارد)
+    LookupMode?: string | number | null;
+    CountInReject?: boolean;
+    BoolMeta1?: boolean;
     /** (اختیاری) ID نوع انتیتی فرم فعلی برای تأمین DesField وقتی srcFields پاس نشده */
     currentEntityTypeId?: string | number | null;
   };
   onMetaChange?: (updated: any) => void;
   onMetaExtraChange?: (updated: { metaType4: string }) => void;
-  /** 🔑 سیگنال ریست از والد هنگام تغییر Type of Information */
   resetKey?: number | string;
 
-  /** ✅ فهرست فیلدهای فرم فعلی (برای ستون DesField). اگر پاس شود، از همین استفاده می‌کنیم. */
+  /** ✅ فهرست فیلدهای فرم فعلی (برای ستون DesField) */
   srcFields?: Array<{ ID: string | number; DisplayName: string }>;
 
-  /** ✅ اگر srcFields پاس نشد، از این ID (یا data.currentEntityTypeId) برای واکشی فیلدهای فرم فعلی استفاده می‌کنیم */
+  /** ✅ اگر srcFields پاس نشد، از این ID واکشی می‌کنیم */
   srcEntityTypeId?: string | number;
 }
 
 interface TableRow {
   ID: string;
-  /** ✅ DesField (ستون چپ): از فیلدهای فرم فعلی (baseFields) */
   DesFieldID: string;
   FilterOpration: string;
   FilterText: string;
-  /** ✅ SrcField (ستون راست): از فیلدهای EntityType منبع (fields) */
   SrcFieldID: string;
 }
 
@@ -58,51 +55,49 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
   srcFields,
   srcEntityTypeId,
 }) => {
-  const { t, i18n } = useTranslation(); // ✅ i18n هم گرفته شد
+  const { t, i18n } = useTranslation();
   const { getAllEntityType, getEntityFieldByEntityTypeId } = useApi();
 
-  // ✅ جهت واقعی UI
   const uiDir = i18n.dir() as "rtl" | "ltr";
   const isRtl = uiDir === "rtl";
 
-  // ─── Refs ────────────────────────────────────────────────
   const initialModeRef = useRef(true);
   const resetMountedRef = useRef(false);
   const baseFieldsLockedRef = useRef(false);
 
-  // ─── State ───────────────────────────────────────────────
   const [meta, setMeta] = useState({
     metaType1: "",
     metaType2: "",
     metaType3: "drop",
     metaType4: "[]",
     metaType5: "",
-    LookupMode: "", // UI ندارد
+    LookupMode: "",
   });
 
+  // BoolMeta1 => set lookup if it is one
+  const [oldLookup, setOldLookup] = useState(false);
+
   const [entities, setEntities] = useState<{ ID: any; Name: string }[]>([]);
-  // ⭐️ fields (پویا): وابسته به metaType1
   const [fields, setFields] = useState<any[]>([]);
-  // ⭐️ baseFields (ثابت): فیلدهای فرم فعلی برای DesField
   const [baseFields, setBaseFields] = useState<any[]>([]);
   const [operationList, setOperationList] = useState<
     { value: string; label: string }[]
   >([]);
+  const [modesList, setModesList] = useState<{ value: string; label: string }[]>(
+    []
+  );
 
   const [tableData, setTableData] = useState<TableRow[]>([]);
-
-  // ✅ برای Delete: ردیف انتخاب‌شده جدول
   const [selectedTableRow, setSelectedTableRow] = useState<any>(null);
-  // ✅ برای ریست کردن انتخاب DataTable بعد از Add/Delete (remount)
   const [tableGridKey, setTableGridKey] = useState<number>(0);
 
-  // ─── Sync initial props.data on mount & when data changes ───
+  // ─── Sync initial props.data ───
   useEffect(() => {
-    // parse metaType4 into tableData
     let rows: any[] = [];
     try {
       rows = JSON.parse(data.metaType4 || "[]");
     } catch {}
+
     setTableData(
       Array.isArray(rows)
         ? rows.map((item) => ({
@@ -115,7 +110,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         : []
     );
 
-    // sync other meta
     setMeta({
       metaType1: toStr(data.metaType1),
       metaType2: toStr(data.metaType2),
@@ -125,10 +119,11 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       LookupMode: toStr(data.LookupMode),
     });
 
+    setOldLookup(!!data.BoolMeta1);
     initialModeRef.current = true;
   }, [data]);
 
-  // ─── Load entities & enums (فقط FilterOpration) ───────────
+  // ─── Load entities & enums ───
   useEffect(() => {
     getAllEntityType()
       .then((res) => Array.isArray(res) && setEntities(res))
@@ -144,9 +139,31 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         )
       )
       .catch(console.error);
+
+    AppServices.getEnum({ str: "lookMode" })
+      .then((resp) =>
+        setModesList(
+          Object.entries(resp).map(([k, v]) => ({
+            value: String(v),
+            label: k,
+          }))
+        )
+      )
+      .catch(console.error);
   }, [getAllEntityType]);
 
-  // ─── Load available fields when metaType1 changes (source entity fields) ───
+  // ─── After modesList loads, apply initial LookupMode once ───
+  useEffect(() => {
+    if (initialModeRef.current && modesList.length && data.LookupMode != null) {
+      const mv = String(data.LookupMode);
+      if (modesList.some((m) => m.value === mv)) {
+        setMeta((prev) => ({ ...prev, LookupMode: mv }));
+      }
+      initialModeRef.current = false;
+    }
+  }, [modesList, data.LookupMode]);
+
+  // ─── Load source fields ───
   useEffect(() => {
     const etId = Number(meta.metaType1);
     if (!isNaN(etId) && etId > 0) {
@@ -158,7 +175,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     }
   }, [meta.metaType1, getEntityFieldByEntityTypeId]);
 
-  /* ─── ثابت‌سازی baseFields از srcFields (اگر پاس داده شده) ─── */
+  // ─── ثابت‌سازی baseFields از srcFields ───
   useEffect(() => {
     if (baseFieldsLockedRef.current) return;
     if (Array.isArray(srcFields) && srcFields.length > 0) {
@@ -167,7 +184,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     }
   }, [srcFields]);
 
-  /* ─── اگر srcFields نبود، با srcEntityTypeId یا currentEntityTypeId واکشی کن ─── */
+  // ─── fallback با srcEntityTypeId یا currentEntityTypeId ───
   useEffect(() => {
     if (baseFieldsLockedRef.current) return;
     const rawId = srcEntityTypeId ?? data.currentEntityTypeId ?? null;
@@ -176,7 +193,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       getEntityFieldByEntityTypeId(idNum)
         .then((r) => {
           const arr = Array.isArray(r) ? r : [];
-          // ⛔️ اگر خالی بود، عمداً baseFields را خالی نگه می‌داریم (طبق نیاز)
           if (arr.length > 0) {
             setBaseFields(arr);
             baseFieldsLockedRef.current = true;
@@ -186,9 +202,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     }
   }, [srcEntityTypeId, data.currentEntityTypeId, getEntityFieldByEntityTypeId]);
 
-  /* ⛔️ هیچ fallback دیگری وجود ندارد: از fields (پویا) هرگز برای DesField استفاده نمی‌کنیم. */
-
-  // ─── Sync metaType2 with fields (ensure valid) ───
+  // ─── Sync metaType2 with fields ───
   useEffect(() => {
     if (!fields.length) return;
     setMeta((prev) => {
@@ -198,6 +212,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         onMetaChange?.({
           ...data,
           ...next,
+          BoolMeta1: oldLookup,
         });
         return next;
       }
@@ -206,13 +221,23 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
-  // ─── Helpers ──────────────────────────────────────────────
+  // ─── Helpers ───
   const pushMeta = (patch: Partial<typeof meta>) => {
     const next = { ...meta, ...patch };
     setMeta(next);
     onMetaChange?.({
       ...data,
       ...next,
+      BoolMeta1: oldLookup,
+    });
+  };
+
+  const handleOldLookupChange = (checked: boolean) => {
+    setOldLookup(checked);
+    onMetaChange?.({
+      ...data,
+      ...meta,
+      BoolMeta1: checked,
     });
   };
 
@@ -223,12 +248,9 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     onMetaExtraChange?.({ metaType4: json });
   };
 
-  // ✅ شرط: وقتی هر دو فیلد «GetInformationFrom» و «WhatColumnToDisplay» خالی‌اند
   const bothEmpty = meta.metaType1.trim() === "" && meta.metaType2.trim() === "";
-  // ✅ شرط: اگر جدول FormsCommand1 خالی باشد، DesField هم باید خالی باشد
   const noDesOptions = bothEmpty || baseFields.length === 0;
 
-  // ✅ Add: مثل کنترلر قبلی، ردیف خالی اضافه شود
   const handleAddRow = () => {
     const newRow: TableRow = {
       ID: genId(),
@@ -242,7 +264,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     setTableGridKey((k) => k + 1);
   };
 
-  // ✅ Delete: حذف ردیف انتخاب‌شده
   const handleDeleteRow = () => {
     const id = selectedTableRow?.ID ? String(selectedTableRow.ID) : "";
     if (!id) return;
@@ -268,7 +289,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     pushTable(next);
   };
 
-  // ─── با تغییر resetKey از والد، metaType5 را هم خالی کن (بعد از mount) ───
+  // ─── resetKey => metaType5 clear ───
   useEffect(() => {
     if (!resetMountedRef.current) {
       resetMountedRef.current = true;
@@ -280,13 +301,13 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
       onMetaChange?.({
         ...data,
         ...next,
+        BoolMeta1: oldLookup,
       });
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey]);
 
-  /* ─── Maps & signatures ─── */
   const fieldsMap = useMemo(
     () => new Map(fields.map((f: any) => [String(f.ID), f.DisplayName])),
     [fields]
@@ -304,7 +325,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     [baseFields]
   );
 
-  /* ─── نرمالایز SrcField پس از تغییر fields ─── */
   useEffect(() => {
     if (!fields.length || bothEmpty) return;
     const valid = new Set(Array.from(fieldsMap.keys()));
@@ -321,9 +341,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldsSig, bothEmpty]);
 
-  /* ─── نرمالایز DesField:
-        1) اگر baseFields خالی شد، همه DesFieldID ها را خالی کن.
-        2) اگر baseFields موجود بود و مقدار نامعتبر بود، به اولین مقدار برگردان. */
   useEffect(() => {
     if (baseFields.length === 0) {
       const changed = tableData.some((r) => r.DesFieldID);
@@ -352,9 +369,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseFieldsSig, noDesOptions]);
 
-  // ─────────────────────────────────────────────────────────
-  // ✅ Ellipsis styles (طبق تصویر 1 برای انگلیسی + طبق تصویر 3 برای فارسی)
-  // ─────────────────────────────────────────────────────────
   const ellipsisCellStyle = useMemo(() => {
     return isRtl
       ? ({
@@ -395,11 +409,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
         } as React.CSSProperties);
   }, [isRtl]);
 
-  // ─── AG-Grid columnDefs ────────────────────────────────────
-  // ✅ طبق درخواست‌های اخیر شما:
-  // 1) Src اول باشد
-  // 2) Des آخر باشد
-  // 3) در حالت Edit هم لیبل‌ها درست نمایش داده شوند (formatValue + valueParser)
   const columnDefs = useMemo(
     () => [
       {
@@ -486,15 +495,13 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     ]
   );
 
-  // ─── Render ────────────────────────────────────────────────
   return (
     <div
-      dir={uiDir} // ✅ خیلی مهم
+      dir={uiDir}
       className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg"
     >
       <div className="flex gap-8">
         <div className="flex flex-col space-y-6 w-1/2">
-          {/* Get Information From */}
           <DynamicSelector
             name="getInformationFrom"
             label={t("LookUpAdvanceTable.Form.GetInformationFrom")}
@@ -506,7 +513,6 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             onChange={(e) => pushMeta({ metaType1: e.target.value })}
           />
 
-          {/* What Column To Display */}
           <DynamicSelector
             name="displayColumn"
             label={t("LookUpAdvanceTable.Form.WhatColumnToDisplay")}
@@ -518,9 +524,29 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             onChange={(e) => pushMeta({ metaType2: e.target.value })}
           />
 
-          {/* Default Projects */}
+          <div className="flex items-end gap-4 w-full">
+            <div className="flex-1">
+              <DynamicSelector
+                name="modes"
+                label={t("LookUpAdvanceTable.Form.Modes")}
+                options={modesList}
+                selectedValue={meta.LookupMode}
+                onChange={(e) => pushMeta({ LookupMode: e.target.value })}
+              />
+            </div>
+
+            <label className="flex items-center gap-2 whitespace-nowrap mb-2">
+              <input
+                type="checkbox"
+                checked={oldLookup}
+                onChange={(e) => handleOldLookupChange(e.target.checked)}
+              />
+              <span>set lookup if it is one</span>
+            </label>
+          </div>
+
           <PostPickerList
-            key={`pp-luat-${meta.metaType1}|${meta.metaType2}|${resetKey ?? 0}`}
+            key={`pp-luat-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`}
             resetKey={resetKey}
             sourceType="projects"
             initialMetaType={meta.metaType5}
@@ -556,7 +582,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
             rowSelection: "single",
             stopEditingWhenCellsLoseFocus: true,
           }}
-          direction={uiDir} // ✅ این هم مهم‌ترین اصلاح
+          direction={uiDir}
         />
       </div>
     </div>

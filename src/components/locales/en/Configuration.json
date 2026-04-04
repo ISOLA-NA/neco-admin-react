@@ -4,13 +4,15 @@
     "Description": "Description",
     "ProgramTemplate": "Program Template",
     "DefaultRibbon": "Default Ribbon",
-    "LessonLearnedForm": "Lesson Learned Form",
-    "LessonLearnedAfTemplate": "Lesson Learned Af Template",
+    "LessonLearnedForm": "Lessons Learned Form Template",
+    "LessonLearnedAfTemplate": "Lessons Learned AF Template",
     "CommentFormTemplate": "Comment Form Template",
     "ProcedureFormTemplate": "Procedure Form Template",
     "DefaultActionButtons": "Default Action Buttons",
     "LetterActionButtons": "Letter Action Buttons",
     "MeetingActionButtons": "Meeting Action Buttons",
+    "MeetingActionButtonsFirstForm": "Meeting Action Buttons For First Form",
+    "MeetingActionButtonsSecondForm": "Meeting Action Buttons For Second Form",
     "NoItemSelected": "No item is selected",
     "StateText": "State Text",
     "Order": "Order",
@@ -30,5 +32,13 @@
     "Edit": "Edit",
     "New": "New",
     "Delete": "Delete"
+  },
+  "DataTables": {
+    "Headers": {
+      "Name": "Name",
+      "Description": "Description",
+      "ProgramTemplateShort": "Prg.Template",
+      "DefaultRibbon": "Default Ribbon"
+    }
   }
 }

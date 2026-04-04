@@ -302,8 +302,11 @@ export const SubTabDefinitionsProvider: React.FC<{
 
   const subTabDefinitions = useMemo(() => {
     return {
+      // ─── فقط بخش Configurations داخل subTabDefinitions را جایگزین کن ───
+
       Configurations: {
         endpoint: api.getAllConfigurations,
+
         columnDefs: [
           {
             headerName: TT("DataTable.Headers.Name", "نام"),
@@ -313,7 +316,14 @@ export const SubTabDefinitionsProvider: React.FC<{
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.ProgramTemplateShort", "قالب برنامه"),
+            headerName: TT("DataTable.Headers.Description", "شرح"),
+            field: "Description",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: i18n.language === "fa" ? "قالب برنامه" : "Prg.Template",
             field: "FirstIDProgramTemplate",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -329,7 +339,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             },
           },
           {
-            headerName: TT("DataTable.Headers.DefaultRibbon", "ریبون پیش‌فرض"),
+            headerName: TT("DataTable.Headers.DefaultRibbon", "منوی پیش فرض"),
             field: "SelMenuIDForMain",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -354,30 +364,76 @@ export const SubTabDefinitionsProvider: React.FC<{
       },
 
       Commands: {
-        endpoint: api.getAllCommands,
-        columnDefs: [
-          {
-            headerName: TT("DataTable.Headers.Name", "نام"),
-            field: "Name",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-          },
-          {
-            headerName: TT("DataTable.Headers.Description", "توضیحات"),
-            field: "Description",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-          },
-        ],
-        iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: false,
-        },
+  endpoint: api.getAllCommands,
+  columnDefs: [
+    {
+      headerName: TT("DataTable.Headers.Name", "نام"),
+      field: "Name",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+    },
+    {
+      headerName: TT("DataTable.Headers.Description", "توضیحات"),
+      field: "Describtion",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+    },
+    {
+  headerName: TT("CommandPage.MainColumnIDName", "شناسه ستون اصلی"),
+  field: "MainColumnIDName",
+  filter: "agTextColumnFilter",
+  sortable: true,
+  resizable: true,
+  valueGetter: (params: any) => {
+    const val = params.data.MainColumnIDName;
+    return val && val.trim() !== "" ? val : "";
+  },
+},
+    {
+      headerName: TT("CommandPage.ColorColumn", "ستون رنگ"),
+      field: "ColorColumn",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+    },
+    {
+      headerName: TT("CommandPage.GroupName", "نام گروه"),
+      field: "GroupName",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+    },
+    {
+      headerName: TT("CommandPage.ProjectIntensive", "مبتنی بر پروژه"),
+      field: "ProjectIntensive",
+      filter: false,
+      sortable: true,
+      resizable: true,
+      minWidth: 130,
+      cellStyle: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       },
+      cellRendererFramework: (p: any) => (
+        <input
+          type="checkbox"
+          checked={!!p.value}
+          readOnly
+          style={{ margin: 0 }}
+        />
+      ),
+    },
+  ],
+  iconVisibility: {
+    showAdd: true,
+    showEdit: true,
+    showDelete: true,
+    showDuplicate: false,
+  },
+},
 
       // ✅ Ribbons: Duplicate فعال + Deep Copy
       Ribbons: {
@@ -1229,10 +1285,10 @@ export const SubTabDefinitionsProvider: React.FC<{
       let newItem =
         newItemRaw && typeof newItemRaw === "object"
           ? newItemRaw.data ??
-            newItemRaw.Data ??
-            newItemRaw.value ??
-            newItemRaw.Value ??
-            newItemRaw
+          newItemRaw.Data ??
+          newItemRaw.value ??
+          newItemRaw.Value ??
+          newItemRaw
           : undefined;
 
       console.log("[DUP] duplicateAction result normalized", { subTabName, newItem });

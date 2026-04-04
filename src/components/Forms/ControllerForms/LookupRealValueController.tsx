@@ -74,7 +74,8 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
     metaType5: "",
     LookupMode: "",
   });
-  // فقط Old Lookup
+
+  // BoolMeta1 => set lookup if it is one
   const [oldLookup, setOldLookup] = useState(false);
 
   const [tableData, setTableData] = useState<TableRow[]>([]);
@@ -97,13 +98,13 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
   // ✅ برای ریست کردن انتخاب DataTable بعد از Add/Delete (remount)
   const [tableGridKey, setTableGridKey] = useState<number>(0);
 
-  /* ─── Ellipsis styles (طبق تصویر 1 برای انگلیسی + طبق تصویر 3 برای فارسی) ─── */
+  /* ─── Ellipsis styles ─── */
   const ellipsisCellStyle = useMemo(() => {
     return isRtl
       ? ({
           textAlign: "right",
-          direction: "rtl", // ✅ مهم: در RTL، direction باید rtl بماند تا ellipsis درست شود
-          unicodeBidi: "plaintext", // ✅ باعث می‌شود انگلیسی بهم نریزد
+          direction: "rtl",
+          unicodeBidi: "plaintext",
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
@@ -167,8 +168,8 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
       metaType5: toStr(data.metaType5),
       LookupMode: toStr(data.LookupMode),
     });
-    setOldLookup(!!data.BoolMeta1);
 
+    setOldLookup(!!data.BoolMeta1);
     initialModeRef.current = true;
   }, [data]);
 
@@ -218,7 +219,7 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
     }
   }, [meta.metaType1, getEntityFieldByEntityTypeId]);
 
-  /* ─── ثابت‌سازی baseFields از srcFields (اگر پاس داده شده) ─── */
+  /* ─── ثابت‌سازی baseFields از srcFields ─── */
   useEffect(() => {
     if (baseFieldsLockedRef.current) return;
     if (Array.isArray(srcFields) && srcFields.length > 0) {
@@ -236,7 +237,6 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
       getEntityFieldByEntityTypeId(idNum)
         .then((r) => {
           const arr = Array.isArray(r) ? r : [];
-          // ⛔️ اگر خالی بود، عمداً baseFields را خالی نگه می‌داریم (طبق نیاز)
           if (arr.length > 0) {
             setBaseFields(arr);
             baseFieldsLockedRef.current = true;
@@ -245,8 +245,6 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
         .catch(console.error);
     }
   }, [srcEntityTypeId, data.currentEntityTypeId, getEntityFieldByEntityTypeId]);
-
-  /* ⛔️ هیچ fallback دیگری وجود ندارد: از fields (پویا) هرگز برای DesField استفاده نمی‌کنیم. */
 
   // ─── Sync metaType2 with fields (ensure valid) ───
   useEffect(() => {
@@ -294,12 +292,9 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
     onMetaExtraChange?.({ metaType4: json });
   };
 
-  // ✅ شرط: وقتی هر دو فیلد «GetInformationFrom» و «WhatColumnToDisplay» خالی‌اند
   const bothEmpty = meta.metaType1.trim() === "" && meta.metaType2.trim() === "";
-  // ✅ شرط: اگر جدول FormsCommand1 خالی باشد، DesField هم باید خالی باشد
   const noDesOptions = bothEmpty || baseFields.length === 0;
 
-  // ✅ Add: مثل کنترلر قبلی، ردیف خالی اضافه شود
   const handleAddRow = () => {
     const newRow: TableRow = {
       ID: genId(),
@@ -313,7 +308,6 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
     setTableGridKey((k) => k + 1);
   };
 
-  // ✅ Delete: حذف ردیف انتخاب‌شده
   const handleDeleteRow = () => {
     const id = selectedTableRow?.ID ? String(selectedTableRow.ID) : "";
     if (!id) return;
@@ -357,7 +351,7 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
     [baseFields]
   );
 
-  /* ─── نرمالایز SrcField پس از تغییر fields ─── */
+  /* ─── نرمالایز SrcField ─── */
   useEffect(() => {
     if (!fields.length || bothEmpty) return;
     const valid = new Set(Array.from(fieldsMap.keys()));
@@ -374,9 +368,7 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldsSig, bothEmpty]);
 
-  /* ─── نرمالایز DesField:
-        1) اگر baseFields خالی شد، همه DesFieldID ها را خالی کن.
-        2) اگر baseFields موجود بود و مقدار نامعتبر بود، به اولین مقدار برگردان. */
+  /* ─── نرمالایز DesField ─── */
   useEffect(() => {
     if (baseFields.length === 0) {
       const changed = tableData.some((r) => r.DesFieldID);
@@ -406,8 +398,6 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
   }, [baseFieldsSig, noDesOptions]);
 
   // ─── AG-Grid columnDefs ───
-  // ✅ طبق خواسته: Src اول باشد و Des آخر
-  // ✅ و برای نمایش صحیح در edit: formatValue + valueParser
   const columnDefs = useMemo(
     () => [
       {
@@ -500,7 +490,6 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
       className="flex flex-col gap-8 p-4 bg-gradient-to-r from-pink-100 to-blue-100 rounded shadow-lg"
     >
       <div className="flex gap-8">
-        {/* Left side */}
         <div className="flex flex-col space-y-6 w-1/2">
           <DynamicSelector
             name="getInformationFrom"
@@ -524,13 +513,26 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
             onChange={(e) => handleMetaChange({ metaType2: e.target.value })}
           />
 
-          <DynamicSelector
-            name="modes"
-            label={t("LookUpRealValue.Form.Modes")}
-            options={modesList}
-            selectedValue={meta.LookupMode}
-            onChange={(e) => handleMetaChange({ LookupMode: e.target.value })}
-          />
+          <div className="flex items-end gap-4 w-full">
+            <div className="flex-1">
+              <DynamicSelector
+                name="modes"
+                label={t("LookUpRealValue.Form.Modes")}
+                options={modesList}
+                selectedValue={meta.LookupMode}
+                onChange={(e) => handleMetaChange({ LookupMode: e.target.value })}
+              />
+            </div>
+
+            <label className="flex items-center gap-2 whitespace-nowrap mb-2">
+              <input
+                type="checkbox"
+                checked={oldLookup}
+                onChange={(e) => handleOldLookupChange(e.target.checked)}
+              />
+              <span>set lookup if it is one</span>
+            </label>
+          </div>
 
           <PostPickerList
             key={`pp-rv-${meta.metaType1}|${meta.metaType2}|${meta.LookupMode}|${resetKey ?? 0}`}
@@ -542,20 +544,9 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
             label={t("LookUpRealValue.Form.DefaultProjects")}
             fullWidth
           />
-
-          {/* فقط Old Lookup */}
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={oldLookup}
-              onChange={(e) => handleOldLookupChange(e.target.checked)}
-            />
-            {t("LookUpRealValue.Form.OldLookup")}
-          </label>
         </div>
       </div>
 
-      {/* Table */}
       <div className="mt-4" style={{ height: 300, overflowY: "auto" }}>
         <DataTable
           key={`dt-rv-${tableGridKey}-${fieldsSig}-${baseFieldsSig}-${noDesOptions ? "noDes" : "hasDes"}-${
