@@ -4,24 +4,24 @@
     "Description": "شرح",
     "ProgramTemplate": "قالب برنامه",
     "DefaultRibbon": "منوی پیش فرض",
-    "LessonLearnedForm": "درس آموخته از قالب",
-    "LessonLearnedAfTemplate": "درس آموخته از قالب AF",
-    "CommentFormTemplate": "نظر از قالب",
-    "ProcedureFormTemplate": "رویه از قالب",
+    "LessonLearnedForm": "فرم درس آموخته",
+    "LessonLearnedAfTemplate": "جریان تایید درس آموخته",
+    "CommentFormTemplate": "فرم اعلام نظر ",
+    "ProcedureFormTemplate": "فرم رویه",
     "DefaultActionButtons": "دکمه های پیش فرض",
-    "LetterActionButtons": "دکمه های عمل نامه",
+    "LetterActionButtons": "دکمه های پیش فرض نامه",
     "MeetingActionButtons": "دکمه های عمل جلسه",
-    "MeetingActionButtonsFirstForm": "دکمه های عمل جلسه برای فرم اول",
-    "MeetingActionButtonsSecondForm": "دکمه های عمل جلسه برای فرم دوم",
+    "MeetingActionButtonsFirstForm": "دکمه های پیش فرض جلسه - فرم اول",
+    "MeetingActionButtonsSecondForm": "دکمه های پیش فرض جلسه - فرم دوم",
     "NoItemSelected": "موردی انتخاب نشده است",
     "StateText": "متن وضعیت",
     "Order": "ترتیب",
     "Tooltip": "متن راهنما",
-    "State": "وضعیت :",
-    "Command": "کامند :",
+    "State": "state :",
+    "Command": "command :",
     "Image": "تصویر",
-    "GoToPreviousStateClient": "بازگشت به وضعیت قبل (کاربر)",
-    "GoToPreviousStateAdmin": "بازگشت به وضعیت قبل (ادمین)",
+    "GoToPreviousStateClient": "برگشت به گروه قبلی کاربر",
+    "GoToPreviousStateAdmin": "برگشت به گروه قبلی ادمین",
     "Accept": "تایید",
     "Reject": "رد",
     "Close": "بستن",
@@ -33,12 +33,12 @@
     "New": "جدید",
     "Delete": "حذف"
   },
-"DataTable": {
-  "Headers": {
-    "Name": "نام",
-    "Description": "شرح",
-    "ProgramTemplateShorts": "قالب برنامه",  
-    "DefaultRibbon": "منوی پیش فرض"          
+  "DataTable": {
+    "Headers": {
+      "Name": "نام",
+      "Description": "شرح",
+      "ProgramTemplateShorts": "قالب برنامه",
+      "DefaultRibbon": "منوی پیش فرض"
+    }
   }
-}
 }

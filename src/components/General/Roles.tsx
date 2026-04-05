@@ -176,7 +176,7 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         placeholder="Enter role code"
         onChange={(e) => handleChange("PostCode", e.target.value)}
       />
-      {/* توضیحات شغلی */}
+      {/* شرح شغلی */}
       <CustomTextarea
         name={t("Roles.JobDescription")}
         value={roleData.Description}

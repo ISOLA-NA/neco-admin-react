@@ -2,7 +2,7 @@
   "ODP": {
     "ODPName": "نام ODP",
     "Address": "آدرس",
-    "Description": "توضیحات",
+    "Description": "شرح",
     "ProgramTemplate": "قالب برنامه",
     "ApprovalFlowTemplate": "قالب جریان تایید",
     "FormTemplate": "قالب فرم",

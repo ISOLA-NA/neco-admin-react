@@ -75,7 +75,7 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
     LookupMode: "",
   });
 
-  // BoolMeta1 => set lookup if it is one
+  // BoolMeta1 => Auto Select if Single
   const [oldLookup, setOldLookup] = useState(false);
 
   const [tableData, setTableData] = useState<TableRow[]>([]);
@@ -530,7 +530,7 @@ const LookUpRealValue: React.FC<LookUpRealValueProps> = ({
                 checked={oldLookup}
                 onChange={(e) => handleOldLookupChange(e.target.checked)}
               />
-              <span>set lookup if it is one</span>
+              <span>Auto Select if Single</span>
             </label>
           </div>
 

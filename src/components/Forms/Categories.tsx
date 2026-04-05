@@ -157,7 +157,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
             <CustomTextarea
               name={t("Category.Description")}
               value={formData.Description}
-              placeholder="توضیحات دسته‌بندی را وارد کنید"
+              placeholder="شرح دسته‌بندی را وارد کنید"
               onChange={handleDescriptionChange}
               required
             />

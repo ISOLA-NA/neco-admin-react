@@ -4,17 +4,19 @@ import React, { useState, useEffect } from "react";
 import Accordion1 from "../RightRibbon/Accordion1";
 import Accordion2 from "../RightRibbon/Accordion2";
 import Accordion3 from "../RightRibbon/Accordion3";
-import "./style.css"
+import "./style.css";
 
 // تعریف نوع برای داده‌های Ribbons
 interface RibbonRow {
   ID: number;
   Name: string;
+  PersianName?: string | null;
 }
 
 interface RowData1 {
   ID: number;
   Name: string;
+  PersianName?: string | null;
   Description: string;
   Order: number;
 }
@@ -22,6 +24,7 @@ interface RowData1 {
 interface RowData2 {
   ID: number;
   Name: string;
+  PersianName?: string | null;
   Description: string;
   Order: number;
 }
@@ -38,7 +41,7 @@ const MainAccordion: React.FC<{ selectedRow?: RibbonRow }> = ({
   const [accordionsOpen, setAccordionsOpen] = useState<{
     [key: number]: boolean;
   }>({
-    1: true, // Accordion1 به صورت پیش‌فرض باز
+    1: true,
     2: false,
     3: false,
   });
@@ -50,49 +53,65 @@ const MainAccordion: React.FC<{ selectedRow?: RibbonRow }> = ({
     }));
   };
 
-  // هر زمان که انتخاب Ribbon تغییر کند، Accordion1 را دوباره بارگذاری می‌کنیم
   useEffect(() => {
     if (selectedRow) {
-      setSelectedMenuId(selectedRow.ID); // ID Ribbon انتخاب‌شده
-      setSelectedRow1(null); // پاک کردن داده‌های Accordion1
-      setSelectedRow2(null); // پاک کردن داده‌های Accordion2
-      setAccordionsOpen({ 1: true, 2: false, 3: false }); // باز کردن Accordion1
+      setSelectedMenuId(selectedRow.ID);
+      setSelectedRow1(null);
+      setSelectedRow2(null);
+      setAccordionsOpen({ 1: true, 2: false, 3: false });
       console.log("Selected Ribbon:", selectedRow);
     }
   }, [selectedRow]);
 
   useEffect(() => {
     if (selectedRow1) {
-      setAccordionsOpen((prev) => ({ ...prev, 2: true })); // باز کردن Accordion2
+      setAccordionsOpen((prev) => ({ ...prev, 2: true }));
     } else {
-      setAccordionsOpen((prev) => ({ ...prev, 2: false, 3: false })); // بستن سایر اکاردئون‌ها
+      setAccordionsOpen((prev) => ({ ...prev, 2: false, 3: false }));
     }
   }, [selectedRow1]);
 
   useEffect(() => {
     if (selectedRow2) {
-      setAccordionsOpen((prev) => ({ ...prev, 3: true })); // باز کردن Accordion3
+      setAccordionsOpen((prev) => ({ ...prev, 3: true }));
     } else {
-      setAccordionsOpen((prev) => ({ ...prev, 3: false })); // بستن Accordion3
+      setAccordionsOpen((prev) => ({ ...prev, 3: false }));
     }
   }, [selectedRow2]);
+
+  const ribbonDisplayName =
+    selectedRow?.PersianName?.trim() ||
+    selectedRow?.Name?.trim() ||
+    null;
+
+  const menuTabDisplayName =
+    selectedRow1?.PersianName?.trim() ||
+    selectedRow1?.Name?.trim() ||
+    null;
+
+  const menuGroupDisplayName =
+    selectedRow2?.PersianName?.trim() ||
+    selectedRow2?.Name?.trim() ||
+    null;
 
   return (
     <div className="-mt-5">
       <Accordion1
         onRowClick={(row: RowData1 | null) => {
           setSelectedRow1(row);
-          setSelectedRow2(null); // پاک کردن انتخاب Accordion2
+          setSelectedRow2(null);
         }}
         onRowDoubleClick={(menuTabId: number) => {
           console.log(`Double clicked MenuTab ID: ${menuTabId}`);
         }}
         isOpen={accordionsOpen[1]}
         toggleAccordion={() => toggleAccordion(1)}
-        selectedMenuId={selectedMenuId} // انتقال ID Ribbon به Accordion1
+        selectedMenuId={selectedMenuId}
+        selectedMenuName={ribbonDisplayName}
       />
       <Accordion2
         selectedMenuTabId={selectedRow1 ? selectedRow1.ID : null}
+        selectedMenuTabName={menuTabDisplayName}
         onRowClick={(row: RowData2 | null) => {
           setSelectedRow2(row);
         }}
@@ -104,6 +123,7 @@ const MainAccordion: React.FC<{ selectedRow?: RibbonRow }> = ({
       />
       <Accordion3
         selectedMenuGroupId={selectedRow2 ? selectedRow2.ID : null}
+        selectedMenuGroupName={menuGroupDisplayName}
         onRowDoubleClick={() => {
           console.log("Double clicked MenuItem");
         }}

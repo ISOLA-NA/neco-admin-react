@@ -151,13 +151,13 @@
   "DataTable": {
     "Headers": {
       "Name": "نام",
-      "Description": "توضیحات",
+      "Description": "شرح",
       "CatA": "دسته A",
       "CatB": "دسته B",
       "Transmittal": "ارسال",
       "IsMegaForm": "فرم بزرگ",
       "ProgramTemplateShort": "قالب برنامه",
-      "DefaultRibbon": "ریبون پیش‌فرض",
+      "DefaultRibbon": "منوی پیش‌فرض",
       "Username": "نام کاربری",
       "FirstName": "نام",
       "LastName": "نام خانوادگی",
@@ -198,8 +198,8 @@
   },
   "Ribbons": {
     "Name": "نام",
-    "Description": "توضیحات",
-    "DescriptionPlaceholder": "توضیحات را وارد کنید"
+    "Description": "شرح",
+    "DescriptionPlaceholder": "شرح را وارد کنید"
   },
   "Category": {
     "CategoryType": "نوع دسته",

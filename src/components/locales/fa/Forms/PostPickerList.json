@@ -21,7 +21,7 @@
         "EnterpriseHeader": "شرکت",
         "SuperIndentHeader": "سرپرست",
         "RoleGroupNameHeader": "نام",
-        "RoleGroupDescriptionHeader": "توضیحات"
+        "RoleGroupDescriptionHeader": "شرح"
       },
       "Messages": {
         "Loading": "در حال بارگذاری…"

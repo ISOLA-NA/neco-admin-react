@@ -374,7 +374,7 @@ export const SubTabDefinitionsProvider: React.FC<{
       resizable: true,
     },
     {
-      headerName: TT("DataTable.Headers.Description", "توضیحات"),
+      headerName: TT("DataTable.Headers.Description", "شرح"),
       field: "Describtion",
       filter: "agTextColumnFilter",
       sortable: true,
@@ -448,10 +448,10 @@ export const SubTabDefinitionsProvider: React.FC<{
           },
         ],
         iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: true,
+          showAdd: false,
+          showEdit: false,
+          showDelete: false,
+          showDuplicate: false,
         },
         duplicateAction: async (row: Menu) => {
           return await duplicateRibbonDeep(row);
@@ -531,7 +531,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "توضیحات"),
+            headerName: TT("DataTable.Headers.Description", "شرح"),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -571,7 +571,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "توضیحات"),
+            headerName: TT("DataTable.Headers.Description", "شرح"),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -933,7 +933,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "توضیحات"),
+            headerName: TT("DataTable.Headers.Description", "شرح"),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -1132,7 +1132,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "توضیحات"),
+            headerName: TT("DataTable.Headers.Description", "شرح"),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -1165,7 +1165,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "توضیحات"),
+            headerName: TT("DataTable.Headers.Description", "شرح"),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -1205,7 +1205,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "توضیحات"),
+            headerName: TT("DataTable.Headers.Description", "شرح"),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,

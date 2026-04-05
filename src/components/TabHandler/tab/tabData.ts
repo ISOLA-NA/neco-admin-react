@@ -704,7 +704,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateADescription: "شرح برای ردیف دوم",
         EntityCateAName: "Development",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -723,7 +723,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateADescription: "شرح برای ردیف سوم",
         EntityCateAName: "Marketing",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -742,7 +742,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateADescription: "شرح برای ردیف چهارم",
         EntityCateAName: "Sales",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -761,7 +761,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateADescription: "شرح برای ردیف پنجم",
         EntityCateAName: "HR",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -795,7 +795,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         Code: "",
         EntityCateADescription:
-          "توضیحات برای ردیف اول سلکت Lesson Learned Af Template",
+          "شرح برای ردیف اول سلکت Lesson Learned Af Template",
         EntityCateAName: "Analysis",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -815,7 +815,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       // افزودن ۴ ردیف دیگر به دلخواه
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateADescription: "شرح برای ردیف دوم",
         EntityCateAName: "Evaluation",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -834,7 +834,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateADescription: "شرح برای ردیف سوم",
         EntityCateAName: "Feedback",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -853,7 +853,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateADescription: "شرح برای ردیف چهارم",
         EntityCateAName: "Review",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -872,7 +872,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateADescription: "شرح برای ردیف پنجم",
         EntityCateAName: "Completion",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -906,7 +906,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         Code: "",
         EntityCateADescription:
-          "توضیحات برای ردیف اول سلکت Comment Form Template",
+          "شرح برای ردیف اول سلکت Comment Form Template",
         EntityCateAName: "Feedback Form",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -925,7 +925,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateADescription: "شرح برای ردیف دوم",
         EntityCateAName: "Survey Form",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -944,7 +944,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateADescription: "شرح برای ردیف سوم",
         EntityCateAName: "Comment Form",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -963,7 +963,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateADescription: "شرح برای ردیف چهارم",
         EntityCateAName: "Review Form",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -982,7 +982,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateADescription: "شرح برای ردیف پنجم",
         EntityCateAName: "Evaluation Form",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -1016,7 +1016,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         Code: "",
         EntityCateADescription:
-          "توضیحات برای ردیف اول سلکت Procedure Form Template",
+          "شرح برای ردیف اول سلکت Procedure Form Template",
         EntityCateAName: "Procedure Form A",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -1036,7 +1036,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       // افزودن ۴ ردیف دیگر به دلخواه
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف دوم",
+        EntityCateADescription: "شرح برای ردیف دوم",
         EntityCateAName: "Procedure Form B",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -1055,7 +1055,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف سوم",
+        EntityCateADescription: "شرح برای ردیف سوم",
         EntityCateAName: "Procedure Form C",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -1074,7 +1074,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف چهارم",
+        EntityCateADescription: "شرح برای ردیف چهارم",
         EntityCateAName: "Procedure Form D",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -1093,7 +1093,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       },
       {
         Code: "",
-        EntityCateADescription: "توضیحات برای ردیف پنجم",
+        EntityCateADescription: "شرح برای ردیف پنجم",
         EntityCateAName: "Procedure Form E",
         EntityCateBDescription: null,
         EntityCateBName: null,
@@ -2229,7 +2229,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         ID: 1,
         Name: "ODP Alpha",
-        Description: "توضیحات مربوط به ODP Alpha",
+        Description: "شرح مربوط به ODP Alpha",
         Address: "آدرس 1",
         nProgramTemplateID: 1,
         nEntityTypeID: 10,
@@ -2238,7 +2238,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         ID: 2,
         Name: "ODP Beta",
-        Description: "توضیحات مربوط به ODP Beta",
+        Description: "شرح مربوط به ODP Beta",
         Address: "آدرس 2",
         nProgramTemplateID: 2,
         nEntityTypeID: 11,
@@ -2247,7 +2247,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         ID: 3,
         Name: "ODP Gamma",
-        Description: "توضیحات مربوط به ODP Gamma",
+        Description: "شرح مربوط به ODP Gamma",
         Address: "آدرس 3",
         nProgramTemplateID: 3,
         nEntityTypeID: 12,
@@ -2256,7 +2256,7 @@ export const subTabDataMapping: { [key: string]: SubTabData } = {
       {
         ID: 4,
         Name: "ODP Delta",
-        Description: "توضیحات مربوط به ODP Delta",
+        Description: "شرح مربوط به ODP Delta",
         Address: "آدرس 4",
         nProgramTemplateID: 4,
         nEntityTypeID: 13,

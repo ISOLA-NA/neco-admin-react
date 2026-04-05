@@ -7,9 +7,8 @@ import {
   FiChevronDown,
   FiChevronUp,
 } from "react-icons/fi";
-import { FaSearch, FaSave, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import DynamicInput from "../../../utilities/DynamicInput";
-import DynamicRadioGroup from "../../../utilities/DynamicRadiogroup";
 import FileUploadHandler, {
   InsertModel,
 } from "../../../../services/FileUploadHandler";
@@ -19,11 +18,11 @@ import AppServices, { MenuItem } from "../../../../services/api.services";
 import DynamicConfirm from "../../../utilities/DynamicConfirm";
 import { showAlert } from "../../../utilities/Alert/DynamicAlert";
 import WindowsCommandSelectorModal from "./WindowsCommandSelectorModal";
-import DynamicButton from "../../../utilities/DynamicButtons";
 import { useTranslation } from "react-i18next";
 
 interface Accordion3Props {
   selectedMenuGroupId: number | null;
+  selectedMenuGroupName?: string | null;
   onRowDoubleClick: (menuItemId: number) => void;
   isOpen: boolean;
   toggleAccordion: () => void;
@@ -32,7 +31,7 @@ interface Accordion3Props {
 interface RowData3 {
   ID: number;
   Name: string;
-  PersianName?: string; // ← اضافه شد (بدون null)
+  PersianName?: string;
   Command: string;
   CommandWeb: string;
   Description: string;
@@ -44,32 +43,32 @@ interface RowData3 {
   CommandMobile?: string;
   HelpText?: string;
   KeyTip?: string;
+  Size?: number;
 }
-
 
 const Accordion3: React.FC<Accordion3Props> = ({
   selectedMenuGroupId,
+  selectedMenuGroupName,
   onRowDoubleClick,
   isOpen,
   toggleAccordion,
 }) => {
   const { t, i18n } = useTranslation();
+  const TT = (key: string, fa: string, en: string) =>
+    t(key, {
+      defaultValue: i18n.language === "fa" ? fa : en,
+    });
+
   const { subTabDefinitions, fetchDataForSubTab } = useSubTabDefinitions();
   const [rowData, setRowData] = useState<RowData3[]>([]);
   const [selectedRow, setSelectedRow] = useState<RowData3 | null>(null);
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  // حالت های ادیت و ادد
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [isAdding, setIsAdding] = useState<boolean>(false);
   const [commandModalOpen, setCommandModalOpen] = useState(false);
-  const [windowsAppCommand, setWindowsAppCommand] = useState<string>("");
 
-  // state فرم
   const [formData, setFormData] = useState<Partial<RowData3>>({
     Name: "",
-    PersianName: "", // ← اضافه شد
+    PersianName: "",
     Command: "",
     Description: "",
     Order: 0,
@@ -77,60 +76,30 @@ const Accordion3: React.FC<Accordion3Props> = ({
     CommandMobile: "",
     HelpText: "",
     KeyTip: "",
+    Size: 0,
   });
 
-  // کنترل عکس و preview
   const [iconImageId, setIconImageId] = useState<string | null>(null);
   const [resetCounter, setResetCounter] = useState<number>(0);
-
-  // سایر stateها
   const [selectedSize, setSelectedSize] = useState<string>("0");
   const [confirmInsertOpen, setConfirmInsertOpen] = useState<boolean>(false);
   const [confirmUpdateOpen, setConfirmUpdateOpen] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [errorConfirmOpen, setErrorConfirmOpen] = useState<boolean>(false);
+  const [isFaMode, setIsFaMode] = useState(true);
 
-  const [isFaMode, setIsFaMode] = useState(true); // EN=false, FA=true
+  const baseDefs = subTabDefinitions["MenuItem"]?.columnDefs || [];
 
+  const accordionTitle = useMemo(() => {
+    const baseName =
+      (selectedMenuGroupName || "").trim() ||
+      TT("Ribbons.SelectedMenuGroupFallback", "بخش انتخاب شده", "Selected Section");
 
-  // ستون‌های جدول
-  const columnDefs = [
-    ...(subTabDefinitions["MenuItem"]?.columnDefs || []),
-    {
-      headerName: "Actions",
-      field: "operations",
-      sortable: false,
-      filter: false,
-      width: 150,
-      cellRendererFramework: (params: any) => (
-        <div className="flex space-x-2">
-          <button
-            className="text-yellow-600 hover:text-yellow-800 transition"
-            onClick={() => handleDuplicate(params.data)}
-            title="Duplicate"
-          >
-            <FiCopy size={20} />
-          </button>
-          <button
-            className="text-blue-600 hover:text-blue-800 transition"
-            onClick={() => handleEdit(params.data)}
-            title="Edit"
-          >
-            <FiEdit size={20} />
-          </button>
-          <button
-            className="text-red-600 hover:text-red-800 transition"
-            onClick={() => handleDelete(params.data)}
-            title="Delete"
-          >
-            <FiTrash2 size={20} />
-          </button>
-        </div>
-      ),
-    },
-  ];
+    return i18n.language === "fa"
+      ? `لیست موارد برای بخش ${baseName}`
+      : `Items List For Section ${baseName}`;
+  }, [selectedMenuGroupName, i18n.language]);
 
-  // گرفتن داده‌ها
   const loadRowData = async () => {
     if (isOpen && selectedMenuGroupId !== null) {
       setIsLoading(true);
@@ -142,6 +111,14 @@ const Accordion3: React.FC<Accordion3Props> = ({
           ...item,
           ModifiedById: item.ModifiedById === "" ? null : item.ModifiedById,
           IconImageId: item.IconImageId === "" ? null : item.IconImageId,
+          PersianName: item.PersianName ?? "",
+          Command: item.Command ?? "",
+          CommandWeb: item.CommandWeb ?? "",
+          Description: item.Description ?? "",
+          CommandMobile: item.CommandMobile ?? "",
+          HelpText: item.HelpText ?? "",
+          KeyTip: item.KeyTip ?? "",
+          Size: item.Size ?? item.Order ?? 0,
         }));
         setRowData(sanitizedData);
       } catch (error) {
@@ -152,9 +129,18 @@ const Accordion3: React.FC<Accordion3Props> = ({
     } else {
       setRowData([]);
       setSelectedRow(null);
-      setIsEditing(false);
-      setIsAdding(false);
-      setFormData({ Name: "", Command: "", Description: "", Order: 0 });
+      setFormData({
+        Name: "",
+        PersianName: "",
+        Command: "",
+        Description: "",
+        Order: 0,
+        CommandWeb: "",
+        CommandMobile: "",
+        HelpText: "",
+        KeyTip: "",
+        Size: 0,
+      });
       setSelectedSize("0");
       setIconImageId(null);
       setResetCounter((prev) => prev + 1);
@@ -163,38 +149,40 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
   useEffect(() => {
     loadRowData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedMenuGroupId]);
 
-  // سرچ
   const filteredRowData = useMemo(() => {
     if (!searchText) return rowData;
     const q = searchText.toLowerCase();
     return rowData.filter(
       (row) =>
         (row.Name || "").toLowerCase().includes(q) ||
-        (row.PersianName || "").toLowerCase().includes(q) || // ← اضافه شد
+        (row.PersianName || "").toLowerCase().includes(q) ||
         (row.Command || "").toLowerCase().includes(q) ||
-        (row.Description || "").toLowerCase().includes(q)
+        (row.KeyTip || "").toLowerCase().includes(q) ||
+        (row.Description || "").toLowerCase().includes(q) ||
+        String(row.Order ?? "").includes(searchText)
     );
   }, [searchText, rowData]);
 
-  // پر کردن فرم موقع کلیک روی ردیف
   const handleRowClick = (row: RowData3) => {
     const sanitizedRow: RowData3 = {
       ...row,
       PersianName: row.PersianName ?? "",
       ModifiedById: row.ModifiedById === "" ? null : row.ModifiedById,
       IconImageId: row.IconImageId === "" ? null : row.IconImageId,
+      Command: row.Command ?? "",
+      CommandWeb: row.CommandWeb ?? "",
+      Description: row.Description ?? "",
+      CommandMobile: row.CommandMobile ?? "",
+      HelpText: row.HelpText ?? "",
+      KeyTip: row.KeyTip ?? "",
+      Size: row.Size ?? row.Order ?? 0,
     };
-
-    setSelectedRow(sanitizedRow); // انتخاب ردیف
-    setFormData(sanitizedRow); // پر کردن فرم (Command و CommandWeb هر دو داخلش هستند)
-    setWindowsAppCommand(sanitizedRow.Command || ""); // مقدار ورودی WindowsAppCommand
-    setSelectedSize(String(sanitizedRow.Order ?? 0)); // رادیو سایز
-    setIconImageId(sanitizedRow.IconImageId ?? null); // عکس آیکن
-    setIsEditing(true);
-    setIsAdding(false);
+    setSelectedRow(sanitizedRow);
+    setFormData(sanitizedRow);
+    setSelectedSize(String(sanitizedRow.Size ?? sanitizedRow.Order ?? 0));
+    setIconImageId(sanitizedRow.IconImageId ?? null);
     setIsFaMode(true);
   };
 
@@ -202,50 +190,33 @@ const Accordion3: React.FC<Accordion3Props> = ({
     onRowDoubleClick(row.ID);
   };
 
-  // دابلیکیت
   const handleDuplicate = (row: RowData3) => {
     const duplicatedRow: RowData3 = {
       ...row,
       ID: 0,
       Name: `${row.Name} (Copy)`,
-      PersianName: row.PersianName ?? "", // ← اضافه شد
+      PersianName: row.PersianName ?? "",
       ModifiedById: null,
       IconImageId: null,
+      Size: row.Size ?? row.Order ?? 0,
     };
     setFormData(duplicatedRow);
-    setSelectedSize("0");
+    setSelectedSize(String(duplicatedRow.Size ?? duplicatedRow.Order ?? 0));
     setIconImageId(null);
-    setIsAdding(true);
-    setIsEditing(false);
     setSelectedRow(null);
     setResetCounter((prev) => prev + 1);
   };
 
-  // ادیت
-  const handleEdit = (row: RowData3) => {
-    setSelectedRow(row); // همان ردیف
-    setFormData(row); // داده‌های فرم
-    setFormData({ ...row, PersianName: row.PersianName ?? "" });
-    setWindowsAppCommand(row.Command || ""); // هم‌زمان ورودی WindowsAppCommand
-    setSelectedSize(String(row.Order ?? 0)); // سایز
-    setIconImageId(row.IconImageId ?? null); // آیکن
-    setIsEditing(true);
-    setIsAdding(false);
-  };
-
-  // حذف از اکشن جدول
   const handleDelete = (row: RowData3) => {
     setSelectedRow(row);
     setConfirmDeleteOpen(true);
   };
 
-  // حذف از دکمه بالا
   const handleDeleteClick = () => {
     if (!selectedRow) return;
     setConfirmDeleteOpen(true);
   };
 
-  // ریست کامل فرم (New)
   const handleNew = () => {
     if (selectedMenuGroupId === null) {
       setErrorConfirmOpen(true);
@@ -266,83 +237,63 @@ const Accordion3: React.FC<Accordion3Props> = ({
       CommandMobile: "",
       HelpText: "",
       KeyTip: "",
+      Size: 0,
     };
     setSelectedRow(null);
     setFormData(newRow);
     setSelectedSize("0");
     setIconImageId(null);
-    setIsAdding(true);
     setIsFaMode(true);
-    setIsEditing(false);
     setResetCounter((prev) => prev + 1);
-    setWindowsAppCommand("");
   };
 
-  // ورودی‌های فرم
-  const handleInputChange = (
-    name: string,
-    value: string | number | boolean
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleInputChange = (name: string, value: string | number | boolean) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // تغییر رادیو
   const handleRadioChange = (value: string) => {
     setSelectedSize(value);
     setFormData((prev) => ({
       ...prev,
-      Order: parseInt(value, 10),
+      Size: parseInt(value, 10),
     }));
   };
 
-  // آپلود عکس موفق
   const handleUploadSuccess = (insertModel: InsertModel) => {
     setIconImageId(insertModel.ID || null);
-    setFormData((prev) => ({
-      ...prev,
-      IconImageId: insertModel.ID || null,
-    }));
+    setFormData((prev) => ({ ...prev, IconImageId: insertModel.ID || null }));
   };
 
-  // ذخیره (Insert)
-  const handleInsert = () => {
-    if (!validateForm()) return;
-    setConfirmInsertOpen(true);
-  };
-
-  // آپدیت
-  const handleUpdate = () => {
-    if (!selectedRow) return;
-    if (!validateForm()) return;
-    setConfirmUpdateOpen(true);
-  };
-
-  // اعتبارسنجی فرم
   const validateForm = (): boolean => {
     const nameTrim = (formData.Name || "").trim();
     const pNameTrim = (formData.PersianName || "").trim();
-
-    // ✅ فقط اگر هر دو خالی بودن خطا بده
     if (!nameTrim && !pNameTrim) {
-      showAlert("warning", null, "Warning", "Name یا PersianName را وارد کنید");
+      showAlert(
+        "warning",
+        null,
+        TT("Alerts.Title.Warning", "هشدار", "Warning"),
+        "Name یا PersianName را وارد کنید"
+      );
       return false;
     }
     return true;
   };
 
+  const handleSave = () => {
+    if (!validateForm()) return;
+    if (selectedRow) setConfirmUpdateOpen(true);
+    else setConfirmInsertOpen(true);
+  };
+
   const nameTrim = (formData.Name || "").trim();
   const pNameTrim = (formData.PersianName || "").trim();
 
-  // تأیید نهایی Insert
   const confirmInsert = async () => {
     try {
       const newMenuItem: MenuItem = {
         ID: 0,
-        Name: nameTrim || pNameTrim,     // ✅ fallback
-        PersianName: pNameTrim || null,  // ✅ null اگر خالی بود
+        Name: nameTrim || pNameTrim,
+        PersianName: pNameTrim || null,
         Command: formData.Command || "",
         CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
@@ -355,12 +306,15 @@ const Accordion3: React.FC<Accordion3Props> = ({
         CommandMobile: formData.CommandMobile || "",
         HelpText: formData.HelpText || "",
         KeyTip: formData.KeyTip || "",
-        Size: formData.Order || 0,
-
+        Size: formData.Size ?? 0,
       };
-      showAlert("success", null, "", t("Alerts.Added.MenuItem"));
-
       await AppServices.insertMenuItem(newMenuItem);
+      showAlert(
+        "success",
+        null,
+        "",
+        TT("Alerts.Added.MenuItem", "با موفقیت اضافه شد", "Added successfully")
+      );
       await loadRowData();
       setFormData({
         Name: "",
@@ -372,40 +326,33 @@ const Accordion3: React.FC<Accordion3Props> = ({
         CommandMobile: "",
         HelpText: "",
         KeyTip: "",
+        Size: 0,
       });
-      setWindowsAppCommand("");
       setSelectedSize("0");
       setIconImageId(null);
-      setIsAdding(true);
       setIsFaMode(true);
       setResetCounter((prev) => prev + 1);
     } catch (error: any) {
-      console.error("Error inserting MenuItem:", error);
       const data = error.response?.data;
       const message =
         typeof data === "string"
           ? data
-          : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          : data?.value?.message || data?.message || "خطا در ذخیره";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmInsertOpen(false);
     }
   };
 
-  // تأیید نهایی Update
   const confirmUpdate = async () => {
     if (!selectedRow) return;
     try {
-
-      const nameTrim = (formData.Name || "").trim();
-      const pNameTrim = (formData.PersianName || "").trim();
-
+      const nameTrimLocal = (formData.Name || "").trim();
+      const pNameTrimLocal = (formData.PersianName || "").trim();
       const updatedMenuItem: MenuItem = {
         ID: formData.ID!,
-        Name: nameTrim || pNameTrim,
-        PersianName: pNameTrim || null,
+        Name: nameTrimLocal || pNameTrimLocal,
+        PersianName: pNameTrimLocal || null,
         Command: formData.Command || "",
         CommandWeb: formData.CommandWeb || "",
         Description: formData.Description || "",
@@ -414,14 +361,19 @@ const Accordion3: React.FC<Accordion3Props> = ({
         IsVisible: formData.IsVisible ?? true,
         LastModified: formData.LastModified || null,
         ModifiedById: formData.ModifiedById || null,
-        IconImageId: formData.IconImageId || null,
+        IconImageId: iconImageId || null,
         CommandMobile: formData.CommandMobile || "",
         HelpText: formData.HelpText || "",
         KeyTip: formData.KeyTip || "",
-        Size: formData.Order || 0,
-
+        Size: formData.Size ?? 0,
       };
-      showAlert("success", null, "", t("Alerts.Updated.MenuTab"));
+      await AppServices.updateMenuItem(updatedMenuItem);
+      showAlert(
+        "success",
+        null,
+        "",
+        TT("Alerts.Updated.MenuItem", "با موفقیت ویرایش شد", "Updated successfully")
+      );
       setFormData({
         Name: "",
         PersianName: "",
@@ -432,27 +384,22 @@ const Accordion3: React.FC<Accordion3Props> = ({
         CommandMobile: "",
         HelpText: "",
         KeyTip: "",
+        Size: 0,
       });
-      await AppServices.updateMenuItem(updatedMenuItem);
       await loadRowData();
-      setIsEditing(false);
       setResetCounter((prev) => prev + 1);
     } catch (error: any) {
-      console.error("Error updating MenuItem:", error);
       const data = error.response?.data;
       const message =
         typeof data === "string"
           ? data
-          : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          : data?.value?.message || data?.message || "خطا در ویرایش";
       showAlert("error", null, "Error", message);
     } finally {
       setConfirmUpdateOpen(false);
     }
   };
 
-  // تأیید نهایی حذف
   const confirmDelete = async () => {
     if (!selectedRow) return;
     try {
@@ -461,6 +408,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
       setSelectedRow(null);
       setFormData({
         Name: "",
+        PersianName: "",
         Command: "",
         Description: "",
         Order: 0,
@@ -468,14 +416,17 @@ const Accordion3: React.FC<Accordion3Props> = ({
         CommandMobile: "",
         HelpText: "",
         KeyTip: "",
+        Size: 0,
       });
-
-      setIsEditing(false);
-      setIsAdding(false);
       setSelectedSize("0");
       setIconImageId(null);
       setResetCounter((prev) => prev + 1);
-      showAlert("success", null, "", t("Alerts.Deleted.MenuItem"));
+      showAlert(
+        "success",
+        null,
+        "",
+        TT("Alerts.Deleted.MenuItem", "با موفقیت حذف شد", "Deleted successfully")
+      );
     } catch (error) {
       console.error("Error deleting MenuItem:", error);
     } finally {
@@ -483,45 +434,73 @@ const Accordion3: React.FC<Accordion3Props> = ({
     }
   };
 
-  // خطای اعتبارسنجی
   const closeErrorConfirm = () => {
     setErrorConfirmOpen(false);
   };
 
   const handleSelectCommand = (cmd: string) => {
-    console.log("🎯 Windows Cmd selected:", cmd);
-    setWindowsAppCommand(cmd);
     setFormData((prev) => ({ ...prev, Command: cmd }));
     setCommandModalOpen(false);
   };
 
-  const baseDefs = subTabDefinitions["MenuItem"]?.columnDefs || [];
-
-  const columnDefsWithFa = useMemo(() => {
+  const columnDefsWithFaAndExtra = useMemo(() => {
     const defs = Array.isArray(baseDefs) ? [...baseDefs] : [];
-    const hasFa = defs.some((c: any) => (c.field ?? "").toString() === "PersianName");
-    if (hasFa) return defs;
 
-    const faCol = {
-      headerName: "PersianName",
-      field: "PersianName",
-      sortable: true,
-      filter: true,
-      resizable: true,
+    const ensureColumn = (
+      field: string,
+      headerFa: string,
+      headerEn: string,
+      width?: number
+    ) => {
+      const exists = defs.some(
+        (c: any) => (c.field ?? "").toString().toLowerCase() === field.toLowerCase()
+      );
+      if (!exists) {
+        defs.push({
+          headerName: TT(`Ribbons.${field}`, headerFa, headerEn),
+          field,
+          sortable: true,
+          filter: true,
+          resizable: true,
+          ...(width ? { width } : {}),
+        });
+      }
     };
 
-    const nameIdx = defs.findIndex(
-      (c: any) => (c.field ?? "").toString().toLowerCase() === "name"
-    );
-    if (nameIdx === -1) return [...defs, faCol];
+    ensureColumn("Name", "نام", "Name", 180);
+    ensureColumn("PersianName", "نام فارسی", "Persian Name", 180);
+    ensureColumn("Command", "فرمان", "Command", 260);
+    ensureColumn("KeyTip", "نکته کلیدی", "Key Tip", 140);
+    ensureColumn("Order", "ترتیب", "Order", 110);
+    ensureColumn("Description", "شرح", "Description", 180);
 
-    const before = defs.slice(0, nameIdx + 1);
-    const after = defs.slice(nameIdx + 1);
-    return [...before, faCol, ...after];
-  }, [baseDefs]);
+    const orderedFields = [
+      "Name",
+      "PersianName",
+      "Command",
+      "KeyTip",
+      "Order",
+      "Description",
+    ];
+
+    const orderedDefs = orderedFields
+      .map((field) =>
+        defs.find(
+          (c: any) => (c.field ?? "").toString().toLowerCase() === field.toLowerCase()
+        )
+      )
+      .filter(Boolean);
+
+    const restDefs = defs.filter(
+      (c: any) =>
+        !orderedFields.includes((c.field ?? "").toString())
+    );
+
+    return [...orderedDefs, ...restDefs];
+  }, [baseDefs, t, i18n.language]);
 
   const actionsCol = {
-    headerName: "Actions",
+    headerName: TT("DataTable.Buttons.Actions", "عملیات", "Actions"),
     field: "operations",
     sortable: false,
     filter: false,
@@ -531,21 +510,21 @@ const Accordion3: React.FC<Accordion3Props> = ({
         <button
           className="text-yellow-600 hover:text-yellow-800 transition"
           onClick={() => handleDuplicate(params.data)}
-          title="Duplicate"
+          title={TT("Ribbons.Duplicate", "کپی", "Duplicate")}
         >
           <FiCopy size={20} />
         </button>
         <button
           className="text-blue-600 hover:text-blue-800 transition"
-          onClick={() => handleEdit(params.data)}
-          title="Edit"
+          onClick={() => handleRowClick(params.data)}
+          title={TT("Ribbons.Save", "ذخیره", "Save")}
         >
           <FiEdit size={20} />
         </button>
         <button
           className="text-red-600 hover:text-red-800 transition"
           onClick={() => handleDelete(params.data)}
-          title="Delete"
+          title={TT("Ribbons.Delete", "حذف", "Delete")}
         >
           <FiTrash2 size={20} />
         </button>
@@ -553,27 +532,22 @@ const Accordion3: React.FC<Accordion3Props> = ({
     ),
   };
 
-
+  const iconBtn =
+    "rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none";
 
   return (
     <>
-      {/* Radio margin for LTR and RTL */}
       <style>{`
-      [dir="ltr"] input[type="radio"] {
-        margin-right: 6px;
-      }
-      [dir="rtl"] input[type="radio"] {
-        margin-left: 6px;
-      }
-    `}</style>
+        [dir="ltr"] input[type="radio"] { margin-right: 6px; }
+        [dir="rtl"] input[type="radio"] { margin-left: 6px; }
+      `}</style>
 
       <div className="mb-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-blue-50 to-purple-50 transition-all duration-300">
-        {/* Accordion header */}
         <div
           className="flex justify-between items-center p-4 bg-white border-b border-gray-300 rounded-t-lg cursor-pointer"
           onClick={toggleAccordion}
         >
-          <span className="text-xl font-medium">Menu Items</span>
+          <span className="text-xl font-medium">{accordionTitle}</span>
           <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full">
             {isOpen ? (
               <FiChevronUp className="text-gray-700" size={20} />
@@ -587,32 +561,65 @@ const Accordion3: React.FC<Accordion3Props> = ({
           <div className="p-4 bg-white rounded-b-lg">
             {selectedMenuGroupId !== null ? (
               <>
-                {/* Search bar */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 gap-4">
                   <div className="relative max-w-sm w-full">
                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                     <input
                       type="text"
-                      placeholder="Search..."
+                      placeholder={TT(
+                        "Ribbons.SearchPlaceholder",
+                        "جستجو...",
+                        "Search..."
+                      )}
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
                       className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                       style={{ fontFamily: "inherit" }}
                     />
                   </div>
+
+                  <div className="flex justify-end gap-2 shrink-0">
+                    <button
+                      title={TT("Ribbons.Save", "ذخیره", "Save")}
+                      onClick={handleSave}
+                      className={`${iconBtn} bg-blue-50 hover:bg-blue-100 text-blue-600`}
+                    >
+                      <FiEdit size={20} />
+                    </button>
+                    <button
+                      title={TT("Ribbons.New", "جدید", "New")}
+                      onClick={handleNew}
+                      className={`${iconBtn} bg-green-50 hover:bg-green-100 text-green-600`}
+                    >
+                      <FiPlus size={20} />
+                    </button>
+                    <button
+                      title={TT("Ribbons.Delete", "حذف", "Delete")}
+                      onClick={handleDeleteClick}
+                      disabled={!selectedRow}
+                      className={`${iconBtn} bg-red-50 hover:bg-red-100 text-red-600 ${
+                        !selectedRow ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      <FiTrash2 size={20} />
+                    </button>
+                    <button
+                      title={TT("Ribbons.Duplicate", "کپی", "Duplicate")}
+                      onClick={() => selectedRow && handleDuplicate(selectedRow)}
+                      disabled={!selectedRow}
+                      className={`${iconBtn} bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${
+                        !selectedRow ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      <FiCopy size={20} />
+                    </button>
+                  </div>
                 </div>
 
-                {/* DataTable */}
-                <div
-                  style={{
-                    height: "300px",
-                    overflowY: "auto",
-                    marginTop: "-15px",
-                  }}
-                >
+                <div style={{ height: "300px", overflowY: "auto", marginTop: "-15px" }}>
                   <DataTable
                     direction={i18n.dir()}
-                    columnDefs={columnDefsWithFa}
+                    columnDefs={[...columnDefsWithFaAndExtra, actionsCol]}
                     rowData={filteredRowData}
                     onRowClick={handleRowClick}
                     onRowDoubleClick={(data) => handleRowDoubleClick(data)}
@@ -626,30 +633,38 @@ const Accordion3: React.FC<Accordion3Props> = ({
                   />
                 </div>
 
-                {/* The form */}
-                <div className="mt-4 p-4 border rounded bg-gray-50 shadow-inner">
-                  {/* دو ستونه دقیق و هم‌راستا */}
+                <div className="mt-2 p-4 border rounded bg-gray-50 shadow-inner">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Row 1: Name | Description */}
                     <div>
                       <div className="flex items-end gap-2">
                         <div className="flex-1">
                           <DynamicInput
-                            name={!isFaMode ? t("Forms.PersianName") : t("Forms.Name")}
+                            name={
+                              !isFaMode
+                                ? TT("Forms.PersianName", "نام فارسی", "Persian Name")
+                                : TT("Ribbons.Name", "نام", "Name")
+                            }
                             type="text"
-                            value={!isFaMode ? (formData.PersianName ?? "") : (formData.Name ?? "")}
-                            placeholder={!isFaMode ? t("Forms.PersianName") : t("Forms.Name")}
+                            value={
+                              !isFaMode
+                                ? (formData.PersianName ?? "")
+                                : (formData.Name ?? "")
+                            }
+                            placeholder={
+                              !isFaMode
+                                ? TT("Forms.PersianName", "نام فارسی", "Persian Name")
+                                : TT("Ribbons.Name", "نام", "Name")
+                            }
                             onChange={(e) => {
                               const v = e.target.value;
                               setFormData((prev) =>
-                                !isFaMode ? { ...prev, PersianName: v } : { ...prev, Name: v }
+                                !isFaMode
+                                  ? { ...prev, PersianName: v }
+                                  : { ...prev, Name: v }
                               );
                             }}
-                          // required={isFaMode} // وقتی FA هستی داری Name می‌زنی، پس Name اجباریه
                           />
                         </div>
-
-                        {/* دکمه EN/FA با استایل گرادیانی */}
                         <button
                           type="button"
                           onClick={() => setIsFaMode((p) => !p)}
@@ -664,31 +679,41 @@ const Accordion3: React.FC<Accordion3Props> = ({
                           ].join(" ")}
                           title={
                             isFaMode
-                              ? t("Forms.SwitchToEN", { field: t("Forms.PersianName") })
-                              : t("Forms.SwitchToFA", { field: t("Forms.Name") })
+                              ? TT(
+                                  "Ribbons.SwitchToEnglish",
+                                  "تغییر به انگلیسی",
+                                  "Switch to English"
+                                )
+                              : TT(
+                                  "Ribbons.SwitchToPersian",
+                                  "تغییر به فارسی",
+                                  "Switch to Persian"
+                                )
                           }
                         >
                           {isFaMode ? "FA" : "EN"}
                         </button>
                       </div>
                     </div>
+
                     <div>
                       <DynamicInput
-                        name={t("Ribbons.Description")}
+                        name={TT("Ribbons.Description", "شرح", "Description")}
                         type="text"
                         value={formData.Description || ""}
-                        placeholder="Description"
-                        onChange={(e) => handleInputChange("Description", e.target.value)}
+                        placeholder={TT("Ribbons.Description", "شرح", "Description")}
+                        onChange={(e) =>
+                          handleInputChange("Description", e.target.value)
+                        }
                       />
                     </div>
 
-                    {/* Row 2: Order | Help Text */}
                     <div>
                       <DynamicInput
-                        name={t("Ribbons.Order")}
+                        name={TT("Ribbons.Order", "ترتیب", "Order")}
                         type="number"
                         value={formData.Order || 0}
-                        placeholder="Order"
+                        placeholder={TT("Ribbons.Order", "ترتیب", "Order")}
                         onChange={(e) =>
                           handleInputChange(
                             "Order",
@@ -700,52 +725,66 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
                     <div>
                       <DynamicInput
-                        name={t("Ribbons.HelpText")}
+                        name={TT("Ribbons.HelpText", "متن راهنما", "Help Text")}
                         type="text"
                         value={formData.HelpText || ""}
                         placeholder=""
-                        onChange={(e) => handleInputChange("HelpText", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("HelpText", e.target.value)
+                        }
                       />
                     </div>
 
-                    {/* Row 3: Windows App Command (+cmd) | Windows Web Command */}
                     <div>
-                      {/* Windows App Command + cmd button (کوچیک و هم‌تراز پایین اینپوت) */}
                       <div className="grid grid-cols-[1fr_auto] items-end gap-3">
                         <DynamicInput
-                          name={t("Ribbons.WindowsAppCommand")}
+                          name={TT(
+                            "Ribbons.WindowsAppCommand",
+                            "فرمان windows application",
+                            "Windows App Command"
+                          )}
                           type="text"
                           value={formData.Command || ""}
                           placeholder=""
-                          onChange={(e) => handleInputChange("Command", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("Command", e.target.value)
+                          }
                           className="w-full"
                         />
                         <button
                           type="button"
-                          title="انتخاب Command"
+                          title="cmd"
                           onClick={() => setCommandModalOpen(true)}
                           className="h-9 px-3 text-sm leading-none bg-purple-600 hover:bg-purple-800 text-white rounded-md font-medium shrink-0 self-end"
                         >
                           cmd
                         </button>
-
                       </div>
                     </div>
 
                     <div>
                       <DynamicInput
-                        name={t("Ribbons.WindowsWebCommand")}
+                        name={TT(
+                          "Ribbons.WindowsWebCommand",
+                          "فرمان wep application",
+                          "Windows Web Command"
+                        )}
                         type="text"
                         value={formData.CommandWeb || ""}
                         placeholder=""
-                        onChange={(e) => handleInputChange("CommandWeb", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("CommandWeb", e.target.value)
+                        }
                       />
                     </div>
 
-                    {/* Row 4: Mobile App Command | Key Tip */}
                     <div>
                       <DynamicInput
-                        name={t("Ribbons.MobileAppCommand")}
+                        name={TT(
+                          "Ribbons.MobileAppCommand",
+                          "فرمان mobile application",
+                          "Mobile App Command"
+                        )}
                         type="text"
                         value={formData.CommandMobile || ""}
                         placeholder=""
@@ -757,23 +796,22 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
                     <div>
                       <DynamicInput
-                        name={t("Ribbons.KeyTip")}
+                        name={TT("Ribbons.KeyTip", "نکته کلیدی", "Key Tip")}
                         type="text"
                         value={formData.KeyTip || ""}
                         placeholder=""
-                        onChange={(e) => handleInputChange("KeyTip", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("KeyTip", e.target.value)
+                        }
                       />
                     </div>
                   </div>
 
-                  {/* Size radios and File Upload side by side */}
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
                     <div className="flex flex-wrap items-center gap-4">
                       <span className="text-lg font-medium">
-                        {" "}
-                        {t("Ribbons.Size")}
+                        {TT("Ribbons.Size", "اندازه:", "Size:")}
                       </span>
-                      {/* Inline radios */}
                       <label className="flex items-center text-lg">
                         <input
                           type="radio"
@@ -782,7 +820,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                           checked={selectedSize === "0"}
                           onChange={() => handleRadioChange("0")}
                         />
-                        {t("Ribbons.Large")}
+                        {TT("Ribbons.Large", "بزرگ", "Large")}
                       </label>
                       <label className="flex items-center text-lg">
                         <input
@@ -792,7 +830,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                           checked={selectedSize === "1"}
                           onChange={() => handleRadioChange("1")}
                         />
-                        {t("Ribbons.Medium")}
+                        {TT("Ribbons.Medium", "متوسط", "Medium")}
                       </label>
                       <label className="flex items-center text-lg">
                         <input
@@ -802,71 +840,38 @@ const Accordion3: React.FC<Accordion3Props> = ({
                           checked={selectedSize === "2"}
                           onChange={() => handleRadioChange("2")}
                         />
-                        {t("Ribbons.Small")}
+                        {TT("Ribbons.Small", "کوچک", "Small")}
                       </label>
                     </div>
+
                     <div className="w-full sm:w-96">
+                      <p className="text-sm text-gray-500 mb-1">
+                        {TT(
+                          "Ribbons.BestIconSize",
+                          "بهترین اندازه برای آیکن ها ۱۶×۱۶ می باشد",
+                          "The best size for icons is 16×16"
+                        )}
+                      </p>
                       <FileUploadHandler
                         selectedFileId={iconImageId}
                         onUploadSuccess={handleUploadSuccess}
                         resetCounter={resetCounter}
                         onReset={() => setResetCounter((prev) => prev + 1)}
-                        isEditMode={isEditing}
+                        isEditMode={!!selectedRow}
                       />
                     </div>
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="flex justify-center items-center gap-4 mt-6">
-                    {/* Add - سبز سازمانی */}
-                    <DynamicButton
-                      text={t("Global.Add")}
-                      leftIcon={<FaSave />}
-                      onClick={handleInsert}
-                      isDisabled={isEditing}
-                      variant="orgGreen"
-                      size="md"
-                    />
-
-                    {/* Edit - زرد سازمانی */}
-                    <DynamicButton
-                      text={t("Global.Edit")}
-                      leftIcon={<FaEdit />}
-                      onClick={handleUpdate}
-                      isDisabled={!selectedRow}
-                      variant="orgYellow"
-                      size="md"
-                    />
-
-                    {/* Delete - قرمز سازمانی */}
-                    <DynamicButton
-                      text={t("Global.Delete")}
-                      leftIcon={<FaTrash />}
-                      onClick={handleDeleteClick}
-                      isDisabled={!selectedRow}
-                      variant="orgRed"
-                    />
-                    {/* New - آبی سازمانی */}
-                    <DynamicButton
-                      text={t("Global.New")}
-                      leftIcon={<FaPlus />}
-                      onClick={handleNew}
-                      isDisabled={!selectedRow}
-                      variant="orgBlue"
-                      size="md"
-                    />
                   </div>
                 </div>
               </>
             ) : (
               <p className="text-gray-500">
-                Please select a Menu Group in Accordion2 so the Menu Items will be displayed.
+                Please select a Menu Group in Accordion2 so the Menu Items will
+                be displayed.
               </p>
             )}
           </div>
         )}
 
-        {/* Confirm dialogs & Modal */}
         <DynamicConfirm
           isOpen={confirmInsertOpen}
           title="Insert Confirmation"
@@ -908,8 +913,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
       </div>
     </>
   );
-
-
 };
 
 export default Accordion3;

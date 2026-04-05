@@ -74,7 +74,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
     LookupMode: "",
   });
 
-  // BoolMeta1 => set lookup if it is one
+  // BoolMeta1 => Auto Select if Single
   const [oldLookup, setOldLookup] = useState(false);
 
   const [entities, setEntities] = useState<{ ID: any; Name: string }[]>([]);
@@ -541,7 +541,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
                 checked={oldLookup}
                 onChange={(e) => handleOldLookupChange(e.target.checked)}
               />
-              <span>set lookup if it is one</span>
+              <span>Auto Select if Single</span>
             </label>
           </div>
 

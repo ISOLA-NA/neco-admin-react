@@ -6,28 +6,26 @@ import { TailSpin } from "react-loader-spinner";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import "./DataTable.css"; // فایل CSS سفارشی شما
-import type { GridOptions, ColDef } from "ag-grid-community"; // ← اضافه کن
-import { useTranslation } from "react-i18next"; // ← i18n
+import "./DataTable.css";
+import type { GridOptions, ColDef } from "ag-grid-community";
+import { useTranslation } from "react-i18next";
 
 interface DataTableProps {
   columnDefs: any[];
   rowData: any[];
   gridOptions?: GridOptions;
 
-  // افزودن این دو برای مدیریت کلیک‌ها در والد
   onRowDoubleClick: (data: any) => void;
   onRowClick?: (data: any) => void;
 
-  // اختیاری: برای ارسال داده‌های انتخاب شده به والد
   setSelectedRowData?: (data: any) => void;
 
   showDuplicateIcon?: boolean;
   showEditIcon?: boolean;
   showAddIcon?: boolean;
   showDeleteIcon?: boolean;
-
   showViewIcon?: boolean;
+
   onView?: () => void;
   onAdd?: () => void;
   onEdit?: () => void;
@@ -49,8 +47,8 @@ const DataTable: React.FC<DataTableProps> = ({
   columnDefs,
   rowData,
   onRowDoubleClick,
-  onRowClick, // prop اختیاری
-  setSelectedRowData, // اختیاری
+  onRowClick,
+  setSelectedRowData,
   showDuplicateIcon = false,
   showEditIcon = true,
   showAddIcon = true,
@@ -69,7 +67,10 @@ const DataTable: React.FC<DataTableProps> = ({
   isEditMode = true,
   direction = "rtl",
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const TT = (key: string, fa: string, en: string) =>
+    t(key, { defaultValue: i18n.language === "fa" ? fa : en });
 
   const [searchText, setSearchText] = useState("");
   const gridApiRef = useRef<any>(null);
@@ -77,31 +78,25 @@ const DataTable: React.FC<DataTableProps> = ({
   const [filteredRowData, setFilteredRowData] = useState<any[]>([]);
   const [isRowSelected, setIsRowSelected] = useState<boolean>(false);
 
-  // هنگام دریافت داده از والد، یک فیلد clientOrder اضافه می‌کنیم
   useEffect(() => {
     const mappedData = rowData.map((item, index) => ({
       ...item,
-      // اگر داده قبلاً clientOrder داشته باشد نگهش می‌داریم و در غیر اینصورت با ایندکس مقداردهی می‌کنیم
       clientOrder: item.clientOrder !== undefined ? item.clientOrder : index,
     }));
     setOriginalRowData(mappedData);
     setFilteredRowData(mappedData);
   }, [rowData]);
 
-  // وقتی rowData عوض شد (مثلاً بعد از Add یا Edit)، سرچ را پاک کن
-useEffect(() => {
-  setSearchText("");
-}, [rowData]);
+  useEffect(() => {
+    setSearchText("");
+  }, [rowData]);
 
-
-  // useEffect برای اسکرول به بالای جدول هنگام تغییر داده‌ها
   useEffect(() => {
     if (gridApiRef.current && filteredRowData && filteredRowData.length > 0) {
       gridApiRef.current.ensureIndexVisible(0, "top");
     }
   }, [filteredRowData]);
 
-  // تابع جستجو
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
@@ -113,9 +108,7 @@ useEffect(() => {
       const filtered = originalRowData.filter((item) => {
         return Object.values(item).some((val) => {
           if (val === null || val === undefined) return false;
-          let strVal = "";
-          if (typeof val === "object") strVal = JSON.stringify(val);
-          else strVal = val.toString();
+          let strVal = typeof val === "object" ? JSON.stringify(val) : val.toString();
           return strVal.toLowerCase().includes(lowerValue);
         });
       });
@@ -123,39 +116,32 @@ useEffect(() => {
     }
   };
 
-  // وقتی grid آماده شد
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api;
-    // params.api.setSortModel([{ colId: "clientOrder", sort: "asc" }]);
     params.api.sizeColumnsToFit();
     if (isLoading) params.api.showLoadingOverlay();
   };
 
-  // تغییر اندازه grid
   const onGridSizeChanged = (params: any) => {
     params.api.sizeColumnsToFit();
   };
 
-  // وقتی ستون‌ها یا داده‌ها تغییر می‌کنند، عرض ستون‌ها تنظیم می‌شود
   useEffect(() => {
     if (gridApiRef.current) {
       gridApiRef.current.sizeColumnsToFit();
     }
   }, [columnDefs, filteredRowData]);
 
-  // نمایش یا مخفی کردن overlay بارگذاری
   useEffect(() => {
     if (!gridApiRef.current) return;
     if (isLoading) gridApiRef.current.showLoadingOverlay();
     else gridApiRef.current.hideOverlay();
   }, [isLoading]);
 
-  // کلیک روی ردیف
   const handleRowClick = (event: any) => {
     if (setSelectedRowData) setSelectedRowData(event.data);
     setIsRowSelected(true);
 
-    // 🔥 هایلایت کردن ردیف از طریق API
     event.api.forEachNode((node: any) => {
       node.setSelected(node === event.node);
     });
@@ -163,42 +149,24 @@ useEffect(() => {
     if (onRowClick) onRowClick(event.data);
   };
 
-  // دوبار کلیک روی ردیف
   const handleRowDoubleClickInternal = (event: any) => {
     onRowDoubleClick(event.data);
   };
 
   const gridClasses = "ag-theme-quartz w-full h-full overflow-y-auto";
 
-  // تابع جهت استایل‌دهی به ردیف انتخاب شده
-  const getRowClass = (params: any) =>
-    params.node.selected ? "ag-row-selected" : "";
+  const getRowClass = (params: any) => (params.node.selected ? "ag-row-selected" : "");
 
-  const gridOptions = {
-    getRowClass: getRowClass,
-    defaultColDef: {
-      sortable: true,
-    },
-  };
-
-  // استایل پایه دکمه‌های آیکونی
   const baseIconButton =
     "rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none";
 
-  // داده‌ها به ترتیب clientOrder
   const sortedFilteredRowData = useMemo(
-    () =>
-      [...filteredRowData].sort(
-        (a, b) => (a.clientOrder ?? 0) - (b.clientOrder ?? 0)
-      ),
+    () => [...filteredRowData].sort((a, b) => (a.clientOrder ?? 0) - (b.clientOrder ?? 0)),
     [filteredRowData]
   );
 
   const isRtl = direction === "rtl";
 
-  console.log("rtl", isRtl);
-
-  // ← تراز سلول‌ها و هدر بر اساس جهت
   const defaultColDefAligned: ColDef = useMemo(
     () => ({
       sortable: true,
@@ -208,76 +176,38 @@ useEffect(() => {
     [isRtl]
   );
 
-  // ← پاک کردن انتخاب و سپس اجرای onAdd
   const handleAddClick = () => {
-    if (gridApiRef.current) {
-      gridApiRef.current.deselectAll();
-    }
+    if (gridApiRef.current) gridApiRef.current.deselectAll();
     setIsRowSelected(false);
-    if (setSelectedRowData) {
-      // @ts-ignore: اعلام به والد که انتخابی وجود ندارد
-      setSelectedRowData({});
-    }
+    if (setSelectedRowData) setSelectedRowData({});
     onAdd();
   };
 
   return (
-    <div
-      dir={direction}
-      className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2"
-    >
-      {/* نوار بالایی شامل جستجو و دکمه‌ها */}
-      {(showSearch ||
-        showAddIcon ||
-        showEditIcon ||
-        showDeleteIcon ||
-        showDuplicateIcon ||
-        showViewIcon) && (
+    <div dir={direction} className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2">
+      {(showSearch || showAddIcon || showEditIcon || showDeleteIcon || showDuplicateIcon || showViewIcon) && (
         <div className="flex items-center justify-between mb-4 bg-gray-300 p-2 rounded-md shadow-sm">
           {showSearch && (
             <div className="relative max-w-sm">
               <FaSearch
-                className={`absolute ${
-                  isRtl ? "right-3" : "left-3"
-                } top-1/2 transform -translate-y-1/2 text-gray-500`}
+                className={`absolute ${isRtl ? "right-3" : "left-3"} top-1/2 transform -translate-y-1/2 text-gray-500`}
               />
               <input
                 type="text"
-                placeholder={t("DataTable.Toolbar.SearchPlaceholder")}
+                placeholder={TT("DataTable.Toolbar.SearchPlaceholder", "جستجو...", "Search...")}
                 value={searchText}
                 onChange={onSearchChange}
-                className={`w-full ${
-                  isRtl ? "pr-10 pl-3" : "pl-10 pr-3"
-                } py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition`}
+                className={`w-full ${isRtl ? "pr-10 pl-3" : "pl-10 pr-3"} py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition`}
                 style={{ fontFamily: "inherit" }}
               />
             </div>
           )}
 
-          <div
-            className={`flex items-center space-x-4 ${
-              isRtl ? "rtl:space-x-reverse" : ""
-            }`}
-          >
-            {showDuplicateIcon && (
-              <button
-                className={`${baseIconButton} bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${
-                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                title={t("DataTable.Buttons.Duplicate")}
-                onClick={onDuplicate}
-                disabled={!isRowSelected || !isEditMode}
-              >
-                <FiCopy size={20} />
-              </button>
-            )}
-
+          <div className={`flex items-center space-x-4 ${isRtl ? "rtl:space-x-reverse" : ""}`}>
             {showEditIcon && (
               <button
-                className={`${baseIconButton} bg-blue-50 hover:bg-blue-100 text-blue-600 ${
-                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                title={t("DataTable.Buttons.Edit")}
+                className={`${baseIconButton} bg-blue-50 hover:bg-blue-100 text-blue-600 ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={TT("DataTable.Buttons.Edit", "ویرایش", "Edit")}
                 onClick={onEdit}
                 disabled={!isRowSelected || !isEditMode}
               >
@@ -285,26 +215,10 @@ useEffect(() => {
               </button>
             )}
 
-            {showDeleteIcon && (
-              <button
-                className={`${baseIconButton} bg-red-50 hover:bg-red-100 text-red-600 ${
-                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                title={t("DataTable.Buttons.Delete")}
-                onClick={onDelete}
-                disabled={!isRowSelected || !isEditMode}
-              >
-                <FiTrash2 size={20} />
-              </button>
-            )}
-
             {showAddIcon && (
               <button
-                type="button"
-                className={`${baseIconButton} bg-green-50 hover:bg-green-100 text-green-600 ${
-                  !isEditMode ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                title={t("DataTable.Buttons.Add")}
+                className={`${baseIconButton} bg-green-50 hover:bg-green-100 text-green-600`}
+                title={TT("DataTable.Buttons.Add", "افزودن", "Add")}
                 onClick={handleAddClick}
                 disabled={!isEditMode}
               >
@@ -312,12 +226,32 @@ useEffect(() => {
               </button>
             )}
 
+            {showDeleteIcon && (
+              <button
+                className={`${baseIconButton} bg-red-50 hover:bg-red-100 text-red-600 ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={TT("DataTable.Buttons.Delete", "حذف", "Delete")}
+                onClick={onDelete}
+                disabled={!isRowSelected || !isEditMode}
+              >
+                <FiTrash2 size={20} />
+              </button>
+            )}
+
+            {showDuplicateIcon && (
+              <button
+                className={`${baseIconButton} bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={TT("DataTable.Buttons.Duplicate", "تکثیر", "Duplicate")}
+                onClick={onDuplicate}
+                disabled={!isRowSelected || !isEditMode}
+              >
+                <FiCopy size={20} />
+              </button>
+            )}
+
             {showViewIcon && (
               <button
-                className={`${baseIconButton} bg-gray-50 hover:bg-gray-100 text-gray-600 ${
-                  !isEditMode ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                title={t("DataTable.Buttons.View")}
+                className={`${baseIconButton} bg-gray-50 hover:bg-gray-100 text-gray-600`}
+                title={TT("DataTable.Buttons.View", "نمایش", "View")}
                 onClick={onView}
                 disabled={!isEditMode}
               >
@@ -328,14 +262,8 @@ useEffect(() => {
         </div>
       )}
 
-      {/* بخش جدول */}
       <div className="flex-grow" style={{ minHeight: 0 }}>
-        <div
-          className={`${gridClasses} ${
-            direction === "rtl" ? "ag-rtl" : "ag-ltr"
-          }`}
-        >
-          {/* کلاس ag-rtl برای پشتیبانی AG Grid از RTL */}
+        <div className={`${gridClasses} ${direction === "rtl" ? "ag-rtl" : "ag-ltr"}`}>
           <AgGridReact
             key={direction}
             onGridReady={onGridReady}
@@ -352,13 +280,13 @@ useEffect(() => {
             singleClickEdit={false}
             stopEditingWhenCellsLoseFocus={true}
             onCellValueChanged={onCellValueChanged}
-            /* متن بارگذاری هم با i18n */
-            overlayLoadingTemplate={`<div class="custom-loading-overlay"><div style="margin-top:8px;font-weight:500;">${t(
-              "DataTable.Status.Loading"
+            overlayLoadingTemplate={`<div class="custom-loading-overlay"><div style="margin-top:8px;font-weight:500;">${TT(
+              "DataTable.Status.Loading",
+              "در حال بارگذاری...",
+              "Loading..."
             )}</div></div>`}
             rowSelection="single"
             enableRtl={isRtl}
-            /* ← تراز پیش‌فرض ستون‌ها بر اساس جهت */
             defaultColDef={defaultColDefAligned}
           />
         </div>
@@ -370,11 +298,10 @@ useEffect(() => {
           className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
           onClick={handleAddClick}
         >
-          {t("DataTable.Toolbar.AddNew")}
+          {TT("DataTable.Toolbar.AddNew", "افزودن مورد جدید", "Add new item")}
         </button>
       )}
 
-      {/* لایه بارگذاری در صورت نیاز */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-10">
           <TailSpin color="#7e3af2" height={80} width={80} />

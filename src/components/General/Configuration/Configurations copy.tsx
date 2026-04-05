@@ -484,7 +484,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             modalContentProps={{
               columnDefs: [
                 { headerName: "نام", field: "Name" },
-                { headerName: "توضیحات", field: "EntityCateADescription" },
+                { headerName: "شرح", field: "EntityCateADescription" },
               ],
               rowData: afButtons,
               selectedRow: selectedRowData,
@@ -501,7 +501,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           <TableSelector
             columnDefs={[
               { headerName: "نام", field: "Name" },
-              { headerName: "توضیحات", field: "EntityCateADescription" },
+              { headerName: "شرح", field: "EntityCateADescription" },
             ]}
             rowData={getRowData(currentSelector)}
             selectedRow={selectedRowData}

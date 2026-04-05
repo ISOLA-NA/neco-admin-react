@@ -1,7 +1,7 @@
 {
     "ApprovalFlows": {
       "ApprovalFlowName": "نام جریان تایید",
-      "Description": "توضیحات",
+      "Description": "شرح",
       "RelatedProjects": "پروژه‌های مرتبط"
     }
   }
