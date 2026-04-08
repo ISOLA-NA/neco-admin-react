@@ -36,7 +36,7 @@ const HyperLinkController: React.FC<HyperLinkControllerProps> = ({
     metaType4: data.metaType4 ?? null,
   });
 
-  /* ----------- keep state in‑sync with props ----------- */
+  /* ----------- keep state in-sync with props ----------- */
   useEffect(() => {
     /* اگر هیچ تغییری در مقادیر جدید نسبت به استیت نیست، ریست نکن */
     setMetaTypes((prev) => {
@@ -50,16 +50,16 @@ const HyperLinkController: React.FC<HyperLinkControllerProps> = ({
       return prev.metaType1 === next.metaType1 &&
         prev.metaType3 === next.metaType3 &&
         prev.metaType4 === next.metaType4
-        ? prev // هیچ تغییری؛ استیت قبلی را نگه‌دار
-        : next; // مقادیر جدید؛ استیت را بروزرسانی کن
+        ? prev
+        : next;
     });
-  }, [data.metaType1, data.metaType3, data.metaType4]); // فقط فیلدهای واقعی
+  }, [data.metaType1, data.metaType3, data.metaType4]);
 
   /* ------------- propagate to parent ------------- */
   useEffect(() => {
     onMetaChange(metaTypes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metaTypes]); // تابع را در وابستگی نمی‌گذاریم (جلوگیری از حلقهٔ بی‌نهایت)
+  }, [metaTypes]);
 
   /* --------------- handlers --------------- */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,11 +70,12 @@ const HyperLinkController: React.FC<HyperLinkControllerProps> = ({
   /* --------------- UI --------------- */
   return (
     <div className="mt-10 bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
-      <div className="mb-4 flex items-center">
+      <div className="mb-4 flex items-center gap-2">
         <span className="mr-2 font-medium">
           {t("HyperLinkController.FormatUrlAs")}
         </span>
-        <input type="radio" checked readOnly className="mr-2" />
+        <input type="radio" checked readOnly className="mr-1" />
+        <span className="font-medium text-gray-700">Hyperlink</span>
       </div>
 
       <DynamicInput

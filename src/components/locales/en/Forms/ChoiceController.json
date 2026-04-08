@@ -3,11 +3,11 @@
       "DisplayChoicesUsing": "Display choices using:",
       "DropDownMenu": "Drop-Down Menu",
       "RadioButtons": "Radio Buttons",
-      "CheckBox": "Check Box",
+      "CheckBox": "Check Boxes (allow multiple selections)",
       "TypeEachChoiceOnSeparateLine": "Type each choice on a separate line:",
-      "EnterEachChoiceOnNewLine": "Enter each choice on a new line",
+      "EnterEachChoiceOnNewLine": "Type each choice on a seperate line",
       "DefaultValueLabel": "Default value:",
-      "EnterDefaultValue": "Enter default value",
+      "EnterDefaultValue": "Default Value",
       "ChooseAnOption": "Choose an option:"
     }
   }

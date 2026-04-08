@@ -1,9 +1,9 @@
 {
     "RoleGroup": {
-      "Name": "نام",
+      "Name": "نام گروه",
       "Description": "شرح",
-      "Projects": "پروژه‌ها",
-      "Members": "اعضا"
+      "Projects": "پروژه‌های مربوطه",
+      "Members": "اعضای گروه"
     }
   }
   

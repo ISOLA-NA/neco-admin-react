@@ -1,9 +1,9 @@
 {
   "Staffing": {
     "ProjectName": "Project Name",
-    "RolesType": "Roles Type",
+    "RolesType": "Roles",
     "SuperiorRole": "Superior Role",
-    "UserName": "User Name",
+    "UserName": "User",
     "RelatedRibbons": "Related Ribbons",
     "Enterprise": "Enterprise",
     "ShowCommandBar": "Show Command Bar",

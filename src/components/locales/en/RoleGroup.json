@@ -1,9 +1,9 @@
 {
     "RoleGroup": {
-      "Name": "Name",
+      "Name": "Name Group",
       "Description": "Description",
-      "Projects": "Projects",
-      "Members": "Members"
+      "Projects": "Related Projects",
+      "Members": "Group Members"
     }
   }
   

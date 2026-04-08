@@ -20,6 +20,8 @@ interface TableControllerProps {
 }
 
 /* ---------- helpers ---------- */
+const DEFAULT_HEADERS_TEXT = "Title #1\nTitle #2\nTitle #3";
+
 const getHeadersFromMeta = (meta: string) => {
   if (meta.includes("|")) {
     return meta
@@ -36,7 +38,10 @@ const getHeadersFromMeta = (meta: string) => {
       field: `a${i + 1}`,
     }));
   }
-  return ["a1", "a2", "a3"].map((h) => ({ headerName: h, field: h }));
+  return ["a1", "a2", "a3"].map((h, i) => ({
+    headerName: `Title #${i + 1}`,
+    field: h,
+  }));
 };
 
 const TableController: React.FC<TableControllerProps> = ({
@@ -44,10 +49,14 @@ const TableController: React.FC<TableControllerProps> = ({
   data = {},
 }) => {
   const { t } = useTranslation();
+
   /* ---------- state ---------- */
   const [headerInput, setHeaderInput] = useState<string>(
-    data.metaType1 ?? "a\nb\nc"
+    data.metaType1 && data.metaType1.trim() !== ""
+      ? data.metaType1.replace(/\|/g, "\n")
+      : DEFAULT_HEADERS_TEXT
   );
+
   const computedHeader = useMemo(
     () => headerInput.replace(/\n/g, "|"),
     [headerInput]
@@ -69,16 +78,22 @@ const TableController: React.FC<TableControllerProps> = ({
     }
     return [];
   });
+
   const nextRowId = useRef(tableData.length);
 
   /* ---------- sync props→state ---------- */
   useEffect(() => {
-    setHeaderInput((p) =>
-      p === (data.metaType1 ?? "a\nb\nc") ? p : data.metaType1 ?? "a\nb\nc"
-    );
+    const nextHeader =
+      data.metaType1 && data.metaType1.trim() !== ""
+        ? data.metaType1.replace(/\|/g, "\n")
+        : DEFAULT_HEADERS_TEXT;
+
+    setHeaderInput((p) => (p === nextHeader ? p : nextHeader));
+
     setIsRowFixed((prev) =>
       prev === !!data.metaType2 ? prev : !!data.metaType2
     );
+
     setFixRowValue((p) =>
       p === (data.metaType2 ?? "") ? p : data.metaType2 ?? ""
     );
@@ -89,6 +104,7 @@ const TableController: React.FC<TableControllerProps> = ({
           ...r,
           id: i,
         }));
+
         setTableData((prev) =>
           JSON.stringify(prev) === JSON.stringify(parsed) ? prev : parsed
         );
@@ -121,6 +137,7 @@ const TableController: React.FC<TableControllerProps> = ({
           .map(({ a1, a2, a3 }) => ({ a1, a2, a3 }))
       ),
     };
+
     const s = JSON.stringify(meta);
     if (s !== prevMetaRef.current) {
       prevMetaRef.current = s;
@@ -141,9 +158,9 @@ const TableController: React.FC<TableControllerProps> = ({
 
   /* ---------- modal ---------- */
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const openModal = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    /* تیک بعدی: اجازه بده رویداد فعلی تمام شود */
     setTimeout(() => setIsModalOpen(true), 0);
   };
 
@@ -151,7 +168,12 @@ const TableController: React.FC<TableControllerProps> = ({
   return (
     <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center">
       <div className="p-4 w-full max-w-xl">
-        {/* Fix Row */}
+        <div className="mb-4">
+          <h3 className="text-base font-semibold text-gray-800">
+            Table Columns
+          </h3>
+        </div>
+
         <div className="mb-4">
           <div className="flex flex-nowrap items-center gap-4">
             <label className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap">
@@ -165,28 +187,23 @@ const TableController: React.FC<TableControllerProps> = ({
               </span>
             </label>
 
-            {/* اگر DynamicInput کلاس نمی‌گیرد، همین دیو بیرونی کافیست */}
             <div className="shrink-0">
               <DynamicInput
                 name={t("TableController.Labels.FixRowValue")}
                 type="number"
                 value={fixRowValue}
                 onChange={(e) => setFixRowValue(e.target.value)}
-                /* اگر پشتیبانی می‌کند مفید است: className="w-24" */
               />
             </div>
           </div>
         </div>
 
-        {/* textarea for headers */}
         <CustomTextarea
-          name={t("TableController.Labels.ColumnTitles")}
+          name=""
           value={headerInput}
           onChange={(e) => setHeaderInput(e.target.value)}
-          placeholder={t(
-            "TableController.Placeholders.EnterEachHeaderOnNewLine"
-          )}
-          rows={headerInput.split("\n").length || 1}
+          placeholder="Type each Column Title on a Seperate line"
+          rows={Math.max(headerInput.split("\n").length, 3)}
         />
 
         <button
@@ -197,7 +214,6 @@ const TableController: React.FC<TableControllerProps> = ({
           {t("TableController.Buttons.DefVal")}
         </button>
 
-        {/* modal */}
         <DynamicModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

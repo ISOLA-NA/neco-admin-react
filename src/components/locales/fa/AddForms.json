@@ -6,7 +6,7 @@
     "SwitchToFA": "تغییر به FA ({{field}})",
     "Order": "ترتیب",
     "Cancel": "لغو",
-    "ColumnName": "نام ستون",
+    "ColumnName": "نام",
     "Description": "شرح",
     "Command": "فرمان / دستور",
     "PrintCode": "پرینت کد",
@@ -26,6 +26,7 @@
     "Updating": "در حال بروزرسانی...",
     "Adding": "در حال افزودن...",
     "UpdateColumn": "بروزرسانی ستون",
-    "AddColumn": "افزودن ستون"
+    "AddColumn": "افزودن ستون",
+    "IsEditableByReceiver": "قابل ویرایش توسط گیرنده"
   }
 }

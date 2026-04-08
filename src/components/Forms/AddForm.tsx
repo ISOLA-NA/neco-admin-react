@@ -251,6 +251,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
     showInTab: existingData ? existingData.ShowInTab : "",
     // این فیلد جدید برای وضعیت CountInReject:
     countInReject: existingData ? existingData.CountInReject : false,
+    isEditableByReceiver: existingData ? existingData.IsEditableByReceiver : false
   });
 
   const [formData, setFormData] = useState(getInitialFormData());
@@ -401,6 +402,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
         metaColumnName: "",
         showInTab: "",
         countInReject: false,
+        isEditableByReceiver: false
       });
 
       setMetaCore(DEFAULT_META_CORE);
@@ -445,203 +447,206 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
+  e.preventDefault();
+  setIsLoading(true);
+  setErrors({});
 
-    const nameTrim = (formData.formName || "").trim();
-    const pNameTrim = (formData.PersianName || "").trim();
+  const nameTrim = (formData.formName || "").trim();
+  const pNameTrim = (formData.PersianName || "").trim();
 
-    // ✅ فقط اگر هر دو خالی بودن خطا بده
-    if (!nameTrim && !pNameTrim) {
-      setErrors({ formName: "Please fill Name or PersianName." });
-      setIsLoading(false);
-      return;
-    }
+  // ✅ فقط اگر هر دو خالی بودن خطا بده
+  if (!nameTrim && !pNameTrim) {
+    setErrors({ formName: "Please fill Name or PersianName." });
+    setIsLoading(false);
+    return;
+  }
 
-    const currentTimestamp = new Date().toISOString();
+  const currentTimestamp = new Date().toISOString();
 
-    const lookupModeValue =
-      metaCore.LookupMode === undefined ||
-        metaCore.LookupMode === null ||
-        metaCore.LookupMode === ""
-        ? null
-        : Number(metaCore.LookupMode);
+  const lookupModeValue =
+    metaCore.LookupMode === undefined ||
+    metaCore.LookupMode === null ||
+    metaCore.LookupMode === ""
+      ? null
+      : Number(metaCore.LookupMode);
 
-    const metaType5Value = metaCore.metaType5 || null;
+  const metaType5Value = metaCore.metaType5 || null;
 
-    // از mutation مستقیم state جلوگیری کنیم
-    let metaCoreForSubmit: MetaCore = {
-      ...metaCore,
-      LookupMode: metaCore.LookupMode ?? "",
-    };
+  // از mutation مستقیم state جلوگیری کنیم
+  let metaCoreForSubmit: MetaCore = {
+    ...metaCore,
+    LookupMode: metaCore.LookupMode ?? "",
+  };
 
-    // ✅ FIX: در Add اگر metaTypeJson از onMetaExtraChange آمده باشد، اینجا قبل از هر کاری جمعش کن
-    // (حتی اگر metaCore.metaTypeJson به‌خاطر setState لحظه‌ای هنوز آپدیت نشده باشد)
-    const finalMetaTypeJson =
-      !isEmptyMetaJsonStr(metaCoreForSubmit.metaTypeJson)
-        ? metaCoreForSubmit.metaTypeJson
-        : !isEmptyMetaJsonStr(metaExtra.metaTypeJson)
-          ? metaExtra.metaTypeJson
-          : metaCoreForSubmit.metaTypeJson;
+  // ✅ FIX: در Add اگر metaTypeJson از onMetaExtraChange آمده باشد، اینجا قبل از هر کاری جمعش کن
+  // (حتی اگر metaCore.metaTypeJson به‌خاطر setState لحظه‌ای هنوز آپدیت نشده باشد)
+  const finalMetaTypeJson =
+    !isEmptyMetaJsonStr(metaCoreForSubmit.metaTypeJson)
+      ? metaCoreForSubmit.metaTypeJson
+      : !isEmptyMetaJsonStr(metaExtra.metaTypeJson)
+      ? metaExtra.metaTypeJson
+      : metaCoreForSubmit.metaTypeJson;
 
-    metaCoreForSubmit = {
-      ...metaCoreForSubmit,
-      metaTypeJson: normalizeMetaJsonToStringOrNull(finalMetaTypeJson),
-    };
+  metaCoreForSubmit = {
+    ...metaCoreForSubmit,
+    metaTypeJson: normalizeMetaJsonToStringOrNull(finalMetaTypeJson),
+  };
 
-    if (
-      formData.typeOfInformation === "component26" &&
-      metaCore.metaType1 &&
-      metaCore.metaType2 &&
-      !isEdit
-    ) {
-      const combinedEntityType = {
-        IsVisible: false,
-        IsGlobal: true,
-        Name: "EntityType For AdvanceLookupAdvanceTable",
-        OriginEntityTypes: `${metaCore.metaType1}|${metaCore.metaType2}|`,
-      };
-
-      try {
-        const res = await apiService.insertEntityType(combinedEntityType);
-        if (res?.ID) {
-          // ✅ FIX: overwrite نکن؛ merge کن تا access/allowed پاک نشود
-          const baseObj = safeParseJson(metaCoreForSubmit.metaTypeJson);
-          const nextObj = { ...baseObj, CombinedEntityType: res.ID };
-
-          metaCoreForSubmit = {
-            ...metaCoreForSubmit,
-            metaTypeJson: JSON.stringify(nextObj),
-          };
-        }
-      } catch (error) {
-        console.error("❌ خطا در ایجاد EntityType ترکیبی:", error);
-        setIsLoading(false);
-        setErrors({ form: "خطا در ایجاد EntityType ترکیبی" });
-        return;
-      }
-    }
-
-    // اطمینان از معتبر بودن metaType4:
-    const normalizedMetaType4 =
-      metaExtra.metaType4 != null ? String(metaExtra.metaType4) : "[]";
-
-    // ✅ ولیدیشن Inventory (نمایش خطاها داخل خود دیالوگ کنترلر)
-    if (formData.typeOfInformation === "component36") {
-      let j: any = {};
-      try {
-        // ✅ از metaCoreForSubmit استفاده کن (که fallback هم دارد)
-        j = metaCoreForSubmit.metaTypeJson
-          ? JSON.parse(metaCoreForSubmit.metaTypeJson)
-          : {};
-      } catch {
-        j = {};
-      }
-
-      const isEmpty = (v: any) =>
-        v == null || String(v).trim() === "" || String(v) === "0";
-
-      const missingMsgs: string[] = [];
-      // مورد نیازها: inventorysum - reserve - inventory1 - wfboxname
-      if (isEmpty(j.InventorySumEntityFieldID)) {
-        missingMsgs.push("Inventory Sum is required.");
-      }
-      if (isEmpty(j.ReserveEntityFieldID)) {
-        missingMsgs.push("Reserve is required.");
-      }
-      if (isEmpty(j.Inventory1EntityFieldID)) {
-        missingMsgs.push("Inventory 1 is required.");
-      }
-      if (isEmpty(j.InventorWfBoxName)) {
-        missingMsgs.push("WF Box Name is required.");
-      }
-
-      // اطمینان از SetFieldAsName (از metaCore.metaType2 یا از metaTypeJson)
-      const setFieldAsName = metaCoreForSubmit.metaType2 ?? j.NameEntityFieldID;
-      if (isEmpty(setFieldAsName)) {
-        missingMsgs.push("Set Field As Name is required.");
-      }
-
-      if (missingMsgs.length) {
-        setInventoryErrors(missingMsgs); // نمایش داخل خود کنترلر
-        setIsLoading(false);
-        return; // از submit خارج شو
-      } else {
-        setInventoryErrors([]);
-      }
-    }
-
-    // ✅ ساخت payload
-    const payload: any = {
-      DisplayName: (formData.formName || "").trim(),
-      PersianName: (formData.PersianName || "").trim(),
-      IsShowGrid: formData.showInListView,
-      IsEditableInWF: formData.isEditableInWf,
-      WFBOXName: formData.allowedWfBoxName,
-      nEntityTypeID:
-        entityTypeId && !isNaN(Number(entityTypeId))
-          ? Number(entityTypeId)
-          : null,
-      ColumnType: columnTypeMapping[formData.typeOfInformation],
-      Code: formData.command || null,
-      Description: formData.description,
-      ...metaCoreForSubmit,
-      metaType4: normalizedMetaType4,
-      metaType5: metaType5Value,
-      PrintCode: formData.printCode,
-      IsForceReadOnly: formData.readOnly,
-      IsUnique: false,
-      IsRequire: formData.required,
-      IsMainColumn: formData.mainColumns,
-      IsRequireInWf: formData.isRequiredInWf,
-      IsRTL: formData.rightToLeft,
-      orderValue: parseFloat(formData.order) || 0,
-      ShowInAlert: formData.showInAlert,
-      ShowInTab: formData.showInTab,
-      CreatedTime:
-        isEdit && existingData ? existingData.CreatedTime : currentTimestamp,
-      ModifiedTime: currentTimestamp,
-      ModifiedById:
-        isEdit && existingData
-          ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
-          : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
-      LookupMode: lookupModeValue,
-      BoolMeta1: metaCore.oldLookup ? true : false,
-      CountInReject: formData.countInReject,
-      ID: isEdit && existingData ? existingData.ID : 0,
-      IsVisible: true,
-      LastModified: currentTimestamp,
+  if (
+    formData.typeOfInformation === "component26" &&
+    metaCore.metaType1 &&
+    metaCore.metaType2 &&
+    !isEdit
+  ) {
+    const combinedEntityType = {
+      IsVisible: false,
       IsGlobal: true,
+      Name: "EntityType For AdvanceLookupAdvanceTable",
+      OriginEntityTypes: `${metaCore.metaType1}|${metaCore.metaType2}|`,
     };
 
     try {
-      let newId = 0;
+      const res = await apiService.insertEntityType(combinedEntityType);
+      if (res?.ID) {
+        // ✅ FIX: overwrite نکن؛ merge کن تا access/allowed پاک نشود
+        const baseObj = safeParseJson(metaCoreForSubmit.metaTypeJson);
+        const nextObj = { ...baseObj, CombinedEntityType: res.ID };
 
-      if (isEdit) {
-        await updateEntityField(payload);
-        newId = payload.ID;
-      } else {
-        const response = await insertEntityField(payload);
-        newId = response?.ID ?? payload.ID;
+        metaCoreForSubmit = {
+          ...metaCoreForSubmit,
+          metaTypeJson: JSON.stringify(nextObj),
+        };
       }
-
+    } catch (error) {
+      console.error("❌ خطا در ایجاد EntityType ترکیبی:", error);
       setIsLoading(false);
-
-      const newField = {
-        ID: newId,
-        Name: (formData.formName || "").trim() || (formData.PersianName || "").trim(),
-      };
-
-      if (onSave) onSave(newField);
-      onClose();
-    } catch (error: any) {
-      console.error(error);
-      setIsLoading(false);
-      setErrors({ form: "خطا در ذخیره اطلاعات." });
-      window.alert("خطا: " + (error?.message || "مشکلی پیش آمد."));
+      setErrors({ form: "خطا در ایجاد EntityType ترکیبی" });
+      return;
     }
+  }
+
+  // اطمینان از معتبر بودن metaType4:
+  const normalizedMetaType4 =
+    metaExtra.metaType4 != null ? String(metaExtra.metaType4) : "[]";
+
+  // ✅ ولیدیشن Inventory (نمایش خطاها داخل خود دیالوگ کنترلر)
+  if (formData.typeOfInformation === "component36") {
+    let j: any = {};
+    try {
+      // ✅ از metaCoreForSubmit استفاده کن (که fallback هم دارد)
+      j = metaCoreForSubmit.metaTypeJson
+        ? JSON.parse(metaCoreForSubmit.metaTypeJson)
+        : {};
+    } catch {
+      j = {};
+    }
+
+    const isEmpty = (v: any) =>
+      v == null || String(v).trim() === "" || String(v) === "0";
+
+    const missingMsgs: string[] = [];
+    // مورد نیازها: inventorysum - reserve - inventory1 - wfboxname
+    if (isEmpty(j.InventorySumEntityFieldID)) {
+      missingMsgs.push("Inventory Sum is required.");
+    }
+    if (isEmpty(j.ReserveEntityFieldID)) {
+      missingMsgs.push("Reserve is required.");
+    }
+    if (isEmpty(j.Inventory1EntityFieldID)) {
+      missingMsgs.push("Inventory 1 is required.");
+    }
+    if (isEmpty(j.InventorWfBoxName)) {
+      missingMsgs.push("WF Box Name is required.");
+    }
+
+    // اطمینان از SetFieldAsName (از metaCore.metaType2 یا از metaTypeJson)
+    const setFieldAsName = metaCoreForSubmit.metaType2 ?? j.NameEntityFieldID;
+    if (isEmpty(setFieldAsName)) {
+      missingMsgs.push("Set Field As Name is required.");
+    }
+
+    if (missingMsgs.length) {
+      setInventoryErrors(missingMsgs); // نمایش داخل خود کنترلر
+      setIsLoading(false);
+      return; // از submit خارج شو
+    } else {
+      setInventoryErrors([]);
+    }
+  }
+
+  // ✅ ساخت payload
+  const payload: any = {
+    DisplayName: (formData.formName || "").trim(),
+    PersianName: (formData.PersianName || "").trim(),
+    IsShowGrid: formData.showInListView,
+    IsEditableInWF: formData.isEditableInWf,
+    IsEditableByReceiver: formData.isEditableByReceiver,
+    WFBOXName: formData.allowedWfBoxName,
+    nEntityTypeID:
+      entityTypeId && !isNaN(Number(entityTypeId))
+        ? Number(entityTypeId)
+        : null,
+    ColumnType: columnTypeMapping[formData.typeOfInformation],
+    Code: formData.command || null,
+    Description: formData.description,
+    ...metaCoreForSubmit,
+    metaType4: normalizedMetaType4,
+    metaType5: metaType5Value,
+    PrintCode: formData.printCode,
+    IsForceReadOnly: formData.readOnly,
+    IsUnique: false,
+    IsRequire: formData.required,
+    IsMainColumn: formData.mainColumns,
+    IsRequireInWf: formData.isRequiredInWf,
+    IsRTL: formData.rightToLeft,
+    orderValue: parseFloat(formData.order) || 0,
+    ShowInAlert: formData.showInAlert,
+    ShowInTab: formData.showInTab,
+    CreatedTime:
+      isEdit && existingData ? existingData.CreatedTime : currentTimestamp,
+    ModifiedTime: currentTimestamp,
+    ModifiedById:
+      isEdit && existingData
+        ? existingData.ModifiedById || "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c"
+        : "d36eda78-5de1-4f70-bc99-d5a2c26a5f8c",
+    LookupMode: lookupModeValue,
+    BoolMeta1: metaCore.oldLookup ? true : false,
+    CountInReject: formData.countInReject,
+    ID: isEdit && existingData ? existingData.ID : 0,
+    IsVisible: true,
+    LastModified: currentTimestamp,
+    IsGlobal: true,
   };
+
+  try {
+    let newId = 0;
+
+    if (isEdit) {
+      await updateEntityField(payload);
+      newId = payload.ID;
+    } else {
+      const response = await insertEntityField(payload);
+      newId = response?.ID ?? payload.ID;
+    }
+
+    setIsLoading(false);
+
+    const newField = {
+      ID: newId,
+      Name:
+        (formData.formName || "").trim() ||
+        (formData.PersianName || "").trim(),
+    };
+
+    if (onSave) onSave(newField);
+    onClose();
+  } catch (error: any) {
+    console.error(error);
+    setIsLoading(false);
+    setErrors({ form: "خطا در ذخیره اطلاعات." });
+    window.alert("خطا: " + (error?.message || "مشکلی پیش آمد."));
+  }
+};
 
   // این متد را کنترلرها برای metaType4 (JSON جدول‌ها) و همچنین (در بعضی کنترلرها) metaTypeJson صدا می‌زنند
   const handleMetaExtraChange = (updated: any) => {
@@ -868,32 +873,54 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             labelClassName="text-gray-700 font-medium"
           />
 
-          {/* Required in Workflow */}
-          <div className="flex items-center md:col-span-1 translate-y-[24px] -mt-12">
-            <input
-              type="checkbox"
-              id="isRequiredInWf"
-              name="isRequiredInWf"
-              checked={formData.isRequiredInWf}
-              onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
-              className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
-            />
-            <label
-              htmlFor="isRequiredInWf"
-              className="ml-3 text-gray-700 font-medium"
-            >
-              {t("AddForms.IsRequiredInWf")}
-            </label>
-          </div>
+   <div className="md:col-span-2">
+  <div className="flex flex-nowrap items-end gap-3 md:gap-5 min-w-0">
+    <div className="flex-1 min-w-[180px]">
+      <DynamicInput
+        name={t("AddForms.PrintCode")}
+        type="text"
+        value={formData.printCode}
+        onChange={(e) => handleChange("printCode", e.target.value)}
+        className="-mt-3"
+        labelClassName="text-gray-700 font-medium"
+      />
+    </div>
 
-          <DynamicInput
-            name={t("AddForms.PrintCode")}
-            type="text"
-            value={formData.printCode}
-            onChange={(e) => handleChange("printCode", e.target.value)}
-            className="-mt-3"
-            labelClassName="text-gray-700 font-medium"
-          />
+    <div className="shrink-0 flex items-center self-center pt-5 md:pt-6 gap-3">
+      <input
+        type="checkbox"
+        id="isEditableByReceiver"
+        name="isEditableByReceiver"
+        checked={formData.isEditableByReceiver}
+        onChange={(e) => handleChange("isEditableByReceiver", e.target.checked)}
+        className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 border-gray-300 rounded shrink-0"
+      />
+      <label
+        htmlFor="isEditableByReceiver"
+        className="text-gray-700 font-medium text-xs md:text-sm whitespace-nowrap leading-none"
+      >
+        {t("AddForms.IsEditableByReceiver")}
+      </label>
+    </div>
+
+    <div className="shrink-0 flex items-center self-center pt-5 md:pt-6 gap-3">
+      <input
+        type="checkbox"
+        id="isRequiredInWf"
+        name="isRequiredInWf"
+        checked={formData.isRequiredInWf}
+        onChange={(e) => handleChange("isRequiredInWf", e.target.checked)}
+        className="h-4 w-4 md:h-5 md:w-5 text-indigo-600 border-gray-300 rounded shrink-0"
+      />
+      <label
+        htmlFor="isRequiredInWf"
+        className="text-gray-700 font-medium text-xs md:text-sm whitespace-nowrap leading-none"
+      >
+        {t("AddForms.IsRequiredInWf")}
+      </label>
+    </div>
+  </div>
+</div>
 
           {/* Editable in Workflow, Workflow Box, Show in Alert */}
           <div className="md:col-span-2 flex flex-col gap-4">
@@ -1113,6 +1140,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
                   metaColumnName: "",
                   showInTab: "",
                   countInReject: false,
+                  isEditableByReceiver: false
                 });
                 setDynamicMeta({});
                 setErrors({});

@@ -6,7 +6,7 @@
     "SwitchToFA": "Switch to FA ({{field}})",
     "Order": "Order",
     "Cancel": "Cancel",
-    "ColumnName": "Column Name",
+    "ColumnName": "Name",
     "Description": "Description",
     "Command": "Command",
     "PrintCode": "Print Code",
@@ -22,10 +22,11 @@
     "CountInReject": "Count In Reject",
     "ProgramMetaColumnName": "Program Meta ColumnName",
     "ShowInTab": "Show in Tab",
-    "ReadOnly": "Read Only",
+    "ReadOnly": "Force Read Only",
     "Updating": "Updating...",
     "Adding": "Adding...",
     "UpdateColumn": "Update Column",
-    "AddColumn": "Add Column"
+    "AddColumn": "Add Column",
+    "IsEditableByReceiver": "Is Editable By Receiver"
   }
 }

@@ -1,8 +1,11 @@
 {
-    "Category": {
-      "Name": "Name",
-      "CategoryType": "Category Type",
-      "Description": "Description"
-    }
+  "Category": {
+    "Name": "Name",
+    "CategoryType": "Category Type",
+    "Description": "Description",
+    "NamePlaceholder": "Enter category name",
+    "DescriptionPlaceholder": "Enter category description",
+    "CategoryA": "Category A",
+    "CategoryB": "Category B"
   }
-  
+}

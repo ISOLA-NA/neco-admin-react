@@ -1,6 +1,6 @@
 {
     "Global": {
-      "Global":"Global",
+      "IsGlobal":"Global",
       "Add": "Add",
       "Edit": "Edit",
       "Delete": "Delete",
@@ -11,7 +11,7 @@
       "Close":"Close",
       "Minimize":"Minimize",
       "maximize":"maximize",
-      "Noitemisselected":"No item is selected",
+      "Noitemisselected":"No item is selectedسسس",
       "LogOut":"You have successfully logged out."
     }
   }

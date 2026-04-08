@@ -113,6 +113,8 @@ export const SubTabDefinitionsProvider: React.FC<{
   const [allCompanies, setAllCompanies] = useState<any[]>([]);
   const [allRoles, setAllRoles] = useState<any[]>([]);
 
+  const [userTypeMap, setUserTypeMap] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const token = Cookies.get("admin_token");
     if (!token) return;
@@ -127,6 +129,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           projectsData,
           companiesData,
           rolesData,
+          userTypesData,
         ] = await Promise.all([
           api.getAllProgramTemplates(),
           api.getAllDefaultRibbons(),
@@ -135,6 +138,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           api.getAllProject(),
           api.getAllCompanies(),
           api.getAllRoles(),
+          AppServices.getEnum({ str: "UserType" }),
         ]);
 
         setProgramTemplates(templates);
@@ -144,6 +148,15 @@ export const SubTabDefinitionsProvider: React.FC<{
         setAllProjects(projectsData);
         setAllCompanies(companiesData);
         setAllRoles(rolesData);
+
+        const mappedUserTypes = Object.fromEntries(
+          Object.entries(userTypesData || {}).map(([label, value]) => [
+            value.toString(),
+            label,
+          ])
+        );
+
+        setUserTypeMap(mappedUserTypes);
       } catch (error) {
         console.error("Error in SubTabDefinitionsProvider:", error);
       }
@@ -364,76 +377,76 @@ export const SubTabDefinitionsProvider: React.FC<{
       },
 
       Commands: {
-  endpoint: api.getAllCommands,
-  columnDefs: [
-    {
-      headerName: TT("DataTable.Headers.Name", "نام"),
-      field: "Name",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-    },
-    {
-      headerName: TT("DataTable.Headers.Description", "شرح"),
-      field: "Describtion",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-    },
-    {
-  headerName: TT("CommandPage.MainColumnIDName", "شناسه ستون اصلی"),
-  field: "MainColumnIDName",
-  filter: "agTextColumnFilter",
-  sortable: true,
-  resizable: true,
-  valueGetter: (params: any) => {
-    const val = params.data.MainColumnIDName;
-    return val && val.trim() !== "" ? val : "";
-  },
-},
-    {
-      headerName: TT("CommandPage.ColorColumn", "ستون رنگ"),
-      field: "ColorColumn",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-    },
-    {
-      headerName: TT("CommandPage.GroupName", "نام گروه"),
-      field: "GroupName",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-    },
-    {
-      headerName: TT("CommandPage.ProjectIntensive", "مبتنی بر پروژه"),
-      field: "ProjectIntensive",
-      filter: false,
-      sortable: true,
-      resizable: true,
-      minWidth: 130,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        endpoint: api.getAllCommands,
+        columnDefs: [
+          {
+            headerName: TT("DataTable.Headers.Name", "نام"),
+            field: "Name",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: TT("DataTable.Headers.Description", "شرح"),
+            field: "Describtion",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: TT("CommandPage.MainColumnIDName", "شناسه ستون اصلی"),
+            field: "MainColumnIDName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            valueGetter: (params: any) => {
+              const val = params.data.MainColumnIDName;
+              return val && val.trim() !== "" ? val : "";
+            },
+          },
+          {
+            headerName: TT("CommandPage.ColorColumn", "ستون رنگ"),
+            field: "ColorColumn",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: TT("CommandPage.GroupName", "نام گروه"),
+            field: "GroupName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: TT("CommandPage.ProjectIntensive", "مبتنی بر پروژه"),
+            field: "ProjectIntensive",
+            filter: false,
+            sortable: true,
+            resizable: true,
+            minWidth: 130,
+            cellStyle: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+            cellRendererFramework: (p: any) => (
+              <input
+                type="checkbox"
+                checked={!!p.value}
+                readOnly
+                style={{ margin: 0 }}
+              />
+            ),
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
       },
-      cellRendererFramework: (p: any) => (
-        <input
-          type="checkbox"
-          checked={!!p.value}
-          readOnly
-          style={{ margin: 0 }}
-        />
-      ),
-    },
-  ],
-  iconVisibility: {
-    showAdd: true,
-    showEdit: true,
-    showDelete: true,
-    showDuplicate: false,
-  },
-},
 
       // ✅ Ribbons: Duplicate فعال + Deep Copy
       Ribbons: {
@@ -463,53 +476,71 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllUsers,
         columnDefs: [
           {
-            headerName: TT("DataTable.Headers.Username", "نام کاربری"),
+            headerName: t("User.Username"),
             field: "Username",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 130,
+            flex: 1,
           },
           {
-            headerName: TT("DataTable.Headers.FirstName", "نام"),
+            headerName: t("User.UserType"),
+            field: "userType",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 120,
+            flex: 1,
+            valueGetter: (params: any) => {
+              const value = params.data?.userType;
+              return userTypeMap[String(value)] ?? String(value ?? "");
+            },
+          },
+          {
+            headerName: t("User.Name"),
             field: "Name",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 120,
+            flex: 1,
           },
           {
-            headerName: TT("DataTable.Headers.LastName", "نام خانوادگی"),
+            headerName: t("User.Family"),
             field: "Family",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 140,
+            flex: 1,
           },
           {
-            headerName: TT("DataTable.Headers.UserType", "نوع کاربر"),
-            field: "userType",
-            filter: "agNumberColumnFilter",
-            sortable: true,
-            resizable: true,
-          },
-          {
-            headerName: TT("DataTable.Headers.Website", "وب‌سایت"),
+            headerName: t("User.Website"),
             field: "Website",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 140,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.Mobile", "موبایل"),
+            headerName: t("User.Mobile"),
             field: "Mobile",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 130,
+            flex: 1,
           },
           {
-            headerName: TT("DataTable.Headers.Email", "ایمیل"),
+            headerName: t("User.Email"),
             field: "Email",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 170,
+            flex: 1.3,
           },
         ],
         iconVisibility: {
@@ -524,32 +555,49 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllRoles,
         columnDefs: [
           {
-            headerName: TT("DataTable.Headers.Name", "نام"),
+            headerName: t("Roles.Role"),
             field: "Name",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 150,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "شرح"),
+            headerName: t("Roles.JobDescription"),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 160,
+            flex: 1.4,
           },
           {
-            headerName: TT("DataTable.Headers.PostCode", "کد پست"),
+            headerName: t("Roles.RoleCode"),
             field: "PostCode",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 120,
+            flex: 1,
           },
           {
-            headerName: TT("DataTable.Headers.Grade", "گِرِید"),
+            headerName: t("Roles.Grade"),
             field: "Grade",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 140,
+            flex: 1,
+          },
+          {
+            headerName: t("Roles.Type"),
+            field: "Type",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 120,
+            flex: 1,
           },
         ],
         iconVisibility: {
@@ -572,7 +620,14 @@ export const SubTabDefinitionsProvider: React.FC<{
           },
           {
             headerName: TT("DataTable.Headers.Description", "شرح"),
-            field: "Description",
+            field: "Describtion",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: TT("DataTable.Headers.Type", "نوع"),
+            field: "Type",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
@@ -592,6 +647,13 @@ export const SubTabDefinitionsProvider: React.FC<{
           {
             headerName: TT("DataTable.Headers.Name", "نام"),
             field: "Name",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: TT("DataTable.Headers.Description", "شرح"),
+            field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
@@ -1017,110 +1079,113 @@ export const SubTabDefinitionsProvider: React.FC<{
 
       // ✅ Forms
       Forms: {
-        endpoint: async () => {
-          const data = await api.getTableTransmittal();
-          return data.map((item: any) => ({
-            ...item,
-            nEntityCateAID: item.nEntityCateAID ?? null,
-            nEntityCateBID: item.nEntityCateBID ?? null,
-            IsDoc: item.IsDoc ?? false,
-            IsMegaForm: item.IsMegaForm ?? false,
-            Code: item.Code ?? "",
-            PersianName: item.PersianName ?? "",
-            TemplateDocID: item.TemplateDocID ?? null,
-            TemplateExcelID: item.TemplateExcelID ?? null,
-            ProjectsStr: item.ProjectsStr ?? "",
-          }));
-        },
+  endpoint: async () => {
+    const data = await api.getTableTransmittal();
+    return data.map((item: any) => ({
+      ...item,
+      nEntityCateAID: item.nEntityCateAID ?? null,
+      nEntityCateBID: item.nEntityCateBID ?? null,
+      IsDoc: item.IsDoc ?? false,
+      IsMegaForm: item.IsMegaForm ?? false,
+      Code: item.Code ?? "",
+      PersianName: item.PersianName ?? "",
+      TemplateDocID: item.TemplateDocID ?? null,
+      TemplateExcelID: item.TemplateExcelID ?? null,
+      ProjectsStr: item.ProjectsStr ?? "",
+    }));
+  },
 
-        columnDefs: [
-          {
-            headerName: TT("Forms.Name", "نام"),
-            field: "Name",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-            flex: 1.6,
-            minWidth: 160,
-          },
-          {
-            headerName: TT("Forms.PersianName", "نام فارسی"),
-            field: "PersianName",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-            flex: 1.6,
-            minWidth: 160,
-          },
-          checkboxCol(TT("Forms.Transmittal", "ارسال"), "IsDoc"),
-          {
-            headerName: TT("Forms.CategoryA", "دسته A"),
-            field: "EntityCateAName",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-            flex: 1.2,
-            minWidth: 140,
-          },
-          {
-            headerName: TT("Forms.CategoryB", "دسته B"),
-            field: "EntityCateBName",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-            flex: 1.2,
-            minWidth: 140,
-          },
-          checkboxCol(TT("Forms.IsMegaForm", "فرم بزرگ"), "IsMegaForm"),
-        ],
+  columnDefs: [
+    {
+      headerName: TT("Forms.Name", "نام"),
+      field: "Name",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+      flex: 1.6,
+      minWidth: 160,
+    },
+    {
+      headerName: TT("Forms.PersianName", "نام فارسی"),
+      field: "PersianName",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+      flex: 1.6,
+      minWidth: 160,
+    },
+    checkboxCol("IsDoc", "IsDoc"),
+    {
+      headerName: TT("Forms.CategoryA", "دسته بندی A"),
+      field: "EntityCateAName",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+      flex: 1.2,
+      minWidth: 140,
+    },
+    {
+      headerName: TT("Forms.CategoryB", "دسته بندی B"),
+      field: "EntityCateBName",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+      flex: 1.2,
+      minWidth: 140,
+    },
+   checkboxCol(TT("Forms.IsMegaForm", "مگافرم"), "IsMegaForm"),
+  ],
 
-        iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: true,
-        },
+  iconVisibility: {
+    showAdd: true,
+    showEdit: true,
+    showDelete: true,
+    showDuplicate: true,
+  },
 
-        duplicateAction: async (row: EntityType) => {
-          const idToDuplicate = Number((row as any).ID);
-          const responseRaw = await api.duplicateEntityType(idToDuplicate);
-          const created = normalizeApiResult(responseRaw);
+  duplicateAction: async (row: EntityType) => {
+    const idToDuplicate = Number((row as any).ID);
+    const responseRaw = await api.duplicateEntityType(idToDuplicate);
+    const created = normalizeApiResult(responseRaw);
 
-          // ✅ پایه created (ID جدید) + پر کردن خالی‌ها از row
-          // این باعث میشه اگر API null برگردوند، اطلاعات از ردیف اصلی بیاد
-          return fillEmptyFrom(created, row);
-        },
+    return fillEmptyFrom(created, row);
+  },
 
-        nameField: "Name",
-        updater: async (payload: EntityType) => {
-          const payloadToSend = {
-            ...payload,
-            ID: payload.ID ? payload.ID.toString() : "",
-          };
-          return await api.updateEntityType(payloadToSend);
-        },
-      },
-
+  nameField: "Name",
+  updater: async (payload: EntityType) => {
+    const payloadToSend = {
+      ...payload,
+      ID: payload.ID ? payload.ID.toString() : "",
+    };
+    return await api.updateEntityType(payloadToSend);
+  },
+},
       Categories: {
-        endpoint: (params?: { categoryType: "cata" | "catb" }) =>
-          params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),
-        columnDefs: [
-          {
-            headerName: TT("DataTable.Headers.Name", "نام"),
-            field: "Name",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-          },
-        ],
-        iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: false,
-        },
-      },
-
+  endpoint: (params?: { categoryType: "cata" | "catb" }) =>
+    params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),
+  columnDefs: [
+    {
+      headerName: t("Category.Name", { defaultValue: "نام" }),
+      field: "Name",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+    },
+    {
+      headerName: t("Category.Description", { defaultValue: "شرح" }),
+      field: "Description",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+    },
+  ],
+  iconVisibility: {
+    showAdd: true,
+    showEdit: true,
+    showDelete: true,
+    showDuplicate: false,
+  },
+},
       MenuTab: {
         endpoint: (params: { ID: number }) => api.getAllMenuTab(params.ID),
         columnDefs: [

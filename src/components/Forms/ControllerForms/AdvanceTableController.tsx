@@ -242,86 +242,123 @@ const AdvanceTable: React.FC<AdvanceTableProps> = ({
   const approvalLabel = "Allowed added numbers of rows by approval:";
 
   return (
-    <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex flex-col gap-6">
-      {/* ✅ Show Form + Gallery mode چسبیده سمت چپ */}
-      <div className="flex justify-start">
-        <div className="flex flex-col gap-2 w-64">
-          <DynamicSelector
-            name="Show Form"
-            label={t("AdvanceTable.Labels.ShowForm")}
-            options={formOptions}
-            selectedValue={selectedForm}
-            onChange={(e) => setSelectedForm(e.target.value)}
-          />
+  <div className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex flex-col gap-6">
+    {/* ✅ Show Form + Gallery mode چسبیده سمت چپ */}
+    <div className="flex justify-start">
+      <div className="flex flex-col gap-2 w-64">
+        <DynamicSelector
+          name="Show Form"
+          label={t("AdvanceTable.Labels.ShowForm")}
+          options={formOptions}
+          selectedValue={selectedForm}
+          onChange={(e) => setSelectedForm(e.target.value)}
+        />
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              id="galleryMode"
-              type="checkbox"
-              className="h-5 w-5 text-purple-600 border-gray-300 rounded"
-              checked={isGalleryMode}
-              onChange={(e) => setIsGalleryMode(e.target.checked)}
-            />
-            <span className="text-gray-700 font-medium">
-              {t("AdvanceTable.Labels.GalleryMode")}
-            </span>
-          </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            id="galleryMode"
+            type="checkbox"
+            className="h-5 w-5 text-purple-600 border-gray-300 rounded"
+            checked={isGalleryMode}
+            onChange={(e) => setIsGalleryMode(e.target.checked)}
+          />
+          <span className="text-gray-700 font-medium">
+            {t("AdvanceTable.Labels.GalleryMode")}
+          </span>
+        </label>
+      </div>
+    </div>
+
+    {/* 🔥 چک‌باکس‌های جدید + اینپوت‌های عددی */}
+    <div className="w-full flex flex-col md:flex-row gap-2 md:gap-3 items-stretch">
+      <div className="p-3 rounded-lg shadow-sm border border-gray-200 flex-1 h-full min-h-[140px]">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-3">
+          <div className="flex flex-col gap-3">
+            {leftItems.map((item) => {
+              const fullText = t(item.labelKey);
+              return (
+                <label
+                  key={item.key}
+                  className="flex items-start gap-1 text-[10px] leading-4 font-normal text-gray-700"
+                  title={fullText}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!!accessState[item.key]}
+                    onChange={(e) => toggleAccess(item.key, e.target.checked)}
+                    className="mt-[2px] h-4 w-4 accent-pink-500 cursor-pointer shrink-0"
+                  />
+                  <span className="whitespace-normal break-words">
+                    {fullText}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {rightItems.map((item) => {
+              const fullText = t(item.labelKey);
+              return (
+                <label
+                  key={item.key}
+                  className="flex items-start gap-1 text-[10px] leading-4 font-normal text-gray-700"
+                  title={fullText}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!!accessState[item.key]}
+                    onChange={(e) => toggleAccess(item.key, e.target.checked)}
+                    className="mt-[2px] h-4 w-4 accent-pink-500 cursor-pointer shrink-0"
+                  />
+                  <span className="whitespace-normal break-words">
+                    {fullText}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* 🔥 چک‌باکس‌های جدید + اینپوت‌های عددی */}
-      <div className="w-full flex flex-col md:flex-row gap-2 md:gap-3 items-stretch">
-        {/* ✅ چک‌باکس‌ها */}
-        <div className="shadow-sm border border-gray-200 p-3 rounded-lg flex-1 h-full min-h-[124px]">
-          <div className="grid grid-cols-2 gap-x-2 gap-y-3">
-            <div className="flex flex-col gap-3 min-w-0">
-              {leftItems.map(renderItem)}
-            </div>
-            <div className="flex flex-col gap-3 min-w-0">
-              {rightItems.map(renderItem)}
-            </div>
+      <div className="p-3 rounded-lg shadow-sm border border-gray-200 h-full min-h-[140px] flex items-stretch">
+        <div className="w-full md:w-[210px] lg:w-[220px] flex flex-col h-full justify-between gap-3">
+          <div className="flex flex-col justify-start" title={actorLabel}>
+            <DynamicInput
+              name="AllowedAddedRowsByActor"
+              type="number"
+              value={allowedByActor}
+              onChange={(e) => updateAllowedRows("actor", e.target.value)}
+              label={actorLabel}
+              labelClassName="text-[11px] font-normal text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis mb-0.5"
+              placeholder=""
+              min={0}
+              step={1}
+              className="w-full"
+              style={{ height: 30 }}
+            />
           </div>
-        </div>
 
-        {/* ✅ ورودی‌ها */}
-        <div className="shadow-sm border border-gray-200 p-3 rounded-lg h-full min-h-[124px] flex items-stretch">
-          <div className="w-full md:w-[180px] lg:w-[170px] flex flex-col h-full justify-between gap-2">
-            <div className="flex flex-col justify-start" title={actorLabel}>
-              <DynamicInput
-                name="AllowedAddedRowsByActor"
-                type="number"
-                value={allowedByActor}
-                onChange={(e) => updateAllowedRows("actor", e.target.value)}
-                label={actorLabel}
-                labelClassName="text-[11px] font-normal text-gray-700 truncate whitespace-nowrap overflow-hidden mb-0.5"
-                placeholder="actor"
-                min={0}
-                step={1}
-                className="w-full"
-                style={{ height: 30 }}
-              />
-            </div>
-
-            <div className="flex flex-col justify-start" title={approvalLabel}>
-              <DynamicInput
-                name="AllowedAddedRowsByApproval"
-                type="number"
-                value={allowedByApproval}
-                onChange={(e) => updateAllowedRows("approval", e.target.value)}
-                label={approvalLabel}
-                labelClassName="text-[11px] font-normal text-gray-700 truncate whitespace-nowrap overflow-hidden mb-0.5"
-                placeholder="approval"
-                min={0}
-                step={1}
-                className="w-full"
-                style={{ height: 30 }}
-              />
-            </div>
+          <div className="flex flex-col justify-start" title={approvalLabel}>
+            <DynamicInput
+              name="AllowedAddedRowsByApproval"
+              type="number"
+              value={allowedByApproval}
+              onChange={(e) => updateAllowedRows("approval", e.target.value)}
+              label={approvalLabel}
+              labelClassName="text-[11px] font-normal text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis mb-0.5"
+              placeholder=""
+              min={0}
+              step={1}
+              className="w-full"
+              style={{ height: 30 }}
+            />
           </div>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default AdvanceTable;

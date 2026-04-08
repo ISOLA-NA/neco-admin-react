@@ -126,27 +126,27 @@
       "Order": "ترتیب",
       "ColumnName": "نام ستون",
       "Type": "نوع",
-      "Command": "دستور",
+      "Command": "فرمان",
       "ShowInList": "نمایش در لیست",
       "Required": "الزامی",
       "MainColumn": "ستون اصلی",
       "IsRtl": "RTL",
-      "CountInReject": "شمارش در رد شده"
+      "CountInReject": "شمارش در رد"
     },
     "PersianName": "نام فارسی",
-    "Name": "نام",
-    "Command": "دستور",
-    "CategoryA": "دسته A",
-    "CategoryB": "دسته B",
-    "Transmittal": "ارسال",
-    "IsMegaForm": "فرم بزرگ",
+    "Name": "نام فرم",
+    "Command": "فرمان",
+    "CategoryA": "دسته بندی فرم A",
+    "CategoryB": "دسته بندی فرم B",
+    "Transmittal": "انتقال دهنده",
+    "IsMegaForm": "مگا فرم",
     "SwitchToEN": "تغییر به انگلیسی ({field})",
     "SwitchToFA": "تغییر به فارسی ({field})",
     "RelatedProjects": "پروژه‌های مرتبط",
     "NoWordFileSelected": "فایل وردی انتخاب نشده است",
     "NoExcelFileSelected": "فایل اکسلی انتخاب نشده است",
-    "UploadWordFile": "آپلود فایل ورد",
-    "UploadExcelFile": "آپلود فایل اکسل"
+    "UploadExcelFile": "قالب Excel File",
+    "UploadWordFile": "قالب Word File"
   },
   "DataTable": {
     "Headers": {
@@ -155,7 +155,7 @@
       "CatA": "دسته A",
       "CatB": "دسته B",
       "Transmittal": "ارسال",
-      "IsMegaForm": "فرم بزرگ",
+      "IsMegaForm": "مگا فرم",
       "ProgramTemplateShort": "قالب برنامه",
       "DefaultRibbon": "منوی پیش‌فرض",
       "Username": "نام کاربری",
@@ -170,7 +170,7 @@
       "Role": "نقش",
       "User": "کاربر",
       "Enterprise": "شرکت",
-      "Superior": "بالادست",
+      "Superior": "رئیس",
       "Status": "وضعیت",
       "ActStart": "شروع واقعی",
       "Duration": "مدت",
@@ -184,9 +184,9 @@
       "WFTemplateName": "نام گردش‌کار",
       "EntityTypeName": "نام فرم",
       "AFName": "نام گردش تایید",
-      "Command": "دستور",
+      "Command": "فرمان",
       "Order": "ترتیب",
-      "PersianColumnName": "نام فارسی ستون",
+      "PersianColumnName": "نام ستون فارسی",
       "ProjectName": "نام پروژه",
       "PersianName": "نام فارسی",
       "Yes": "بله",
@@ -202,16 +202,20 @@
     "DescriptionPlaceholder": "شرح را وارد کنید"
   },
   "Category": {
-    "CategoryType": "نوع دسته",
-    "CategoryA": "دسته A",
-    "CategoryB": "دسته B"
+    "Name": "نام",
+    "CategoryType": "نوع دسته بندی",
+    "Description": "شرح",
+    "NamePlaceholder": "نام دسته‌بندی را وارد کنید",
+    "DescriptionPlaceholder": "شرح دسته‌بندی را وارد کنید",
+     "CategoryTypeA": "دسته‌بندی A",
+    "CategoryTypeB": "دسته‌بندی B"
   },
   "General": {
     "Loading": "در حال بارگذاری...",
     "LoadingProjectsAccess": "در حال بارگذاری دسترسی‌های پروژه..."
   },
   "Global": {
-    "Global": "عمومی",
+    "Global": "جهانی",
     "Noitemisselected": "هیچ آیتمی انتخاب نشده است"
   }
 }

@@ -525,7 +525,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
           />
 
           <div className="flex items-end gap-4 w-full">
-            <div className="flex-1">
+            {/* <div className="flex-1">
               <DynamicSelector
                 name="modes"
                 label={t("LookUpAdvanceTable.Form.Modes")}
@@ -533,7 +533,7 @@ const LookUpAdvanceTable: React.FC<LookUpAdvanceTableProps> = ({
                 selectedValue={meta.LookupMode}
                 onChange={(e) => pushMeta({ LookupMode: e.target.value })}
               />
-            </div>
+            </div> */}
 
             <label className="flex items-center gap-2 whitespace-nowrap mb-2">
               <input

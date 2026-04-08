@@ -1,8 +1,11 @@
 {
-    "Category": {
-      "Name": "نام",
-      "CategoryType": "نوع دسته بندی",
-      "Description": "شرح"
-    }
+  "Category": {
+    "Name": "نام",
+    "CategoryType": "نوع دسته بندی",
+    "Description": "شرح",
+    "NamePlaceholder": "نام دسته‌بندی را وارد کنید",
+    "DescriptionPlaceholder": "شرح دسته‌بندی را وارد کنید",
+    "CategoryTypeA": "دسته‌بندی A",
+    "CategoryTypeB": "دسته‌بندی B"
   }
-  
+}

@@ -9,7 +9,6 @@ import React, {
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
-import DynamicSelector from "../utilities/DynamicSelector"; // وارد کردن DynamicSelector
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
 import { CategoryItem } from "../../services/api.services";
 import { useTranslation } from "react-i18next";
@@ -29,7 +28,6 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
     const { t } = useTranslation();
     const { handleSaveCatA, handleSaveCatB } = useAddEditDelete();
 
-    // وضعیت برای داده‌های فرم
     const [formData, setFormData] = useState<
       Omit<CategoryItem, "ID" | "ModifiedById"> & {
         ID?: number | undefined;
@@ -44,7 +42,6 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
       ModifiedById: undefined,
     });
 
-    // وضعیت برای نوع دسته‌بندی
     const [categoryType, setCategoryType] = useState<"cata" | "catb">(
       selectedCategoryType
     );
@@ -61,7 +58,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
             ? Number(selectedRow.ModifiedById)
             : undefined,
         });
-        setCategoryType(selectedCategoryType); // نوع دسته‌بندی ثابت در حالت ویرایش
+        setCategoryType(selectedCategoryType);
       } else {
         setFormData({
           ID: undefined,
@@ -71,7 +68,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
           LastModified: new Date().toISOString(),
           ModifiedById: undefined,
         });
-        setCategoryType(selectedCategoryType); // مقدار اولیه نوع دسته‌بندی در حالت افزودن
+        setCategoryType(selectedCategoryType);
       }
     }, [selectedRow, selectedCategoryType]);
 
@@ -79,7 +76,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
       save: async () => {
         const saveData = {
           ...formData,
-          categoryType, // استفاده از نوع دسته‌بندی فعلی
+          categoryType,
           LastModified: new Date().toISOString(),
         };
 
@@ -116,40 +113,17 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
       }));
     };
 
-    const handleCategoryTypeChange = (
-      e: React.ChangeEvent<HTMLSelectElement>
-    ) => {
-      setCategoryType(e.target.value as "cata" | "catb");
-    };
-
-    // تعریف گزینه‌های دسته‌بندی با برچسب‌های فارسی
-    const categoryOptions = [
-      { value: "cata", label: "دسته‌بندی A" },
-      { value: "catb", label: "دسته‌بندی B" },
-    ];
-
     return (
       <div className="p-4">
         <TwoColumnLayout>
-          <TwoColumnLayout.Item span={1}>
+          <TwoColumnLayout.Item span={2}>
             <DynamicInput
               name={t("Category.Name")}
               type="text"
               value={formData.Name}
               onChange={handleNameChange}
+              placeholder={t("Category.NamePlaceholder")}
               required
-            />
-          </TwoColumnLayout.Item>
-
-          <TwoColumnLayout.Item span={1}>
-            <DynamicSelector
-              name="categoryType"
-              label={t("Category.CategoryType")}
-              options={categoryOptions}
-              selectedValue={categoryType}
-              onChange={handleCategoryTypeChange}
-              disabled={!!selectedRow} // غیرفعال در حالت ویرایش
-              className="mb-4"
             />
           </TwoColumnLayout.Item>
 
@@ -157,7 +131,7 @@ const Categories = forwardRef<CategoryHandle, CategoriesProps>(
             <CustomTextarea
               name={t("Category.Description")}
               value={formData.Description}
-              placeholder="شرح دسته‌بندی را وارد کنید"
+              placeholder={t("Category.DescriptionPlaceholder")}
               onChange={handleDescriptionChange}
               required
             />

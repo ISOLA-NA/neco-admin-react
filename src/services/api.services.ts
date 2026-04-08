@@ -609,6 +609,7 @@ export interface EntityField {
   BoolMeta1: boolean;
   IsVisible: boolean;
   LastModified: string;
+  IsEditableByReceiver: boolean;
 }
 
 export interface EditProfileUserInterface {

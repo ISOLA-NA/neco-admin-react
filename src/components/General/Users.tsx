@@ -3,16 +3,14 @@ import React, {
   useEffect,
   forwardRef,
   useImperativeHandle,
+  useMemo,
 } from "react";
 import TwoColumnLayout from "../layout/TwoColumnLayout";
 import DynamicInput from "../utilities/DynamicInput";
 import DynamicSelector from "../utilities/DynamicSelector";
 import FileUploadHandler from "../../services/FileUploadHandler";
 import { useAddEditDelete } from "../../context/AddEditDeleteContext";
-import type {
-  GetEnumResponse,
-  User as UserType,
-} from "../../services/api.services";
+import type { User as UserType } from "../../services/api.services";
 import AppServices from "../../services/api.services";
 import DynamicConfirm from "../utilities/DynamicConfirm";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
@@ -31,9 +29,16 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   const { t } = useTranslation();
   const { handleSaveUser } = useAddEditDelete();
 
-  const [userTypeOptions, setUserTypeOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const userTypeOptions = useMemo(
+    () => [
+      { value: "7", label: t("User.UserTypeBoss") },
+      { value: "6", label: t("User.UserTypeManager") },
+      { value: "0", label: t("User.UserTypeEmployee") },
+      { value: "8", label: t("User.UserTypeSysAdmin") },
+    ],
+    [t]
+  );
+
   const [resetCounter, setResetCounter] = useState<number>(0);
   const [newPassword, setNewPassword] = useState("");
 
@@ -51,7 +56,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
 
   const showModal = (
     message: string,
-    title: string = "Error",
+    title: string = t("User.ModalError"),
     variant: "add" | "edit" | "delete" | "notice" | "error" = "error"
   ) => {
     setModalTitle(title);
@@ -81,29 +86,6 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     CreateDate: selectedRow?.CreateDate || null,
     LastLoginTime: selectedRow?.LastLoginTime || null,
   });
-
-  useEffect(() => {
-    const fetchUserTypes = async () => {
-      try {
-        const response: GetEnumResponse = await AppServices.getEnum({
-          str: "UserType",
-        });
-        // تبدیل مقادیر به رشته برای نمایش در selector
-        const options = Object.entries(response).map(([key, val]) => ({
-          value: val.toString(),
-          label: key,
-        }));
-        setUserTypeOptions(options);
-      } catch (error: any) {
-        showModal(
-          "Error fetching UserType enums: " + (error?.message || error),
-          "Error",
-          "error"
-        );
-      }
-    };
-    fetchUserTypes();
-  }, []);
 
   useEffect(() => {
     if (selectedRow) {
@@ -159,12 +141,16 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     try {
       const payload = { UserId: selectedRow.ID, Password: newPassword };
       await AppServices.changePasswordByAdmin(payload);
-      showModal("Password changed successfully", "Success", "notice");
+      showModal(
+        t("User.MsgPasswordChangedSuccessfully"),
+        t("User.ModalSuccess"),
+        "notice"
+      );
       setNewPassword("");
     } catch (error: any) {
       showModal(
-        "Failed to change password: " + (error?.message || error),
-        "Error",
+        `${t("User.MsgPasswordChangeFailed")} ${error?.message || error}`,
+        t("User.ModalError"),
         "error"
       );
     }
@@ -173,7 +159,11 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   // تابع مربوط به دکمه change password
   const handleChangePasswordClick = () => {
     if (!newPassword) {
-      showModal("New password cannot be empty", "Validation Error", "error");
+      showModal(
+        t("User.MsgNewPasswordCannotBeEmpty"),
+        t("User.ModalValidationError"),
+        "error"
+      );
       return;
     }
     // باز کردن مدال تایید تغییر پسورد
@@ -198,23 +188,43 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
 
   const validateForm = () => {
     if (!userData.Username) {
-      showModal("Username is required", "Validation Error", "error");
+      showModal(
+        t("User.MsgUsernameRequired"),
+        t("User.ModalValidationError"),
+        "error"
+      );
       return false;
     }
     if (!userData.Name) {
-      showModal("Name is required", "Validation Error", "error");
+      showModal(
+        t("User.MsgNameRequired"),
+        t("User.ModalValidationError"),
+        "error"
+      );
       return false;
     }
     if (!selectedRow && !userData.Password) {
       showModal(
-        "Password is required for new users",
-        "Validation Error",
+        t("User.MsgPasswordRequiredForNewUser"),
+        t("User.ModalValidationError"),
+        "error"
+      );
+      return false;
+    }
+    if (!selectedRow && userData.Password !== userData.ConfirmPassword) {
+      showModal(
+        t("User.MsgPasswordConfirmMismatch"),
+        t("User.ModalValidationError"),
         "error"
       );
       return false;
     }
     if (userData.Email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.Email)) {
-      showModal("Invalid email format", "Validation Error", "error");
+      showModal(
+        t("User.MsgInvalidEmail"),
+        t("User.ModalValidationError"),
+        "error"
+      );
       return false;
     }
     return true;
@@ -232,6 +242,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         LastLoginTime: userData.LastLoginTime ?? null,
         UserImageId: userData.UserImageId ?? null,
       };
+
       if (selectedRow) {
         if (!userData.Password) {
           delete dataToSave.Password;
@@ -240,10 +251,10 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         delete dataToSave.ID;
         dataToSave.ConfirmPassword = userData.ConfirmPassword;
       }
+
       const result = await handleSaveUser(dataToSave);
       return result;
     } catch (error: any) {
-      // showModal(`Failed to ${selectedRow ? 'update' : 'create'} user: ` + (error?.message || error), 'Error', 'error');
       const data = error.response?.data;
       const message =
         typeof data === "string"
@@ -251,7 +262,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           : data?.value?.message ||
             data?.message ||
             "خطایی در فرآیند ذخیره دستور رخ داده است.";
-      showAlert("error", null, "Error", message);
+      showAlert("error", null, t("User.ModalError"), message);
       return null;
     }
   };
@@ -260,7 +271,11 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     save,
     checkNameFilled: () => {
       if (!userData.Name.trim()) {
-        showModal("Name cannot be empty", "Warning", "error");
+        showModal(
+          t("User.MsgNameCannotBeEmpty"),
+          t("User.ModalWarning"),
+          "error"
+        );
         return false;
       }
       return true;
@@ -269,23 +284,37 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
 
   return (
     <TwoColumnLayout>
+      {/* Row 1: User Name | ID */}
       <div>
         <DynamicInput
           name={t("User.Username")}
           type="text"
           value={userData.Username}
           onChange={(e) => handleChange("Username", e.target.value)}
+          placeholder={t("User.PlaceholderUsername")}
           required
           disabled={!!selectedRow}
         />
       </div>
       <div>
         <DynamicInput
-          name={t("User.Code")}
-          type="number"
-          value={userData.Code}
-          onChange={(e) => handleChange("Code", e.target.value)}
-          disabled={!!selectedRow}
+          name="ID"
+          type="text"
+          value={userData.ID ?? ""}
+          onChange={() => {}}
+          disabled
+        />
+      </div>
+
+      {/* Row 2: Last Name | First Name */}
+      <div>
+        <DynamicInput
+          name={t("User.Family")}
+          type="text"
+          value={userData.Family}
+          onChange={(e) => handleChange("Family", e.target.value)}
+          placeholder={t("User.PlaceholderFamily")}
+          className="-mt-5"
         />
       </div>
       <div>
@@ -294,19 +323,35 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           type="text"
           value={userData.Name}
           onChange={(e) => handleChange("Name", e.target.value)}
+          placeholder={t("User.PlaceholderName")}
           className="-mt-5"
           required
         />
       </div>
+
+      {/* Row 3: Email | Mobile */}
       <div>
         <DynamicInput
-          name={t("User.Family")}
+          name={t("User.Email")}
           type="text"
-          value={userData.Family}
-          onChange={(e) => handleChange("Family", e.target.value)}
+          value={userData.Email}
+          onChange={(e) => handleChange("Email", e.target.value)}
+          placeholder={t("User.PlaceholderEmail")}
           className="-mt-5"
         />
       </div>
+      <div>
+        <DynamicInput
+          name={t("User.Mobile")}
+          type="text"
+          value={userData.Mobile}
+          onChange={(e) => handleChange("Mobile", e.target.value)}
+          placeholder={t("User.PlaceholderMobile")}
+          className="-mt-5"
+        />
+      </div>
+
+      {/* Row 4: Password | Confirm Password / Change Password */}
       {!selectedRow && (
         <>
           <div>
@@ -315,6 +360,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
               type="password"
               value={userData.Password}
               onChange={(e) => handleChange("Password", e.target.value)}
+              placeholder={t("User.PlaceholderPassword")}
               className="-mt-5"
               required
             />
@@ -325,12 +371,14 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
               type="password"
               value={userData.ConfirmPassword}
               onChange={(e) => handleChange("ConfirmPassword", e.target.value)}
+              placeholder={t("User.PlaceholderConfirmPassword")}
               className="-mt-5"
               required
             />
           </div>
         </>
       )}
+
       {selectedRow && (
         <>
           <div>
@@ -339,11 +387,11 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password (optional)"
+              placeholder={t("User.PlaceholderNewPassword")}
               className="-mt-5"
             />
           </div>
-          <div>
+          <div className="flex items-end -mt-1">
             <button
               onClick={handleChangePasswordClick}
               className="px-5 py-2.5 border rounded bg-gradient-to-r from-[#e14aa7] via-[#6761f0] to-[#b23ace] text-white transition-all duration-300 hover:bg-gradient-to-r hover:from-[#b23ace] hover:via-[#6761f0] hover:to-[#e14aa7]"
@@ -353,30 +401,15 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           </div>
         </>
       )}
-      <div>
-        <DynamicInput
-          name={t("User.Email")}
-          type="text"
-          value={userData.Email}
-          onChange={(e) => handleChange("Email", e.target.value)}
-          className="-mt-5"
-        />
-      </div>
-      <div>
-        <DynamicInput
-          name={t("User.Mobile")}
-          type="text"
-          value={userData.Mobile}
-          onChange={(e) => handleChange("Mobile", e.target.value)}
-          className="-mt-5"
-        />
-      </div>
+
+      {/* Row 5: Web Site | User Type */}
       <div>
         <DynamicInput
           name={t("User.Website")}
           type="text"
           value={userData.Website}
           onChange={(e) => handleChange("Website", e.target.value)}
+          placeholder={t("User.PlaceholderWebsite")}
           className="-mt-5"
         />
       </div>
@@ -390,21 +423,40 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           className="-mt-6"
         />
       </div>
-      <div>
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <h3 className="text-lg font-medium mb-4">
-            {t("User.UserProfileImage")}
-          </h3>
-          <FileUploadHandler
-            selectedFileId={userData.UserImageId}
-            onUploadSuccess={handleImageUploadSuccess}
-            resetCounter={resetCounter}
-            onReset={handleResetUpload}
-            isEditMode={!!selectedRow}
-          />
+
+      {/* Bottom Row: Image | Activate */}
+      <div className="-mt-2">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-medium">{t("User.UserProfileImage")}</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {t("User.ImageBestSize")}
+            </p>
+          </div>
+          <div className="flex-1">
+            <FileUploadHandler
+              selectedFileId={userData.UserImageId}
+              onUploadSuccess={handleImageUploadSuccess}
+              resetCounter={resetCounter}
+              onReset={handleResetUpload}
+              isEditMode={!!selectedRow}
+            />
+          </div>
         </div>
       </div>
-      {/* مدال پیام (برای خطا یا اطلاع رسانی) */}
+      <div className="-mt-2 flex items-center">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!!userData.IsVisible}
+            onChange={(e) => handleChange("IsVisible", e.target.checked)}
+            className="h-5 w-5"
+          />
+          <span>{t("User.Activate")}</span>
+        </label>
+      </div>
+
+      {/* Modal */}
       <DynamicConfirm
         isOpen={modalOpen}
         title={modalTitle}
@@ -414,11 +466,12 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         variant={modalVariant}
         hideCancelButton={true}
       />
-      {/* مدال تایید تغییر پسورد */}
+
+      {/* Password Confirm Modal */}
       <DynamicConfirm
         isOpen={passwordConfirmModalOpen}
-        title="Confirm"
-        message="Are you sure you want to change password?"
+        title={t("User.ModalConfirm")}
+        message={t("User.MsgConfirmPasswordChange")}
         onConfirm={async () => {
           setPasswordConfirmModalOpen(false);
           await doChangePassword();

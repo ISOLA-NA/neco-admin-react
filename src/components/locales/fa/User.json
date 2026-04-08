@@ -1,17 +1,52 @@
 {
-    "User": {
-      "Code": "شماره پرسنل",
-      "Username": "نام کاربری",
-      "Name": "نام",
-      "Family": "نام خانوادگی",
-      "Password": "رمز عبور",
-      "ConfirmPassword":"تایید رمز عبور",
-      "ChangePassword": "تغییر پسورد",
-      "Mobile": "موبایل",
-      "Email": "ایمیل",
-      "UserType": "نقش کاربر",
-      "Website": "وب سایت",
-      "UserProfileImage":"تصویر پروفایل کاربر"
-    }
+  "User": {
+    "Code": "ID",
+    "Username": "نام کاربر",
+    "Name": "نام",
+    "Family": "نام خانوادگی",
+    "Password": "رمز عبور",
+    "ConfirmPassword": "تایید رمز عبور",
+    "ChangePassword": "تغییر پسورد",
+    "Mobile": "تلفن همراه",
+    "Email": "پست الکترونیک",
+    "UserType": "نوع کاربر",
+    "Website": "وب‌سایت",
+    "UserProfileImage": "تصویر",
+    "Activate": "فعال کردن",
+
+    "UserTypeBoss": "رئیس سیستم",
+    "UserTypeManager": "مدیر سیستم",
+    "UserTypeEmployee": "راهبر سیستم",
+    "UserTypeSysAdmin": "کاربر سیستم",
+
+    "PlaceholderUsername": "نام کاربر را وارد کنید",
+    "PlaceholderName": "نام را وارد کنید",
+    "PlaceholderFamily": "نام خانوادگی را وارد کنید",
+    "PlaceholderEmail": "پست الکترونیک را وارد کنید",
+    "PlaceholderMobile": "شماره همراه را وارد کنید",
+    "PlaceholderPassword": "رمز عبور را وارد کنید",
+    "PlaceholderConfirmPassword": "تایید رمز عبور را وارد کنید",
+    "PlaceholderWebsite": "وب‌سایت را وارد کنید",
+    "PlaceholderNewPassword": "رمز عبور جدید را وارد کنید (اختیاری)",
+
+    "ImageBestSize": "بهترین اندازه برای آیکن 25*30 است",
+
+    "ModalError": "خطا",
+    "ModalSuccess": "موفق",
+    "ModalWarning": "هشدار",
+    "ModalValidationError": "خطای اعتبارسنجی",
+    "ModalConfirm": "تایید",
+
+    "MsgUsernameRequired": "نام کاربری الزامی است",
+    "MsgNameRequired": "نام الزامی است",
+    "MsgPasswordRequiredForNewUser": "برای کاربر جدید وارد کردن رمز عبور الزامی است",
+    "MsgPasswordConfirmMismatch": "رمز عبور و تایید رمز عبور یکسان نیستند",
+    "MsgInvalidEmail": "فرمت ایمیل معتبر نیست",
+    "MsgPasswordChangedSuccessfully": "رمز عبور با موفقیت تغییر کرد",
+    "MsgPasswordChangeFailed": "تغییر رمز عبور ناموفق بود:",
+    "MsgNewPasswordCannotBeEmpty": "رمز عبور جدید نمی‌تواند خالی باشد",
+    "MsgConfirmPasswordChange": "آیا از تغییر رمز عبور اطمینان دارید؟",
+    "MsgNameCannotBeEmpty": "نام نمی‌تواند خالی باشد",
+    "MsgFetchUserTypesFailed": "خطا در دریافت نوع کاربر:"
   }
-  
+}

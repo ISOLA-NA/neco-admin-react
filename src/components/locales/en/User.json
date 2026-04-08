@@ -1,17 +1,52 @@
 {
-    "User": {
-      "Code": "Code",
-      "Username": "Username",
-      "Name": "Name",
-      "Family": "LastName",
-      "Password": "Password",
-      "ConfirmPassword":"Confirm Password",
-      "ChangePassword": "Change Password",
-      "Mobile": "Mobile",
-      "Email": "Email",
-      "UserType": "User Type",
-      "Website": "Website",
-      "UserProfileImage":"User Profile Image"
-    }
+  "User": {
+    "Code": "ID",
+    "Username": "Username",
+    "Name": "First Name",
+    "Family": "Last Name",
+    "Password": "Password",
+    "ConfirmPassword": "Confirm Password",
+    "ChangePassword": "Change Password",
+    "Mobile": "Mobile",
+    "Email": "Email",
+    "UserType": "User Type",
+    "Website": "Website",
+    "UserProfileImage": "Image",
+    "Activate": "Activate",
+
+    "UserTypeBoss": "Boss",
+    "UserTypeManager": "Manager",
+    "UserTypeEmployee": "Employee",
+    "UserTypeSysAdmin": "SysAdmin",
+
+    "PlaceholderUsername": "Enter username",
+    "PlaceholderName": "Enter first name",
+    "PlaceholderFamily": "Enter last name",
+    "PlaceholderEmail": "Enter email",
+    "PlaceholderMobile": "Enter mobile number",
+    "PlaceholderPassword": "Enter password",
+    "PlaceholderConfirmPassword": "Confirm password",
+    "PlaceholderWebsite": "Enter website",
+    "PlaceholderNewPassword": "Enter new password (optional)",
+
+    "ImageBestSize": "The best size for icons is 25*30",
+
+    "ModalError": "Error",
+    "ModalSuccess": "Success",
+    "ModalWarning": "Warning",
+    "ModalValidationError": "Validation Error",
+    "ModalConfirm": "Confirm",
+
+    "MsgUsernameRequired": "Username is required",
+    "MsgNameRequired": "Name is required",
+    "MsgPasswordRequiredForNewUser": "Password is required for new users",
+    "MsgPasswordConfirmMismatch": "Password and confirm password do not match",
+    "MsgInvalidEmail": "Invalid email format",
+    "MsgPasswordChangedSuccessfully": "Password changed successfully",
+    "MsgPasswordChangeFailed": "Failed to change password:",
+    "MsgNewPasswordCannotBeEmpty": "New password cannot be empty",
+    "MsgConfirmPasswordChange": "Are you sure you want to change password?",
+    "MsgNameCannotBeEmpty": "Name cannot be empty",
+    "MsgFetchUserTypesFailed": "Error fetching user types:"
   }
-  
+}
