@@ -1,8 +1,23 @@
 {
-    "ApprovalFlows": {
-      "ApprovalFlowName": "نام جریان تایید",
+  "ApprovalFlows": {
+    "ApprovalFlowName": "نام جریان تایید",
+    "Description": "شرح",
+    "RelatedProjects": "پروژه‌های مربوطه",
+    "Placeholders": {
+      "ApprovalFlowName": "نام جریان تایید را وارد کنید",
+      "PersianName": "نام فارسی را وارد کنید",
+      "Description": "شرح را وارد کنید"
+    },
+    "Columns": {
+      "Name": "نام",
+      "PersianName": "نام فارسی",
       "Description": "شرح",
-      "RelatedProjects": "پروژه‌های مرتبط"
-    }
+      "IsGlobal": "جهانی",
+      "MaxDuration": "حداکثر مدت",
+      "Cost1": "هزینه 1",
+      "Predecessor": "پیش‌نیاز"
+    },
+    "DeleteConfirmTitle": "حذف جریان تایید",
+    "DeleteConfirmMessage": "آیا مطمئن هستید که می‌خواهید این جریان تایید را حذف کنید؟"
   }
-  
+}

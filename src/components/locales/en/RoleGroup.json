@@ -1,9 +1,12 @@
 {
-    "RoleGroup": {
-      "Name": "Name Group",
-      "Description": "Description",
-      "Projects": "Related Projects",
-      "Members": "Group Members"
+  "RoleGroup": {
+    "Name": "Name Group",
+    "Description": "Description",
+    "Projects": "Related Projects",
+    "Members": "Group Members",
+    "Placeholders": {
+      "Name": "Enter group name",
+      "Description": "Enter description"
     }
   }
-  
+}

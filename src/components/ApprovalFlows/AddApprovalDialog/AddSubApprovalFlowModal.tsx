@@ -1,4 +1,3 @@
-// AddSubApprovalFlowModal.tsx
 import React, { useState, useRef, useEffect } from "react";
 import DynamicModal from "../MainApproval/ModalApprovalFlow";
 import ApprovalFlowsTab, {
@@ -29,12 +28,11 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
   onBoxTemplateInserted,
 }) => {
   const { t } = useTranslation();
-  // همیشه پیش‌فرض روی Approval Flows
   const [activeTab, setActiveTab] = useState<"approval" | "alert">("approval");
   const api = useApi();
 
-  // ریست کامل فرم هر بار بازشدن
   const [modalKey, setModalKey] = useState<number>(Date.now());
+
   useEffect(() => {
     if (isOpen) {
       setModalKey(Date.now());
@@ -49,13 +47,10 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       const child = approvalFlowsTabRef.current;
       if (!child) return;
 
-      // ✅ اعتبارسنجی کامل در فرزند
       if (!child.validateForm()) return;
 
-      // اگر معتبر بود، داده‌ها را بگیر
       const formData: ApprovalFlowsTabData = child.getFormData();
 
-      // ... ادامه ساخت payload و ذخیره مثل قبل
       const wfApprovals = formData.tableData.map((row) => ({
         nPostTypeID: null,
         nPostID: row.nPostID,
@@ -119,14 +114,18 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
       onClose();
     } catch (err) {
       console.error(err);
-      showAlert("error", null, "Error", "Failed to save");
+      showAlert(
+        "error",
+        null,
+        t("AddApprovalFlows.Error"),
+        t("AddApprovalFlows.SaveFailed")
+      );
     }
   };
 
   return (
     <DynamicModal isOpen={isOpen} onClose={onClose} size="large">
       <div className="relative">
-        {/* تب‌ها */}
         <div
           role="tablist"
           className="tabs tabs-boxed bg-gradient-to-r from-[#EA479B] via-[#A256F6] to-[#E8489E] text-white"
@@ -141,7 +140,7 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
 
           <button
             role="tab"
-            title={!editData ? "Alerts is active in edit mode" : undefined}
+            title={!editData ? t("AddApprovalFlows.AlertsEditModeOnly") : undefined}
             disabled={!editData}
             className={`tab ${activeTab === "alert" ? "tab-active" : ""} ${
               !editData ? "cursor-not-allowed opacity-50" : ""
@@ -152,35 +151,39 @@ const AddSubApprovalFlowModal: React.FC<AddSubApprovalFlowModalProps> = ({
           </button>
         </div>
 
-        {/* محتوای تب‌ها */}
         <div className="mt-4 p-4 overflow-auto">
           {activeTab === "approval" && (
             <ApprovalFlowsTab
               key={modalKey}
-              ref={(inst) => (approvalFlowsTabRef.current = inst)}
+              ref={(inst) => {
+                approvalFlowsTabRef.current = inst;
+              }}
               editData={editData}
               boxTemplates={boxTemplates}
             />
           )}
+
           {activeTab === "alert" && (
             <AlertTab nWFBoxTemplateId={editData ? editData.ID : 0} />
           )}
         </div>
 
-        {/* دکمه‌های Save/Edit و Cancel فقط در تب Approval */}
         {activeTab === "approval" && (
           <div className="flex justify-center mt-6 gap-3 mb-4">
             <button
               onClick={handleSaveOrUpdate}
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
             >
-              {editData ? t("Global.Edit") : t("Global.Add")}
+              {editData
+                ? t("AddApprovalFlows.Edit")
+                : t("AddApprovalFlows.Add")}
             </button>
+
             <button
               onClick={onClose}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
             >
-              {t("Global.Cancel")}
+              {t("AddApprovalFlows.Cancel")}
             </button>
           </div>
         )}

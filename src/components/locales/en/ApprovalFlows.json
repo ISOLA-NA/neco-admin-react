@@ -1,8 +1,23 @@
 {
-    "ApprovalFlows": {
-      "ApprovalFlowName": "Approval Flow Name",
+  "ApprovalFlows": {
+    "ApprovalFlowName": "Approval Flow Name",
+    "Description": "Description",
+    "RelatedProjects": "Related Projects",
+    "Placeholders": {
+      "ApprovalFlowName": "Enter approval flow name",
+      "PersianName": "Enter Persian name",
+      "Description": "Enter description"
+    },
+    "Columns": {
+      "Name": "Name",
+      "PersianName": "Persian Name",
       "Description": "Description",
-      "RelatedProjects": "Related Projects"
-    }
+      "IsGlobal": "Global",
+      "MaxDuration": "Max Duration",
+      "Cost1": "Cost 1",
+      "Predecessor": "Predecessor"
+    },
+    "DeleteConfirmTitle": "Delete Approval Flow",
+    "DeleteConfirmMessage": "Are you sure you want to delete this approval flow?"
   }
-  
+}

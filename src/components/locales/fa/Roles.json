@@ -2,6 +2,7 @@
     "Roles": {
       "RoleCode": "کد نقش",
       "Role": "نقش",
+      "RoleName": "نام",
       "Responsibilities": "مسئولیت‌ها",
       "JobDescription": "شرح شغل",
       "Competencies": "شایستگی‌ها",

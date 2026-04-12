@@ -1,9 +1,12 @@
 {
-    "RoleGroup": {
-      "Name": "نام گروه",
-      "Description": "شرح",
-      "Projects": "پروژه‌های مربوطه",
-      "Members": "اعضای گروه"
+  "RoleGroup": {
+    "Name": "نام گروه",
+    "Description": "شرح",
+    "Projects": "پروژه‌های مربوطه",
+    "Members": "اعضای گروه",
+    "Placeholders": {
+      "Name": "نام گروه را وارد کنید",
+      "Description": "شرح را وارد کنید"
     }
   }
-  
+}

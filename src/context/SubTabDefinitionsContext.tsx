@@ -555,7 +555,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllRoles,
         columnDefs: [
           {
-            headerName: t("Roles.Role"),
+            headerName: t("Roles.RoleName"),
             field: "Name",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -1031,51 +1031,119 @@ export const SubTabDefinitionsProvider: React.FC<{
 
       // ✅ ApprovalFlows: Duplicate فعال شد
       ApprovalFlows: {
-        endpoint: async () => {
-          const data = await api.getAllWfTemplate();
-          return data.map((r: any) => ({
-            ...r,
-            PersianName: r.PersianName ?? "",
-          }));
-        },
-        columnDefs: withPersianName([
-          {
-            headerName: TT("DataTable.Headers.AFName", "نام گردش تایید"),
-            field: "Name",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-          },
-        ]),
-        iconVisibility: {
-          showAdd: true,
-          showEdit: true,
-          showDelete: true,
-          showDuplicate: true,
-        },
-        duplicateAction: async (row: any) => {
-          const baseName = ((row as any)?.Name ?? "").toString().trim();
-          const targetName = withCopySuffix(baseName);
-
-          const payloadToInsert = {
-            ...row,
-            ID: 0,
-            Name: targetName,
-            ModifiedById: null,
-            LastModified: null,
-          };
-
-          const createdRaw = await api.addApprovalFlow(payloadToInsert as any);
-          const created = normalizeApiResult(createdRaw);
-
-          // ✅ حواسمون به nullها هست: پایه created، خالی‌ها از row پر شوند
-          return fillEmptyFrom(created, row);
-        },
-        nameField: "Name",
-        updater: async (payload: any) => {
-          return await api.editApprovalFlow(payload as any);
-        },
+  endpoint: async () => {
+    const data = await api.getAllWfTemplate();
+    return data.map((r: any) => ({
+      ...r,
+      PersianName: r.PersianName ?? "",
+      Describtion: r.Describtion ?? "",
+      IsGlobal: typeof r.IsGlobal === "boolean" ? r.IsGlobal : true,
+      MaxDuration: r.MaxDuration ?? 0,
+      PCost: r.PCost ?? 0,
+    }));
+  },
+  columnDefs: [
+    {
+      headerName: t("ApprovalFlows.Columns.Name", { defaultValue: "Name" }),
+      field: "Name",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+      minWidth: 150,
+      flex: 1.2,
+    },
+    {
+      headerName: t("ApprovalFlows.Columns.PersianName", {
+        defaultValue: "Persian Name",
+      }),
+      field: "PersianName",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+      minWidth: 150,
+      flex: 1.2,
+    },
+    {
+      headerName: t("ApprovalFlows.Columns.Description", {
+        defaultValue: "Description",
+      }),
+      field: "Describtion",
+      filter: "agTextColumnFilter",
+      sortable: true,
+      resizable: true,
+      minWidth: 170,
+      flex: 1.4,
+    },
+    {
+      headerName: t("ApprovalFlows.Columns.IsGlobal", {
+        defaultValue: "Global",
+      }),
+      field: "IsGlobal",
+      filter: false,
+      sortable: true,
+      resizable: true,
+      minWidth: 110,
+      flex: 0.8,
+      cellStyle: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       },
+      cellRendererFramework: (p: any) => (
+        <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
+      ),
+    },
+    {
+      headerName: t("ApprovalFlows.Columns.MaxDuration", {
+        defaultValue: "Max Duration",
+      }),
+      field: "MaxDuration",
+      filter: "agNumberColumnFilter",
+      sortable: true,
+      resizable: true,
+      minWidth: 130,
+      flex: 1,
+    },
+    {
+      headerName: t("ApprovalFlows.Columns.Cost1", {
+        defaultValue: "Cost 1",
+      }),
+      field: "PCost",
+      filter: "agNumberColumnFilter",
+      sortable: true,
+      resizable: true,
+      minWidth: 120,
+      flex: 1,
+    },
+  ],
+  iconVisibility: {
+    showAdd: true,
+    showEdit: true,
+    showDelete: true,
+    showDuplicate: true,
+  },
+  duplicateAction: async (row: any) => {
+    const baseName = ((row as any)?.Name ?? "").toString().trim();
+    const targetName = withCopySuffix(baseName);
+
+    const payloadToInsert = {
+      ...row,
+      ID: 0,
+      Name: targetName,
+      ModifiedById: null,
+      LastModified: null,
+    };
+
+    const createdRaw = await api.addApprovalFlow(payloadToInsert as any);
+    const created = normalizeApiResult(createdRaw);
+
+    return fillEmptyFrom(created, row);
+  },
+  nameField: "Name",
+  updater: async (payload: any) => {
+    return await api.editApprovalFlow(payload as any);
+  },
+},
 
       // ✅ Forms
       Forms: {

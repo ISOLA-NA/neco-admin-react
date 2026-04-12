@@ -1,4 +1,3 @@
-// src/components/DeemedSection.tsx
 import React, { useState, useEffect } from "react";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import DynamicInput from "../../utilities/DynamicInput";
@@ -42,7 +41,8 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
   setActionBtnID,
 }) => {
   const { t } = useTranslation();
-  // حالا value ها را به string تبدیل می‌کنیم
+  const api = useApi();
+
   const [fromOptions, setFromOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -54,7 +54,6 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
   const [localActionBtnOptions, setLocalActionBtnOptions] = useState<
     { value: string; label: string }[]
   >([]);
-  const api = useApi();
 
   useEffect(() => {
     const fetchEnums = async () => {
@@ -66,13 +65,13 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
           str: "DeemCondition",
         });
         const fromOpts = Object.entries(response1).map(([key, val]) => ({
-          value: String(val), // ← به string تبدیل می‌کنیم
+          value: String(val),
           label: key,
         }));
         setFromOptions(fromOpts);
       } catch (error) {
         console.error("Error fetching DeemCondition enums:", error);
-        setErrorEnums("خطا در دریافت DeemCondition");
+        setErrorEnums(t("AddApprovalFlows.ErrFetchingDeemCondition"));
       }
 
       try {
@@ -80,27 +79,27 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
           str: "DeemAction",
         });
         const statusOpts = Object.entries(response2).map(([key, val]) => ({
-          value: String(val), // ← به string تبدیل می‌کنیم
+          value: String(val),
           label: key,
         }));
         setStatusOptions(statusOpts);
       } catch (error) {
         console.error("Error fetching DeemAction enums:", error);
-        setErrorEnums("خطا در دریافت DeemAction");
+        setErrorEnums(t("AddApprovalFlows.ErrFetchingDeemAction"));
       } finally {
         setLoadingEnums(false);
       }
     };
 
     fetchEnums();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     const fetchActionBtnOptions = async () => {
       try {
         const res = await api.getAllAfbtn();
         const opts = res.map((btn: any) => ({
-          value: String(btn.ID), // ← به string تبدیل می‌کنیم
+          value: String(btn.ID),
           label: btn.Name,
         }));
         setLocalActionBtnOptions(opts);
@@ -112,7 +111,6 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
     fetchActionBtnOptions();
   }, [api]);
 
-  // قبلا boxTemplates دارای عدد بود، اینجا به string تبدیل می‌کنیم
   const previousStateOptions = boxTemplates.map((box) => ({
     value: String(box.ID),
     label: box.Name,
@@ -120,48 +118,66 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
 
   return (
     <div className="mt-4">
-      <div className="bg-gray-200 p-6 rounded mb-4">
-        <div className="flex flex-wrap gap-4 items-center">
-          {/* After */}
-          <div className="w-40">
+      <div className="bg-gray-200 p-4 rounded mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+          <div className="md:col-span-2">
             <DynamicInput
               name={t("AddApprovalFlows.After")}
               type="number"
-              value={deemDay}
-              onChange={(e) => setDeemDay(Number(e.target.value))}
+              value={deemDay === 0 ? "" : deemDay}
+              onChange={(e) =>
+                setDeemDay(e.target.value ? Number(e.target.value) : 0)
+              }
               disabled={disableMain}
             />
           </div>
 
-          {/* From */}
-          <div className="w-40">
+          <div className="md:col-span-4">
             <DynamicSelector
-              options={fromOptions}
-              selectedValue={String(deemCondition)}
-              onChange={(e) => setDeemCondition(Number(e.target.value))}
-              label={t("AddApprovalFlows.From")}
+              options={[
+                {
+                  value: "",
+                  label: t("AddApprovalFlows.SelectCondition"),
+                },
+                ...fromOptions,
+              ]}
+              selectedValue={deemCondition ? String(deemCondition) : ""}
+              onChange={(e) =>
+                setDeemCondition(e.target.value ? Number(e.target.value) : 0)
+              }
+              label={t("AddApprovalFlows.Condition")}
               disabled={disableMain}
             />
           </div>
 
-          {/* The status will set to */}
-          <div className="w-40">
+          <div className="md:col-span-6">
             <DynamicSelector
-              options={statusOptions}
-              selectedValue={String(deemAction)}
-              onChange={(e) => setDeemAction(Number(e.target.value))}
+              options={[
+                {
+                  value: "",
+                  label: t("AddApprovalFlows.SelectStatus"),
+                },
+                ...statusOptions,
+              ]}
+              selectedValue={deemAction ? String(deemAction) : ""}
+              onChange={(e) =>
+                setDeemAction(e.target.value ? Number(e.target.value) : 0)
+              }
               label={t("AddApprovalFlows.TheStatusWillSetTo")}
               disabled={disableMain}
             />
           </div>
 
-          {/* Previous State */}
-          <div className="w-40">
+          <div className="md:col-span-4">
             <DynamicSelector
-              options={previousStateOptions}
-              selectedValue={
-                previewsStateId !== null ? String(previewsStateId) : ""
-              }
+              options={[
+                {
+                  value: "",
+                  label: t("AddApprovalFlows.SelectPreviousState"),
+                },
+                ...previousStateOptions,
+              ]}
+              selectedValue={previewsStateId ? String(previewsStateId) : ""}
               onChange={(e) =>
                 setPreviewsStateId(
                   e.target.value ? Number(e.target.value) : null
@@ -172,12 +188,17 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
             />
           </div>
 
-          {/* Select Action Button */}
           {showAdminSection && (
-            <div className="w-40">
+            <div className="md:col-span-4">
               <DynamicSelector
-                options={localActionBtnOptions}
-                selectedValue={actionBtnID !== null ? String(actionBtnID) : ""}
+                options={[
+                  {
+                    value: "",
+                    label: t("AddApprovalFlows.SelectActionButtonPlaceholder"),
+                  },
+                  ...localActionBtnOptions,
+                ]}
+                selectedValue={actionBtnID ? String(actionBtnID) : ""}
                 onChange={(e) =>
                   setActionBtnID(e.target.value ? Number(e.target.value) : null)
                 }
@@ -189,23 +210,30 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
         </div>
 
         {loadingEnums && (
-          <p className="text-xs text-gray-600 mt-2">Loading enums...</p>
+          <p className="text-xs text-gray-600 mt-2">
+            {t("AddApprovalFlows.LoadingEnums")}
+          </p>
         )}
+
         {errorEnums && (
           <p className="text-xs text-red-600 mt-2">{errorEnums}</p>
         )}
       </div>
 
-      {/* بخش Admin-only */}
       <div className="bg-gray-100 p-2 rounded">
         <p className="text-sm text-gray-700 mb-2">
           {t("AddApprovalFlows.IfUserClicksAdmin")}
         </p>
+
         <DynamicSelector
-          options={previousStateOptions}
-          selectedValue={
-            goToPreviousStateID !== null ? String(goToPreviousStateID) : ""
-          }
+          options={[
+            {
+              value: "",
+              label: t("AddApprovalFlows.SelectPreviousState"),
+            },
+            ...previousStateOptions,
+          ]}
+          selectedValue={goToPreviousStateID ? String(goToPreviousStateID) : ""}
           onChange={(e) =>
             setGoToPreviousStateID(
               e.target.value ? Number(e.target.value) : null

@@ -327,75 +327,75 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
     );
 
     return (
-      <TwoColumnLayout>
-        <DynamicInput
-          name={t("RoleGroup.Name")}
-          type="text"
-          value={formData.Name}
-          placeholder="Enter group name"
-          onChange={(e) => handleChange("Name", e.target.value)}
-          required
-          className="mb-4"
-        />
+  <TwoColumnLayout>
+    <DynamicInput
+      name={t("RoleGroup.Name")}
+      type="text"
+      value={formData.Name}
+      placeholder={t("RoleGroup.Placeholders.Name")}
+      onChange={(e) => handleChange("Name", e.target.value)}
+      required
+      className="mb-4"
+    />
 
-        <CustomTextarea
-          name={t("RoleGroup.Description")}
-          value={formData.Description || ""}
-          placeholder="Enter description"
-          onChange={(e) => handleChange("Description", e.target.value)}
-          className="mb-4"
-        />
+    <CustomTextarea
+      name={t("RoleGroup.Description")}
+      value={formData.Description || ""}
+      placeholder={t("RoleGroup.Placeholders.Description")}
+      onChange={(e) => handleChange("Description", e.target.value)}
+      className="mb-4"
+    />
 
-        <ListSelector
-          title={t("RoleGroup.Projects")}
-          className="mb-4"
-          columnDefs={columnDefs.projects}
-          rowData={processedData.projectsListData}
-          selectedIds={selectedIds.projects}
-          onSelectionChange={handleProjectsChange}
-          showSwitcher={true}
-          isGlobal={formData.IsGlobal}
-          onGlobalChange={handleGlobalChange}
-          loading={loading.projects}
-          ModalContentComponent={TableSelector}
-          modalContentProps={{
-            columnDefs: columnDefs.projects,
-            rowData: processedData.projectsListData,
-            selectedRows: getAssociatedItems(
-              formData.ProjectsStr,
-              processedData.projectsListData
-            ),
-            onRowDoubleClick: (rows: any[]) =>
-              handleProjectsChange(rows.map((row) => row.ID)),
-            selectionMode: "multiple",
-          }}
-        />
+    <ListSelector
+      title={t("RoleGroup.Projects")}
+      className="mb-4"
+      columnDefs={columnDefs.projects}
+      rowData={processedData.projectsListData}
+      selectedIds={selectedIds.projects}
+      onSelectionChange={handleProjectsChange}
+      showSwitcher={true}
+      isGlobal={formData.IsGlobal}
+      onGlobalChange={handleGlobalChange}
+      loading={loading.projects}
+      ModalContentComponent={TableSelector}
+      modalContentProps={{
+        columnDefs: columnDefs.projects,
+        rowData: processedData.projectsListData,
+        selectedRows: getAssociatedItems(
+          formData.ProjectsStr,
+          processedData.projectsListData
+        ),
+        onRowDoubleClick: (rows: any[]) =>
+          handleProjectsChange(rows.map((row) => row.ID)),
+        selectionMode: "multiple",
+      }}
+    />
 
-        <ListSelector
-          title={t("RoleGroup.Members")}
-          className="mb-4"
-          columnDefs={columnDefs.members}
-          rowData={processedData.processedRoles}
-          selectedIds={selectedIds.members}
-          onSelectionChange={handleMembersChange}
-          showSwitcher={false}
-          isGlobal={false}
-          loading={loading.groupMembers}
-          ModalContentComponent={TableSelector}
-          modalContentProps={{
-            columnDefs: columnDefs.members,
-            rowData: processedData.processedRoles,
-            selectedRows: getAssociatedItems(
-              formData.PostsStr,
-              processedData.processedRoles
-            ),
-            onRowDoubleClick: (rows: any[]) =>
-              handleMembersChange(rows.map((row) => row.ID)),
-            selectionMode: "multiple",
-          }}
-        />
-      </TwoColumnLayout>
-    );
+    <ListSelector
+      title={t("RoleGroup.Members")}
+      className="mb-4"
+      columnDefs={columnDefs.members}
+      rowData={processedData.processedRoles}
+      selectedIds={selectedIds.members}
+      onSelectionChange={handleMembersChange}
+      showSwitcher={false}
+      isGlobal={false}
+      loading={loading.groupMembers}
+      ModalContentComponent={TableSelector}
+      modalContentProps={{
+        columnDefs: columnDefs.members,
+        rowData: processedData.processedRoles,
+        selectedRows: getAssociatedItems(
+          formData.PostsStr,
+          processedData.processedRoles
+        ),
+        onRowDoubleClick: (rows: any[]) =>
+          handleMembersChange(rows.map((row) => row.ID)),
+        selectionMode: "multiple",
+      }}
+    />
+  </TwoColumnLayout>
+);
   }
 );
 
