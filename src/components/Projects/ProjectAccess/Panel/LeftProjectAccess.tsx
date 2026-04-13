@@ -1,6 +1,3 @@
-/* ----------------------------------------------------------
-   src/components/Projects/ProjectAccess/Panel/LeftProjectAccess.tsx
-   ---------------------------------------------------------- */
 import React, { useState, useEffect, useMemo } from "react";
 import { FaTrash } from "react-icons/fa";
 import SelectorProjectAccess, { OptionType } from "../SelectorProjectAccess";
@@ -35,7 +32,6 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   const dir = i18n.dir();
   const isRtl = dir === "rtl";
 
-  /* ----------------------------- state ------------------------------ */
   const [rows, setRows] = useState<AccessProject[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [posts, setPosts] = useState<PostSmall[]>([]);
@@ -43,11 +39,9 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
   const [selectedPostId, setSelectedPostId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Confirm state for delete
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<AccessProject | null>(null);
 
-  /* -------------------- maps & selector options --------------------- */
   const rolesMap = useMemo(() => {
     const m: Record<string, string> = {};
     roles.forEach((r) => {
@@ -70,7 +64,6 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     [rows, rolesMap]
   );
 
-  /* ----------------------- data fetch ----------------------- */
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -89,12 +82,10 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     })();
   }, [selectedRow, api, refreshTrigger]);
 
-  /* ---------------- sync selector with state ---------------- */
   useEffect(() => {
     setSelectedPostId(String(currentAccess.nPostID ?? ""));
   }, [currentAccess.nPostID]);
 
-  /* ----------------------- handlers ------------------------- */
   const handlePostChange = (v: string) => {
     setSelectedPostId(v);
     onAccessChange({
@@ -105,24 +96,38 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
 
   const handleSelectRow = (r: AccessProject) => {
     setSelectedRowId(r.ID);
-    onEditStart(r); // تأیید ادیت در هدر (PAHeader) انجام می‌شود
+    onEditStart(r);
   };
 
-  // OPEN delete confirm
   const handleAskDelete = (r: AccessProject) => {
     setRowToDelete(r);
     setConfirmOpen(true);
   };
 
-  // CONFIRM delete action
   const handleConfirmDelete = async () => {
     if (!rowToDelete) return;
     try {
       await api.deleteAccessProject(rowToDelete.ID!);
       setRows((prev) => prev.filter((x) => x.ID !== rowToDelete.ID));
-      showAlert("success", null, "", t("Alerts.Deleted.Deleted", { defaultValue: "Deleted successfully." }));
+      showAlert(
+        "success",
+        null,
+        "",
+        t("Alerts.Deleted.Deleted", {
+          defaultValue: "Deleted successfully.",
+        })
+      );
     } catch (e) {
-      showAlert("error", null, t("DynamicConfirm.Confirmations.Default.Title", { defaultValue: "Error" }), t("Alerts.Errors.Default", { defaultValue: "Failed to delete." }));
+      showAlert(
+        "error",
+        null,
+        t("DynamicConfirm.Confirmations.Default.Title", {
+          defaultValue: "Error",
+        }),
+        t("Alerts.Errors.Default", {
+          defaultValue: "Failed to delete.",
+        })
+      );
     } finally {
       setConfirmOpen(false);
       setRowToDelete(null);
@@ -138,10 +143,8 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
     onEditStart(r);
   };
 
-  /* --------------------------- UI --------------------------- */
   return (
     <>
-      {/* DynamicConfirm for Delete */}
       <DynamicConfirm
         isOpen={confirmOpen}
         variant="delete"
@@ -149,14 +152,14 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
           defaultValue: "Delete Confirmation",
         })}
         message={t("DynamicConfirm.Confirmations.Delete.Message", {
-          defaultValue: "Are you sure you want to perform the delete operation?",
+          defaultValue:
+            "Are you sure you want to perform the delete operation?",
         })}
         onConfirm={handleConfirmDelete}
         onClose={handleCancelDelete}
       />
 
       <div className="h-full p-2 flex flex-col" dir={dir}>
-        {/* Select Post */}
         <div className="mb-2">
           <SelectorProjectAccess
             options={options}
@@ -167,7 +170,6 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
           />
         </div>
 
-        {/* Table */}
         <div className="flex-1 overflow-y-auto border rounded bg-white">
           <table className="w-full text-xs border-separate border-spacing-0">
             <thead>
@@ -198,17 +200,18 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
                   <tr
                     key={r.ID}
                     onClick={() => handleSelectRow(r)}
-                    className={`cursor-pointer ${selectedRowId === r.ID
-                      ? `${isRtl ? "border-r-4" : "border-l-4"
-                      } border-blue-400 bg-blue-50`
-                      : "hover:bg-gray-50"
-                      }`}
+                    className={`cursor-pointer ${
+                      selectedRowId === r.ID
+                        ? `${
+                            isRtl ? "border-r-4" : "border-l-4"
+                          } border-blue-400 bg-blue-50`
+                        : "hover:bg-gray-50"
+                    }`}
                   >
                     <td className="p-2 truncate max-w-[200px]">
                       {r.PostName || rolesMap[r.nPostID.trim().toLowerCase()]}
                     </td>
 
-                    {/* ستون Actions — فقط Delete (دکمه Edit حذف شد) */}
                     <td className="p-2">
                       <div className="flex items-center justify-center gap-2 flex-nowrap">
                         <button

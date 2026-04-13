@@ -1,6 +1,7 @@
 {
   "ODP": {
     "ODPName": "نام ODP",
+    "PersianName": "نام فارسی",
     "Address": "آدرس",
     "Description": "شرح",
     "ProgramTemplate": "قالب برنامه",
@@ -8,6 +9,12 @@
     "FormTemplate": "قالب فرم",
     "RelatedProjects": "پروژه‌های مرتبط",
     "Public": "عمومی",
+    "Columns": {
+      "Name": "نام",
+      "PersianName": "نام فارسی",
+      "Address": "آدرس",
+      "ProgramTemplate": "قالب برنامه"
+    },
     "Alerts": {
       "Titles": {
         "Attention": "توجه"

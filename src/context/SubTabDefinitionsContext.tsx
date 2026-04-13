@@ -18,6 +18,7 @@ import AppServices, {
   MenuGroup,
   MenuItem,
   EntityType,
+  ProgramType,
 } from "../../src/services/api.services";
 import { useTranslation } from "react-i18next";
 import type { ColDef } from "ag-grid-community";
@@ -98,14 +99,15 @@ export const SubTabDefinitionsProvider: React.FC<{
 }> = ({ children }) => {
   const api = useApi();
   const { t, i18n } = useTranslation();
+  const [programTypes, setProgramTypes] = useState<ProgramType[]>([]);
 
   // ✅ کمک: اگر کلید ترجمه نبود، defaultValue نمایش بده تا key خام دیده نشه
   const TT = (key: string, fallback: string) =>
     t(key, { defaultValue: fallback });
 
-  const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>(
-    []
-  );
+  const [programTemplates, setProgramTemplates] = useState<
+    ProgramTemplateItem[]
+  >([]);
   const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -130,6 +132,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           companiesData,
           rolesData,
           userTypesData,
+          programTypesData,
         ] = await Promise.all([
           api.getAllProgramTemplates(),
           api.getAllDefaultRibbons(),
@@ -139,6 +142,7 @@ export const SubTabDefinitionsProvider: React.FC<{
           api.getAllCompanies(),
           api.getAllRoles(),
           AppServices.getEnum({ str: "UserType" }),
+          api.getAllProgramType(),
         ]);
 
         setProgramTemplates(templates);
@@ -148,6 +152,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         setAllProjects(projectsData);
         setAllCompanies(companiesData);
         setAllRoles(rolesData);
+        setProgramTypes(programTypesData);
 
         const mappedUserTypes = Object.fromEntries(
           Object.entries(userTypesData || {}).map(([label, value]) => [
@@ -205,7 +210,12 @@ export const SubTabDefinitionsProvider: React.FC<{
     },
     headerStyle: { textAlign: "center" },
     cellRendererFramework: (p: any) => (
-      <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
+      <input
+        type="checkbox"
+        checked={!!p.value}
+        readOnly
+        style={{ margin: 0 }}
+      />
     ),
   });
 
@@ -228,7 +238,9 @@ export const SubTabDefinitionsProvider: React.FC<{
     } as any);
 
     const createdMenu = normalizeApiResult(createdMenuRaw);
-    const newMenuId = Number((createdMenu as any)?.ID ?? (createdMenu as any)?.id);
+    const newMenuId = Number(
+      (createdMenu as any)?.ID ?? (createdMenu as any)?.id
+    );
 
     if (!newMenuId || Number.isNaN(newMenuId)) {
       throw new Error("Ribbon duplication failed: new Menu ID not returned");
@@ -251,7 +263,9 @@ export const SubTabDefinitionsProvider: React.FC<{
       const insertedTabRaw = await AppServices.insertMenuTab(insertPayload);
       const insertedTab = normalizeApiResult(insertedTabRaw);
 
-      const newTabId = Number((insertedTab as any)?.ID ?? (insertedTab as any)?.id);
+      const newTabId = Number(
+        (insertedTab as any)?.ID ?? (insertedTab as any)?.id
+      );
 
       if (!newTabId || Number.isNaN(newTabId)) {
         throw new Error("Ribbon duplication failed: new Tab ID not returned");
@@ -271,7 +285,9 @@ export const SubTabDefinitionsProvider: React.FC<{
           LastModified: null,
         };
 
-        const insertedGroupRaw = await AppServices.insertMenuGroup(groupPayload);
+        const insertedGroupRaw = await AppServices.insertMenuGroup(
+          groupPayload
+        );
         const insertedGroup = normalizeApiResult(insertedGroupRaw);
 
         const newGroupId = Number(
@@ -279,7 +295,9 @@ export const SubTabDefinitionsProvider: React.FC<{
         );
 
         if (!newGroupId || Number.isNaN(newGroupId)) {
-          throw new Error("Ribbon duplication failed: new Group ID not returned");
+          throw new Error(
+            "Ribbon duplication failed: new Group ID not returned"
+          );
         }
 
         // 4) duplicate items for this group
@@ -302,9 +320,12 @@ export const SubTabDefinitionsProvider: React.FC<{
           );
 
           if (!newItemId || Number.isNaN(newItemId)) {
-            console.warn("Ribbon duplication: item inserted but no new ID returned", {
-              insertedItem,
-            });
+            console.warn(
+              "Ribbon duplication: item inserted but no new ID returned",
+              {
+                insertedItem,
+              }
+            );
           }
         }
       }
@@ -693,7 +714,9 @@ export const SubTabDefinitionsProvider: React.FC<{
             sortable: true,
             resizable: true,
             valueGetter: (params: any) => {
-              const proj = allProjects.find((p) => p.ID === params.data.nProjectID);
+              const proj = allProjects.find(
+                (p) => p.ID === params.data.nProjectID
+              );
               return proj ? proj.ProjectName : "";
             },
           },
@@ -715,7 +738,9 @@ export const SubTabDefinitionsProvider: React.FC<{
             sortable: true,
             resizable: true,
             valueGetter: (params: any) => {
-              const comp = allCompanies.find((c) => c.ID === params.data.nCompanyID);
+              const comp = allCompanies.find(
+                (c) => c.ID === params.data.nCompanyID
+              );
               return comp ? comp.Name : "";
             },
           },
@@ -726,7 +751,9 @@ export const SubTabDefinitionsProvider: React.FC<{
             sortable: true,
             resizable: true,
             valueGetter: (params: any) => {
-              const sup = allRoles.find((r: any) => r.ID === params.data.ParrentId);
+              const sup = allRoles.find(
+                (r: any) => r.ID === params.data.ParrentId
+              );
               return sup ? sup.Name : "";
             },
           },
@@ -743,11 +770,54 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllProgramTemplates,
         columnDefs: [
           {
-            headerName: TT("DataTable.Headers.Name", "نام"),
+            headerName: t("ProgramTemplate.ProgramName", {
+              defaultValue: "نام برنامه",
+            }),
             field: "Name",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 180,
+            flex: 2,
+          },
+          {
+            headerName: t("ProgramTemplate.Type", { defaultValue: "نوع" }),
+            field: "nProgramTypeID",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 140,
+            flex: 1.5,
+            valueGetter: (params: any) => {
+              const type = programTypes.find(
+                (pt) =>
+                  String(pt?.ID ?? "") ===
+                  String(params.data?.nProgramTypeID ?? "")
+              );
+              return type?.Name || "";
+            },
+          },
+          {
+            headerName: t("ProgramTemplate.Global", { defaultValue: "جهانی" }),
+            field: "IsGlobal",
+            filter: false,
+            sortable: true,
+            resizable: true,
+            minWidth: 110,
+            flex: 1,
+            cellStyle: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+            cellRendererFramework: (p: any) => (
+              <input
+                type="checkbox"
+                checked={!!p.value}
+                readOnly
+                style={{ margin: 0 }}
+              />
+            ),
           },
         ],
         iconVisibility: {
@@ -781,72 +851,81 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllProjectsWithCalendar,
         columnDefs: [
           {
-            headerName: TT("DataTable.Headers.ProjectName", "نام پروژه"),
+            headerName: t("Projects.ProjectName", {
+              defaultValue: "نام پروژه",
+            }),
             field: "ProjectName",
             filter: "agTextColumnFilter",
-            minWidth: 140,
+            minWidth: 160,
             sortable: true,
             resizable: true,
+            flex: 1.8,
           },
           {
-            headerName: TT("DataTable.Headers.Status", "وضعیت"),
+            headerName: t("Projects.Status", { defaultValue: "وضعیت" }),
             field: "State",
             filter: "agTextColumnFilter",
-            minWidth: 100,
+            minWidth: 110,
             sortable: true,
             resizable: true,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.ActStart", "شروع واقعی"),
+            headerName: t("Projects.ExecutionStartDate", {
+              defaultValue: "تاریخ شروع اجرا",
+            }),
             field: "AcualStartTime",
             filter: "agDateColumnFilter",
-            minWidth: 110,
+            minWidth: 150,
             sortable: true,
             resizable: true,
+            flex: 1.4,
           },
           {
-            headerName: TT("DataTable.Headers.Duration", "مدت"),
+            headerName: t("Projects.ProjectPlanDuration", {
+              defaultValue: "مدت زمان",
+            }),
             field: "TotalDuration",
             filter: "agNumberColumnFilter",
-            minWidth: 100,
+            minWidth: 110,
             sortable: true,
             resizable: true,
+            flex: 1,
           },
           {
-            headerName: TT("DataTable.Headers.BudgetAct", "بودجه واقعی"),
+            headerName: t("Projects.ExecutionBudget", {
+              defaultValue: "بودجه اجرا",
+            }),
             field: "PCostAct",
             filter: "agNumberColumnFilter",
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             resizable: true,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.BudgetAppr", "بودجه مصوب"),
+            headerName: t("Projects.ApprovalBudget", {
+              defaultValue: "بودجه تایید",
+            }),
             field: "PCostAprov",
             filter: "agNumberColumnFilter",
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             resizable: true,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.Phase", "فاز"),
+            headerName: t("Projects.Phase", { defaultValue: "فاز" }),
             field: "IsIdea",
             valueGetter: (params: any) =>
               params.data.IsIdea
-                ? TT("DataTable.Headers.IsIdea", "ایده")
-                : TT("DataTable.Headers.Project", "پروژه"),
+                ? t("Projects.IsIdea", { defaultValue: "ایده" })
+                : t("Projects.Project", { defaultValue: "پروژه" }),
             filter: "agTextColumnFilter",
             minWidth: 100,
             sortable: true,
             resizable: true,
-          },
-          {
-            headerName: TT("DataTable.Headers.Calendar", "تقویم"),
-            field: "calendarName",
-            filter: "agTextColumnFilter",
-            minWidth: 120,
-            sortable: true,
-            resizable: true,
+            flex: 1,
           },
         ],
         iconVisibility: {
@@ -857,76 +936,164 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
       },
 
+      // ProjectsAccess: {
+      //   endpoint: api.getAllProjectsWithCalendar,
+      //   columnDefs: [
+      //     {
+      //       headerName: TT("DataTable.Headers.ProjectName", "نام پروژه"),
+      //       field: "ProjectName",
+      //       filter: "agTextColumnFilter",
+      //       minWidth: 140,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //     {
+      //       headerName: TT("DataTable.Headers.Status", "وضعیت"),
+      //       field: "State",
+      //       filter: "agTextColumnFilter",
+      //       minWidth: 100,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //     {
+      //       headerName: TT("DataTable.Headers.ActStart", "شروع واقعی"),
+      //       field: "AcualStartTime",
+      //       filter: "agDateColumnFilter",
+      //       minWidth: 110,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //     {
+      //       headerName: TT("DataTable.Headers.Duration", "مدت"),
+      //       field: "TotalDuration",
+      //       filter: "agNumberColumnFilter",
+      //       minWidth: 100,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //     {
+      //       headerName: TT("DataTable.Headers.BudgetAct", "بودجه واقعی"),
+      //       field: "PCostAct",
+      //       filter: "agNumberColumnFilter",
+      //       minWidth: 110,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //     {
+      //       headerName: TT("DataTable.Headers.BudgetAppr", "بودجه مصوب"),
+      //       field: "PCostAprov",
+      //       filter: "agNumberColumnFilter",
+      //       minWidth: 110,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //     {
+      //       headerName: TT("DataTable.Headers.Phase", "فاز"),
+      //       field: "IsIdea",
+      //       valueGetter: (params: any) =>
+      //         params.data.IsIdea
+      //           ? TT("DataTable.Headers.IsIdea", "ایده")
+      //           : TT("DataTable.Headers.Project", "پروژه"),
+      //       filter: "agTextColumnFilter",
+      //       minWidth: 100,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //     {
+      //       headerName: TT("DataTable.Headers.Calendar", "تقویم"),
+      //       field: "calendarName",
+      //       filter: "agTextColumnFilter",
+      //       minWidth: 120,
+      //       sortable: true,
+      //       resizable: true,
+      //     },
+      //   ],
+      //   iconVisibility: {
+      //     showAdd: false,
+      //     showEdit: false,
+      //     showDelete: true,
+      //     showDuplicate: false,
+      //   },
+      // },
       ProjectsAccess: {
         endpoint: api.getAllProjectsWithCalendar,
         columnDefs: [
           {
-            headerName: TT("DataTable.Headers.ProjectName", "نام پروژه"),
+            headerName: t("Projects.ProjectName", {
+              defaultValue: "نام پروژه",
+            }),
             field: "ProjectName",
             filter: "agTextColumnFilter",
-            minWidth: 140,
+            minWidth: 160,
             sortable: true,
             resizable: true,
+            flex: 1.8,
           },
           {
-            headerName: TT("DataTable.Headers.Status", "وضعیت"),
+            headerName: t("Projects.Status", { defaultValue: "وضعیت" }),
             field: "State",
             filter: "agTextColumnFilter",
-            minWidth: 100,
+            minWidth: 110,
             sortable: true,
             resizable: true,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.ActStart", "شروع واقعی"),
+            headerName: t("Projects.ExecutionStartDate", {
+              defaultValue: "تاریخ شروع اجرا",
+            }),
             field: "AcualStartTime",
             filter: "agDateColumnFilter",
-            minWidth: 110,
+            minWidth: 150,
             sortable: true,
             resizable: true,
+            flex: 1.4,
           },
           {
-            headerName: TT("DataTable.Headers.Duration", "مدت"),
+            headerName: t("Projects.ProjectPlanDuration", {
+              defaultValue: "مدت زمان",
+            }),
             field: "TotalDuration",
             filter: "agNumberColumnFilter",
-            minWidth: 100,
+            minWidth: 110,
             sortable: true,
             resizable: true,
+            flex: 1,
           },
           {
-            headerName: TT("DataTable.Headers.BudgetAct", "بودجه واقعی"),
+            headerName: t("Projects.ExecutionBudget", {
+              defaultValue: "بودجه اجرا",
+            }),
             field: "PCostAct",
             filter: "agNumberColumnFilter",
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             resizable: true,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.BudgetAppr", "بودجه مصوب"),
+            headerName: t("Projects.ApprovalBudget", {
+              defaultValue: "بودجه تایید",
+            }),
             field: "PCostAprov",
             filter: "agNumberColumnFilter",
-            minWidth: 110,
+            minWidth: 130,
             sortable: true,
             resizable: true,
+            flex: 1.2,
           },
           {
-            headerName: TT("DataTable.Headers.Phase", "فاز"),
+            headerName: t("Projects.Phase", { defaultValue: "فاز" }),
             field: "IsIdea",
             valueGetter: (params: any) =>
               params.data.IsIdea
-                ? TT("DataTable.Headers.IsIdea", "ایده")
-                : TT("DataTable.Headers.Project", "پروژه"),
+                ? t("Projects.IsIdea", { defaultValue: "ایده" })
+                : t("Projects.Project", { defaultValue: "پروژه" }),
             filter: "agTextColumnFilter",
             minWidth: 100,
             sortable: true,
             resizable: true,
-          },
-          {
-            headerName: TT("DataTable.Headers.Calendar", "تقویم"),
-            field: "calendarName",
-            filter: "agTextColumnFilter",
-            minWidth: 120,
-            sortable: true,
-            resizable: true,
+            flex: 1,
           },
         ],
         iconVisibility: {
@@ -940,42 +1107,61 @@ export const SubTabDefinitionsProvider: React.FC<{
       Odp: {
         endpoint: async () => {
           const data = await api.getAllOdpWithExtra();
-          console.log("ODP list sample:", data[0]);
           return data.map((r: any) => ({
             ...r,
             PersianName: r.PersianName ?? "",
           }));
         },
-        columnDefs: withPersianName([
+        columnDefs: [
           {
-            headerName: TT("DataTable.Headers.Name", "نام"),
+            headerName: t("ODP.Columns.Name", { defaultValue: "نام" }),
             field: "Name",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 160,
+            flex: 1.5,
           },
           {
-            headerName: TT("DataTable.Headers.Address", "آدرس"),
+            headerName: t("ODP.Columns.PersianName", {
+              defaultValue: "نام فارسی",
+            }),
+            field: "PersianName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 160,
+            flex: 1.5,
+          },
+          {
+            headerName: t("ODP.Columns.Address", { defaultValue: "آدرس" }),
             field: "Address",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 180,
+            flex: 1.8,
           },
           {
-            headerName: TT("DataTable.Headers.WFTemplateName", "نام گردش‌کار"),
-            field: "WFTemplateName",
+            headerName: t("ODP.Columns.ProgramTemplate", {
+              defaultValue: "قالب برنامه",
+            }),
+            field: "nProgramTemplateID",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
+            minWidth: 170,
+            flex: 1.6,
+            valueGetter: (params: any) => {
+              const template = programTemplates.find(
+                (pt) =>
+                  String(pt?.ID ?? "") ===
+                  String(params.data?.nProgramTemplateID ?? "")
+              );
+              return template?.Name || params.data?.ProgramTemplateIDName || "";
+            },
           },
-          {
-            headerName: TT("DataTable.Headers.EntityTypeName", "نام فرم"),
-            field: "EntityTypeName",
-            filter: "agTextColumnFilter",
-            sortable: true,
-            resizable: true,
-          },
-        ]),
+        ],
         iconVisibility: {
           showAdd: true,
           showEdit: true,
@@ -988,14 +1174,14 @@ export const SubTabDefinitionsProvider: React.FC<{
         endpoint: api.getAllEntityCollection,
         columnDefs: [
           {
-            headerName: TT("DataTable.Headers.Name", "نام"),
+            headerName: t("Procedure.Name", { defaultValue: "نام رویه" }),
             field: "Name",
             filter: "agTextColumnFilter",
             sortable: true,
             resizable: true,
           },
           {
-            headerName: TT("DataTable.Headers.Description", "شرح"),
+            headerName: t("Procedure.Description", { defaultValue: "شرح" }),
             field: "Description",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -1031,229 +1217,236 @@ export const SubTabDefinitionsProvider: React.FC<{
 
       // ✅ ApprovalFlows: Duplicate فعال شد
       ApprovalFlows: {
-  endpoint: async () => {
-    const data = await api.getAllWfTemplate();
-    return data.map((r: any) => ({
-      ...r,
-      PersianName: r.PersianName ?? "",
-      Describtion: r.Describtion ?? "",
-      IsGlobal: typeof r.IsGlobal === "boolean" ? r.IsGlobal : true,
-      MaxDuration: r.MaxDuration ?? 0,
-      PCost: r.PCost ?? 0,
-    }));
-  },
-  columnDefs: [
-    {
-      headerName: t("ApprovalFlows.Columns.Name", { defaultValue: "Name" }),
-      field: "Name",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-      minWidth: 150,
-      flex: 1.2,
-    },
-    {
-      headerName: t("ApprovalFlows.Columns.PersianName", {
-        defaultValue: "Persian Name",
-      }),
-      field: "PersianName",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-      minWidth: 150,
-      flex: 1.2,
-    },
-    {
-      headerName: t("ApprovalFlows.Columns.Description", {
-        defaultValue: "Description",
-      }),
-      field: "Describtion",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-      minWidth: 170,
-      flex: 1.4,
-    },
-    {
-      headerName: t("ApprovalFlows.Columns.IsGlobal", {
-        defaultValue: "Global",
-      }),
-      field: "IsGlobal",
-      filter: false,
-      sortable: true,
-      resizable: true,
-      minWidth: 110,
-      flex: 0.8,
-      cellStyle: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        endpoint: async () => {
+          const data = await api.getAllWfTemplate();
+          return data.map((r: any) => ({
+            ...r,
+            PersianName: r.PersianName ?? "",
+            Describtion: r.Describtion ?? "",
+            IsGlobal: typeof r.IsGlobal === "boolean" ? r.IsGlobal : true,
+            MaxDuration: r.MaxDuration ?? 0,
+            PCost: r.PCost ?? 0,
+          }));
+        },
+        columnDefs: [
+          {
+            headerName: t("ApprovalFlows.Columns.Name", {
+              defaultValue: "Name",
+            }),
+            field: "Name",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 150,
+            flex: 1.2,
+          },
+          {
+            headerName: t("ApprovalFlows.Columns.PersianName", {
+              defaultValue: "Persian Name",
+            }),
+            field: "PersianName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 150,
+            flex: 1.2,
+          },
+          {
+            headerName: t("ApprovalFlows.Columns.Description", {
+              defaultValue: "Description",
+            }),
+            field: "Describtion",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 170,
+            flex: 1.4,
+          },
+          {
+            headerName: t("ApprovalFlows.Columns.IsGlobal", {
+              defaultValue: "Global",
+            }),
+            field: "IsGlobal",
+            filter: false,
+            sortable: true,
+            resizable: true,
+            minWidth: 110,
+            flex: 0.8,
+            cellStyle: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            },
+            cellRendererFramework: (p: any) => (
+              <input
+                type="checkbox"
+                checked={!!p.value}
+                readOnly
+                style={{ margin: 0 }}
+              />
+            ),
+          },
+          {
+            headerName: t("ApprovalFlows.Columns.MaxDuration", {
+              defaultValue: "Max Duration",
+            }),
+            field: "MaxDuration",
+            filter: "agNumberColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 130,
+            flex: 1,
+          },
+          {
+            headerName: t("ApprovalFlows.Columns.Cost1", {
+              defaultValue: "Cost 1",
+            }),
+            field: "PCost",
+            filter: "agNumberColumnFilter",
+            sortable: true,
+            resizable: true,
+            minWidth: 120,
+            flex: 1,
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: true,
+        },
+        duplicateAction: async (row: any) => {
+          const baseName = ((row as any)?.Name ?? "").toString().trim();
+          const targetName = withCopySuffix(baseName);
+
+          const payloadToInsert = {
+            ...row,
+            ID: 0,
+            Name: targetName,
+            ModifiedById: null,
+            LastModified: null,
+          };
+
+          const createdRaw = await api.addApprovalFlow(payloadToInsert as any);
+          const created = normalizeApiResult(createdRaw);
+
+          return fillEmptyFrom(created, row);
+        },
+        nameField: "Name",
+        updater: async (payload: any) => {
+          return await api.editApprovalFlow(payload as any);
+        },
       },
-      cellRendererFramework: (p: any) => (
-        <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
-      ),
-    },
-    {
-      headerName: t("ApprovalFlows.Columns.MaxDuration", {
-        defaultValue: "Max Duration",
-      }),
-      field: "MaxDuration",
-      filter: "agNumberColumnFilter",
-      sortable: true,
-      resizable: true,
-      minWidth: 130,
-      flex: 1,
-    },
-    {
-      headerName: t("ApprovalFlows.Columns.Cost1", {
-        defaultValue: "Cost 1",
-      }),
-      field: "PCost",
-      filter: "agNumberColumnFilter",
-      sortable: true,
-      resizable: true,
-      minWidth: 120,
-      flex: 1,
-    },
-  ],
-  iconVisibility: {
-    showAdd: true,
-    showEdit: true,
-    showDelete: true,
-    showDuplicate: true,
-  },
-  duplicateAction: async (row: any) => {
-    const baseName = ((row as any)?.Name ?? "").toString().trim();
-    const targetName = withCopySuffix(baseName);
-
-    const payloadToInsert = {
-      ...row,
-      ID: 0,
-      Name: targetName,
-      ModifiedById: null,
-      LastModified: null,
-    };
-
-    const createdRaw = await api.addApprovalFlow(payloadToInsert as any);
-    const created = normalizeApiResult(createdRaw);
-
-    return fillEmptyFrom(created, row);
-  },
-  nameField: "Name",
-  updater: async (payload: any) => {
-    return await api.editApprovalFlow(payload as any);
-  },
-},
 
       // ✅ Forms
       Forms: {
-  endpoint: async () => {
-    const data = await api.getTableTransmittal();
-    return data.map((item: any) => ({
-      ...item,
-      nEntityCateAID: item.nEntityCateAID ?? null,
-      nEntityCateBID: item.nEntityCateBID ?? null,
-      IsDoc: item.IsDoc ?? false,
-      IsMegaForm: item.IsMegaForm ?? false,
-      Code: item.Code ?? "",
-      PersianName: item.PersianName ?? "",
-      TemplateDocID: item.TemplateDocID ?? null,
-      TemplateExcelID: item.TemplateExcelID ?? null,
-      ProjectsStr: item.ProjectsStr ?? "",
-    }));
-  },
+        endpoint: async () => {
+          const data = await api.getTableTransmittal();
+          return data.map((item: any) => ({
+            ...item,
+            nEntityCateAID: item.nEntityCateAID ?? null,
+            nEntityCateBID: item.nEntityCateBID ?? null,
+            IsDoc: item.IsDoc ?? false,
+            IsMegaForm: item.IsMegaForm ?? false,
+            Code: item.Code ?? "",
+            PersianName: item.PersianName ?? "",
+            TemplateDocID: item.TemplateDocID ?? null,
+            TemplateExcelID: item.TemplateExcelID ?? null,
+            ProjectsStr: item.ProjectsStr ?? "",
+          }));
+        },
 
-  columnDefs: [
-    {
-      headerName: TT("Forms.Name", "نام"),
-      field: "Name",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-      flex: 1.6,
-      minWidth: 160,
-    },
-    {
-      headerName: TT("Forms.PersianName", "نام فارسی"),
-      field: "PersianName",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-      flex: 1.6,
-      minWidth: 160,
-    },
-    checkboxCol("IsDoc", "IsDoc"),
-    {
-      headerName: TT("Forms.CategoryA", "دسته بندی A"),
-      field: "EntityCateAName",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-      flex: 1.2,
-      minWidth: 140,
-    },
-    {
-      headerName: TT("Forms.CategoryB", "دسته بندی B"),
-      field: "EntityCateBName",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-      flex: 1.2,
-      minWidth: 140,
-    },
-   checkboxCol(TT("Forms.IsMegaForm", "مگافرم"), "IsMegaForm"),
-  ],
+        columnDefs: [
+          {
+            headerName: TT("Forms.Name", "نام"),
+            field: "Name",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            flex: 1.6,
+            minWidth: 160,
+          },
+          {
+            headerName: TT("Forms.PersianName", "نام فارسی"),
+            field: "PersianName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            flex: 1.6,
+            minWidth: 160,
+          },
+          checkboxCol("IsDoc", "IsDoc"),
+          {
+            headerName: TT("Forms.CategoryA", "دسته بندی A"),
+            field: "EntityCateAName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            flex: 1.2,
+            minWidth: 140,
+          },
+          {
+            headerName: TT("Forms.CategoryB", "دسته بندی B"),
+            field: "EntityCateBName",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+            flex: 1.2,
+            minWidth: 140,
+          },
+          checkboxCol(TT("Forms.IsMegaForm", "مگافرم"), "IsMegaForm"),
+        ],
 
-  iconVisibility: {
-    showAdd: true,
-    showEdit: true,
-    showDelete: true,
-    showDuplicate: true,
-  },
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: true,
+        },
 
-  duplicateAction: async (row: EntityType) => {
-    const idToDuplicate = Number((row as any).ID);
-    const responseRaw = await api.duplicateEntityType(idToDuplicate);
-    const created = normalizeApiResult(responseRaw);
+        duplicateAction: async (row: EntityType) => {
+          const idToDuplicate = Number((row as any).ID);
+          const responseRaw = await api.duplicateEntityType(idToDuplicate);
+          const created = normalizeApiResult(responseRaw);
 
-    return fillEmptyFrom(created, row);
-  },
+          return fillEmptyFrom(created, row);
+        },
 
-  nameField: "Name",
-  updater: async (payload: EntityType) => {
-    const payloadToSend = {
-      ...payload,
-      ID: payload.ID ? payload.ID.toString() : "",
-    };
-    return await api.updateEntityType(payloadToSend);
-  },
-},
+        nameField: "Name",
+        updater: async (payload: EntityType) => {
+          const payloadToSend = {
+            ...payload,
+            ID: payload.ID ? payload.ID.toString() : "",
+          };
+          return await api.updateEntityType(payloadToSend);
+        },
+      },
       Categories: {
-  endpoint: (params?: { categoryType: "cata" | "catb" }) =>
-    params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),
-  columnDefs: [
-    {
-      headerName: t("Category.Name", { defaultValue: "نام" }),
-      field: "Name",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-    },
-    {
-      headerName: t("Category.Description", { defaultValue: "شرح" }),
-      field: "Description",
-      filter: "agTextColumnFilter",
-      sortable: true,
-      resizable: true,
-    },
-  ],
-  iconVisibility: {
-    showAdd: true,
-    showEdit: true,
-    showDelete: true,
-    showDuplicate: false,
-  },
-},
+        endpoint: (params?: { categoryType: "cata" | "catb" }) =>
+          params?.categoryType === "cata" ? api.getAllCatA() : api.getAllCatB(),
+        columnDefs: [
+          {
+            headerName: t("Category.Name", { defaultValue: "نام" }),
+            field: "Name",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+          {
+            headerName: t("Category.Description", { defaultValue: "شرح" }),
+            field: "Description",
+            filter: "agTextColumnFilter",
+            sortable: true,
+            resizable: true,
+          },
+        ],
+        iconVisibility: {
+          showAdd: true,
+          showEdit: true,
+          showDelete: true,
+          showDuplicate: false,
+        },
+      },
       MenuTab: {
         endpoint: (params: { ID: number }) => api.getAllMenuTab(params.ID),
         columnDefs: [
@@ -1382,6 +1575,7 @@ export const SubTabDefinitionsProvider: React.FC<{
     allRoles,
     i18n.language,
     t,
+    programTypes,
   ]);
 
   const fetchDataForSubTab = async (subTabName: string, params?: any) => {
@@ -1406,7 +1600,9 @@ export const SubTabDefinitionsProvider: React.FC<{
       return await fetchDataForSubTab(subTabName, params);
     }
     if (!def.duplicateAction) {
-      console.warn(`Duplicate action not defined for subTabName: ${subTabName}`);
+      console.warn(
+        `Duplicate action not defined for subTabName: ${subTabName}`
+      );
       return await fetchDataForSubTab(subTabName, params);
     }
 
@@ -1418,13 +1614,16 @@ export const SubTabDefinitionsProvider: React.FC<{
       let newItem =
         newItemRaw && typeof newItemRaw === "object"
           ? newItemRaw.data ??
-          newItemRaw.Data ??
-          newItemRaw.value ??
-          newItemRaw.Value ??
-          newItemRaw
+            newItemRaw.Data ??
+            newItemRaw.value ??
+            newItemRaw.Value ??
+            newItemRaw
           : undefined;
 
-      console.log("[DUP] duplicateAction result normalized", { subTabName, newItem });
+      console.log("[DUP] duplicateAction result normalized", {
+        subTabName,
+        newItem,
+      });
 
       if (!newItem || typeof newItem !== "object") {
         const after = await fetchDataForSubTab(subTabName, params);

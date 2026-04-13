@@ -3,29 +3,30 @@
     "ProgramName": "نام برنامه",
     "Duration": "مدت زمان",
     "ActivityBudget": "بودجه فعالیت",
-    "AfBudget": "بودجه AF",
+    "AfBudget": "بودجه مصوب",
     "Type": "نوع",
+    "Global": "جهانی",
     "RelatedProjects": "پروژه‌های مرتبط",
-    "MetaData": "اطلاعات متا",
-
+    "MetaData": "فراداده",
     "Columns": {
       "Order": "ترتیب",
       "ActivityName": "نام فعالیت",
       "Code": "کد",
-      "ActivityDuration": "مدت فعالیت",
+      "ActivityDuration": "مدت زمان",
       "Start": "شروع",
       "End": "پایان",
-      "ResponsiblePost": "پست مسئول",
-      "ApprovalFlow": "جریان تأیید",
+      "ResponsiblePost": "نقش مسئول",
+      "Job": "شغل",
+      "ApprovalFlow": "جریان تایید",
       "ActivityType": "نوع فعالیت",
       "FormName": "نام فرم",
       "Weight": "وزن",
       "ActivityBudget": "بودجه فعالیت",
-      "ProgramTemplate": "الگوی برنامه",
-      "SubProgramTemplate": "الگوی زیر‌برنامه",
-      "ProgramDuration": "مدت برنامه",
+      "ProgramTemplate": "قالب برنامه",
+      "SubProgramTemplate": "زیرقالب برنامه",
+      "ProgramDuration": "مدت زمان برنامه",
       "ProgramExecutionBudget": "بودجه اجرای برنامه",
-      "ProgramToPlan": "نسبت برنامه به طرح"
+      "ProgramToPlan": "برنامه به طرح"
     }
   }
 }

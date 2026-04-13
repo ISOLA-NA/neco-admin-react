@@ -1,15 +1,24 @@
 {
-    "Roles": {
-      "RoleCode": "Role Code",
-      "Role": "Role",
-      "RoleName": "Name",
-      "Responsibilities": "Responsibilities",
-      "JobDescription": "Job Description",
-      "Competencies": "Competencies",
-      "Authorities": "Authorities",
-      "Type": "Type",
-      "Grade": "Grade",
-      "StaticPost": "Static Post"
+  "Roles": {
+    "RoleCode": "Role Code",
+    "Role": "Role",
+    "RoleName": "Name",
+    "Responsibilities": "Responsibilities",
+    "JobDescription": "Job Description",
+    "Competencies": "Competencies",
+    "Authorities": "Authorities",
+    "Type": "Type",
+    "Grade": "Grade",
+    "StaticPost": "Static Post",
+    "Placeholders": {
+      "EnterRoleName": "Enter role name",
+      "EnterRoleCode": "Enter role code",
+      "EnterJobDescription": "Enter job description",
+      "EnterResponsibilities": "Enter responsibilities",
+      "EnterAuthorities": "Enter authorities",
+      "EnterCompetencies": "Enter competencies",
+      "EnterGrade": "Enter grade",
+      "EnterType": "Enter type"
     }
   }
-  
+}

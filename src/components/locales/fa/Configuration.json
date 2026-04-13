@@ -2,7 +2,7 @@
   "Configuration": {
     "Name": "نام",
     "Description": "شرح",
-    "ProgramTemplate": "قالب برنامه",
+    "ProgramTemplate": "قالب برنامه اولیه",
     "DefaultRibbon": "منوی پیش فرض",
     "LessonLearnedForm": "فرم درس آموخته",
     "LessonLearnedAfTemplate": "جریان تایید درس آموخته",

@@ -256,73 +256,99 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         )?.Name,
       }));
     }, [programTemplateField, roles, wfTemplates, forms, programTemplates]);
-    
 
     const detailColumnDefs = [
-  { headerName: t("ProgramTemplate.Columns.Order"), field: "Order", flex: 1, minWidth: 80 },
-  { headerName: t("ProgramTemplate.Columns.ActivityName"), field: "Name", flex: 3, minWidth: 150 },
-  { headerName: t("ProgramTemplate.Columns.Code"), field: "Code", flex: 1, minWidth: 100 },
-  { headerName: t("ProgramTemplate.Columns.ActivityDuration"), field: "ActDuration", flex: 1, minWidth: 100 },
-  { headerName: t("ProgramTemplate.Columns.Start"), field: "Top", flex: 1, minWidth: 80 },
-  { headerName: t("ProgramTemplate.Columns.End"), field: "Left", flex: 1, minWidth: 80 },
-  {
-    headerName: t("ProgramTemplate.Columns.ResponsiblePost"),
-    field: "nPostName",
-    flex: 3,
-    minWidth: 150,
-  },
-  {
-    headerName: t("ProgramTemplate.Columns.ApprovalFlow"),
-    field: "nWFTemplateName",
-    flex: 3,
-    minWidth: 150,
-  },
-  { headerName: t("ProgramTemplate.Columns.ActivityType"), field: "PFIType", flex: 2, minWidth: 150 },
-  {
-    headerName: t("ProgramTemplate.Columns.FormName"),
-    field: "nEntityTypeName",
-    flex: 3,
-    minWidth: 150,
-  },
-  { headerName: t("ProgramTemplate.Columns.Weight"), field: "Weight1", flex: 1, minWidth: 80 },
-  {
-    headerName: t("ProgramTemplate.Columns.ActivityBudget"),
-    field: "PCostAct",
-    flex: 1,
-    minWidth: 80,
-  },
-  {
-    headerName: t("ProgramTemplate.Columns.ProgramTemplate"),
-    field: "nProgramTemplateName",
-    flex: 3,
-    minWidth: 150,
-  },
-  // ستون جدید جهت نمایش Sub Program Template
-  {
-    headerName: t("ProgramTemplate.Columns.SubProgramTemplate"),
-    field: "subProgramTemplateName",
-    flex: 3,
-    minWidth: 150,
-  },
-  {
-    headerName: t("ProgramTemplate.Columns.ProgramDuration"),
-    field: "WFDuration",
-    flex: 1,
-    minWidth: 80,
-  },
-  {
-    headerName: t("ProgramTemplate.Columns.ProgramExecutionBudget"),
-    field: "PCostSubAct",
-    flex: 1,
-    minWidth: 80,
-  },
-  {
-    headerName: t("ProgramTemplate.Columns.ProgramToPlan"),
-    field: "WeightWF",
-    flex: 1,
-    minWidth: 80,
-  },
-];
+      {
+        headerName: t("ProgramTemplate.Columns.ActivityName"),
+        field: "Name",
+        flex: 3,
+        minWidth: 170,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ActivityDuration"),
+        field: "ActDuration",
+        flex: 1.3,
+        minWidth: 110,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.Start"),
+        field: "Top",
+        flex: 1,
+        minWidth: 90,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.End"),
+        field: "Left",
+        flex: 1,
+        minWidth: 90,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ResponsiblePost"),
+        field: "nPostName",
+        flex: 2.2,
+        minWidth: 160,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.Job"),
+        field: "",
+        flex: 1.4,
+        minWidth: 110,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ApprovalFlow"),
+        field: "nWFTemplateName",
+        flex: 2.2,
+        minWidth: 160,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ActivityType"),
+        field: "PFIType",
+        flex: 1.8,
+        minWidth: 140,
+        valueGetter: (params: any) =>
+          activityTypes.find(
+            (x) => String(x.label) === String(params.data?.PFIType)
+          )?.value ||
+          params.data?.PFIType ||
+          "",
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.FormName"),
+        field: "nEntityTypeName",
+        flex: 2.2,
+        minWidth: 160,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.Weight"),
+        field: "Weight1",
+        flex: 1,
+        minWidth: 90,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ActivityBudget"),
+        field: "PCostAct",
+        flex: 1.4,
+        minWidth: 120,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ProgramTemplate"),
+        field: "nProgramTemplateName",
+        flex: 2.2,
+        minWidth: 160,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ProgramDuration"),
+        field: "WFDuration",
+        flex: 1.4,
+        minWidth: 120,
+      },
+      {
+        headerName: t("ProgramTemplate.Columns.ProgramExecutionBudget"),
+        field: "PCostSubAct",
+        flex: 1.6,
+        minWidth: 140,
+      },
+    ];
 
     /* ================================================================= */
     /*                          SAVE (forwardRef)                        */

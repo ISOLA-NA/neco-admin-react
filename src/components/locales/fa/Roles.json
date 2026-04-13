@@ -1,15 +1,24 @@
 {
-    "Roles": {
-      "RoleCode": "کد نقش",
-      "Role": "نقش",
-      "RoleName": "نام",
-      "Responsibilities": "مسئولیت‌ها",
-      "JobDescription": "شرح شغل",
-      "Competencies": "شایستگی‌ها",
-      "Authorities": "مسئولین",
-      "Type": "نوع",
-      "Grade": "مقطع کاربری",
-      "StaticPost": "نقش ایستا"
+  "Roles": {
+    "RoleCode": "کد نقش",
+    "Role": "نقش",
+    "RoleName": "نام",
+    "Responsibilities": "مسئولیت‌ها",
+    "JobDescription": "شرح شغل",
+    "Competencies": "شایستگی‌ها",
+    "Authorities": "مسئولین",
+    "Type": "نوع",
+    "Grade": "مقطع کاری",
+    "StaticPost": "نقش ایستا",
+    "Placeholders": {
+      "EnterRoleName": "نام نقش را وارد کنید",
+      "EnterRoleCode": "کد نقش را وارد کنید",
+      "EnterJobDescription": "شرح شغل را وارد کنید",
+      "EnterResponsibilities": "مسئولیت‌ها را وارد کنید",
+      "EnterAuthorities": "اختیارات را وارد کنید",
+      "EnterCompetencies": "شایستگی‌ها را وارد کنید",
+      "EnterGrade": "مقطع کاری را وارد کنید",
+      "EnterType": "نوع را وارد کنید"
     }
   }
-  
+}

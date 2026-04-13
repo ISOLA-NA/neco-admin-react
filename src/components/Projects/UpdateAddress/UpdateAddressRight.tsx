@@ -1,11 +1,12 @@
-// src/components/Projects/UpdateAddress/UpdateAddressRight.tsx
 import React, { useState } from "react";
 import { FiSave } from "react-icons/fi";
 import { useUpdateAddress } from "./UpdateAddressContext";
 import DynamicInput from "../../utilities/DynamicInput";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
+import { useTranslation } from "react-i18next";
 
 const UpdateAddressRight: React.FC = () => {
+  const { t } = useTranslation();
   const { selectedNode, address, setAddress, saveAddress } = useUpdateAddress();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -30,25 +31,28 @@ const UpdateAddressRight: React.FC = () => {
 
   return (
     <div className="w-full">
-      {/* Hint text */}
       <div className="mb-2 text-xs text-gray-500">
         {selectedNode
-          ? `Selected: ${selectedNode.Name}`
-          : "Please select an item from the tree on the left."}
+          ? `${t("UpdateAddress.Selected", { defaultValue: "Selected" })}: ${
+              selectedNode.Name
+            }`
+          : t("UpdateAddress.SelectItemFromTree", {
+              defaultValue: "Please select an item from the tree on the left.",
+            })}
       </div>
 
-      {/* Address input */}
       <DynamicInput
-        name="Address"
+        name={t("UpdateAddress.Address", { defaultValue: "Address" })}
         type="text"
         value={address}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setAddress(e.target.value)
         }
-        placeholder="Enter address here..."
+        placeholder={t("UpdateAddress.EnterAddressHere", {
+          defaultValue: "Enter address here...",
+        })}
       />
 
-      {/* Green button centered */}
       <div className="mt-4 flex justify-center">
         <button
           onClick={openConfirm}
@@ -59,21 +63,32 @@ const UpdateAddressRight: React.FC = () => {
             "disabled:opacity-50 disabled:cursor-not-allowed",
             saving ? "opacity-75 cursor-wait" : "",
           ].join(" ")}
-          title="Edit Address"
+          title={t("UpdateAddress.EditAddress", {
+            defaultValue: "Edit Address",
+          })}
         >
           <FiSave />
-          <span>{saving ? "Saving..." : "Edit Address"}</span>
+          <span>
+            {saving
+              ? t("UpdateAddress.Saving", { defaultValue: "Saving..." })
+              : t("UpdateAddress.EditAddress", {
+                  defaultValue: "Edit Address",
+                })}
+          </span>
         </button>
       </div>
 
-      {/* English confirmation dialog */}
       <DynamicConfirm
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirmSave}
         variant="notice"
-        title="Confirmation"
-        message="Are you sure you want to update the address?"
+        title={t("UpdateAddress.ConfirmationTitle", {
+          defaultValue: "Confirmation",
+        })}
+        message={t("UpdateAddress.ConfirmationMessage", {
+          defaultValue: "Are you sure you want to update the address?",
+        })}
       />
     </div>
   );

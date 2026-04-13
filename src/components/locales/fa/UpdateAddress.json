@@ -1,0 +1,19 @@
+{
+    "UpdateAddress": {
+      "Project": "پروژه",
+      "Selected": "انتخاب شده",
+      "SelectItemFromTree": "لطفاً یک مورد از درخت سمت چپ انتخاب کنید.",
+      "Address": "آدرس",
+      "EnterAddressHere": "آدرس را اینجا وارد کنید...",
+      "Saving": "در حال ذخیره...",
+      "EditAddress": "ویرایش آدرس",
+      "ConfirmationTitle": "تأیید",
+      "ConfirmationMessage": "آیا از بروزرسانی آدرس اطمینان دارید؟",
+      "UpdateSuccess": "آدرس با موفقیت بروزرسانی شد",
+      "UpdateFailed": "بروزرسانی آدرس ناموفق بود",
+      "Collapse": "بستن",
+      "Expand": "باز کردن",
+      "Loading": "در حال بارگذاری…",
+      "NoData": "داده‌ای وجود ندارد"
+    }
+  }

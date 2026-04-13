@@ -1,8 +1,7 @@
 {
-    "Procedure": {
-      "Name": "Name",
-      "Description": "Description",
-      "Projects": "Projects"
-    }
+  "Procedure": {
+    "Name": "Procedure Name",
+    "Description": "Description",
+    "Projects": "Related Projects"
   }
-  
+}

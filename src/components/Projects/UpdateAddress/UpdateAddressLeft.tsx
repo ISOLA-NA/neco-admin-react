@@ -1,7 +1,7 @@
-// src/components/Projects/UpdateAddress/UpdateAddressLeft.tsx
 import React, { useEffect } from "react";
 import { FiChevronRight, FiChevronDown } from "react-icons/fi";
 import { useUpdateAddress } from "./UpdateAddressContext";
+import { useTranslation } from "react-i18next";
 
 export type UaPickPayload = { gid?: string; id?: number; address?: string };
 
@@ -10,6 +10,8 @@ type Props = {
 };
 
 const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
+  const { t } = useTranslation();
+
   const {
     projects,
     selectedProjectId,
@@ -22,7 +24,6 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
     selectNode,
   } = useUpdateAddress();
 
-  // اگر پروژه‌ای انتخاب شد/تغییر کرد، ریشه‌ها را لود کن
   useEffect(() => {
     if (selectedProjectId) {
       loadRoots(selectedProjectId);
@@ -41,11 +42,16 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
   };
 
   const renderNode = (node: any, depth = 0) => (
-    <div key={`${node.ID}-${node.ChildProgramID}-${depth}`} className="select-none">
+    <div
+      key={`${node.ID}-${node.ChildProgramID}-${depth}`}
+      className="select-none"
+    >
       <div
         className={[
           "flex items-center gap-2 px-2 py-1 rounded-md",
-          selectedNode && selectedNode.ID === node.ID && selectedNode.ChildProgramID === node.ChildProgramID
+          selectedNode &&
+          selectedNode.ID === node.ID &&
+          selectedNode.ChildProgramID === node.ChildProgramID
             ? "bg-blue-50 ring-1 ring-blue-200"
             : "hover:bg-gray-50",
         ].join(" ")}
@@ -54,28 +60,38 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
         <button
           className="shrink-0 w-5 h-5 flex items-center justify-center text-gray-600"
           onClick={() => toggleExpand(node)}
-          title={node._expanded ? "Collapse" : "Expand"}
+          title={
+            node._expanded
+              ? t("UpdateAddress.Collapse", { defaultValue: "Collapse" })
+              : t("UpdateAddress.Expand", { defaultValue: "Expand" })
+          }
         >
           {node._expanded ? <FiChevronDown /> : <FiChevronRight />}
         </button>
 
-        <div className="flex-1 cursor-pointer" onClick={() => handleSelectNode(node)}>
+        <div
+          className="flex-1 cursor-pointer"
+          onClick={() => handleSelectNode(node)}
+        >
           <div className="text-sm font-medium text-gray-800">{node.Name}</div>
           <div className="text-xs text-gray-500 break-all">{node.Address}</div>
         </div>
       </div>
 
       {node._expanded && node.children && node.children.length > 0 && (
-        <div className="pl-4">{node.children.map((ch: any) => renderNode(ch, depth + 1))}</div>
+        <div className="pl-4">
+          {node.children.map((ch: any) => renderNode(ch, depth + 1))}
+        </div>
       )}
     </div>
   );
 
   return (
     <div className="flex flex-col gap-3 h-full">
-      {/* سلکت پروژه */}
       <div className="w-full">
-        <label className="block text-xs text-gray-500 mb-1">Project</label>
+        <label className="block text-xs text-gray-500 mb-1">
+          {t("UpdateAddress.Project", { defaultValue: "Project" })}
+        </label>
         <select
           className="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-blue-300"
           value={selectedProjectId || ""}
@@ -89,12 +105,15 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
         </select>
       </div>
 
-      {/* درخت */}
       <div className="flex-1 overflow-auto bg-white rounded-lg border border-gray-200 p-2">
         {loadingRoot ? (
-          <div className="text-xs text-gray-400 py-1">Loading…</div>
+          <div className="text-xs text-gray-400 py-1">
+            {t("UpdateAddress.Loading", { defaultValue: "Loading…" })}
+          </div>
         ) : roots.length === 0 ? (
-          <div className="text-sm text-gray-500">No data</div>
+          <div className="text-sm text-gray-500">
+            {t("UpdateAddress.NoData", { defaultValue: "No data" })}
+          </div>
         ) : (
           roots.map((n) => renderNode(n))
         )}

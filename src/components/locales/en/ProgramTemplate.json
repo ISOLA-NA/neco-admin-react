@@ -3,11 +3,11 @@
     "ProgramName": "Program Name",
     "Duration": "Duration",
     "ActivityBudget": "Activity Budget",
-    "AfBudget": "Af Budget",
+    "AfBudget": "Approved Budget",
     "Type": "Type",
+    "Global": "Global",
     "RelatedProjects": "Related Projects",
     "MetaData": "Meta Data",
-
     "Columns": {
       "Order": "Order",
       "ActivityName": "Activity Name",
@@ -15,7 +15,8 @@
       "ActivityDuration": "Duration",
       "Start": "Start",
       "End": "End",
-      "ResponsiblePost": "Responsible Post",
+      "ResponsiblePost": "Responsible Role",
+      "Job": "Job",
       "ApprovalFlow": "Approval Flow",
       "ActivityType": "Activity Type",
       "FormName": "Form Name",
@@ -25,7 +26,7 @@
       "SubProgramTemplate": "Sub Program Template",
       "ProgramDuration": "Program Duration",
       "ProgramExecutionBudget": "Program Execution Budget",
-      "ProgramToPlan": "Program to plan"
+      "ProgramToPlan": "Program To Plan"
     }
   }
 }

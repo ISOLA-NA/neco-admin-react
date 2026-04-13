@@ -1,6 +1,3 @@
-/* ----------------------------------------------------------
-   src/components/Projects/ProjectAccess/ProjectAccess.tsx
-   ---------------------------------------------------------- */
 import React, {
   forwardRef,
   useImperativeHandle,
@@ -31,7 +28,6 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
     const { t, i18n } = useTranslation();
     const dir = i18n.dir();
 
-    /* ---------- helpers ---------- */
     const blankAccess = useCallback(
       (): AccessProject => ({
         nProjectID: selectedProject?.ID,
@@ -59,14 +55,12 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
       [selectedProject]
     );
 
-    /* ---------- state ---------- */
     const [currentAccess, setCurrentAccess] = useState<AccessProject>(
       blankAccess()
     );
     const [editMode, setEditMode] = useState<"add" | "edit">("add");
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-    /* ---------- save / update ---------- */
     const persist = async () => {
       if (!currentAccess.nPostID?.trim()) {
         showAlert(
@@ -80,7 +74,7 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
         return;
       }
       try {
-        const isNew = !currentAccess.ID; // ثبت یا به‌روزرسانی؟
+        const isNew = !currentAccess.ID;
         const result = isNew
           ? await api.insertAccessProject({ ...currentAccess })
           : await api.updateAccessProject(currentAccess);
@@ -93,13 +87,13 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
             : t("ProjectAccess.Updated", { defaultValue: "Updated" }),
           isNew
             ? t("ProjectAccess.AccessCreated", {
-              defaultValue: "Access created.",
-            })
+                defaultValue: "Access created.",
+              })
             : t("ProjectAccess.AccessUpdated", {
-              defaultValue: "Access updated.",
-            })
+                defaultValue: "Access updated.",
+              })
         );
-        // setCurrentAccess(result);
+
         setCurrentAccess(blankAccess());
         setEditMode("add");
         setRefreshTrigger((p) => p + 1);
@@ -115,16 +109,13 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
       }
     };
 
-    /* ---------- expose to parent ---------- */
     useImperativeHandle(ref, () => ({ save: persist, update: persist }));
 
-    /* ---------- reset when project changes ---------- */
     useEffect(() => {
       setCurrentAccess(blankAccess());
       setEditMode("add");
     }, [selectedProject, blankAccess]);
 
-    /* ---------- UI ---------- */
     return (
       <div
         className="flex flex-col h/full w/full bg-gray-50 rounded-md"
@@ -141,7 +132,6 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
         />
 
         <div className="flex flex-1 gap-2 p-2">
-          {/* Left panel */}
           <div className="w-1/2 h-[95vh] bg-white rounded-md border border-gray-200 shadow-sm flex flex-col">
             <LeftProjectAccess
               selectedRow={selectedProject}
@@ -153,19 +143,16 @@ const ProjectAccess = forwardRef<ProjectAccessHandle, ProjectAccessProps>(
               }}
               onAccessChange={(changes) => {
                 setCurrentAccess((p) => ({ ...p, ...changes }));
-                /* در حالت add می‌مانیم تا ذخیره شود */
               }}
               refreshTrigger={refreshTrigger}
             />
           </div>
 
-          {/* Right panel */}
           <div className="w-1/2 h-[95vh] bg-white rounded-md border border-gray-200 shadow-sm flex flex-col">
             <RightProjectAccess
               selectedRow={currentAccess}
               onRowChange={(changes) => {
                 setCurrentAccess((p) => ({ ...p, ...changes }));
-                /* فقط وقتی رکورد موجود است حالت edit باقی می‌ماند */
               }}
             />
           </div>

@@ -1,6 +1,3 @@
-/* ----------------------------------------------------------
-   src/components/Projects/ProjectAccess/PAHeader.tsx
-   ---------------------------------------------------------- */
 import React, { useState } from "react";
 import { FaSave, FaEdit } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
@@ -69,7 +66,6 @@ const PAHeader: React.FC<Props> = ({
   return (
     <>
       <div className="flex items-center gap-2 bg-white border-b px-3 py-2 shadow-sm">
-        {/* Save / Update */}
         {isEditMode ? (
           <button
             onClick={openConfirmForUpdate}
@@ -88,7 +84,6 @@ const PAHeader: React.FC<Props> = ({
           </button>
         )}
 
-        {/* Cancel */}
         {onClose && (
           <button
             onClick={onClose}
@@ -99,7 +94,6 @@ const PAHeader: React.FC<Props> = ({
         )}
       </div>
 
-      {/* Confirm */}
       <DynamicConfirm
         isOpen={confirmOpen}
         variant={confirmVariant as any}

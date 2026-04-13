@@ -1,5 +1,3 @@
-// src/components/General/Role.tsx
-
 import React, {
   useState,
   useEffect,
@@ -27,6 +25,7 @@ interface RoleProps {
 const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
   const { t } = useTranslation();
   const { handleSaveRole } = useAddEditDelete();
+
   const [roleData, setRoleData] = useState({
     ID: "",
     Name: "",
@@ -130,7 +129,6 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
     try {
       console.log("داده‌های ذخیره‌شده نقش:", roleData);
       await handleSaveRole(roleData);
-      // showAlert("success", null, "", "Role Added successfully.");
       return true;
     } catch (error: any) {
       console.error("خطا در ذخیره‌سازی نقش:", error);
@@ -164,62 +162,70 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         name={t("Roles.Role")}
         type="text"
         value={roleData.Name}
-        placeholder="Enter role name"
+        placeholder={t("Roles.Placeholders.EnterRoleName")}
         onChange={(e) => handleChange("Name", e.target.value)}
         required
       />
+
       {/* ورودی کد نقش */}
       <DynamicInput
         name={t("Roles.RoleCode")}
         type="text"
         value={roleData.PostCode}
-        placeholder="Enter role code"
+        placeholder={t("Roles.Placeholders.EnterRoleCode")}
         onChange={(e) => handleChange("PostCode", e.target.value)}
       />
+
       {/* شرح شغلی */}
       <CustomTextarea
         name={t("Roles.JobDescription")}
         value={roleData.Description}
-        placeholder="Enter job description"
+        placeholder={t("Roles.Placeholders.EnterJobDescription")}
         onChange={(e) => handleChange("Description", e.target.value)}
       />
+
       {/* مسئولیت‌ها */}
       <CustomTextarea
         name={t("Roles.Responsibilities")}
         value={roleData.Responsibility}
-        placeholder="Enter responsibilities"
+        placeholder={t("Roles.Placeholders.EnterResponsibilities")}
         onChange={(e) => handleChange("Responsibility", e.target.value)}
       />
+
       {/* اختیارات */}
       <CustomTextarea
         name={t("Roles.Authorities")}
         value={roleData.Authorization}
-        placeholder="Enter authorities"
+        placeholder={t("Roles.Placeholders.EnterAuthorities")}
         onChange={(e) => handleChange("Authorization", e.target.value)}
       />
+
       {/* شایستگی‌ها */}
       <CustomTextarea
         name={t("Roles.Competencies")}
         value={roleData.Competencies}
-        placeholder="Enter competencies"
+        placeholder={t("Roles.Placeholders.EnterCompetencies")}
         onChange={(e) => handleChange("Competencies", e.target.value)}
       />
+
       {/* سطح */}
       <DynamicInput
         name={t("Roles.Grade")}
         type="text"
         value={roleData.Grade}
-        placeholder="Enter grade"
+        placeholder={t("Roles.Placeholders.EnterGrade")}
         onChange={(e) => handleChange("Grade", e.target.value)}
       />
+
       {/* نوع */}
       <DynamicInput
         name={t("Roles.Type")}
         type="text"
         value={roleData.Type}
-        placeholder="Enter type"
+        placeholder={t("Roles.Placeholders.EnterType")}
         onChange={(e) => handleChange("Type", e.target.value)}
       />
+
       {/* سوئیچر مربوط به Static Post */}
       <div className="mb-4">
         <DynamicSwitcher

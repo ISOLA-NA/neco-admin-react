@@ -1,0 +1,19 @@
+{
+    "UpdateAddress": {
+      "Project": "Project",
+      "Selected": "Selected",
+      "SelectItemFromTree": "Please select an item from the tree on the left.",
+      "Address": "Address",
+      "EnterAddressHere": "Enter address here...",
+      "Saving": "Saving...",
+      "EditAddress": "Edit Address",
+      "ConfirmationTitle": "Confirmation",
+      "ConfirmationMessage": "Are you sure you want to update the address?",
+      "UpdateSuccess": "Address updated successfully",
+      "UpdateFailed": "Failed to update address",
+      "Collapse": "Collapse",
+      "Expand": "Expand",
+      "Loading": "Loading…",
+      "NoData": "No data"
+    }
+  }

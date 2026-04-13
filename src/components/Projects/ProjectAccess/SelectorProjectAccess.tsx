@@ -8,7 +8,7 @@ export interface OptionType {
 }
 
 interface SelectorProjectAccessProps {
-  label?: string; // اگر بدی، همون نمایش داده میشه؛ وگرنه ترجمه استفاده میشه
+  label?: string;
   options: OptionType[];
   selectedValue: string;
   onChange: (value: string) => void;
@@ -19,8 +19,7 @@ interface SelectorProjectAccessProps {
 }
 
 const SelectorProjectAccess: React.FC<SelectorProjectAccessProps> = ({
-  // ❌ قبلاً: label = "Select post"  → باعث نادیده گرفتن ترجمه می‌شد
-  label, // بدون پیش‌فرض؛ تا ترجمه اعمال شود
+  label,
   options = [],
   selectedValue,
   onChange,
@@ -62,7 +61,6 @@ const SelectorProjectAccess: React.FC<SelectorProjectAccessProps> = ({
 
   const selected = options.find((o) => o.value === selectedValue);
 
-  // --- ترجمه‌ها (با fallback در صورت نبودن کلید) ---
   const labelText =
     label ?? t("ProjectAccess.SelectPost", { defaultValue: "Select post" });
   const selectPlaceholder = t("ProjectAccess.SelectPlaceholder", {

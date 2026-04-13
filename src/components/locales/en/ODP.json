@@ -1,6 +1,7 @@
 {
   "ODP": {
     "ODPName": "ODP Name",
+    "PersianName": "Persian Name",
     "Address": "Address",
     "Description": "Description",
     "ProgramTemplate": "Program Template",
@@ -8,6 +9,12 @@
     "FormTemplate": "Form Template",
     "RelatedProjects": "Related Projects",
     "Public": "Public",
+    "Columns": {
+      "Name": "Name",
+      "PersianName": "Persian Name",
+      "Address": "Address",
+      "ProgramTemplate": "Program Template"
+    },
     "Alerts": {
       "Titles": {
         "Attention": "Attention"

@@ -8,22 +8,23 @@ interface ProjectsProps {
 
 const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
   const { t } = useTranslation();
+
   const [projectData, setProjectData] = useState({
     ID: "",
     ProjectName: "",
     State: "",
     CreateDate: "",
-    TotalDuration: null,
-    PCostAct: null,
-    PCostAprov: null,
+    TotalDuration: null as number | null,
+    PCostAct: null as number | null,
+    PCostAprov: null as number | null,
     IsIdea: false,
     calendarName: "",
-    TaskNum: null,
-    RolesNum: null,
-    LettersNum: null,
-    MeetingsNum: null,
-    IssuesNum: null,
-    KnowledgeNum: null,
+    TaskNum: null as number | null,
+    RolesNum: null as number | null,
+    LettersNum: null as number | null,
+    MeetingsNum: null as number | null,
+    IssuesNum: null as number | null,
+    KnowledgeNum: null as number | null,
   });
 
   useEffect(() => {
@@ -96,7 +97,7 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <DynamicInput
           name={t("Projects.PlanningExecutionBudget")}
           type="text"
-          value={projectData.PCostAct}
+          value={projectData.PCostAct ?? ""}
           disabled={true}
         />
 
@@ -119,7 +120,9 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <DynamicInput
           name={t("Projects.Phase")}
           type="text"
-          value={projectData.IsIdea ? "IsIdea" : "Project"}
+          value={
+            projectData.IsIdea ? t("Projects.IsIdea") : t("Projects.Project")
+          }
           disabled={true}
         />
 
@@ -133,14 +136,14 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <DynamicInput
           name={t("Projects.ProjectPlanDuration")}
           type="text"
-          value={projectData.TotalDuration}
+          value={projectData.TotalDuration ?? ""}
           disabled={true}
         />
 
         <DynamicInput
           name={t("Projects.ProjectApprovalBudget")}
           type="text"
-          value={projectData.PCostAprov}
+          value={projectData.PCostAprov ?? ""}
           disabled={true}
         />
 
@@ -154,7 +157,7 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
           <DynamicInput
             name={t("Projects.Tasks")}
             type="number"
-            value={projectData.TaskNum}
+            value={projectData.TaskNum ?? ""}
             disabled={true}
           />
           <DynamicInput
@@ -175,13 +178,13 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
           <DynamicInput
             name={t("Projects.Roles")}
             type="number"
-            value={projectData.RolesNum}
+            value={projectData.RolesNum ?? ""}
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Letters")}
             type="number"
-            value={projectData.LettersNum}
+            value={projectData.LettersNum ?? ""}
             disabled={true}
           />
         </div>
@@ -190,19 +193,19 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
           <DynamicInput
             name={t("Projects.Meetings")}
             type="number"
-            value={projectData.MeetingsNum}
+            value={projectData.MeetingsNum ?? ""}
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Issues")}
             type="number"
-            value={projectData.IssuesNum}
+            value={projectData.IssuesNum ?? ""}
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Knowledge")}
             type="number"
-            value={projectData.KnowledgeNum}
+            value={projectData.KnowledgeNum ?? ""}
             disabled={true}
           />
         </div>

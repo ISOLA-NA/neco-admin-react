@@ -81,8 +81,14 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
           dateTimeRoutine: selectedRow.dateTimeRoutine || "{}",
         });
 
-        setRoutineData(parseJsonSafely(selectedRow.dateTimeRoutine));
-        setExceptionData(parseJsonSafely(selectedRow.SpecialDay));
+        setRoutineData(
+          parseJsonSafely(selectedRow.dateTimeRoutine) as {
+            [key: string]: number;
+          }
+        );
+        setExceptionData(
+          parseJsonSafely(selectedRow.SpecialDay) as { [key: string]: number }
+        );
       } else {
         setCalendarData({
           Name: "",
@@ -260,7 +266,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
               onClick={() => setActiveTab("routine")}
             >
               {t("Calendars.RoutineWorkingHours", {
-                defaultValue: "Routine Working Hours",
+                defaultValue: "Routine Dates",
               })}
             </button>
             <button
@@ -280,45 +286,107 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
           {activeTab === "routine" && (
             <div className="routine-tab p-4 bg-white rounded-lg shadow-sm">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {weekDayKeys.map((dayKey, idx) => {
-                  const dayLabel = weekDaysLocalized[idx];
-                  return (
-                    <div
-                      key={dayKey}
-                      className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg"
-                    >
-                      <label className="flex items-center gap-2 min-w-[120px]">
-                        <input
-                          type="checkbox"
-                          className="form-checkbox h-5 w-5 text-purple-600 rounded border-purple-600"
-                          checked={dayKey in routineData}
-                          onChange={() => handleRoutineToggle(dayKey)}
-                        />
-                        <span className="text-gray-700 whitespace-nowrap">
-                          {dayLabel}
-                        </span>
-                      </label>
-                      <div className="flex-grow">
-                        <DynamicInput
-                          name={`${dayLabel} ${t("Calendars.Hours", {
-                            defaultValue: "Hours",
-                          })}`}
-                          type="number"
-                          min={0}
-                          max={1}
-                          step={0.1}
-                          value={routineData[dayKey]?.toString() || ""}
-                          onChange={(e) => handleRoutineChange(dayKey, e)}
-                          disabled={!(dayKey in routineData)}
-                          placeholder={t("Calendars.Value", {
-                            defaultValue: "Value (0-1)",
-                          })}
-                          className="w-full"
-                        />
-                      </div>
+                {/* ستون چپ */}
+                <div>
+                  <div className="grid grid-cols-[140px_1fr] gap-4 mb-3 px-1">
+                    <div className="text-sm font-medium text-gray-700">
+                      {t("Calendars.DayCount", { defaultValue: "Day Count" })}
                     </div>
-                  );
-                })}
+                    <div className="text-sm font-medium text-gray-700">
+                      {t("Calendars.WorkHoursPerDay", {
+                        defaultValue: "Work Hours Per Day",
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {weekDayKeys.slice(0, 4).map((dayKey, idx) => {
+                      const dayLabel = weekDaysLocalized[idx];
+                      return (
+                        <div
+                          key={dayKey}
+                          className="grid grid-cols-[140px_1fr] gap-4 items-center bg-gray-50 p-4 rounded-lg"
+                        >
+                          <label className="flex items-center gap-2 min-w-[120px]">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-purple-600 rounded border-purple-600"
+                              checked={dayKey in routineData}
+                              onChange={() => handleRoutineToggle(dayKey)}
+                            />
+                            <span className="text-gray-700 whitespace-nowrap">
+                              {dayLabel}
+                            </span>
+                          </label>
+
+                          <DynamicInput
+                            name=""
+                            type="number"
+                            min={0}
+                            max={1}
+                            step={0.1}
+                            value={routineData[dayKey]?.toString() || ""}
+                            onChange={(e) => handleRoutineChange(dayKey, e)}
+                            disabled={!(dayKey in routineData)}
+                            placeholder=""
+                            className="w-full"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ستون راست */}
+                <div>
+                  <div className="grid grid-cols-[140px_1fr] gap-4 mb-3 px-1">
+                    <div className="text-sm font-medium text-gray-700">
+                      {t("Calendars.DayCount", { defaultValue: "Day Count" })}
+                    </div>
+                    <div className="text-sm font-medium text-gray-700">
+                      {t("Calendars.WorkHoursPerDay", {
+                        defaultValue: "Work Hours Per Day",
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {weekDayKeys.slice(4).map((dayKey, idx) => {
+                      const dayLabel = weekDaysLocalized[idx + 4];
+                      return (
+                        <div
+                          key={dayKey}
+                          className="grid grid-cols-[140px_1fr] gap-4 items-center bg-gray-50 p-4 rounded-lg"
+                        >
+                          <label className="flex items-center gap-2 min-w-[120px]">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-5 w-5 text-purple-600 rounded border-purple-600"
+                              checked={dayKey in routineData}
+                              onChange={() => handleRoutineToggle(dayKey)}
+                            />
+                            <span className="text-gray-700 whitespace-nowrap">
+                              {dayLabel}
+                            </span>
+                          </label>
+
+                          <DynamicInput
+                            name=""
+                            type="number"
+                            min={0}
+                            max={1}
+                            step={0.1}
+                            value={routineData[dayKey]?.toString() || ""}
+                            onChange={(e) => handleRoutineChange(dayKey, e)}
+                            disabled={!(dayKey in routineData)}
+                            placeholder=""
+                            className="w-full"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -355,7 +423,6 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                 </select>
               </div>
 
-              {/* نام کامل روزهای هفته در هدر تب استثناها */}
               <div className="grid grid-cols-7 gap-2">
                 {weekDaysLocalized.map((dayLabel) => (
                   <div
@@ -419,7 +486,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                 </h3>
                 <DynamicInput
                   name={t("Calendars.WorkingHours", {
-                    defaultValue: "Working Hours",
+                    defaultValue: "Work Hours Per Day",
                   })}
                   type="number"
                   min={0}
@@ -427,9 +494,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                   step={0.1}
                   value={modalValue}
                   onChange={(e) => setModalValue(e.target.value)}
-                  placeholder={t("Calendars.EnterHours01", {
-                    defaultValue: "Enter hours (0-1)",
-                  })}
+                  placeholder=""
                   className="w-full"
                 />
                 <div className="flex justify-end gap-4 mt-6">

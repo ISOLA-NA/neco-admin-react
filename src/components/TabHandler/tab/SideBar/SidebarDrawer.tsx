@@ -1,5 +1,6 @@
 import React, { useState, useLayoutEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { IoIosRefresh } from "react-icons/io";
 import Info from "./Info";
 import Account from "./account";
 import { useTranslation } from "react-i18next";
@@ -10,9 +11,8 @@ interface SidebarDrawerProps {
   onLogout: () => void;
 }
 
-// تشخیص جهت سند با در نظر گرفتن تمام سناریوها
 const detectRTL = (): boolean => {
-  if (typeof window === "undefined") return false; // SSR
+  if (typeof window === "undefined") return false;
   const rootAttr = document.documentElement.getAttribute("dir");
   const bodyAttr = document.body.getAttribute("dir");
   const attrDir = (rootAttr || bodyAttr || "").toLowerCase();
@@ -23,7 +23,11 @@ const detectRTL = (): boolean => {
   );
 };
 
-const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout }) => {
+const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
+  isOpen,
+  onClose,
+  onLogout,
+}) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"info" | "account">("info");
   const [isRTL, setIsRTL] = useState<boolean>(detectRTL);
@@ -32,15 +36,22 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout
     const observer = new MutationObserver(() => {
       setIsRTL(detectRTL());
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["dir"] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["dir"],
+    });
     return () => observer.disconnect();
   }, []);
 
-  const renderTabContent = () => (activeTab === "info" ? <Info /> : <Account />);
+  const handleRefresh = () => {
+    window.location.reload();
+  };
 
-  // Framer Motion variants for the drawer sliding
+  const renderTabContent = () =>
+    activeTab === "info" ? <Info /> : <Account />;
+
   const variants = {
-    hidden: (rtl: boolean) => ({ x: rtl ? '100%' : '-100%' }),
+    hidden: (rtl: boolean) => ({ x: rtl ? "100%" : "-100%" }),
     visible: { x: 0 },
   };
 
@@ -54,7 +65,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout
           exit="hidden"
           custom={isRTL}
           variants={variants}
-          transition={{ type: 'tween', duration: 0.3 }}
+          transition={{ type: "tween", duration: 0.3 }}
         >
           {/* نوار کناری */}
           <motion.div
@@ -67,30 +78,47 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout
             {/* دکمه بستن */}
             <button
               onClick={onClose}
-              className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} text-white text-xl font-bold`}
+              className={`absolute top-4 ${
+                isRTL ? "left-4" : "right-4"
+              } text-white text-xl font-bold`}
               aria-label={t("sideDrawer.Aria.CloseDrawer")}
             >
               &times;
             </button>
 
-            {/* دکمه‌های تب و خروج */}
+            {/* دکمه‌های تب، رفرش و خروج */}
             <div className="mt-16 flex flex-col gap-2">
               <button
-                onClick={() => setActiveTab('info')}
-                className={`w-full px-4 py-2 rounded ${
-                  activeTab === 'info' ? 'bg-white text-black' : 'bg-transparent text-white'
+                onClick={() => setActiveTab("info")}
+                className={`w-full px-4 py-2 rounded transition-colors duration-200 ${
+                  activeTab === "info"
+                    ? "bg-white text-black"
+                    : "bg-transparent text-white"
                 }`}
               >
                 {t("sideDrawer.Tabs.Info")}
               </button>
               <button
-                onClick={() => setActiveTab('account')}
-                className={`w-full px-4 py-2 rounded ${
-                  activeTab === 'account' ? 'bg-white text-black' : 'bg-transparent text-white'
+                onClick={() => setActiveTab("account")}
+                className={`w-full px-4 py-2 rounded transition-colors duration-200 ${
+                  activeTab === "account"
+                    ? "bg-white text-black"
+                    : "bg-transparent text-white"
                 }`}
               >
                 {t("sideDrawer.Tabs.Account")}
               </button>
+
+              {/* دکمه رفرش — هارد کد */}
+              <button
+                onClick={handleRefresh}
+                className="w-full flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors duration-300"
+              >
+                <IoIosRefresh size={18} />
+                <span>بارگذاری مجدد</span>
+              </button>
+
+              {/* دکمه خروج */}
               <button
                 onClick={onLogout}
                 className="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300"
@@ -102,7 +130,9 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ isOpen, onClose, onLogout
 
           {/* ناحیه محتوا */}
           <motion.div
-            className={`flex-1 bg-white flex items-center justify-center p-4 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`flex-1 bg-white flex items-start justify-center p-4 overflow-y-auto ${
+              isRTL ? "text-right" : "text-left"
+            }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -1,24 +1,14 @@
-// File: Account.tsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { FaLock } from "react-icons/fa";
 import { IoIosRefresh } from "react-icons/io";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { useTranslation } from "react-i18next";
 
-// استفاده از getIdByUserToken از api.servicesFile
 import projectServiceFile from "../../../../services/api.servicesFile";
-// استفاده از postUser و editProfileUser از projectService
 import projectService from "../../../../services/api.services";
-
-// کامپوننت FileUploadHandler جهت دانلود و نمایش عکس کاربر
 import FileUploadHandler from "../../../../services/FileUploadHandler";
 
-// اگر اینترفیس در فایل دیگری تعریف شده است، آن را import کنید:
-// import { EditProfileUserInterface } from "../../../../types/UserTypes";
-
-// در اینجا اینترفیس EditProfileUserInterface را تعریف می‌کنیم (در صورت نیاز)
 export interface EditProfileUserInterface {
   IsVisible: boolean;
   LastModified: string | null;
@@ -41,7 +31,6 @@ export interface EditProfileUserInterface {
   Code: string;
 }
 
-// اینترفیس نمونه برای UserToken
 interface UserToken {
   ID: string;
   Name: string;
@@ -55,18 +44,41 @@ interface UserToken {
   LastLoginTime: string;
   UserImageId: string;
   Code?: string;
-  // در صورت نیاز، اطلاعات بیشتری مانند RepoInfo و غیره...
 }
 
-const Account: React.FC = () => {
+// تشخیص جهت RTL
+const detectRTL = (): boolean => {
+  if (typeof window === "undefined") return false;
+  const rootAttr = document.documentElement.getAttribute("dir");
+  const bodyAttr = document.body.getAttribute("dir");
+  const attrDir = (rootAttr || bodyAttr || "").toLowerCase();
+  if (attrDir) return attrDir === "rtl";
+  return (
+    window.getComputedStyle(document.documentElement).direction === "rtl" ||
+    window.getComputedStyle(document.body).direction === "rtl"
+  );
+};
 
+const Account: React.FC = () => {
   const { t } = useTranslation();
 
-  // در ابتدا از یک مقدار پیش‌فرض خالی برای ID استفاده می‌کنیم تا بعد از دریافت از API مقداردهی شود.
+  const [isRTL, setIsRTL] = useState<boolean>(detectRTL);
+
+  useLayoutEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsRTL(detectRTL());
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["dir"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
   const [updated, setUpdated] = useState({
     IsVisible: true,
     LastModified: null,
-    ID: "", // مقدار پیش‌فرض خالی، تا بعد از دریافت از API مقداردهی شود.
+    ID: "",
     ModifiedById: null,
     Username: "",
     Password: "",
@@ -82,23 +94,15 @@ const Account: React.FC = () => {
     UserImageId: "",
     TTKK: "",
     userType: 0,
-    Code: "" // مقدار اولیه Code به عنوان رشته خالی
+    Code: "",
   });
 
-  // state برای ذخیره اطلاعات کاربر دریافتی
   const [userInfo, setUserInfo] = useState<UserToken | null>(null);
-
-  // state برای URL عکس پروفایل
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  // state مربوط به بخش Right Side (برای تب‌بندی)
   const [activeRibbon, setActiveRibbon] = useState("Home");
   const ribbonOptions = ["Home", "Dashboard", "Profile"];
-
-  // state برای ذخیره نام‌های دریافتی از postUser
   const [userNames, setUserNames] = useState<string[]>([]);
 
-  // متدهای دکمه‌ها
   const handleChangePassword = () => {
     alert("Change Password clicked!");
   };
@@ -111,19 +115,15 @@ const Account: React.FC = () => {
     alert("Sign Out clicked!");
   };
 
-  // دریافت اطلاعات کاربر از API با استفاده از getIdByUserToken
   useEffect(() => {
     const fetchUserTokenId = async () => {
       try {
         const res = await projectServiceFile.getIdByUserToken();
-        console.log("Response Data from getIdByUserToken:", res.data);
-        // اگر res.data آرایه باشد، عنصر اول را در نظر بگیرید؛ در غیر این صورت از res.data استفاده کنید.
         const data = Array.isArray(res.data) ? res.data[0] : res.data;
         if (data) {
-          // مقدار Code و همچنین ID به صورت مستقیم از داده دریافتی تنظیم می‌شود
           setUpdated((prev) => ({
             ...prev,
-            ID: data.ID, // به روزرسانی فیلد ID
+            ID: data.ID,
             Username: data.Username,
             Name: data.Name,
             Mobile: data.Mobile,
@@ -131,7 +131,7 @@ const Account: React.FC = () => {
             Website: data.Website,
             Email: data.Email,
             UserImageId: data.UserImageId,
-            Code: data.Code // مقدار Code از API دریافت می‌شود
+            Code: data.Code,
           }));
           setUserInfo(data);
         }
@@ -139,16 +139,13 @@ const Account: React.FC = () => {
         console.error("Error fetching user token ID:", error);
       }
     };
-
     fetchUserTokenId();
   }, []);
 
-  // دریافت نام‌های کاربری از API با استفاده از postUser (مثالی برای نمایش نام‌ها)
   useEffect(() => {
     const fetchUserNames = async () => {
       try {
         const res: any = await projectService.postUser();
-        console.log("Response Data from postUser:", res);
         if (res && Array.isArray(res)) {
           const names = res.map((user: any) => user.Name);
           setUserNames(names);
@@ -159,11 +156,9 @@ const Account: React.FC = () => {
         console.error("Error fetching user names:", error);
       }
     };
-
     fetchUserNames();
   }, []);
 
-  // تابع ویرایش حساب کاربری با استفاده از API editProfileUser
   const editAccount = () => {
     const regexMobile = /^(?:09\d{9})?$/;
     const regexEmail = /^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -176,12 +171,10 @@ const Account: React.FC = () => {
       return;
     }
 
-    // ساخت payload آپدیت به همراه منطق Code و ID از اطلاعات دریافتی (userInfo)
     const updateUser: EditProfileUserInterface = {
       ...updated,
-      // استفاده از مقدار Code و ID گرفته شده از API (در userInfo) در صورت موجود بودن.
       ID: userInfo?.ID ?? updated.ID,
-      Code: userInfo?.Code ?? updated.Code ?? ""
+      Code: userInfo?.Code ?? updated.Code ?? "",
     };
 
     console.log("Sending updated data:", updateUser);
@@ -198,33 +191,35 @@ const Account: React.FC = () => {
       });
   };
 
-  // هندل تغییر ورودی‌های فرم
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUpdated((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <div className="container mx-auto mt-6 px-4">
-      <h2 className="text-2xl font-bold mb-8">{t("account.Titles.AccountInformation")}</h2>
+    <div className="container mx-auto mt-3 mb-3 px-4">
+      <h2 className="text-2xl font-bold mb-4">
+        {t("account.Titles.AccountInformation")}
+      </h2>
 
-      {/* استفاده از FileUploadHandler جهت دانلود عکس پروفایل */}
       <FileUploadHandler
         selectedFileId={updated.UserImageId}
         resetCounter={0}
-        onReset={() => { }}
+        onReset={() => {}}
         onPreviewUrlChange={setPreviewUrl}
         hideUploader={true}
       />
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* ستون سمت چپ: User Information */}
+        {/* ستون چپ: اطلاعات کاربر */}
         <div className="w-full md:w-2/3">
           <div className="border rounded shadow p-4 h-[600px]">
-            <h4 className="text-xl font-semibold mb-4">{t("account.Titles.UserInformation")}</h4>
+            <h4 className="text-xl font-semibold mb-3">
+              {t("account.Titles.UserInformation")}
+            </h4>
 
-            {/* بخش آواتار و اطلاعات کاربر */}
-            <div className="flex items-center gap-4 mb-4">
+            {/* بخش آواتار */}
+            <div className="flex items-center gap-4 mb-3">
               {previewUrl ? (
                 <img
                   src={previewUrl}
@@ -233,15 +228,20 @@ const Account: React.FC = () => {
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                  <p className="text-xs text-gray-500">{t("account.Messages.Loading")}</p>
+                  <p className="text-xs text-gray-500">
+                    {t("account.Messages.Loading")}
+                  </p>
                 </div>
               )}
               <div>
                 <p className="text-lg font-medium">
-                  {userInfo ? userInfo.Name : t("account.Placeholders.UserName")}
+                  {userInfo
+                    ? userInfo.Name
+                    : t("account.Placeholders.UserName")}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {userNames.filter((uname) => uname && uname.trim() !== "").length > 0 ? (
+                  {userNames.filter((uname) => uname && uname.trim() !== "")
+                    .length > 0 ? (
                     userNames
                       .filter((uname) => uname && uname.trim() !== "")
                       .map((uname, index) => (
@@ -253,20 +253,24 @@ const Account: React.FC = () => {
                         </div>
                       ))
                   ) : (
-                    <p className="text-sm text-gray-600">{t("account.Messages.LoadingUserNames")}</p>
+                    <p className="text-sm text-gray-600">
+                      {t("account.Messages.LoadingUserNames")}
+                    </p>
                   )}
                 </div>
               </div>
             </div>
 
-            <hr className="my-4" />
+            <hr className="my-3" />
 
-            {/* فرم به دو ستون */}
+            {/* فرم دو ستونه */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              {/* ستون فرم سمت چپ */}
+              {/* ستون چپ فرم */}
               <div className="space-y-4">
                 <div>
-                  <label className="block mb-1">{t("account.Fields.Username")}</label>
+                  <label className="block mb-1">
+                    {t("account.Fields.Username")}
+                  </label>
                   <input
                     type="text"
                     name="Username"
@@ -277,7 +281,9 @@ const Account: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">{t("account.Fields.Name")}</label>
+                  <label className="block mb-1">
+                    {t("account.Fields.Name")}
+                  </label>
                   <input
                     type="text"
                     name="Name"
@@ -288,7 +294,9 @@ const Account: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">{t("account.Fields.Mobile")}</label>
+                  <label className="block mb-1">
+                    {t("account.Fields.Mobile")}
+                  </label>
                   <input
                     type="text"
                     name="Mobile"
@@ -299,7 +307,8 @@ const Account: React.FC = () => {
                   />
                 </div>
               </div>
-              {/* ستون فرم سمت راست */}
+
+              {/* ستون راست فرم */}
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <button
@@ -319,7 +328,9 @@ const Account: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block mb-1">{t("account.Fields.LastName")}</label>
+                  <label className="block mb-1">
+                    {t("account.Fields.LastName")}
+                  </label>
                   <input
                     type="text"
                     name="Family"
@@ -330,7 +341,9 @@ const Account: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">{t("account.Fields.Website")}</label>
+                  <label className="block mb-1">
+                    {t("account.Fields.Website")}
+                  </label>
                   <input
                     type="text"
                     name="Website"
@@ -341,7 +354,9 @@ const Account: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">{t("account.Fields.Email")}</label>
+                  <label className="block mb-1">
+                    {t("account.Fields.Email")}
+                  </label>
                   <input
                     type="text"
                     name="Email"
@@ -354,9 +369,13 @@ const Account: React.FC = () => {
               </div>
             </div>
 
-            {/* بخش باکس پایین با بردر آبی */}
-            <div className="mt-6 border border-blue-500 rounded p-4">
-              <div className="flex justify-end gap-4">
+            {/* بخش پایین با بردر آبی — در RTL دکمه‌ها به راست می‌روند */}
+            <div className="mt-4 border border-blue-500 rounded p-4">
+              <div
+                className={`flex gap-4 ${
+                  isRTL ? "justify-start" : "justify-end"
+                }`}
+              >
                 <button
                   onClick={handleSwitchAccount}
                   className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100"
@@ -373,25 +392,25 @@ const Account: React.FC = () => {
                 </button>
               </div>
             </div>
-
           </div>
         </div>
 
-        {/* ستون سمت راست: سه باکس با ارتفاع مساوی */}
+        {/* ستون راست: سه باکس */}
         <div className="w-full md:w-1/3 flex flex-col gap-4 h-[600px]">
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
-            <p className="font-semibold mb-2">{t("account.Side.Superintendent")}</p>
-            <p className="text-sm text-gray-600">
-
+            <p className="font-semibold mb-2">
+              {t("account.Side.Superintendent")}
             </p>
+            <p className="text-sm text-gray-600"></p>
           </div>
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
             <p className="font-semibold mb-2">{t("account.Side.Admins")}</p>
-            <p className="text-sm text-gray-600">
-            </p>
+            <p className="text-sm text-gray-600"></p>
           </div>
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
-            <p className="font-semibold mb-2">{t("account.Side.ChangeActiveRibbon")}</p>
+            <p className="font-semibold mb-2">
+              {t("account.Side.ChangeActiveRibbon")}
+            </p>
             <select
               value={activeRibbon}
               onChange={(e) => setActiveRibbon(e.target.value)}

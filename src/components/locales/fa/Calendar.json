@@ -1,22 +1,25 @@
 {
-    "Calendars": {
-      "CalendarName": "نام تقویم",
-      "Exceptions": "استثناها",
-      "RoutineWorkingHours": "ساعات کاری روتین",
-      "Saturday": "شنبه",
-      "Sunday": "یکشنبه",
-      "Monday": "دوشنبه",
-      "Tuesday": "سه‌شنبه",
-      "Wednesday": "چهارشنبه",
-      "Thursday": "پنج‌شنبه",
-      "Friday": "جمعه",
-      "Hours": "ساعات",
-      "Value": "مقدار (0-1)",
-      "SetWorkingHoursFor": "تنظیم ساعات کاری برای {{date}}",
-      "WorkingHours": "ساعات کاری",
-      "EnterHours01": "ساعت را وارد کنید (۰–۱)",
-      "EnterValidNumber01": "لطفاً عددی بین ۰ تا ۱ وارد کنید",
-      "SaveFailed": "ذخیره‌سازی تقویم ناموفق بود"
-    }
+  "Calendars": {
+    "CalendarName": "نام تقویم",
+    "CalendarNameRequired": "نام تقویم الزامی است",
+    "Exceptions": "استثناها",
+    "RoutineWorkingHours": "تاریخ های روال",
+    "Saturday": "شنبه",
+    "Sunday": "یک‌شنبه",
+    "Monday": "دوشنبه",
+    "Tuesday": "سه‌شنبه",
+    "Wednesday": "چهارشنبه",
+    "Thursday": "پنج‌شنبه",
+    "Friday": "جمعه",
+    "DayCount": "تعداد روز",
+    "WorkHoursPerDay": "ساعت کار در روز",
+    "Hours": "ساعات",
+    "Value": "مقدار",
+    "SetWorkingHoursFor": "تنظیم ساعات کاری برای {{date}}",
+    "WorkingHours": "ساعت کار در روز",
+    "EnterHours01": "",
+    "EnterValidNumber01": "لطفاً عددی بین ۰ تا ۱ وارد کنید",
+    "EnterCalendarName": "نام تقویم را وارد کنید",
+    "SaveFailed": "ذخیره‌سازی تقویم ناموفق بود"
   }
-  
+}

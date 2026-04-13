@@ -1,6 +1,3 @@
-/* ----------------------------------------------------------
-   src/components/Projects/ProjectAccess/Panel/RightProjectAccess.tsx
-   ---------------------------------------------------------- */
 import React from "react";
 import DynamicSwitcher from "../../../utilities/DynamicSwitcher";
 import { AccessProject } from "../../../../services/api.services";
@@ -65,7 +62,6 @@ const RightProjectAccess: React.FC<RightProps> = ({
       className="p-2 h-full flex flex-col gap-3 bg-gradient-to-b from-blue-50 to-pink-50 rounded-md overflow-auto"
       dir={dir}
     >
-      {/* Mode switcher */}
       <div className="flex items-center justify-center gap-2">
         <span className="text-sm font-semibold">
           {t("ProjectAccess.Mode", { defaultValue: "Mode" })}

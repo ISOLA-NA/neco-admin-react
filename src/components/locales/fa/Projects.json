@@ -1,25 +1,29 @@
 {
-    "Projects": {
-      "Status": "وضعیت",
-      "ProjectName": "نام پروژه",
-      "Phase": "فاز",
-      "Configuration": "کانفیگ",
-      "ProjectCharteredDate": "تاریخ تایید پروژه",
-      "IdeaStartDate": "تاریخ آغاز ایده",
-      "ProjectPlanDuration": "مدت زمان برنامه‌ریزی پروژه",
-      "IdeaPlanDuration": "مدت زمان طرح ایده",
-      "ProjectApprovalBudget": "بودجه تصویب پروژه",
-      "PlanningExecutionBudget": "برنامه‌ریزی بودجه اجرایی",
-      "Files": "تعداد فایل‌ها",
-      "Tasks": "تعداد تسک‌ها",
-      "ProgramItems": "تعداد آیتم‌های برنامه",
-      "AssignedCalendars": "تقویم‌های اختصاص داده شده",
-      "Letters": "تعداد نامه‌ها",
-      "Roles": "جایگاه شغلی",
-      "FileSize": "سایز فایل",
-      "Knowledge": "دانش‌ها",
-      "Issues": "موضوعات",
-      "Meetings": "تعداد جلسه‌ها"
-    }
+  "Projects": {
+    "Status": "وضعیت",
+    "ProjectName": "نام پروژه",
+    "Phase": "فاز",
+    "Configuration": "پیکر بندی",
+    "ProjectCharteredDate": "تاریخ تایید پروژه",
+    "IdeaStartDate": "تاریخ شروع ایده",
+    "ProjectPlanDuration": "مدت زمان طرح پروژه",
+    "IdeaPlanDuration": "مدت زمان طرح ایده",
+    "ProjectApprovalBudget": "بودجه تایید پروژه",
+    "PlanningExecutionBudget": "بودجه اجرای پروژه",
+    "Files": "تعداد فایل‌ها",
+    "Tasks": "تعداد وظایف",
+    "ProgramItems": "تعداد آیتم‌های برنامه",
+    "AssignedCalendars": "تقویم‌های اختصاص داده شده",
+    "Letters": "تعداد نامه‌ها",
+    "Roles": "نقش",
+    "FileSize": "مجموع اندازه فایل ها",
+    "Knowledge": "دانش‌ها",
+    "Issues": "مسائل موردی",
+    "Meetings": "تعداد جلسات",
+    "ExecutionStartDate": "تاریخ شروع اجرا",
+    "ExecutionBudget": "بودجه اجرا",
+    "ApprovalBudget": "بودجه تایید",
+    "IsIdea": "ایده",
+    "Project": "پروژه"
   }
-  
+}

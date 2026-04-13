@@ -1,4 +1,3 @@
-// src/components/Projects/UpdateAddress.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { FiChevronRight, FiChevronDown, FiRefreshCcw } from "react-icons/fi";
 
@@ -9,7 +8,8 @@ import AppServices, {
 
 import DynamicSelector from "../utilities/DynamicSelector";
 import DynamicInput from "../utilities/DynamicInput";
-import { showAlert } from "../utilities/Alert/DynamicAlert"; // ← مسیر درست: Projects/.. -> utilities/Alert
+import { showAlert } from "../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 type TreeNode = AddressNode & {
   children?: TreeNode[];
@@ -18,6 +18,8 @@ type TreeNode = AddressNode & {
 };
 
 const UpdateAddress: React.FC = () => {
+  const { t } = useTranslation();
+
   const [projects, setProjects] = useState<ProjectWithCalendar[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
@@ -80,7 +82,7 @@ const UpdateAddress: React.FC = () => {
   const toggleExpand = async (node: TreeNode) => {
     if (!node._expanded) {
       if (!node._loaded) {
-        const kids = await AppServices.getChildren(node.ChildProgramID); // id = ChildProgramID
+        const kids = await AppServices.getChildren(node.ChildProgramID);
         const prepared: TreeNode[] = kids.map((k) => ({
           ...k,
           children: [],
@@ -89,10 +91,14 @@ const UpdateAddress: React.FC = () => {
         }));
         setRoots((prev) => attachChildren(prev, node, prepared, true));
       } else {
-        setRoots((prev) => attachChildren(prev, node, node.children ?? [], false, true));
+        setRoots((prev) =>
+          attachChildren(prev, node, node.children ?? [], false, true)
+        );
       }
     } else {
-      setRoots((prev) => mutateNode(prev, node, (n) => ({ ...n, _expanded: false })));
+      setRoots((prev) =>
+        mutateNode(prev, node, (n) => ({ ...n, _expanded: false }))
+      );
     }
   };
 
@@ -113,7 +119,10 @@ const UpdateAddress: React.FC = () => {
         };
       }
       if (n.children && n.children.length) {
-        return { ...n, children: attachChildren(n.children, target, children, markLoaded) };
+        return {
+          ...n,
+          children: attachChildren(n.children, target, children, markLoaded),
+        };
       }
       return n;
     });
@@ -137,29 +146,49 @@ const UpdateAddress: React.FC = () => {
     return a.ID === b.ID && a.ChildProgramID === b.ChildProgramID;
   }
 
-  // === دکمه Edit Address
   const handleEditAddress = async () => {
     if (!selectedNode) return;
     try {
       setUpdatingAddress(true);
 
-      // طبق فیدلر: id = ID نود، str = آدرس
       const res = await AppServices.updateAddress(selectedNode.ID, address);
 
       if (res?.isSuccess) {
-        // پیام موفقیت
-        showAlert("success", undefined, undefined, "Update Address Successfully");
+        showAlert(
+          "success",
+          undefined,
+          undefined,
+          t("UpdateAddress.UpdateSuccess", {
+            defaultValue: "Address updated successfully",
+          })
+        );
 
-        // آدرس نود انتخابی را در State هم به‌روز کن
         setRoots((prev) =>
           mutateNode(prev, selectedNode, (n) => ({ ...n, Address: address }))
         );
-        setSelectedNode((prev) => (prev ? { ...prev, Address: address } : prev));
+        setSelectedNode((prev) =>
+          prev ? { ...prev, Address: address } : prev
+        );
       } else {
-        showAlert("error", undefined, undefined, res?.Msg || "Update failed");
+        showAlert(
+          "error",
+          undefined,
+          undefined,
+          res?.Msg ||
+            t("UpdateAddress.UpdateFailed", {
+              defaultValue: "Failed to update address",
+            })
+        );
       }
     } catch (e) {
-      showAlert("error", undefined, undefined, "Update failed");
+      showAlert(
+        "error",
+        undefined,
+        undefined,
+        t("UpdateAddress.UpdateFailed", {
+          defaultValue: "Failed to update address",
+        })
+      );
     } finally {
       setUpdatingAddress(false);
     }
@@ -175,7 +204,14 @@ const UpdateAddress: React.FC = () => {
   );
 
   const TreeView: React.FC<{ nodes: TreeNode[] }> = ({ nodes }) => {
-    if (!nodes.length) return <div className="text-gray-400 text-sm px-2 py-3">موردی وجود ندارد…</div>;
+    if (!nodes.length) {
+      return (
+        <div className="text-gray-400 text-sm px-2 py-3">
+          {t("UpdateAddress.NoItems", { defaultValue: "No items found…" })}
+        </div>
+      );
+    }
+
     return (
       <ul className="space-y-1">
         {nodes.map((n) => (
@@ -189,7 +225,11 @@ const UpdateAddress: React.FC = () => {
             >
               <button
                 className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-200"
-                title={n._expanded ? "Collapse" : "Expand"}
+                title={
+                  n._expanded
+                    ? t("UpdateAddress.Collapse", { defaultValue: "Collapse" })
+                    : t("UpdateAddress.Expand", { defaultValue: "Expand" })
+                }
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleExpand(n);
@@ -220,11 +260,10 @@ const UpdateAddress: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col gap-3">
-      {/* Select پروژه + Refresh */}
       <div className="flex items-center gap-2">
         <div className="min-w-[260px]">
           <DynamicSelector
-            label="Project"
+            label={t("UpdateAddress.Project", { defaultValue: "Project" })}
             options={projectOptions}
             selectedValue={selectedProjectId}
             onChange={handleProjectChange}
@@ -233,30 +272,35 @@ const UpdateAddress: React.FC = () => {
 
         <button
           onClick={handleRefresh}
-          title="Refresh"
+          title={t("UpdateAddress.Refresh", { defaultValue: "Refresh" })}
           className="inline-flex items-center gap-2 px-3 py-2 rounded-md border bg-white hover:bg-gray-50"
           disabled={!selectedProjectId || loadingRoot}
         >
           <FiRefreshCcw className={loadingRoot ? "animate-spin" : ""} />
-          <span>Refresh</span>
+          <span>{t("UpdateAddress.Refresh", { defaultValue: "Refresh" })}</span>
         </button>
       </div>
 
-      {/* بدنه: درخت / آدرس */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
         <div className="h-full overflow-auto border rounded-md bg-white p-3">
           {loadingRoot ? (
-            <div className="text-gray-500">در حال بارگذاری…</div>
+            <div className="text-gray-500">
+              {t("UpdateAddress.Loading", { defaultValue: "Loading…" })}
+            </div>
           ) : selectedProjectId ? (
             <TreeView nodes={roots} />
           ) : (
-            <div className="text-gray-500">ابتدا یک پروژه انتخاب کنید…</div>
+            <div className="text-gray-500">
+              {t("UpdateAddress.SelectProjectFirst", {
+                defaultValue: "Please select a project first…",
+              })}
+            </div>
           )}
         </div>
 
         <div className="h-full overflow-auto border rounded-md bg-white p-4 space-y-3">
           <DynamicInput
-            name="Address"
+            name={t("UpdateAddress.Address", { defaultValue: "Address" })}
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
@@ -269,7 +313,11 @@ const UpdateAddress: React.FC = () => {
               disabled={!selectedNode || !address || updatingAddress}
               className="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
             >
-              {updatingAddress ? "Saving..." : "Edit Address"}
+              {updatingAddress
+                ? t("UpdateAddress.Saving", { defaultValue: "Saving..." })
+                : t("UpdateAddress.EditAddress", {
+                    defaultValue: "Edit Address",
+                  })}
             </button>
           </div>
         </div>

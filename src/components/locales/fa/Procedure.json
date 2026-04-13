@@ -1,8 +1,7 @@
 {
-    "Procedure": {
-      "Name": "نام",
-      "Description": "شرح",
-      "Projects": "پروژه‌ها"
-    }
+  "Procedure": {
+    "Name": "نام رویه",
+    "Description": "شرح",
+    "Projects": "پروژه‌های مربوطه"
   }
-  
+}

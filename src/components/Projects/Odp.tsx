@@ -292,7 +292,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 
       // ✅ Address همچنان اجباری
       if (!OdpData.Address.trim()) {
-        showAlert("warning", null, "", t("ODP.Alerts.Messages.AddressRequired"));
+        showAlert(
+          "warning",
+          null,
+          "",
+          t("ODP.Alerts.Messages.AddressRequired")
+        );
         return false;
       }
 
@@ -301,7 +306,8 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       const finalPersianName = pNameTrim || null;
 
       const finalRelateProjectsStr =
-        selectedProjectIds.join("|") + (selectedProjectIds.length > 0 ? "|" : "");
+        selectedProjectIds.join("|") +
+        (selectedProjectIds.length > 0 ? "|" : "");
 
       const { ID, ...restOdp } = OdpData;
 
@@ -344,7 +350,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     }
   };
 
-
   useImperativeHandle(ref, () => ({
     save,
   }));
@@ -374,7 +379,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         label: item.Name,
       }))}
       selectedValue={OdpData.nEntityTypeID?.toString() ?? ""}
-      onChange={() => { }}
+      onChange={() => {}}
       label="Form Template"
       disabled
       loading={loadingFormTemplates}
@@ -391,7 +396,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         label: item.Name,
       }))}
       selectedValue={OdpData.nWFTemplateID?.toString() ?? ""}
-      onChange={() => { }}
+      onChange={() => {}}
       label="Approval Flow Template"
       disabled
       loading={loadingApprovalFlows}
@@ -405,17 +410,12 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   return (
     <>
       <TwoColumnLayout>
-        {/* Name / PersianName + سوئیچر */}
-        {/* Name / PersianName + سوئیچر */}
-        {/* Name / PersianName + سوئیچر */}
         <div className="flex items-end gap-2 mb-4">
-          {" "}
-          {/* ← فاصله را به کانتینر دادیم */}
           <div className="flex-1">
             <DynamicInput
-              name={isFaMode ? t("ODP.ODPName") : "PersianName"}
+              name={isFaMode ? t("ODP.ODPName") : t("ODP.PersianName")}
               type="text"
-              value={isFaMode ? (OdpData.Name ?? "") : (OdpData.PersianName ?? "")}
+              value={isFaMode ? OdpData.Name ?? "" : OdpData.PersianName ?? ""}
               placeholder=""
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChange(isFaMode ? "Name" : "PersianName", e.target.value)
@@ -424,6 +424,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
               labelClassName="text-gray-700 font-medium"
             />
           </div>
+
           <button
             type="button"
             onClick={() => setIsFaMode((p) => !p)}
@@ -437,8 +438,9 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
               "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-md hover:scale-[1.01]",
               "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
             ].join(" ")}
-           title={isFaMode ? "Switch to EN (PersianName)" : "Switch to FA (Name)"}
-
+            title={
+              isFaMode ? "Switch to EN (PersianName)" : "Switch to FA (Name)"
+            }
           >
             {isFaMode ? "FA" : "EN"}
           </button>
@@ -479,14 +481,10 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           }}
           label={t("ODP.ProgramTemplate")}
           showButton={true}
-          onButtonClick={handleOpenProgramTemplateModal} // اینجا مودال باز می‌شود!
+          onButtonClick={handleOpenProgramTemplateModal}
           disabled={false}
           className="mb-4"
         />
-
-        {/* فقط همین دوتا متغیر 👇 */}
-        {formTemplateSelector}
-        {approvalFlowSelector}
 
         <ListSelector
           title={t("ODP.RelatedProjects")}
@@ -514,7 +512,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         />
       </TwoColumnLayout>
 
-      {/* Modal Program Template */}
       {renderProgramTemplateModal()}
     </>
   );

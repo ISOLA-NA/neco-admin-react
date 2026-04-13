@@ -1,7 +1,15 @@
-// src/components/Projects/UpdateAddress/UpdateAddressContext.tsx
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import AppServices, { ProjectWithCalendar } from "../../../services/api.services";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import AppServices, {
+  ProjectWithCalendar,
+} from "../../../services/api.services";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
+import { useTranslation } from "react-i18next";
 
 export type AddressNode = {
   ID: number;
@@ -34,7 +42,11 @@ type Ctx = {
 
 const UpdateAddressCtx = createContext<Ctx | null>(null);
 
-export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { t } = useTranslation();
+
   const [projects, setProjects] = useState<ProjectWithCalendar[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
 
@@ -44,7 +56,6 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   const [address, setAddress] = useState<string>("");
 
-  // پروژه‌ها
   useEffect(() => {
     (async () => {
       try {
@@ -56,7 +67,6 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
     })();
   }, []);
 
-  // ریشه‌های یک پروژه
   const loadRoots = async (gid: string) => {
     setSelectedProjectId(gid);
     setSelectedNode(null);
@@ -67,7 +77,12 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const data = await AppServices.getAddressesByPrjLevel(gid);
       setRoots(
-        (data ?? []).map((n) => ({ ...n, children: [], _expanded: false, _loaded: false }))
+        (data ?? []).map((n) => ({
+          ...n,
+          children: [],
+          _expanded: false,
+          _loaded: false,
+        }))
       );
     } catch (e) {
       console.error("getAddressesByPrjLevel failed", e);
@@ -84,11 +99,8 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const toggleExpand = async (node: TreeNode) => {
     if (!node._expanded) {
-      // در حالت expand
       if (!node._loaded) {
         try {
-          // نکته‌ی مهم: برای ریشه‌ها ChildProgramID می‌دیم؛
-          // برای بقیه‌ی سطوح اگر ChildProgramID نداشت، از خود ID استفاده کن.
           const parentParam = node.ChildProgramID ?? node.ID;
           const kids = await AppServices.getChildren(parentParam);
           const prepared: TreeNode[] = (kids ?? []).map((k) => ({
@@ -102,11 +114,14 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
           console.error("getChildren failed", e);
         }
       } else {
-        setRoots((prev) => attachChildren(prev, node, node.children ?? [], false));
+        setRoots((prev) =>
+          attachChildren(prev, node, node.children ?? [], false)
+        );
       }
     } else {
-      // در حالت collapse
-      setRoots((prev) => mutateNode(prev, node, (n) => ({ ...n, _expanded: false })));
+      setRoots((prev) =>
+        mutateNode(prev, node, (n) => ({ ...n, _expanded: false }))
+      );
     }
   };
 
@@ -114,20 +129,35 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!selectedNode) return;
     const res = await AppServices.updateAddress(selectedNode.ID, address);
     if (res?.isSuccess) {
-      showAlert("success", undefined, undefined, "Update Address Successfully");
+      showAlert(
+        "success",
+        undefined,
+        undefined,
+        t("UpdateAddress.UpdateSuccess", {
+          defaultValue: "Address updated successfully",
+        })
+      );
       setRoots((prev) =>
         mutateNode(prev, selectedNode, (n) => ({ ...n, Address: address }))
       );
       setSelectedNode((p) => (p ? { ...p, Address: address } : p));
     } else {
-      showAlert("error", undefined, undefined, res?.Msg || "Update failed");
+      showAlert(
+        "error",
+        undefined,
+        undefined,
+        res?.Msg ||
+          t("UpdateAddress.UpdateFailed", {
+            defaultValue: "Failed to update address",
+          })
+      );
     }
   };
 
-  // کمک‌ها
   function sameNode(a: TreeNode, b: TreeNode) {
     return a.ID === b.ID && a.ChildProgramID === b.ChildProgramID;
   }
+
   function attachChildren(
     list: TreeNode[],
     target: TreeNode,
@@ -144,11 +174,15 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
         };
       }
       if (n.children && n.children.length) {
-        return { ...n, children: attachChildren(n.children, target, children, markLoaded) };
+        return {
+          ...n,
+          children: attachChildren(n.children, target, children, markLoaded),
+        };
       }
       return n;
     });
   }
+
   function mutateNode(
     list: TreeNode[],
     target: TreeNode,
@@ -181,11 +215,19 @@ export const UpdateAddressProvider: React.FC<{ children: React.ReactNode }> = ({
     [projects, selectedProjectId, roots, loadingRoot, selectedNode, address]
   );
 
-  return <UpdateAddressCtx.Provider value={value}>{children}</UpdateAddressCtx.Provider>;
+  return (
+    <UpdateAddressCtx.Provider value={value}>
+      {children}
+    </UpdateAddressCtx.Provider>
+  );
 };
 
 export const useUpdateAddress = () => {
   const ctx = useContext(UpdateAddressCtx);
-  if (!ctx) throw new Error("useUpdateAddress must be used inside UpdateAddressProvider");
+  if (!ctx) {
+    throw new Error(
+      "useUpdateAddress must be used inside UpdateAddressProvider"
+    );
+  }
   return ctx;
 };
