@@ -51,7 +51,7 @@ import apiService from "../../services/api.services";
 // Mapping of column types
 const columnTypeMapping: { [key: string]: number } = {
   component1: 15,
-  component2: 40,
+  component2: 1,
   component3: 2,
   component4: 3,
   component5: 4,
@@ -625,6 +625,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       await updateEntityField(payload);
       newId = payload.ID;
     } else {
+      console.log("SUBMIT ColumnType =>", payload.ColumnType, formData.typeOfInformation);
       const response = await insertEntityField(payload);
       newId = response?.ID ?? payload.ID;
     }

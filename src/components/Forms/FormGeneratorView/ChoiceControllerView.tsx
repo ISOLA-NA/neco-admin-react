@@ -10,10 +10,15 @@ interface ChoiceControllerViewProps {
     metaType2?: "drop" | "radio" | "check";
     metaType3?: string;
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => {
+const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   if (!data) return null;
 
   const options = data.metaType3
@@ -26,7 +31,10 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
         .filter((opt) => opt.value.length > 0)
     : [];
 
-  const displayName = data.DisplayName || "Choose an option:";
+  // ✅ نمایش نام بر اساس زبان
+  const displayName = isFaMode
+    ? data.PersianName || data.DisplayName || "یک گزینه انتخاب کنید"
+    : data.DisplayName || data.PersianName || "Choose an option:";
 
   let content: JSX.Element | null = null;
 
@@ -53,7 +61,7 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
           <div className="option-list radio-list">
             <DynamicRadioGroup
               options={options}
-              title=""                 // عنوان داخلی را پنهان می‌کنیم؛ عنوان بیرونی را داریم
+              title=""
               name="choiceView"
               selectedValue={data.metaType1 || ""}
               onChange={() => {}}
@@ -97,22 +105,17 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
     <div className="choice-controller-view">
       <style>
         {`
-          /* -----------------------------
-             متغیرهای فاصله‌گذاری (قابل تنظیم)
-             ----------------------------- */
           .choice-controller-view {
-            --title-gap: 1rem;       /* فاصله عنوان از گروه گزینه‌ها */
-            --group-gap: 0.75rem;    /* فاصله بین آیتم‌ها (12px) */
-            --label-gap: 0.375rem;   /* فاصله input ↔ متن لیبل (6px) */
+            --title-gap: 1rem;
+            --group-gap: 0.75rem;
+            --label-gap: 0.375rem;
           }
 
-          /* ردیف‌های عنوان + گروه گزینه‌ها: تراز وسط و فاصله ثابت */
           .choice-controller-view .option-row {
             align-items: center;
             gap: var(--title-gap);
           }
 
-          /* گروه گزینه‌ها: همیشه فلکس با فاصله یکنواخت بین آیتم‌ها */
           .choice-controller-view .option-list {
             display: flex;
             flex-wrap: wrap;
@@ -120,41 +123,33 @@ const ChoiceControllerView: React.FC<ChoiceControllerViewProps> = ({ data }) => 
             gap: var(--group-gap);
           }
 
-          /* ——— یکسان‌سازی آیتم‌ها برای رادیو و چک‌باکس ———
-             هر ظرفی که input مستقیمِ رادیو/چک‌باکس داخلش باشد را به inline-flex تبدیل کن
-             تا فاصله‌ی input و متن با gap کنترل شود (حتی اگر متن «نود متنی» باشد). */
           .choice-controller-view .option-list :where(label, div, span):has(> input[type="radio"]),
           .choice-controller-view .option-list :where(label, div, span):has(> input[type="checkbox"]) {
             display: inline-flex !important;
             flex-direction: row !important;
-            align-items: center !important;   /* تراز عمودی دقیق */
-            gap: var(--label-gap) !important; /* فاصله‌ی 6px بین input و متن */
+            align-items: center !important;
+            gap: var(--label-gap) !important;
             line-height: 1.25;
           }
 
-          /* اگر ساختار به صورت input + [هرچیز] بود: فاصله بعد از input */
           .choice-controller-view :is(input[type="radio"], input[type="checkbox"]) + * {
             margin-inline-start: var(--label-gap) !important;
           }
 
-          /* اگر ساختار به صورت [هرچیز] + input بود: فاصله قبل از input */
           .choice-controller-view * + :is(input[type="radio"], input[type="checkbox"]) {
             margin-inline-start: var(--label-gap) !important;
           }
 
-          /* خودِ کنترل‌ها: تراز و رنگ (اختیاری) */
           .choice-controller-view input[type="radio"],
           .choice-controller-view input[type="checkbox"] {
             vertical-align: middle;
-            accent-color: #9333ea; /* نزدیک Tailwind purple-600 */
+            accent-color: #9333ea;
           }
 
-          /* عنوان داخلی DynamicRadioGroup را اگر رندر شد پنهان کن */
           .choice-controller-view .radio-list :is(legend, .title, .group-title, [class*="title"]) {
             display: none !important;
           }
 
-          /* ——— خنثی‌سازی قانون span سراسری در RTL که باعث چسبندگی می‌شد ——— */
           [dir="rtl"] .choice-controller-view .option-row span,
           [dir="rtl"] .choice-controller-view .option-list span {
             margin-right: 0 !important;

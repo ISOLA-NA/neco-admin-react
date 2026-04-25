@@ -9,13 +9,16 @@ interface CtrTextBoxViewProps {
     metaType3?: string | null;
     metaType4?: string | null;
     DisplayName?: string;
+    PersianName?: string;
   };
   isDisable?: boolean;
+  isFaMode?: boolean;
 }
 
 const CtrTextBoxView: React.FC<CtrTextBoxViewProps> = ({
   data,
   isDisable = true,
+  isFaMode = false,
 }) => {
   const [metaTypes, setMetaTypes] = useState({
     metaType1: data?.metaType1 || "",
@@ -35,15 +38,18 @@ const CtrTextBoxView: React.FC<CtrTextBoxViewProps> = ({
     }
   }, [data]);
 
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   return (
-    <div className="mt-10 bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+    <div>
       <DynamicInput
-        name={data?.DisplayName || "Default Value"}
+        name={label}
         type="text"
         value={metaTypes.metaType1}
         placeholder=" "
         disabled={isDisable}
-        className="w-full p-2 border rounded focus:outline-none focus:border-gray-700"
       />
     </div>
   );

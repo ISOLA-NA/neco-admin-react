@@ -9,10 +9,15 @@ interface HyperLinkViewProps {
     metaType3?: string | null;
     metaType4?: string | null;
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const HyperLinkView: React.FC<HyperLinkViewProps> = ({ data }) => {
+const HyperLinkView: React.FC<HyperLinkViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   const [linkValue, setLinkValue] = useState("");
 
   useEffect(() => {
@@ -21,11 +26,15 @@ const HyperLinkView: React.FC<HyperLinkViewProps> = ({ data }) => {
     }
   }, [data]);
 
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   return (
-    <div className="mt-4 p-4 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg flex items-center">
-      {data?.DisplayName && (
+    <div>
+      {label && (
         <span className="mr-4 text-sm font-medium text-gray-700">
-          {data.DisplayName}
+          {label}
         </span>
       )}
       <DynamicInput
@@ -34,7 +43,6 @@ const HyperLinkView: React.FC<HyperLinkViewProps> = ({ data }) => {
         value={linkValue}
         placeholder=""
         disabled
-        className="w-full p-2 border rounded focus:outline-none focus:border-gray-700"
       />
     </div>
   );

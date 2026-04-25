@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import DynamicModal from "../../utilities/DynamicModal";
-import RolePickerTabs from "../ControllerForms/PostPickerList/RolePickerTabs"; // مسیر را مطابق پروژه تنظیم کنید
+import RolePickerTabs from "../ControllerForms/PostPickerList/RolePickerTabs";
 import { useApi } from "../../../context/ApiContext";
 import { SelectedItem } from "../ControllerForms/PostPickerList/MembersTable";
 import { useTranslation } from "react-i18next";
@@ -10,15 +10,18 @@ interface PostPickerListViewProps {
   data?: {
     metaType1?: string;
     DisplayName?: string;
+    PersianName?: string;
   };
   fullWidth?: boolean;
   onMetaChange?: (meta: { metaType1: string }) => void;
+  isFaMode?: boolean;
 }
 
 const PostPickerListView: React.FC<PostPickerListViewProps> = ({
   data,
   fullWidth = false,
   onMetaChange,
+  isFaMode = false,
 }) => {
   const { t } = useTranslation();
   const api = useApi();
@@ -26,15 +29,16 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingInitial, setIsLoadingInitial] = useState<boolean>(false);
 
-  // مقدار اولیه metaType از data.metaType1
   const initMeta = data?.metaType1 || "";
 
-  // لاگ گرفتن از data?.DisplayName
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || "مقدار پیش‌فرض"
+    : data?.DisplayName || data?.PersianName || "Default Value(s)";
+
   useEffect(() => {
     console.log("DisplayName prop in PostPickerListView:", data?.DisplayName);
   }, [data?.DisplayName]);
 
-  // بارگذاری آیتم‌های اولیه (در حالت ویرایش) بر اساس initMeta
   useEffect(() => {
     if (initMeta) {
       const ids = initMeta.split("|").filter(Boolean);
@@ -59,7 +63,6 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
     }
   }, [initMeta, api]);
 
-  // به‌روزرسانی metaType (رشته pipe-separated) به والد
   useEffect(() => {
     const metaType = selectedItems.map((item) => item.id).join("|");
     if (onMetaChange) {
@@ -67,7 +70,6 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
     }
   }, [selectedItems, onMetaChange]);
 
-  // هندلر دریافت آیتم‌های انتخاب‌شده از RolePickerTabs
   const handleSelectRole = (selected: SelectedItem[]) => {
     setSelectedItems((prev) => {
       const newItems = selected.filter(
@@ -78,20 +80,19 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
     setIsModalOpen(false);
   };
 
-  // حذف یک آیتم از لیست انتخاب‌شده
   const handleRemoveItem = (id: string) => {
     setSelectedItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
     <div
+      dir={isFaMode ? "rtl" : "ltr"}
       className="p-4 bg-white rounded-lg border border-gray-300 relative"
       style={{ minHeight: "120px", width: fullWidth ? "100%" : "auto" }}
     >
-      {/* بخش بالایی: عنوان (DisplayName از data) و دکمه Add */}
       <div className="flex items-center justify-between mb-2">
         <label className="text-gray-700 text-sm font-semibold">
-          {data?.DisplayName ? data.DisplayName : "Default Value(s)"}
+          {label}
         </label>
         <button
           type="button"
@@ -103,7 +104,6 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
         </button>
       </div>
 
-      {/* نمایش آیتم‌های انتخاب‌شده */}
       <div className="overflow-y-auto max-h-32 border border-gray-200 p-2 rounded">
         {isLoadingInitial ? (
           <div className="flex justify-center items-center h-full">
@@ -131,13 +131,11 @@ const PostPickerListView: React.FC<PostPickerListViewProps> = ({
           </div>
         ) : (
           <p className="text-gray-500 text-sm">
-            {" "}
             {t("PostPickerList.Labels.NoDefaultValues")}
           </p>
         )}
       </div>
 
-      {/* مودال نمایش RolePickerTabs */}
       <DynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <div className="p-4 min-h-[400px] min-w-[600px]">
           <RolePickerTabs

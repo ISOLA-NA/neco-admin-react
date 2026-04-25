@@ -57,23 +57,24 @@ const Info: React.FC = () => {
 
             {/* وب‌سایت شرکت نکو */}
             <div className="text-center text-blue-600 hover:underline">
-              آدرس سایت را اینجا وارد کنید
+              www.necoware.com
             </div>
 
             <hr className="my-2" />
 
             {/* نوع محصول */}
-            <div>
+            {/* <div>
               <span className="font-semibold">
                 {t("info.Labels.ProductTypeActivated")}
               </span>
-            </div>
+            </div> */}
 
             {/* تاریخ فعال‌سازی */}
             <div>
               <span className="font-semibold">
                 {t("info.Labels.ActivationDate")}
               </span>
+              <p>02/02/2025</p>
             </div>
 
             {/* آخرین نسخه نصب شده */}
@@ -81,6 +82,7 @@ const Info: React.FC = () => {
               <span className="font-semibold">
                 {t("info.Labels.LatestVersionInstalled")}
               </span>
+              <p>2026.04.20</p>
             </div>
           </div>
         </div>

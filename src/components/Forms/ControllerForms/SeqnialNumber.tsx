@@ -70,6 +70,10 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
   const { t, i18n } = useTranslation();
   const isFa = i18n.language?.toLowerCase().startsWith("fa");
 
+  const containerDir = isFa ? "rtl" : "ltr";
+  const textAlignClass = isFa ? "text-right" : "text-left";
+  const checkboxLabelDirection = isFa ? "flex-row-reverse" : "flex-row";
+
   const labels = {
     afterSubmit: isFa ? "بعد از ثبت" : "After Submit",
     afterAccept: isFa ? "بعد از تایید" : "After Accept",
@@ -97,7 +101,9 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
   );
 
   useEffect(() => {
-    setCommand((prev) => (prev === (data.metaType1 ?? "") ? prev : data.metaType1 ?? ""));
+    setCommand((prev) =>
+      prev === (data.metaType1 ?? "") ? prev : data.metaType1 ?? ""
+    );
     setNumberOfDigit((prev) =>
       prev === (data.metaType2 ?? "") ? prev : data.metaType2 ?? ""
     );
@@ -173,127 +179,169 @@ const SeqenialNumber: React.FC<SeqenialNumberProps> = ({
     }));
   };
 
+  const modeItems = [
+    {
+      key: "afterSubmit" as keyof ModeState,
+      label: labels.afterSubmit,
+      checked: modes.afterSubmit,
+    },
+    {
+      key: "afterAccept" as keyof ModeState,
+      label: labels.afterAccept,
+      checked: modes.afterAccept,
+    },
+    {
+      key: "afterReject" as keyof ModeState,
+      label: labels.afterReject,
+      checked: modes.afterReject,
+    },
+    {
+      key: "afterClose" as keyof ModeState,
+      label: labels.afterClose,
+      checked: modes.afterClose,
+    },
+  ];
+
   return (
     <div
-      dir="rtl"
+      dir={containerDir}
       className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center"
     >
-      <div className="p-4 w-full max-w-lg space-y-6 text-right [&_input]:text-right [&_textarea]:text-right">
+      <div className={`p-4 w-full max-w-lg space-y-6 ${textAlignClass}`}>
         <div className="w-full">
-          <DynamicInput
-            name={t("SeqenialNumber.Labels.Command")}
+          <label
+            className={`block text-sm font-medium text-gray-700 mb-1 ${textAlignClass}`}
+          >
+            {t("SeqenialNumber.Labels.Command")}
+          </label>
+
+          <input
             type="text"
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             placeholder={t("SeqenialNumber.Placeholders.Command")}
+            dir="ltr"
+            className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 ${
+              isFa ? "placeholder:text-right" : "placeholder:text-left"
+            }`}
+            style={{ direction: "ltr", textAlign: "left" }}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4 w-full items-end">
           <div className="min-w-0">
-            <DynamicInput
-              name={t("SeqenialNumber.Labels.NumberOfDigit")}
-              type="number"
-              value={numberOfDigit}
-              onChange={(e) => setNumberOfDigit(e.target.value)}
-              placeholder={t("SeqenialNumber.Placeholders.NumberOfDigit")}
-            />
+            <div className={isFa ? "[&_input]:text-right" : "[&_input]:text-left"}>
+              <DynamicInput
+                name={t("SeqenialNumber.Labels.NumberOfDigit")}
+                type="number"
+                value={numberOfDigit}
+                onChange={(e) => setNumberOfDigit(e.target.value)}
+                placeholder={t("SeqenialNumber.Placeholders.NumberOfDigit")}
+              />
+            </div>
           </div>
 
           <div className="min-w-0">
-            <DynamicInput
-              name={t("SeqenialNumber.Labels.SeparatorCharacter")}
-              type="text"
-              value={separatorCharacter}
-              onChange={(e) => setSeparatorCharacter(e.target.value)}
-              placeholder={t("SeqenialNumber.Placeholders.SeparatorCharacter")}
-            />
+            <div className={isFa ? "[&_input]:text-right" : "[&_input]:text-left"}>
+              <DynamicInput
+                name={t("SeqenialNumber.Labels.SeparatorCharacter")}
+                type="text"
+                value={separatorCharacter}
+                onChange={(e) => setSeparatorCharacter(e.target.value)}
+                placeholder={t("SeqenialNumber.Placeholders.SeparatorCharacter")}
+              />
+            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 w-full items-end">
-          <div className="min-w-0">
-            <DynamicInput
-              name={t("SeqenialNumber.Labels.CountOfConst")}
-              type="number"
-              value={countOfConst}
-              onChange={(e) => setCountOfConst(e.target.value)}
-              placeholder={t("SeqenialNumber.Placeholders.CountOfConst")}
-            />
-          </div>
+          {isFa ? (
+            <>
+              <div className="min-w-0">
+                <div className="[&_input]:text-right">
+                  <DynamicInput
+                    name={t("SeqenialNumber.Labels.CountOfConst")}
+                    type="number"
+                    value={countOfConst}
+                    onChange={(e) => setCountOfConst(e.target.value)}
+                    placeholder={t("SeqenialNumber.Placeholders.CountOfConst")}
+                  />
+                </div>
+              </div>
 
-          <div className="min-w-0 flex items-center h-10">
-            <label className="inline-flex flex-row-reverse items-center gap-1 cursor-pointer select-none whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={countInReject}
-                onChange={(e) => setCountInReject(e.target.checked)}
-                className="h-3.5 w-3.5 text-indigo-600 border-gray-300 rounded"
-              />
-              <span className="text-sm font-medium leading-none">
-                {labels.countInReject}
-              </span>
-            </label>
-          </div>
+              {/* ✅ تغییر: justify-end → justify-start تا از ابتدای ستون شروع شه */}
+              <div className="min-w-0 flex items-center justify-start h-10">
+                <label
+                  className={`inline-flex ${checkboxLabelDirection} items-center gap-1.5 cursor-pointer select-none whitespace-nowrap`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={countInReject}
+                    onChange={(e) => setCountInReject(e.target.checked)}
+                    className="h-3.5 w-3.5 flex-shrink-0 text-indigo-600 border-gray-300 rounded"
+                  />
+                  <span className="text-sm font-medium">
+                    {labels.countInReject}
+                  </span>
+                </label>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="min-w-0">
+                <div className="[&_input]:text-left">
+                  <DynamicInput
+                    name={t("SeqenialNumber.Labels.CountOfConst")}
+                    type="number"
+                    value={countOfConst}
+                    onChange={(e) => setCountOfConst(e.target.value)}
+                    placeholder={t("SeqenialNumber.Placeholders.CountOfConst")}
+                  />
+                </div>
+              </div>
+
+              <div className="min-w-0 flex items-center justify-start h-10">
+                <label
+                  className={`inline-flex ${checkboxLabelDirection} items-center gap-1.5 cursor-pointer select-none whitespace-nowrap`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={countInReject}
+                    onChange={(e) => setCountInReject(e.target.checked)}
+                    className="h-3.5 w-3.5 flex-shrink-0 text-indigo-600 border-gray-300 rounded"
+                  />
+                  <span className="text-sm font-medium">
+                    {labels.countInReject}
+                  </span>
+                </label>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="w-full">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <label className="inline-flex flex-row-reverse items-center gap-1 cursor-pointer select-none whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={modes.afterSubmit}
-                onChange={(e) =>
-                  handleModeChange("afterSubmit", e.target.checked)
-                }
-                className="h-3.5 w-3.5 text-orange-500 border-gray-300 rounded-sm"
-              />
-              <span className="text-sm font-medium leading-none">
-                {labels.afterSubmit}
-              </span>
-            </label>
-
-            <label className="inline-flex flex-row-reverse items-center gap-1 cursor-pointer select-none whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={modes.afterAccept}
-                onChange={(e) =>
-                  handleModeChange("afterAccept", e.target.checked)
-                }
-                className="h-3.5 w-3.5 text-orange-500 border-gray-300 rounded-sm"
-              />
-              <span className="text-sm font-medium leading-none">
-                {labels.afterAccept}
-              </span>
-            </label>
-
-            <label className="inline-flex flex-row-reverse items-center gap-1 cursor-pointer select-none whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={modes.afterReject}
-                onChange={(e) =>
-                  handleModeChange("afterReject", e.target.checked)
-                }
-                className="h-3.5 w-3.5 text-orange-500 border-gray-300 rounded-sm"
-              />
-              <span className="text-sm font-medium leading-none">
-                {labels.afterReject}
-              </span>
-            </label>
-
-            <label className="inline-flex flex-row-reverse items-center gap-1 cursor-pointer select-none whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={modes.afterClose}
-                onChange={(e) =>
-                  handleModeChange("afterClose", e.target.checked)
-                }
-                className="h-3.5 w-3.5 text-orange-500 border-gray-300 rounded-sm"
-              />
-              <span className="text-sm font-medium leading-none">
-                {labels.afterClose}
-              </span>
-            </label>
+          {/* ✅ تغییر: در فارسی justify-end → justify-start تا از سمت راست (ابتدای RTL) شروع شه */}
+          <div
+            className={`flex flex-wrap items-center gap-x-3 gap-y-2 ${
+              isFa ? "justify-start" : "justify-start"
+            }`}
+          >
+            {modeItems.map((item) => (
+              <label
+                key={item.key}
+                className={`inline-flex ${checkboxLabelDirection} items-center gap-1.5 cursor-pointer select-none whitespace-nowrap`}
+              >
+                <input
+                  type="checkbox"
+                  checked={item.checked}
+                  onChange={(e) => handleModeChange(item.key, e.target.checked)}
+                  className="h-3.5 w-3.5 flex-shrink-0 text-orange-500 border-gray-300 rounded-sm"
+                />
+                <span className="text-sm font-medium">
+                  {item.label}
+                </span>
+              </label>
+            ))}
           </div>
         </div>
       </div>

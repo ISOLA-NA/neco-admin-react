@@ -6,10 +6,10 @@ import React, {
   useEffect,
   MouseEvent as ReactMouseEvent,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { EntityField } from "../../../services/api.services";
 import { FiMaximize, FiMinimize } from "react-icons/fi";
 
-// ---------------- Lazy imports ----------------
 const CtrTextBoxView = React.lazy(() => import("./CtrTextBoxView"));
 const RichTextControllerView = React.lazy(() => import("./RichTextControllerView"));
 const ChoiceControllerView = React.lazy(() => import("./ChoiceControllerView"));
@@ -46,8 +46,6 @@ const LookupImageRealValue = React.lazy(() => import("./LookupImageRealValueView
 const InventoryView = React.lazy(() => import("./InventoryView"));
 const InventoryFieldView = React.lazy(() => import("./InventoryFieldView"));
 
-
-// ---------------- type → component map ----------------
 const viewComponentMapping: { [key: number]: React.FC<any> } = {
   15: CtrTextBoxView,
   40: RichTextControllerView,
@@ -82,9 +80,13 @@ const viewComponentMapping: { [key: number]: React.FC<any> } = {
   18: MePostSelectorView,
   23: AdvanceWfView,
   37: LookupImageRealValue,
-  38: InventoryView,      
+  38: InventoryView,
   39: InventoryFieldView,
 };
+
+interface ExtendedEntityField extends EntityField {
+  PersianName?: string;
+}
 
 interface FormGeneratorViewProps {
   isOpen: boolean;
@@ -99,9 +101,9 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
   entityFields,
   selectedRow,
 }) => {
+  const { i18n } = useTranslation();
+  const [isRtl, setIsRtl] = useState<boolean>(i18n.dir() === "rtl");
   const [isMaximized, setIsMaximized] = useState(false);
-
-  // Drag state (only when not maximized)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const dragStartRef = useRef<{
     mouseX: number;
@@ -111,17 +113,23 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
   } | null>(null);
 
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+    const handleLanguageChange = () => setIsRtl(i18n.dir() === "rtl");
+    setIsRtl(i18n.dir() === "rtl");
+    i18n.on("languageChanged", handleLanguageChange);
+    return () => { i18n.off("languageChanged", handleLanguageChange); };
+  }, [i18n]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsRtl(i18n.dir() === "rtl");
+      document.body.style.overflow = "hidden";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen, i18n]);
 
   const onHeaderMouseDown = (e: ReactMouseEvent) => {
     if (isMaximized) return;
-    // avoid dragging when clicking buttons
     if ((e.target as HTMLElement).closest("button")) return;
-
     e.preventDefault();
     dragStartRef.current = {
       mouseX: e.clientX,
@@ -164,39 +172,33 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
       aria-modal="true"
     >
       <div
-        className={`bg-white rounded-lg w-full transition-all duration-200 shadow-xl ${isMaximized ? "max-w-7xl h-[90vh]" : "max-w-2xl h-[80vh]"
-          }`}
+        className={`bg-white rounded-lg w-full transition-all duration-200 shadow-xl ${
+          isMaximized ? "max-w-7xl h-[90vh]" : "max-w-2xl h-[80vh]"
+        }`}
         style={
           isMaximized
             ? {}
             : {
-              position: "fixed",
-              left: "50%",
-              top: "50%",
-              transform: `translate(calc(-50% + ${dragOffset.x}px), calc(-50% + ${dragOffset.y}px))`,
-            }
+                position: "fixed",
+                left: "50%",
+                top: "50%",
+                transform: `translate(calc(-50% + ${dragOffset.x}px), calc(-50% + ${dragOffset.y}px))`,
+              }
         }
       >
-        {/* Header */}
+        {/* ✅ هدر فقط شامل دکمه‌های maximize و close — بدون عنوان */}
         <div
-          className="sticky top-0 bg-white z-10 flex justify-between items-center px-6 py-3 border-b cursor-move select-none"
+          className="sticky top-0 bg-white z-10 flex justify-end items-center px-3 py-2 border-b cursor-move select-none"
           onMouseDown={onHeaderMouseDown}
         >
-          <h2 className="text-2xl font-bold cursor-default select-none">
-            View Form
-          </h2>
-
-          <div className="flex items-center gap-3 cursor-default select-none">
-            {/* Maximize / Minimize button (always visible) */}
+          <div className="flex items-center gap-2 cursor-default select-none">
             <button
               onClick={toggleMaximize}
-              className="text-gray-600 hover:text-gray-800 focus:outline-none"
+              className="text-gray-500 hover:text-gray-700 focus:outline-none"
               title={isMaximized ? "Restore" : "Maximize"}
             >
-              {isMaximized ? <FiMinimize size={20} /> : <FiMaximize size={20} />}
+              {isMaximized ? <FiMinimize size={18} /> : <FiMaximize size={18} />}
             </button>
-
-            {/* Close */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -207,7 +209,7 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="h-5 w-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -222,14 +224,21 @@ const FormGeneratorView: React.FC<FormGeneratorViewProps> = ({
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto" style={{ maxHeight: "calc(100% - 4rem)" }}>
-          {entityFields.map((field, index) => {
+        <div
+          className="p-6 overflow-y-auto"
+          style={{ maxHeight: "calc(100% - 3rem)" }}
+        >
+          {(entityFields as ExtendedEntityField[]).map((field, index) => {
             const ViewComponent = viewComponentMapping[field.ColumnType];
             if (!ViewComponent) return null;
             return (
               <div key={index} className="mb-4">
                 <Suspense fallback={<div>Loading...</div>}>
-                  <ViewComponent data={field} selectedRow={selectedRow} />
+                  <ViewComponent
+                    data={field}
+                    selectedRow={selectedRow}
+                    isFaMode={isRtl}
+                  />
                 </Suspense>
               </div>
             );

@@ -5,24 +5,31 @@ import { useTranslation } from "react-i18next";
 
 interface NumberControllerViewProps {
   data?: {
-    metaType3?: string; // مقدار max
-    DisplayName?: string; // عنوان ورودی
+    metaType3?: string;
+    DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
 const NumberControllerView: React.FC<NumberControllerViewProps> = ({
   data,
+  isFaMode = false,
 }) => {
   const { t } = useTranslation();
+
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || t("NumberController.MaxValueLabel")
+    : data?.DisplayName || data?.PersianName || t("NumberController.MaxValueLabel");
+
   return (
-    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+    <div>
       <DynamicInput
-        name={data?.DisplayName || t("NumberController.MaxValueLabel")}
+        name={label}
         type="number"
         value={data?.metaType3 ?? ""}
         placeholder={t("NumberController.MaximumValuePlaceholder")}
         disabled={true}
-        className="border-b-gray-400 focus-within:border-b-gray-700"
       />
     </div>
   );

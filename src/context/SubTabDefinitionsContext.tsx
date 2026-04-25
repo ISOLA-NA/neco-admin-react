@@ -798,7 +798,7 @@ export const SubTabDefinitionsProvider: React.FC<{
             },
           },
           {
-            headerName: t("ProgramTemplate.Global", { defaultValue: "جهانی" }),
+            headerName: t("ProgramTemplate.Global", { defaultValue: "عمومی" }),
             field: "IsGlobal",
             filter: false,
             sortable: true,

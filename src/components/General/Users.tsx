@@ -260,8 +260,8 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         typeof data === "string"
           ? data
           : data?.value?.message ||
-            data?.message ||
-            "خطایی در فرآیند ذخیره دستور رخ داده است.";
+          data?.message ||
+          "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, t("User.ModalError"), message);
       return null;
     }
@@ -298,11 +298,11 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       </div>
       <div>
         <DynamicInput
-          name="ID"
+          name={t("User.Code")}
           type="text"
-          value={userData.ID ?? ""}
-          onChange={() => {}}
-          disabled
+          value={userData.Code}
+          onChange={(e) => handleChange("Code", e.target.value)}
+          placeholder={t("User.PlaceholderCode")}
         />
       </div>
 

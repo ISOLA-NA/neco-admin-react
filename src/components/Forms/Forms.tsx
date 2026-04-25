@@ -49,7 +49,7 @@ interface FormsCommand1Props {
 }
 const columnTypeMapping: { [key: string]: number } = {
   component1: 15,
-  component2: 40,
+  component2: 1,
   component3: 2,
   component4: 3,
   component5: 4,
@@ -142,40 +142,40 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const ellipsisCellStyle = React.useMemo(() => {
     return isRtl
       ? ({
-          textAlign: "right",
-          direction: "rtl",
-          unicodeBidi: "plaintext",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        } as React.CSSProperties)
+        textAlign: "right",
+        direction: "rtl",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties)
       : ({
-          textAlign: "left",
-          direction: "ltr",
-          unicodeBidi: "plaintext",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        } as React.CSSProperties);
+        textAlign: "left",
+        direction: "ltr",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties);
   }, [isRtl]);
   const ellipsisHeaderStyle = React.useMemo(() => {
     return isRtl
       ? ({
-          textAlign: "right",
-          direction: "rtl",
-          unicodeBidi: "plaintext",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        } as React.CSSProperties)
+        textAlign: "right",
+        direction: "rtl",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties)
       : ({
-          textAlign: "left",
-          direction: "ltr",
-          unicodeBidi: "plaintext",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        } as React.CSSProperties);
+        textAlign: "left",
+        direction: "ltr",
+        unicodeBidi: "plaintext",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      } as React.CSSProperties);
   }, [isRtl]);
   const { handleSaveForm } = useAddEditDelete();
   const api = useApi();
@@ -377,104 +377,104 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     }
   }, [api, formData.ID]);
   const newColumnDefs = React.useMemo(
-  () => [
-    {
-      headerName: t("Forms.Columns.Order"),
-      field: "orderValue",
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 0.6,
-      minWidth: 90,
-      cellStyle: ellipsisCellStyle,
-      headerStyle: ellipsisHeaderStyle,
-    },
-    {
-      headerName: t("Forms.Columns.ColumnName"),
-      field: "DisplayName",
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 2,
-      minWidth: 180,
-      cellStyle: ellipsisCellStyle,
-      headerStyle: ellipsisHeaderStyle,
-    },
-    {
-      headerName: t("DataTable.Headers.PersianColumnName") || "Persian ColumnName",
-      field: "PersianName",
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 2,
-      minWidth: 180,
-      cellStyle: ellipsisCellStyle,
-      headerStyle: ellipsisHeaderStyle,
-    },
-    {
-      headerName: t("Forms.Columns.Type"),
-      field: "ColumnType",
-      editable: false,
-      sortable: true,
-      filter: true,
-      flex: 1.3,
-      minWidth: 150,
-      valueGetter: (params: any) => {
-        const opt = typeOfInformationOptions.find(
-          (o) => columnTypeMapping[o.value] === params.data.ColumnType
-        );
-        return opt ? opt.label : params.data.ColumnType;
+    () => [
+      {
+        headerName: t("Forms.Columns.Order"),
+        field: "orderValue",
+        editable: true,
+        sortable: true,
+        filter: true,
+        flex: 0.6,
+        minWidth: 90,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
-      cellStyle: ellipsisCellStyle,
-      headerStyle: ellipsisHeaderStyle,
-    },
-    {
-      headerName: t("Forms.Columns.Command"),
-      field: "Code",
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 1,
-      minWidth: 130,
-      cellStyle: ellipsisCellStyle,
-      headerStyle: ellipsisHeaderStyle,
-    },
-    ...[
-      { headerNameKey: "ShowInList", field: "IsShowGrid" },
-      { headerNameKey: "Required", field: "IsRequire" },
-      { headerNameKey: "MainColumn", field: "IsMainColumn" },
-      { headerNameKey: "IsRtl", field: "IsRTL" },
-      { headerNameKey: "CountInReject", field: "CountInReject" },
-    ].map((c) => ({
-      headerName: t(`Forms.Columns.${c.headerNameKey}`),
-      field: c.field,
-      editable: true,
-      sortable: true,
-      filter: true,
-      flex: 0.9,
-      minWidth: 110,
-      cellStyle: {
-        ...ellipsisCellStyle,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+      {
+        headerName: t("Forms.Columns.ColumnName"),
+        field: "DisplayName",
+        editable: true,
+        sortable: true,
+        filter: true,
+        flex: 2,
+        minWidth: 180,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
-      headerStyle: {
-        ...ellipsisHeaderStyle,
-        textAlign: "center",
+      {
+        headerName: t("DataTable.Headers.PersianColumnName") || "Persian ColumnName",
+        field: "PersianName",
+        editable: true,
+        sortable: true,
+        filter: true,
+        flex: 2,
+        minWidth: 180,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
-      cellRendererFramework: (p: any) => (
-        <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
-      ),
-      cellEditor: "agCheckboxCellEditor",
-      cellEditorParams: {
-        checkboxTrueValue: true,
-        checkboxFalseValue: false,
+      {
+        headerName: t("Forms.Columns.Type"),
+        field: "ColumnType",
+        editable: false,
+        sortable: true,
+        filter: true,
+        flex: 1.3,
+        minWidth: 150,
+        valueGetter: (params: any) => {
+          const opt = typeOfInformationOptions.find(
+            (o) => columnTypeMapping[o.value] === params.data.ColumnType
+          );
+          return opt ? opt.label : params.data.ColumnType;
+        },
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
       },
-    })),
-  ],
-  [t, ellipsisCellStyle, ellipsisHeaderStyle]
-);
+      {
+        headerName: t("Forms.Columns.Command"),
+        field: "Code",
+        editable: true,
+        sortable: true,
+        filter: true,
+        flex: 1,
+        minWidth: 130,
+        cellStyle: ellipsisCellStyle,
+        headerStyle: ellipsisHeaderStyle,
+      },
+      ...[
+        { headerNameKey: "ShowInList", field: "IsShowGrid" },
+        { headerNameKey: "Required", field: "IsRequire" },
+        { headerNameKey: "MainColumn", field: "IsMainColumn" },
+        { headerNameKey: "IsRtl", field: "IsRTL" },
+        { headerNameKey: "CountInReject", field: "CountInReject" },
+      ].map((c) => ({
+        headerName: t(`Forms.Columns.${c.headerNameKey}`),
+        field: c.field,
+        editable: true,
+        sortable: true,
+        filter: true,
+        flex: 0.9,
+        minWidth: 110,
+        cellStyle: {
+          ...ellipsisCellStyle,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        headerStyle: {
+          ...ellipsisHeaderStyle,
+          textAlign: "center",
+        },
+        cellRendererFramework: (p: any) => (
+          <input type="checkbox" checked={!!p.value} readOnly style={{ margin: 0 }} />
+        ),
+        cellEditor: "agCheckboxCellEditor",
+        cellEditorParams: {
+          checkboxTrueValue: true,
+          checkboxFalseValue: false,
+        },
+      })),
+    ],
+    [t, ellipsisCellStyle, ellipsisHeaderStyle]
+  );
   useEffect(() => {
     refreshEntityFields();
   }, [refreshEntityFields]);
@@ -565,7 +565,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
       setExcelFileName(result.FileName);
       showAlert("success", undefined, t("Alerts.Titles.Success"), t("Alerts.Upload.ExcelSuccess"));
     } catch (error: any) {
-       showAlert("error", undefined, t("Alerts.Titles.Error"), error.message || t("Alerts.Upload.ExcelFailed"));
+      showAlert("error", undefined, t("Alerts.Titles.Error"), error.message || t("Alerts.Upload.ExcelFailed"));
     }
   };
   const handleDeleteWord = () => {
@@ -808,58 +808,58 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
           </div>
         </TwoColumnLayout.Item>
         <TwoColumnLayout.Item span={2}>
-  <div dir={uiDir} className="overflow-x-auto pb-2">
-    <div className="h-[400px] min-w-full flex flex-col justify-end">
-      <DataTable
-        columnDefs={newColumnDefs}
-        rowData={entityFields}
-        setSelectedRowData={setSelectedRowData}
-        gridOptions={{
-          singleClickEdit: true,
-          rowSelection: "single",
-          enableRtl: uiDir === "rtl",
-          onGridReady: (p) => {
-            p.api.sizeColumnsToFit();
-            window.addEventListener("resize", () => p.api.sizeColumnsToFit());
-          },
-        }}
-        onCellValueChanged={handleCellValueChanged}
-        showAddIcon
-        showEditIcon
-        showDeleteIcon
-        showViewIcon
-        showDuplicateIcon={false}
-        onAdd={handleAddClick}
-        onEdit={() =>
-          selectedRowData
-            ? handleEditClick(selectedRowData)
-            : showAlert("error", undefined,  t("Alerts.Errors.NoRowSelectedForEdit"))
-        }
-        onDelete={async () => {
-          if (!selectedRowData) {
-            showAlert("error", undefined, t("Alerts.Deleted.NoRowSelected"));
-            return;
-          }
-          try {
-            await api.deleteEntityField(selectedRowData.ID);
-            showAlert("success", undefined, t("Alerts.Deleted.Success"));
-            setSelectedRowData(null);
-            refreshEntityFields();
-          } catch {
-            showAlert("error", undefined,  t("Alerts.Deleted.Failed"));
-          }
-        }}
-        onView={() => setViewModalOpen(true)}
-        onRowDoubleClick={(row) => handleEditClick(row)}
-        domLayout="normal"
-        showSearch
-        isEditMode={isEditMode}
-        isLoading={isLoadingFields}
-        direction={uiDir}
-      />
-    </div>
-  </div>
-</TwoColumnLayout.Item>
+          <div dir={uiDir} className="overflow-x-auto pb-2">
+            <div className="h-[400px] min-w-full flex flex-col justify-end">
+              <DataTable
+                columnDefs={newColumnDefs}
+                rowData={entityFields}
+                setSelectedRowData={setSelectedRowData}
+                gridOptions={{
+                  singleClickEdit: true,
+                  rowSelection: "single",
+                  enableRtl: uiDir === "rtl",
+                  onGridReady: (p) => {
+                    p.api.sizeColumnsToFit();
+                    window.addEventListener("resize", () => p.api.sizeColumnsToFit());
+                  },
+                }}
+                onCellValueChanged={handleCellValueChanged}
+                showAddIcon
+                showEditIcon
+                showDeleteIcon
+                showViewIcon
+                showDuplicateIcon={false}
+                onAdd={handleAddClick}
+                onEdit={() =>
+                  selectedRowData
+                    ? handleEditClick(selectedRowData)
+                    : showAlert("error", undefined, t("Alerts.Errors.NoRowSelectedForEdit"))
+                }
+                onDelete={async () => {
+                  if (!selectedRowData) {
+                    showAlert("error", undefined, t("Alerts.Deleted.NoRowSelected"));
+                    return;
+                  }
+                  try {
+                    await api.deleteEntityField(selectedRowData.ID);
+                    showAlert("success", undefined, t("Alerts.Deleted.Success"));
+                    setSelectedRowData(null);
+                    refreshEntityFields();
+                  } catch {
+                    showAlert("error", undefined, t("Alerts.Deleted.Failed"));
+                  }
+                }}
+                onView={() => setViewModalOpen(true)}
+                onRowDoubleClick={(row) => handleEditClick(row)}
+                domLayout="normal"
+                showSearch
+                isEditMode={isEditMode}
+                isLoading={isLoadingFields}
+                direction={uiDir}
+              />
+            </div>
+          </div>
+        </TwoColumnLayout.Item>
       </TwoColumnLayout>
       <DynamicModal isOpen={modalOpen} onClose={handleCloseModal}>
         <TableSelector
@@ -905,7 +905,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         isOpen={viewModalOpen}
         onClose={() => setViewModalOpen(false)}
         entityFields={entityFields}
-        selectedRow={selectedRow}
+        selectedRow={selectedRowData}
       />
     </div>
   );

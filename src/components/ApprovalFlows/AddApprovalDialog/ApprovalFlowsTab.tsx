@@ -789,101 +789,110 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
 return (
   <div className="flex flex-col md:flex-row h-full relative">
     <main className="flex-1 p-4 bg-white overflow-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 items-start">
-        <div className="sm:col-span-1 relative">
-          <DynamicInput
-            name={
-              isFaMode
-                ? t("AddApprovalFlows.Name", { defaultValue: "Name" })
-                : t("Forms.PersianName", { defaultValue: "PersianName" })
-            }
-            type="text"
-            value={isFaMode ? nameValue ?? "" : pNameValue ?? ""}
-            onChange={(e) =>
-              isFaMode
-                ? setNameValue(e.target.value)
-                : setPNameValue(e.target.value)
-            }
-            className="w-full"
-          />
+     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 items-start">
+  <div className="relative">
+    <DynamicInput
+      name={
+        isFaMode
+          ? t("AddApprovalFlows.Name", { defaultValue: "Name" })
+          : t("Forms.PersianName", { defaultValue: "PersianName" })
+      }
+      type="text"
+      value={isFaMode ? nameValue ?? "" : pNameValue ?? ""}
+      onChange={(e) =>
+        isFaMode
+          ? setNameValue(e.target.value)
+          : setPNameValue(e.target.value)
+      }
+      className="w-full"
+    />
+    <button
+      type="button"
+      onClick={() => setIsFaMode((p) => !p)}
+      title={
+        isFaMode
+          ? t("AddForms.SwitchToEN", { defaultValue: "Switch to EN (PersianName)" })
+          : t("AddForms.SwitchToFA", { defaultValue: "Switch to FA (Name)" })
+      }
+      className={`absolute ${
+        i18n.dir() === "rtl" ? "left-2" : "right-2"
+      } top-[38px] -translate-y-1/2 h-6 px-2 rounded-md text-[10px] font-semibold bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-sm transition-transform active:scale-95 z-10`}
+    >
+      {isFaMode ? "FA" : "EN"}
+    </button>
+  </div>
 
-          <button
-            type="button"
-            onClick={() => setIsFaMode((p) => !p)}
-            title={
-              isFaMode
-                ? t("AddForms.SwitchToEN", {
-                    defaultValue: "Switch to EN (PersianName)",
-                  })
-                : t("AddForms.SwitchToFA", {
-                    defaultValue: "Switch to FA (Name)",
-                  })
-            }
-            className="absolute right-2 top-[38px] -translate-y-1/2 h-6 px-2 rounded-md text-[10px] font-semibold bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-sm transition-transform active:scale-95 z-10"
-          >
-            {isFaMode ? "FA" : "EN"}
-          </button>
-        </div>
-
-        {!isStage && (
-          <div>
-            <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2 leading-tight whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={acceptChecked}
-                onChange={(e) => setAcceptChecked(e.target.checked)}
-                className="h-4 w-4 shrink-0"
-              />
-              <span>{t("AddApprovalFlows.MinAccept")}</span>
-            </label>
-
-            <DynamicInput
-              name=""
-              type="number"
-              value={minAcceptValue}
-              onChange={(e) => setMinAcceptValue(e.target.value)}
-              disabled={!acceptChecked}
-              className="w-full"
-            />
-          </div>
-        )}
-
-        <div>
-          <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2 leading-tight whitespace-nowrap">
-            <input
-              type="checkbox"
-              checked={rejectChecked}
-              onChange={(e) => setRejectChecked(e.target.checked)}
-              className="h-4 w-4 shrink-0"
-            />
-            <span>{t("AddApprovalFlows.MinReject")}</span>
-          </label>
-
-          <DynamicInput
-            name=""
-            type="number"
-            value={minRejectValue}
-            onChange={(e) => setMinRejectValue(e.target.value)}
-            className="w-full"
-          />
-        </div>
-
-        <DynamicInput
-          name={t("AddApprovalFlows.ActDuration")}
-          type="number"
-          value={actDurationValue}
-          onChange={(e) => setActDurationValue(e.target.value)}
-          className="w-full"
+  {!isStage && (
+    <div className="min-w-0">
+      <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2">
+        <input
+          type="checkbox"
+          checked={acceptChecked}
+          onChange={(e) => setAcceptChecked(e.target.checked)}
+          className="h-4 w-4 shrink-0"
         />
+        <span
+          className="truncate"
+          title={t("AddApprovalFlows.MinAccept")}
+        >
+          {t("AddApprovalFlows.MinAccept")}
+        </span>
+      </label>
+      <DynamicInput
+        name=""
+        type="number"
+        value={minAcceptValue}
+        onChange={(e) => setMinAcceptValue(e.target.value)}
+        disabled={!acceptChecked}
+        className="w-full"
+      />
+    </div>
+  )}
 
-        <DynamicInput
-          name={t("AddApprovalFlows.Order")}
-          type="number"
-          value={orderValue}
-          onChange={(e) => setOrderValue(e.target.value)}
-          className="w-full"
-        />
-      </div>
+  <div className="min-w-0">
+    <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2">
+      <input
+        type="checkbox"
+        checked={rejectChecked}
+        onChange={(e) => setRejectChecked(e.target.checked)}
+        className="h-4 w-4 shrink-0"
+      />
+      <span
+        className="truncate"
+        title={t("AddApprovalFlows.MinReject")}
+      >
+        {t("AddApprovalFlows.MinReject")}
+      </span>
+    </label>
+    <DynamicInput
+      name=""
+      type="number"
+      value={minRejectValue}
+      onChange={(e) => setMinRejectValue(e.target.value)}
+      className="w-full"
+    />
+  </div>
+
+  <div className="min-w-0">
+    <DynamicInput
+      name={t("AddApprovalFlows.ActDuration")}
+      type="number"
+      value={actDurationValue}
+      onChange={(e) => setActDurationValue(e.target.value)}
+      className="w-full"
+    />
+  </div>
+
+  <div className="min-w-0">
+    <DynamicInput
+      name={t("AddApprovalFlows.Order")}
+      type="number"
+      value={orderValue}
+      onChange={(e) => setOrderValue(e.target.value)}
+      className="w-full"
+    />
+  </div>
+</div>
 
       <div className="mt-6">
         <label className="flex items-center text-sm text-gray-700 gap-2">

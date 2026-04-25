@@ -12,7 +12,7 @@
       "Name": "نام",
       "PersianName": "نام فارسی",
       "Description": "شرح",
-      "IsGlobal": "جهانی",
+      "IsGlobal": "عمومی",
       "MaxDuration": "حداکثر مدت",
       "Cost1": "هزینه 1",
       "Predecessor": "پیش‌نیاز"

@@ -7,7 +7,12 @@ interface LookUpRealValueViewProps {
   selectedValue: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onButtonClick?: () => void;
-  data?: { DisplayName?: string; [key: string]: any };
+  data?: {
+    DisplayName?: string;
+    PersianName?: string;
+    [key: string]: any;
+  };
+  isFaMode?: boolean;
 }
 
 const LookUpRealValueView: React.FC<LookUpRealValueViewProps> = ({
@@ -16,16 +21,21 @@ const LookUpRealValueView: React.FC<LookUpRealValueViewProps> = ({
   onChange,
   onButtonClick,
   data,
+  isFaMode = false,
 }) => {
   useEffect(() => {
     console.log("LookUpRealValueView data:", data);
   }, [data]);
 
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || "انتخاب کنید"
+    : data?.DisplayName || data?.PersianName || "Select Option";
+
   return (
-    <div className="w-full">
+    <div className="w-full" dir={isFaMode ? "rtl" : "ltr"}>
       <DynamicSelector
         name="lookupView"
-        label={data?.DisplayName || "Select Option"}
+        label={label}
         options={options}
         selectedValue={selectedValue}
         onChange={onChange}

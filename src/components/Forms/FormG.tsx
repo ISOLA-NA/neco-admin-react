@@ -86,6 +86,7 @@ const FormG: React.FC<FormGProps> = ({
                 selectedRow={selectedRow}
                 getFileName={getFileName}
                 emitmetaTypes={emitmetaTypes}
+                
               />
             );
           })}

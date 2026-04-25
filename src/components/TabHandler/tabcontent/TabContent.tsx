@@ -88,13 +88,13 @@ const TabContent: FC<TabContentProps> = ({
   const { t, i18n } = useTranslation();
 
   // ✅ کمک: اگر کلید ترجمه نبود، defaultValue نمایش بده تا key خام دیده نشه
-const TT = useCallback(
-  (key: string, fa: string, en: string) =>
-    t(key, {
-      defaultValue: i18n.language === "fa" ? fa : en,
-    }),
-  [t, i18n.language]
-);
+  const TT = useCallback(
+    (key: string, fa: string, en: string) =>
+      t(key, {
+        defaultValue: i18n.language === "fa" ? fa : en,
+      }),
+    [t, i18n.language]
+  );
 
   const api = useApi();
   const { fetchDataForSubTab, duplicateForSubTab } = useSubTabDefinitions();
@@ -1170,6 +1170,11 @@ const TT = useCallback(
 
           {activeSubTab === "Categories" && (
             <div className="mb-4 p-2">
+              <div className="flex mb-2 w-full" dir={i18n.dir()}>
+                <span className="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
+                  {i18n.dir() === "rtl" ? "دسته بندی فرم ها" : "Form Categories"}
+                </span>
+              </div>
               <DynamicSelector
                 name="categoryType"
                 label={t("Category.CategoryType")}
@@ -1183,117 +1188,119 @@ const TT = useCallback(
 
           <div className="h-full p-4 overflow-auto relative">
             {activeSubTab === "UpdateAddress" ? (
-              <UpdateAddressLeft onPick={(payload) => setUaSelection(payload)} />
+              <>
+                <div className="flex mb-2 w-full" dir={i18n.dir()}>
+                  <span className="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
+                    {i18n.dir() === "rtl" ? "به‌روزرسانی آدرس ها" : "Update Addresses"}
+                  </span>
+                </div>
+                <UpdateAddressLeft onPick={(payload) => setUaSelection(payload)} />
+              </>
             ) : (
               <>
- {activeSubTab === "Ribbons" && (
-  <div className="mt-4 w-full p-4 bg-white rounded-md shadow-md">
-    <div className="flex justify-end gap-2 mb-4">
-      <button
-        title={TT("Ribbons.Duplicate", "کپی", "Duplicate")}
-        onClick={handleDuplicateClick}
-        disabled={!selectedRow}
-        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${
-          !selectedRow ? "opacity-50 cursor-not-allowed" : ""
-        }`}
-      >
-        <FiCopy size={20} />
-      </button>
+                {activeSubTab === "Ribbons" && (
+                  <div className="mt-4 w-full p-4 bg-white rounded-md shadow-md">
+                    <div className="flex mb-3 w-full" dir={i18n.dir()}>
+                      <span className="text-sm font-semibold text-gray-700 bg-gray-50 px-3 py-1 rounded-md shadow-sm border border-gray-200">
+                        {i18n.dir() === "rtl" ? "منو ها" : "Ribbons"}
+                      </span>
+                    </div>
+                    <div className="flex justify-end gap-2 mb-4">
+                      <button
+                        title={TT("Ribbons.Duplicate", "کپی", "Duplicate")}
+                        onClick={handleDuplicateClick}
+                        disabled={!selectedRow}
+                        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${!selectedRow ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                      >
+                        <FiCopy size={20} />
+                      </button>
 
-      <button
-        title={TT("Ribbons.Delete", "حذف", "Delete")}
-        onClick={handleDeleteClick}
-        disabled={!selectedRow}
-        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-red-50 hover:bg-red-100 text-red-600 ${
-          !selectedRow ? "opacity-50 cursor-not-allowed" : ""
-        }`}
-      >
-        <FiTrash2 size={20} />
-      </button>
+                      <button
+                        title={TT("Ribbons.Delete", "حذف", "Delete")}
+                        onClick={handleDeleteClick}
+                        disabled={!selectedRow}
+                        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-red-50 hover:bg-red-100 text-red-600 ${!selectedRow ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                      >
+                        <FiTrash2 size={20} />
+                      </button>
 
-      <button
-        title={TT("Ribbons.New", "جدید", "New")}
-        onClick={resetRibbonAndClose}
-        className="rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-green-50 hover:bg-green-100 text-green-600"
-      >
-        <FiPlus size={20} />
-      </button>
+                      <button
+                        title={TT("Ribbons.New", "جدید", "New")}
+                        onClick={resetRibbonAndClose}
+                        className="rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-green-50 hover:bg-green-100 text-green-600"
+                      >
+                        <FiPlus size={20} />
+                      </button>
 
-      <button
-        title={TT("Ribbons.Save", "ذخیره", "Save")}
-        onClick={isAdding ? handleInsert : handleUpdate}
-        className="rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-blue-50 hover:bg-blue-100 text-blue-600"
-      >
-        <FiEdit size={20} />
-      </button>
-    </div>
+                      <button
+                        title={TT("Ribbons.Save", "ذخیره", "Save")}
+                        onClick={isAdding ? handleInsert : handleUpdate}
+                        className="rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-blue-50 hover:bg-blue-100 text-blue-600"
+                      >
+                        <FiEdit size={20} />
+                      </button>
+                    </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="flex items-end gap-2">
-        <div className="flex-1">
-          <DynamicInput
-            name={
-              isFaMode
-                ? TT("Ribbons.Name", "نام", "Name")
-                : TT("Forms.PersianName", "نام فارسی", "Persian Name")
-            }
-            type="text"
-            value={isFaMode ? nameInput : persianNameInput}
-            placeholder={
-              isFaMode
-                ? TT("Ribbons.Name", "نام", "Name")
-                : TT("Forms.PersianName", "نام فارسی", "Persian Name")
-            }
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (isFaMode) setNameInput(e.target.value);
-              else setPersianNameInput(e.target.value);
-            }}
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsFaMode((p) => !p)}
-          className={[
-            "shrink-0 inline-flex items-center justify-center h-10 px-3 rounded-lg",
-            "bg-gradient-to-r from-fuchsia-500 to-pink-500",
-            "text-white text-xs font-semibold tracking-wide",
-            "shadow-md shadow-pink-200/50",
-            "transition-all duration-200",
-            "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
-            "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
-          ].join(" ")}
-          title={
-            isFaMode
-              ? TT(
-                  "Ribbons.SwitchToEnglish",
-                  "تغییر به انگلیسی",
-                  "Switch to English"
-                )
-              : TT(
-                  "Ribbons.SwitchToPersian",
-                  "تغییر به فارسی",
-                  "Switch to Persian"
-                )
-          }
-        >
-          {isFaMode ? "FA" : "EN"}
-        </button>
-      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <DynamicInput
+                            name={
+                              isFaMode
+                                ? TT("Ribbons.Name", "نام", "Name")
+                                : TT("Forms.PersianName", "نام فارسی", "Persian Name")
+                            }
+                            type="text"
+                            value={isFaMode ? nameInput : persianNameInput}
+                            placeholder={
+                              isFaMode
+                                ? TT("Ribbons.Name", "نام", "Name")
+                                : TT("Forms.PersianName", "نام فارسی", "Persian Name")
+                            }
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              if (isFaMode) setNameInput(e.target.value);
+                              else setPersianNameInput(e.target.value);
+                            }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsFaMode((p) => !p)}
+                          className={[
+                            "shrink-0 inline-flex items-center justify-center h-10 px-3 rounded-lg",
+                            "bg-gradient-to-r from-fuchsia-500 to-pink-500",
+                            "text-white text-xs font-semibold tracking-wide",
+                            "shadow-md shadow-pink-200/50",
+                            "transition-all duration-200",
+                            "hover:from-fuchsia-600 hover:to-pink-600 hover:shadow-lg hover:scale-[1.02]",
+                            "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-pink-300",
+                          ].join(" ")}
+                          title={
+                            isFaMode
+                              ? TT("Ribbons.SwitchToEnglish", "تغییر به انگلیسی", "Switch to English")
+                              : TT("Ribbons.SwitchToPersian", "تغییر به فارسی", "Switch to Persian")
+                          }
+                        >
+                          {isFaMode ? "FA" : "EN"}
+                        </button>
+                      </div>
 
-      <DynamicInput
-        name={TT("Ribbons.Description", "شرح", "Description")}
-        type="text"
-        value={descriptionInput}
-        placeholder={TT(
-          "Ribbons.DescriptionPlaceholder",
-          "شرح را وارد کنید",
-          "Enter description"
-        )}
-        onChange={handleDescriptionChange}
-      />
-    </div>
-  </div>
-)}
+                      <DynamicInput
+                        name={TT("Ribbons.Description", "شرح", "Description")}
+                        type="text"
+                        value={descriptionInput}
+                        placeholder={TT(
+                          "Ribbons.DescriptionPlaceholder",
+                          "شرح را وارد کنید",
+                          "Enter description"
+                        )}
+                        onChange={handleDescriptionChange}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {(() => {
                   const addPersianCol =
@@ -1314,37 +1321,72 @@ const TT = useCallback(
                     ]
                     : fixedColumnDefs;
 
+                  const tabTitles: Record<string, { fa: string; en: string }> = {
+                    Configurations: { fa: "پیکربندی", en: "Configurations" },
+                    Commands: { fa: "فرمان ها", en: "Commands" },
+                    Ribbons: { fa: "منو ها", en: "Ribbons" },
+                    Users: { fa: "کاربران", en: "Users" },
+                    Roles: { fa: "نقش‌ها", en: "Roles" },
+                    Enterprises: { fa: "شرکت‌ها", en: "Enterprises" },
+                    RoleGroups: { fa: "گروه نقش ها", en: "Role Groups" },
+                    Staffing: { fa: "کارکنان", en: "Staffing" },
+                    ProgramTemplate: { fa: "قالب های برنامه", en: "Program Templates" },
+                    ProgramTypes: { fa: "انواع برنامه", en: "Program Types" },
+                    Projects: { fa: "پروژه‌ها", en: "Projects" },
+                    ProjectsAccess: { fa: "دسترسی پروژه‌ها", en: "Projects Access" },
+                    Odp: { fa: "ODP", en: "ODP" },
+                    Procedures: { fa: "رویه‌ها", en: "Procedures" },
+                    Calendars: { fa: "تقویم‌ها", en: "Calendars" },
+                    ApprovalFlows: { fa: "جریان‌های تایید", en: "Approval Flows" },
+                    Forms: { fa: "فرم‌ها", en: "Forms" },
+                    Categories: { fa: "دسته‌بندی‌ها", en: "Categories" },
+                    UpdateAddress: { fa: "به‌روزرسانی آدرس", en: "Update Address" },
+                  };
+
+                  const currentTitle = tabTitles[activeSubTab];
+                  const titleText = currentTitle
+                    ? i18n.dir() === "rtl"
+                      ? currentTitle.fa
+                      : currentTitle.en
+                    : activeSubTab;
+
                   return (
-                    <DataTable
-                      columnDefs={cols}
-                      rowData={fetchedRowData}
-                      onRowDoubleClick={(data: any) => {
-                        handleDoubleClick(data);
-                        if (activeSubTab === "Ribbons") {
-                          setPersianNameInput(data?.PersianName || "");
-                        }
-                      }}
-                      setSelectedRowData={(data: any) => {
-                        handleRowClickLocal(data);
-                        if (activeSubTab === "Ribbons") {
-                          setPersianNameInput(data?.PersianName || "");
-                        }
-                      }}
-                      // ✅ فقط دکمه Duplicate بالای جدول (Toolbar)
-                      showDuplicateIcon={effectiveShowDuplicateIcon}
-                      showEditIcon={showEditIcon}
-                      showAddIcon={showAddIcon}
-                      showDeleteIcon={showDeleteIcon}
-                      onEdit={handleEditFromLeft}
-                      onAdd={handleAddClick}
-                      onDelete={handleDeleteClick}
-                      // ✅ اینجا دقیقا API مدنظر شما برای Ribbons کال می‌شود
-                      // (و برای بقیه تب‌ها همان روال قبلی)
-                      onDuplicate={handleDuplicateClick}
-                      isLoading={isLoading}
-                      direction={i18n.dir()}
-                      resetSearchKey={resetSearchKey}
-                    />
+                    <>
+                      <div className="flex mb-2 w-full" dir={i18n.dir()}>
+                        {activeSubTab !== "Categories" && (
+                          <span className="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
+                            {titleText}
+                          </span>
+                        )}
+                      </div>
+                      <DataTable
+                        columnDefs={cols}
+                        rowData={fetchedRowData}
+                        onRowDoubleClick={(data: any) => {
+                          handleDoubleClick(data);
+                          if (activeSubTab === "Ribbons") {
+                            setPersianNameInput(data?.PersianName || "");
+                          }
+                        }}
+                        setSelectedRowData={(data: any) => {
+                          handleRowClickLocal(data);
+                          if (activeSubTab === "Ribbons") {
+                            setPersianNameInput(data?.PersianName || "");
+                          }
+                        }}
+                        showDuplicateIcon={effectiveShowDuplicateIcon}
+                        showEditIcon={showEditIcon}
+                        showAddIcon={showAddIcon}
+                        showDeleteIcon={showDeleteIcon}
+                        onEdit={handleEditFromLeft}
+                        onAdd={handleAddClick}
+                        onDelete={handleDeleteClick}
+                        onDuplicate={handleDuplicateClick}
+                        isLoading={isLoading}
+                        direction={i18n.dir()}
+                        resetSearchKey={resetSearchKey}
+                      />
+                    </>
                   );
                 })()}
               </>
@@ -1437,6 +1479,7 @@ const TT = useCallback(
                 )}
 
               {activeSubTab === "UpdateAddress" ? (
+
                 <div className="mt-2 flex-grow overflow-y-auto">
                   <UpdateAddressRight />
                 </div>
