@@ -13,16 +13,18 @@ interface AttachFileViewProps {
     metaType1?: string;
     fileName?: string;
     DisplayName?: string;
+    PersianName?: string;
   };
   onMetaChange?: (data: any) => void;
+  isFaMode?: boolean;
 }
 
 const AttachFileView: React.FC<AttachFileViewProps> = ({
   data,
   onMetaChange,
+  isFaMode = false,
 }) => {
   const { t } = useTranslation();
-  // مقدار اولیه fileId و fileName از data
   const [fileId, setFileId] = useState<string | null>(data.metaType1 || null);
   const [fileName, setFileName] = useState<string>(data.fileName || "");
   const [resetCounter, setResetCounter] = useState<number>(0);
@@ -30,23 +32,23 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showUploadHandler, setShowUploadHandler] = useState<boolean>(false);
 
-  // لاگ گرفتن از پراپ DisplayName
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || t("AttachFile.Labels.FileName")
+    : data?.DisplayName || data?.PersianName || t("AttachFile.Labels.FileName");
+
   useEffect(() => {
     console.log("DisplayName prop in AttachFileView:", data?.DisplayName);
   }, [data?.DisplayName]);
 
-  // لاگ تغییرات fileId و fileName
   useEffect(() => {
     console.log("Current fileId:", fileId, "and fileName:", fileName);
   }, [fileId, fileName]);
 
-  // دریافت preview URL فایل آپلود شده با استفاده از منطق دانلود مشابه FileUploadHandler
   useEffect(() => {
     if (fileId) {
       fileService
         .getFile(fileId)
         .then((res) => {
-          // دریافت اطلاعات فایل و ساخت blob جهت ایجاد preview URL
           const downloadingFileObject = {
             FileName: res.data.FileIQ + res.data.FileType,
             FolderName: res.data.FolderName,
@@ -68,7 +70,6 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({
               const blob = new Blob([uint8Array], { type: mimeType });
               const objectUrl = URL.createObjectURL(blob);
               setPreviewUrl(objectUrl);
-              // ذخیره نام فایل دریافتی از سرور در state
               setFileName(res.data.FileName);
               console.log(
                 "File downloaded. Updated previewUrl and fileName:",
@@ -124,7 +125,6 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({
 
   const handleToggleUploadHandler = () => {
     setShowUploadHandler((prev) => !prev);
-    // در زمان تغییر وضعیت آپلود، preview پاک می‌شود
     setPreviewUrl(null);
     console.log(
       "Toggle upload handler. showUploadHandler:",
@@ -133,7 +133,10 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full mt-10">
+    <div
+      className="flex flex-col items-center w-full mt-10"
+      dir={isFaMode ? "rtl" : "ltr"}
+    >
       <div className="flex flex-row items-center gap-2 w-full">
         {fileId && (
           <button
@@ -146,9 +149,8 @@ const AttachFileView: React.FC<AttachFileViewProps> = ({
           </button>
         )}
 
-        {/* استفاده از DynamicInput برای نمایش fileName؛ در صورت عدم وجود، placeholder خالی است */}
         <DynamicInput
-          name={data?.DisplayName || t("AttachFile.Labels.FileName")}
+          name={label}
           type="text"
           value={fileName}
           placeholder=""

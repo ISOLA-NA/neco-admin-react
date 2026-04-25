@@ -5,19 +5,27 @@ import DynamicInput from "../../utilities/DynamicInput";
 interface SeqenialNumberViewProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const SeqenialNumberView: React.FC<SeqenialNumberViewProps> = ({ data }) => {
+const SeqenialNumberView: React.FC<SeqenialNumberViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   return (
-    <div className="p-4">
+    <div dir={isFaMode ? "rtl" : "ltr"}>
       <DynamicInput
-        name={data?.DisplayName || "SeqenialNumberView"}
+        name={label}
         type="text"
         value=""
         placeholder=""
         disabled={true}
-        className="w-full p-2 border rounded focus:outline-none"
       />
     </div>
   );

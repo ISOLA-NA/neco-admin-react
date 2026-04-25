@@ -5,20 +5,19 @@ import { useTranslation } from "react-i18next";
 
 interface TableControllerViewProps {
   data?: {
-    metaType1?: string; // به صورت ذخیره‌شده بدون newline، مثلاً "alimammadhabib" یا ممکن است شامل \n هم باشد (برای ویرایش)
-    metaType3?: string; // داده‌های جدول به صورت JSON؛ مثلاً: [{"a1":"11","a2":"22","a3":"23"},{"a1":"44","a2":"55","a3":"66"}]
+    metaType1?: string;
+    metaType3?: string;
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-// تابع کمکی برای تولید هدرهای جدول
-// اگر meta شامل newline باشد، آن را با تقسیم بر newline دریافت می‌کنیم؛ در غیر این صورت به صورت مساوی تقسیم می‌شود.
 const getHeadersFromMeta = (meta: string) => {
   if (meta.includes("\n")) {
     const parts = meta.split("\n").filter((part) => part.trim() !== "");
     return parts.map((p, i) => ({ headerName: p, field: `a${i + 1}` }));
   } else {
-    // اگر meta به صورت پیوسته باشد؛ تقسیم به 3 بخش
     const columns = 3;
     const trimmed = meta.trim();
     if (trimmed.length % columns === 0 && trimmed.length !== 0) {
@@ -33,7 +32,6 @@ const getHeadersFromMeta = (meta: string) => {
         { headerName: parts[2], field: "a3" },
       ];
     }
-    // fallback
     const approx = Math.floor(trimmed.length / columns);
     return [
       { headerName: trimmed.substring(0, approx), field: "a1" },
@@ -43,18 +41,19 @@ const getHeadersFromMeta = (meta: string) => {
   }
 };
 
-const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
+const TableControllerView: React.FC<TableControllerViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   const { t } = useTranslation();
-  // metaType1 برای ذخیره‌سازی معمولاً بدون newline است؛ اما برای نمایش، اگر newline داشته باشد، همان استفاده شود.
-  // در صورتی که metaType1 شامل newline نباشد، برای نمایش آن را به صورت multiline تبدیل می‌کنیم.
-  const metaHeaderStored = data?.metaType1 || "";
-  // برای نمایش، اگر metaHeaderStored شامل "|" (delimiter) نباشد، می‌توانیم به صورت پیش‌فرض هر 2 کاراکتر را جدا کنیم؛
-  // اما در اینجا فرض می‌کنیم اگر newline وجود نداشته باشد، همان مقدار نمایش داده شود.
-  const headerDisplay = metaHeaderStored.includes("\n")
-    ? metaHeaderStored
-    : metaHeaderStored; // می‌توانید در صورت نیاز، تقسیم‌بندی دلخواه انجام دهید.
 
-  // استخراج هدرها از metaType1 (یا headerDisplay)
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
+  const metaHeaderStored = data?.metaType1 || "";
+  const headerDisplay = metaHeaderStored;
+
   const headers = useMemo(() => {
     if (headerDisplay) {
       return getHeadersFromMeta(headerDisplay);
@@ -66,7 +65,6 @@ const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
     ];
   }, [headerDisplay]);
 
-  // پارس کردن metaType3 به آرایه‌ای از اشیاء
   const tableDataRaw = useMemo(() => {
     if (data?.metaType3 && data.metaType3.trim() !== "") {
       try {
@@ -79,7 +77,6 @@ const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
     return [];
   }, [data?.metaType3]);
 
-  // ساخت داده‌های جدول جهت نمایش؛ به ازای هر ردیف، کلیدهای آن از هدرهای استخراج‌شده گرفته می‌شود.
   const tableDataForShow = useMemo(() => {
     return tableDataRaw.map((row: any) => {
       const values = Object.values(row);
@@ -91,7 +88,6 @@ const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
     });
   }, [tableDataRaw, headers]);
 
-  // تعریف ستون‌ها برای DataTable
   const columns = useMemo(() => {
     if (tableDataForShow.length > 0) {
       return Object.keys(tableDataForShow[0]).map((key) => ({
@@ -109,10 +105,8 @@ const TableControllerView: React.FC<TableControllerViewProps> = ({ data }) => {
 
   return (
     <div className="p-4 bg-white rounded-lg border border-gray-300">
-      {data?.DisplayName && (
-        <div className="mb-2 text-sm font-medium text-gray-700">
-          {data.DisplayName}
-        </div>
+      {label && (
+        <div className="mb-2 text-xs font-semibold text-gray-700">{label}</div>
       )}
       <div className="ag-theme-quartz h-40">
         <DataTable

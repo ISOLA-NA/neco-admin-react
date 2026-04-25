@@ -6,25 +6,32 @@ interface YesNoViewProps {
   data?: {
     metaType1?: "yes" | "no";
     DisplayName?: string;
+    PersianName?: string;
   };
-  /** در صورت نیاز می‌تونی جهت رو هم مستقیماً بدی؛ پیش‌فرض از والد می‌گیره */
   dir?: "ltr" | "rtl";
+  isFaMode?: boolean;
 }
 
-const YesNoView: React.FC<YesNoViewProps> = ({ data, dir }) => {
+const YesNoView: React.FC<YesNoViewProps> = ({
+  data,
+  dir,
+  isFaMode = false,
+}) => {
   const { t } = useTranslation();
 
   const selected = data?.metaType1 || "yes";
 
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   return (
     <div
-      dir={dir}
-      className="p-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg flex items-center gap-4"
+      dir={dir ?? (isFaMode ? "rtl" : "ltr")}
+      className="rounded-lg flex items-center gap-4"
     >
-      {data?.DisplayName && (
-        <span className="text-sm font-medium text-gray-700">
-          {data.DisplayName}
-        </span>
+      {label && (
+        <span className="text-sm font-medium text-gray-700">{label}</span>
       )}
 
       <div className="flex items-center gap-4">

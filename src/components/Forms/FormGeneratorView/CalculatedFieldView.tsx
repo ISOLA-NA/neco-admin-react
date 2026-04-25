@@ -5,19 +5,27 @@ import DynamicInput from "../../utilities/DynamicInput";
 interface CalculatedFieldViewProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const CalculatedFieldView: React.FC<CalculatedFieldViewProps> = ({ data }) => {
+const CalculatedFieldView: React.FC<CalculatedFieldViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   return (
-    <div className="p-4">
+    <div dir={isFaMode ? "rtl" : "ltr"}>
       <DynamicInput
-        name={data?.DisplayName || "CalculatedFieldView"}
+        name={label}
         type="text"
         value=""
         placeholder=""
         disabled={true}
-        className="w-full p-2 border rounded focus:outline-none"
       />
     </div>
   );

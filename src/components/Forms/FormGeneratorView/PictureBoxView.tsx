@@ -14,13 +14,16 @@ interface PictureBoxViewProps {
     metaType1?: string;
     fileName?: string;
     DisplayName?: string;
+    PersianName?: string;
   };
   onMetaChange?: (data: any) => void;
+  isFaMode?: boolean;
 }
 
 const PictureBoxView: React.FC<PictureBoxViewProps> = ({
   data,
   onMetaChange,
+  isFaMode = false,
 }) => {
   const { t } = useTranslation();
 
@@ -35,13 +38,19 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showUploadHandler, setShowUploadHandler] = useState<boolean>(false);
 
-  // واکشی اطلاعات فایل (نام و URL پیش‌نمایش) در صورت وجود selectedFileId
+  const label = isFaMode
+    ? data?.PersianName ||
+      data?.DisplayName ||
+      t("PictureBoxFile.Labels.FileName")
+    : data?.DisplayName ||
+      data?.PersianName ||
+      t("PictureBoxFile.Labels.FileName");
+
   useEffect(() => {
     if (selectedFileId) {
       fileService
         .getFile(selectedFileId)
         .then((res) => {
-          // فرض بر این است که res.data شامل FileName و FileIQ (URL پیش‌نمایش) می‌باشد
           setFileName(res.data.FileName);
           setPreviewUrl(res.data.FileIQ || null);
         })
@@ -54,12 +63,10 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
     }
   }, [selectedFileId]);
 
-  // Callback جهت دریافت تغییرات URL پیش‌نمایش از FileUploadHandler
   const handlePreviewUrlChange = useCallback((url: string | null) => {
     setPreviewUrl(url);
   }, []);
 
-  // در صورت آپلود موفق فایل جدید
   const handleUploadSuccess = (insertedModel: InsertModel) => {
     setSelectedFileId(insertedModel.ID || null);
     setFileName(insertedModel.FileName);
@@ -69,7 +76,6 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
     setShowUploadHandler(false);
   };
 
-  // حذف فایل
   const handleReset = () => {
     setSelectedFileId(null);
     setResetCounter((prev) => prev + 1);
@@ -80,7 +86,6 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
     setPreviewUrl(null);
   };
 
-  // بازکردن مدال جهت نمایش پیش‌نمایش فایل
   const handleShowFile = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (previewUrl) {
@@ -90,15 +95,16 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
     }
   };
 
-  // تغییر وضعیت نمایش بخش آپلود؛ با کلیک روی دکمه Upload، بخش آپلود زیر سطر اصلی ظاهر/مخفی می‌شود و previewUrl پاک می‌شود
   const handleToggleUploadHandler = () => {
     setShowUploadHandler((prev) => !prev);
     setPreviewUrl(null);
   };
 
   return (
-    <div className="flex flex-col items-center w-full mt-10">
-      {/* سطر اصلی: دکمه Delete، DynamicInput نمایش نام فایل (label از DisplayName)، دکمه Upload و دکمه View */}
+    <div
+      className="flex flex-col items-center w-full mt-10"
+      dir={isFaMode ? "rtl" : "ltr"}
+    >
       <div className="flex flex-row items-center gap-2 w-full">
         {selectedFileId && (
           <button
@@ -112,7 +118,7 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
         )}
 
         <DynamicInput
-          name={data?.DisplayName || t("PictureBoxFile.Labels.FileName")}
+          name={label}
           type="text"
           value={fileName}
           placeholder={t("PictureBoxFile.Labels.NoFileSelected")}
@@ -146,7 +152,6 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
         </button>
       </div>
 
-      {/* بخش آپلود: تنها زمانی نمایش داده می‌شود که showUploadHandler فعال باشد */}
       {showUploadHandler && (
         <div className="w-full mt-4">
           <FileUploadHandler
@@ -155,7 +160,7 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
             onReset={() => {}}
             onUploadSuccess={handleUploadSuccess}
             onPreviewUrlChange={handlePreviewUrlChange}
-            externalPreviewUrl={null} // باکس آپلود به صورت خالی نمایش داده شود
+            externalPreviewUrl={null}
           />
           <button
             type="button"
@@ -167,7 +172,6 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
         </div>
       )}
 
-      {/* FileUploadHandler مخفی جهت واکشی previewUrl در پس‌زمینه (در صورت عدم نمایش بخش آپلود) */}
       {selectedFileId && !showUploadHandler && (
         <div className="hidden">
           <FileUploadHandler
@@ -181,7 +185,6 @@ const PictureBoxView: React.FC<PictureBoxViewProps> = ({
         </div>
       )}
 
-      {/* مدال نمایش پیش‌نمایش فایل با عرض نصف صفحه و تصویر مربعی */}
       <DynamicModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

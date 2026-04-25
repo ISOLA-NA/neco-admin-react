@@ -5,12 +5,14 @@ import { Map, Marker } from "pigeon-maps";
 interface MapViewProps {
   data?: {
     DisplayName?: string;
-    metaType1?: string; // فرمت: "lat,lng|zoom"
+    PersianName?: string;
+    metaType1?: string;
   };
+  isFaMode?: boolean;
 }
 
-const MapView: React.FC<MapViewProps> = ({ data }) => {
-  const defaultLocation: [number, number] = [35.6892, 51.389]; // مختصات پیش‌فرض
+const MapView: React.FC<MapViewProps> = ({ data, isFaMode = false }) => {
+  const defaultLocation: [number, number] = [35.6892, 51.389];
   let markerLocation: [number, number] = defaultLocation;
   let zoom = 6;
 
@@ -25,20 +27,17 @@ const MapView: React.FC<MapViewProps> = ({ data }) => {
     }
   }
 
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   return (
     <div className="p-4 bg-white rounded-lg border border-gray-300 flex flex-col items-center">
-      {data?.DisplayName && (
-        <div className="mb-2 text-sm font-medium text-gray-700">
-          {data.DisplayName}
-        </div>
+      {label && (
+        <div className="mb-2 text-xs font-semibold text-gray-700">{label}</div>
       )}
       <div className="w-72 h-48">
-        <Map
-          center={markerLocation}
-          zoom={zoom}
-          height={192} // حدوداً 192px ارتفاع
-          width={288}  // حدوداً 288px عرض (تنظیم توسط container)
-        >
+        <Map center={markerLocation} zoom={zoom} height={192} width={288}>
           <Marker anchor={markerLocation} />
         </Map>
       </div>

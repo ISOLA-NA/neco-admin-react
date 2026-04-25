@@ -1,24 +1,34 @@
 import React, { useEffect, useState } from "react";
-import DynamicSelector from "../../utilities/DynamicSelector"; // مسیر صحیح ایمپورت را مطابق پروژه تنظیم کنید
+import DynamicSelector from "../../utilities/DynamicSelector";
 import { useApi } from "../../../context/ApiContext";
 
 interface AdvanceWfViewProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const AdvanceWfView: React.FC<AdvanceWfViewProps> = ({ data }) => {
+const AdvanceWfView: React.FC<AdvanceWfViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   const { getAllRoles } = useApi();
   const [roles, setRoles] = useState<Array<{ ID: string; Name: string }>>([]);
   const [selectedRole, setSelectedRole] = useState("");
+
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || "انتخاب نقش"
+    : data?.DisplayName || data?.PersianName || "Select Role";
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const res = await getAllRoles();
-        // فیلتر کردن نقش‌هایی که فیلد Name معتبر دارند
-        const validRoles = res.filter((role: any) => role.Name && role.Name.trim() !== "");
+        const validRoles = res.filter(
+          (role: any) => role.Name && role.Name.trim() !== ""
+        );
         setRoles(
           validRoles.map((role: any) => ({
             ID: role.ID,
@@ -33,9 +43,8 @@ const AdvanceWfView: React.FC<AdvanceWfViewProps> = ({ data }) => {
     fetchRoles();
   }, [getAllRoles]);
 
-  // تبدیل نقش‌ها به گزینه‌های مورد نیاز DynamicSelector
   const roleOptions = roles.map((role) => ({
-    value: role.ID, // استفاده از ID به عنوان value (در صورت نیاز می‌توانید Name هم قرار دهید)
+    value: role.ID,
     label: role.Name,
   }));
 
@@ -45,10 +54,13 @@ const AdvanceWfView: React.FC<AdvanceWfViewProps> = ({ data }) => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+    <div
+      className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg"
+      dir={isFaMode ? "rtl" : "ltr"}
+    >
       <DynamicSelector
         name="roles"
-        label={data?.DisplayName ? data.DisplayName : "Select Role"}
+        label={label}
         options={roleOptions}
         selectedValue={selectedRole}
         onChange={handleChange}

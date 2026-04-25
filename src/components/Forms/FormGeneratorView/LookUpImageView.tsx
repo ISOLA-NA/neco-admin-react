@@ -3,13 +3,17 @@ import React, { useEffect } from "react";
 import DynamicSelector from "../../utilities/DynamicSelector";
 import { useTranslation } from "react-i18next";
 
-
 interface LookUpImageViewProps {
   options: { value: string; label: string }[];
   selectedValue: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onButtonClick?: () => void;
-  data?: { DisplayName?: string; [key: string]: any };
+  data?: {
+    DisplayName?: string;
+    PersianName?: string;
+    [key: string]: any;
+  };
+  isFaMode?: boolean;
 }
 
 const LookUpImageView: React.FC<LookUpImageViewProps> = ({
@@ -18,17 +22,25 @@ const LookUpImageView: React.FC<LookUpImageViewProps> = ({
   onChange,
   onButtonClick,
   data,
+  isFaMode = false,
 }) => {
   const { t } = useTranslation();
+
   useEffect(() => {
     console.log("LookUpImageView data:", data);
   }, [data]);
 
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || "انتخاب کنید"
+    : data?.DisplayName ||
+      data?.PersianName ||
+      t("LookupUmage.View.SelectOption");
+
   return (
-    <div className="w-full">
+    <div className="w-full" dir={isFaMode ? "rtl" : "ltr"}>
       <DynamicSelector
         name="lookupView"
-        label={data?.DisplayName || t("LookupUmage.View.SelectOption")}
+        label={label}
         options={options}
         selectedValue={selectedValue}
         onChange={onChange}

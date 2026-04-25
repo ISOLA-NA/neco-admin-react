@@ -1,27 +1,32 @@
 import React, { useEffect, useState } from "react";
-import DynamicSelector from "../../utilities/DynamicSelector"; // مسیر صحیح ایمپورت را مطابق پروژه تنظیم کنید
-import projectService from "../../../services/api.services"; // مسیر صحیح را تنظیم کنید
+import DynamicSelector from "../../utilities/DynamicSelector";
+import projectService from "../../../services/api.services";
 
 interface MePostSelectorProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const MePostSelector: React.FC<MePostSelectorProps> = ({ data }) => {
-  // state برای ذخیره آرایه پست‌ها (فقط ID و Name)
+const MePostSelector: React.FC<MePostSelectorProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   const [posts, setPosts] = useState<Array<{ ID: string; Name: string }>>([]);
-  // state برای نگهداری مقدار انتخاب‌شده از سلکتور
   const [selectedValue, setSelectedValue] = useState("");
+
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || "انتخاب پست"
+    : data?.DisplayName || data?.PersianName || "Select Post";
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // فراخوانی متد postUser از projectService
         const response = await projectService.postUser();
         console.log("Fetched posts:", response);
         if (Array.isArray(response)) {
-          // فقط پست‌هایی که Name معتبر دارند انتخاب می‌شوند
           const validPosts = response.filter(
             (post: any) => post.Name && post.Name.trim() !== ""
           );
@@ -42,7 +47,6 @@ const MePostSelector: React.FC<MePostSelectorProps> = ({ data }) => {
     fetchPosts();
   }, []);
 
-  // تبدیل پست‌ها به فرمت گزینه‌های مورد نیاز DynamicSelector
   const postOptions = posts.map((post) => ({
     value: post.Name,
     label: post.Name,
@@ -54,10 +58,10 @@ const MePostSelector: React.FC<MePostSelectorProps> = ({ data }) => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg">
+    <div dir={isFaMode ? "rtl" : "ltr"}>
       <DynamicSelector
         name="posts"
-        label={data?.DisplayName ? data.DisplayName : "Select Post"}
+        label={label}
         options={postOptions}
         selectedValue={selectedValue}
         onChange={handleChange}

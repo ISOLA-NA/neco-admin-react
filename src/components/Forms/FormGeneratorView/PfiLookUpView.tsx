@@ -7,23 +7,32 @@ import { useTranslation } from "react-i18next";
 interface PfiLookupViewProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const PfiLookupView: React.FC<PfiLookupViewProps> = ({ data }) => {
+const PfiLookupView: React.FC<PfiLookupViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   const { t } = useTranslation();
 
-  const [displayName, setDisplayName] = useState<string>(
-    data?.DisplayName || ""
-  );
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
+  const [displayName, setDisplayName] = useState<string>(label);
 
   const handleReset = () => {
     setDisplayName("");
   };
 
   return (
-    <div className="flex flex-col items-center w-full mt-10">
-      {/* ردیف بالا: دکمه Reset، ورودی نمایش DisplayName و دکمه View */}
+    <div
+      className="flex flex-col items-center w-full mt-10"
+      dir={isFaMode ? "rtl" : "ltr"}
+    >
       <div className="flex items-center gap-2 w-full">
         {displayName && (
           <button
