@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import ReusableButton from "../../utilities/DynamicButtons";
+import { useTranslation } from "react-i18next";
 
 interface ColumnDef {
   headerName: string;
@@ -28,6 +29,7 @@ const TableSelector: React.FC<TableSelectorProps> = ({
   isSelectDisabled,
 }) => {
   const [localSelectedRow, setLocalSelectedRow] = useState<any>(null);
+  const { i18n } = useTranslation();
 
   // وقتی روی ردیفی کلیک می‌کنیم، state محلی بروز شود
   const handleRowClick = (data: any) => {
@@ -50,13 +52,10 @@ const TableSelector: React.FC<TableSelectorProps> = ({
   return (
     <div
       className="bg-white rounded-lg p-4 flex flex-col"
-      style={{ height: "600px" }}
+      style={{ height: "550px" }}
     >
       {/* ظرف جدول با ارتفاع ثابت و اسکرول */}
-      <div
-        className="flex-grow overflow-y-auto mb-4"
-        style={{ height: "100%" }}
-      >
+      <div className="flex-grow mb-4" style={{ height: "450px" }}>
         <DataTable
           columnDefs={columnDefs}
           rowData={rowData}
@@ -67,11 +66,11 @@ const TableSelector: React.FC<TableSelectorProps> = ({
           onEdit={() => {}}
           onDelete={() => {}}
           onDuplicate={() => {}}
-          // استفاده از domLayout "normal" برای پرکردن ارتفاع والد
           domLayout="normal"
           showAddIcon={false}
           showEditIcon={false}
           showDeleteIcon={false}
+          direction={i18n.dir()}
         />
       </div>
 

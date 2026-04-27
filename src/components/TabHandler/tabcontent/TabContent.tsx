@@ -1,5 +1,3 @@
-
-
 import React, {
   useState,
   useEffect,
@@ -130,7 +128,7 @@ const TabContent: FC<TabContentProps> = ({
   );
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmAction, setConfirmAction] = useState<() => void>(() => { });
+  const [confirmAction, setConfirmAction] = useState<() => void>(() => {});
   const [isAdding, setIsAdding] = useState(false);
   const [pendingSelectedRow, setPendingSelectedRow] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -317,7 +315,9 @@ const TabContent: FC<TabContentProps> = ({
         const message =
           typeof data === "string"
             ? data
-            : data?.value?.message || data?.message || t("Alerts.Duplicated.Failed");
+            : data?.value?.message ||
+              data?.message ||
+              t("Alerts.Duplicated.Failed");
 
         showAlert("error", null, t("Alerts.Title.Error"), message);
       } finally {
@@ -328,7 +328,9 @@ const TabContent: FC<TabContentProps> = ({
     setConfirmOpen(true);
   };
 
-  const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCategoryTypeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const newType = e.target.value as "cata" | "catb";
     setSelectedCategoryType(newType);
   };
@@ -595,8 +597,8 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          t("Alerts.Errors.FailedToSaveCommand");
+            data?.message ||
+            t("Alerts.Errors.FailedToSaveCommand");
       showAlert("error", null, t("Alerts.Title.Error"), message);
     }
   };
@@ -835,13 +837,13 @@ const TabContent: FC<TabContentProps> = ({
           if (categoriesRef.current) {
             await (selectedCategoryType === "cata"
               ? api.updateCatA({
-                ...categoriesRef.current.getData(),
-                categoryType: selectedCategoryType,
-              })
+                  ...categoriesRef.current.getData(),
+                  categoryType: selectedCategoryType,
+                })
               : api.updateCatB({
-                ...categoriesRef.current.getData(),
-                categoryType: selectedCategoryType,
-              }));
+                  ...categoriesRef.current.getData(),
+                  categoryType: selectedCategoryType,
+                }));
             showAlert(
               "success",
               null,
@@ -866,8 +868,8 @@ const TabContent: FC<TabContentProps> = ({
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          t("Alerts.Errors.FailedToSaveCommand");
+            data?.message ||
+            t("Alerts.Errors.FailedToSaveCommand");
       showAlert("error", null, t("Alerts.Title.Error"), message);
     }
   };
@@ -1126,6 +1128,47 @@ const TabContent: FC<TabContentProps> = ({
   const effectiveShowDuplicateIcon =
     activeSubTab === "Ribbons" ? false : showDuplicateIcon;
 
+  const tabTitles: Record<string, { fa: string; en: string }> = {
+    Configurations: { fa: "پیکربندی", en: "Configurations" },
+    Commands: { fa: "فرمان ها", en: "Commands" },
+    Ribbons: { fa: "منو ها", en: "Ribbons" },
+    Users: { fa: "کاربران", en: "Users" },
+    Roles: { fa: "نقش‌ها", en: "Roles" },
+    Enterprises: { fa: "شرکت‌ها", en: "Enterprises" },
+    RoleGroups: { fa: "گروه نقش ها", en: "Role Groups" },
+    Staffing: { fa: "کارکنان", en: "Staffing" },
+    ProgramTemplate: {
+      fa: "قالب های برنامه",
+      en: "Program Templates",
+    },
+    ProgramTypes: { fa: "انواع برنامه", en: "Program Types" },
+    Projects: { fa: "پروژه‌ها", en: "Projects" },
+    ProjectsAccess: {
+      fa: "دسترسی پروژه‌ها",
+      en: "Projects Access",
+    },
+    Odp: { fa: "فرآیندهای درخواستی", en: "ODP" },
+    Procedures: { fa: "رویه‌ها", en: "Procedures" },
+    Calendars: { fa: "تقویم‌ها", en: "Calendars" },
+    ApprovalFlows: {
+      fa: "جریان‌های تایید",
+      en: "Approval Flows",
+    },
+    Forms: { fa: "فرم‌ها", en: "Forms" },
+    Categories: { fa: "دسته‌بندی‌ها", en: "Categories" },
+    UpdateAddress: {
+      fa: "به‌روزرسانی آدرس",
+      en: "Update Address",
+    },
+  };
+
+  const currentTitle = tabTitles[activeSubTab];
+  const titleText = currentTitle
+    ? i18n.dir() === "rtl"
+      ? currentTitle.fa
+      : currentTitle.en
+    : activeSubTab;
+
   return (
     <UpdateAddressProvider>
       <div
@@ -1150,7 +1193,13 @@ const TabContent: FC<TabContentProps> = ({
           }}
         >
           <div className="flex items-center justify-between p-2 border-b border-gray-300 bg-gray-100 w-full">
-            <div className="font-bold text-gray-700 text-sm"> </div>
+            <div className="font-bold text-gray-700 text-sm">
+              <div className="font-bold text-gray-700 text-sm">
+                <span className="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
+                  {titleText}
+                </span>
+              </div>
+            </div>
             <button
               onClick={togglePanelSize}
               className="text-gray-700 hover:text-gray-900 transition"
@@ -1170,11 +1219,6 @@ const TabContent: FC<TabContentProps> = ({
 
           {activeSubTab === "Categories" && (
             <div className="mb-4 p-2">
-              <div className="flex mb-2 w-full" dir={i18n.dir()}>
-                <span className="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
-                  {i18n.dir() === "rtl" ? "دسته بندی فرم ها" : "Form Categories"}
-                </span>
-              </div>
               <DynamicSelector
                 name="categoryType"
                 label={t("Category.CategoryType")}
@@ -1189,29 +1233,22 @@ const TabContent: FC<TabContentProps> = ({
           <div className="h-full p-4 overflow-auto relative">
             {activeSubTab === "UpdateAddress" ? (
               <>
-                <div className="flex mb-2 w-full" dir={i18n.dir()}>
-                  <span className="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
-                    {i18n.dir() === "rtl" ? "به‌روزرسانی آدرس ها" : "Update Addresses"}
-                  </span>
-                </div>
-                <UpdateAddressLeft onPick={(payload) => setUaSelection(payload)} />
+                <UpdateAddressLeft
+                  onPick={(payload) => setUaSelection(payload)}
+                />
               </>
             ) : (
               <>
                 {activeSubTab === "Ribbons" && (
-                  <div className="mt-4 w-full p-4 bg-white rounded-md shadow-md">
-                    <div className="flex mb-3 w-full" dir={i18n.dir()}>
-                      <span className="text-sm font-semibold text-gray-700 bg-gray-50 px-3 py-1 rounded-md shadow-sm border border-gray-200">
-                        {i18n.dir() === "rtl" ? "منو ها" : "Ribbons"}
-                      </span>
-                    </div>
+                  <div className="w-full p-4 bg-white rounded-md shadow-md">
                     <div className="flex justify-end gap-2 mb-4">
                       <button
                         title={TT("Ribbons.Duplicate", "کپی", "Duplicate")}
                         onClick={handleDuplicateClick}
                         disabled={!selectedRow}
-                        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${!selectedRow ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${
+                          !selectedRow ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         <FiCopy size={20} />
                       </button>
@@ -1220,8 +1257,9 @@ const TabContent: FC<TabContentProps> = ({
                         title={TT("Ribbons.Delete", "حذف", "Delete")}
                         onClick={handleDeleteClick}
                         disabled={!selectedRow}
-                        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-red-50 hover:bg-red-100 text-red-600 ${!selectedRow ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
+                        className={`rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none bg-red-50 hover:bg-red-100 text-red-600 ${
+                          !selectedRow ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         <FiTrash2 size={20} />
                       </button>
@@ -1250,16 +1288,26 @@ const TabContent: FC<TabContentProps> = ({
                             name={
                               isFaMode
                                 ? TT("Ribbons.Name", "نام", "Name")
-                                : TT("Forms.PersianName", "نام فارسی", "Persian Name")
+                                : TT(
+                                    "Forms.PersianName",
+                                    "نام فارسی",
+                                    "Persian Name"
+                                  )
                             }
                             type="text"
                             value={isFaMode ? nameInput : persianNameInput}
                             placeholder={
                               isFaMode
                                 ? TT("Ribbons.Name", "نام", "Name")
-                                : TT("Forms.PersianName", "نام فارسی", "Persian Name")
+                                : TT(
+                                    "Forms.PersianName",
+                                    "نام فارسی",
+                                    "Persian Name"
+                                  )
                             }
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) => {
                               if (isFaMode) setNameInput(e.target.value);
                               else setPersianNameInput(e.target.value);
                             }}
@@ -1279,8 +1327,16 @@ const TabContent: FC<TabContentProps> = ({
                           ].join(" ")}
                           title={
                             isFaMode
-                              ? TT("Ribbons.SwitchToEnglish", "تغییر به انگلیسی", "Switch to English")
-                              : TT("Ribbons.SwitchToPersian", "تغییر به فارسی", "Switch to Persian")
+                              ? TT(
+                                  "Ribbons.SwitchToEnglish",
+                                  "تغییر به انگلیسی",
+                                  "Switch to English"
+                                )
+                              : TT(
+                                  "Ribbons.SwitchToPersian",
+                                  "تغییر به فارسی",
+                                  "Switch to Persian"
+                                )
                           }
                         >
                           {isFaMode ? "FA" : "EN"}
@@ -1306,59 +1362,35 @@ const TabContent: FC<TabContentProps> = ({
                   const addPersianCol =
                     activeSubTab === "Ribbons" &&
                     Array.isArray(fixedColumnDefs) &&
-                    !fixedColumnDefs.some((c: any) => c.field === "PersianName");
+                    !fixedColumnDefs.some(
+                      (c: any) => c.field === "PersianName"
+                    );
 
                   const cols = addPersianCol
                     ? [
-                      ...fixedColumnDefs,
-                      {
-                        headerName: t("DataTable.Headers.PersianName"),
-                        field: "PersianName",
-                        sortable: true,
-                        filter: true,
-                        resizable: true,
-                      },
-                    ]
+                        ...fixedColumnDefs,
+                        {
+                          headerName: t("DataTable.Headers.PersianName"),
+                          field: "PersianName",
+                          sortable: true,
+                          filter: true,
+                          resizable: true,
+                        },
+                      ]
                     : fixedColumnDefs;
-
-                  const tabTitles: Record<string, { fa: string; en: string }> = {
-                    Configurations: { fa: "پیکربندی", en: "Configurations" },
-                    Commands: { fa: "فرمان ها", en: "Commands" },
-                    Ribbons: { fa: "منو ها", en: "Ribbons" },
-                    Users: { fa: "کاربران", en: "Users" },
-                    Roles: { fa: "نقش‌ها", en: "Roles" },
-                    Enterprises: { fa: "شرکت‌ها", en: "Enterprises" },
-                    RoleGroups: { fa: "گروه نقش ها", en: "Role Groups" },
-                    Staffing: { fa: "کارکنان", en: "Staffing" },
-                    ProgramTemplate: { fa: "قالب های برنامه", en: "Program Templates" },
-                    ProgramTypes: { fa: "انواع برنامه", en: "Program Types" },
-                    Projects: { fa: "پروژه‌ها", en: "Projects" },
-                    ProjectsAccess: { fa: "دسترسی پروژه‌ها", en: "Projects Access" },
-                    Odp: { fa: "ODP", en: "ODP" },
-                    Procedures: { fa: "رویه‌ها", en: "Procedures" },
-                    Calendars: { fa: "تقویم‌ها", en: "Calendars" },
-                    ApprovalFlows: { fa: "جریان‌های تایید", en: "Approval Flows" },
-                    Forms: { fa: "فرم‌ها", en: "Forms" },
-                    Categories: { fa: "دسته‌بندی‌ها", en: "Categories" },
-                    UpdateAddress: { fa: "به‌روزرسانی آدرس", en: "Update Address" },
-                  };
-
-                  const currentTitle = tabTitles[activeSubTab];
-                  const titleText = currentTitle
-                    ? i18n.dir() === "rtl"
-                      ? currentTitle.fa
-                      : currentTitle.en
-                    : activeSubTab;
 
                   return (
                     <>
-                      <div className="flex mb-2 w-full" dir={i18n.dir()}>
+                      {/* <div
+                        className="flex mb-2 w-full sticky top-0 z-10 bg-gray-100 py-1"
+                        dir={i18n.dir()}
+                      >
                         {activeSubTab !== "Categories" && (
                           <span className="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded-md shadow-sm border border-gray-200">
                             {titleText}
                           </span>
                         )}
-                      </div>
+                      </div> */}
                       <DataTable
                         columnDefs={cols}
                         rowData={fetchedRowData}
@@ -1404,8 +1436,9 @@ const TabContent: FC<TabContentProps> = ({
 
         {isPanelOpen && (
           <div
-            className={`flex-1 transition-opacity duration-100 bg-gray-100 ${isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
-              }`}
+            className={`flex-1 transition-opacity duration-100 bg-gray-100 ${
+              isMaximized ? "opacity-50 pointer-events-none" : "opacity-100"
+            }`}
             style={{
               transition: "opacity 0.1s ease-out",
               backgroundColor: "#f3f4f6",
@@ -1424,48 +1457,48 @@ const TabContent: FC<TabContentProps> = ({
                 activeSubTab !== "UpdateAddress" && (
                   <PanelHeader
                     isExpanded={false}
-                    toggleExpand={() => { }}
+                    toggleExpand={() => {}}
                     onSave={
                       isAdding &&
-                        (activeSubTab === "Configurations" ||
-                          activeSubTab === "Commands" ||
-                          activeSubTab === "Users" ||
-                          activeSubTab === "Ribbons" ||
-                          activeSubTab === "Roles" ||
-                          activeSubTab === "RoleGroups" ||
-                          activeSubTab === "Enterprises" ||
-                          activeSubTab === "Staffing" ||
-                          activeSubTab === "ProgramTemplate" ||
-                          activeSubTab === "ProgramTypes" ||
-                          activeSubTab === "Odp" ||
-                          activeSubTab === "Procedures" ||
-                          activeSubTab === "Calendars" ||
-                          activeSubTab === "ProjectsAccess" ||
-                          activeSubTab === "ApprovalFlows" ||
-                          activeSubTab === "Forms" ||
-                          activeSubTab === "Categories")
+                      (activeSubTab === "Configurations" ||
+                        activeSubTab === "Commands" ||
+                        activeSubTab === "Users" ||
+                        activeSubTab === "Ribbons" ||
+                        activeSubTab === "Roles" ||
+                        activeSubTab === "RoleGroups" ||
+                        activeSubTab === "Enterprises" ||
+                        activeSubTab === "Staffing" ||
+                        activeSubTab === "ProgramTemplate" ||
+                        activeSubTab === "ProgramTypes" ||
+                        activeSubTab === "Odp" ||
+                        activeSubTab === "Procedures" ||
+                        activeSubTab === "Calendars" ||
+                        activeSubTab === "ProjectsAccess" ||
+                        activeSubTab === "ApprovalFlows" ||
+                        activeSubTab === "Forms" ||
+                        activeSubTab === "Categories")
                         ? handleInsert
                         : undefined
                     }
                     onUpdate={
                       !isAdding &&
-                        (activeSubTab === "Configurations" ||
-                          activeSubTab === "Commands" ||
-                          activeSubTab === "Users" ||
-                          activeSubTab === "Ribbons" ||
-                          activeSubTab === "Roles" ||
-                          activeSubTab === "Enterprises" ||
-                          activeSubTab === "RoleGroups" ||
-                          activeSubTab === "Staffing" ||
-                          activeSubTab === "ProgramTemplate" ||
-                          activeSubTab === "ProgramTypes" ||
-                          activeSubTab === "Odp" ||
-                          activeSubTab === "Procedures" ||
-                          activeSubTab === "Calendars" ||
-                          activeSubTab === "ProjectsAccess" ||
-                          activeSubTab === "ApprovalFlows" ||
-                          activeSubTab === "Forms" ||
-                          activeSubTab === "Categories")
+                      (activeSubTab === "Configurations" ||
+                        activeSubTab === "Commands" ||
+                        activeSubTab === "Users" ||
+                        activeSubTab === "Ribbons" ||
+                        activeSubTab === "Roles" ||
+                        activeSubTab === "Enterprises" ||
+                        activeSubTab === "RoleGroups" ||
+                        activeSubTab === "Staffing" ||
+                        activeSubTab === "ProgramTemplate" ||
+                        activeSubTab === "ProgramTypes" ||
+                        activeSubTab === "Odp" ||
+                        activeSubTab === "Procedures" ||
+                        activeSubTab === "Calendars" ||
+                        activeSubTab === "ProjectsAccess" ||
+                        activeSubTab === "ApprovalFlows" ||
+                        activeSubTab === "Forms" ||
+                        activeSubTab === "Categories")
                         ? handleUpdate
                         : undefined
                     }
@@ -1479,7 +1512,6 @@ const TabContent: FC<TabContentProps> = ({
                 )}
 
               {activeSubTab === "UpdateAddress" ? (
-
                 <div className="mt-2 flex-grow overflow-y-auto">
                   <UpdateAddressRight />
                 </div>
@@ -1504,8 +1536,8 @@ const TabContent: FC<TabContentProps> = ({
                             isAdding
                               ? "add-mode"
                               : selectedRow
-                                ? selectedRow.ID
-                                : "no-selection"
+                              ? selectedRow.ID
+                              : "no-selection"
                           }
                           selectedRow={isAdding ? null : selectedRow}
                           ref={getActiveRef()}

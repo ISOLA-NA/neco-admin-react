@@ -361,7 +361,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       onClose={handleCloseProgramTemplateModal}
     >
       <TableSelector
-        columnDefs={[{ headerName: "Name", field: "Name" }]}
+        columnDefs={[{ headerName: t("ODP.Name"), field: "Name" }]}
         rowData={programTemplates}
         onRowDoubleClick={handleProgramTemplateRowDoubleClick}
         onRowClick={handleProgramTemplateRowClick}

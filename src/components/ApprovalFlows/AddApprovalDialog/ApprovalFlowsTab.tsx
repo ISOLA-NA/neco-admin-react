@@ -143,7 +143,6 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     // false=EN(Name), true=FA(PersianName)
     const [pNameValue, setPNameValue] = useState<string>(""); // PersianName
 
-
     // داخل ApprovalFlowsTab.tsx، کنار validateMinFields:
 
     const validateForm = (): boolean => {
@@ -159,33 +158,51 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       // ادامه‌ی اعتبارسنجی‌های قبلی شما (MinAccept/MinReject/...) بدون تغییر
       if (!isStage) {
         if (!acceptChecked && !rejectChecked) {
-          showAlert("error", null, "", t("AddApprovalFlows.SelectMinAcceptOrMinReject"));
+          showAlert(
+            "error",
+            null,
+            "",
+            t("AddApprovalFlows.SelectMinAcceptOrMinReject")
+          );
           return false;
         }
         if (acceptChecked) {
           const v = Number(minAcceptValue);
           if (!Number.isFinite(v) || v <= 0) {
-            showAlert("error", null, "", t("AddApprovalFlows.InvalidMinAccept"));
+            showAlert(
+              "error",
+              null,
+              "",
+              t("AddApprovalFlows.InvalidMinAccept")
+            );
             return false;
           }
         }
         if (rejectChecked) {
           const v = Number(minRejectValue);
           if (!Number.isFinite(v) || v <= 0) {
-            showAlert("error", null, "", t("AddApprovalFlows.InvalidMinReject"));
+            showAlert(
+              "error",
+              null,
+              "",
+              t("AddApprovalFlows.InvalidMinReject")
+            );
             return false;
           }
         }
         if (tableData.length === 0) {
-          showAlert("error", null, "", t("AddApprovalFlows.ApprovalContextMustHaveOneRow"));
+          showAlert(
+            "error",
+            null,
+            "",
+            t("AddApprovalFlows.ApprovalContextMustHaveOneRow")
+          );
           return false;
         }
       }
 
       return true;
     };
-
-
 
     // گرفتن لیست نقش‌ها
     useEffect(() => {
@@ -336,9 +353,9 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         rows.map((r) =>
           r.id === params.data.id
             ? {
-              ...r,
-              [field]: newValue,
-            }
+                ...r,
+                [field]: newValue,
+              }
             : r
         )
       );
@@ -629,20 +646,20 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
         const updated = tableData.map((r) =>
           r.id === selectedRow.id
             ? {
-              ...r,
-              nPostID: selectedStaticPost
-                ? selectedStaticPost.ID.toString()
-                : "",
-              cost1: Number(cost1) || 0,
-              cost2: Number(cost2) || 0,
-              cost3: Number(cost3) || 0,
-              weight1: Number(weight1) || 0,
-              weight2: Number(weight2) || 0,
-              weight3: Number(weight3) || 0,
-              required: requiredChecked,
-              veto: vetoChecked,
-              code: Number(codeValue) || 0,
-            }
+                ...r,
+                nPostID: selectedStaticPost
+                  ? selectedStaticPost.ID.toString()
+                  : "",
+                cost1: Number(cost1) || 0,
+                cost2: Number(cost2) || 0,
+                cost3: Number(cost3) || 0,
+                weight1: Number(weight1) || 0,
+                weight2: Number(weight2) || 0,
+                weight3: Number(weight3) || 0,
+                required: requiredChecked,
+                veto: vetoChecked,
+                code: Number(codeValue) || 0,
+              }
             : r
         );
         setTableData(updated);
@@ -786,402 +803,408 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
       validateForm: () => validateForm(),
     }));
 
-return (
-  <div className="flex flex-col md:flex-row h-full relative">
-    <main className="flex-1 p-4 bg-white overflow-auto">
-     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 items-start">
-  <div className="relative">
-    <DynamicInput
-      name={
-        isFaMode
-          ? t("AddApprovalFlows.Name", { defaultValue: "Name" })
-          : t("Forms.PersianName", { defaultValue: "PersianName" })
-      }
-      type="text"
-      value={isFaMode ? nameValue ?? "" : pNameValue ?? ""}
-      onChange={(e) =>
-        isFaMode
-          ? setNameValue(e.target.value)
-          : setPNameValue(e.target.value)
-      }
-      className="w-full"
-    />
-    <button
-      type="button"
-      onClick={() => setIsFaMode((p) => !p)}
-      title={
-        isFaMode
-          ? t("AddForms.SwitchToEN", { defaultValue: "Switch to EN (PersianName)" })
-          : t("AddForms.SwitchToFA", { defaultValue: "Switch to FA (Name)" })
-      }
-      className={`absolute ${
-        i18n.dir() === "rtl" ? "left-2" : "right-2"
-      } top-[38px] -translate-y-1/2 h-6 px-2 rounded-md text-[10px] font-semibold bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-sm transition-transform active:scale-95 z-10`}
-    >
-      {isFaMode ? "FA" : "EN"}
-    </button>
-  </div>
-
-  {!isStage && (
-    <div className="min-w-0">
-      <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2">
-        <input
-          type="checkbox"
-          checked={acceptChecked}
-          onChange={(e) => setAcceptChecked(e.target.checked)}
-          className="h-4 w-4 shrink-0"
-        />
-        <span
-          className="truncate"
-          title={t("AddApprovalFlows.MinAccept")}
-        >
-          {t("AddApprovalFlows.MinAccept")}
-        </span>
-      </label>
-      <DynamicInput
-        name=""
-        type="number"
-        value={minAcceptValue}
-        onChange={(e) => setMinAcceptValue(e.target.value)}
-        disabled={!acceptChecked}
-        className="w-full"
-      />
-    </div>
-  )}
-
-  <div className="min-w-0">
-    <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2">
-      <input
-        type="checkbox"
-        checked={rejectChecked}
-        onChange={(e) => setRejectChecked(e.target.checked)}
-        className="h-4 w-4 shrink-0"
-      />
-      <span
-        className="truncate"
-        title={t("AddApprovalFlows.MinReject")}
-      >
-        {t("AddApprovalFlows.MinReject")}
-      </span>
-    </label>
-    <DynamicInput
-      name=""
-      type="number"
-      value={minRejectValue}
-      onChange={(e) => setMinRejectValue(e.target.value)}
-      className="w-full"
-    />
-  </div>
-
-  <div className="min-w-0">
-    <DynamicInput
-      name={t("AddApprovalFlows.ActDuration")}
-      type="number"
-      value={actDurationValue}
-      onChange={(e) => setActDurationValue(e.target.value)}
-      className="w-full"
-    />
-  </div>
-
-  <div className="min-w-0">
-    <DynamicInput
-      name={t("AddApprovalFlows.Order")}
-      type="number"
-      value={orderValue}
-      onChange={(e) => setOrderValue(e.target.value)}
-      className="w-full"
-    />
-  </div>
-</div>
-
-      <div className="mt-6">
-        <label className="flex items-center text-sm text-gray-700 gap-2">
-          <input
-            type="checkbox"
-            checked={isStage}
-            onChange={(e) => setIsStage(e.target.checked)}
-            className="h-4 w-4"
-          />
-          <span>{t("AddApprovalFlows.IsStage")}</span>
-        </label>
-      </div>
-
-      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-lg font-semibold text-gray-700">
-            {t("AddApprovalFlows.ApprovalContext")}
-          </span>
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={handleAddOrUpdateRow}
-              title={t("Global.Add")}
-              className="flex items-center justify-center bg-green-500 text-white w-10 h-10 rounded hover:bg-green-600 transition-colors"
-            >
-              <FaPlus />
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDeleteRow}
-              title={t("Global.Delete")}
-              className={`flex items-center justify-center w-10 h-10 rounded transition-colors ${
-                selectedRow
-                  ? "bg-red-500 hover:bg-red-600 text-white"
-                  : "bg-red-300 text-white cursor-not-allowed"
-              }`}
-              disabled={!selectedRow}
-            >
-              <FaTimes className="text-white" />
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-sm text-gray-700">
-              {t("AddApprovalFlows.StaticPost")}
-            </label>
-            <DynamicSelector
-              options={staticPostOptions}
-              selectedValue={staticPostValue}
-              onChange={(e) => {
-                const val = e.target.value;
-                setStaticPostValue(val);
-                setSelectedStaticPost(
-                  allRoles.find((r) => r.ID.toString() === val) || null
-                );
-              }}
-              label=""
-              showButton
-              onButtonClick={openModal}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <div className="flex flex-col gap-1">
+    return (
+      <div className="flex flex-col md:flex-row h-full relative">
+        <main className="flex-1 p-4 bg-white overflow-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4 items-start">
+            <div className="relative">
               <DynamicInput
-                name={t("AddApprovalFlows.Weight1")}
-                type="number"
-                value={weight1}
-                onChange={(e) => setWeight1(e.target.value)}
+                name={
+                  isFaMode
+                    ? t("AddApprovalFlows.Name", { defaultValue: "Name" })
+                    : t("Forms.PersianName", { defaultValue: "PersianName" })
+                }
+                type="text"
+                value={isFaMode ? nameValue ?? "" : pNameValue ?? ""}
+                onChange={(e) =>
+                  isFaMode
+                    ? setNameValue(e.target.value)
+                    : setPNameValue(e.target.value)
+                }
                 className="w-full"
               />
-              <DynamicInput
-                name={t("AddApprovalFlows.Cost1")}
-                type="number"
-                value={cost1}
-                onChange={(e) => setCost1(e.target.value)}
-                className="w-full"
-              />
+              <button
+                type="button"
+                onClick={() => setIsFaMode((p) => !p)}
+                title={
+                  isFaMode
+                    ? t("AddForms.SwitchToEN", {
+                        defaultValue: "Switch to EN (PersianName)",
+                      })
+                    : t("AddForms.SwitchToFA", {
+                        defaultValue: "Switch to FA (Name)",
+                      })
+                }
+                className={`absolute ${
+                  i18n.dir() === "rtl" ? "left-2" : "right-2"
+                } top-[38px] -translate-y-1/2 h-6 px-2 rounded-md text-[10px] font-semibold bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white shadow-sm transition-transform active:scale-95 z-10`}
+              >
+                {isFaMode ? "FA" : "EN"}
+              </button>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <DynamicInput
-                name={t("AddApprovalFlows.Weight2")}
-                type="number"
-                value={weight2}
-                onChange={(e) => setWeight2(e.target.value)}
-                className="w-full"
-              />
-              <DynamicInput
-                name={t("AddApprovalFlows.Cost2")}
-                type="number"
-                value={cost2}
-                onChange={(e) => setCost2(e.target.value)}
-                className="w-full"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <DynamicInput
-                name={t("AddApprovalFlows.Weight3")}
-                type="number"
-                value={weight3}
-                onChange={(e) => setWeight3(e.target.value)}
-                className="w-full"
-              />
-              <DynamicInput
-                name={t("AddApprovalFlows.Cost3")}
-                type="number"
-                value={cost3}
-                onChange={(e) => setCost3(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center mt-2 gap-5">
-            <div className="w-1/3">
-              <DynamicInput
-                name={t("AddApprovalFlows.Code")}
-                type="number"
-                value={codeValue}
-                onChange={(e) => setCodeValue(e.target.value)}
-                className="w-full"
-              />
-            </div>
-
-            <div className="flex items-center gap-5 mt-4">
-              <label className="flex items-center text-sm text-gray-700 gap-2">
-                <input
-                  type="checkbox"
-                  checked={vetoChecked}
-                  onChange={(e) => setVetoChecked(e.target.checked)}
-                  className="h-4 w-4"
-                />
-                {t("AddApprovalFlows.Veto")}
-              </label>
-
-              <label className="flex items-center text-sm text-gray-700 gap-2">
-                <input
-                  type="checkbox"
-                  checked={requiredChecked}
-                  onChange={(e) => setRequiredChecked(e.target.checked)}
-                  className="h-4 w-4"
-                />
-                {t("AddApprovalFlows.Required")}
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {!isStage && (
-          <div className="mt-4">
-            <div className="overflow-x-auto pb-2">
-              <div className="h-[33vh] min-w-full relative">
-                {approvalContextLoading ? (
-                  <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-60">
-                    <TailSpin
-                      height={50}
-                      width={50}
-                      ariaLabel="loading"
-                      color="#FF69B4"
-                    />
-                  </div>
-                ) : (
-                  <DataTable
-                    columnDefs={columnDefs}
-                    rowData={tableData}
-                    onCellValueChanged={handleCellValueChanged}
-                    setSelectedRowData={handleSelectRow}
-                    showDuplicateIcon={false}
-                    showEditIcon={false}
-                    showAddIcon={false}
-                    showDeleteIcon={false}
-                    domLayout="normal"
-                    gridOptions={{
-                      rowSelection: "single",
-                      onGridReady: (p) => {
-                        p.api.sizeColumnsToFit();
-                        window.addEventListener("resize", () =>
-                          p.api.sizeColumnsToFit()
-                        );
-                      },
-                    }}
-                    direction={i18n.dir()}
+            {!isStage && (
+              <div className="min-w-0">
+                <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2">
+                  <input
+                    type="checkbox"
+                    checked={acceptChecked}
+                    onChange={(e) => setAcceptChecked(e.target.checked)}
+                    className="h-4 w-4 shrink-0"
                   />
-                )}
+                  <span
+                    className="truncate"
+                    title={t("AddApprovalFlows.MinAccept")}
+                  >
+                    {t("AddApprovalFlows.MinAccept")}
+                  </span>
+                </label>
+                <DynamicInput
+                  name=""
+                  type="number"
+                  value={minAcceptValue}
+                  onChange={(e) => setMinAcceptValue(e.target.value)}
+                  disabled={!acceptChecked}
+                  className="w-full"
+                />
+              </div>
+            )}
+
+            <div className="min-w-0">
+              <label className="flex items-center text-[11px] md:text-xs text-gray-700 mb-1 gap-2">
+                <input
+                  type="checkbox"
+                  checked={rejectChecked}
+                  onChange={(e) => setRejectChecked(e.target.checked)}
+                  className="h-4 w-4 shrink-0"
+                />
+                <span
+                  className="truncate"
+                  title={t("AddApprovalFlows.MinReject")}
+                >
+                  {t("AddApprovalFlows.MinReject")}
+                </span>
+              </label>
+              <DynamicInput
+                name=""
+                type="number"
+                value={minRejectValue}
+                onChange={(e) => setMinRejectValue(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <DynamicInput
+                name={t("AddApprovalFlows.ActDuration")}
+                type="number"
+                value={actDurationValue}
+                onChange={(e) => setActDurationValue(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <DynamicInput
+                name={t("AddApprovalFlows.Order")}
+                type="number"
+                value={orderValue}
+                onChange={(e) => setOrderValue(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <label className="flex items-center text-sm text-gray-700 gap-2">
+              <input
+                type="checkbox"
+                checked={isStage}
+                onChange={(e) => setIsStage(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <span>{t("AddApprovalFlows.IsStage")}</span>
+            </label>
+          </div>
+
+          <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-semibold text-gray-700">
+                {t("AddApprovalFlows.ApprovalContext")}
+              </span>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleAddOrUpdateRow}
+                  title={t("AddApprovalFlows.Add")}
+                  className="flex items-center justify-center bg-green-500 text-white w-10 h-10 rounded hover:bg-green-600 transition-colors"
+                >
+                  <FaPlus />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDeleteRow}
+                  title={t("AddApprovalFlows.Delete")}
+                  className={`flex items-center justify-center w-10 h-10 rounded transition-colors ${
+                    selectedRow
+                      ? "bg-red-500 hover:bg-red-600 text-white"
+                      : "bg-red-100 border border-red-400 cursor-not-allowed"
+                  }`}
+                  disabled={!selectedRow}
+                >
+                  <FaTimes
+                    className={selectedRow ? "text-white" : "text-red-500"}
+                  />
+                </button>
               </div>
             </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm text-gray-700">
+                  {t("AddApprovalFlows.StaticPost")}
+                </label>
+                <DynamicSelector
+                  options={staticPostOptions}
+                  selectedValue={staticPostValue}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setStaticPostValue(val);
+                    setSelectedStaticPost(
+                      allRoles.find((r) => r.ID.toString() === val) || null
+                    );
+                  }}
+                  label=""
+                  showButton
+                  onButtonClick={openModal}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col gap-1">
+                  <DynamicInput
+                    name={t("AddApprovalFlows.Weight1")}
+                    type="number"
+                    value={weight1}
+                    onChange={(e) => setWeight1(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name={t("AddApprovalFlows.Cost1")}
+                    type="number"
+                    value={cost1}
+                    onChange={(e) => setCost1(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <DynamicInput
+                    name={t("AddApprovalFlows.Weight2")}
+                    type="number"
+                    value={weight2}
+                    onChange={(e) => setWeight2(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name={t("AddApprovalFlows.Cost2")}
+                    type="number"
+                    value={cost2}
+                    onChange={(e) => setCost2(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <DynamicInput
+                    name={t("AddApprovalFlows.Weight3")}
+                    type="number"
+                    value={weight3}
+                    onChange={(e) => setWeight3(e.target.value)}
+                    className="w-full"
+                  />
+                  <DynamicInput
+                    name={t("AddApprovalFlows.Cost3")}
+                    type="number"
+                    value={cost3}
+                    onChange={(e) => setCost3(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center mt-2 gap-5">
+                <div className="w-1/3">
+                  <DynamicInput
+                    name={t("AddApprovalFlows.Code")}
+                    type="number"
+                    value={codeValue}
+                    onChange={(e) => setCodeValue(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="flex items-center gap-5 mt-4">
+                  <label className="flex items-center text-sm text-gray-700 gap-2">
+                    <input
+                      type="checkbox"
+                      checked={vetoChecked}
+                      onChange={(e) => setVetoChecked(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    {t("AddApprovalFlows.Veto")}
+                  </label>
+
+                  <label className="flex items-center text-sm text-gray-700 gap-2">
+                    <input
+                      type="checkbox"
+                      checked={requiredChecked}
+                      onChange={(e) => setRequiredChecked(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    {t("AddApprovalFlows.Required")}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {!isStage && (
+              <div className="mt-4">
+                <div className="overflow-x-auto pb-2">
+                  <div className="h-[33vh] min-w-full relative">
+                    {approvalContextLoading ? (
+                      <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-60">
+                        <TailSpin
+                          height={50}
+                          width={50}
+                          ariaLabel="loading"
+                          color="#FF69B4"
+                        />
+                      </div>
+                    ) : (
+                      <DataTable
+                        columnDefs={columnDefs}
+                        rowData={tableData}
+                        onCellValueChanged={handleCellValueChanged}
+                        setSelectedRowData={handleSelectRow}
+                        showDuplicateIcon={false}
+                        showEditIcon={false}
+                        showAddIcon={false}
+                        showDeleteIcon={false}
+                        domLayout="normal"
+                        gridOptions={{
+                          rowSelection: "single",
+                          onGridReady: (p) => {
+                            p.api.sizeColumnsToFit();
+                            window.addEventListener("resize", () =>
+                              p.api.sizeColumnsToFit()
+                            );
+                          },
+                        }}
+                        direction={i18n.dir()}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <div className="mt-6">
-        <label className="flex items-center text-sm text-gray-700 gap-2">
-          <input
-            type="checkbox"
-            checked={isDeemed}
-            onChange={(e) => setIsDeemed(e.target.checked)}
-            className="h-4 w-4"
+          <div className="mt-6">
+            <label className="flex items-center text-sm text-gray-700 gap-2">
+              <input
+                type="checkbox"
+                checked={isDeemed}
+                onChange={(e) => setIsDeemed(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <span>{t("AddApprovalFlows.DeemedAsApprovedOrReject")}</span>
+            </label>
+          </div>
+
+          <DeemedSection
+            deemDay={deemDay}
+            setDeemDay={setDeemDay}
+            deemCondition={deemCondition}
+            setDeemCondition={setDeemCondition}
+            deemAction={deemAction}
+            setDeemAction={setDeemAction}
+            previewsStateId={previewsStateId}
+            setPreviewsStateId={setPreviewsStateId}
+            goToPreviousStateID={goToPreviousStateID}
+            setGoToPreviousStateID={setGoToPreviousStateID}
+            boxTemplates={boxTemplates}
+            disableMain={!isDeemed}
+            showAdminSection={true}
+            actionBtnID={actionBtnID}
+            setActionBtnID={setActionBtnID}
           />
-          <span>{t("AddApprovalFlows.DeemedAsApprovedOrReject")}</span>
-        </label>
+        </main>
+
+        <aside className="w-full md:w-64 bg-gray-100 p-4 border-t md:border-l border-gray-300 overflow-auto mt-4 md:mt-0">
+          <BoxPredecessor
+            boxTemplates={boxTemplates}
+            selectedPredecessors={selectedPredecessors}
+            onSelectionChange={setSelectedPredecessors}
+            currentBoxId={editData ? editData.ID : 0}
+          />
+
+          <ListSelector
+            title={t("AddApprovalFlows.Button")}
+            columnDefs={[
+              { headerName: "Name", field: "Name" },
+              { headerName: "Tooltip", field: "Tooltip" },
+            ]}
+            rowData={btnList}
+            selectedIds={selectedDefaultBtnIds}
+            onSelectionChange={(selectedIds: (string | number)[]) =>
+              handleSelectionChange("DefaultBtn", selectedIds)
+            }
+            showSwitcher={false}
+            isGlobal={false}
+            ModalContentComponent={ButtonComponent}
+            modalContentProps={{
+              columnDefs: [
+                { headerName: "Name", field: "Name" },
+                { headerName: "Tooltip", field: "Tooltip" },
+              ],
+              rowData: btnList,
+              onRowDoubleClick: () => {},
+              onRowClick: () => {},
+              onSelectButtonClick: () => {},
+              isSelectDisabled: false,
+              onClose: () => {},
+              onSelectFromButton: () => {},
+            }}
+          />
+        </aside>
+
+        <DynamicModal isOpen={isModalOpen} onClose={closeModal}>
+          <TableSelector
+            columnDefs={rolesColumnDefs}
+            rowData={allRoles}
+            onRowDoubleClick={handleRoleSelect}
+            onRowClick={(data: Role) => setSelectedStaticPost(data)}
+            onSelectButtonClick={() => {
+              if (selectedStaticPost) {
+                setStaticPostValue(selectedStaticPost.ID.toString());
+                closeModal();
+              } else {
+                showAlert(
+                  "error",
+                  null,
+                  t("AddApprovalFlows.Error"),
+                  t("AddApprovalFlows.NoRowSelected")
+                );
+              }
+            }}
+            isSelectDisabled={!selectedStaticPost}
+          />
+        </DynamicModal>
       </div>
-
-      <DeemedSection
-        deemDay={deemDay}
-        setDeemDay={setDeemDay}
-        deemCondition={deemCondition}
-        setDeemCondition={setDeemCondition}
-        deemAction={deemAction}
-        setDeemAction={setDeemAction}
-        previewsStateId={previewsStateId}
-        setPreviewsStateId={setPreviewsStateId}
-        goToPreviousStateID={goToPreviousStateID}
-        setGoToPreviousStateID={setGoToPreviousStateID}
-        boxTemplates={boxTemplates}
-        disableMain={!isDeemed}
-        showAdminSection={true}
-        actionBtnID={actionBtnID}
-        setActionBtnID={setActionBtnID}
-      />
-    </main>
-
-    <aside className="w-full md:w-64 bg-gray-100 p-4 border-t md:border-l border-gray-300 overflow-auto mt-4 md:mt-0">
-      <BoxPredecessor
-        boxTemplates={boxTemplates}
-        selectedPredecessors={selectedPredecessors}
-        onSelectionChange={setSelectedPredecessors}
-        currentBoxId={editData ? editData.ID : 0}
-      />
-
-      <ListSelector
-        title={t("AddApprovalFlows.Button")}
-        columnDefs={[
-          { headerName: "Name", field: "Name" },
-          { headerName: "Tooltip", field: "Tooltip" },
-        ]}
-        rowData={btnList}
-        selectedIds={selectedDefaultBtnIds}
-        onSelectionChange={(selectedIds: (string | number)[]) =>
-          handleSelectionChange("DefaultBtn", selectedIds)
-        }
-        showSwitcher={false}
-        isGlobal={false}
-        ModalContentComponent={ButtonComponent}
-        modalContentProps={{
-          columnDefs: [
-            { headerName: "Name", field: "Name" },
-            { headerName: "Tooltip", field: "Tooltip" },
-          ],
-          rowData: btnList,
-          onRowDoubleClick: () => {},
-          onRowClick: () => {},
-          onSelectButtonClick: () => {},
-          isSelectDisabled: false,
-          onClose: () => {},
-          onSelectFromButton: () => {},
-        }}
-      />
-    </aside>
-
-    <DynamicModal isOpen={isModalOpen} onClose={closeModal}>
-      <TableSelector
-        columnDefs={rolesColumnDefs}
-        rowData={allRoles}
-        onRowDoubleClick={handleRoleSelect}
-        onRowClick={(data: Role) => setSelectedStaticPost(data)}
-        onSelectButtonClick={() => {
-          if (selectedStaticPost) {
-            setStaticPostValue(selectedStaticPost.ID.toString());
-            closeModal();
-          } else {
-            showAlert(
-              "error",
-              null,
-              t("AddApprovalFlows.Error"),
-              t("AddApprovalFlows.NoRowSelected")
-            );
-          }
-        }}
-        isSelectDisabled={!selectedStaticPost}
-      />
-    </DynamicModal>
-  </div>
-);
+    );
   }
 );
 

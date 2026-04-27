@@ -43,7 +43,8 @@ interface StaffingProps {
 
 const Staffing = forwardRef<StaffingHandle, StaffingProps>(
   ({ selectedRow }, ref) => {
-    const { t } = useTranslation();
+    // const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const api = useApi();
     const [projects, setProjects] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
@@ -323,7 +324,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           {currentSelector === "ProjectID" && (
             <TableSelector
               columnDefs={[
-                { headerName: "Project Name", field: "ProjectName" },
+                { headerName: t("Staffing.Name"), field: "ProjectName" },
               ]}
               rowData={projects}
               // selectedRow={selectedRowData}
@@ -335,7 +336,9 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           )}
           {currentSelector === "OwnerID" && (
             <TableSelector
-              columnDefs={[{ headerName: "Username", field: "Username" }]}
+              columnDefs={[
+                { headerName: t("Staffing.Name"), field: "Username" },
+              ]}
               rowData={users}
               // selectedRow={selectedRowData}
               onRowClick={onRowClick}
@@ -346,7 +349,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           )}
           {currentSelector === "nPostTypeID" && (
             <TableSelector
-              columnDefs={[{ headerName: "Role Name", field: "Name" }]}
+              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
               rowData={roles}
               // selectedRow={selectedRowData}
               onRowClick={onRowClick}
@@ -357,7 +360,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           )}
           {currentSelector === "nCompanyID" && (
             <TableSelector
-              columnDefs={[{ headerName: "Enterprise Name", field: "Name" }]}
+              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
               rowData={companies}
               // selectedRow={selectedRowData}
               onRowClick={onRowClick}
@@ -369,7 +372,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           {currentSelector === "nMenuID" && (
             <TableSelector
-              columnDefs={[{ headerName: "Menu Name", field: "Name" }]}
+              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
               rowData={menus}
               // selectedRow={selectedRowData}
               onRowClick={onRowClick}
@@ -381,7 +384,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
           {currentSelector === "ParrentId" && (
             <TableSelector
-              columnDefs={[{ headerName: "Role Name", field: "Name" }]}
+              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
               rowData={roles}
               onRowClick={onRowClick}
               onRowDoubleClick={onSelect}

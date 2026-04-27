@@ -30,7 +30,7 @@ export interface ConfigurationHandle {
 
 const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
   ({ selectedRow }, ref) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const api = useApi();
 
     const [configData, setConfigData] = useState({
@@ -70,29 +70,43 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const [programTemplates, setProgramTemplates] = useState<ProgramTemplateItem[]>([]);
-    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>([]);
+    const [programTemplates, setProgramTemplates] = useState<
+      ProgramTemplateItem[]
+    >([]);
+    const [defaultRibbons, setDefaultRibbons] = useState<DefaultRibbonItem[]>(
+      []
+    );
     const [entityTypes, setEntityTypes] = useState<EntityTypeItem[]>([]);
     const [wfTemplates, setWfTemplates] = useState<WfTemplateItem[]>([]);
     const [afButtons, setAfButtons] = useState<AFBtnItem[]>([]);
 
     const mapWFStateForDeemedToRadio = (val?: number): string => {
       switch (val) {
-        case 1: return "accept";
-        case 2: return "reject";
-        case 3: return "close";
-        default: return "accept";
+        case 1:
+          return "accept";
+        case 2:
+          return "reject";
+        case 3:
+          return "close";
+        default:
+          return "accept";
       }
     };
 
     const mapWFCommandToRadio = (val?: number): string => {
       switch (val) {
-        case 1: return "accept";
-        case 2: return "close";
-        case 3: return "reject";
-        case 4: return "client";
-        case 5: return "admin";
-        default: return "accept";
+        case 1:
+          return "accept";
+        case 2:
+          return "close";
+        case 3:
+          return "reject";
+        case 4:
+          return "client";
+        case 5:
+          return "admin";
+        default:
+          return "accept";
       }
     };
 
@@ -149,14 +163,19 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           LetterBtns: configData.LetterBtns,
           MeetingBtns: configData.MeetingBtns,
           MeetingBtnsForSecondForm: configData.MeetingBtnsForSecondForm,
-          FirstIDProgramTemplate: Number(configData.FirstIDProgramTemplate) || 0,
+          FirstIDProgramTemplate:
+            Number(configData.FirstIDProgramTemplate) || 0,
           SelMenuIDForMain: Number(configData.SelMenuIDForMain) || 0,
           IsVisible: configData.IsVisible,
           LastModified: new Date().toISOString(),
-          EnityTypeIDForLessonLearn: Number(configData.EnityTypeIDForLessonLearn) || 0,
-          EnityTypeIDForTaskCommnet: Number(configData.EnityTypeIDForTaskCommnet) || 0,
-          EnityTypeIDForProcesure: Number(configData.EnityTypeIDForProcesure) || 0,
-          WFTemplateIDForLessonLearn: Number(configData.WFTemplateIDForLessonLearn) || 0,
+          EnityTypeIDForLessonLearn:
+            Number(configData.EnityTypeIDForLessonLearn) || 0,
+          EnityTypeIDForTaskCommnet:
+            Number(configData.EnityTypeIDForTaskCommnet) || 0,
+          EnityTypeIDForProcesure:
+            Number(configData.EnityTypeIDForProcesure) || 0,
+          WFTemplateIDForLessonLearn:
+            Number(configData.WFTemplateIDForLessonLearn) || 0,
         };
 
         let updatedConfig: ConfigurationItem;
@@ -265,7 +284,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
     const defaultBtnIds = parseIds(configData.DefaultBtn);
     const letterBtnIds = parseIds(configData.LetterBtns);
     const meetingBtnIds = parseIds(configData.MeetingBtns);
-    const meetingBtnsSecondFormIds = parseIds(configData.MeetingBtnsForSecondForm);
+    const meetingBtnsSecondFormIds = parseIds(
+      configData.MeetingBtnsForSecondForm
+    );
 
     useEffect(() => {
       const fetchInitialData = async () => {
@@ -323,16 +344,22 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
           LetterBtns: selectedRow?.LetterBtns || "",
           MeetingBtns: selectedRow?.MeetingBtns || "",
           MeetingBtnsForSecondForm: selectedRow?.MeetingBtnsForSecondForm || "",
-          EnityTypeIDForLessonLearn: (selectedRow?.EnityTypeIDForLessonLearn || "")
+          EnityTypeIDForLessonLearn: (
+            selectedRow?.EnityTypeIDForLessonLearn || ""
+          )
             .toString()
             .replace(/\|+$/, ""),
-          EnityTypeIDForTaskCommnet: (selectedRow?.EnityTypeIDForTaskCommnet || "")
+          EnityTypeIDForTaskCommnet: (
+            selectedRow?.EnityTypeIDForTaskCommnet || ""
+          )
             .toString()
             .replace(/\|+$/, ""),
           EnityTypeIDForProcesure: (selectedRow?.EnityTypeIDForProcesure || "")
             .toString()
             .replace(/\|+$/, ""),
-          WFTemplateIDForLessonLearn: (selectedRow?.WFTemplateIDForLessonLearn || "")
+          WFTemplateIDForLessonLearn: (
+            selectedRow?.WFTemplateIDForLessonLearn || ""
+          )
             .toString()
             .replace(/\|+$/, ""),
         });
@@ -401,7 +428,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: pt.Name,
             }))}
             selectedValue={configData.FirstIDProgramTemplate}
-            onChange={(e) => handleChange("FirstIDProgramTemplate", e.target.value)}
+            onChange={(e) =>
+              handleChange("FirstIDProgramTemplate", e.target.value)
+            }
             label={t("Configuration.ProgramTemplate")}
             showButton={true}
             onButtonClick={() => handleOpenModal("FirstIDProgramTemplate")}
@@ -433,7 +462,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: llf.Name,
             }))}
             selectedValue={configData.EnityTypeIDForLessonLearn}
-            onChange={(e) => handleChange("EnityTypeIDForLessonLearn", e.target.value)}
+            onChange={(e) =>
+              handleChange("EnityTypeIDForLessonLearn", e.target.value)
+            }
             label={t("Configuration.LessonLearnedForm")}
             showButton={true}
             onButtonClick={() => handleOpenModal("Lesson Learned Form")}
@@ -449,7 +480,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: wf.Name,
             }))}
             selectedValue={configData.WFTemplateIDForLessonLearn}
-            onChange={(e) => handleChange("WFTemplateIDForLessonLearn", e.target.value)}
+            onChange={(e) =>
+              handleChange("WFTemplateIDForLessonLearn", e.target.value)
+            }
             label={t("Configuration.LessonLearnedAfTemplate")}
             showButton={true}
             onButtonClick={() => handleOpenModal("Lesson Learned Af Template")}
@@ -465,7 +498,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: cft.Name,
             }))}
             selectedValue={configData.EnityTypeIDForTaskCommnet}
-            onChange={(e) => handleChange("EnityTypeIDForTaskCommnet", e.target.value)}
+            onChange={(e) =>
+              handleChange("EnityTypeIDForTaskCommnet", e.target.value)
+            }
             label={t("Configuration.CommentFormTemplate")}
             showButton={true}
             onButtonClick={() => handleOpenModal("Comment Form Template")}
@@ -481,7 +516,9 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
               label: pft.Name,
             }))}
             selectedValue={configData.EnityTypeIDForProcesure}
-            onChange={(e) => handleChange("EnityTypeIDForProcesure", e.target.value)}
+            onChange={(e) =>
+              handleChange("EnityTypeIDForProcesure", e.target.value)
+            }
             label={t("Configuration.ProcedureFormTemplate")}
             showButton={true}
             onButtonClick={() => handleOpenModal("Procedure Form Template")}
@@ -617,11 +654,25 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
         </TwoColumnLayout>
 
         {/* Modal عمومی */}
-        <DynamicModal isOpen={modalOpen} onClose={handleCloseModal} size="small">
+        <DynamicModal
+          isOpen={modalOpen}
+          onClose={handleCloseModal}
+          size="small"
+        >
           <TableSelector
             columnDefs={[
-              { headerName: "Name", field: "Name" },
-              { headerName: "Description", field: "EntityCateADescription" },
+              {
+                headerName: t("TableSelector.Name", {
+                  defaultValue: i18n.language === "fa" ? "نام" : "Name",
+                }),
+                field: "Name",
+              },
+              {
+                headerName: t("TableSelector.Description", {
+                  defaultValue: i18n.language === "fa" ? "شرح" : "Description",
+                }),
+                field: "EntityCateADescription",
+              },
             ]}
             rowData={getRowData(currentSelector)}
             selectedRow={selectedRowData}

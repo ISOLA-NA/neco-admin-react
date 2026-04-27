@@ -11,6 +11,7 @@ import DynamicInput from "../utilities/DynamicInput";
 import CustomTextarea from "../utilities/DynamicTextArea";
 import ListSelector from "../ListSelector/ListSelector";
 import TableSelector from "./Configuration/TableSelector";
+import DynamicSwitcher from "../utilities/DynamicSwitcher";
 import { useApi } from "../../context/ApiContext";
 import {
   PostCat,
@@ -46,7 +47,6 @@ interface ProjectListItem {
   Name: string;
 }
 
-// Helper functions
 const parseIds = (idsStr?: string): string[] => {
   if (!idsStr) return [];
   return idsStr.split("|").filter(Boolean);
@@ -103,7 +103,6 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
       allData: true,
     });
 
-    // Column definitions
     const columnDefs = {
       projects: [{ field: "Name", headerName: "Project Name" }],
       members: [
@@ -115,7 +114,6 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
       ],
     };
 
-    // Fetch data
     useEffect(() => {
       const fetchData = async () => {
         try {
@@ -169,7 +167,6 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
       fetchData();
     }, [api]);
 
-    // Process data
     const processedData = useMemo(() => {
       const processedRoles: ProcessedRole[] = apiData.roles
         .filter((role) => role.ID)
@@ -206,7 +203,6 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
       };
     }, [apiData]);
 
-    // Update form when selected row changes
     useEffect(() => {
       if (selectedRow && !loading.allData) {
         setFormData({
@@ -241,7 +237,6 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
       }
     }, [selectedRow, loading.allData]);
 
-    // Event handlers
     const handleProjectsChange = (selectedIds: (string | number)[]) => {
       setSelectedIds((prev) => ({
         ...prev,
@@ -270,7 +265,6 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
       }));
     };
 
-    // Expose functions to parent via ref
     useImperativeHandle(
       ref,
       () => ({
@@ -300,18 +294,14 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
           try {
             if (selectedRow?.ID) {
               await api.updatePostCat(dataToSave);
-              // showAlert("success", null, "Updated", "Role group updated successfully.");
             } else {
               await api.insertPostCat(dataToSave);
-              // showAlert("success", null, "Saved", "Role group added successfully.");
             }
             return true;
           } catch (error: any) {
             console.error("Error saving role group:", error);
-            // showAlert("error", null, "Error", "Failed to save role group data");
             const data = error.response?.data;
 
-            // اگه خطاهای اعتبارسنجی داریم:
             if (data?.errors) {
               const key = Object.keys(data.errors)[0];
               const msg = data.errors[key][0];
@@ -327,75 +317,86 @@ const RoleGroups = forwardRef<RoleGroupsHandle, RoleGroupsProps>(
     );
 
     return (
-  <TwoColumnLayout>
-    <DynamicInput
-      name={t("RoleGroup.Name")}
-      type="text"
-      value={formData.Name}
-      placeholder={t("RoleGroup.Placeholders.Name")}
-      onChange={(e) => handleChange("Name", e.target.value)}
-      required
-      className="mb-4"
-    />
+      <TwoColumnLayout>
+        <DynamicInput
+          name={t("RoleGroup.Name")}
+          type="text"
+          value={formData.Name}
+          placeholder={t("RoleGroup.Placeholders.Name")}
+          onChange={(e) => handleChange("Name", e.target.value)}
+          required
+          className="mb-4"
+        />
 
-    <CustomTextarea
-      name={t("RoleGroup.Description")}
-      value={formData.Description || ""}
-      placeholder={t("RoleGroup.Placeholders.Description")}
-      onChange={(e) => handleChange("Description", e.target.value)}
-      className="mb-4"
-    />
+        <CustomTextarea
+          name={t("RoleGroup.Description")}
+          value={formData.Description || ""}
+          placeholder={t("RoleGroup.Placeholders.Description")}
+          onChange={(e) => handleChange("Description", e.target.value)}
+          className="mb-4"
+        />
 
-    <ListSelector
-      title={t("RoleGroup.Projects")}
-      className="mb-4"
-      columnDefs={columnDefs.projects}
-      rowData={processedData.projectsListData}
-      selectedIds={selectedIds.projects}
-      onSelectionChange={handleProjectsChange}
-      showSwitcher={true}
-      isGlobal={formData.IsGlobal}
-      onGlobalChange={handleGlobalChange}
-      loading={loading.projects}
-      ModalContentComponent={TableSelector}
-      modalContentProps={{
-        columnDefs: columnDefs.projects,
-        rowData: processedData.projectsListData,
-        selectedRows: getAssociatedItems(
-          formData.ProjectsStr,
-          processedData.projectsListData
-        ),
-        onRowDoubleClick: (rows: any[]) =>
-          handleProjectsChange(rows.map((row) => row.ID)),
-        selectionMode: "multiple",
-      }}
-    />
+        {/* ردیف سوم — سوییچر گلوبال */}
+        <DynamicSwitcher
+          isChecked={formData.IsGlobal}
+          onChange={() => handleGlobalChange(!formData.IsGlobal)}
+          leftLabel={t("RoleGroup.IsGlobal")}
+          rightLabel=""
+        />
 
-    <ListSelector
-      title={t("RoleGroup.Members")}
-      className="mb-4"
-      columnDefs={columnDefs.members}
-      rowData={processedData.processedRoles}
-      selectedIds={selectedIds.members}
-      onSelectionChange={handleMembersChange}
-      showSwitcher={false}
-      isGlobal={false}
-      loading={loading.groupMembers}
-      ModalContentComponent={TableSelector}
-      modalContentProps={{
-        columnDefs: columnDefs.members,
-        rowData: processedData.processedRoles,
-        selectedRows: getAssociatedItems(
-          formData.PostsStr,
-          processedData.processedRoles
-        ),
-        onRowDoubleClick: (rows: any[]) =>
-          handleMembersChange(rows.map((row) => row.ID)),
-        selectionMode: "multiple",
-      }}
-    />
-  </TwoColumnLayout>
-);
+        {/* ستون خالی برای حفظ چینش TwoColumnLayout */}
+        <div />
+
+        <ListSelector
+          title={t("RoleGroup.Projects")}
+          className="mb-4"
+          columnDefs={columnDefs.projects}
+          rowData={processedData.projectsListData}
+          selectedIds={selectedIds.projects}
+          onSelectionChange={handleProjectsChange}
+          showSwitcher={false}
+          isGlobal={formData.IsGlobal}
+          onGlobalChange={handleGlobalChange}
+          loading={loading.projects}
+          ModalContentComponent={TableSelector}
+          modalContentProps={{
+            columnDefs: columnDefs.projects,
+            rowData: processedData.projectsListData,
+            selectedRows: getAssociatedItems(
+              formData.ProjectsStr,
+              processedData.projectsListData
+            ),
+            onRowDoubleClick: (rows: any[]) =>
+              handleProjectsChange(rows.map((row) => row.ID)),
+            selectionMode: "multiple",
+          }}
+        />
+
+        <ListSelector
+          title={t("RoleGroup.Members")}
+          className="mb-4"
+          columnDefs={columnDefs.members}
+          rowData={processedData.processedRoles}
+          selectedIds={selectedIds.members}
+          onSelectionChange={handleMembersChange}
+          showSwitcher={false}
+          isGlobal={false}
+          loading={loading.groupMembers}
+          ModalContentComponent={TableSelector}
+          modalContentProps={{
+            columnDefs: columnDefs.members,
+            rowData: processedData.processedRoles,
+            selectedRows: getAssociatedItems(
+              formData.PostsStr,
+              processedData.processedRoles
+            ),
+            onRowDoubleClick: (rows: any[]) =>
+              handleMembersChange(rows.map((row) => row.ID)),
+            selectionMode: "multiple",
+          }}
+        />
+      </TwoColumnLayout>
+    );
   }
 );
 

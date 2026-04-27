@@ -31,6 +31,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
 
   const userTypeOptions = useMemo(
     () => [
+      // { value: "", label: "" },
       { value: "7", label: t("User.UserTypeBoss") },
       { value: "6", label: t("User.UserTypeManager") },
       { value: "0", label: t("User.UserTypeEmployee") },
@@ -79,7 +80,8 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     MaxWrongPass: selectedRow?.MaxWrongPass || 5,
     Website: selectedRow?.Website || "",
     TTKK: selectedRow?.TTKK || "",
-    userType: selectedRow?.userType || 0,
+    // userType: selectedRow?.userType || 0,
+    userType: selectedRow?.userType ?? "",
     Code: selectedRow?.Code || "",
     IsVisible: selectedRow?.IsVisible ?? true,
     UserImageId: selectedRow?.UserImageId || null,
@@ -102,7 +104,8 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         MaxWrongPass: selectedRow.MaxWrongPass || 5,
         Website: selectedRow.Website || "",
         TTKK: selectedRow.TTKK || "",
-        userType: selectedRow.userType || 0,
+        // userType: selectedRow.userType || 0,
+        userType: selectedRow.userType ?? "",
         Code: selectedRow.Code || "",
         IsVisible: selectedRow.IsVisible ?? true,
         UserImageId: selectedRow.UserImageId || null,
@@ -124,7 +127,7 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         MaxWrongPass: 5,
         Website: "",
         TTKK: "",
-        userType: 0,
+        userType: "",
         Code: "",
         IsVisible: true,
         UserImageId: null,
@@ -260,8 +263,8 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         typeof data === "string"
           ? data
           : data?.value?.message ||
-          data?.message ||
-          "خطایی در فرآیند ذخیره دستور رخ داده است.";
+            data?.message ||
+            "خطایی در فرآیند ذخیره دستور رخ داده است.";
       showAlert("error", null, t("User.ModalError"), message);
       return null;
     }
@@ -428,7 +431,9 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
       <div className="-mt-2">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-sm font-medium">{t("User.UserProfileImage")}</h3>
+            <h3 className="text-sm font-medium">
+              {t("User.UserProfileImage")}
+            </h3>
             <p className="text-xs text-gray-500 mt-1">
               {t("User.ImageBestSize")}
             </p>

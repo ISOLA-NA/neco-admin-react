@@ -220,14 +220,18 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
                             handleAskDelete(r);
                           }}
                           className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-[0.8rem] flex items-center gap-2"
-                          aria-label={t("Global.Delete", {
+                          aria-label={t("AddApprovalFlows.Delete", {
                             defaultValue: "Delete",
                           })}
-                          title={t("Global.Delete", { defaultValue: "Delete" })}
+                          title={t("AddApprovalFlows.Delete", {
+                            defaultValue: "Delete",
+                          })}
                         >
                           <FaTrash />
                           <span>
-                            {t("Global.Delete", { defaultValue: "Delete" })}
+                            {t("AddApprovalFlows.Delete", {
+                              defaultValue: "Delete",
+                            })}
                           </span>
                         </button>
                         <button
@@ -237,7 +241,11 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
                           }}
                           className="px-2 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 text-[0.8rem]"
                         >
-                          Edit
+                          <span>
+                            {t("AddApprovalFlows.Edit", {
+                              defaultValue: "Edit",
+                            })}
+                          </span>
                         </button>
                       </div>
                     </td>
