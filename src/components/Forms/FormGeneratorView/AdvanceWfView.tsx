@@ -55,7 +55,6 @@ const AdvanceWfView: React.FC<AdvanceWfViewProps> = ({
 
   return (
     <div
-      className="bg-gradient-to-r from-pink-100 to-blue-100 p-6 rounded-lg"
       dir={isFaMode ? "rtl" : "ltr"}
     >
       <DynamicSelector

@@ -4,17 +4,12 @@ import DynamicInput from "../../utilities/DynamicInput";
 import { useTranslation } from "react-i18next";
 
 interface CalculatedFieldProps {
-  /** متاهای اصلی (به جز metaType4) */
   onMetaChange?: (meta: {
-    metaType1: string; // Expression
-    metaType2: string; // "1" | "2"
-    metaType3: string; // Format
+    metaType1: string;
+    metaType2: string;
+    metaType3: string;
   }) => void;
-
-  /** فقط برای metaType4 (Unit) */
   onMetaExtraChange?: (meta: { metaType4: string }) => void;
-
-  /** مقادیر اولیه در حالت ویرایش */
   data?: {
     metaType1?: string;
     metaType2?: string;
@@ -28,7 +23,28 @@ const CalculatedField: React.FC<CalculatedFieldProps> = ({
   onMetaExtraChange,
   data = {},
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  /* ---------- direction detection ---------- */
+  const [isRtl, setIsRtl] = useState<boolean>(
+    document.documentElement.dir === "rtl" ||
+      i18n.dir(i18n.language) === "rtl"
+  );
+
+  useEffect(() => {
+    const handleLangChange = () => {
+      setIsRtl(
+        document.documentElement.dir === "rtl" ||
+          i18n.dir(i18n.language) === "rtl"
+      );
+    };
+    i18n.on("languageChanged", handleLangChange);
+    return () => i18n.off("languageChanged", handleLangChange);
+  }, [i18n]);
+
+  const dir = isRtl ? "rtl" : "ltr";
+  const textAlignClass = isRtl ? "text-right" : "text-left";
+
   /* ---------- state ---------- */
   const [expression, setExpression] = useState<string>(data.metaType1 ?? "");
   const [type, setType] = useState<"number" | "date">(
@@ -39,7 +55,7 @@ const CalculatedField: React.FC<CalculatedFieldProps> = ({
   );
   const [unit, setUnit] = useState<string>(data.metaType4 ?? "");
 
-  /* ---------- sync props→state only if different ---------- */
+  /* ---------- sync props→state ---------- */
   useEffect(() => {
     setExpression((p) =>
       p === (data.metaType1 ?? "") ? p : data.metaType1 ?? ""
@@ -89,75 +105,124 @@ const CalculatedField: React.FC<CalculatedFieldProps> = ({
 
   /* ---------- UI ---------- */
   return (
-    <div
-      className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center"
-      dir="rtl"
-    >
-      <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 space-y-6">
-        {/* Expression */}
-        <DynamicInput
-          name={t("calculatedfield.Labels.Expression")}
+  <div
+    dir={dir}
+    className="p-6 bg-gradient-to-r from-pink-100 to-blue-100 rounded-lg flex justify-center"
+  >
+    <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 space-y-6">
+
+      {/* Expression */}
+      <div className="flex flex-col gap-1" dir={dir}>
+        <label
+          className={`text-sm font-medium text-gray-700 block w-full ${textAlignClass}`}
+        >
+          {t("calculatedfield.Labels.Expression")}
+        </label>
+        <input
           type="text"
           value={expression}
           onChange={(e) => setExpression(e.target.value)}
-          placeholder="Enter expression"
-          className="w-full"
+          placeholder={isRtl ? "عبارت را وارد کنید" : "Enter expression"}
+          dir={dir}
+          className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 ${textAlignClass}`}
         />
+      </div>
 
-        {/* Type (radios close to the label) */}
-        <div className="grid grid-cols-[auto,1fr] items-center gap-2">
-          <label className="text-sm font-medium text-gray-700 text-right">
-            {t("calculatedfield.Labels.Type")}
-          </label>
-          <div className="flex flex-wrap items-center gap-4">
-            <label className="inline-flex items-center gap-2 flex-row-reverse">
-              <span>{t("calculatedfield.Options.Number")}</span>
-              <input
-                type="radio"
-                name="calc-type"
-                value="number"
-                checked={type === "number"}
-                onChange={() => setType("number")}
-                className="text-purple-600 focus:ring-purple-500"
-              />
-            </label>
+      {/* Type (radios) */}
+      <div className="flex flex-col gap-2" dir={dir}>
+        <label
+          className={`text-sm font-medium text-gray-700 block w-full ${textAlignClass}`}
+        >
+          {t("calculatedfield.Labels.Type")}
+        </label>
+        <div
+          className={`flex items-center gap-4 w-full ${
+            isRtl ? "flex-row-reverse justify-end" : "flex-row justify-start"
+          }`}
+        >
+         <div
+  className="flex items-center gap-4 w-full"
 
-            <label className="inline-flex items-center gap-2 flex-row-reverse">
-              <span>{t("calculatedfield.Options.Date")}</span>
-              <input
-                type="radio"
-                name="calc-type"
-                value="date"
-                checked={type === "date"}
-                onChange={() => setType("date")}
-                className="text-purple-600 focus:ring-purple-500"
-              />
-            </label>
-          </div>
+>
+  {/* Number */}
+  <label
+    className={`inline-flex items-center gap-2 cursor-pointer ${
+      isRtl ? "flex-row-reverse" : "flex-row"
+    }`}
+  >
+    <span className="text-sm text-gray-700">
+      {t("calculatedfield.Options.Number")}
+    </span>
+    <input
+      type="radio"
+      name="calc-type"
+      value="number"
+      checked={type === "number"}
+      onChange={() => setType("number")}
+      className="text-purple-600 focus:ring-purple-500"
+    />
+  </label>
+
+  {/* Date */}
+  <label
+    className={`inline-flex items-center gap-2 cursor-pointer ${
+      isRtl ? "flex-row-reverse" : "flex-row"
+    }`}
+  >
+    <span className="text-sm text-gray-700">
+      {t("calculatedfield.Options.Date")}
+    </span>
+    <input
+      type="radio"
+      name="calc-type"
+      value="date"
+      checked={type === "date"}
+      onChange={() => setType("date")}
+      className="text-purple-600 focus:ring-purple-500"
+    />
+  </label>
+</div>
+          
         </div>
+      </div>
 
-        {/* Format */}
-        <DynamicInput
-          name={t("calculatedfield.Labels.Format")}
+      {/* Format */}
+      <div className="flex flex-col gap-1" dir={dir}>
+        <label
+          className={`text-sm font-medium text-gray-700 block w-full ${textAlignClass}`}
+        >
+          {t("calculatedfield.Labels.Format")}
+        </label>
+        <input
           type="text"
           value={format}
           onChange={(e) => setFormat(e.target.value)}
           placeholder={t("calculatedfield.Placeholders.EnterFormat")}
-          className="w-full"
+          dir={dir}
+          className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 ${textAlignClass}`}
         />
+      </div>
 
-        {/* Unit (metaType4) */}
-        <DynamicInput
-          name={t("calculatedfield.Labels.Unit")}
+      {/* Unit (metaType4) */}
+      <div className="flex flex-col gap-1" dir={dir}>
+        <label
+          className={`text-sm font-medium text-gray-700 block w-full ${textAlignClass}`}
+        >
+          {t("calculatedfield.Labels.Unit")}
+        </label>
+        <input
           type="text"
           value={unit}
           onChange={(e) => setUnit(e.target.value)}
           placeholder={t("calculatedfield.Placeholders.EnterUnit")}
-          className="w-full"
+          dir={dir}
+          className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 ${textAlignClass}`}
         />
       </div>
+
     </div>
-  );
+  </div>
+);
 };
 
 export default CalculatedField;

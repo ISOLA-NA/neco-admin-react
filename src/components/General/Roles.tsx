@@ -231,8 +231,8 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         <DynamicSwitcher
           isChecked={roleData.isStaticPost}
           onChange={() => handleChange("isStaticPost", !roleData.isStaticPost)}
-          leftLabel=""
-          rightLabel={t("Roles.StaticPost")}
+          leftLabel={t("Roles.StaticPost")}
+          rightLabel=""
         />
       </div>
     </TwoColumnLayout>

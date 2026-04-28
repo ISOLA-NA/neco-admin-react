@@ -5,17 +5,26 @@ import { useTranslation } from "react-i18next";
 interface WordPanelViewProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
     metaType4?: string;
     fileName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
+const WordPanelView: React.FC<WordPanelViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   const { t } = useTranslation();
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data?.metaType4 || null
   );
   const [fileName, setFileName] = useState<string>(data?.fileName || "");
+
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
 
   useEffect(() => {
     if (selectedFileId) {
@@ -65,10 +74,13 @@ const WordPanelView: React.FC<WordPanelViewProps> = ({ data }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-300">
-      <div className="mb-4 text-xl font-bold text-gray-800">
-        {data?.DisplayName || ""}
-      </div>
+    <div
+      className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-300"
+      dir={isFaMode ? "rtl" : "ltr"}
+    >
+      {label && (
+        <div className="mb-4 text-xs font-semibold text-gray-800">{label}</div>
+      )}
       <button
         type="button"
         onClick={handleDownloadFile}

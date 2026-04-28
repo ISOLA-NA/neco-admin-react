@@ -1,12 +1,13 @@
 // src/utilities/DynamicSwitcher.tsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface DynamicSwitcherProps {
   isChecked: boolean;
   onChange: () => void;
   leftLabel: string;
   rightLabel: string;
-  disabled?: boolean; // <- امکان غیرفعال شدن سوییچر
+  disabled?: boolean;
 }
 
 const DynamicSwitcher: React.FC<DynamicSwitcherProps> = ({
@@ -16,6 +17,14 @@ const DynamicSwitcher: React.FC<DynamicSwitcherProps> = ({
   rightLabel,
   disabled = false,
 }) => {
+  const { i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
+
+  // ✅ در RTL وقتی checked است دایره باید به راست برود (سمت leftLabel که در RTL راست است)
+  // در LTR وقتی checked است دایره باید به چپ برود (سمت leftLabel که در LTR چپ است)
+  const checkedTranslate = isRtl ? "translate-x-6" : "translate-x-0";
+  const uncheckedTranslate = isRtl ? "translate-x-0" : "translate-x-6";
+
   return (
     <div className="flex items-center gap-6">
       <span className="text-black text-sm sm:text-base">{leftLabel}</span>
@@ -39,7 +48,7 @@ const DynamicSwitcher: React.FC<DynamicSwitcherProps> = ({
         >
           <span
             className={`absolute w-6 h-6 bg-white rounded-full shadow-md top-0 left-0 transform transition-transform duration-300 ${
-              isChecked ? "translate-x-6" : "translate-x-0"
+              isChecked ? checkedTranslate : uncheckedTranslate
             }`}
           ></span>
         </div>

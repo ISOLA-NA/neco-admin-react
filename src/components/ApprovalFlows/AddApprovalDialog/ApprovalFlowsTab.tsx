@@ -129,7 +129,7 @@ const ApprovalFlowsTab = forwardRef<ApprovalFlowsTabRef, ApprovalFlowsTabProps>(
     >(null);
 
     const [isStage, setIsStage] = useState<boolean>(false);
-    const [isDeemed, setIsDeemed] = useState<boolean>(true);
+    const [isDeemed, setIsDeemed] = useState<boolean>(false);
 
     const [actionBtnOptions, setActionBtnOptions] = useState<
       { value: number; label: string }[]
@@ -1120,42 +1120,48 @@ return (
       />
     </main>
 
-    <aside className="w-full md:w-64 bg-gray-100 p-4 border-t md:border-l border-gray-300 overflow-auto mt-4 md:mt-0">
-      <BoxPredecessor
-        boxTemplates={boxTemplates}
-        selectedPredecessors={selectedPredecessors}
-        onSelectionChange={setSelectedPredecessors}
-        currentBoxId={editData ? editData.ID : 0}
-      />
+    <aside className="w-full md:w-64 bg-gray-100 p-4 border-t md:border-l border-gray-300 mt-4 md:mt-0 flex flex-col gap-4 overflow-hidden self-stretch">
+      <div className="flex-1 flex flex-col min-h-0">
+        <BoxPredecessor
+          boxTemplates={boxTemplates}
+          selectedPredecessors={selectedPredecessors}
+          onSelectionChange={setSelectedPredecessors}
+          currentBoxId={editData ? editData.ID : 0}
+          contentClassName="flex-1 min-h-0 overflow-y-auto"
+        />
+      </div>
 
-      <ListSelector
-        title={t("AddApprovalFlows.Button")}
-        columnDefs={[
-          { headerName: "Name", field: "Name" },
-          { headerName: "Tooltip", field: "Tooltip" },
-        ]}
-        rowData={btnList}
-        selectedIds={selectedDefaultBtnIds}
-        onSelectionChange={(selectedIds: (string | number)[]) =>
-          handleSelectionChange("DefaultBtn", selectedIds)
-        }
-        showSwitcher={false}
-        isGlobal={false}
-        ModalContentComponent={ButtonComponent}
-        modalContentProps={{
-          columnDefs: [
+      <div className="flex-1 flex flex-col min-h-0">
+        <ListSelector
+          title={t("AddApprovalFlows.Button")}
+          columnDefs={[
             { headerName: "Name", field: "Name" },
             { headerName: "Tooltip", field: "Tooltip" },
-          ],
-          rowData: btnList,
-          onRowDoubleClick: () => {},
-          onRowClick: () => {},
-          onSelectButtonClick: () => {},
-          isSelectDisabled: false,
-          onClose: () => {},
-          onSelectFromButton: () => {},
-        }}
-      />
+          ]}
+          rowData={btnList}
+          selectedIds={selectedDefaultBtnIds}
+          onSelectionChange={(selectedIds: (string | number)[]) =>
+            handleSelectionChange("DefaultBtn", selectedIds)
+          }
+          showSwitcher={false}
+          isGlobal={false}
+          contentClassName="flex-1 min-h-0 overflow-y-auto"
+          ModalContentComponent={ButtonComponent}
+          modalContentProps={{
+            columnDefs: [
+              { headerName: "Name", field: "Name" },
+              { headerName: "Tooltip", field: "Tooltip" },
+            ],
+            rowData: btnList,
+            onRowDoubleClick: () => {},
+            onRowClick: () => {},
+            onSelectButtonClick: () => {},
+            isSelectDisabled: false,
+            onClose: () => {},
+            onSelectFromButton: () => {},
+          }}
+        />
+      </div>
     </aside>
 
     <DynamicModal isOpen={isModalOpen} onClose={closeModal}>

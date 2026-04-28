@@ -12,12 +12,12 @@ import DynamicSelector from "../utilities/DynamicSelector";
 import DynamicModal from "../utilities/DynamicModal";
 import TableSelector from "../General/Configuration/TableSelector";
 import ListSelector from "../ListSelector/ListSelector";
+import DynamicSwitcher from "../utilities/DynamicSwitcher";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { useApi } from "../../context/ApiContext";
 import type { OdpWithExtra } from "../../services/api.services";
 import { useTranslation } from "react-i18next";
 
-// Types
 export interface IODP {
   ID?: number;
   Name: string;
@@ -28,6 +28,7 @@ export interface IODP {
   nEntityTypeID: number | null;
   nWFTemplateID: number | null;
   IsVisible?: boolean;
+  IsGlobal?: boolean; // ✅ اضافه شد
   ModifiedById?: number | null;
   LastModified?: string;
   ProjectsStr?: string;
@@ -51,7 +52,6 @@ interface ItemType {
   Name: string;
 }
 
-// Helpers
 const parseIds = (idsStr?: string | null): string[] => {
   if (!idsStr) return [];
   return idsStr.split("|").filter(Boolean);
@@ -76,7 +76,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
 
   const isEditMode = Boolean(selectedRow?.ID);
 
-  // State for ODP data
   const [OdpData, setOdpData] = useState<IODP>({
     Name: "",
     PersianName: "",
@@ -86,14 +85,14 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     nEntityTypeID: null,
     nWFTemplateID: null,
     IsVisible: true,
+    IsGlobal: true, // ✅ پیش‌فرض
     ModifiedById: null,
     ProjectsStr: "",
   });
 
-  // --- Form Template Data (from API)
   const [formTemplates, setFormTemplates] = useState<ItemType[]>([]);
   const [loadingFormTemplates, setLoadingFormTemplates] = useState(false);
-  const [isFaMode, setIsFaMode] = useState(true); // EN=false, FA=true
+  const [isFaMode, setIsFaMode] = useState(true);
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -102,10 +101,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         setLoadingFormTemplates(true);
         const res = await api.getTableTransmittal();
         setFormTemplates(
-          res.map((item: any) => ({
-            ID: item.ID,
-            Name: item.Name,
-          }))
+          res.map((item: any) => ({ ID: item.ID, Name: item.Name }))
         );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching Form Templates failed.");
@@ -116,7 +112,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     fetchFormTemplates();
   }, [api, isEditMode]);
 
-  // --- Approval Flow Data (from API)
   const [approvalFlows, setApprovalFlows] = useState<ItemType[]>([]);
   const [loadingApprovalFlows, setLoadingApprovalFlows] = useState(false);
 
@@ -127,10 +122,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         setLoadingApprovalFlows(true);
         const res = await api.getAllWfTemplate();
         setApprovalFlows(
-          res.map((item: any) => ({
-            ID: item.ID,
-            Name: item.Name,
-          }))
+          res.map((item: any) => ({ ID: item.ID, Name: item.Name }))
         );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching Approval Flows failed.");
@@ -150,10 +142,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         setLoadingProgramTemplates(true);
         const res = await api.getAllProgramTemplates();
         setProgramTemplates(
-          res.map((pt: any) => ({
-            ID: pt.ID,
-            Name: pt.Name,
-          }))
+          res.map((pt: any) => ({ ID: pt.ID, Name: pt.Name }))
         );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching Program Templates failed.");
@@ -164,13 +153,11 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     fetchProgramTemplates();
   }, [api]);
 
-  // Modal state for Program Template TableSelector
   const [isProgramTemplateModalOpen, setIsProgramTemplateModalOpen] =
     useState(false);
   const [selectedProgramTemplateRow, setSelectedProgramTemplateRow] =
     useState<ItemType | null>(null);
 
-  // Projects for Relate Project
   const [projectsData, setProjectsData] = useState<ItemType[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
 
@@ -180,10 +167,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         setLoadingProjects(true);
         const res = await api.getAllProject();
         setProjectsData(
-          res.map((proj: any) => ({
-            ID: proj.ID,
-            Name: proj.ProjectName,
-          }))
+          res.map((proj: any) => ({ ID: proj.ID, Name: proj.ProjectName }))
         );
       } catch (error) {
         showAlert("error", null, "Error", "Fetching projects failed.");
@@ -204,7 +188,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     projectsListData.map((p) => ({ ID: String(p.ID), Name: p.Name }))
   );
 
-  // Handle form state on edit/add
   useEffect(() => {
     if (selectedRow) {
       setOdpData({
@@ -217,6 +200,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         nEntityTypeID: selectedRow.nEntityTypeID,
         nWFTemplateID: selectedRow.nWFTemplateID,
         IsVisible: selectedRow.IsVisible ?? true,
+        IsGlobal: selectedRow.IsGlobal ?? true, // ✅
         ModifiedById: selectedRow.ModifiedById,
         LastModified: selectedRow.LastModified,
         ProjectsStr: selectedRow.ProjectsStr ?? "",
@@ -233,6 +217,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         nEntityTypeID: null,
         nWFTemplateID: null,
         IsVisible: true,
+        IsGlobal: true, // ✅
         ModifiedById: null,
         ProjectsStr: "",
       });
@@ -241,10 +226,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
   }, [selectedRow, projectsData]);
 
   const handleChange = (field: keyof IODP, value: any) => {
-    setOdpData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setOdpData((prev) => ({ ...prev, [field]: value }));
   };
 
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
@@ -258,7 +240,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     setIsGlobalProjects(isGlobal);
   };
 
-  // --- Program Template Modal handlers
   const handleOpenProgramTemplateModal = () =>
     setIsProgramTemplateModalOpen(true);
   const handleCloseProgramTemplateModal = () => {
@@ -278,30 +259,21 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     handleCloseProgramTemplateModal();
   };
 
-  // --- Save Function (with correct type for API) ---
   const save = async (): Promise<boolean> => {
     try {
       const nameTrim = (OdpData.Name || "").trim();
       const pNameTrim = (OdpData.PersianName || "").trim();
 
-      // ✅ فقط اگر هر دو خالی باشند خطا
       if (!nameTrim && !pNameTrim) {
         showAlert("warning", null, "", "Name یا PersianName را وارد کنید");
         return false;
       }
 
-      // ✅ Address همچنان اجباری
       if (!OdpData.Address.trim()) {
-        showAlert(
-          "warning",
-          null,
-          "",
-          t("ODP.Alerts.Messages.AddressRequired")
-        );
+        showAlert("warning", null, "", t("ODP.Alerts.Messages.AddressRequired"));
         return false;
       }
 
-      // ✅ fallback
       const finalName = nameTrim || pNameTrim;
       const finalPersianName = pNameTrim || null;
 
@@ -314,17 +286,14 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       const dataToSave: OdpWithExtra = {
         ID: isEditMode ? selectedRow!.ID! : 0,
         ...restOdp,
-
-        // ✅ override with final values
         Name: finalName,
-        PersianName: finalPersianName,
+        PersianName: finalPersianName, // ✅
+        IsGlobal: OdpData.IsGlobal ?? true, // ✅
         ModifiedById:
           OdpData.ModifiedById != null ? String(OdpData.ModifiedById) : null,
         ProjectsStr: finalRelateProjectsStr,
         LastModified: new Date().toISOString(),
         IsVisible: OdpData.IsVisible ?? true,
-
-        // extra fields
         EntityTypeName: "",
         ProgramTemplateIDName: "",
         WFTemplateName: "",
@@ -340,9 +309,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         console.log("ODP payload about to save:", dataToSave);
       }
 
-      // ✅ اختیاری: بعد save روی FA بماند
       setIsFaMode(true);
-
       return true;
     } catch (error) {
       showAlert("error", null, "Error", "Saving ODP failed.");
@@ -350,11 +317,8 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     }
   };
 
-  useImperativeHandle(ref, () => ({
-    save,
-  }));
+  useImperativeHandle(ref, () => ({ save }));
 
-  // --- Program Template Modal render
   const renderProgramTemplateModal = () => (
     <DynamicModal
       isOpen={isProgramTemplateModalOpen}
@@ -371,7 +335,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     </DynamicModal>
   );
 
-  // Form Template & Approval Flow Selectors
   const formTemplateSelector = isEditMode ? (
     <DynamicSelector
       options={formTemplates.map((item) => ({
@@ -406,7 +369,6 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     <></>
   );
 
-  // --- UI ---
   return (
     <>
       <TwoColumnLayout>
@@ -450,9 +412,9 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           name={t("ODP.Description")}
           value={OdpData.Description}
           placeholder=""
-          onChange={(e: {
-            target: { value: string | number | boolean | null };
-          }) => handleChange("Description", e.target.value)}
+          onChange={(e: { target: { value: string | number | boolean | null } }) =>
+            handleChange("Description", e.target.value)
+          }
           className="mb-4"
         />
 
@@ -461,9 +423,9 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           type="text"
           value={OdpData.Address}
           placeholder=""
-          onChange={(e: {
-            target: { value: string | number | boolean | null };
-          }) => handleChange("Address", e.target.value)}
+          onChange={(e: { target: { value: string | number | boolean | null } }) =>
+            handleChange("Address", e.target.value)
+          }
           required={true}
           className="mb-4"
         />
@@ -486,6 +448,8 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           className="mb-4"
         />
 
+        {/* ✅ Global Switcher */}
+       
         <ListSelector
           title={t("ODP.RelatedProjects")}
           className="mt-4"
@@ -493,8 +457,8 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
           rowData={projectsListData}
           selectedIds={selectedProjectIds}
           onSelectionChange={handleProjectsChange}
-          showSwitcher={true}
-          isGlobal={!!isGlobalProjects}
+          showSwitcher={false}
+          isGlobal={!!OdpData.IsGlobal}
           onGlobalChange={handleGlobalProjectsChange}
           loading={loadingProjects}
           ModalContentComponent={TableSelector}
@@ -510,6 +474,15 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
             selectionMode: "multiple",
           }}
         />
+         <div className="mb-4">
+          <DynamicSwitcher
+            isChecked={!!OdpData.IsGlobal}
+            onChange={() => handleChange("IsGlobal", !OdpData.IsGlobal)}
+            leftLabel={t("Global.Global")}
+            rightLabel=""
+          />
+        </div>
+
       </TwoColumnLayout>
 
       {renderProgramTemplateModal()}

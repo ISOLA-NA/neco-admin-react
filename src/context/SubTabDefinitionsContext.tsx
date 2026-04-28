@@ -1105,13 +1105,14 @@ export const SubTabDefinitionsProvider: React.FC<{
       },
 
       Odp: {
-        endpoint: async () => {
-          const data = await api.getAllOdpWithExtra();
-          return data.map((r: any) => ({
-            ...r,
-            PersianName: r.PersianName ?? "",
-          }));
-        },
+      endpoint: async () => {
+  const data = await api.getAllOdpWithExtra();
+  console.log("ODP raw data:", data[0]); // ببین PersianName هست یا نه
+  return data.map((r: any) => ({
+    ...r,
+    PersianName: r.PersianName ?? "",
+  }));
+},
         columnDefs: [
           {
             headerName: t("ODP.Columns.Name", { defaultValue: "نام" }),

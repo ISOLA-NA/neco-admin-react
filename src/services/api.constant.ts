@@ -72,7 +72,7 @@ export const apiConst = Object.freeze({
   insertProgramType: "api/ProgramType/Insert",
   updateProgramType: "api/ProgramType/Update",
   deleteProgramType: "api/ProgramType/Delete",
-  getAllOdpWithExtra: "api/KnowledgeType/GetAllWithExtraData",
+  getAllOdpWithExtra: "api/KnowledgeType/GetAll",
   insertOdp: "api/KnowledgeType/Insert",
   updateOdp: "api/KnowledgeType/Update",
   deleteOdp: "api/KnowledgeType/Delete",

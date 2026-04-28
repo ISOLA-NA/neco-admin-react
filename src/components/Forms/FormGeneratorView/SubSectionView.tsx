@@ -4,17 +4,25 @@ import React from "react";
 interface SubSectionViewProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
     BgColor?: string;
     TextColor?: string;
     Align?: "left" | "center" | "right";
   };
-  selectedRow?: any; // فقط برای سازگاری با سایر ویوها، درصورت عدم نیاز می‌توانید حذف کنید
+  selectedRow?: any;
+  isFaMode?: boolean;
 }
 
-const SubSectionView: React.FC<SubSectionViewProps> = ({ data }) => {
-  const title = data?.DisplayName || "Sub Section";
-  const bg = data?.BgColor || "#d1d5db";      // gray-300
-  const color = data?.TextColor || "#000000"; // black
+const SubSectionView: React.FC<SubSectionViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || "Sub Section"
+    : data?.DisplayName || data?.PersianName || "Sub Section";
+
+  const bg = data?.BgColor || "#d1d5db";
+  const color = data?.TextColor || "#000000";
   const align = data?.Align || "center";
 
   return (
@@ -22,7 +30,7 @@ const SubSectionView: React.FC<SubSectionViewProps> = ({ data }) => {
       className="font-normal p-2 rounded-md"
       style={{ backgroundColor: bg, color, textAlign: align as any }}
     >
-      {title}
+      {label}
     </div>
   );
 };

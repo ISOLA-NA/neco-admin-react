@@ -5,28 +5,32 @@ import { useTranslation } from "react-i18next";
 interface ExcellCalculatorViewProps {
   data?: {
     DisplayName?: string;
+    PersianName?: string;
   };
-  /** در صورت نیاز می‌تونی جهت رو مشخص کنی؛ اگر ندی از والد ارث می‌بره */
   dir?: "ltr" | "rtl";
+  isFaMode?: boolean;
 }
 
 const ExcellCalculatorView: React.FC<ExcellCalculatorViewProps> = ({
   data,
   dir,
+  isFaMode = false,
 }) => {
   const { t } = useTranslation();
+
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   return (
     <div
-      dir={dir}
+      dir={dir ?? (isFaMode ? "rtl" : "ltr")}
       className="flex flex-col gap-4 p-6 bg-white rounded-lg border border-gray-300 items-center justify-center"
     >
-      {data?.DisplayName && (
-        <div className="text-xl font-bold text-gray-800">
-          {data.DisplayName}
-        </div>
+      {label && (
+        <div className="text-xs font-semibold text-gray-800">{label}</div>
       )}
 
-      {/* به‌جای space-x-4 از gap-4 استفاده شده تا در RTL/LTR یکسان عمل کند */}
       <div className="flex items-center gap-4">
         <button
           type="button"

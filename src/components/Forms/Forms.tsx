@@ -23,6 +23,7 @@ import apiService from "../../services/api.services";
 import fileService from "../../services/api.servicesFile";
 import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "react-i18next";
+import { classNames } from "primereact/utils";
 interface IFormData {
   ID: string;
   Name: string;
@@ -756,18 +757,27 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             rightLabel=""
           />
         </TwoColumnLayout.Item>
-        <TwoColumnLayout.Item span={1}>
-          <DynamicSwitcher
-            isChecked={formData.IsMegaForm}
-            onChange={() => {
-              if (!isEditMode) {
-                handleChange("IsMegaForm", !formData.IsMegaForm);
-              }
-            }}
-            leftLabel={t("Forms.IsMegaForm")}
-            rightLabel=""
-            disabled={isEditMode}
-          />
+      <TwoColumnLayout.Item span={1}>
+          <div className="flex items-center gap-6">
+            <DynamicSwitcher
+              isChecked={formData.IsMegaForm}
+              onChange={() => {
+                if (!isEditMode) {
+                  handleChange("IsMegaForm", !formData.IsMegaForm);
+                }
+              }}
+              leftLabel={t("Forms.IsMegaForm")}
+              rightLabel=""
+              disabled={isEditMode}
+            />
+
+            <DynamicSwitcher
+              isChecked={formData.IsGlobal}
+              onChange={() => handleChange("IsGlobal", !formData.IsGlobal)}
+              leftLabel={t("Global.Global")}
+              rightLabel=""
+            />
+          </div>
         </TwoColumnLayout.Item>
         <TwoColumnLayout.Item span={2} className="mt-5 flex items-start gap-4">
           <div className="w-1/2 flex flex-wrap items-center gap-2 min-w-0">

@@ -15,6 +15,7 @@ import AppServices from "../../services/api.services";
 import DynamicConfirm from "../utilities/DynamicConfirm";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { useTranslation } from "react-i18next";
+import DynamicSwitcher from "../utilities/DynamicSwitcher";
 
 export interface UserHandle {
   save: () => Promise<UserType | null>;
@@ -444,18 +445,14 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
           </div>
         </div>
       </div>
-      <div className="-mt-2 flex items-center">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={!!userData.IsVisible}
-            onChange={(e) => handleChange("IsVisible", e.target.checked)}
-            className="h-5 w-5"
-          />
-          <span>{t("User.Activate")}</span>
-        </label>
+     <div className="-mt-2 flex items-center">
+        <DynamicSwitcher
+          isChecked={!!userData.IsVisible}
+          onChange={() => handleChange("IsVisible", !userData.IsVisible)}
+          leftLabel={t("User.Activate")}
+          rightLabel=""
+        />
       </div>
-
       {/* Modal */}
       <DynamicConfirm
         isOpen={modalOpen}

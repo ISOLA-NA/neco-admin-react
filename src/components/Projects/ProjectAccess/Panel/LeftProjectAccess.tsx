@@ -225,7 +225,7 @@ const LeftProjectAccess: React.FC<LeftProjectAccessProps> = ({
                           })}
                           title={t("Global.Delete", { defaultValue: "Delete" })}
                         >
-                          <FaTrash />
+                          {/* <FaTrash /> */}
                           <span>
                             {t("Global.Delete", { defaultValue: "Delete" })}
                           </span>

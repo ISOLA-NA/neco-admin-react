@@ -2,13 +2,19 @@ import React, { useState, useMemo, useEffect } from "react";
 
 interface TabViewProps {
   data?: {
-    metaType1?: string; // تب‌های انگلیسی (هر خط یک تب)
-    metaType2?: string; // تب‌های فارسی (هر خط یک تب)
+    metaType1?: string;
+    metaType2?: string;
+    DisplayName?: string;
+    PersianName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const TabView: React.FC<TabViewProps> = ({ data }) => {
-  // تب‌های انگلیسی
+const TabView: React.FC<TabViewProps> = ({ data, isFaMode = false }) => {
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   const tabsEn = useMemo(() => {
     return data?.metaType1
       ? data.metaType1
@@ -18,7 +24,6 @@ const TabView: React.FC<TabViewProps> = ({ data }) => {
       : [];
   }, [data]);
 
-  // تب‌های فارسی
   const tabsFa = useMemo(() => {
     return data?.metaType2
       ? data.metaType2
@@ -28,11 +33,9 @@ const TabView: React.FC<TabViewProps> = ({ data }) => {
       : [];
   }, [data]);
 
-  // اندیس تب فعال برای انگلیسی و فارسی (کاملاً مستقل)
   const [activeTabEn, setActiveTabEn] = useState<number>(0);
   const [activeTabFa, setActiveTabFa] = useState<number>(0);
 
-  // ایمن‌سازی اندیس‌ها هنگام تغییر طول آرایه‌ها
   useEffect(() => {
     if (tabsEn.length === 0) {
       setActiveTabEn(0);
@@ -49,7 +52,6 @@ const TabView: React.FC<TabViewProps> = ({ data }) => {
     }
   }, [tabsFa.length, activeTabFa]);
 
-  // کلاس مشترک برای تب‌ها
   const tabClass = (isActive: boolean) =>
     `px-4 py-2 cursor-pointer whitespace-nowrap transition-colors ${
       isActive
@@ -59,40 +61,53 @@ const TabView: React.FC<TabViewProps> = ({ data }) => {
 
   return (
     <div className="p-4 bg-white rounded-lg border border-gray-300">
-      {/* نوار تب‌های انگلیسی (مستقل) */}
-      <div className="flex border-b border-gray-300 mb-4 overflow-x-auto">
-        {tabsEn.map((tab, index) => (
-          <div
-            key={`en-${index}`}
-            onClick={() => setActiveTabEn(index)}
-            className={tabClass(activeTabEn === index)}
-          >
-            {tab}
-          </div>
-        ))}
-        {tabsEn.length === 0 && (
-          <div className="text-gray-400 text-sm px-2 py-2">(no English tabs)</div>
-        )}
-      </div>
+      {label && (
+        <div className="mb-3 text-xs font-semibold text-gray-800">{label}</div>
+      )}
 
-      {/* نوار تب‌های فارسی (مستقل از انگلیسی) */}
-      <div className="flex border-b border-gray-200 mb-1 overflow-x-auto" dir="rtl">
-        {tabsFa.map((tab, index) => (
-          <div
-            key={`fa-${index}`}
-            onClick={() => setActiveTabFa(index)}
-            className={tabClass(activeTabFa === index)}
-            title={tab}
-          >
-            {tab}
-          </div>
-        ))}
-        {tabsFa.length === 0 && (
-          <div className="text-gray-400 text-sm px-2 py-2" dir="ltr">
-            (no Persian tabs)
-          </div>
-        )}
-      </div>
+      {/* نوار تب‌های انگلیسی */}
+      {!isFaMode && (
+        <div className="flex border-b border-gray-300 mb-4 overflow-x-auto">
+          {tabsEn.map((tab, index) => (
+            <div
+              key={`en-${index}`}
+              onClick={() => setActiveTabEn(index)}
+              className={tabClass(activeTabEn === index)}
+            >
+              {tab}
+            </div>
+          ))}
+          {tabsEn.length === 0 && (
+            <div className="text-gray-400 text-sm px-2 py-2">
+              (no English tabs)
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* نوار تب‌های فارسی */}
+      {isFaMode && (
+        <div
+          className="flex border-b border-gray-200 mb-1 overflow-x-auto"
+          dir="rtl"
+        >
+          {tabsFa.map((tab, index) => (
+            <div
+              key={`fa-${index}`}
+              onClick={() => setActiveTabFa(index)}
+              className={tabClass(activeTabFa === index)}
+              title={tab}
+            >
+              {tab}
+            </div>
+          ))}
+          {tabsFa.length === 0 && (
+            <div className="text-gray-400 text-sm px-2 py-2" dir="ltr">
+              (no Persian tabs)
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

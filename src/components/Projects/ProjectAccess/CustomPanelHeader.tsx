@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaSave, FaEdit } from "react-icons/fa";
+import { FiSave, FiX, FiRefreshCw } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 
@@ -65,33 +65,48 @@ const PAHeader: React.FC<Props> = ({
 
   return (
     <>
-      <div className="flex items-center gap-2 bg-white border-b px-3 py-2 shadow-sm">
-        {isEditMode ? (
-          <button
-            onClick={openConfirmForUpdate}
-            className="flex items-center gap-1 px-4 py-1 text-xs rounded bg-amber-500 hover:bg-amber-600 text-white"
-          >
-            <FaEdit />
-            {t("Global.Edit", { defaultValue: "Edit" })}
-          </button>
-        ) : (
-          <button
-            onClick={openConfirmForSave}
-            className="flex items-center gap-1 px-4 py-1 text-xs rounded bg-green-500 hover:bg-green-600 text-white"
-          >
-            <FaSave />
-            {t("Global.Add", { defaultValue: "Add" })}
-          </button>
-        )}
+      <div className="flex items-center justify-between p-4 bg-white shadow-md rounded-t-md">
 
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1 px-3 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 text-gray-800"
-          >
-            {t("Global.Cancel", { defaultValue: "Cancel" })}
-          </button>
-        )}
+        {/* سمت چپ: دکمه Save یا Update */}
+        <div className="flex items-center gap-4">
+          {isEditMode ? (
+            <button
+              onClick={openConfirmForUpdate}
+              className="flex items-center gap-2 text-yellow-600 hover:text-yellow-800 transition"
+              title={t("DynamicConfirm.Buttons.Edit")}
+            >
+              <FiRefreshCw size={20} />
+              <span className="font-medium">
+                {t("DynamicConfirm.Buttons.Edit", { defaultValue: "Edit" })}
+              </span>
+            </button>
+          ) : (
+            <button
+              onClick={openConfirmForSave}
+              className="flex items-center gap-2 text-green-600 hover:text-green-800 transition"
+              title={t("DynamicConfirm.Buttons.Add")}
+            >
+              <FiSave size={20} />
+              <span className="font-medium">
+                {t("DynamicConfirm.Buttons.Add", { defaultValue: "Add" })}
+              </span>
+            </button>
+          )}
+        </div>
+
+        {/* سمت راست: دکمه Close */}
+        <div className="flex items-center gap-4">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-red-600 hover:text-red-800 transition"
+              title={t("DynamicConfirm.Buttons.Close", { defaultValue: "Close" })}
+              aria-label={t("DynamicConfirm.Buttons.Close", { defaultValue: "Close" })}
+            >
+              <FiX size={20} />
+            </button>
+          )}
+        </div>
       </div>
 
       <DynamicConfirm

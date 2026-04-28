@@ -10,6 +10,7 @@ interface BoxPredecessorProps {
   selectedPredecessors: number[];
   onSelectionChange: (selected: number[]) => void;
   currentBoxId?: number;
+  contentClassName?: string; 
 }
 
 const BoxPredecessor: React.FC<BoxPredecessorProps> = ({
@@ -18,6 +19,7 @@ const BoxPredecessor: React.FC<BoxPredecessorProps> = ({
   selectedPredecessors,
   onSelectionChange,
   currentBoxId = 0,
+  contentClassName,
 }) => {
   const { t } = useTranslation();
   const handleCheckboxChange = (value: number) => {
@@ -33,13 +35,13 @@ const BoxPredecessor: React.FC<BoxPredecessorProps> = ({
   );
 
   return (
-    <div className={classNames("w-full", className)}>
-      <div className="flex justify-center items-center p-2 bg-gradient-to-r from-purple-600 to-indigo-500 h-10 rounded-t-md">
+    <div className={classNames("w-full h-full flex flex-col", className)}>
+      <div className="flex justify-center items-center p-2 bg-gradient-to-r from-purple-600 to-indigo-500 h-10 rounded-t-md shrink-0">
         <h3 className="text-sm font-semibold text-white">
           {t("AddApprovalFlows.Predecessor")}
         </h3>
       </div>
-      <div className="max-h-64 overflow-y-auto bg-gray-50 rounded-b-md p-3 border border-t-0 border-gray-200">
+      <div className={`overflow-y-auto bg-gray-50 rounded-b-md p-3 border border-t-0 border-gray-200 ${contentClassName || "max-h-64"}`}>
         <div className="flex flex-col space-y-2">
           {filteredBoxTemplates.map((box) => (
             <label

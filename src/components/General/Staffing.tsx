@@ -307,15 +307,15 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           <DynamicSwitcher
             isChecked={staffingData.isAccessCreateProject}
             onChange={() => handleSwitcher("isAccessCreateProject")}
-            leftLabel=""
-            rightLabel={t("Staffing.AccessToNewProjects")}
+            leftLabel={t("Staffing.AccessToNewProjects")}
+            rightLabel=""
           />
 
           <DynamicSwitcher
             isChecked={staffingData.isHaveAddressbar}
             onChange={() => handleSwitcher("isHaveAddressbar")}
-            leftLabel=""
-            rightLabel={t("Staffing.ShowCommandBar")}
+            leftLabel={t("Staffing.ShowCommandBar")}
+            rightLabel=""
           />
         </TwoColumnLayout>
 

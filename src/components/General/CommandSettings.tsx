@@ -330,14 +330,15 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
         />
 
         {/* ProjectIntensive */}
+       {/* ProjectIntensive */}
         <div className="mt-4">
           <DynamicSwitcher
             isChecked={!!commandData.ProjectIntensive}
             onChange={() =>
               handleChange("ProjectIntensive", !commandData.ProjectIntensive)
             }
-            leftLabel=""
-            rightLabel={t("CommandPage.ProjectIntensive")}
+            leftLabel={t("CommandPage.ProjectIntensive")}
+            rightLabel=""
           />
         </div>
 
@@ -351,8 +352,8 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
                 !commandData.ShowDownloadGroupButton
               )
             }
-            leftLabel=""
-            rightLabel={t("CommandPage.ShowDownloadGroupButton")}
+            leftLabel={t("CommandPage.ShowDownloadGroupButton")}
+            rightLabel=""
           />
         </div>
       </TwoColumnLayout>

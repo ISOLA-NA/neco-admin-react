@@ -6,29 +6,33 @@ import { useTranslation } from "react-i18next";
 interface ExcelPanelViewProps {
   data?: {
     DisplayName?: string;
-    metaType4?: string; // شناسه فایل اکسل آپلود شده
+    PersianName?: string;
+    metaType4?: string;
     fileName?: string;
   };
+  isFaMode?: boolean;
 }
 
-const ExcelPanelView: React.FC<ExcelPanelViewProps> = ({ data }) => {
+const ExcelPanelView: React.FC<ExcelPanelViewProps> = ({
+  data,
+  isFaMode = false,
+}) => {
   const { t } = useTranslation();
   const [selectedFileId, setSelectedFileId] = useState<string | null>(
     data?.metaType4 || null
   );
   const [fileName, setFileName] = useState<string>(data?.fileName || "");
 
+  const label = isFaMode
+    ? data?.PersianName || data?.DisplayName || ""
+    : data?.DisplayName || data?.PersianName || "";
+
   useEffect(() => {
     if (selectedFileId) {
       fileService
         .getFile(selectedFileId)
-        .then((res) => {
-          // فرض بر این است که res.data شامل FileName می‌باشد
-          setFileName(res.data.FileName);
-        })
-        .catch((err) => {
-          console.error("Error fetching file info:", err);
-        });
+        .then((res) => setFileName(res.data.FileName))
+        .catch((err) => console.error("Error fetching file info:", err));
     } else {
       setFileName("");
     }
@@ -51,6 +55,7 @@ const ExcelPanelView: React.FC<ExcelPanelViewProps> = ({ data }) => {
 
       const downloadRes = await fileService.download(downloadingFileObject);
       const uint8Array = new Uint8Array(downloadRes.data);
+
       let mimeType = "application/octet-stream";
       if (FileType === ".xls") {
         mimeType = "application/vnd.ms-excel";
@@ -58,6 +63,7 @@ const ExcelPanelView: React.FC<ExcelPanelViewProps> = ({ data }) => {
         mimeType =
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
       }
+
       const blob = new Blob([uint8Array], { type: mimeType });
       const blobUrl = (window.URL || window.webkitURL).createObjectURL(blob);
       const link = document.createElement("a");
@@ -72,10 +78,13 @@ const ExcelPanelView: React.FC<ExcelPanelViewProps> = ({ data }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-300">
-      <div className="mb-4 text-xl font-bold text-gray-800">
-        {data?.DisplayName || ""}
-      </div>
+    <div
+      className="flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-gray-300"
+      dir={isFaMode ? "rtl" : "ltr"}
+    >
+      {label && (
+        <div className="mb-4 text-xs font-semibold text-gray-800">{label}</div>
+      )}
       <button
         type="button"
         onClick={handleDownloadFile}

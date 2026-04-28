@@ -953,37 +953,39 @@ const AddProgramTemplate: React.FC<AddProgramTemplateProps> = ({
       </div>
 
       {/* footer با دکمه‌های Save/Update و Cancel */}
-      <div className="sticky bottom-0 left-0 right-0 z-10 bg-white pt-4 pb-2">
-        <div className="flex justify-center gap-8">
-          {editingRow ? (
-            <button
-              onClick={handleUpdate}
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-            >
-              {t("Global.Edit")}
-            </button>
-          ) : (
-            <button
-              onClick={handleSave}
-              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-            >
-              {t("Global.Add")}
-            </button>
-          )}
-          <button
-            onClick={() => {
-              setFormData(initialFormData);
-              setSelectedMetaIds([]);
-              setMetaValues([]);
-              setMetaNames([]);
-              if (onCancel) onCancel();
-            }}
-            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-          >
-            {t("Global.Cancel")}
-          </button>
-        </div>
-      </div>
+      {/* footer با دکمه‌های Save/Update و Cancel */}
+<div className="sticky bottom-0 left-0 right-0 z-10 bg-white pt-4 pb-2">
+  <div className="flex justify-center gap-6">
+    <button
+      onClick={() => {
+        setFormData(initialFormData);
+        setSelectedMetaIds([]);
+        setMetaValues([]);
+        setMetaNames([]);
+        if (onCancel) onCancel();
+      }}
+      className="px-6 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-200"
+    >
+      {t("AddApprovalFlows.Cancel")}
+    </button>
+
+    {editingRow ? (
+      <button
+        onClick={handleUpdate}
+        className="px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200"
+      >
+        {t("AddApprovalFlows.Edit")}
+      </button>
+    ) : (
+      <button
+        onClick={handleSave}
+        className="px-6 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200"
+      >
+        {t("AddApprovalFlows.Add")}
+      </button>
+    )}
+  </div>
+</div>
     </div>
   );
 };

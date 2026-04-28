@@ -1,5 +1,4 @@
 import React from "react";
-import DynamicSwitcher from "../../../utilities/DynamicSwitcher";
 import { AccessProject } from "../../../../services/api.services";
 import { useTranslation } from "react-i18next";
 
@@ -19,11 +18,7 @@ const RightProjectAccess: React.FC<RightProps> = ({
   const READ_MODE = 1;
   const WRITE_MODE = 2;
 
-  const isRead = selectedRow.AccessMode === WRITE_MODE;
-  const modeLabel = isRead
-    ? t("ProjectAccess.Read", { defaultValue: "Read" })
-    : t("ProjectAccess.Write", { defaultValue: "Write" });
-  const labelClass = isRead ? "text-gray-500" : "text-blue-600 font-semibold";
+  const isWrite = selectedRow.AccessMode === WRITE_MODE;
 
   const keyToI18n: Record<string, string> = {
     CreateMeeting: "ProjectAccess.CreateMeeting",
@@ -62,21 +57,39 @@ const RightProjectAccess: React.FC<RightProps> = ({
       className="p-2 h-full flex flex-col gap-3 bg-gradient-to-b from-blue-50 to-pink-50 rounded-md overflow-auto"
       dir={dir}
     >
+      {/* Mode row */}
       <div className="flex items-center justify-center gap-2">
-        <span className="text-sm font-semibold">
+        <span className="text-sm font-semibold text-gray-700">
           {t("ProjectAccess.Mode", { defaultValue: "Mode" })}
         </span>
-        <DynamicSwitcher
-          isChecked={isRead}
-          onChange={() =>
+
+        {/* ✅ Toggle هارد کد — دایره وقتی Write فعاله به سمت Write (چپ) میره */}
+        <div
+          onClick={() =>
             onRowChange({
-              AccessMode: isRead ? WRITE_MODE : READ_MODE,
+              AccessMode: isWrite ? READ_MODE : WRITE_MODE,
             })
           }
-          leftLabel=""
-          rightLabel=""
-        />
-        <span className={`text-sm ${labelClass}`}>{modeLabel}</span>
+          className="relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300"
+          style={{ backgroundColor: isWrite ? "#ec4899" : "#9ca3af" }}
+        >
+          <span
+            className="absolute w-6 h-6 bg-white rounded-full shadow-md top-0 left-0 transform transition-transform duration-300"
+            style={{
+  transform: isWrite ? "translateX(24px)" : "translateX(0px)",
+}}
+          />
+        </div>
+
+        <span
+          className={`text-sm font-semibold ${
+            isWrite ? "text-blue-600" : "text-gray-500"
+          }`}
+        >
+          {isWrite
+            ? t("ProjectAccess.Write", { defaultValue: "Write" })
+            : t("ProjectAccess.Read", { defaultValue: "Read" })}
+        </span>
       </div>
 
       <h2 className="text-center text-lg font-semibold">

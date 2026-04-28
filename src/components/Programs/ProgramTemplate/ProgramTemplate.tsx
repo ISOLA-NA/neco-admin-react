@@ -38,7 +38,7 @@ interface ProgramTemplateProps {
 /* ===================================================================== */
 const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
   ({ selectedRow }, ref) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const api = useApi();
 
     /* ---------------- state اصلی ---------------- */
@@ -471,9 +471,9 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                 columnDefs: projectColumnDefs,
                 rowData: projectsListData,
                 selectedRow: null,
-                onRowDoubleClick: () => {},
-                onRowClick: () => {},
-                onSelectButtonClick: () => {},
+                onRowDoubleClick: () => { },
+                onRowClick: () => { },
+                onSelectButtonClick: () => { },
                 isSelectDisabled: true,
               }}
             />
@@ -536,17 +536,18 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                 selectedDetailRow
                   ? (setEditingRow(selectedDetailRow), setIsAddModalOpen(true))
                   : showAlert(
-                      "warning",
-                      null,
-                      "No selection",
-                      "Please select a row to edit."
-                    )
+                    "warning",
+                    null,
+                    "No selection",
+                    "Please select a row to edit."
+                  )
               }
               onDelete={() => setShowDeleteConfirm(true)}
-              onDuplicate={() => {}}
+              onDuplicate={() => { }}
               showSearch
               isLoading={loadingFields}
               domLayout="normal"
+              direction={i18n.dir()}   
               gridOptions={{
                 rowSelection: "single",
                 onGridReady: (p) => {

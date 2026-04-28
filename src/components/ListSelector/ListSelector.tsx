@@ -16,6 +16,7 @@ interface ListSelectorProps {
   ModalContentComponent: React.FC<any>;
   modalContentProps?: any;
   loading?: boolean;
+  contentClassName?: string;
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
@@ -31,6 +32,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   ModalContentComponent,
   modalContentProps = {},
   loading = false,
+  contentClassName,
 }) => {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -64,37 +66,14 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           border-radius: 0.375rem 0.375rem 0 0;
           background: linear-gradient(to right, #7e22ce, #4f46e5);
           height: 2.5rem;
+          flex-shrink: 0;
         }
       `}</style>
 
-      <div className={classNames("w-full", className)} dir="rtl">
+      <div className={classNames("w-full h-full flex flex-col", className)} dir="rtl">
         <div className="header">
-          {/* Group title and switch together */}
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          <div className="flex items-center">
             <h3 className="text-xs font-semibold text-white">{title}</h3>
-            {showSwitcher && (
-              <label className="flex items-center cursor-pointer">
-                <div
-                  dir="ltr"
-                  className={classNames(
-                    "w-9 h-5 flex items-center rounded-full p-1 transition-colors duration-300",
-                    isGlobal ? "bg-pink-500" : "bg-gray-400"
-                  )}
-                  onClick={() => onGlobalChange && onGlobalChange(!isGlobal)}
-                  style={{ minWidth: 36 }}
-                >
-                  <div
-                    className={classNames(
-                      "bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300",
-                      isGlobal ? "translate-x-4" : "translate-x-0"
-                    )}
-                  />
-                </div>
-                <span className="text-white text-xs select-none ml-2 rtl:mr-2">
-                  {t("Global.Global")}
-                </span>
-              </label>
-            )}
           </div>
 
           <button
@@ -110,7 +89,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
           </button>
         </div>
 
-        <div className="relative h-32 overflow-y-auto bg-gray-200 rounded-b-md p-3">
+        <div className={`relative overflow-y-auto bg-gray-200 rounded-b-md p-3 ${contentClassName || "h-32"}`}>
           {loading ? (
             <div className="flex justify-center items-center h-full">
               <svg
