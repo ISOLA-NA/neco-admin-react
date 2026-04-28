@@ -10,6 +10,8 @@ import { useApi } from "../../context/ApiContext";
 import { EntityCollection, Project } from "../../services/api.services";
 import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { useTranslation } from "react-i18next";
+import DynamicSwitcher from "../utilities/DynamicSwitcher";
+import i18n from "../../i18n";
 
 export interface ProcedureHandle {
   save: () => Promise<boolean>;
@@ -159,7 +161,7 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
       }));
     };
 
-    const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
+    const projectColumnDefs = [{ field: "Name", headerName: i18n.language === "fa" ? "نام پروژه" : "Project Name" }];
 
     const handleProjectsChange = (selectedIds: (string | number)[]) => {
       setSelectedProjectIds(selectedIds.map(String));
@@ -201,11 +203,17 @@ const Procedure = forwardRef<ProcedureHandle, ProcedureProps>(
           className="mb-4"
         />
 
-        <div className="-mt-10">
+        <div className="-mt-10 flex flex-col gap-3">
+          <DynamicSwitcher
+            isChecked={procedureData.IsGlobal}
+            onChange={() => handleChange("IsGlobal", !procedureData.IsGlobal)}
+            leftLabel={i18n.language === "fa" ? "عمومی" : "Global"}
+            rightLabel=""
+          />
           {/* Projects Selector */}
           <ListSelector
             title={t("Procedure.Projects")}
-            className="mb-4"
+            className="mb-2"
             columnDefs={projectColumnDefs}
             rowData={projectsListData}
             selectedIds={selectedProjectIds}

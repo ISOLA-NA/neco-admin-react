@@ -2,6 +2,7 @@
   "RoleGroup": {
     "Name": "Name Group",
     "Description": "Description",
+    "IsGlobal":"Global",
     "Projects": "Related Projects",
     "Members": "Group Members",
     "Placeholders": {

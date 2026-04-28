@@ -1,9 +1,10 @@
 {
-  "AddApprovalFlows": {
+  "AddApprovalFlows": {    
     "Post": "Role",
     "ApprovalFlows": "Approval Flows",
     "Alerts": "Alerts",
     "Name": "Name",
+    "PersianName":"PersianName",
     "MinAccept": "Min Number for Accept",
     "MinReject": "Min Number for Reject",
     "ActDuration": "Action Duration",
@@ -38,6 +39,8 @@
     "Error": "Error",
     "Success": "Success",
     "Add": "Add",
+    "Delete":"Delete",
+    "New":"New",
     "Edit": "Edit",
     "Cancel": "Cancel",
     "SaveFailed": "Failed to save",

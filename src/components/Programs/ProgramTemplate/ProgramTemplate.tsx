@@ -22,8 +22,10 @@ import {
   ProgramType,
 } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
+import DynamicSwitcher from "../../utilities/DynamicSwitcher";
 import AddColumnForm from "../../Forms/AddForm"; // برای انتخاب متادیتا
 import { useTranslation } from "react-i18next";
+
 
 /* ---------- types ---------- */
 export interface ProgramTemplateHandle {
@@ -225,7 +227,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
     const handleChange = (field: keyof ProgramTemplateItem, value: any) =>
       setProgramTemplateData((p) => ({ ...p, [field]: value }));
 
-    const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
+    const projectColumnDefs = [{ field: "Name", headerName: i18n.language === "fa" ? "نام پروژه" : "Project Name" }];
     const projectsListData = projectsData.map((p) => ({
       ID: p.ID,
       Name: p.ProjectName,
@@ -453,6 +455,13 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
           {/* ---------------- ستون راست (لیست سلکتورها) ---------------- */}
           <div className="flex flex-col gap-10">
+            {/* سوییچر گلوبال */}
+            <DynamicSwitcher
+              isChecked={programTemplateData.IsGlobal}
+              onChange={() => handleChange("IsGlobal", !programTemplateData.IsGlobal)}
+              leftLabel={i18n.language === "fa" ? "عمومی" : "Global"}
+              rightLabel=""
+            />
             {/* Related projects + سوییچ Global */}
             <ListSelector
               title={t("ProgramTemplate.RelatedProjects")}
@@ -547,7 +556,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               showSearch
               isLoading={loadingFields}
               domLayout="normal"
-              direction={i18n.dir()}   
+              direction={i18n.dir()}
               gridOptions={{
                 rowSelection: "single",
                 onGridReady: (p) => {

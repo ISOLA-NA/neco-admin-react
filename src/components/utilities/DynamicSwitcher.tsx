@@ -20,14 +20,11 @@ const DynamicSwitcher: React.FC<DynamicSwitcherProps> = ({
   const { i18n } = useTranslation();
   const isRtl = i18n.dir() === "rtl";
 
-  // ✅ در RTL وقتی checked است دایره باید به راست برود (سمت leftLabel که در RTL راست است)
-  // در LTR وقتی checked است دایره باید به چپ برود (سمت leftLabel که در LTR چپ است)
-  const checkedTranslate = isRtl ? "translate-x-6" : "translate-x-0";
-  const uncheckedTranslate = isRtl ? "translate-x-0" : "translate-x-6";
-
   return (
     <div className="flex items-center gap-6">
-      <span className="text-black text-sm sm:text-base">{leftLabel}</span>
+      <span className="text-black text-sm sm:text-base">
+  {isRtl ? rightLabel : rightLabel}
+</span>
       <label
         className={`inline-flex items-center ${
           disabled ? "cursor-not-allowed" : "cursor-pointer"
@@ -48,12 +45,16 @@ const DynamicSwitcher: React.FC<DynamicSwitcherProps> = ({
         >
           <span
             className={`absolute w-6 h-6 bg-white rounded-full shadow-md top-0 left-0 transform transition-transform duration-300 ${
-              isChecked ? checkedTranslate : uncheckedTranslate
+              isChecked
+  ? isRtl ? "translate-x-0" : "translate-x-6"
+  : isRtl ? "translate-x-6" : "translate-x-0"
             }`}
           ></span>
         </div>
       </label>
-      <span className="text-black text-sm sm:text-base">{rightLabel}</span>
+      <span className="text-black text-sm sm:text-base">
+  {isRtl ? leftLabel : leftLabel}
+</span>
     </div>
   );
 };

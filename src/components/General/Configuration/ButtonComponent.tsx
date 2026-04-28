@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import DataTable from "../../TableDynamic/DataTable";
 import DynamicInput from "../../utilities/DynamicInput";
-import DynamicRadioGroup from "../../utilities/DynamicRadiogroup";
 import DynamicButton from "../../utilities/DynamicButtons";
-import FileUploadHandler, {
-  InsertModel,
-} from "../../../services/FileUploadHandler";
 import { useApi } from "../../../context/ApiContext";
 import { AFBtnItem } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import { useTranslation } from "react-i18next";
 import { FaPlus, FaPencilAlt, FaTrash, FaUndo } from "react-icons/fa";
-import i18n from "../../../i18n";
+import FileUploadHandler from "../../../services/FileUploadHandler";
 
 interface ButtonComponentProps {
   columnDefs: { headerName: string; field: string }[];
@@ -55,6 +51,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const [isFaMode, setIsFaMode] = useState(true);
   const [persianNameValue, setPersianNameValue] = useState("");
 
+  const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
 
   // فایل آپلودی
@@ -71,8 +68,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
   // وضعیت خطای تصویر
   const [imageError, setImageError] = useState<boolean>(false);
-
-  const { t } = useTranslation();
 
   // رادیوها
   const RadioOptionsState = [
@@ -360,7 +355,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const handleImageUploadSuccess = (insertModel: any) => {
     console.log("Upload success insertModel ➜", insertModel);
 
-    const uploadedId = insertModel?.ID ?? insertModel?.Id ?? insertModel?.id ?? null;
+    const uploadedId =
+      insertModel?.ID ?? insertModel?.Id ?? insertModel?.id ?? null;
     console.log("Resolved uploaded image ID ➜", uploadedId);
 
     setSelectedFileId(uploadedId);
@@ -510,25 +506,48 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
   // ستون‌های ورودی از والد رو با PersianName غنی کنیم
   const columnDefsWithFa = React.useMemo(() => {
-    const defs = Array.isArray(columnDefs) ? [...columnDefs] : [];
-    const hasFa = defs.some((c) => (c.field ?? "").toString() === "PersianName");
-    if (hasFa) return defs;
+    const translatedDefs = (
+      Array.isArray(columnDefs) ? [...columnDefs] : []
+    ).map((col) => {
+      if (col.field === "Name")
+        return {
+          ...col,
+          headerName: t("DataTable.Headers.Name", {
+            defaultValue: i18n.language === "fa" ? "نام" : "Name",
+          }),
+        };
+      if (col.field === "Tooltip")
+        return {
+          ...col,
+          headerName: t("DataTable.Headers.Tooltip", {
+            defaultValue: i18n.language === "fa" ? "متن راهنما" : "Tooltip",
+          }),
+        };
+      return col;
+    });
+
+    const hasFa = translatedDefs.some(
+      (c) => (c.field ?? "").toString() === "PersianName"
+    );
+    if (hasFa) return translatedDefs;
 
     const faCol = {
-      headerName: "PersianName",
+      headerName: t("DataTable.Headers.PersianName", {
+        defaultValue:
+          i18n.language === "fa" ? "نام فارسی ستون" : "Persian Name",
+      }),
       field: "PersianName",
       sortable: true,
       filter: true,
       resizable: true,
     };
-
-    const nameIdx = defs.findIndex(
+    const nameIdx = translatedDefs.findIndex(
       (c) => (c.field ?? "").toString().toLowerCase() === "name"
     );
-    if (nameIdx === -1) return [...defs, faCol];
+    if (nameIdx === -1) return [...translatedDefs, faCol];
 
-    const before = defs.slice(0, nameIdx + 1);
-    const after = defs.slice(nameIdx + 1);
+    const before = translatedDefs.slice(0, nameIdx + 1);
+    const after = translatedDefs.slice(nameIdx + 1);
     return [...before, faCol, ...after];
   }, [columnDefs]);
 
@@ -604,8 +623,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                       <DynamicInput
                         name={
                           isFaMode
-                            ? t("Configuration.Name")
-                            : t("Configuration.PersianName", "PersianName")
+                            ? t("AddApprovalFlows.Name")
+                            : t("AddApprovalFlows.PersianName", "PersianName")
                         }
                         type="text"
                         value={isFaMode ? nameValue : persianNameValue}
@@ -697,7 +716,10 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
                   <div className="flex items-center gap-10">
                     {RadioOptionsState.map((opt) => (
-                      <label key={opt.value} className="flex items-center gap-2">
+                      <label
+                        key={opt.value}
+                        className="flex items-center gap-2"
+                      >
                         <input
                           type="radio"
                           name="wfState"
@@ -712,12 +734,16 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
                 {/* Command: */}
                 <div className="mt-4">
-                  <div className="text-sm mb-2">{t("Configuration.Command")}</div>
+                  <div className="text-sm mb-2">
+                    {t("Configuration.Command")}
+                  </div>
 
                   {/* accept/reject/close یک خط */}
                   <div className="flex items-center gap-10 mb-2">
                     {["accept", "reject", "close"].map((val) => {
-                      const opt = RadioOptionsCommand.find((x) => x.value === val);
+                      const opt = RadioOptionsCommand.find(
+                        (x) => x.value === val
+                      );
                       if (!opt) return null;
                       return (
                         <label key={val} className="flex items-center gap-2">
@@ -737,7 +763,9 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2">
                     <div className="flex flex-col gap-2">
                       {["client"].map((val) => {
-                        const opt = RadioOptionsCommand.find((x) => x.value === val);
+                        const opt = RadioOptionsCommand.find(
+                          (x) => x.value === val
+                        );
                         if (!opt) return null;
                         return (
                           <label key={val} className="flex items-center gap-2">
@@ -755,7 +783,9 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
                     <div className="flex flex-col gap-2">
                       {["admin"].map((val) => {
-                        const opt = RadioOptionsCommand.find((x) => x.value === val);
+                        const opt = RadioOptionsCommand.find(
+                          (x) => x.value === val
+                        );
                         if (!opt) return null;
                         return (
                           <label key={val} className="flex items-center gap-2">
@@ -794,7 +824,9 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                         src={`/api/getImage/${selectedFileId}`}
                         alt="Selected"
                         className="w-32 h-32 object-cover"
-                        onLoad={() => console.log("Preview image loaded ✅", selectedFileId)}
+                        onLoad={() =>
+                          console.log("Preview image loaded ✅", selectedFileId)
+                        }
                         onError={(e) => {
                           console.log("Preview image error ❌", {
                             selectedFileId,
@@ -820,7 +852,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           <div className="bg-white/90 backdrop-blur mt-6 py-2">
             <div className="flex items-center justify-center gap-3">
               <DynamicButton
-                text={t("Global.Add", "Add")}
+                text={t("AddApprovalFlows.Add", "Add")}
                 onClick={handleAddClick}
                 isDisabled={isRowClicked}
                 size="md"
@@ -829,7 +861,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
               />
 
               <DynamicButton
-                text={t("Global.Edit", "Edit")}
+                text={t("AddApprovalFlows.Edit", "Edit")}
                 onClick={handleEditClick}
                 isDisabled={!selectedRow}
                 size="md"
@@ -838,7 +870,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
               />
 
               <DynamicButton
-                text={t("Global.New", "New")}
+                text={t("AddApprovalFlows.New", "New")}
                 onClick={handleNewClick}
                 size="md"
                 variant="orgBlue"
@@ -846,7 +878,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
               />
 
               <DynamicButton
-                text={t("Global.Delete", "Delete")}
+                text={t("AddApprovalFlows.Delete", "Delete")}
                 onClick={handleDeleteClick}
                 isDisabled={isDeleteDisabled}
                 size="md"

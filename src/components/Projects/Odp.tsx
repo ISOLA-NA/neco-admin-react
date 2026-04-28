@@ -17,6 +17,7 @@ import { showAlert } from "../utilities/Alert/DynamicAlert";
 import { useApi } from "../../context/ApiContext";
 import type { OdpWithExtra } from "../../services/api.services";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 export interface IODP {
   ID?: number;
@@ -178,7 +179,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
     fetchProjects();
   }, [api]);
 
-  const projectColumnDefs = [{ field: "Name", headerName: "Project Name" }];
+  const projectColumnDefs = [{ field: "Name", headerName:i18n.language === "fa" ? "نام پروژه" : "Project Name" }];
   const projectsListData = projectsData.map((proj) => ({
     ID: proj.ID,
     Name: proj.Name,
@@ -325,7 +326,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
       onClose={handleCloseProgramTemplateModal}
     >
       <TableSelector
-        columnDefs={[{ headerName: "Name", field: "Name" }]}
+        columnDefs={[{ headerName: t("ODP.Name"), field: "Name" }]}
         rowData={programTemplates}
         onRowDoubleClick={handleProgramTemplateRowDoubleClick}
         onRowClick={handleProgramTemplateRowClick}

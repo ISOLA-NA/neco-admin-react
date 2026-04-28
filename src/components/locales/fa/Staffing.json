@@ -1,5 +1,6 @@
 {
   "Staffing": {
+    "Name":"نام",
     "ProjectName": "نام پروژه",
     "RolesType": "نقش",
     "SuperiorRole": "رئیس نقش",

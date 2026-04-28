@@ -21,6 +21,7 @@ import {
 } from "../../../services/api.services";
 import { showAlert } from "../../utilities/Alert/DynamicAlert";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
+import DynamicSwitcher from "../../utilities/DynamicSwitcher";
 import { useTranslation } from "react-i18next";
 
 export interface ApprovalFlowHandle {
@@ -218,7 +219,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
     const projectColumnDefs = [
       {
         field: "Name",
-        headerName: "Project Name",
+        headerName: i18n.language === "fa" ? "نام پروژه" : "Project Name",
         filter: "agTextColumnFilter",
       },
     ];
@@ -413,32 +414,40 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
           </TwoColumnLayout.Item>
 
 
-          <TwoColumnLayout.Item span={1}>
-            <CustomTextarea
-              name={t("ApprovalFlows.Description")}
-              value={approvalFlowData.Describtion}
-              placeholder=""
-              onChange={(e) => handleChange("Describtion", e.target.value)}
-            />
-          </TwoColumnLayout.Item>
+         <TwoColumnLayout.Item span={1}>
+  <CustomTextarea
+    name={t("ApprovalFlows.Description")}
+    value={approvalFlowData.Describtion}
+    placeholder=""
+    onChange={(e) => handleChange("Describtion", e.target.value)}
+  />
+</TwoColumnLayout.Item>
 
-          <TwoColumnLayout.Item span={1} className="mt-10">
-            <ListSelector
-              title={t("ApprovalFlows.RelatedProjects")}
-              columnDefs={projectColumnDefs}
-              rowData={mappedProjects}
-              selectedIds={selectedProjectIds}
-              onSelectionChange={handleProjectsChange}
-              showSwitcher={true}
-              isGlobal={approvalFlowData.IsGlobal}
-              onGlobalChange={handleGlobalChange}
-              ModalContentComponent={TableSelector}
-              modalContentProps={modalContentProps}
-              className="-mt-8"
-            />
-          </TwoColumnLayout.Item>
+<TwoColumnLayout.Item span={1} className="mt-10">
+  <div className="flex flex-col gap-2">
+    <DynamicSwitcher
+      isChecked={approvalFlowData.IsGlobal}
+      onChange={() => handleChange("IsGlobal", !approvalFlowData.IsGlobal)}
+      leftLabel={i18n.language === "fa" ? "عمومی" : "Global"}
+      rightLabel=""
+    />
+    <ListSelector
+      title={i18n.language === "fa" ? "نام پروژه" : "Project Name"}
+      columnDefs={projectColumnDefs}
+      rowData={mappedProjects}
+      selectedIds={selectedProjectIds}
+      onSelectionChange={handleProjectsChange}
+      showSwitcher={false}
+      isGlobal={approvalFlowData.IsGlobal}
+      onGlobalChange={handleGlobalChange}
+      ModalContentComponent={TableSelector}
+      modalContentProps={modalContentProps}
+      className="mt-8"
+    />
+  </div>
+</TwoColumnLayout.Item>
 
-          {/* ───────── TwoColumnLayout.Item: BoxTemplate DataTable ───────── */}
+{/* ───────── TwoColumnLayout.Item: BoxTemplate DataTable ───────── */}
           <TwoColumnLayout.Item span={2}>
             {selectedRow && (
               <div className="overflow-x-auto pb-2">

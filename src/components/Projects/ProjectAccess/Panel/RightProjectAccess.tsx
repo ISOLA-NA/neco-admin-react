@@ -74,17 +74,18 @@ const RightProjectAccess: React.FC<RightProps> = ({
           style={{ backgroundColor: isWrite ? "#ec4899" : "#9ca3af" }}
         >
           <span
-            className="absolute w-6 h-6 bg-white rounded-full shadow-md top-0 left-0 transform transition-transform duration-300"
+            className="absolute w-6 h-6 bg-white rounded-full shadow-md top-0 left-0 transition-all duration-300"
             style={{
-  transform: isWrite ? "translateX(24px)" : "translateX(0px)",
-}}
+              transform: isWrite
+                ? isRtl ? "translateX(0px)" : "translateX(24px)"
+                : isRtl ? "translateX(24px)" : "translateX(0px)",
+            }}
           />
         </div>
 
         <span
-          className={`text-sm font-semibold ${
-            isWrite ? "text-blue-600" : "text-gray-500"
-          }`}
+          className={`text-sm font-semibold ${isWrite ? "text-blue-600" : "text-gray-500"
+            }`}
         >
           {isWrite
             ? t("ProjectAccess.Write", { defaultValue: "Write" })
@@ -100,9 +101,8 @@ const RightProjectAccess: React.FC<RightProps> = ({
         {booleanKeys.map((key) => (
           <label
             key={key}
-            className={`relative border rounded bg-white ${
-              isRtl ? "pr-8" : "pl-8"
-            } px-2 py-1 flex items-center`}
+            className={`relative border rounded bg-white ${isRtl ? "pr-8" : "pl-8"
+              } px-2 py-1 flex items-center`}
           >
             <input
               type="checkbox"
@@ -110,14 +110,12 @@ const RightProjectAccess: React.FC<RightProps> = ({
               onChange={() =>
                 onRowChange({ [key]: !(selectedRow as any)[key] })
               }
-              className={`h-4 w-4 shrink-0 absolute top-1/2 -translate-y-1/2 ${
-                isRtl ? "right-2" : "left-2"
-              }`}
+              className={`h-4 w-4 shrink-0 absolute top-1/2 -translate-y-1/2 ${isRtl ? "right-2" : "left-2"
+                }`}
             />
             <span
-              className={`text-xs truncate w-full ${
-                isRtl ? "text-right" : "text-left"
-              }`}
+              className={`text-xs truncate w-full ${isRtl ? "text-right" : "text-left"
+                }`}
               title={getLabel(key)}
             >
               {getLabel(key)}

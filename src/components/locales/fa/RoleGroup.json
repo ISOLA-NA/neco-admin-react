@@ -1,6 +1,7 @@
 {
   "RoleGroup": {
     "Name": "نام گروه",
+    "IsGlobal":"عمومی",
     "Description": "شرح",
     "Projects": "پروژه‌های مربوطه",
     "Members": "اعضای گروه",
