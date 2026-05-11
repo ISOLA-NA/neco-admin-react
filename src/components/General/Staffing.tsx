@@ -43,18 +43,20 @@ interface StaffingProps {
 
 const Staffing = forwardRef<StaffingHandle, StaffingProps>(
   ({ selectedRow }, ref) => {
-    // const { t } = useTranslation();
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const api = useApi();
+
     const [projects, setProjects] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [roles, setRoles] = useState<any[]>([]);
     const [companies, setCompanies] = useState<any[]>([]);
     const [menus, setMenus] = useState<any[]>([]);
+
     const [isLoading, setIsLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [currentSelector, setCurrentSelector] = useState<string | null>(null);
     const [selectedRowData, setSelectedRowData] = useState<any>(null);
+
     const [isProjectNameDisabled, setIsProjectNameDisabled] =
       useState<boolean>(false);
 
@@ -74,6 +76,27 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
       CreateDate: new Date().toISOString(),
     });
 
+    // حذف رکوردهای خالی از همه‌ی دیتاها، نه فقط Roles
+    const validRoles = roles.filter(
+      (r) => r?.ID && r?.Name && r.Name.trim() !== ""
+    );
+
+    const validProjects = projects.filter(
+      (p) => p?.ID && p?.ProjectName && p.ProjectName.trim() !== ""
+    );
+
+    const validUsers = users.filter(
+      (u) => u?.ID && u?.Username && u.Username.trim() !== ""
+    );
+
+    const validCompanies = companies.filter(
+      (c) => c?.ID && c?.Name && c.Name.trim() !== ""
+    );
+
+    const validMenus = menus.filter(
+      (m) => m?.ID && m?.Name && m.Name.trim() !== ""
+    );
+
     useEffect(() => {
       Promise.all([
         api.getAllProject(),
@@ -83,11 +106,11 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
         api.getAllMenu(),
       ])
         .then(([pd, ud, rd, cd, md]) => {
-          setProjects(pd);
-          setUsers(ud);
-          setRoles(rd);
-          setCompanies(cd);
-          setMenus(md);
+          setProjects(Array.isArray(pd) ? pd : []);
+          setUsers(Array.isArray(ud) ? ud : []);
+          setRoles(Array.isArray(rd) ? rd : []);
+          setCompanies(Array.isArray(cd) ? cd : []);
+          setMenus(Array.isArray(md) ? md : []);
         })
         .catch(console.error)
         .finally(() => setIsLoading(false));
@@ -95,12 +118,15 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
     useEffect(() => {
       if (!selectedRow) return;
+
+      const selectedPostTypeId = (selectedRow.nPostTypeID ?? "").toString();
+
       setStaffingData({
         id: selectedRow.ID?.toString() || "",
         Name: selectedRow.Name || "",
         ProjectID: (selectedRow.nProjectID ?? "").toString(),
         OwnerID: (selectedRow.OwnerID ?? "").toString(),
-        nPostTypeID: (selectedRow.nPostTypeID ?? "").toString(),
+        nPostTypeID: selectedPostTypeId,
         nCompanyID: (selectedRow.nCompanyID ?? "").toString(),
         ParrentId: (selectedRow.ParrentId ?? "").toString(),
         nMenuID: (selectedRow.nMenuID ?? "").toString(),
@@ -110,18 +136,23 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
         PostCode: selectedRow.PostCode || "",
         CreateDate: selectedRow.CreateDate || new Date().toISOString(),
       });
-      if (selectedRow.nPostTypeID) {
-        const sel = roles.find((r) => r.ID === selectedRow.nPostTypeID);
+
+      if (selectedPostTypeId) {
+        const sel = validRoles.find(
+          (r) => r.ID?.toString() === selectedPostTypeId
+        );
         setIsProjectNameDisabled(sel?.isStaticPost || false);
       }
-    }, [selectedRow, roles]);
+    }, [selectedRow, validRoles]);
 
     const save = async () => {
       if (staffingData.nPostTypeID) {
-        const sel = roles.find((r) => r.ID === staffingData.nPostTypeID);
+        const sel = validRoles.find(
+          (r) => r.ID?.toString() === staffingData.nPostTypeID
+        );
+
         if (sel && !sel.isStaticPost && !staffingData.ProjectID) {
           showAlert("warning", null, t("Staffing.DynamicRoleSelectProject"));
-          // throw new Error("Missing ProjectID");
           return false;
         }
       }
@@ -133,6 +164,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
 
       const currentUserId = localStorage.getItem("currentUserId") || undefined;
       const sd = staffingData;
+
       const payload: Role = {
         ID: sd.id || uuidv4(),
         Name: sd.Name,
@@ -172,11 +204,12 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
     useImperativeHandle(ref, () => ({ save }));
 
     const handleChange = (field: keyof StaffingData, value: string) => {
-      setStaffingData((p) => ({ ...p, [field]: value }));
       if (field === "nPostTypeID") {
-        const sel = roles.find((r) => r.ID === value);
+        const sel = validRoles.find((r) => r.ID?.toString() === value);
         const isStatic = sel?.isStaticPost || false;
+
         setIsProjectNameDisabled(isStatic);
+
         setStaffingData((p) => ({
           ...p,
           id: value,
@@ -186,7 +219,11 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           ProjectID: isStatic ? "" : p.ProjectID,
           isStaticPost: isStatic,
         }));
+
+        return;
       }
+
+      setStaffingData((p) => ({ ...p, [field]: value }));
     };
 
     const handleSwitcher = (
@@ -200,62 +237,66 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
       setSelectedRowData(null);
       setModalOpen(true);
     };
+
     const closeModal = () => {
       setModalOpen(false);
       setCurrentSelector(null);
       setSelectedRowData(null);
     };
+
     const onRowClick = (row: any) => setSelectedRowData(row);
+
     const onSelect = () => {
       if (!currentSelector || !selectedRowData) return;
+
       handleChange(
         currentSelector as keyof StaffingData,
         selectedRowData.ID.toString()
       );
+
       closeModal();
     };
 
-    if (isLoading)
+    if (isLoading) {
       return (
         <div className="flex justify-center items-center h-48">Loading...</div>
       );
+    }
 
     return (
       <div className="p-4">
         <TwoColumnLayout>
           <DynamicSelector
-            options={[
-              { value: "", label: "" },
-              ...roles.map((r) => ({ value: r.ID, label: r.Name })),
-            ]}
-            selectedValue={staffingData.Name}
+            options={validRoles.map((r) => ({
+              value: r.ID.toString(),
+              label: r.Name,
+            }))}
+            selectedValue={staffingData.nPostTypeID}
             onChange={(e) => handleChange("nPostTypeID", e.target.value)}
             label={t("Staffing.RolesType")}
             showButton
             onButtonClick={() => openModal("nPostTypeID")}
             disabled={!!selectedRow}
           />
+
           <DynamicSelector
-            options={[
-              { value: "", label: "" },
-              ...projects.map((p) => ({
-                value: p.ID.toString(),
-                label: p.ProjectName,
-              })),
-            ]}
+            options={validProjects.map((p) => ({
+              value: p.ID.toString(),
+              label: p.ProjectName,
+            }))}
             selectedValue={staffingData.ProjectID}
             onChange={(e) => handleChange("ProjectID", e.target.value)}
             label={t("Staffing.ProjectName")}
             showButton
             onButtonClick={() => openModal("ProjectID")}
-            disabled={staffingData.isStaticPost}
+            disabled={staffingData.isStaticPost || isProjectNameDisabled}
           />
 
           <DynamicSelector
-            options={[
-              { value: "", label: "" },
-              ...users.map((u) => ({ value: u.ID, label: u.Username })),
-            ]}
+            options={validUsers.map((u) => ({
+              value: u.ID.toString(),
+              label: u.Username,
+            }))}
             selectedValue={staffingData.OwnerID}
             onChange={(e) => handleChange("OwnerID", e.target.value)}
             label={t("Staffing.UserName")}
@@ -264,10 +305,10 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           />
 
           <DynamicSelector
-            options={[
-              { value: "", label: "" },
-              ...roles.map((r) => ({ value: r.ID, label: r.Name })),
-            ]}
+            options={validRoles.map((r) => ({
+              value: r.ID.toString(),
+              label: r.Name,
+            }))}
             selectedValue={staffingData.ParrentId}
             onChange={(e) => handleChange("ParrentId", e.target.value)}
             label={t("Staffing.SuperiorRole")}
@@ -276,13 +317,10 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           />
 
           <DynamicSelector
-            options={[
-              { value: "", label: "" },
-              ...companies.map((c) => ({
-                value: c.ID.toString(),
-                label: c.Name,
-              })),
-            ]}
+            options={validCompanies.map((c) => ({
+              value: c.ID.toString(),
+              label: c.Name,
+            }))}
             selectedValue={staffingData.nCompanyID}
             onChange={(e) => handleChange("nCompanyID", e.target.value)}
             label={t("Staffing.Enterprise")}
@@ -291,13 +329,10 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           />
 
           <DynamicSelector
-            options={[
-              { value: "", label: "" },
-              ...menus.map((m) => ({
-                value: m.ID.toString(),
-                label: m.Name,
-              })),
-            ]}
+            options={validMenus.map((m) => ({
+              value: m.ID.toString(),
+              label: m.Name,
+            }))}
             selectedValue={staffingData.nMenuID}
             onChange={(e) => handleChange("nMenuID", e.target.value)}
             label={t("Staffing.RelatedRibbons")}
@@ -326,43 +361,7 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
               columnDefs={[
                 { headerName: t("Staffing.Name"), field: "ProjectName" },
               ]}
-              rowData={projects}
-              // selectedRow={selectedRowData}
-              onRowClick={onRowClick}
-              onRowDoubleClick={onSelect}
-              onSelectButtonClick={onSelect}
-              isSelectDisabled={!selectedRowData}
-            />
-          )}
-          {currentSelector === "OwnerID" && (
-            <TableSelector
-              columnDefs={[
-                { headerName: t("Staffing.Name"), field: "Username" },
-              ]}
-              rowData={users}
-              // selectedRow={selectedRowData}
-              onRowClick={onRowClick}
-              onRowDoubleClick={onSelect}
-              onSelectButtonClick={onSelect}
-              isSelectDisabled={!selectedRowData}
-            />
-          )}
-          {currentSelector === "nPostTypeID" && (
-            <TableSelector
-              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
-              rowData={roles}
-              // selectedRow={selectedRowData}
-              onRowClick={onRowClick}
-              onRowDoubleClick={onSelect}
-              onSelectButtonClick={onSelect}
-              isSelectDisabled={!selectedRowData}
-            />
-          )}
-          {currentSelector === "nCompanyID" && (
-            <TableSelector
-              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
-              rowData={companies}
-              // selectedRow={selectedRowData}
+              rowData={validProjects}
               onRowClick={onRowClick}
               onRowDoubleClick={onSelect}
               onSelectButtonClick={onSelect}
@@ -370,11 +369,23 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
             />
           )}
 
-          {currentSelector === "nMenuID" && (
+          {currentSelector === "OwnerID" && (
+            <TableSelector
+              columnDefs={[
+                { headerName: t("Staffing.Name"), field: "Username" },
+              ]}
+              rowData={validUsers}
+              onRowClick={onRowClick}
+              onRowDoubleClick={onSelect}
+              onSelectButtonClick={onSelect}
+              isSelectDisabled={!selectedRowData}
+            />
+          )}
+
+          {currentSelector === "nPostTypeID" && (
             <TableSelector
               columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
-              rowData={menus}
-              // selectedRow={selectedRowData}
+              rowData={validRoles}
               onRowClick={onRowClick}
               onRowDoubleClick={onSelect}
               onSelectButtonClick={onSelect}
@@ -385,7 +396,29 @@ const Staffing = forwardRef<StaffingHandle, StaffingProps>(
           {currentSelector === "ParrentId" && (
             <TableSelector
               columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
-              rowData={roles}
+              rowData={validRoles}
+              onRowClick={onRowClick}
+              onRowDoubleClick={onSelect}
+              onSelectButtonClick={onSelect}
+              isSelectDisabled={!selectedRowData}
+            />
+          )}
+
+          {currentSelector === "nCompanyID" && (
+            <TableSelector
+              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
+              rowData={validCompanies}
+              onRowClick={onRowClick}
+              onRowDoubleClick={onSelect}
+              onSelectButtonClick={onSelect}
+              isSelectDisabled={!selectedRowData}
+            />
+          )}
+
+          {currentSelector === "nMenuID" && (
+            <TableSelector
+              columnDefs={[{ headerName: t("Staffing.Name"), field: "Name" }]}
+              rowData={validMenus}
               onRowClick={onRowClick}
               onRowDoubleClick={onSelect}
               onSelectButtonClick={onSelect}

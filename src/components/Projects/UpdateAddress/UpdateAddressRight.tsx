@@ -6,11 +6,39 @@ import DynamicConfirm from "../../utilities/DynamicConfirm";
 import { useTranslation } from "react-i18next";
 
 const UpdateAddressRight: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { selectedNode, address, setAddress, saveAddress } = useUpdateAddress();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const isRtl = i18n.dir() === "rtl" || i18n.language === "fa";
+
+  const toPersianDigits = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return "";
+
+    return value.toString().replace(/\d/g, (digit) => {
+      return "۰۱۲۳۴۵۶۷۸۹"[Number(digit)];
+    });
+  };
+
+  const toEnglishDigits = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return "";
+
+    return value
+      .toString()
+      .replace(/[۰-۹]/g, (digit) => {
+        return String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit));
+      })
+      .replace(/[٠-٩]/g, (digit) => {
+        return String("٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+      });
+  };
+
+  const localizeText = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return "";
+    return i18n.language === "fa" ? toPersianDigits(value) : value.toString();
+  };
 
   const disabled = !selectedNode || !address?.trim();
 
@@ -29,12 +57,17 @@ const UpdateAddressRight: React.FC = () => {
     }
   };
 
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAddress(toEnglishDigits(value));
+  };
+
   return (
-    <div className="w-full">
+    <div className="w-full" dir={isRtl ? "rtl" : "ltr"}>
       <div className="mb-2 text-xs text-gray-500">
         {selectedNode
           ? `${t("UpdateAddress.Selected", { defaultValue: "Selected" })}: ${
-              selectedNode.Name
+              localizeText(selectedNode.Name)
             }`
           : t("UpdateAddress.SelectItemFromTree", {
               defaultValue: "Please select an item from the tree on the left.",
@@ -44,10 +77,8 @@ const UpdateAddressRight: React.FC = () => {
       <DynamicInput
         name={t("UpdateAddress.Address", { defaultValue: "Address" })}
         type="text"
-        value={address}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setAddress(e.target.value)
-        }
+        value={localizeText(address)}
+        onChange={handleAddressChange}
         placeholder={t("UpdateAddress.EnterAddressHere", {
           defaultValue: "Enter address here...",
         })}

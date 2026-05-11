@@ -73,6 +73,39 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
     const [modalValue, setModalValue] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
 
+    const isFa = i18n.language === "fa";
+
+    const toPersianDigits = (value: string | number | null | undefined) => {
+      if (value === null || value === undefined) return "";
+
+      return value.toString().replace(/\d/g, (digit) => {
+        return "۰۱۲۳۴۵۶۷۸۹"[Number(digit)];
+      });
+    };
+
+    const toEnglishDigits = (value: string | number | null | undefined) => {
+      if (value === null || value === undefined) return "";
+
+      return value
+        .toString()
+        .replace(/[۰-۹]/g, (digit) => {
+          return String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit));
+        })
+        .replace(/[٠-٩]/g, (digit) => {
+          return String("٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+        });
+    };
+
+    const localizeNumber = (value: string | number | null | undefined) => {
+      if (value === null || value === undefined) return "";
+      return isFa ? toPersianDigits(value) : value.toString();
+    };
+
+    const localizeDate = (value: string | null | undefined) => {
+      if (!value) return "";
+      return isFa ? toPersianDigits(value) : value;
+    };
+
     useEffect(() => {
       if (selectedRow) {
         setCalendarData({
@@ -164,7 +197,17 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
       day: string,
       e: React.ChangeEvent<HTMLInputElement>
     ) => {
-      const numValue = parseFloat(e.target.value);
+      const englishValue = toEnglishDigits(e.target.value);
+      const numValue = parseFloat(englishValue);
+
+      if (englishValue.trim() === "") {
+        setRoutineData((prev) => ({
+          ...prev,
+          [day]: 0,
+        }));
+        return;
+      }
+
       if (isNaN(numValue) || numValue < 0 || numValue > 1) return;
 
       setRoutineData((prev) => ({
@@ -186,7 +229,9 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
     const handleSaveModal = () => {
       if (!selectedDate) return;
 
-      const numValue = parseFloat(modalValue);
+      const englishValue = toEnglishDigits(modalValue);
+      const numValue = parseFloat(englishValue);
+
       if (isNaN(numValue) || numValue < 0 || numValue > 1) {
         showAlert(
           "error",
@@ -213,6 +258,25 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
         .padStart(2, "0")}`;
       setSelectedDate(dateStr);
       setModalValue(exceptionData[dateStr]?.toString() || "");
+    };
+
+    const handleModalValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const englishValue = toEnglishDigits(e.target.value);
+
+      if (englishValue.trim() === "") {
+        setModalValue("");
+        return;
+      }
+
+      const validNumberPattern = /^(0|1|0\.\d*)$/;
+
+      if (!validNumberPattern.test(englishValue)) return;
+
+      const numValue = parseFloat(englishValue);
+
+      if (!isNaN(numValue) && numValue >= 0 && numValue <= 1) {
+        setModalValue(englishValue);
+      }
     };
 
     const weekDayKeys = [
@@ -321,11 +385,16 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
 
                           <DynamicInput
                             name=""
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
                             min={0}
                             max={1}
                             step={0.1}
-                            value={routineData[dayKey]?.toString() || ""}
+                            value={
+                              dayKey in routineData
+                                ? localizeNumber(routineData[dayKey])
+                                : ""
+                            }
                             onChange={(e) => handleRoutineChange(dayKey, e)}
                             disabled={!(dayKey in routineData)}
                             placeholder=""
@@ -372,11 +441,16 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
 
                           <DynamicInput
                             name=""
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
                             min={0}
                             max={1}
                             step={0.1}
-                            value={routineData[dayKey]?.toString() || ""}
+                            value={
+                              dayKey in routineData
+                                ? localizeNumber(routineData[dayKey])
+                                : ""
+                            }
                             onChange={(e) => handleRoutineChange(dayKey, e)}
                             disabled={!(dayKey in routineData)}
                             placeholder=""
@@ -416,7 +490,7 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                     const yearValue = new Date().getFullYear() - 5 + i;
                     return (
                       <option key={yearValue} value={yearValue}>
-                        {yearValue}
+                        {localizeNumber(yearValue)}
                       </option>
                     );
                   })}
@@ -461,11 +535,11 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                       <span
                         className={hasValue ? "text-white" : "text-gray-700"}
                       >
-                        {day + 1}
+                        {localizeNumber(day + 1)}
                       </span>
                       {hasValue && (
                         <span className="text-xs mt-1">
-                          {exceptionData[dateStr]}h
+                          {localizeNumber(exceptionData[dateStr])}h
                         </span>
                       )}
                     </div>
@@ -481,19 +555,20 @@ const CalendarTabs = forwardRef<CalendarHandle, CalendarProps>(
                 <h3 className="text-lg font-bold mb-4 text-gray-800">
                   {t("Calendars.SetWorkingHoursFor", {
                     defaultValue: "Set Working Hours for {{date}}",
-                    date: selectedDate,
+                    date: localizeDate(selectedDate),
                   })}
                 </h3>
                 <DynamicInput
                   name={t("Calendars.WorkingHours", {
                     defaultValue: "Work Hours Per Day",
                   })}
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   min={0}
                   max={1}
                   step={0.1}
-                  value={modalValue}
-                  onChange={(e) => setModalValue(e.target.value)}
+                  value={localizeNumber(modalValue)}
+                  onChange={handleModalValueChange}
                   placeholder=""
                   className="w-full"
                 />

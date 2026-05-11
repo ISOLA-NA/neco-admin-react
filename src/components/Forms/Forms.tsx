@@ -86,44 +86,7 @@ const columnTypeMapping: { [key: string]: number } = {
   component36: 38,
   component37: 39,
 };
-const typeOfInformationOptions = [
-  { value: "component1", label: "Text" },
-  { value: "component2", label: "RichText" },
-  { value: "component3", label: "Choice" },
-  { value: "component4", label: "Number" },
-  { value: "component5", label: "Date Time" },
-  { value: "component6", label: "Persian Date" },
-  { value: "component7", label: "Lookup" },
-  { value: "component27", label: "Hyper Link" },
-  { value: "component8", label: "Post PickerList" },
-  { value: "component9", label: "Lookup RealValue" },
-  { value: "component10", label: "Lookup AdvanceTable" },
-  { value: "component26", label: "Advance Lookup AdvanceTable" },
-  { value: "component12", label: "Lookup Image" },
-  { value: "component28", label: "Select User In Post" },
-  { value: "component13", label: "Yes No" },
-  { value: "component14", label: "Attach File" },
-  { value: "component15", label: "Picture Box" },
-  { value: "component16", label: "Table" },
-  { value: "component17", label: "Pfi Lookup" },
-  { value: "component18", label: "Seqnial Number" },
-  { value: "component19", label: "Advance Table" },
-  { value: "component20", label: "Word Panel" },
-  { value: "component21", label: "Excel Panel" },
-  { value: "component22", label: "Calculated Field" },
-  { value: "component23", label: "Excel Calculator" },
-  { value: "component24", label: "Tab" },
-  { value: "component25", label: "Map" },
-  { value: "component29", label: "Title" },
-  { value: "component30", label: "Section" },
-  { value: "component31", label: "Sub Section" },
-  { value: "component32", label: "New Line" },
-  { value: "component33", label: "Mepost Selector" },
-  { value: "component34", label: "Advance WF" },
-  { value: "component35", label: "LookupImage RealValue" },
-  { value: "component36", label: "Inventory" },
-  { value: "component37", label: "Inventory Field" },
-];
+
 async function fetchFileNameById(fileId: string) {
   if (!fileId) return "";
   try {
@@ -138,6 +101,49 @@ async function fetchFileNameById(fileId: string) {
 }
 const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
   const { t, i18n } = useTranslation();
+
+  const typeOfInformationOptions = React.useMemo(() => [
+
+  
+  { value: "component1",  label: t("ColumnTypes.Text") },
+  { value: "component2",  label: t("ColumnTypes.RichText") },
+  { value: "component3",  label: t("ColumnTypes.Choice") },
+  { value: "component4",  label: t("ColumnTypes.Number") },
+  { value: "component5",  label: t("ColumnTypes.DateTime") },
+  { value: "component6",  label: t("ColumnTypes.PersianDate") },
+  { value: "component7",  label: t("ColumnTypes.Lookup") },
+  { value: "component27", label: t("ColumnTypes.HyperLink") },
+  { value: "component8",  label: t("ColumnTypes.PostPickerList") },
+  { value: "component9",  label: t("ColumnTypes.LookupRealValue") },
+  { value: "component10", label: t("ColumnTypes.LookupAdvanceTable") },
+  { value: "component26", label: t("ColumnTypes.AdvanceLookupAdvanceTable") },
+  { value: "component12", label: t("ColumnTypes.LookupImage") },
+  { value: "component28", label: t("ColumnTypes.SelectUserInPost") },
+  { value: "component13", label: t("ColumnTypes.YesNo") },
+  { value: "component14", label: t("ColumnTypes.AttachFile") },
+  { value: "component15", label: t("ColumnTypes.PictureBox") },
+  { value: "component16", label: t("ColumnTypes.Table") },
+  { value: "component17", label: t("ColumnTypes.PfiLookup") },
+  { value: "component18", label: t("ColumnTypes.SeqnialNumber") },
+  { value: "component19", label: t("ColumnTypes.AdvanceTable") },
+  { value: "component20", label: t("ColumnTypes.WordPanel") },
+  { value: "component21", label: t("ColumnTypes.ExceclPanel") },
+  { value: "component22", label: t("ColumnTypes.CalculatedField") },
+  { value: "component23", label: t("ColumnTypes.ExcelCalculator") },
+  { value: "component24", label: t("ColumnTypes.Tab") },
+  { value: "component25", label: t("ColumnTypes.Map") },
+  { value: "component29", label: t("ColumnTypes.Title") },
+  { value: "component30", label: t("ColumnTypes.Section") },
+  { value: "component31", label: t("ColumnTypes.SubSection") },
+  { value: "component32", label: t("ColumnTypes.MePostSelector") },
+  { value: "component33", label: t("ColumnTypes.Advancewf") },
+  { value: "component34", label: t("ColumnTypes.LookUpRealValueImg") },
+  { value: "component35", label: t("ColumnTypes.LookUpRealValueImg") },
+  { value: "component36", label: t("ColumnTypes.Inventory") },
+  { value: "component37", label: t("ColumnTypes.InventoryField") },
+], [t]);
+
+
   const uiDir = i18n.dir() as "rtl" | "ltr";
   const isRtl = uiDir === "rtl";
   const ellipsisCellStyle = React.useMemo(() => {
@@ -420,12 +426,18 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         filter: true,
         flex: 1.3,
         minWidth: 150,
+        // valueGetter: (params: any) => {
+        //   const opt = typeOfInformationOptions.find(
+        //     (o) => columnTypeMapping[o.value] === params.data.ColumnType
+        //   );
+        //   return opt ? opt.label : params.data.ColumnType;
+        // },
         valueGetter: (params: any) => {
-          const opt = typeOfInformationOptions.find(
-            (o) => columnTypeMapping[o.value] === params.data.ColumnType
-          );
-          return opt ? opt.label : params.data.ColumnType;
-        },
+  const opt = typeOfInformationOptions.find(
+    (o) => columnTypeMapping[o.value] === params.data.ColumnType
+  );
+  return opt ? opt.label : params.data.ColumnType;
+},
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -444,7 +456,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         { headerNameKey: "ShowInList", field: "IsShowGrid" },
         { headerNameKey: "Required", field: "IsRequire" },
         { headerNameKey: "MainColumn", field: "IsMainColumn" },
-        { headerNameKey: "IsRtl", field: "IsRTL" },
+        // { headerNameKey: "IsRtl", field: "IsRTL" },
         { headerNameKey: "CountInReject", field: "CountInReject" },
       ].map((c) => ({
         headerName: t(`Forms.Columns.${c.headerNameKey}`),
@@ -757,7 +769,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
             rightLabel=""
           />
         </TwoColumnLayout.Item>
-      <TwoColumnLayout.Item span={1}>
+        <TwoColumnLayout.Item span={1}>
           <div className="flex items-center gap-6">
             <DynamicSwitcher
               isChecked={formData.IsMegaForm}

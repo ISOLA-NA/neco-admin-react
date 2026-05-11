@@ -40,7 +40,18 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
   actionBtnID,
   setActionBtnID,
 }) => {
-  const { t } = useTranslation();
+   const { t, i18n } = useTranslation(); // ← i18n اضافه شد
+   // ── تشخیص حالت فارسی از زبان جاری ──
+  const isFaMode = i18n.language === "fa";
+
+  const toPersian = (val: string | number): string => {
+  if (i18n.language !== "fa") return String(val ?? "");
+  return String(val ?? "").replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+};
+
+const fromPersian = (val: string): string =>
+  val.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+
   const api = useApi();
 
   const [fromOptions, setFromOptions] = useState<
@@ -117,134 +128,150 @@ const DeemedSection: React.FC<DeemedSectionProps> = ({
   }));
 
   return (
-    <div className="mt-4">
-      <div className="bg-gray-200 p-4 rounded mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-          <div className="md:col-span-2">
-            <DynamicInput
-              name={t("AddApprovalFlows.After")}
-              type="number"
-              value={deemDay === 0 ? "" : deemDay}
-              onChange={(e) =>
-                setDeemDay(e.target.value ? Number(e.target.value) : 0)
-              }
-              disabled={disableMain}
-            />
-          </div>
+  <div className="mt-4">
+    <div className="bg-gray-200 p-4 rounded mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
 
+        {/* ── After (deemDay) ── */}
+        <div className="md:col-span-2">
+          <DynamicInput
+            name={t("AddApprovalFlows.After")}
+            type={isFaMode ? "text" : "number"}
+            value={
+              deemDay === 0
+                ? ""
+                : toPersian(deemDay)
+            }
+            onChange={(e) => {
+              const raw = fromPersian(e.target.value);
+              setDeemDay(raw ? Number(raw) : 0);
+            }}
+            disabled={disableMain}
+          />
+        </div>
+
+        {/* ── Condition ── */}
+        <div className="md:col-span-4">
+          <DynamicSelector
+            options={[
+              {
+                value: "",
+                label: t("AddApprovalFlows.SelectCondition"),
+              },
+              ...fromOptions,
+            ]}
+            selectedValue={deemCondition ? String(deemCondition) : ""}
+            onChange={(e) =>
+              setDeemCondition(e.target.value ? Number(e.target.value) : 0)
+            }
+            label={t("AddApprovalFlows.Condition")}
+            disabled={disableMain}
+          />
+        </div>
+
+        {/* ── TheStatusWillSetTo ── */}
+        <div className="md:col-span-6">
+          <DynamicSelector
+            options={[
+              {
+                value: "",
+                label: t("AddApprovalFlows.SelectStatus"),
+              },
+              ...statusOptions,
+            ]}
+            selectedValue={deemAction ? String(deemAction) : ""}
+            onChange={(e) =>
+              setDeemAction(e.target.value ? Number(e.target.value) : 0)
+            }
+            label={t("AddApprovalFlows.TheStatusWillSetTo")}
+            disabled={disableMain}
+          />
+        </div>
+
+        {/* ── PreviousState ── */}
+        <div className="md:col-span-4">
+          <DynamicSelector
+            options={[
+              {
+                value: "",
+                label: t("AddApprovalFlows.SelectPreviousState"),
+              },
+              ...previousStateOptions,
+            ]}
+            selectedValue={previewsStateId ? String(previewsStateId) : ""}
+            onChange={(e) =>
+              setPreviewsStateId(
+                e.target.value ? Number(e.target.value) : null
+              )
+            }
+            label={t("AddApprovalFlows.PreviousState")}
+            disabled={disableMain}
+          />
+        </div>
+
+        {/* ── ActionButton ── */}
+        {showAdminSection && (
           <div className="md:col-span-4">
             <DynamicSelector
               options={[
                 {
                   value: "",
-                  label: t("AddApprovalFlows.SelectCondition"),
+                  label: t("AddApprovalFlows.SelectActionButtonPlaceholder"),
                 },
-                ...fromOptions,
+                ...localActionBtnOptions,
               ]}
-              selectedValue={deemCondition ? String(deemCondition) : ""}
+              selectedValue={actionBtnID ? String(actionBtnID) : ""}
               onChange={(e) =>
-                setDeemCondition(e.target.value ? Number(e.target.value) : 0)
-              }
-              label={t("AddApprovalFlows.Condition")}
-              disabled={disableMain}
-            />
-          </div>
-
-          <div className="md:col-span-6">
-            <DynamicSelector
-              options={[
-                {
-                  value: "",
-                  label: t("AddApprovalFlows.SelectStatus"),
-                },
-                ...statusOptions,
-              ]}
-              selectedValue={deemAction ? String(deemAction) : ""}
-              onChange={(e) =>
-                setDeemAction(e.target.value ? Number(e.target.value) : 0)
-              }
-              label={t("AddApprovalFlows.TheStatusWillSetTo")}
-              disabled={disableMain}
-            />
-          </div>
-
-          <div className="md:col-span-4">
-            <DynamicSelector
-              options={[
-                {
-                  value: "",
-                  label: t("AddApprovalFlows.SelectPreviousState"),
-                },
-                ...previousStateOptions,
-              ]}
-              selectedValue={previewsStateId ? String(previewsStateId) : ""}
-              onChange={(e) =>
-                setPreviewsStateId(
+                setActionBtnID(
                   e.target.value ? Number(e.target.value) : null
                 )
               }
-              label={t("AddApprovalFlows.PreviousState")}
+              label={t("AddApprovalFlows.SelectActionButton")}
               disabled={disableMain}
             />
           </div>
-
-          {showAdminSection && (
-            <div className="md:col-span-4">
-              <DynamicSelector
-                options={[
-                  {
-                    value: "",
-                    label: t("AddApprovalFlows.SelectActionButtonPlaceholder"),
-                  },
-                  ...localActionBtnOptions,
-                ]}
-                selectedValue={actionBtnID ? String(actionBtnID) : ""}
-                onChange={(e) =>
-                  setActionBtnID(e.target.value ? Number(e.target.value) : null)
-                }
-                label={t("AddApprovalFlows.SelectActionButton")}
-                disabled={disableMain}
-              />
-            </div>
-          )}
-        </div>
-
-        {loadingEnums && (
-          <p className="text-xs text-gray-600 mt-2">
-            {t("AddApprovalFlows.LoadingEnums")}
-          </p>
-        )}
-
-        {errorEnums && (
-          <p className="text-xs text-red-600 mt-2">{errorEnums}</p>
         )}
       </div>
 
-      <div className="bg-gray-100 p-2 rounded">
-        <p className="text-sm text-gray-700 mb-2">
-          {t("AddApprovalFlows.IfUserClicksAdmin")}
+      {loadingEnums && (
+        <p className="text-xs text-gray-600 mt-2">
+          {t("AddApprovalFlows.LoadingEnums")}
         </p>
+      )}
 
-        <DynamicSelector
-          options={[
-            {
-              value: "",
-              label: t("AddApprovalFlows.SelectPreviousState"),
-            },
-            ...previousStateOptions,
-          ]}
-          selectedValue={goToPreviousStateID ? String(goToPreviousStateID) : ""}
-          onChange={(e) =>
-            setGoToPreviousStateID(
-              e.target.value ? Number(e.target.value) : null
-            )
-          }
-          label=""
-          className="w-40"
-        />
-      </div>
+      {errorEnums && (
+        <p className="text-xs text-red-600 mt-2">{errorEnums}</p>
+      )}
     </div>
-  );
+
+    {/* ── GoToPreviousStateID ── */}
+    <div className="bg-gray-100 p-2 rounded">
+      <p className="text-sm text-gray-700 mb-2">
+        {t("AddApprovalFlows.IfUserClicksAdmin")}
+      </p>
+
+      <DynamicSelector
+        options={[
+          {
+            value: "",
+            label: t("AddApprovalFlows.SelectPreviousState"),
+          },
+          ...previousStateOptions,
+        ]}
+        selectedValue={
+          goToPreviousStateID ? String(goToPreviousStateID) : ""
+        }
+        onChange={(e) =>
+          setGoToPreviousStateID(
+            e.target.value ? Number(e.target.value) : null
+          )
+        }
+        label=""
+        className="w-40"
+      />
+    </div>
+  </div>
+);
 };
 
 export default DeemedSection;

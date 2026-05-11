@@ -429,7 +429,7 @@ export interface OdpWithExtra {
   IsVisible: boolean;
   LastModified: string | null;
   ModifiedById: string | null;
-  ProgramTemplateIDName: string | null;
+  ProgramTemplateName: string | null;
   WFTemplateName: string;
   nEntityTypeID: number | null;
   nProgramTemplateID: number | null;

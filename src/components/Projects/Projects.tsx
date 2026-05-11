@@ -7,7 +7,15 @@ interface ProjectsProps {
 }
 
 const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const isFaMode = i18n.language === "fa";
+
+  const toPersian = (val: string | number | null): string => {
+    if (val === null || val === undefined || val === "") return "";
+    if (!isFaMode) return String(val);
+    return String(val).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+  };
 
   const [projectData, setProjectData] = useState({
     ID: "",
@@ -65,6 +73,7 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
 
   return (
     <div className="grid grid-cols-2 gap-x-8 gap-y-6 p-4">
+      {/* ── ستون چپ ── */}
       <div className="space-y-6">
         <DynamicInput
           name={t("Projects.ProjectName")}
@@ -83,7 +92,7 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <DynamicInput
           name={t("Projects.IdeaStartDate")}
           type="text"
-          value={projectData.CreateDate}
+          value={toPersian(projectData.CreateDate)}
           disabled={true}
         />
 
@@ -97,7 +106,7 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <DynamicInput
           name={t("Projects.PlanningExecutionBudget")}
           type="text"
-          value={projectData.PCostAct ?? ""}
+          value={toPersian(projectData.PCostAct)}
           disabled={true}
         />
 
@@ -109,6 +118,7 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         />
       </div>
 
+      {/* ── ستون راست ── */}
       <div className="space-y-6">
         <DynamicInput
           name={t("Projects.Status")}
@@ -121,7 +131,9 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
           name={t("Projects.Phase")}
           type="text"
           value={
-            projectData.IsIdea ? t("Projects.IsIdea") : t("Projects.Project")
+            projectData.IsIdea
+              ? t("Projects.IsIdea")
+              : t("Projects.Project")
           }
           disabled={true}
         />
@@ -136,33 +148,33 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <DynamicInput
           name={t("Projects.ProjectPlanDuration")}
           type="text"
-          value={projectData.TotalDuration ?? ""}
+          value={toPersian(projectData.TotalDuration)}
           disabled={true}
         />
 
         <DynamicInput
           name={t("Projects.ProjectApprovalBudget")}
           type="text"
-          value={projectData.PCostAprov ?? ""}
+          value={toPersian(projectData.PCostAprov)}
           disabled={true}
         />
 
         <div className="grid grid-cols-3 gap-4 mt-4">
           <DynamicInput
             name={t("Projects.ProgramItems")}
-            type="number"
+            type="text"
             value=""
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Tasks")}
-            type="number"
-            value={projectData.TaskNum ?? ""}
+            type="text"
+            value={toPersian(projectData.TaskNum)}
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Files")}
-            type="number"
+            type="text"
             value=""
             disabled={true}
           />
@@ -171,20 +183,20 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <div className="grid grid-cols-3 gap-4">
           <DynamicInput
             name={t("Projects.FileSize")}
-            type="number"
+            type="text"
             value=""
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Roles")}
-            type="number"
-            value={projectData.RolesNum ?? ""}
+            type="text"
+            value={toPersian(projectData.RolesNum)}
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Letters")}
-            type="number"
-            value={projectData.LettersNum ?? ""}
+            type="text"
+            value={toPersian(projectData.LettersNum)}
             disabled={true}
           />
         </div>
@@ -192,20 +204,20 @@ const Projects: React.FC<ProjectsProps> = ({ selectedRow }) => {
         <div className="grid grid-cols-3 gap-4">
           <DynamicInput
             name={t("Projects.Meetings")}
-            type="number"
-            value={projectData.MeetingsNum ?? ""}
+            type="text"
+            value={toPersian(projectData.MeetingsNum)}
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Issues")}
-            type="number"
-            value={projectData.IssuesNum ?? ""}
+            type="text"
+            value={toPersian(projectData.IssuesNum)}
             disabled={true}
           />
           <DynamicInput
             name={t("Projects.Knowledge")}
-            type="number"
-            value={projectData.KnowledgeNum ?? ""}
+            type="text"
+            value={toPersian(projectData.KnowledgeNum)}
             disabled={true}
           />
         </div>

@@ -168,7 +168,7 @@ interface OdpData {
   IsVisible: boolean;
   LastModified: string | null;
   ModifiedById: string | null;
-  ProgramTemplateIDName: string | null;
+  ProgramTemplateName: string | null;
   WFTemplateName: string;
   nEntityTypeID: number;
   nProgramTemplateID: number | null;
@@ -686,7 +686,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         IsVisible: data.IsVisible,
         LastModified: data.LastModified,
         ModifiedById: data.ModifiedById,
-        ProgramTemplateIDName: data.ProgramTemplateIDName,
+        ProgramTemplateName: data.ProgramTemplateName,
         WFTemplateName: data.WFTemplateName,
         nEntityTypeID: data.nEntityTypeID,
         nProgramTemplateID: data.nProgramTemplateID,

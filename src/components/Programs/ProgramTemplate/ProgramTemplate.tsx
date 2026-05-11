@@ -387,6 +387,14 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       },
     }));
 
+    const toLocalNum = (val: any): string =>
+      i18n.language === "fa"
+        ? String(val ?? "").replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d])
+        : String(val ?? "");
+
+    const fromLocalNum = (val: string): number =>
+      Number(val.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))));
+
     /* ================================================================= */
     /*                               UI                                  */
     /* ================================================================= */
@@ -407,10 +415,10 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
 
             <DynamicInput
               name={t("ProgramTemplate.Duration")}
-              type="number"
-              value={programTemplateData.Duration}
+              type="text"
+              value={toLocalNum(programTemplateData.Duration)}
               placeholder="Enter duration"
-              onChange={(e) => handleChange("Duration", Number(e.target.value))}
+              onChange={(e) => handleChange("Duration", fromLocalNum(e.target.value))}
               required
             />
 
@@ -418,25 +426,25 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             <div className="grid grid-cols-2 gap-6">
               <DynamicInput
                 name={t("ProgramTemplate.ActivityBudget")}
-                type="number"
-                value={programTemplateData.PCostAct}
+                type="text"
+                value={toLocalNum(programTemplateData.PCostAct)}
                 placeholder="Activity budget"
                 onChange={(e) =>
-                  handleChange("PCostAct", Number(e.target.value))
+                  handleChange("PCostAct", fromLocalNum(e.target.value))
                 }
               />
               <DynamicInput
                 name={t("ProgramTemplate.AfBudget")}
-                type="number"
-                value={programTemplateData.PCostAprov}
+                type="text"
+                value={toLocalNum(programTemplateData.PCostAprov)}
                 placeholder="Af budget"
                 onChange={(e) =>
-                  handleChange("PCostAprov", Number(e.target.value))
+                  handleChange("PCostAprov", fromLocalNum(e.target.value))
                 }
               />
             </div>
 
-            {/* نوع برنامه (در تصویر پایین ستون چپ) */}
+            {/* نوع برنامه */}
             <DynamicSelector
               label={t("ProgramTemplate.Type")}
               options={programTypeOptions}
@@ -458,19 +466,20 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
             {/* سوییچر گلوبال */}
             <DynamicSwitcher
               isChecked={programTemplateData.IsGlobal}
-              onChange={() => handleChange("IsGlobal", !programTemplateData.IsGlobal)}
+              onChange={() =>
+                handleChange("IsGlobal", !programTemplateData.IsGlobal)
+              }
               leftLabel={i18n.language === "fa" ? "عمومی" : "Global"}
               rightLabel=""
             />
-            {/* Related projects + سوییچ Global */}
+
+            {/* Related projects */}
             <ListSelector
               title={t("ProgramTemplate.RelatedProjects")}
               columnDefs={projectColumnDefs}
               rowData={projectsListData}
               selectedIds={selectedProjectIds}
-              onSelectionChange={(ids) =>
-                setSelectedProjectIds(ids.map(String))
-              }
+              onSelectionChange={(ids) => setSelectedProjectIds(ids.map(String))}
               showSwitcher
               isGlobal={programTemplateData.IsGlobal}
               onGlobalChange={(v) => handleChange("IsGlobal", v)}
@@ -610,12 +619,6 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               );
               setSelectedDetailRow(null);
               setShowDeleteConfirm(false);
-              // showAlert(
-              //   "success",
-              //   null,
-              //   "Deleted",
-              //   "Row deleted successfully."
-              // );
             } catch (err) {
               console.error(err);
               showAlert("error", null, "Error", "Failed to delete the row.");

@@ -7,7 +7,7 @@ import { TailSpin } from "react-loader-spinner";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import "./DataTable.css";
-import type { GridOptions, ColDef } from "ag-grid-community";
+import type { GridOptions } from "ag-grid-community";
 import { useTranslation } from "react-i18next";
 
 interface DataTableProps {
@@ -66,6 +66,7 @@ const DataTable: React.FC<DataTableProps> = ({
   isLoading = false,
   isEditMode = true,
   direction = "rtl",
+  resetSearchKey,
 }) => {
   const { t, i18n } = useTranslation();
 
@@ -78,18 +79,37 @@ const DataTable: React.FC<DataTableProps> = ({
   const [filteredRowData, setFilteredRowData] = useState<any[]>([]);
   const [isRowSelected, setIsRowSelected] = useState<boolean>(false);
 
+  const isRtl = direction === "rtl";
+
+  const toPersianDigits = (value: any) => {
+    if (value === null || value === undefined) return value;
+
+    return value.toString().replace(/\d/g, (digit: string) => {
+      return "۰۱۲۳۴۵۶۷۸۹"[Number(digit)];
+    });
+  };
+
+  const localizeDigitsByLanguage = (value: any) => {
+    if (value === null || value === undefined) return "";
+
+    if (i18n.language !== "fa") return value;
+
+    return toPersianDigits(value);
+  };
+
   useEffect(() => {
     const mappedData = rowData.map((item, index) => ({
       ...item,
       clientOrder: item.clientOrder !== undefined ? item.clientOrder : index,
     }));
+
     setOriginalRowData(mappedData);
     setFilteredRowData(mappedData);
   }, [rowData]);
 
   useEffect(() => {
     setSearchText("");
-  }, [rowData]);
+  }, [rowData, resetSearchKey]);
 
   useEffect(() => {
     if (gridApiRef.current && filteredRowData && filteredRowData.length > 0) {
@@ -105,13 +125,18 @@ const DataTable: React.FC<DataTableProps> = ({
       setFilteredRowData(originalRowData);
     } else {
       const lowerValue = value.toLowerCase();
+
       const filtered = originalRowData.filter((item) => {
         return Object.values(item).some((val) => {
           if (val === null || val === undefined) return false;
-          let strVal = typeof val === "object" ? JSON.stringify(val) : val.toString();
+
+          const strVal =
+            typeof val === "object" ? JSON.stringify(val) : val.toString();
+
           return strVal.toLowerCase().includes(lowerValue);
         });
       });
+
       setFilteredRowData(filtered);
     }
   };
@@ -119,6 +144,7 @@ const DataTable: React.FC<DataTableProps> = ({
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api;
     params.api.sizeColumnsToFit();
+
     if (isLoading) params.api.showLoadingOverlay();
   };
 
@@ -134,40 +160,50 @@ const DataTable: React.FC<DataTableProps> = ({
 
   useEffect(() => {
     if (!gridApiRef.current) return;
+
     if (isLoading) gridApiRef.current.showLoadingOverlay();
     else gridApiRef.current.hideOverlay();
   }, [isLoading]);
 
   const handleRowClick = (event: any) => {
+    if (!event || !event.data) return;
+
     if (setSelectedRowData) setSelectedRowData(event.data);
+
     setIsRowSelected(true);
 
-    event.api.forEachNode((node: any) => {
-      node.setSelected(node === event.node);
-    });
+    if (event.api && event.node) {
+      event.api.forEachNode((node: any) => {
+        node.setSelected(node === event.node);
+      });
+    }
 
     if (onRowClick) onRowClick(event.data);
   };
 
   const handleRowDoubleClickInternal = (event: any) => {
+    if (!event || !event.data) return;
+
     onRowDoubleClick(event.data);
   };
 
   const gridClasses = "ag-theme-quartz w-full h-full overflow-y-auto";
 
-  const getRowClass = (params: any) => (params.node.selected ? "ag-row-selected" : "");
+  const getRowClass = (params: any) =>
+    params.node.selected ? "ag-row-selected" : "";
 
   const baseIconButton =
     "rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none";
 
   const sortedFilteredRowData = useMemo(
-    () => [...filteredRowData].sort((a, b) => (a.clientOrder ?? 0) - (b.clientOrder ?? 0)),
+    () =>
+      [...filteredRowData].sort(
+        (a, b) => (a.clientOrder ?? 0) - (b.clientOrder ?? 0)
+      ),
     [filteredRowData]
   );
 
-  const isRtl = direction === "rtl";
-
-  const defaultColDefAligned: ColDef = useMemo(
+  const defaultColDefAligned = useMemo<any>(
     () => ({
       sortable: true,
       cellStyle: { textAlign: isRtl ? "right" : "left" },
@@ -176,37 +212,82 @@ const DataTable: React.FC<DataTableProps> = ({
     [isRtl]
   );
 
+  const localizedColumnDefs = useMemo<any[]>(
+    () =>
+      columnDefs.map((col) => {
+        const existingValueFormatter = col.valueFormatter;
+
+        return {
+          ...col,
+          valueFormatter: (params: any) => {
+            const formattedValue = existingValueFormatter
+              ? existingValueFormatter(params)
+              : params.value;
+
+            return localizeDigitsByLanguage(formattedValue);
+          },
+        };
+      }),
+    [columnDefs, i18n.language]
+  );
+
   const handleAddClick = () => {
     if (gridApiRef.current) gridApiRef.current.deselectAll();
+
     setIsRowSelected(false);
+
     if (setSelectedRowData) setSelectedRowData({});
+
     onAdd();
   };
 
   return (
-    <div dir={direction} className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2">
-      {(showSearch || showAddIcon || showEditIcon || showDeleteIcon || showDuplicateIcon || showViewIcon) && (
+    <div
+      dir={direction}
+      className="data-table-container w-full h-full flex flex-col relative rounded-md shadow-md p-2"
+    >
+      {(showSearch ||
+        showAddIcon ||
+        showEditIcon ||
+        showDeleteIcon ||
+        showDuplicateIcon ||
+        showViewIcon) && (
         <div className="flex items-center justify-between mb-4 bg-gray-300 p-2 rounded-md shadow-sm">
           {showSearch && (
             <div className="relative max-w-sm">
               <FaSearch
-                className={`absolute ${isRtl ? "right-3" : "left-3"} top-1/2 transform -translate-y-1/2 text-gray-500`}
+                className={`absolute ${
+                  isRtl ? "right-3" : "left-3"
+                } top-1/2 transform -translate-y-1/2 text-gray-500`}
               />
+
               <input
                 type="text"
-                placeholder={TT("DataTable.Toolbar.SearchPlaceholder", "جستجو...", "Search...")}
+                placeholder={TT(
+                  "DataTable.Toolbar.SearchPlaceholder",
+                  "جستجو...",
+                  "Search..."
+                )}
                 value={searchText}
                 onChange={onSearchChange}
-                className={`w-full ${isRtl ? "pr-10 pl-3" : "pl-10 pr-3"} py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition`}
+                className={`w-full ${
+                  isRtl ? "pr-10 pl-3" : "pl-10 pr-3"
+                } py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 transition`}
                 style={{ fontFamily: "inherit" }}
               />
             </div>
           )}
 
-          <div className={`flex items-center space-x-4 ${isRtl ? "rtl:space-x-reverse" : ""}`}>
+          <div
+            className={`flex items-center space-x-4 ${
+              isRtl ? "rtl:space-x-reverse" : ""
+            }`}
+          >
             {showEditIcon && (
               <button
-                className={`${baseIconButton} bg-blue-50 hover:bg-blue-100 text-blue-600 ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`${baseIconButton} bg-blue-50 hover:bg-blue-100 text-blue-600 ${
+                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 title={TT("DataTable.Buttons.Edit", "ویرایش", "Edit")}
                 onClick={onEdit}
                 disabled={!isRowSelected || !isEditMode}
@@ -228,7 +309,9 @@ const DataTable: React.FC<DataTableProps> = ({
 
             {showDeleteIcon && (
               <button
-                className={`${baseIconButton} bg-red-50 hover:bg-red-100 text-red-600 ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`${baseIconButton} bg-red-50 hover:bg-red-100 text-red-600 ${
+                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 title={TT("DataTable.Buttons.Delete", "حذف", "Delete")}
                 onClick={onDelete}
                 disabled={!isRowSelected || !isEditMode}
@@ -239,8 +322,14 @@ const DataTable: React.FC<DataTableProps> = ({
 
             {showDuplicateIcon && (
               <button
-                className={`${baseIconButton} bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${!isRowSelected ? "opacity-50 cursor-not-allowed" : ""}`}
-                title={TT("DataTable.Buttons.Duplicate", "تکثیر", "Duplicate")}
+                className={`${baseIconButton} bg-yellow-50 hover:bg-yellow-100 text-yellow-600 ${
+                  !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title={TT(
+                  "DataTable.Buttons.Duplicate",
+                  "تکثیر",
+                  "Duplicate"
+                )}
                 onClick={onDuplicate}
                 disabled={!isRowSelected || !isEditMode}
               >
@@ -263,12 +352,16 @@ const DataTable: React.FC<DataTableProps> = ({
       )}
 
       <div className="flex-grow" style={{ minHeight: 0 }}>
-        <div className={`${gridClasses} ${direction === "rtl" ? "ag-rtl" : "ag-ltr"}`}>
+        <div
+          className={`${gridClasses} ${
+            direction === "rtl" ? "ag-rtl" : "ag-ltr"
+          }`}
+        >
           <AgGridReact
             key={direction}
             onGridReady={onGridReady}
             onGridSizeChanged={onGridSizeChanged}
-            columnDefs={columnDefs}
+            columnDefs={localizedColumnDefs}
             rowData={sortedFilteredRowData}
             pagination={false}
             paginationPageSize={10}
@@ -288,6 +381,8 @@ const DataTable: React.FC<DataTableProps> = ({
             rowSelection="single"
             enableRtl={isRtl}
             defaultColDef={defaultColDefAligned}
+            getRowClass={getRowClass}
+            suppressRowClickSelection={false}
           />
         </div>
       </div>

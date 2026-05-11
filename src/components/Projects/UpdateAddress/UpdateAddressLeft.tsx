@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { FiChevronRight, FiChevronDown } from "react-icons/fi";
+import { FiChevronRight, FiChevronLeft, FiChevronDown } from "react-icons/fi";
 import { useUpdateAddress } from "./UpdateAddressContext";
 import { useTranslation } from "react-i18next";
 
@@ -10,7 +10,7 @@ type Props = {
 };
 
 const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const {
     projects,
@@ -23,6 +23,21 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
     toggleExpand,
     selectNode,
   } = useUpdateAddress();
+
+  const isRtl = i18n.dir() === "rtl" || i18n.language === "fa";
+
+  const toPersianDigits = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return "";
+
+    return value.toString().replace(/\d/g, (digit) => {
+      return "۰۱۲۳۴۵۶۷۸۹"[Number(digit)];
+    });
+  };
+
+  const localizeText = (value: string | number | null | undefined) => {
+    if (value === null || value === undefined) return "";
+    return i18n.language === "fa" ? toPersianDigits(value) : value.toString();
+  };
 
   useEffect(() => {
     if (selectedProjectId) {
@@ -41,6 +56,12 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
     onPick?.({ gid: selectedProjectId, id: node.ID, address: node.Address });
   };
 
+  const renderExpandIcon = (node: any) => {
+    if (node._expanded) return <FiChevronDown />;
+
+    return isRtl ? <FiChevronLeft /> : <FiChevronRight />;
+  };
+
   const renderNode = (node: any, depth = 0) => (
     <div
       key={`${node.ID}-${node.ChildProgramID}-${depth}`}
@@ -55,9 +76,13 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
             ? "bg-blue-50 ring-1 ring-blue-200"
             : "hover:bg-gray-50",
         ].join(" ")}
-        style={{ marginInlineStart: depth * 12 }}
+        style={{
+          paddingInlineStart: 8 + depth * 16,
+          paddingInlineEnd: 8,
+        }}
       >
         <button
+          type="button"
           className="shrink-0 w-5 h-5 flex items-center justify-center text-gray-600"
           onClick={() => toggleExpand(node)}
           title={
@@ -66,20 +91,24 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
               : t("UpdateAddress.Expand", { defaultValue: "Expand" })
           }
         >
-          {node._expanded ? <FiChevronDown /> : <FiChevronRight />}
+          {renderExpandIcon(node)}
         </button>
 
         <div
-          className="flex-1 cursor-pointer"
+          className="flex-1 cursor-pointer min-w-0"
           onClick={() => handleSelectNode(node)}
         >
-          <div className="text-sm font-medium text-gray-800">{node.Name}</div>
-          <div className="text-xs text-gray-500 break-all">{node.Address}</div>
+          <div className="text-sm font-medium text-gray-800 truncate">
+            {localizeText(node.Name)}
+          </div>
+          <div className="text-xs text-gray-500 break-all">
+            {localizeText(node.Address)}
+          </div>
         </div>
       </div>
 
       {node._expanded && node.children && node.children.length > 0 && (
-        <div className="pl-4">
+        <div>
           {node.children.map((ch: any) => renderNode(ch, depth + 1))}
         </div>
       )}
@@ -87,7 +116,7 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
   );
 
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="flex flex-col gap-3 h-full" dir={isRtl ? "rtl" : "ltr"}>
       <div className="w-full">
         <label className="block text-xs text-gray-500 mb-1">
           {t("UpdateAddress.Project", { defaultValue: "Project" })}
@@ -96,16 +125,20 @@ const UpdateAddressLeft: React.FC<Props> = ({ onPick }) => {
           className="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-blue-300"
           value={selectedProjectId || ""}
           onChange={handleSelectProject}
+          dir={isRtl ? "rtl" : "ltr"}
         >
           {(projects ?? []).map((p) => (
             <option key={p.ID} value={p.ID}>
-              {p.ProjectName}
+              {localizeText(p.ProjectName)}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="flex-1 overflow-auto bg-white rounded-lg border border-gray-200 p-2">
+      <div
+        className="flex-1 overflow-auto bg-white rounded-lg border border-gray-200 p-2"
+        dir={isRtl ? "rtl" : "ltr"}
+      >
         {loadingRoot ? (
           <div className="text-xs text-gray-400 py-1">
             {t("UpdateAddress.Loading", { defaultValue: "Loading…" })}

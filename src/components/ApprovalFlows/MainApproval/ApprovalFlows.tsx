@@ -423,7 +423,7 @@ const ApprovalFlow = forwardRef<ApprovalFlowHandle, ApprovalFlowProps>(
   />
 </TwoColumnLayout.Item>
 
-<TwoColumnLayout.Item span={1} className="mt-10">
+<TwoColumnLayout.Item span={1} className="-mt-5">
   <div className="flex flex-col gap-2">
     <DynamicSwitcher
       isChecked={approvalFlowData.IsGlobal}

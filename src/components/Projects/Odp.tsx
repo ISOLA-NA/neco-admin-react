@@ -296,7 +296,7 @@ const OdpComp: ForwardRefRenderFunction<OdpHandle, OdpProps> = (
         LastModified: new Date().toISOString(),
         IsVisible: OdpData.IsVisible ?? true,
         EntityTypeName: "",
-        ProgramTemplateIDName: "",
+        ProgramTemplateName: "",
         WFTemplateName: "",
         nEntityTypeID: OdpData.nEntityTypeID,
         nProgramTemplateID: OdpData.nProgramTemplateID,

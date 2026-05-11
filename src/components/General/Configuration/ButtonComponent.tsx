@@ -69,6 +69,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // وضعیت خطای تصویر
   const [imageError, setImageError] = useState<boolean>(false);
 
+  const msg = (fa: string, en: string) => i18n.language === "fa" ? fa : en;
+
   // رادیوها
   const RadioOptionsState = [
     { value: "accept", label: t("Configuration.Accept", "Accept") },
@@ -104,7 +106,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmHideCancel, setConfirmHideCancel] = useState<boolean>(false);
   // تابع اکشنی که بعد از زدن دکمه "Confirm" اجرا می‌شود
-  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => {});
+  const [onConfirmAction, setOnConfirmAction] = useState<() => void>(() => { });
 
   // تابع کمکی برای بازکردن DynamicConfirm
   const openConfirm = (
@@ -158,7 +160,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       setRowData(decorated);
     } catch (error) {
       console.error("Error fetching AFBtn data:", error);
-      openConfirm("error", "Error", "Failed to fetch data.", true);
+      // openConfirm("error", "Error", "Failed to fetch data.", true);
+      openConfirm("error", msg("خطا", "Error"), msg("دریافت اطلاعات با خطا مواجه شد.", "Failed to fetch data."), true);
     }
   };
 
@@ -199,11 +202,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     if (!nameTrim && !pNameTrim) {
       openConfirm(
         "notice",
-        t("Global.Warning", "Warning"),
-        t(
-          "Configuration.NameOrPersianNameRequired",
-          "Name or PersianName must be filled."
-        ),
+        msg("هشدار", "Warning"),
+        msg("نام یا نام فارسی باید وارد شود.", "Name or PersianName must be filled."),
         true
       );
       return;
@@ -229,7 +229,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       console.log("INSERT AFBtn payload ➜", newAFBtn);
 
       await api.insertAFBtn(newAFBtn);
-      openConfirm("add", "Success", "Item added successfully.", true);
+      // openConfirm("add", "Success", "Item added successfully.", true);
+      openConfirm("add", msg("موفق", "Success"), msg("آیتم با موفقیت اضافه شد.", "Item added successfully."), true);
 
       await fetchAllAFBtn();
       if (refreshButtons) refreshButtons();
@@ -237,7 +238,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     } catch (error: any) {
       console.error("Error inserting AFBtn:", error);
       console.log("Insert error response ➜", error?.response?.data);
-      openConfirm("error", "Error", "Failed to add item.", true);
+      // openConfirm("error", "Error", "Failed to add item.", true);
+      openConfirm("error", msg("خطا", "Error"), msg("افزودن آیتم با خطا مواجه شد.", "Failed to add item."), true);
     }
   };
 
@@ -246,7 +248,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // =========================
   const handleEditClick = async () => {
     if (!selectedRow || !selectedRow.ID) {
-      openConfirm("notice", "Warning", "Please select a row to edit.", true);
+      // openConfirm("notice", "Warning", "Please select a row to edit.", true);
+      openConfirm("notice", msg("هشدار", "Warning"), msg("لطفاً یک ردیف برای ویرایش انتخاب کنید.", "Please select a row to edit."), true);
       return;
     }
 
@@ -257,11 +260,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     if (!nameTrim && !pNameTrim) {
       openConfirm(
         "notice",
-        t("Global.Warning", "Warning"),
-        t(
-          "Configuration.NameOrPersianNameRequired",
-          "Name or PersianName must be filled."
-        ),
+        msg("هشدار", "Warning"),
+        msg("نام یا نام فارسی باید وارد شود.", "Name or PersianName must be filled."),
         true
       );
       return;
@@ -269,8 +269,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
     openConfirm(
       "edit",
-      "Edit Confirmation",
-      "Are you sure you want to edit this item?",
+      msg("تأیید ویرایش", "Edit Confirmation"),
+      msg("آیا مطمئن هستید که می‌خواهید این آیتم را ویرایش کنید؟", "Are you sure you want to edit this item?"),
       false,
       async () => {
         try {
@@ -293,7 +293,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
           await api.updateAFBtn(updatedAFBtn);
 
-          openConfirm("notice", "Success", "Item updated successfully.", true);
+          // openConfirm("notice", "Success", "Item updated successfully.", true);
+          openConfirm("notice", msg("موفق", "Success"), msg("آیتم با موفقیت بروزرسانی شد.", "Item updated successfully."), true);
           setTimeout(() => {
             setConfirmOpen(false);
           }, 3000);
@@ -304,7 +305,8 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         } catch (error: any) {
           console.error("Error updating AFBtn:", error);
           console.log("Update error response ➜", error?.response?.data);
-          openConfirm("error", "Error", "Failed to update item.", true);
+          // openConfirm("error", "Error", "Failed to update item.", true);
+          openConfirm("error", msg("خطا", "Error"), msg("بروزرسانی آیتم با خطا مواجه شد.", "Failed to update item."), true);
         }
       }
     );
@@ -315,28 +317,29 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // =========================
   const handleDeleteClick = async () => {
     if (!selectedRow || !selectedRow.ID) {
-      openConfirm("notice", "Warning", "Please select a row to delete.", true);
+      // openConfirm("notice", "Warning", "Please select a row to delete.", true);
+      openConfirm("notice", msg("هشدار", "Warning"), msg("لطفاً یک ردیف برای حذف انتخاب کنید.", "Please select a row to delete."), true);
       return;
     }
 
     openConfirm(
       "delete",
-      "Delete Confirmation",
-      "Are you sure you want to delete this item?",
+      msg("تأیید حذف", "Delete Confirmation"),
+      msg("آیا مطمئن هستید که می‌خواهید این آیتم را حذف کنید؟", "Are you sure you want to delete this item?"),
       false,
       async () => {
         try {
           console.log("DELETE AFBtn ID ➜", selectedRow.ID);
           await api.deleteAFBtn(selectedRow.ID);
 
-          openConfirm("notice", "Success", "Item deleted successfully.", true);
+          openConfirm("notice", msg("موفق", "Success"), msg("آیتم با موفقیت حذف شد.", "Item deleted successfully."), true);
           await fetchAllAFBtn();
           if (refreshButtons) refreshButtons();
           handleReset();
         } catch (error: any) {
           console.error("Error deleting AFBtn:", error);
           console.log("Delete error response ➜", error?.response?.data);
-          openConfirm("error", "Error", "Failed to delete item.", true);
+          openConfirm("error", msg("خطا", "Error"), msg("حذف آیتم با خطا مواجه شد.", "Failed to delete item."), true);
         }
       }
     );
@@ -556,27 +559,29 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   const stateTextCount = (stateTextValue || "").length;
   const tooltipCount = (tooltipValue || "").length;
 
+  const toPersian = (val: string | number): string => {
+    if (!isFaMode) return String(val ?? "");
+    return String(val ?? "").replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d]);
+  };
+
+  const fromPersian = (val: string): string =>
+    val.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+
   return (
     <>
-      {/* استایل داخلی برای همهٔ رادیوباتن‌ها در حالت RTL */}
       <style>{`
-        .rtl input[type="radio"] {
-          margin-left: 6px;
-        }
-      `}</style>
+      .rtl input[type="radio"] {
+        margin-left: 6px;
+      }
+    `}</style>
 
-      {/* ظرف کلی: بدون min-h-screen تا فاصله‌ی اضافی ته کارت ایجاد نشود */}
       <div
         dir={isRTL ? "rtl" : "ltr"}
-        className={`w-full h-full flex flex-col bg-white rounded-lg ${
-          isRTL ? "rtl" : ""
-        }`}
+        className={`w-full h-full flex flex-col bg-white rounded-lg ${isRTL ? "rtl" : ""
+          }`}
       >
-        {/* لایهٔ اسکرول: محتوا + فوتر استیکی هر دو داخل این هستند */}
         <div className="flex-1 overflow-y-auto">
-          {/* پدینگ افقی ثابت برای کل محتوا */}
           <div className="p-4">
-            {/* ✅ DynamicConfirm برای هشدارها */}
             <DynamicConfirm
               isOpen={confirmOpen}
               variant={confirmVariant}
@@ -587,7 +592,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
               hideCancelButton={confirmHideCancel}
             />
 
-            {/* ✅ جدول آیتم‌ها */}
+            {/* ── جدول ── */}
             <div
               dir={isRTL ? "rtl" : "ltr"}
               className="w-full overflow-hidden mb-4"
@@ -604,19 +609,19 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                 showEditIcon={false}
                 showDeleteIcon={false}
                 showAddIcon={false}
-                onAdd={() => {}}
-                onEdit={() => {}}
-                onDelete={() => {}}
-                onDuplicate={() => {}}
+                onAdd={() => { }}
+                onEdit={() => { }}
+                onDelete={() => { }}
+                onDuplicate={() => { }}
                 domLayout="normal"
               />
             </div>
 
-            {/* ✅ فرم (چینش مطابق عکس: چپ Name/Tooltip/Order | راست StateText + State + Command + Image) */}
+            {/* ── فرم ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* ستون چپ */}
               <div>
-                {/* ✅ فقط یک input: با سوییچ FA/EN همان input بین Name و PersianName عوض می‌شود */}
+                {/* Name / PersianName با سوییچ FA/EN */}
                 <div className="relative">
                   <div className="flex items-end gap-3">
                     <div className="flex-1">
@@ -638,7 +643,6 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                       />
                     </div>
 
-                    {/* ✅ دکمه EN/FA وسط‌چین عمودی دقیق */}
                     <div className="h-10 flex items-center">
                       <button
                         type="button"
@@ -682,13 +686,17 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                   </div>
                 </div>
 
-                {/* Order */}
+                {/* ── Order ── */}
                 <div className="mt-4">
                   <DynamicInput
                     name={t("Configuration.Order")}
-                    type="text"
-                    value={orderValue}
-                    onChange={(e) => setOrderValue(e.target.value)}
+                    type={i18n.language === "fa" ? "text" : "number"}
+                    value={
+                      i18n.language === "fa"
+                        ? String(orderValue).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[+d])
+                        : orderValue  // ✅ برای EN مستقیم عدد لاتین
+                    }
+                    onChange={(e) => setOrderValue(fromPersian(e.target.value))}
                     className="w-full"
                   />
                 </div>
@@ -710,16 +718,12 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                   </div>
                 </div>
 
-                {/* State: */}
+                {/* State */}
                 <div className="mt-4">
                   <div className="text-sm mb-2">{t("Configuration.State")}</div>
-
                   <div className="flex items-center gap-10">
                     {RadioOptionsState.map((opt) => (
-                      <label
-                        key={opt.value}
-                        className="flex items-center gap-2"
-                      >
+                      <label key={opt.value} className="flex items-center gap-2">
                         <input
                           type="radio"
                           name="wfState"
@@ -732,13 +736,13 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                   </div>
                 </div>
 
-                {/* Command: */}
+                {/* Command */}
                 <div className="mt-4">
                   <div className="text-sm mb-2">
                     {t("Configuration.Command")}
                   </div>
 
-                  {/* accept/reject/close یک خط */}
+                  {/* accept / reject / close */}
                   <div className="flex items-center gap-10 mb-2">
                     {["accept", "reject", "close"].map((val) => {
                       const opt = RadioOptionsCommand.find(
@@ -759,7 +763,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                     })}
                   </div>
 
-                  {/* client/admin */}
+                  {/* client / admin */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2">
                     <div className="flex flex-col gap-2">
                       {["client"].map((val) => {
@@ -803,13 +807,12 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                   </div>
                 </div>
 
-                {/* Image: */}
+                {/* Image */}
                 <div className="mt-6">
                   <div className="text-sm mb-2">
                     {t("Configuration.Image", "Image")}:
                   </div>
 
-                  {/* ✅ الگو مثل User2: پاس دادن selectedFileId + resetCounter + onReset + isEditMode */}
                   <FileUploadHandler
                     selectedFileId={selectedFileId}
                     onUploadSuccess={handleImageUploadSuccess}
@@ -839,16 +842,14 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                     </div>
                   )}
                   {selectedFileId && imageError && (
-                    <div className="mt-2 text-xs text-red-600">
-                      {/* Image preview failed to load. Check console logs. */}
-                    </div>
+                    <div className="mt-2 text-xs text-red-600" />
                   )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Footer Buttons */}
+          {/* ── Footer Buttons ── */}
           <div className="bg-white/90 backdrop-blur mt-6 py-2">
             <div className="flex items-center justify-center gap-3">
               <DynamicButton

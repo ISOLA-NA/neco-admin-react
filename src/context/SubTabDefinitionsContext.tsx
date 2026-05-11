@@ -1159,7 +1159,7 @@ export const SubTabDefinitionsProvider: React.FC<{
                   String(pt?.ID ?? "") ===
                   String(params.data?.nProgramTemplateID ?? "")
               );
-              return template?.Name || params.data?.ProgramTemplateIDName || "";
+              return template?.Name || params.data?.ProgramTemplateName || "";
             },
           },
         ],
