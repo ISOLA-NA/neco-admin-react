@@ -10,10 +10,12 @@ import {
 import HomePage from "./components/TabHandler/tab/TabbedInterface";
 import Login from "./Views/Login";
 import Login1 from "./Views/Login1";
+import TestProgramDesigner from "./Views/TestProgramDesigner";
 
 import { APIProvider } from "./context/ApiContext";
 import { SubTabDefinitionsProvider } from "./context/SubTabDefinitionsContext";
 import { AddEditDeleteProvider } from "./context/AddEditDeleteContext";
+import { ProgramDesignerProvider } from "./context/ProgramDesignerContext";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -72,26 +74,29 @@ const App: React.FC = () => {
       <APIProvider>
         <SubTabDefinitionsProvider>
           <AddEditDeleteProvider>
-            <Router>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    isAuthenticated ? (
-                      <HomePage onLogout={handleLogout} />
-                    ) : (
-                      <Navigate to="/login" replace />
-                    )
-                  }
-                />
-                <Route
-                  path="/login"
-                  element={<Login onLogin={handleLogin} />}
-                />
-                {/* <Route path="/login1" element={<Login1 />} /> */}
-                <Route path="/test" element={<Login1 />} />
-              </Routes>
-            </Router>
+            <ProgramDesignerProvider>
+              <Router>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      isAuthenticated ? (
+                        <HomePage onLogout={handleLogout} />
+                      ) : (
+                        <Navigate to="/login" replace />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/login"
+                    element={<Login onLogin={handleLogin} />}
+                  />
+                  {/* <Route path="/login1" element={<Login1 />} /> */}
+                  <Route path="/test" element={<Login1 />} />
+                  <Route path="/test-program-designer" element={<TestProgramDesigner />} />
+                </Routes>
+              </Router>
+            </ProgramDesignerProvider>
           </AddEditDeleteProvider>
         </SubTabDefinitionsProvider>
       </APIProvider>
