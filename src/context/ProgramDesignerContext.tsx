@@ -8,7 +8,10 @@ import {
   ProgramDesignerRow,
   ProgramValidationResult,
   ImportExcelTemplatePayload,
+  ImportExcelTemplateResponse,
   ExcelTemplateFileInfo,
+  FileInsertPayload,
+  FileInsertResponse,
 } from "../services/programDesigner/types";
 
 interface ProgramDesignerContextType {
@@ -30,11 +33,19 @@ interface ProgramDesignerContextType {
     programTemplateId: number
   ) => Promise<ExcelTemplateFileInfo>;
   downloadFile: (fileName: string, folderName: string) => Promise<Blob>;
-  uploadFile: (file: File) => Promise<any>;
-  insertFileRecord: (fileMeta: any) => Promise<any>;
+  uploadFile: (file: File) => Promise<{ fileIQ: string; raw: any }>;
+  insertFileRecord: (
+    fileMeta: FileInsertPayload
+  ) => Promise<FileInsertResponse>;
+  /**
+   * ⚠️ اصلاح مهم: قبلاً Promise<void> بود. این endpoint همیشه با HTTP 200
+   * پاسخ می‌دهد، حتی در شکست‌های واقعی (مثل Validation های InFPP)، پس
+   * موفقیت واقعی فقط از طریق فیلد isSuccess داخل بدنه‌ی پاسخ مشخص می‌شود.
+   * صدازننده (مثل ProgramTemplate.tsx) باید حتماً isSuccess را چک کند.
+   */
   importExcelTemplate: (
     payload: ImportExcelTemplatePayload
-  ) => Promise<void>;
+  ) => Promise<ImportExcelTemplateResponse>;
 }
 
 const ProgramDesignerContext = createContext<ProgramDesignerContextType | undefined>(undefined);

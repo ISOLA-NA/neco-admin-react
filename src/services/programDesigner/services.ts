@@ -8,7 +8,10 @@ import {
   ProgramDesignerRow,
   ProgramValidationResult,
   ImportExcelTemplatePayload,
+  ImportExcelTemplateResponse,
   ExcelTemplateFileInfo,
+  FileInsertPayload,
+  FileInsertResponse,
 } from "./types";
 
 const FILE_SERVER_URL = import.meta.env.VITE_URL_FILE;
@@ -29,6 +32,45 @@ function decodeGCMDZip<T = any>(base64Zipped: string): {
   const decompressedBytes = pako.ungzip(bytes);
   const decompressedText = new TextDecoder("utf-8").decode(decompressedBytes);
   return JSON.parse(decompressedText);
+}
+
+/**
+ * جایگزین امن برای crypto.randomUUID() — چون آن متد فقط توی Secure Context
+ * (HTTPS یا localhost) کار می‌کند و روی سرورهای HTTP خطای
+ * "crypto.randomUUID is not a function" می‌دهد. crypto.getRandomValues()
+ * برخلاف randomUUID نیازی به Secure Context ندارد و همه‌جا کار می‌کند.
+ */
+function generateUUID(): string {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof (crypto as any).randomUUID === "function"
+  ) {
+    try {
+      return (crypto as any).randomUUID();
+    } catch {
+      // ادامه به fallback زیر
+    }
+  }
+
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.getRandomValues === "function"
+  ) {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+    return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex
+      .slice(6, 8)
+      .join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
+  }
+
+  // fallback خیلی نادر (مرورگرهای بسیار قدیمی که هیچ‌کدام از موارد بالا را ندارند)
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 // ================== کلاس سرویس ==================
@@ -76,7 +118,7 @@ class ProgramDesignerService {
   async getSinglePFI(id: number): Promise<SinglePFI> {
     const response = await httpClient.post<SinglePFI>(
       "api/ProgramDesigner/GetSinglePFI",
-      { id }
+      { id, tf: true }
     );
     return response.data;
   }
@@ -103,20 +145,39 @@ class ProgramDesignerService {
     return response.data;
   }
 
-  /** حذف یک ردیف */
+  /**
+   * حذف یک ردیف
+   * ✅ طبق درخواست کارفرما: چون این API با ProgramDesigner شروع می‌شود و
+   * ورودی‌اش شبیه IDDTO است، tf: true هم فرستاده می‌شود.
+   */
   async deleteOneProgramFieldTemplate(id: number): Promise<boolean> {
     const response = await httpClient.post<boolean>(
       "api/ProgramDesigner/DeleteOneProgramFieldTemplate",
-      { id }
+      { id, tf: true }
     );
     return response.data;
   }
 
-  /** آیا موتور در حال پردازش این تمپلیت است؟ (قفل بودن) */
+  /**
+   * آیا موتور در حال پردازش این تمپلیت است؟ (قفل بودن)
+   * ✅ بادی کامل با امضای مشترک این بخش (تا 400 Bad Request نگیریم).
+   */
   async checkIsWaitingForEngine(programTemplateId: number): Promise<boolean> {
     const response = await httpClient.post<string>(
       "api/ProgramDesigner/CheckIsWaitingForEngine",
-      { id: programTemplateId }
+      {
+        db: null,
+        dt: null,
+        dt2: null,
+        gid: null,
+        id: programTemplateId,
+        id2: null,
+        id3: null,
+        lid: null,
+        str: null,
+        str2: null,
+        tf: true,
+      }
     );
     const lines = response.data.toString().split("\n");
     return lines[1]?.trim() === "true";
@@ -128,18 +189,33 @@ class ProgramDesignerService {
   ): Promise<ProgramValidationResult> {
     const response = await httpClient.post<ProgramValidationResult>(
       "api/ProgramDesigner/CheckValidation",
-      { id: programTemplateId, tf: true }
+      {
+        db: null,
+        dt: null,
+        dt2: null,
+        gid: null,
+        id: programTemplateId,
+        id2: null,
+        id3: null,
+        lid: null,
+        str: null,
+        str2: null,
+        tf: true,
+      }
     );
     return response.data;
   }
 
-  /** گرفتن فایل اکسل تولید‌شده برای Export */
+  /**
+   * گرفتن فایل اکسل تولید‌شده برای Export
+   * ✅ طبق درخواست کارفرما: tf: true اضافه شد.
+   */
   async getExcelTemplate(
     programTemplateId: number
   ): Promise<ExcelTemplateFileInfo> {
     const response = await httpClient.post<ExcelTemplateFileInfo>(
       "api/ProgramDesigner/GetExcelTemplate",
-      { id: programTemplateId }
+      { id: programTemplateId, tf: true }
     );
     return response.data;
   }
@@ -154,29 +230,61 @@ class ProgramDesignerService {
     return response.data;
   }
 
-  /** آپلود فایل خام (سرور فایل جدا) - مرحله‌ی اول Import */
-  async uploadFile(file: File): Promise<any> {
+  /**
+   * آپلود فایل خام (سرور فایل جدا) - مرحله‌ی اول Import
+   * ✅ تأیید‌شده با فیدلر: بادی باید دقیقاً سه فیلد multipart داشته باشد:
+   * FileName (یک GUID تصادفی + پسوند اصلی فایل)، FolderName (ثابت: "prgdes")،
+   * و Data (خودِ فایل باینری). اسم فیلد فایل "Data" است، نه "file".
+   */
+  async uploadFile(file: File): Promise<{ fileIQ: string; raw: any }> {
+    const extension = file.name.substring(file.name.lastIndexOf("."));
+    const fileIQ = generateUUID();
+    const generatedFileName = `${fileIQ}${extension}`;
+
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("FileName", generatedFileName);
+    formData.append("FolderName", "prgdes");
+    formData.append("Data", file, file.name);
+
     const response = await httpClient.post(
       `${FILE_SERVER_URL}/api/File/Upload`,
       formData,
       { headers: { "Content-Type": undefined } }
     );
+    return { fileIQ, raw: response.data };
+  }
+
+  /**
+   * ثبت متادیتای فایل - مرحله‌ی دوم Import
+   * ✅ بادی و پاسخ تأیید‌شده با فیدلر.
+   */
+  async insertFileRecord(
+    fileMeta: FileInsertPayload
+  ): Promise<FileInsertResponse> {
+    const response = await httpClient.post<FileInsertResponse>(
+      "api/File/Insert",
+      fileMeta
+    );
     return response.data;
   }
 
-  /** ثبت متادیتای فایل - مرحله‌ی دوم Import */
-  async insertFileRecord(fileMeta: any): Promise<any> {
-    const response = await httpClient.post("api/File/Insert", fileMeta);
-    return response.data;
-  }
-
-  /** اجرای Import - مرحله‌ی سوم */
+  /**
+   * اجرای Import - مرحله‌ی سوم
+   * ⚠️ اصلاح حیاتی: این endpoint همیشه با کد HTTP 200 پاسخ می‌دهد، حتی
+   * وقتی واقعاً شکست خورده باشد (Validation های InFPP مثل
+   * "Total Weight is Above"). قبلاً این متد فقط void برمی‌گرداند و
+   * Response واقعی (isHaveError/isSuccess/Msg) اصلاً خوانده نمی‌شد، پس
+   * شکست‌های واقعی به‌اشتباه موفق تلقی می‌شدند. الان کل Response برگردانده
+   * می‌شود تا صدازننده (ProgramTemplate.tsx) بتواند isSuccess را چک کند.
+   */
   async importExcelTemplate(
     payload: ImportExcelTemplatePayload
-  ): Promise<void> {
-    await httpClient.post("api/ProgramDesigner/ImportExcelTemplate", payload);
+  ): Promise<ImportExcelTemplateResponse> {
+    const response = await httpClient.post<ImportExcelTemplateResponse>(
+      "api/ProgramDesigner/ImportExcelTemplate",
+      payload
+    );
+    return response.data;
   }
 }
 

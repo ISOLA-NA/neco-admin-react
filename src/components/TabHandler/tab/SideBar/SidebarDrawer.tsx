@@ -1,6 +1,6 @@
 import React, { useState, useLayoutEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { IoIosRefresh } from "react-icons/io";
+import { IoIosRefresh, IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import Info from "./Info";
 import Account from "./account";
 import { useTranslation } from "react-i18next";
@@ -75,15 +75,22 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* دکمه بستن */}
+            {/* دکمه بستن — دایره پس‌زمینه + آیکون فلش با موقعیت/جهت بر اساس RTL */}
             <button
               onClick={onClose}
               className={`absolute top-4 ${
-                isRTL ? "left-4" : "right-4"
-              } text-white text-xl font-bold`}
+                isRTL ? "right-4" : "left-4"
+              } w-9 h-9 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors duration-200`}
               aria-label={t("sideDrawer.Aria.CloseDrawer")}
             >
-              &times;
+              <IoIosArrowForward
+                size={20}
+                className={isRTL ? "block" : "hidden"}
+              />
+              <IoIosArrowBack
+                size={20}
+                className={isRTL ? "hidden" : "block"}
+              />
             </button>
 
             {/* دکمه‌های تب، رفرش و خروج */}
@@ -109,13 +116,13 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                 {t("sideDrawer.Tabs.Account")}
               </button>
 
-              {/* دکمه رفرش — هارد کد */}
+              {/* دکمه رفرش — متن دوزبانه مثل بقیه دکمه‌ها */}
               <button
                 onClick={handleRefresh}
                 className="w-full flex items-center justify-center gap-2 bg-white/20 text-white px-4 py-2 rounded hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors duration-300"
               >
                 <IoIosRefresh size={18} />
-                <span>بارگذاری مجدد</span>
+                <span>{t("account.Buttons.Refresh")}</span>
               </button>
 
               {/* دکمه خروج */}

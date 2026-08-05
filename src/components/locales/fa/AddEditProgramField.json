@@ -1,0 +1,121 @@
+{
+  "AddEditProgramField": {
+    "Tabs": {
+      "Details": "جزئیات",
+      "ActivePredecessors": "پیش‌نیازهای فعال",
+      "Conditions": "شروط"
+    },
+    "ActivityName": "نام فعالیت",
+    "PersianActivityName": "نام فارسی فعالیت",
+    "ActivityCode": "کد فعالیت",
+    "Order": "ترتیب",
+    "ResponsiblePost": "نقش مسئول",
+    "Procedure": "رویه",
+    "ApprovalFlow": "جریان تایید",
+    "Weight": "وزن",
+    "Duration": "مدت زمان",
+    "Address": "آدرس",
+    "Lag": "تاخیر",
+    "AfDuration": "مدت زمان جریان تایید",
+    "ProgramType": "نوع برنامه",
+    "ProgramDuration": "مدت زمان برنامه",
+    "ProgramDurationPlaceholder": "نامشخص - نیاز به بررسی",
+    "ProgramTemplate": "قالب برنامه",
+    "ProgramTemplateIdLabel": "شناسه قالب برنامه",
+    "ApprovalExecutionWeight": "وزن تایید اجرا (%)",
+    "ActivityType": "نوع فعالیت",
+    "ActivityBudget": "بودجه فعالیت",
+    "FormName": "نام فرم",
+    "ApprovalBudget": "بودجه تایید",
+    "ProgramExecutionBudget": "بودجه اجرای برنامه",
+    "ProgramApprovalBudget": "بودجه تایید برنامه",
+    "ProgramToPlanWeight": "وزن برنامه برای طرح‌ریزی (%)",
+    "InheritColumns": "ارث بردن ستون‌ها",
+    "InheritValues": "ارث بردن مقدارها",
+    "MetaData": "متادیتا",
+    "Save": "ذخیره",
+    "Cancel": "لغو",
+    "Loading": "در حال بارگذاری...",
+    "NoItemsFound": "موردی وجود ندارد",
+    "DeletedOrInvalidItem": "آیتم حذف‌شده / نامعتبر",
+    "Predecessors": {
+      "PlanningActivityPredecessors": "پیش‌نیازهای برنامه‌ریزی فعالیت در این برنامه",
+      "SubProgramPredecessors": "پیش‌نیازهای زیرمجموعه در این برنامه",
+      "AddPredecessor": "اضافه کردن پیش‌نیاز",
+      "InItemPredecessor": "پیش‌نیاز درون‌آیتمی",
+      "InSubPredecessor": "پیش‌نیاز زیرمجموعه",
+      "Select": "انتخاب",
+      "TreeSelectorTitle": "انتخاب‌گر درختی فعالیت‌ها"
+    },
+    "Conditions": {
+      "BetweenTwoTypesMustBe": "بین دو نوع شرط باید باشد:",
+      "BetweenFormsMustBe": "بین شروط فرم‌ها باید باشد:",
+      "And": "و",
+      "Or": "یا",
+      "AddApprovalCondition": "اضافه کردن شرط تایید",
+      "AddFormCondition": "اضافه کردن شرط فرم",
+      "IfStatusTextEqualTo": "اگر وضعیت آخرین تایید این آیتم برنامه برابر باشد با",
+      "ThenExecuteThisItem": "، این آیتم برنامه اجرا شود",
+      "IfValueOfField": "اگر مقدار فیلد",
+      "IsEqualTo": "برابر باشد با",
+      "FormFieldConditionsTitle": "شروط فیلد فرم",
+      "PredecessorLabel": "پیش‌نیاز",
+      "FieldLabel": "فیلد",
+      "ValueLabel": "مقدار",
+      "Cancel": "لغو",
+      "Confirm": "تایید"
+    },
+    "Validation": {
+      "MustSelectResponsiblePost": "باید نقش مسئول را انتخاب کنید.",
+      "MustSelectApprovalFlow": "باید جریان تایید را انتخاب کنید.",
+      "MustSelectActivityType": "باید نوع فعالیت را انتخاب کنید.",
+      "MustSelectFormName": "برای حالت فرم باید نام فرم را انتخاب کنید.",
+      "ProgramDurationNotZero": "مدت زمان برنامه نمی‌تواند صفر باشد.",
+      "MustSelectProgramTemplate": "برای حالت TPP باید قالب برنامه را انتخاب کنید.",
+      "SaveError": "خطا در ذخیره‌سازی."
+    },
+    "Warnings": {
+      "SelectRowFirst": "لطفاً ابتدا یک ردیف را انتخاب کنید.",
+      "SelectInFPPRowFirst": "لطفاً ابتدا یک ردیف از نوع InFPP انتخاب کنید.",
+      "SelectedRowMustBeInFPP": "برای افزودن زیرمجموعه، ردیف انتخاب‌شده باید از نوع InFPP باشد."
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

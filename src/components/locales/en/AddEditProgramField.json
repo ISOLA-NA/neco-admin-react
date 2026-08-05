@@ -1,0 +1,83 @@
+{
+  "AddEditProgramField": {
+    "Tabs": {
+      "Details": "Details",
+      "ActivePredecessors": "Active Predecessors",
+      "Conditions": "Conditions"
+    },
+    "ActivityName": "Activity Name",
+    "PersianActivityName": "Persian Activity Name",
+    "ActivityCode": "Activity Code",
+    "Order": "Order",
+    "ResponsiblePost": "Responsible Post",
+    "Procedure": "Procedure",
+    "ApprovalFlow": "Approval Flow",
+    "Weight": "Weight",
+    "Duration": "Duration",
+    "Address": "Address",
+    "Lag": "Lag",
+    "AfDuration": "Af Duration",
+    "ProgramType": "Program Type",
+    "ProgramDuration": "Program Duration",
+    "ProgramDurationPlaceholder": "Unspecified - needs review",
+    "ProgramTemplate": "Program Template",
+    "ProgramTemplateIdLabel": "ProgramTemplate ID",
+    "ApprovalExecutionWeight": "Approval to execution Weight (%)",
+    "ActivityType": "Activity Type",
+    "ActivityBudget": "Activity Budget",
+    "FormName": "Form Name",
+    "ApprovalBudget": "Approval Budget",
+    "ProgramExecutionBudget": "FProgram Execution Budget",
+    "ProgramApprovalBudget": "Program Approval Budget",
+    "ProgramToPlanWeight": "Program to plan weight (%)",
+    "InheritColumns": "Inherit Columns",
+    "InheritValues": "Inherit Values",
+    "MetaData": "Meta Data",
+    "Save": "Save",
+    "Cancel": "Cancel",
+    "Loading": "Loading...",
+    "NoItemsFound": "No items found",
+    "DeletedOrInvalidItem": "Deleted / invalid item",
+    "Predecessors": {
+      "PlanningActivityPredecessors": "Planning Activity Predecessors in this program",
+      "SubProgramPredecessors": "Sub Program Predesessors in this program",
+      "AddPredecessor": "Add Predecessor",
+      "InItemPredecessor": "InItemPredecessor",
+      "InSubPredecessor": "InSubPredecessor",
+      "Select": "Select",
+      "TreeSelectorTitle": "TreePfiSelector"
+    },
+    "Conditions": {
+      "BetweenTwoTypesMustBe": "Between 2 types of conditions must be:",
+      "BetweenFormsMustBe": "Between forms conditions must be:",
+      "And": "And",
+      "Or": "Or",
+      "AddApprovalCondition": "Add Approval Condition",
+      "AddFormCondition": "Add Form Condition",
+      "IfStatusTextEqualTo": "if StatusText of Last approval of the program item is equal to",
+      "ThenExecuteThisItem": ", then execute this program item",
+      "IfValueOfField": "if value of field",
+      "IsEqualTo": "is equal to",
+      "FormFieldConditionsTitle": "Form Field Conditions",
+      "PredecessorLabel": "Predecessor",
+      "FieldLabel": "Field",
+      "ValueLabel": "Value",
+      "Cancel": "Cancel",
+      "Confirm": "Confirm"
+    },
+    "Validation": {
+      "MustSelectResponsiblePost": "Must select Responsible post.",
+      "MustSelectApprovalFlow": "Must select Approval flow.",
+      "MustSelectActivityType": "Must select Activity Type.",
+      "MustSelectFormName": "For Form Mode Must select Form Name.",
+      "ProgramDurationNotZero": "Program Duration Not Allow to Zero.",
+      "MustSelectProgramTemplate": "For TPP Mode Must select Program Template.",
+      "SaveError": "Error while saving."
+    },
+    "Warnings": {
+      "SelectRowFirst": "Please select a row first.",
+      "SelectInFPPRowFirst": "Please select a row of type InFPP first.",
+      "SelectedRowMustBeInFPP": "The selected row must be of type InFPP to add a sub-item."
+    }
+  }
+}

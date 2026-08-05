@@ -25,7 +25,8 @@
       "ChangePassword": "تغییر رمز",
       "Update": "به‌روزرسانی",
       "SwitchAccount": "تعویض حساب کاربری",
-      "SignOut": "خروج"
+      "SignOut": "خروج",
+      "Refresh":"بارگزاری مجدد"
     },
     "Messages": {
       "Loading": "در حال بارگذاری...",

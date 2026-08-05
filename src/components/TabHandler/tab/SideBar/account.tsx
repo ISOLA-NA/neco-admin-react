@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
-import { FaLock } from "react-icons/fa";
+import { FaLock, FaRegUserCircle } from "react-icons/fa";
 import { IoIosRefresh } from "react-icons/io";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { RiLogoutCircleLine } from "react-icons/ri";
@@ -196,6 +196,8 @@ const Account: React.FC = () => {
     setUpdated((prev) => ({ ...prev, [name]: value }));
   };
 
+  const roleTags = userNames.filter((uname) => uname && uname.trim() !== "");
+
   return (
     <div className="container mx-auto mt-3 mb-3 px-4">
       <h2 className="text-2xl font-bold mb-4">
@@ -213,182 +215,169 @@ const Account: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-6">
         {/* ستون چپ: اطلاعات کاربر */}
         <div className="w-full md:w-2/3">
-          <div className="border rounded shadow p-4 h-[600px]">
-            <h4 className="text-xl font-semibold mb-3">
+          <div className="bg-white rounded-md shadow p-4 h-[600px]">
+            <h2 className="text-lg font-bold border-b pb-2 mb-3">
               {t("account.Titles.UserInformation")}
-            </h4>
+            </h2>
 
-            {/* بخش آواتار */}
-            <div className="flex items-center gap-4 mb-3">
+            {/* بخش آواتار + نام + نقش‌ها */}
+            <div className="flex items-start gap-4 mb-3 pb-3 border-b">
               {previewUrl ? (
                 <img
                   src={previewUrl}
                   alt="User Avatar"
-                  className="w-16 h-16 rounded-full object-cover"
+                  className="w-16 h-16 rounded-full object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                  <p className="text-xs text-gray-500">
-                    {t("account.Messages.Loading")}
-                  </p>
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                  <FaRegUserCircle size={40} className="text-gray-400" />
                 </div>
               )}
               <div>
-                <p className="text-lg font-medium">
+                <p className="text-base font-bold">
                   {userInfo
-                    ? userInfo.Name
+                    ? `${userInfo.Name} ${userInfo.Family}`
                     : t("account.Placeholders.UserName")}
                 </p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {userNames.filter((uname) => uname && uname.trim() !== "")
-                    .length > 0 ? (
-                    userNames
-                      .filter((uname) => uname && uname.trim() !== "")
-                      .map((uname, index) => (
-                        <div
-                          key={index}
-                          className="bg-gray-50 border border-gray-200 p-2 rounded shadow"
-                        >
-                          <p className="text-sm text-gray-700">{uname}</p>
-                        </div>
-                      ))
-                  ) : (
-                    <p className="text-sm text-gray-600">
-                      {t("account.Messages.LoadingUserNames")}
-                    </p>
-                  )}
-                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  {roleTags.length > 0
+                    ? roleTags.map((uname) => `${uname} ؛`).join(" ")
+                    : t("account.Messages.LoadingUserNames")}
+                </p>
               </div>
             </div>
 
-            <hr className="my-3" />
-
-            {/* فرم دو ستونه */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              {/* ستون چپ فرم */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block mb-1">
-                    {t("account.Fields.Username")}
-                  </label>
-                  <input
-                    type="text"
-                    name="Username"
-                    value={updated.Username}
-                    disabled
-                    placeholder={t("account.Placeholders.Username")}
-                    className="border px-2 py-1 w-full rounded text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">
-                    {t("account.Fields.Name")}
-                  </label>
-                  <input
-                    type="text"
-                    name="Name"
-                    value={updated.Name}
-                    onChange={handleChange}
-                    placeholder={t("account.Placeholders.Name")}
-                    className="border px-2 py-1 w-full rounded text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">
-                    {t("account.Fields.Mobile")}
-                  </label>
-                  <input
-                    type="text"
-                    name="Mobile"
-                    value={updated.Mobile}
-                    onChange={handleChange}
-                    placeholder="Mobile"
-                    className="border px-2 py-1 w-full rounded text-sm"
-                  />
-                </div>
+            {/* فرم — گرید واحد دو‌ستونه تا ردیف‌ها دقیقاً هم‌تراز باشند */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+              {/* ردیف ۱: Username | دکمه‌ها */}
+              <div>
+                <label className="block mb-1 text-sm text-gray-600">
+                  {t("account.Fields.Username")}
+                </label>
+                <input
+                  type="text"
+                  name="Username"
+                  value={updated.Username}
+                  disabled
+                  placeholder={t("account.Placeholders.Username")}
+                  className="border-b border-gray-300 bg-transparent outline-none w-full text-sm pb-1"
+                />
               </div>
-
-              {/* ستون راست فرم */}
-              <div className="space-y-4">
-                <div className="flex gap-2">
+              <div>
+                <label className="block mb-1 text-sm text-gray-600 invisible">
+                  .
+                </label>
+                <div className="flex items-center justify-end gap-6 pb-1">
                   <button
                     onClick={handleChangePassword}
-                    className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100"
+                    className="flex items-center gap-1 text-sm hover:opacity-70"
                   >
-                    <FaLock size={16} />
+                    <FaLock size={14} />
                     <span>{t("account.Buttons.ChangePassword")}</span>
                   </button>
                   <button
                     onClick={editAccount}
-                    className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100"
+                    className="flex items-center gap-1 text-sm hover:opacity-70"
                   >
                     <IoIosRefresh size={16} />
                     <span>{t("account.Buttons.Update")}</span>
                   </button>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block mb-1">
-                    {t("account.Fields.LastName")}
-                  </label>
-                  <input
-                    type="text"
-                    name="Family"
-                    value={updated.Family}
-                    onChange={handleChange}
-                    placeholder={t("account.Placeholders.LastName")}
-                    className="border px-2 py-1 w-full rounded text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">
-                    {t("account.Fields.Website")}
-                  </label>
-                  <input
-                    type="text"
-                    name="Website"
-                    value={updated.Website}
-                    onChange={handleChange}
-                    placeholder={t("account.Placeholders.Website")}
-                    className="border px-2 py-1 w-full rounded text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">
-                    {t("account.Fields.Email")}
-                  </label>
-                  <input
-                    type="text"
-                    name="Email"
-                    value={updated.Email}
-                    onChange={handleChange}
-                    placeholder={t("account.Placeholders.Email")}
-                    className="border px-2 py-1 w-full rounded text-sm"
-                  />
-                </div>
+              {/* ردیف ۲: Name | Last Name */}
+              <div>
+                <label className="block mb-1 text-sm text-gray-600">
+                  {t("account.Fields.Name")}
+                </label>
+                <input
+                  type="text"
+                  name="Name"
+                  value={updated.Name}
+                  onChange={handleChange}
+                  placeholder={t("account.Placeholders.Name")}
+                  className="border-b border-gray-300 bg-transparent outline-none w-full text-sm pb-1"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm text-gray-600">
+                  {t("account.Fields.LastName")}
+                </label>
+                <input
+                  type="text"
+                  name="Family"
+                  value={updated.Family}
+                  onChange={handleChange}
+                  placeholder={t("account.Placeholders.LastName")}
+                  className="border-b border-gray-300 bg-transparent outline-none w-full text-sm pb-1"
+                />
+              </div>
+
+              {/* ردیف ۳: Mobile | Website */}
+              <div>
+                <label className="block mb-1 text-sm text-gray-600">
+                  {t("account.Fields.Mobile")}
+                </label>
+                <input
+                  type="text"
+                  name="Mobile"
+                  value={updated.Mobile}
+                  onChange={handleChange}
+                  placeholder="Mobile"
+                  className="border-b border-gray-300 bg-transparent outline-none w-full text-sm pb-1"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm text-gray-600">
+                  {t("account.Fields.Website")}
+                </label>
+                <input
+                  type="text"
+                  name="Website"
+                  value={updated.Website}
+                  onChange={handleChange}
+                  placeholder={t("account.Placeholders.Website")}
+                  className="border-b border-gray-300 bg-transparent outline-none w-full text-sm pb-1"
+                />
+              </div>
+
+              {/* ردیف ۴: (خالی) | Email */}
+              <div className="hidden md:block" />
+              <div>
+                <label className="block mb-1 text-sm text-gray-600">
+                  {t("account.Fields.Email")}
+                </label>
+                <input
+                  type="text"
+                  name="Email"
+                  value={updated.Email}
+                  onChange={handleChange}
+                  placeholder={t("account.Placeholders.Email")}
+                  className="border-b border-gray-300 bg-transparent outline-none w-full text-sm pb-1"
+                />
               </div>
             </div>
 
             {/* بخش پایین با بردر آبی — در RTL دکمه‌ها به راست می‌روند */}
-            <div className="mt-4 border border-blue-500 rounded p-4">
+            <div className="mt-6 border border-blue-500 rounded p-4">
               <div
-                className={`flex gap-4 ${
+                className={`flex gap-6 ${
                   isRTL ? "justify-start" : "justify-end"
                 }`}
               >
                 <button
-                  onClick={handleSwitchAccount}
-                  className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100"
-                >
-                  <HiOutlineSwitchHorizontal size={16} />
-                  <span>{t("account.Buttons.SwitchAccount")}</span>
-                </button>
-                <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 border rounded px-3 py-2 hover:bg-gray-100 text-red-600"
+                  className="flex items-center gap-2 text-sm text-red-600 hover:opacity-70"
                 >
                   <RiLogoutCircleLine size={16} />
                   <span>{t("account.Buttons.SignOut")}</span>
+                </button>
+                <button
+                  onClick={handleSwitchAccount}
+                  className="flex items-center gap-2 text-sm hover:opacity-70"
+                >
+                  <HiOutlineSwitchHorizontal size={16} />
+                  <span>{t("account.Buttons.SwitchAccount")}</span>
                 </button>
               </div>
             </div>
@@ -404,7 +393,7 @@ const Account: React.FC = () => {
             <p className="text-sm text-gray-600"></p>
           </div>
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">
-            <p className="font-semibold mb-2">{t("account.Side.Admins")}</p>
+            <p className="font-semibold mb-2">{t("account.Side.Admin")}</p>
             <p className="text-sm text-gray-600"></p>
           </div>
           <div className="flex-1 border rounded shadow p-4 bg-gray-200">

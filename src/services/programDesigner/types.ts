@@ -146,7 +146,56 @@ export interface ImportExcelTemplatePayload {
   ProgramID: number;
 }
 
+/**
+ * ✅ تأیید‌شده با فیدلر (نکته‌ی حیاتی): این endpoint همیشه با کد HTTP ۲۰۰
+ * پاسخ می‌دهد، حتی وقتی واقعاً شکست خورده باشد (مثلاً به‌خاطر شکست
+ * Validation های InFPP مثل "Total Weight is Above"). موفقیت واقعی فقط
+ * از طریق فیلد isSuccess داخل بدنه‌ی پاسخ مشخص می‌شود، نه از کد HTTP.
+ * پس همیشه باید isSuccess چک شود، وگرنه شکست‌ها به‌اشتباه موفق تلقی می‌شوند.
+ */
+export interface ImportExcelTemplateResponse {
+  isHaveError: boolean;
+  isSuccess: boolean;
+  Msg: string;
+}
+
 export interface ExcelTemplateFileInfo {
   FileName: string;
   FolderName: string;
+}
+
+/**
+ * ✅ تأیید‌شده با فیدلر: Response خودِ POST /api/File/Upload فقط عدد
+ * موفقیت (۱) است و شامل هیچ شناسه‌ای نیست. FileIQ توسط خودِ کلاینت ساخته
+ * می‌شود (نگاه کن به services.ts → uploadFile).
+ */
+
+/**
+ * Response قطعی (تأیید‌شده با فیدلر) از POST /api/File/Insert.
+ * ⚠️ نکته‌ی حیاتی: فیلد ID همین Response (نه FileIQ) باید به عنوان
+ * FileID در بادی ImportExcelTemplate استفاده شود.
+ */
+export interface FileInsertResponse {
+  FileIQ: string;
+  FileName: string;
+  FileSize: number;
+  FileType: string;
+  FolderName: string;
+  ID: string;
+  IsVisible: boolean;
+  LastModified: string | null;
+  SenderID: string;
+}
+
+/** بادی درخواست قطعی (تأیید‌شده با فیدلر) POST /api/File/Insert */
+export interface FileInsertPayload {
+  FileIQ: string;
+  FileName: string;
+  FileSize: number;
+  FileType: string;
+  FolderName: string;
+  ID: string;
+  IsVisible: boolean;
+  LastModified: string | null;
+  SenderID: string;
 }

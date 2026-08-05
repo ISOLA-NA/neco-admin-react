@@ -62,6 +62,7 @@ import enSidebarDrawer from "./components/locales/en/SideBarDrawer.json";
 import enColumnTypes from "./components/locales/en/ColumnTypes.json";
 import extraForms from "./components/locales/en/ExtraForms.json";
 import UpdateAddress from "./components/locales/en/UpdateAddress.json";
+import enAddEditProgramField from "./components/locales/en/AddEditProgramField.json";
 
 // Farsi files
 import faGlobal from "./components/locales/fa/global.json";
@@ -123,6 +124,7 @@ import faSidebarDrawer from "./components/locales/fa/SideBarDrawer.json";
 import faColumnTypes from "./components/locales/fa/ColumnTypes.json";
 import faextraForms from "./components/locales/fa/ExtraForms.json";
 import faUpdateAddress from "./components/locales/fa/UpdateAddress.json";
+import faAddEditProgramField from "./components/locales/fa/AddEditProgramField.json";
 
 const resources = {
   en: {
@@ -184,6 +186,7 @@ const resources = {
       ...enAccount,
       ...enSidebarDrawer,
       ...enColumnTypes,
+      ...enAddEditProgramField,
       ...extraForms,
       ...UpdateAddress,
     },
@@ -249,6 +252,7 @@ const resources = {
       ...faColumnTypes,
       ...faextraForms,
       ...faUpdateAddress,
+      ...faAddEditProgramField,
     },
   },
 };

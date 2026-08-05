@@ -112,9 +112,22 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           path: "/",
         });
 
-        // Cookies.set("userId", MyUser.ID.toString(), {
-        //   expires: defaultTokenHours / 24,
-        // });
+        // ⚠️ جدید: ذخیره‌ی ID خودِ کاربر (نه Post)، چون برای SenderID در
+        // مرحله‌ی Insert فایل (بخش Import Excel) لازم است.
+        Cookies.set("userId", MyUser.ID.toString(), {
+          expires: defaultTokenHours / 24,
+          path: "/",
+        });
+
+        // ⚠️ جدید: ذخیره‌ی اولین Post کاربر (نقش/سِمَت سازمانی) در یک Cookie
+        // جدا، چون این مقدار (PostID) بعداً برای Import Excel Template لازم است
+        // و در جای دیگری از پروژه ذخیره نمی‌شود.
+        if (response.UserPosts && response.UserPosts.length > 0) {
+          Cookies.set("userPostId", response.UserPosts[0].ID, {
+            expires: defaultTokenHours / 24,
+            path: "/",
+          });
+        }
 
         if (MyUser.userType === 6 || MyUser.userType === 8) {
           // Cookies.set("authenticated", "true", {

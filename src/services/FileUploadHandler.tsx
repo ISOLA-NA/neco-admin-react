@@ -54,6 +54,24 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
 
   const finalPreviewUrl = externalPreviewUrl ?? internalPreviewUrl;
 
+  const getMimeTypeFromExt = (ext: string | undefined | null): string => {
+    switch ((ext || "").toLowerCase().replace(".", "")) {
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+      case "png":
+        return "image/png";
+      case "gif":
+        return "image/gif";
+      case "webp":
+        return "image/webp";
+      case "svg":
+        return "image/svg+xml";
+      default:
+        return "application/octet-stream";
+    }
+  };
+
   useEffect(() => {
     if (!selectedFileId || selectedFileId.trim() === "") {
       updatePreview(null);
@@ -72,15 +90,18 @@ const FileUploadHandler: React.FC<FileUploadHandlerProps> = ({
           FolderName: res.data.FolderName,
           cacheBust: Date.now(),
         };
-        return fileService.download(downloadingFileObject);
+        // پسوند فایل باید از پاسخ سرور خونده بشه، نه از finalPreviewUrl
+        // (finalPreviewUrl در این لحظه هنوز مقدار قبلی/خالی است و باعث
+        // می‌شد mimeType همیشه روی application/octet-stream بمونه و
+        // مرورگر نتونه blob رو به‌عنوان عکس رندر کنه)
+        return fileService
+          .download(downloadingFileObject)
+          .then((downloadRes) => ({ downloadRes, fileType: res.data.FileType }));
       })
-      .then((downloadRes) => {
+      .then(({ downloadRes, fileType }) => {
         if (didCancel) return;
         const uint8Array = new Uint8Array(downloadRes.data);
-        let mimeType = "application/octet-stream";
-        const ext = finalPreviewUrl?.split(".").pop()?.toLowerCase();
-        if (ext === "jpg" || ext === "jpeg") mimeType = "image/jpeg";
-        else if (ext === "png") mimeType = "image/png";
+        const mimeType = getMimeTypeFromExt(fileType);
         const blob = new Blob([uint8Array], { type: mimeType });
         const objectUrl = URL.createObjectURL(blob);
         updatePreview(objectUrl);

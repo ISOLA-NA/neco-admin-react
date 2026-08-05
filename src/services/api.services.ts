@@ -23,11 +23,20 @@ export interface MyUser {
   userType?: number;
 }
 
+// ⚠️ جدید: هر آیتم آرایه‌ی UserPosts در پاسخ لاگین
+export interface UserPost {
+  ID: string;
+  Name: string;
+  OwnerUserID?: string;
+  PostTypeID?: string | null;
+}
+
 // برای لاگین (OTP و ...)
 export interface WebLoginResponse {
   data: { MyUser: any; tokenLife: any };
   AppSetting: AppSetting;
   MyUser: MyUser;
+  UserPosts?: UserPost[]; // ⚠️ جدید — این خط رو اضافه کن
 }
 
 export interface Post {
