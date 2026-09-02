@@ -1,8 +1,8 @@
 {
   "DynamicConfirm": {
     "Buttons": {
-      "Add": "افزودن",
-      "Edit": "ویرایش",
+      "Add": "ذخیره",
+      "Edit": "به روز رسانی",
       "Save": "ذخیره",
       "Delete": "حذف",
       "Duplicate": "کپی",
@@ -193,7 +193,7 @@
       "No": "خیر"
     },
     "Toolbar": {
-      "SearchPlaceholder": "جستجو..."
+      "SearchPlaceholder": "جستجو"
     }
   },
   "Ribbons": {

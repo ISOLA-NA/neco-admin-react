@@ -11,6 +11,8 @@ interface DynamicInputProps extends InputHTMLAttributes<HTMLInputElement> {
   loading?: boolean;
   /** کلاس سفارشی برای لیبل (برای هماهنگ‌کردن با چک‌باکس‌ها در AddColumnForm) */
   labelClassName?: string;
+  /** اگر true باشد و maxLength مقداردهی شده باشد، شمارنده‌ی کاراکتر (مثل 0/50) زیر اینپوت نمایش داده می‌شود */
+  showCharCount?: boolean;
 }
 
 const DynamicInput: React.FC<DynamicInputProps> = ({
@@ -31,11 +33,15 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
   min,
   max,
   step,
+  maxLength,
+  showCharCount = false,
   labelClassName, // ← دریافت کلاس سفارشی لیبل
   ...others
 }) => {
   // برچسبی که نمایش داده می‌شود: اگر label باشد، آن را نمایش بده، وگرنه از name استفاده کن
   const labelText = label ?? name;
+
+  const currentLength = value ? value.toString().length : 0;
 
   return (
     <div className={classNames("w-full", className)}>
@@ -75,6 +81,7 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           min={min}
           max={max}
           step={step}
+          maxLength={maxLength}
           style={
             type === "number"
               ? {
@@ -128,6 +135,12 @@ const DynamicInput: React.FC<DynamicInputProps> = ({
           </div>
         )}
       </div>
+
+      {showCharCount && maxLength !== undefined && (
+        <p dir="ltr" className="mt-1 text-[10px] text-gray-400 text-left">
+          {currentLength} / {maxLength}
+        </p>
+      )}
 
       {error && errorMessage && (
         <p className="mt-1 text-red-500 text-xs">{errorMessage}</p>

@@ -176,9 +176,9 @@ const Role = forwardRef<RoleHandle, RoleProps>(({ selectedRow }, ref) => {
         onChange={(e) => handleChange("PostCode", e.target.value)}
       />
 
-      {/* شرح شغلی */}
+      {/* شرح شغلی — کلید جدا از هدر ستون جدول (Roles.JobDescription) تا با تغییر یکی، آن دیگری تغییر نکند */}
       <CustomTextarea
-        name={t("Roles.JobDescription")}
+        name={t("Roles.Description")}
         value={roleData.Description}
         placeholder={t("Roles.Placeholders.EnterJobDescription")}
         onChange={(e) => handleChange("Description", e.target.value)}

@@ -7,7 +7,7 @@
     "Command": "Command",
     "CategoryA": "Form Category A",
     "CategoryB": "Form Category B",
-    "IsMegaForm": "Is Mega Form",
+    "IsMegaForm": "MegaForm",
     "Transmittal": "Transmittal",
     "RelatedProjects": "Related Projects",
     "UploadExcelFile": "Template Excel File",
@@ -25,7 +25,8 @@
       "ShowInList": "Show In List",
       "Required": "Required",
       "MainColumn": "Main Column",
-      "IsRtl": "Is RTL",
+      "IsRtl": "IsRTL",
+      "ForceReadOnly": "Force ReadOnly",
       "CountInReject": "Count In Reject"
     }
   }

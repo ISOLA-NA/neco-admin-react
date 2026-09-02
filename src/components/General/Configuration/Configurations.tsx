@@ -408,6 +408,8 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
             onChange={(e) => handleChange("Name", e.target.value)}
             required
             loading={loading}
+            maxLength={50}
+            showCharCount={true}
             data-testid="new-config-name-input"
           />
 
@@ -657,7 +659,7 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
         <DynamicModal
           isOpen={modalOpen}
           onClose={handleCloseModal}
-          size="small"
+          size="normal"
         >
           <TableSelector
             columnDefs={[
@@ -668,10 +670,24 @@ const Configuration = forwardRef<ConfigurationHandle, ConfigurationProps>(
                 field: "Name",
               },
               {
-                headerName: t("TableSelector.Description", {
-                  defaultValue: i18n.language === "fa" ? "شرح" : "Description",
+                headerName: "IsDoc",
+                field: "IsDoc",
+                cellRenderer: "agCheckboxCellRenderer",
+                cellRendererParams: { disabled: true },
+                editable: false,
+                maxWidth: 90,
+              },
+              {
+                headerName: t("TableSelector.CateA", {
+                  defaultValue: i18n.language === "fa" ? "دسته بندی A" : "Cat A",
                 }),
-                field: "EntityCateADescription",
+                field: "EntityCateAName",
+              },
+              {
+                headerName: t("TableSelector.CateB", {
+                  defaultValue: i18n.language === "fa" ? "دسته بندی B" : "Cat B",
+                }),
+                field: "EntityCateBName",
               },
             ]}
             rowData={getRowData(currentSelector)}

@@ -140,7 +140,6 @@ const resources = {
       ...enRole,
       ...enStaffing,
       ...enRoleGroup,
-      ...enForms,
       ...enAddForms,
       ...enCategory,
       ...enApprovalFlows,
@@ -189,6 +188,13 @@ const resources = {
       ...enAddEditProgramField,
       ...extraForms,
       ...UpdateAddress,
+      /* ✅ enForms عمداً اینجا، بعد از extraForms، آخرین‌بار spread می‌شود
+         تا کلید بالادستی "Forms" همیشه از Forms.json بیاید، نه از
+         ExtraForms.json (که یک "Forms" جزئی/قدیمی‌تر دارد و چون shallow
+         spread است، هر فایلی که آخرتر بیاید کل آبجکت Forms قبلی را
+         کامل بازنویسی می‌کند، نه merge). محتوای ExtraForms.json دست
+         نخورده باقی مانده؛ فقط ترتیب همین خط جابه‌جا شده است. */
+      ...enForms,
     },
   },
   fa: {
@@ -204,7 +210,6 @@ const resources = {
       ...faRole,
       ...faStaffing,
       ...faRoleGroup,
-      ...faForms,
       ...faAddForms,
       ...faCategory,
       ...faApprovalFlows,
@@ -253,6 +258,8 @@ const resources = {
       ...faextraForms,
       ...faUpdateAddress,
       ...faAddEditProgramField,
+      /* ✅ همان استدلال بالا، برای فارسی */
+      ...faForms,
     },
   },
 };

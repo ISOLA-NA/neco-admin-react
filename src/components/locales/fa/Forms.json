@@ -6,10 +6,10 @@
     "SwitchToFA": "رفتن به FA ({{field}})",
     "Command": "فرمان",
     "CategoryA": "دسته بندی فرم A",
-    "CategoryB": "دسته‌بندی فرم B",
-    "IsMegaForm": "مگا فرم",
-    "Transmittal": "انتقال دهنده",
-    "RelatedProjects": "پروژه‌های مرتبط",
+    "CategoryB": "دسته بندی فرم B",
+    "IsMegaForm": "مگافرم",
+    "Transmittal": "ترنسمیتال",
+    "RelatedProjects": "پروژه های مرتبط",
     "UploadExcelFile": "قالب Excel File",
     "UploadWordFile": "قالب Word File",
     "ChangeWordFile": "تغییر فایل ورد",
@@ -24,7 +24,8 @@
       "ShowInList": "نمایش در لیست",
       "Required": "اجباری",
       "MainColumn": "ستون اصلی",
-      "IsRtl": "راست‌به‌چپ",
+      "IsRtl": "IsRTL",
+      "ForceReadOnly": "فقط خواندنی اجباری",
       "CountInReject": "شمارش در رد شده ها"
     }
   }

@@ -141,20 +141,36 @@ const DataTable: React.FC<DataTableProps> = ({
     }
   };
 
+  // عرض هر ستون را دقیقاً متناسب با محتوای واقعی خودش (هدر و سلول‌ها)
+  // تنظیم می‌کند، به‌جای پر کردن کل فضای جدول (که کار sizeColumnsToFit بود).
+  const autoSizeColumns = (api: any) => {
+    if (!api) return;
+    const allColumnIds: string[] = [];
+    api.getColumns()?.forEach((column: any) => {
+      allColumnIds.push(column.getColId());
+    });
+    if (allColumnIds.length > 0) {
+      api.autoSizeColumns(allColumnIds, false);
+    }
+  };
+
   const onGridReady = (params: any) => {
     gridApiRef.current = params.api;
-    params.api.sizeColumnsToFit();
+    // با یک فریم تاخیر اجرا می‌شود تا هدر و سلول‌ها قبل از اندازه‌گیری
+    // کامل paint شده باشند؛ وگرنه ستون‌های کم‌محتوا (چک‌باکس‌ها) خیلی
+    // باریک‌تر از عرض واقعی هدرشان بسته می‌شوند.
+    requestAnimationFrame(() => autoSizeColumns(params.api));
 
     if (isLoading) params.api.showLoadingOverlay();
   };
 
   const onGridSizeChanged = (params: any) => {
-    params.api.sizeColumnsToFit();
+    requestAnimationFrame(() => autoSizeColumns(params.api));
   };
 
   useEffect(() => {
     if (gridApiRef.current) {
-      gridApiRef.current.sizeColumnsToFit();
+      requestAnimationFrame(() => autoSizeColumns(gridApiRef.current));
     }
   }, [columnDefs, filteredRowData]);
 
@@ -181,8 +197,19 @@ const DataTable: React.FC<DataTableProps> = ({
     if (onRowClick) onRowClick(event.data);
   };
 
-  const handleRowDoubleClickInternal = (event: any) => {
+  // دابل‌کلیک روی یک سلولِ قابل‌ویرایش دیگر مودال ویرایش را باز نمی‌کند؛
+  // فقط خودِ AG Grid وارد حالت ویرایش درون‌سلولی می‌شود. مودال فقط برای
+  // ستون‌های غیرقابل‌ویرایش (مثل ستون Type) با دابل‌کلیک باز می‌شود.
+  const handleCellDoubleClickInternal = (event: any) => {
     if (!event || !event.data) return;
+
+    const colDef = event.colDef;
+    const isEditable =
+      typeof colDef?.editable === "function"
+        ? colDef.editable(event)
+        : !!colDef?.editable;
+
+    if (isEditable) return;
 
     onRowDoubleClick(event.data);
   };
@@ -203,9 +230,12 @@ const DataTable: React.FC<DataTableProps> = ({
     [filteredRowData]
   );
 
+  // توجه: resizable روی true می‌ماند تا کاربر در صورت نیاز بتواند دستی
+  // عرض ستون را تغییر دهد، ولی عرض اولیه دیگر با sizeColumnsToFit کشیده نمی‌شود.
   const defaultColDefAligned = useMemo<any>(
     () => ({
       sortable: true,
+      resizable: true,
       cellStyle: { textAlign: isRtl ? "right" : "left" },
       headerClass: isRtl ? "rtl-header" : "ltr-header",
     }),
@@ -288,7 +318,7 @@ const DataTable: React.FC<DataTableProps> = ({
                 className={`${baseIconButton} bg-blue-50 hover:bg-blue-100 text-blue-600 ${
                   !isRowSelected ? "opacity-50 cursor-not-allowed" : ""
                 }`}
-                title={TT("DataTable.Buttons.Edit", "ویرایش", "Edit")}
+                title={TT("DataTable.Buttons.Edit", "ذخیره", "Save")}
                 onClick={onEdit}
                 disabled={!isRowSelected || !isEditMode}
               >
@@ -299,7 +329,7 @@ const DataTable: React.FC<DataTableProps> = ({
             {showAddIcon && (
               <button
                 className={`${baseIconButton} bg-green-50 hover:bg-green-100 text-green-600`}
-                title={TT("DataTable.Buttons.Add", "افزودن", "Add")}
+                title={TT("DataTable.Buttons.Add", "جدید", "New")}
                 onClick={handleAddClick}
                 disabled={!isEditMode}
               >
@@ -367,7 +397,7 @@ const DataTable: React.FC<DataTableProps> = ({
             paginationPageSize={10}
             animateRows={true}
             onRowClicked={handleRowClick}
-            onRowDoubleClicked={handleRowDoubleClickInternal}
+            onCellDoubleClicked={handleCellDoubleClickInternal}
             domLayout={domLayout}
             suppressHorizontalScroll={false}
             singleClickEdit={false}

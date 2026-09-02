@@ -391,8 +391,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         editable: true,
         sortable: true,
         filter: true,
-        flex: 0.6,
-        minWidth: 90,
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -402,8 +400,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         editable: true,
         sortable: true,
         filter: true,
-        flex: 2,
-        minWidth: 180,
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -413,8 +409,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         editable: true,
         sortable: true,
         filter: true,
-        flex: 2,
-        minWidth: 180,
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
@@ -424,8 +418,6 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         editable: false,
         sortable: true,
         filter: true,
-        flex: 1.3,
-        minWidth: 150,
         // valueGetter: (params: any) => {
         //   const opt = typeOfInformationOptions.find(
         //     (o) => columnTypeMapping[o.value] === params.data.ColumnType
@@ -447,25 +439,21 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
         editable: true,
         sortable: true,
         filter: true,
-        flex: 1,
-        minWidth: 130,
         cellStyle: ellipsisCellStyle,
         headerStyle: ellipsisHeaderStyle,
       },
       ...[
-        { headerNameKey: "ShowInList", field: "IsShowGrid" },
         { headerNameKey: "Required", field: "IsRequire" },
         { headerNameKey: "MainColumn", field: "IsMainColumn" },
-        // { headerNameKey: "IsRtl", field: "IsRTL" },
-        { headerNameKey: "CountInReject", field: "CountInReject" },
+        { headerNameKey: "ShowInList", field: "IsShowGrid" },
+        { headerNameKey: "IsRtl", field: "IsRTL" },
+        { headerNameKey: "ForceReadOnly", field: "IsForceReadOnly" },
       ].map((c) => ({
         headerName: t(`Forms.Columns.${c.headerNameKey}`),
         field: c.field,
         editable: true,
         sortable: true,
         filter: true,
-        flex: 0.9,
-        minWidth: 110,
         cellStyle: {
           ...ellipsisCellStyle,
           display: "flex",
@@ -651,7 +639,7 @@ const FormsCommand1 = forwardRef(({ selectedRow }: FormsCommand1Props, ref) => {
     }
     setSelectedRowData(updatedData);
     try {
-      // await api.updateEntityField(updatedData);
+      await api.updateEntityField(updatedData);
     } catch (e) {
       console.error(e);
       showAlert("error", undefined, t("Alerts.Errors.FailedToUpdateServer"));

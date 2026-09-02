@@ -359,6 +359,19 @@ export interface ChangePasswordByAdminRequest {
   Password: string; // رمز عبور جدید
 }
 
+// تغییر رمز عبور توسط Admin
+export interface ChangePasswordByAdminRequest {
+  UserId: string;
+  Password: string;
+}
+
+// تغییر رمز عبور توسط خود کاربر
+export interface ChangeProfilePasswordRequest {
+  LastPassword: string;
+  Password: string;
+  ModifiedById: string | null;
+}
+
 export interface Project {
   ID: any;
   ProjectName: string;
@@ -1113,10 +1126,17 @@ class ApiService {
   }
 
   async changePasswordByAdmin(
-    data: ChangePasswordByAdminRequest
-  ): Promise<void> {
-    await httpClient.post(apiConst.changePassword, data);
-  }
+  data: ChangePasswordByAdminRequest
+): Promise<void> {
+  await httpClient.post(apiConst.changePassword, data);
+}
+
+// تغییر رمز عبور توسط خود کاربر
+async changeProfilePassword(
+  data: ChangeProfilePasswordRequest
+): Promise<void> {
+  await httpClient.post(apiConst.changeProfilePassword, data);
+}
 
   async getAllRoles(): Promise<Role[]> {
     const response = await httpClient.post<Role[]>(apiConst.getAllRoles);

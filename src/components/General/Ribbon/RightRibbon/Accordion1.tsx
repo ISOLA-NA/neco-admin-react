@@ -91,7 +91,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
 
     return i18n.language === "fa"
       ? `لیست تب ها برای ${baseName}`
-      : `Menu Tabs List For ${baseName}`;
+      : `Tab List for Menu:${baseName}`;
   }, [selectedMenuName, i18n.language]);
 
   const loadRowData = async () => {
@@ -379,7 +379,7 @@ const Accordion1: React.FC<Accordion1Props> = ({
                 placeholder={TT(
                   "Ribbons.SearchPlaceholder",
                   "جستجو...",
-                  "Search..."
+                  "Full Text Search"
                 )}
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}

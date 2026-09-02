@@ -229,7 +229,7 @@ const CommandSettings = forwardRef<CommandHandle, CommandProps>(
 
         {/* ColorColumn */}
         <DynamicInput
-          name={t("CommandPage.ColorColumns")}
+          name={t("CommandPage.ColorColumn")}
           type="text"
           value={commandData.ColorColumn || ""}
           placeholder=""

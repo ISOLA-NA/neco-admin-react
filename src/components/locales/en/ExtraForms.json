@@ -1,8 +1,8 @@
 {
   "DynamicConfirm": {
     "Buttons": {
-      "Add": "Add",
-      "Edit": "Edit",
+      "Add": "Save",
+      "Edit": "Update",
       "Save": "Save",
       "Delete": "Delete",
       "Duplicate": "Duplicate",
@@ -139,7 +139,7 @@
     "CategoryA": "Category A",
     "CategoryB": "Category B",
     "Transmittal": "Transmittal",
-    "IsMegaForm": "Is MegaForm",
+    "IsMegaForm": "Mega Form",
     "SwitchToEN": "Switch to English ({field})",
     "SwitchToFA": "Switch to Persian ({field})",
     "RelatedProjects": "Related Projects",
@@ -193,7 +193,7 @@
       "No": "No"
     },
     "Toolbar": {
-      "SearchPlaceholder": "Search..."
+      "SearchPlaceholder": "Full Text Search"
     }
   },
   "Ribbons": {

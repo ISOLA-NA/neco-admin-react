@@ -1,12 +1,16 @@
 // src/components/Programs/ProgramTemplate/ProgramDesignerGrid.tsx
-
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { AgGridReact } from "ag-grid-react";
 import { useTranslation } from "react-i18next";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useProgramDesigner } from "../../../context/ProgramDesignerContext";
 import { ProgramDesignerRow } from "../../../services/programDesigner/types";
+
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
+import "./ProgramDesignerGrid.css";
 
 interface TreeNode extends ProgramDesignerRow {
   children?: TreeNode[];
@@ -15,15 +19,17 @@ interface TreeNode extends ProgramDesignerRow {
   isLoadingChildren?: boolean;
 }
 
-/**
- * ستون ID همیشه نمایش داده می‌شود (چون آیکون Expand/Collapse درخت رویش
- * سوار است) و در Column Chooser قابل حذف نیست. بقیه‌ی ستون‌ها این‌جا
- * تعریف شده‌اند تا هم در گرید و هم در Column Chooser (که در صفحه‌ی بالاتر
- * رندر می‌شود) استفاده‌ی مشترک داشته باشند.
- */
+// فقط برای رندر در AG Grid لازم است؛ به منطق اصلی درخت چیزی اضافه نمی‌کند.
+interface FlatRow extends TreeNode {
+  __depth: number;
+  __parentGPIC: string | null;
+}
+
 export interface ProgramDesignerColumnDef {
   key: keyof ProgramDesignerRow;
   label: string;
+  /** عرض حداقلی سفارشی برای ستون‌هایی با اسم طولانی/پیوسته */
+  minWidth?: number;
 }
 
 export const PROGRAM_DESIGNER_TOGGLEABLE_COLUMNS: ProgramDesignerColumnDef[] = [
@@ -41,27 +47,31 @@ export const PROGRAM_DESIGNER_TOGGLEABLE_COLUMNS: ProgramDesignerColumnDef[] = [
   {
     key: "Approval to execution Weight (%)",
     label: "Approval to Execution Weight",
+    minWidth: 200,
   },
   { key: "Approval Budjet", label: "Approval Budget" },
   { key: "AF Duration", label: "AF Duration" },
   { key: "Program Type", label: "Program Type" },
   { key: "Program Duration", label: "Program Duration" },
-  { key: "Program Approval Budget", label: "Program Approval Budget" },
-  { key: "Program to plan Weight (%)", label: "Program To plan Weight" },
+  { key: "Program Approval Budget", label: "Program Approval Budget", minWidth: 180 },
+  {
+    key: "Program to plan Weight (%)",
+    label: "Program To plan Weight",
+    minWidth: 190,
+  },
   { key: "Check LIST", label: "Check List" },
   { key: "Procedure", label: "Procedure" },
   { key: "GPIC", label: "GPIC" },
-  { key: "PredecessorForItemStr", label: "PredecessorForItemStr" },
-  { key: "PredecessorForSubStr", label: "PredecessorForSubStr" },
-  { key: "PredecessorForItemNames", label: "PredecessorForItemNames" },
+  { key: "PredecessorForItemStr", label: "Predecessor For Item Str", minWidth: 210 },
+  { key: "PredecessorForSubStr", label: "Predecessor For Sub Str", minWidth: 210 },
+  {
+    key: "PredecessorForItemNames",
+    label: "Predecessor For Item Names",
+    minWidth: 230,
+  },
   { key: "ParrentIC", label: "ParrentIC" },
 ];
 
-/**
- * ستون‌های پیش‌فرض نمایش‌داده‌شده: همه‌ی ستون‌ها (دقیقاً مطابق نسخه‌ی
- * ویندوزی که همه‌ی چک‌باکس‌ها از اول تیک‌خورده بودند). با Column Chooser
- * می‌شود هرکدام را که لازم نیست مخفی کرد.
- */
 export const DEFAULT_VISIBLE_COLUMN_KEYS: string[] =
   PROGRAM_DESIGNER_TOGGLEABLE_COLUMNS.map((col) => col.key as string);
 
@@ -71,7 +81,6 @@ interface ProgramDesignerGridProps {
   onRowDoubleClick?: (row: TreeNode, parentGPIC: string | null) => void;
   selectedRowId?: string | null;
   refreshKey?: number;
-  /** کلیدهای ستون‌های قابل‌نمایش (از PROGRAM_DESIGNER_TOGGLEABLE_COLUMNS) */
   visibleColumnKeys?: Set<string>;
 }
 
@@ -85,9 +94,11 @@ const ProgramDesignerGrid: React.FC<ProgramDesignerGridProps> = ({
 }) => {
   const { getRootRows, getChildRows } = useProgramDesigner();
   const { i18n } = useTranslation();
-  const alignClass = i18n.dir() === "rtl" ? "text-right" : "text-left";
+  const isRtl = i18n.dir() === "rtl";
+
   const [rows, setRows] = useState<TreeNode[]>([]);
   const [isLoadingRoot, setIsLoadingRoot] = useState(false);
+  const gridApiRef = useRef<any>(null);
 
   const activeColumnKeys =
     visibleColumnKeys ?? new Set(DEFAULT_VISIBLE_COLUMN_KEYS);
@@ -95,6 +106,7 @@ const ProgramDesignerGrid: React.FC<ProgramDesignerGridProps> = ({
     activeColumnKeys.has(col.key as string)
   );
 
+  /* ------------------------- بارگذاری داده (بدون تغییر منطق) ------------------------- */
   const loadRoot = useCallback(async () => {
     setIsLoadingRoot(true);
     try {
@@ -108,6 +120,12 @@ const ProgramDesignerGrid: React.FC<ProgramDesignerGridProps> = ({
   useEffect(() => {
     loadRoot();
   }, [loadRoot, refreshKey]);
+
+  useEffect(() => {
+    if (!gridApiRef.current) return;
+    if (isLoadingRoot) gridApiRef.current.showLoadingOverlay();
+    else gridApiRef.current.hideOverlay();
+  }, [isLoadingRoot]);
 
   const updateNodeByGPIC = (
     nodes: TreeNode[],
@@ -158,116 +176,156 @@ const ProgramDesignerGrid: React.FC<ProgramDesignerGridProps> = ({
     }
   };
 
-  // parentGPIC: GPIC والد مستقیم این ردیف در درخت (null اگر ردیف در لایه‌ی ریشه باشد)
-  const renderRow = (
-    node: TreeNode,
+  /* ------------------------- flatten درخت برای AG Grid ------------------------- */
+  // فقط لایه‌ی نمایش را از تودرتو به فلَت تبدیل می‌کند؛ منطق expand/collapse
+  // و lazy-load فرزندان دقیقاً همان چیزی است که قبلاً بود.
+  const flattenTree = (
+    nodes: TreeNode[],
     depth: number,
     parentGPIC: string | null
-  ): React.ReactNode => {
+  ): FlatRow[] => {
+    const out: FlatRow[] = [];
+    for (const node of nodes) {
+      out.push({ ...node, __depth: depth, __parentGPIC: parentGPIC });
+      if (node.isExpanded && node.children) {
+        out.push(...flattenTree(node.children, depth + 1, node.GPIC));
+      }
+    }
+    return out;
+  };
+
+  const flatRows = useMemo(() => flattenTree(rows, 0, null), [rows]);
+
+  const handleRowClicked = (event: any) => {
+    if (!event?.data) return;
+    onRowSelect?.(event.data);
+  };
+
+  const handleCellDoubleClicked = (event: any) => {
+    if (!event?.data) return;
+    onRowDoubleClick?.(event.data, event.data.__parentGPIC ?? null);
+  };
+
+  const getRowClass = (params: any) =>
+    selectedRowId && params.data?.GPIC === selectedRowId ? "ag-row-selected" : "";
+
+  /* ------------------------- ستون ID با آیکن Expand/Collapse ------------------------- */
+  const IdCellRenderer = (params: any) => {
+    const node: FlatRow = params.data;
     const isInFPP = node["Activity Type"] === "InFPP";
-    const isSelected = selectedRowId === node.GPIC;
-
     return (
-      <React.Fragment key={node.GPIC}>
-        <tr
-          onClick={() => onRowSelect?.(node)}
-          onDoubleClick={() => onRowDoubleClick?.(node, parentGPIC)}
-          className={`cursor-pointer transition-colors border-b border-purple-100 ${
-            isSelected
-              ? "bg-gradient-to-r from-pink-100 to-purple-100"
-              : "odd:bg-orange-50 even:bg-white hover:bg-purple-50"
-          }`}
-        >
-          <td className={`px-3 py-2 text-sm ${alignClass}`}>
-            <div
-              className="flex items-center gap-1"
-              style={{ paddingLeft: depth * 20 }}
-            >
-              {isInFPP ? (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleExpand(node);
-                  }}
-                  className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-purple-200 text-purple-600 shrink-0"
-                >
-                  {node.isLoadingChildren ? (
-                    <CircularProgress size={14} />
-                  ) : node.isExpanded ? (
-                    <KeyboardArrowDownIcon sx={{ fontSize: 16 }} />
-                  ) : (
-                    <KeyboardArrowRightIcon sx={{ fontSize: 16 }} />
-                  )}
-                </button>
-              ) : (
-                <span className="w-5 h-5 shrink-0" />
-              )}
-              <span className="truncate">{node.ID}</span>
-            </div>
-          </td>
-
-          {visibleColumns.map((col) => (
-            <td
-              key={col.key as string}
-              className={`px-3 py-2 text-sm ${alignClass}`}
-            >
-              {node[col.key] as React.ReactNode}
-            </td>
-          ))}
-        </tr>
-
-        {node.isExpanded &&
-          node.children?.map((child) =>
-            renderRow(child, depth + 1, node.GPIC)
-          )}
-      </React.Fragment>
+      <div
+        className="flex items-center gap-1 h-full"
+        style={{ paddingInlineStart: node.__depth * 20 }}
+      >
+        {isInFPP ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleExpand(node);
+            }}
+            className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-purple-200 text-purple-600 shrink-0"
+          >
+            {node.isLoadingChildren ? (
+              <CircularProgress size={14} />
+            ) : node.isExpanded ? (
+              <KeyboardArrowDownIcon sx={{ fontSize: 16 }} />
+            ) : (
+              <KeyboardArrowRightIcon sx={{ fontSize: 16 }} />
+            )}
+          </button>
+        ) : (
+          <span className="w-5 h-5 shrink-0" />
+        )}
+        <span className="truncate">{node.ID as React.ReactNode}</span>
+      </div>
     );
   };
 
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "ID",
+        field: "ID",
+        cellRenderer: IdCellRenderer,
+        minWidth: 90,
+      },
+      ...visibleColumns.map((col) => ({
+        headerName: col.label,
+        field: col.key as string,
+        minWidth: col.minWidth ?? 110,
+      })),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visibleColumns]
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      sortable: true,
+      resizable: true,
+      cellStyle: { textAlign: isRtl ? "right" : "left" },
+      headerClass: isRtl ? "rtl-header" : "ltr-header",
+    }),
+    [isRtl]
+  );
+
+  const autoSizeAll = (api: any) => {
+    if (!api) return;
+    const ids: string[] = [];
+    api.getColumns()?.forEach((c: any) => ids.push(c.getColId()));
+    if (ids.length) api.autoSizeColumns(ids, false);
+  };
+
+  const onGridReady = (params: any) => {
+    gridApiRef.current = params.api;
+    requestAnimationFrame(() => {
+      autoSizeAll(params.api);
+      // اجرای دوباره بعد از لود کامل فونت‌ها، چون اندازه‌گیری اول
+      // ممکن است کمی کمتر از عرض واقعی متن حساب شود (باعث بریده‌شدن
+      // هدرهای طولانی مثل PredecessorForItemNames می‌شد).
+      setTimeout(() => autoSizeAll(params.api), 150);
+    });
+    if (isLoadingRoot) params.api.showLoadingOverlay();
+  };
+
+  useEffect(() => {
+    if (gridApiRef.current) {
+      requestAnimationFrame(() => {
+        autoSizeAll(gridApiRef.current);
+        setTimeout(() => autoSizeAll(gridApiRef.current), 150);
+      });
+    }
+  }, [columnDefs, flatRows]);
+
   return (
-    <div className="rounded-lg overflow-hidden border border-purple-200 shadow-sm">
-      <div className="overflow-x-auto overflow-y-auto min-h-[450px] max-h-[600px]">
-        <table dir={i18n.dir()} className={`w-full ${alignClass}`}>
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-gradient-to-r from-pink-500 to-purple-600 text-white">
-              <th className={`px-3 py-2 text-sm font-semibold ${alignClass}`}>
-                ID
-              </th>
-              {visibleColumns.map((col) => (
-                <th
-                  key={col.key as string}
-                  className={`px-3 py-2 text-sm font-semibold whitespace-nowrap ${alignClass}`}
-                >
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {isLoadingRoot ? (
-              <tr>
-                <td
-                  colSpan={visibleColumns.length + 1}
-                  className="text-center py-8 text-gray-400"
-                >
-                  <CircularProgress size={18} className="mr-2" />
-                  در حال بارگذاری...
-                </td>
-              </tr>
-            ) : rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={visibleColumns.length + 1}
-                  className="text-center py-8 text-gray-400"
-                >
-                  هیچ فعالیتی ثبت نشده است
-                </td>
-              </tr>
-            ) : (
-              rows.map((row) => renderRow(row, 0, null))
-            )}
-          </tbody>
-        </table>
+    <div dir={i18n.dir()} className="overflow-x-auto pb-2">
+      <div
+        className="program-designer-table-container w-full flex flex-col relative rounded-md shadow-md p-2"
+        style={{ minWidth: "100%" }}
+      >
+        <div className="h-[330px] min-w-full flex flex-col justify-end">
+          <div
+            className={`ag-theme-quartz w-full h-full ${isRtl ? "ag-rtl" : "ag-ltr"}`}
+          >
+            <AgGridReact
+              key={isRtl ? "rtl" : "ltr"}
+              onGridReady={onGridReady}
+              onGridSizeChanged={(p) => requestAnimationFrame(() => autoSizeAll(p.api))}
+              columnDefs={columnDefs}
+              rowData={flatRows}
+              animateRows={true}
+              domLayout="normal"
+              onRowClicked={handleRowClicked}
+              onCellDoubleClicked={handleCellDoubleClicked}
+              enableRtl={isRtl}
+              defaultColDef={defaultColDef}
+              getRowClass={getRowClass}
+              overlayLoadingTemplate={`<div class="custom-loading-overlay"><div style="margin-top:8px;font-weight:500;">در حال بارگذاری...</div></div>`}
+              overlayNoRowsTemplate={`<div style="padding:2rem;color:#9ca3af;">هیچ فعالیتی ثبت نشده است</div>`}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

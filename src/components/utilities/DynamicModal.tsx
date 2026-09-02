@@ -25,21 +25,29 @@ const DynamicModal: React.FC<DynamicModalProps> = ({
 
   const handleClose = () => onClose();
 
-  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    if (e.target === dialogRef.current) handleClose();
+  // نکته: کلیک روی بک‌دراپ (بیرون از modal-box) دیگر مودال را نمی‌بندد.
+  // طبق تصمیم پروژه، بستن مودال فقط از طریق دکمه‌ی × یا دکمه‌ی Cancel داخل
+  // فرم انجام می‌شود، نه با کلیک بیرون از آن.
+  // (قبلاً اینجا handleDialogClick با onClick روی <dialog> این کار را می‌کرد؛
+  // به همین دلیل onClick از تگ dialog حذف شده است.)
+
+  // جلوگیری از بسته‌شدن با کلید Escape هم — چون این هم یکی از راه‌های
+  // پیش‌فرض بستن <dialog> است و طبق خواسته باید فقط با × یا Cancel بسته شود.
+  const handleCancelEvent = (e: React.SyntheticEvent<HTMLDialogElement>) => {
+    e.preventDefault();
   };
 
   // عرض: large ≈ دو برابر، ولی از viewport تجاوز نکند
   const widthClass =
     size === "large"
-      ? "w-full max-w-[min(1600px,95vw)]"  // ~2x
+      ? "w-full max-w-[min(1600px,95vw)]" // ~2x
       : "w-full max-w-2xl";
 
   return (
     <dialog
       ref={dialogRef}
       className="modal fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity duration-300"
-      onClick={handleDialogClick}
+      onCancel={handleCancelEvent}
     >
       <div
         className={`modal-box bg-white rounded-lg p-6 relative shadow-lg

@@ -492,7 +492,7 @@ export const SubTabDefinitionsProvider: React.FC<{
         },
         nameField: "Name",
       },
-
+      
       Users: {
         endpoint: api.getAllUsers,
         columnDefs: [
@@ -537,7 +537,8 @@ export const SubTabDefinitionsProvider: React.FC<{
             flex: 1,
           },
           {
-            headerName: t("User.Website"),
+            // ✅ ستون Website همیشه به همین شکل (بدون ترجمه) نمایش داده شود، چه در حالت فارسی و چه انگلیسی
+            headerName: "وب سایت",
             field: "Website",
             filter: "agTextColumnFilter",
             sortable: true,
@@ -563,6 +564,11 @@ export const SubTabDefinitionsProvider: React.FC<{
             minWidth: 170,
             flex: 1.3,
           },
+          // ✅ ستون جدید: قابل مشاهده (IsVisible)
+          checkboxCol(
+            TT("User.Visible", "قابل مشاهده"),
+            "IsVisible"
+          ),
         ],
         iconVisibility: {
           showAdd: true,

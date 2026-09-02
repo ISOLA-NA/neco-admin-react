@@ -41,6 +41,8 @@ interface CommandData {
   SpParam: string;
   CmdType: number;
   ApiMode?: string;
+  ConditionalCommands?: string;
+
 }
 
 interface ConfigurationData {
@@ -386,6 +388,7 @@ export const AddEditDeleteProvider: React.FC<{ children: React.ReactNode }> = ({
         SpParam: data.SpParam || "",
         CmdType: data.CmdType || 0,
         ApiMode: data.ApiMode || "",
+        ConditionalCommands: data.ConditionalCommands || "",
       };
 
       let updatedCmd: CommandItem;

@@ -220,6 +220,10 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
       value: "@wf",
       label: "Command : @wf , info : For Letter Wf",
     },
+    {
+      value: "@me",
+      label: "@me info:For Letter Generator",
+    },
   ];
   const [commandOptions] = useState(initialCommandOptions);
 
@@ -868,6 +872,7 @@ const AddColumnForm: React.FC<AddColumnFormProps> = ({
             onChange={(e) => handleChange("command", e.target.value)}
             label={t("AddForms.Command")}
             allowCustom={true}
+            searchable={false}
             className="md:col-span-1 -mt-3"
             labelClassName="text-gray-700 font-medium"
           />

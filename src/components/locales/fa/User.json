@@ -47,6 +47,7 @@
     "MsgNewPasswordCannotBeEmpty": "رمز عبور جدید نمی‌تواند خالی باشد",
     "MsgConfirmPasswordChange": "آیا از تغییر رمز عبور اطمینان دارید؟",
     "MsgNameCannotBeEmpty": "نام نمی‌تواند خالی باشد",
-    "MsgFetchUserTypesFailed": "خطا در دریافت نوع کاربر:"
+    "MsgFetchUserTypesFailed": "خطا در دریافت نوع کاربر:",
+    "Visible": "قابل مشاهده"
   }
 }

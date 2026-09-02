@@ -76,7 +76,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
 
     return i18n.language === "fa"
       ? `لیست بخش ها برای تب ${baseName}`
-      : `Sections List For Tab ${baseName}`;
+      : `Section List for Tab:${baseName}`;
   }, [selectedMenuTabName, i18n.language]);
 
   const [searchText, setSearchText] = useState<string>("");
@@ -359,7 +359,7 @@ const Accordion2: React.FC<Accordion2Props> = ({
                     placeholder={TT(
                       "Ribbons.SearchPlaceholder",
                       "جستجو...",
-                      "Search..."
+                      "Full Text Search"
                     )}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}

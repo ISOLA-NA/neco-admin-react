@@ -6,7 +6,7 @@ import { useApi } from "../../../context/ApiContext";
 import { AFBtnItem } from "../../../services/api.services";
 import DynamicConfirm from "../../utilities/DynamicConfirm";
 import { useTranslation } from "react-i18next";
-import { FaPlus, FaPencilAlt, FaTrash, FaUndo } from "react-icons/fa";
+import { FaPlus, FaPencilAlt, FaTrash, FaUndo, FaPaintBrush } from "react-icons/fa";
 import FileUploadHandler from "../../../services/FileUploadHandler";
 
 interface ButtonComponentProps {
@@ -50,6 +50,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // true => Name (FA), false => PersianName (EN)
   const [isFaMode, setIsFaMode] = useState(true);
   const [persianNameValue, setPersianNameValue] = useState("");
+  const [persianStateTextValue, setPersianStateTextValue] = useState("");
 
   const { t, i18n } = useTranslation();
   const isRTL = i18n.dir() === "rtl";
@@ -96,6 +97,15 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
       ),
     },
   ];
+
+  // برچسب انگلیسیِ ثابت فرمان برای نمایش داخل ستون جدول (مستقل از زبان رابط کاربری)
+  const commandEnglishLabelMap: Record<string, string> = {
+    accept: "Accept",
+    reject: "Reject",
+    close: "Close",
+    client: "GoToPreviousStateClient",
+    admin: "GoToPreviousStateAdmin",
+  };
 
   // ----- DynamicConfirm state -----
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -175,6 +185,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     setTooltipValue("");
     setOrderValue("1");
     setPersianNameValue("");
+    setPersianStateTextValue("");
 
     // ✅ پیش‌فرض هر دو accept
     setSelectedState("accept");
@@ -217,6 +228,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         PersianName: pNameTrim,
         Tooltip: tooltipValue,
         StateText: stateTextValue,
+        PersianStateText: persianStateTextValue,
         Order: parseFloat(orderValue || "1"),
         WFStateForDeemed: radioToWFStateForDeemed(selectedState),
         WFCommand: radioToWFCommand(selectedCommand),
@@ -224,7 +236,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
         IsVisible: true,
         LastModified: null,
         ModifiedById: null,
-      };
+      } as AFBtnItem;
 
       console.log("INSERT AFBtn payload ➜", newAFBtn);
 
@@ -280,6 +292,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
             PersianName: pNameTrim,
             Tooltip: tooltipValue,
             StateText: stateTextValue,
+            PersianStateText: persianStateTextValue,
             Order: parseFloat(orderValue || "1"),
             WFStateForDeemed: radioToWFStateForDeemed(selectedState),
             WFCommand: radioToWFCommand(selectedCommand),
@@ -287,7 +300,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
             IsVisible: true,
             LastModified: null,
             ModifiedById: null,
-          };
+          } as AFBtnItem;
 
           console.log("UPDATE AFBtn payload ➜", updatedAFBtn);
 
@@ -350,6 +363,18 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   // =========================
   const handleNewClick = () => {
     handleReset();
+  };
+
+  // =========================
+  //      DESIGN (Select)
+  // =========================
+  // نکته: onSelectButtonClick همان تابعی است که ListSelector واقعاً
+  // برای «انتخاب ردیف + بستن مودال» استفاده می‌کند (دقیقاً همان مسیری
+  // که دابل‌کلیک روی ردیف طی می‌کند). onSelectFromButton یک پراپ دیگر
+  // و نامرتبط بود که به اشتباه استفاده شده بود.
+  const handleDesignClick = () => {
+    if (!selectedRow) return;
+    onSelectButtonClick();
   };
 
   // =========================
@@ -463,6 +488,7 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     setPersianNameValue(data.PersianName ?? "");
 
     setStateTextValue(data.StateText || "");
+    setPersianStateTextValue((data as any).PersianStateText ?? "");
     setTooltipValue(data.Tooltip || "");
     setOrderValue(
       data.Order !== undefined && data.Order !== null
@@ -507,52 +533,57 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
     return `${base} (State: ${stateLabel} - Command: ${commandLabel})`;
   };
 
-  // ستون‌های ورودی از والد رو با PersianName غنی کنیم
+  // ستون‌های جدول: Name, Persian Name, Command, State Text, Persian State Text, Order
+  // (دقیقاً منطبق با ترتیب ستون‌های نرم‌افزار اصلی — نه ساختار قبلی که فقط Name/PersianName/Tooltip داشت)
   const columnDefsWithFa = React.useMemo(() => {
-    const translatedDefs = (
-      Array.isArray(columnDefs) ? [...columnDefs] : []
-    ).map((col) => {
-      if (col.field === "Name")
-        return {
-          ...col,
-          headerName: t("DataTable.Headers.Name", {
-            defaultValue: i18n.language === "fa" ? "نام" : "Name",
-          }),
-        };
-      if (col.field === "Tooltip")
-        return {
-          ...col,
-          headerName: t("DataTable.Headers.Tooltip", {
-            defaultValue: i18n.language === "fa" ? "متن راهنما" : "Tooltip",
-          }),
-        };
-      return col;
-    });
-
-    const hasFa = translatedDefs.some(
-      (c) => (c.field ?? "").toString() === "PersianName"
-    );
-    if (hasFa) return translatedDefs;
-
-    const faCol = {
-      headerName: t("DataTable.Headers.PersianName", {
-        defaultValue:
-          i18n.language === "fa" ? "نام فارسی ستون" : "Persian Name",
-      }),
-      field: "PersianName",
-      sortable: true,
-      filter: true,
-      resizable: true,
-    };
-    const nameIdx = translatedDefs.findIndex(
-      (c) => (c.field ?? "").toString().toLowerCase() === "name"
-    );
-    if (nameIdx === -1) return [...translatedDefs, faCol];
-
-    const before = translatedDefs.slice(0, nameIdx + 1);
-    const after = translatedDefs.slice(nameIdx + 1);
-    return [...before, faCol, ...after];
-  }, [columnDefs]);
+    return [
+      {
+        headerName: t("DataTable.Headers.Name", {
+          defaultValue: i18n.language === "fa" ? "نام" : "Name",
+        }),
+        field: "Name",
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: t("Configuration.PersianName", "PersianName"),
+        field: "PersianName",
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: t("DataTable.Headers.Command", {
+          defaultValue: "Command",
+        }),
+        field: "WFCommand",
+        sortable: true,
+        filter: true,
+        valueGetter: (params: any) =>
+          commandEnglishLabelMap[mapWFCommandToRadio(params.data?.WFCommand)] ??
+          "",
+      },
+      {
+        headerName: t("Configuration.StateText", "State Text"),
+        field: "StateText",
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: t("Configuration.PersianStateText", "Persian State Text"),
+        field: "PersianStateText",
+        sortable: true,
+        filter: true,
+      },
+      {
+        headerName: t("DataTable.Headers.Order", {
+          defaultValue: i18n.language === "fa" ? "ترتیب" : "Order",
+        }),
+        field: "Order",
+        sortable: true,
+        filter: true,
+      },
+    ];
+  }, [t, i18n.language]);
 
   // شمارنده‌ها (مثل عکس)
   const nameCount = (nameValue || "").length;
@@ -704,13 +735,21 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
               {/* ستون راست */}
               <div>
-                {/* StateText */}
+                {/* StateText / PersianStateText با همون سوییچ FA/EN بالا */}
                 <div>
                   <DynamicInput
-                    name={t("Configuration.StateText")}
+                    name={
+                      isFaMode
+                        ? t("Configuration.StateText")
+                        : t("Configuration.PersianStateText", "Persian State Text")
+                    }
                     type="text"
-                    value={stateTextValue}
-                    onChange={(e) => setStateTextValue(e.target.value)}
+                    value={isFaMode ? stateTextValue : persianStateTextValue}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (isFaMode) setStateTextValue(v);
+                      else setPersianStateTextValue(v);
+                    }}
                     className="w-full"
                   />
                   <div className="flex justify-end text-xs mt-1">
@@ -850,33 +889,35 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
           </div>
 
           {/* ── Footer Buttons ── */}
+          {/* ترتیب دقیقاً مطابق نرم‌افزار اصلی: Design | Add/Edit (ادغام‌شده) | Delete | New */}
           <div className="bg-white/90 backdrop-blur mt-6 py-2">
             <div className="flex items-center justify-center gap-3">
               <DynamicButton
-                text={t("AddApprovalFlows.Add", "Add")}
-                onClick={handleAddClick}
-                isDisabled={isRowClicked}
-                size="md"
-                variant="orgGreen"
-                leftIcon={<FaPlus />}
-              />
-
-              <DynamicButton
-                text={t("AddApprovalFlows.Edit", "Edit")}
-                onClick={handleEditClick}
+                text={t("AddApprovalFlows.Design", "Design")}
+                onClick={handleDesignClick}
                 isDisabled={!selectedRow}
                 size="md"
-                variant="orgYellow"
-                leftIcon={<FaPencilAlt />}
+                variant="orgBlue"
+                leftIcon={<FaPaintBrush />}
               />
 
-              <DynamicButton
-                text={t("AddApprovalFlows.New", "New")}
-                onClick={handleNewClick}
-                size="md"
-                variant="orgBlue"
-                leftIcon={<FaUndo />}
-              />
+              {selectedRow ? (
+                <DynamicButton
+                  text={t("AddApprovalFlows.Edit", "Edit")}
+                  onClick={handleEditClick}
+                  size="md"
+                  variant="orgYellow"
+                  leftIcon={<FaPencilAlt />}
+                />
+              ) : (
+                <DynamicButton
+                  text={t("AddApprovalFlows.Add", "Add")}
+                  onClick={handleAddClick}
+                  size="md"
+                  variant="orgGreen"
+                  leftIcon={<FaPlus />}
+                />
+              )}
 
               <DynamicButton
                 text={t("AddApprovalFlows.Delete", "Delete")}
@@ -885,6 +926,14 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
                 size="md"
                 variant="orgRed"
                 leftIcon={<FaTrash />}
+              />
+
+              <DynamicButton
+                text={t("AddApprovalFlows.New", "New")}
+                onClick={handleNewClick}
+                size="md"
+                variant="orgBlue"
+                leftIcon={<FaUndo />}
               />
             </div>
           </div>

@@ -47,6 +47,7 @@
     "MsgNewPasswordCannotBeEmpty": "New password cannot be empty",
     "MsgConfirmPasswordChange": "Are you sure you want to change password?",
     "MsgNameCannotBeEmpty": "Name cannot be empty",
-    "MsgFetchUserTypesFailed": "Error fetching user types:"
+    "MsgFetchUserTypesFailed": "Error fetching user types:",
+    "Visible": "Visible"
   }
 }

@@ -2,13 +2,13 @@
   "Staffing": {
     "Name":"Name",
     "ProjectName": "Project Name",
-    "RolesType": "Roles",
+    "RolesType": "Role",
     "SuperiorRole": "Superior Role",
     "UserName": "User",
     "RelatedRibbons": "Related Ribbons",
     "Enterprise": "Enterprise",
     "ShowCommandBar": "Show Command Bar",
-    "AccessToNewProjects": "Access To New Projects",
+    "AccessToNewProjects": "Access To New Project",
     "DynamicRoleSelectProject": "A dynamic role has been selected; please select a project",
     "SelectUserBeforeSaving": "Please select a user before saving."
   }

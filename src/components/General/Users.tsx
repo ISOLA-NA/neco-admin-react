@@ -26,6 +26,15 @@ interface UserProps {
   selectedRow: any;
 }
 
+// ✅ نرمال‌سازی مقادیر boolean که ممکن است از سرور به‌صورت رشته ("true"/"false") یا عدد (1/0) بیایند.
+// بدون این تابع، !!"false" همیشه true برمی‌گرداند چون هر رشته‌ی غیرخالی truthy است.
+const toBool = (v: any): boolean => {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v === 1;
+  if (typeof v === "string") return v.toLowerCase() === "true" || v === "1";
+  return !!v;
+};
+
 const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   const { t } = useTranslation();
   const { handleSaveUser } = useAddEditDelete();
@@ -84,7 +93,8 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
     // userType: selectedRow?.userType || 0,
     userType: selectedRow?.userType ?? "",
     Code: selectedRow?.Code || "",
-    IsVisible: selectedRow?.IsVisible ?? true,
+    // ✅ استفاده از toBool به‌جای مقایسه مستقیم، تا مقادیر رشته‌ای ("true"/"false") هم درست تفسیر شوند
+    IsVisible: selectedRow ? toBool(selectedRow?.IsVisible) : true,
     UserImageId: selectedRow?.UserImageId || null,
     CreateDate: selectedRow?.CreateDate || null,
     LastLoginTime: selectedRow?.LastLoginTime || null,
@@ -108,7 +118,8 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         // userType: selectedRow.userType || 0,
         userType: selectedRow.userType ?? "",
         Code: selectedRow.Code || "",
-        IsVisible: selectedRow.IsVisible ?? true,
+        // ✅ نرمال‌سازی مقدار IsVisible که ممکن است از سرور به‌صورت رشته بیاید
+        IsVisible: toBool(selectedRow.IsVisible),
         UserImageId: selectedRow.UserImageId || null,
         CreateDate: selectedRow.CreateDate || null,
         LastLoginTime: selectedRow.LastLoginTime || null,
@@ -175,6 +186,10 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
   };
 
   const handleChange = (field: keyof typeof userData, value: any) => {
+    if (field === "IsVisible") {
+      // 🔍 لاگ تشخیصی موقت — بعد از رفع مشکل حذف شود
+      console.log("[DEBUG] handleChange IsVisible called. New value will be:", value, typeof value);
+    }
     setUserData((prev) => ({
       ...prev,
       [field]: value,
@@ -451,9 +466,20 @@ const User2 = forwardRef<UserHandle, UserProps>(({ selectedRow }, ref) => {
         </div>
       </div>
      <div className="-mt-2 flex items-center">
+        {/* 🔍 لاگ تشخیصی موقت — بعد از رفع مشکل حذف شود */}
+        {(() => {
+          console.log(
+            "[DEBUG] Render: userData.IsVisible =",
+            userData.IsVisible,
+            typeof userData.IsVisible,
+            "| toBool result =",
+            toBool(userData.IsVisible)
+          );
+          return null;
+        })()}
         <DynamicSwitcher
-          isChecked={!!userData.IsVisible}
-          onChange={() => handleChange("IsVisible", !userData.IsVisible)}
+          isChecked={toBool(userData.IsVisible)}
+          onChange={() => handleChange("IsVisible", !toBool(userData.IsVisible))}
           leftLabel={t("User.Activate")}
           rightLabel=""
         />

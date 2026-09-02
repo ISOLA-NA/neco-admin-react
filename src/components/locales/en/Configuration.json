@@ -15,6 +15,7 @@
     "MeetingActionButtonsSecondForm": "Meeting Action Buttons For Second Form",
     "NoItemSelected": "No item is selected",
     "StateText": "State Text",
+    "PersianStateText": "Persian State Text",
     "Order": "Order",
     "Tooltip": "Tooltip",
     "State": "State:",
@@ -25,7 +26,7 @@
     "Accept": "Accept",
     "Reject": "Reject",
     "Close": "Close",
-    "PersianName": "PersianName"
+    "PersianName": "Persian Name"
   },
   "Global": {
     "Add": "Add",
@@ -33,7 +34,7 @@
     "New": "New",
     "Delete": "Delete"
   },
-  "DataTables": {
+  "DataTable": {
     "Headers": {
       "Name": "Name",
       "Description": "Description",

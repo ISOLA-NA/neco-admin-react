@@ -2,6 +2,7 @@
 export const apiConst = Object.freeze({
   // webLogin: "api/Login/LoginO",
   webLogin: "api/Login/LoginONew",
+  changeProfilePassword: "api/User/ChangePassword",
   sendOtp: "api/SendOtp",
   loginWithOtp: "api/loginWithOtp",
   tokenSetup: "api/tokenSetup",

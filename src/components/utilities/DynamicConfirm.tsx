@@ -1,27 +1,39 @@
 // src/components/utilities/Confirm/DynamicConfirm.tsx
 
 import React from "react";
-import { FiAlertTriangle, FiCheck } from "react-icons/fi";
+import {
+  FiAlertTriangle,
+  FiCheck,
+  FiInfo,
+} from "react-icons/fi";
+
 import { useTranslation } from "react-i18next";
 
-/**
- * بسته به سلیقه می‌توانید Variantهای بیشتری اضافه کنید،
- * اینجا پنج تا گذاشته‌ایم: add, edit, delete, notice, error
- */
-type VariantType = "add" | "edit" | "delete" | "notice" | "error";
+export type VariantType =
+  | "add"
+  | "edit"
+  | "delete"
+  | "notice"
+  | "error";
 
 interface DynamicConfirmProps {
   isOpen: boolean;
+
   title?: string;
+
   message?: string;
-  onConfirm: () => void;
+
+  onConfirm: () => void | Promise<void>;
+
   onClose: () => void;
-  variant: VariantType;
-  /**
-   * اگر بخواهیم کادر Cancel را مخفی کنیم (مثلاً در پیام‌های اطلاع‌رسانی)،
-   * می‌توانیم از این استفاده کنیم.
-   */
+
+  variant?: VariantType;
+
   hideCancelButton?: boolean;
+
+  confirmText?: string;
+
+  cancelText?: string;
 }
 
 const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
@@ -30,101 +42,196 @@ const DynamicConfirm: React.FC<DynamicConfirmProps> = ({
   message,
   onConfirm,
   onClose,
-  variant,
+  variant = "notice",
   hideCancelButton = false,
+  confirmText,
+  cancelText,
 }) => {
-  // طبق درخواست شما: بدون namespace
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
-  // تعیین رنگ‌ها بر اساس variant
+  const language =
+    i18n.language?.toLowerCase() || "en";
+
+  const isFa = language.startsWith("fa");
+
+  const dir = isFa ? "rtl" : "ltr";
+
   let headerColor = "text-gray-700";
-  let confirmButtonColor = "bg-blue-500 hover:bg-blue-600";
-  let IconComponent = FiAlertTriangle;
+
+  let confirmButtonColor =
+    "bg-blue-500 hover:bg-blue-600";
+
+  let IconComponent = FiInfo;
+
   let iconSize = 24;
 
   switch (variant) {
     case "delete":
       headerColor = "text-red-500";
-      confirmButtonColor = "bg-red-500 hover:bg-red-600";
+      confirmButtonColor =
+        "bg-red-500 hover:bg-red-600";
       IconComponent = FiAlertTriangle;
       iconSize = 24;
       break;
+
     case "edit":
       headerColor = "text-yellow-500";
-      confirmButtonColor = "bg-yellow-500 hover:bg-yellow-600";
+      confirmButtonColor =
+        "bg-yellow-500 hover:bg-yellow-600";
       IconComponent = FiAlertTriangle;
       iconSize = 24;
       break;
+
     case "add":
       headerColor = "text-green-500";
-      confirmButtonColor = "bg-green-500 hover:bg-green-600";
+      confirmButtonColor =
+        "bg-green-500 hover:bg-green-600";
       IconComponent = FiCheck;
       iconSize = 30;
       break;
+
     case "notice":
-      // پیام اطلاع‌رسانی (سبز کم‌رنگ) با دکمه OK
-      headerColor = "text-green-500";
-      confirmButtonColor = "bg-green-500 hover:bg-green-600";
-      IconComponent = FiCheck;
-      iconSize = 30;
+      headerColor = "text-blue-500";
+      confirmButtonColor =
+        "bg-blue-500 hover:bg-blue-600";
+      IconComponent = FiInfo;
+      iconSize = 26;
       break;
+
     case "error":
-      // پیام خطا (قرمز)
       headerColor = "text-red-500";
-      confirmButtonColor = "bg-red-500 hover:bg-red-600";
+      confirmButtonColor =
+        "bg-red-500 hover:bg-red-600";
       IconComponent = FiAlertTriangle;
       iconSize = 24;
       break;
   }
 
   const resolvedTitle =
-    title ?? t("DynamicConfirm.Confirmations.Default.Title");
+    title ??
+    t("DynamicConfirm.Confirmations.Default.Title");
+
   const resolvedMessage =
-    message ?? t("DynamicConfirm.Confirmations.Default.Message");
+    message ??
+    t("DynamicConfirm.Confirmations.Default.Message");
 
   return (
     <div
+      dir={dir}
       className="
-        fixed inset-0 z-50 flex items-center justify-center 
-        bg-gradient-to-r from-[#E44AA5]/20 via-[#A036DE]/20 to-[#DE45A6]/20
+        fixed
+        inset-0
+        z-[9999]
+        flex
+        items-center
+        justify-center
+        bg-black/20
         backdrop-blur-sm
+        px-4
       "
-      style={{ overflow: "hidden" }}
       role="dialog"
       aria-modal="true"
       aria-label={resolvedTitle}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
-      <div className="bg-white rounded-lg shadow-lg p-6 w-80 relative flex flex-col items-center">
-        {/* هدر و آیکون */}
-        <div className={`mb-4 flex items-center justify-center gap-2 ${headerColor}`}>
-          <IconComponent size={iconSize} aria-hidden />
-          <h2 className="text-lg font-bold">{resolvedTitle}</h2>
+      <div
+        className="
+          w-full
+          max-w-md
+          rounded-xl
+          bg-white
+          shadow-2xl
+          border
+          border-gray-200
+          p-6
+        "
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div
+          className={`
+            mb-4
+            flex
+            items-center
+            justify-center
+            gap-2
+            ${headerColor}
+          `}
+        >
+          <IconComponent size={iconSize} />
+
+          <h3 className="text-lg font-bold">
+            {resolvedTitle}
+          </h3>
         </div>
 
-        {/* متن پیام */}
-        <p className="text-gray-700 text-center mb-6 whitespace-pre-line">
+        {/* Message */}
+        <p
+          className={`
+            text-gray-700
+            mb-6
+            whitespace-pre-line
+            leading-7
+            w-full
+            ${
+              dir === "rtl"
+                ? "text-right"
+                : "text-left"
+            }
+          `}
+        >
           {resolvedMessage}
         </p>
 
-        {/* دکمه‌ها */}
+        {/* Buttons */}
         <div className="flex justify-center items-center gap-4">
           {!hideCancelButton && (
             <button
+              type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-700"
+              className="
+                min-w-[90px]
+                px-4
+                py-2
+                rounded-md
+                bg-gray-200
+                hover:bg-gray-300
+                text-gray-700
+                transition-colors
+              "
             >
-              {t("DynamicConfirm.Buttons.Cancel")}
+              {cancelText ??
+                t("DynamicConfirm.Buttons.Cancel")}
             </button>
           )}
+
           <button
+            type="button"
             onClick={onConfirm}
-            className={`px-4 py-2 rounded text-white ${confirmButtonColor}`}
+            className={`
+              min-w-[90px]
+              px-4
+              py-2
+              rounded-md
+              text-white
+              transition-colors
+              ${confirmButtonColor}
+            `}
           >
-            {hideCancelButton
-              ? t("DynamicConfirm.Buttons.Ok")
-              : t("DynamicConfirm.Buttons.Confirm")}
+            {confirmText ??
+              (hideCancelButton
+                ? t("DynamicConfirm.Buttons.Ok")
+                : t(
+                    "DynamicConfirm.Buttons.Confirm"
+                  ))}
           </button>
         </div>
       </div>

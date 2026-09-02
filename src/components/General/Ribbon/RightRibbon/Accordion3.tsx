@@ -97,7 +97,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
 
     return i18n.language === "fa"
       ? `لیست موارد برای بخش ${baseName}`
-      : `Items List For Section ${baseName}`;
+      : `Item List for Section:${baseName}`;
   }, [selectedMenuGroupName, i18n.language]);
 
   const loadRowData = async () => {
@@ -499,39 +499,6 @@ const Accordion3: React.FC<Accordion3Props> = ({
     return [...orderedDefs, ...restDefs];
   }, [baseDefs, t, i18n.language]);
 
-  const actionsCol = {
-    headerName: TT("DataTable.Buttons.Actions", "عملیات", "Actions"),
-    field: "operations",
-    sortable: false,
-    filter: false,
-    width: 150,
-    cellRendererFramework: (params: any) => (
-      <div className="flex space-x-2">
-        <button
-          className="text-yellow-600 hover:text-yellow-800 transition"
-          onClick={() => handleDuplicate(params.data)}
-          title={TT("Ribbons.Duplicate", "کپی", "Duplicate")}
-        >
-          <FiCopy size={20} />
-        </button>
-        <button
-          className="text-blue-600 hover:text-blue-800 transition"
-          onClick={() => handleRowClick(params.data)}
-          title={TT("Ribbons.Save", "ذخیره", "Save")}
-        >
-          <FiEdit size={20} />
-        </button>
-        <button
-          className="text-red-600 hover:text-red-800 transition"
-          onClick={() => handleDelete(params.data)}
-          title={TT("Ribbons.Delete", "حذف", "Delete")}
-        >
-          <FiTrash2 size={20} />
-        </button>
-      </div>
-    ),
-  };
-
   const iconBtn =
     "rounded-full p-2 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none";
 
@@ -569,7 +536,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                       placeholder={TT(
                         "Ribbons.SearchPlaceholder",
                         "جستجو...",
-                        "Search..."
+                        "Full Text Search"
                       )}
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
@@ -619,7 +586,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                 <div style={{ height: "300px", overflowY: "auto", marginTop: "-15px" }}>
                   <DataTable
                     direction={i18n.dir()}
-                    columnDefs={[...columnDefsWithFaAndExtra, actionsCol]}
+                    columnDefs={columnDefsWithFaAndExtra}
                     rowData={filteredRowData}
                     onRowClick={handleRowClick}
                     onRowDoubleClick={(data) => handleRowDoubleClick(data)}
@@ -766,8 +733,8 @@ const Accordion3: React.FC<Accordion3Props> = ({
                       <DynamicInput
                         name={TT(
                           "Ribbons.WindowsWebCommand",
-                          "فرمان wep application",
-                          "Windows Web Command"
+                          "دستور وب ویندوز",
+                          "Web App Command"
                         )}
                         type="text"
                         value={formData.CommandWeb || ""}
@@ -820,7 +787,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                           checked={selectedSize === "0"}
                           onChange={() => handleRadioChange("0")}
                         />
-                        {TT("Ribbons.Large", "بزرگ", "Large")}
+                        {TT("Ribbons.Large", "بزرگ", "Larg")}
                       </label>
                       <label className="flex items-center text-lg">
                         <input
@@ -830,7 +797,7 @@ const Accordion3: React.FC<Accordion3Props> = ({
                           checked={selectedSize === "1"}
                           onChange={() => handleRadioChange("1")}
                         />
-                        {TT("Ribbons.Medium", "متوسط", "Medium")}
+                        {TT("Ribbons.Medium", "متوسط", "Middle")}
                       </label>
                       <label className="flex items-center text-lg">
                         <input

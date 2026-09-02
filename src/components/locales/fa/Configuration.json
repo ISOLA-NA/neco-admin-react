@@ -15,15 +15,16 @@
     "MeetingActionButtonsSecondForm": "دکمه های پیش فرض جلسه - فرم دوم",
     "NoItemSelected": "موردی انتخاب نشده است",
     "StateText": "متن وضعیت",
+    "PersianStateText": "متن وضعیت فارسی",
     "Order": "ترتیب",
-    "Tooltip": "متن راهنما",
+    "Tooltip": "راهنمای ابزار",
     "State": "state :",
     "Command": "command :",
     "Image": "تصویر",
     "GoToPreviousStateClient": "برگشت به گروه قبلی کاربر",
     "GoToPreviousStateAdmin": "برگشت به گروه قبلی ادمین",
-    "Accept": "تایید",
-    "Reject": "رد",
+    "Accept": "تایید کردن",
+    "Reject": "رد کردن",
     "Close": "بستن",
     "PersianName": "نام فارسی"
   },
@@ -37,7 +38,7 @@
     "Headers": {
       "Name": "نام",
       "Description": "شرح",
-      "ProgramTemplateShorts": "قالب برنامه",
+      "ProgramTemplateShort": "قالب برنامه",
       "DefaultRibbon": "منوی پیش فرض"
     }
   }

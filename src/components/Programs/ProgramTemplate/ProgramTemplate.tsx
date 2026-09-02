@@ -405,8 +405,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           null,
           "Error",
           err?.response?.data?.toString() ||
-            err?.message ||
-            "خطا در حذف ردیف."
+          err?.message ||
+          "خطا در حذف ردیف."
         );
       } finally {
         setIsDeletingRow(false);
@@ -451,6 +451,98 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
       runHealthCheck();
     };
 
+    /**
+     * پیام‌های خطای بک‌اند (که توی Import/Export می‌بینیم) همیشه انگلیسی و
+     * خام هستند (مثل "Total Weight is Above in infppParentTest" یا
+     * "Row 6: Level must be greater than zero."). این تابع الگوهای
+     * شناخته‌شده را با regex تشخیص می‌دهد و با t() ترجمه می‌کند (بخش‌های
+     * متغیر مثل نام آیتم/شماره‌ی ردیف حفظ می‌شوند). اگر پیام با هیچ الگویی
+     * مطابقت نداشت، همان متن اصلی (انگلیسی) بدون تغییر نمایش داده می‌شود
+     * تا هیچ اطلاعاتی از دست نرود.
+     */
+    const translateBackendError = (rawMessage: string | null | undefined): string => {
+      if (!rawMessage) return "";
+
+      const lines = rawMessage
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+      const translatedLines = lines.map((line) => {
+        let match: RegExpMatchArray | null;
+
+        match = line.match(/^Total Duration is Above in (.+)$/i);
+        if (match) {
+          return t("ProgramTemplate.BackendErrors.TotalDurationAboveInItem", {
+            name: match[1],
+          });
+        }
+        if (/^Total Duration is Above$/i.test(line)) {
+          return t("ProgramTemplate.BackendErrors.TotalDurationAboveGeneric");
+        }
+
+        match = line.match(/^Total Weight is Above in (.+)$/i);
+        if (match) {
+          return t("ProgramTemplate.BackendErrors.TotalWeightAboveInItem", {
+            name: match[1],
+          });
+        }
+        if (/^Total Weight is Above$/i.test(line)) {
+          return t("ProgramTemplate.BackendErrors.TotalWeightAboveGeneric");
+        }
+
+        match = line.match(
+          /^In item:\s*(.+?)\s+GPIC must be filled for add or edit\.?$/i
+        );
+        if (match) {
+          return t("ProgramTemplate.BackendErrors.GpicMustBeFilled", {
+            name: match[1],
+          });
+        }
+
+        match = line.match(/^Row\s+(\d+):\s*GPIC not found\.?$/i);
+        if (match) {
+          return t("ProgramTemplate.BackendErrors.RowGpicNotFound", {
+            row: match[1],
+          });
+        }
+
+        match = line.match(
+          /^Row\s+(\d+):\s*Level must be greater than zero\.?$/i
+        );
+        if (match) {
+          return t(
+            "ProgramTemplate.BackendErrors.RowLevelMustBeGreaterThanZero",
+            { row: match[1] }
+          );
+        }
+
+        match = line.match(
+          /^In item:\s*(.+?)\s+Form_Name must be filled\.?$/i
+        );
+        if (match) {
+          return t("ProgramTemplate.BackendErrors.FormNameMustBeFilled", {
+            name: match[1],
+          });
+        }
+
+        match = line.match(
+          /^Row\s+(\d+):\s*Form must have Entity Type\.?$/i
+        );
+        if (match) {
+          return t(
+            "ProgramTemplate.BackendErrors.RowFormMustHaveEntityType",
+            { row: match[1] }
+          );
+        }
+
+        // الگوی ناشناخته: متن اصلی سرور (انگلیسی) بدون تغییر نمایش داده می‌شود
+        return line;
+      });
+
+      return translatedLines.join("\n");
+    };
+
     const handleExport = async () => {
       if (!programTemplateId) return;
       setIsExporting(true);
@@ -474,11 +566,17 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           "success",
           null,
           "Export",
-          "Export has completed successfully."
+          t("ProgramTemplate.BackendErrors.ExportSuccess")
         );
-      } catch (err) {
+      } catch (err: any) {
         console.error("Export failed:", err);
-        setExportError("خطا در دریافت فایل خروجی اکسل.");
+        const rawMessage =
+          err?.response?.data?.toString() || err?.message || "";
+        const message = rawMessage
+          ? translateBackendError(rawMessage)
+          : t("ProgramTemplate.BackendErrors.ExportGenericError");
+        setExportError(message);
+        showAlert("error", null, "Export Error", message);
       } finally {
         setIsExporting(false);
       }
@@ -532,12 +630,7 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           FolderName: "prgdes",
           FileSize: file.size,
           FileType: file.name.substring(file.name.lastIndexOf(".")),
-          ID: (() => {
-            console.log("🔍 [handleImportFileSelected] calling generateUUID() now...");
-            const generatedId = generateUUID();
-            console.log("🔍 [handleImportFileSelected] generatedId:", generatedId);
-            return generatedId;
-          })(),
+          ID: generateUUID(),
           IsVisible: true,
           LastModified: null,
           SenderID: userId,
@@ -567,7 +660,8 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
         // چک کنیم؛ وگرنه شکست‌ها به‌اشتباه موفق تلقی می‌شوند.
         if (!importResult.isSuccess) {
           throw new Error(
-            importResult.Msg || "Import ناموفق بود (isSuccess=false)."
+            translateBackendError(importResult.Msg) ||
+            t("ProgramTemplate.BackendErrors.ImportGenericError")
           );
         }
 
@@ -578,14 +672,15 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
           "success",
           null,
           "Import",
-          "Import has completed successfully."
+          t("ProgramTemplate.BackendErrors.ImportSuccess")
         );
       } catch (err: any) {
         console.error("Import failed:", err);
-        const message =
-          err?.response?.data?.toString() ||
-          err?.message ||
-          "خطا در وارد کردن فایل اکسل.";
+        const rawMessage =
+          err?.response?.data?.toString() || err?.message || "";
+        const message = rawMessage
+          ? translateBackendError(rawMessage)
+          : t("ProgramTemplate.BackendErrors.ImportGenericError");
         setImportError(message);
         showAlert("error", null, "Import Error", message);
       } finally {
@@ -837,11 +932,10 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                 <button
                   onClick={handleToggleHealthCheck}
                   title=""
-                  className={`w-9 h-9 flex items-center justify-center rounded-full border transition ${
-                    isHealthCheckOpen
+                  className={`w-9 h-9 flex items-center justify-center rounded-full border transition ${isHealthCheckOpen
                       ? "bg-purple-600 text-white border-purple-600"
                       : "bg-white text-purple-600 border-purple-300 hover:bg-purple-50"
-                  }`}
+                    }`}
                 >
                   <SpeedIcon sx={{ fontSize: 20 }} />
                 </button>
@@ -849,11 +943,10 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
                 <button
                   onClick={() => setIsColumnChooserOpen((o) => !o)}
                   title="انتخاب ستون‌ها"
-                  className={`w-9 h-9 flex items-center justify-center rounded-full border transition ${
-                    isColumnChooserOpen
+                  className={`w-9 h-9 flex items-center justify-center rounded-full border transition ${isColumnChooserOpen
                       ? "bg-purple-600 text-white border-purple-600"
                       : "bg-white text-purple-600 border-purple-300 hover:bg-purple-50"
-                  }`}
+                    }`}
                 >
                   <ViewColumnIcon sx={{ fontSize: 20 }} />
                 </button>
@@ -949,11 +1042,11 @@ const ProgramTemplate = forwardRef<ProgramTemplateHandle, ProgramTemplateProps>(
               onConfirm={handleConfirmDeleteRow}
               onClose={() => setShowDeleteRowConfirm(false)}
               variant="delete"
-              title="Delete Confirmation"
+              title={t("DynamicConfirm.Confirmations.Delete.Title")}
               message={
                 isDeletingRow
-                  ? "در حال حذف..."
-                  : "آیا از حذف این ردیف مطمئن هستید؟"
+                  ? t("DynamicConfirm.Confirmations.Delete.InProgress")
+                  : t("DynamicConfirm.Confirmations.Delete.Message")
               }
             />
           </div>

@@ -41,7 +41,8 @@
     "Side": {
       "Superintendent": "سرپرست",
       "Admins": "مدیران",
-      "ChangeActiveRibbon": "تغییر ریبُن فعال"
+      "ChangeActiveRibbon": "تغییر ریبُن فعال",
+      "Posts": "پست‌ها"
     },
     "Ribbon": {
       "Home": "خانه",

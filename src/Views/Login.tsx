@@ -138,6 +138,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             expires: defaultTokenHours / 24,
             path: "/",
           });
+
+          // ⚠️ جدید: ذخیره‌ی UserPosts و userType در localStorage تا صفحه‌ی
+          // Account بعداً بتواند بدون فراخوانی دوباره‌ی API لاگین، Superintendent
+          // (ParrentName)، لیست پست‌ها (Name) و تشخیص ادمین/کلاینت را بخواند.
+          localStorage.setItem(
+            "userPosts",
+            JSON.stringify(response.UserPosts || [])
+          );
+          localStorage.setItem("userType", String(MyUser.userType));
+
           onLogin();
           showAlert(
             "success",

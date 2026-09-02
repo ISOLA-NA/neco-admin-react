@@ -27,6 +27,21 @@
       "ProgramDuration": "مدت زمان برنامه",
       "ProgramExecutionBudget": "بودجه اجرای برنامه",
       "ProgramToPlan": "برنامه به طرح"
+    },
+    "BackendErrors": {
+      "TotalDurationAboveGeneric": "مجموع مدت‌زمان بیشتر از حد مجاز است.",
+      "TotalDurationAboveInItem": "مجموع مدت‌زمان بیشتر از حد مجاز است، در «{{name}}».",
+      "TotalWeightAboveGeneric": "مجموع وزن بیشتر از حد مجاز است.",
+      "TotalWeightAboveInItem": "مجموع وزن بیشتر از حد مجاز است، در «{{name}}».",
+      "GpicMustBeFilled": "در آیتم «{{name}}»: شناسه (GPIC) باید برای افزودن یا ویرایش پر شود.",
+      "RowGpicNotFound": "ردیف {{row}}: شناسه (GPIC) یافت نشد.",
+      "RowLevelMustBeGreaterThanZero": "ردیف {{row}}: مقدار Level باید بزرگ‌تر از صفر باشد.",
+      "FormNameMustBeFilled": "در آیتم «{{name}}»: نام فرم باید پر شود.",
+      "RowFormMustHaveEntityType": "ردیف {{row}}: فعالیت از نوع فرم باید یک فرم (Entity Type) انتخاب‌شده داشته باشد.",
+      "ImportSuccess": "عملیات ایمپورت با موفقیت انجام شد.",
+      "ExportSuccess": "عملیات اکسپورت با موفقیت انجام شد.",
+      "ImportGenericError": "خطایی در وارد کردن فایل اکسل رخ داد.",
+      "ExportGenericError": "خطایی در دریافت فایل خروجی اکسل رخ داد."
     }
   }
 }

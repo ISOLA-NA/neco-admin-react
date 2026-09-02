@@ -1,7 +1,7 @@
 {
   "DynamicConfirm": {
     "Buttons": {
-      "Add": "Add",
+      "Add": "Save",
       "Edit": "Edit",
       "Minimize": "Minimize",
       "Maximize": "Maximize",
@@ -17,7 +17,7 @@
       },
       "Update": {
         "Title": "Update Confirmation",
-        "Message": "Are you sure you want to update?"
+        "Message": "Are you sure you want to update your account information?"
       },
       "Delete": {
         "Title": "Delete Confirmation",
@@ -30,22 +30,124 @@
       "Duplicate": {
         "Title": "Duplicate Confirmation",
         "Message": "Are you sure you want to duplicate this item?"
+      },
+      "ChangePassword": {
+        "Title": "Change Password Confirmation",
+        "Message": "Are you sure you want to change your password?"
+      },
+      "SignOut": {
+        "Title": "Sign Out Confirmation",
+        "Message": "Are you sure you want to sign out of your account?"
+      },
+      "SwitchAccount": {
+        "Title": "Switch Account Confirmation",
+        "Message": "Are you sure you want to switch to another account?"
       }
     }
   },
+
   "Alerts": {
-    "Title": {
+    "Titles": {
+      "Success": "Success",
       "Error": "Error",
-      "Success": "Success"
+      "Warning": "Warning",
+      "Info": "Information",
+      "Deleted": "Deleted",
+      "Updated": "Updated",
+      "DeleteConfirm": "Delete Confirmation"
     },
-    "Duplicates": {
-      "Success": "Duplicate successful",
-      "Failed": "Duplicate failed"
+
+    "Messages": {
+      "FailedToFetch": "Failed to fetch data.",
+      "FailedToDelete": "Failed to delete data.",
+      "NameEmpty": "Name cannot be empty.",
+      "SelectRowToDelete": "Please select a row to delete.",
+      "SelectRowToDuplicate": "Please select a row to duplicate.",
+      "DeleteConfirm": "Are you sure you want to delete this {{entity}}?",
+      "DeletedSuccessDynamic": "{{entity}} deleted successfully.",
+
+      "InvalidMobile": "The entered mobile number is invalid.",
+      "InvalidEmail": "The entered email address is invalid.",
+      "UpdateFailed": "Failed to update user information.",
+      "ChangePasswordSelected": "Change password operation selected.",
+      "SignOutSelected": "Sign out operation selected.",
+      "SwitchAccountSelected": "Switch account operation selected."
     },
-    "Duplicated": {
-      "Failed": "Duplicate failed"
+
+    "Added": {
+      "Configuration": "Configuration added successfully.",
+      "Command": "Command added successfully.",
+      "User": "User added successfully.",
+      "Ribbon": "Ribbon added successfully.",
+      "Role": "Role added successfully.",
+      "Enterprise": "Enterprise added successfully.",
+      "RoleGroup": "Role Group added successfully.",
+      "Staffing": "Staffing added successfully.",
+      "ProgramTemplate": "Program Template added successfully.",
+      "ProgramType": "Program Type added successfully.",
+      "Odp": "Odp added successfully.",
+      "Procedure": "Procedure added successfully.",
+      "Calendar": "Calendar added successfully.",
+      "ProjectAccess": "Project Access added successfully.",
+      "ApprovalFlow": "Approval Flow added successfully.",
+      "Form": "Form added successfully.",
+      "Category": "Category added successfully.",
+      "MenuTab": "Menu Tab added successfully.",
+      "MenuGroup": "Menu Group added successfully.",
+      "MenuItem": "Menu Item added successfully."
+    },
+
+    "Updated": {
+      "Configuration": "Configuration updated successfully.",
+      "Command": "Command updated successfully.",
+      "User": "User updated successfully.",
+      "Ribbon": "Ribbon updated successfully.",
+      "Role": "Role updated successfully.",
+      "Enterprise": "Enterprise updated successfully.",
+      "RoleGroup": "Role Group updated successfully.",
+      "Staffing": "Staffing updated successfully.",
+      "ProgramTemplate": "Program Template updated successfully.",
+      "ProgramType": "Program Type updated successfully.",
+      "Odp": "Odp updated successfully.",
+      "Procedure": "Procedure updated successfully.",
+      "Calendar": "Calendar updated successfully.",
+      "ProjectAccess": "Project Access updated successfully.",
+      "ApprovalFlow": "Approval Flow updated successfully.",
+      "Form": "Form updated successfully.",
+      "Category": "Category updated successfully.",
+      "MenuTab": "Menu Tab updated successfully.",
+      "MenuGroup": "Menu Group updated successfully.",
+      "MenuItem": "Menu Item updated successfully."
+    },
+
+    "Deleted": {
+      "Deleted": "Deleted Successfully",
+      "MenuTab": "MenuTab Deleted Successfully",
+      "MenuGroup": "MenuGroup Deleted Successfully",
+      "MenuItem": "MenuItem Deleted Successfully"
+    },
+
+    "Entities": {
+      "Configurations": "Configuration",
+      "Commands": "Command",
+      "Users": "User",
+      "Ribbons": "Ribbon",
+      "Roles": "Role",
+      "Enterprises": "Enterprise",
+      "RoleGroups": "Role Group",
+      "Staffing": "Staffing",
+      "ProgramTemplate": "Program Template",
+      "ProgramTypes": "Program Type",
+      "Odp": "Odp",
+      "Procedures": "Procedure",
+      "Calendars": "Calendar",
+      "ProjectsAccess": "Project Access",
+      "ApprovalFlows": "Approval Flow",
+      "Forms": "Form",
+      "Categories": "Category"
     }
   },
+
   "Global": {
     "Global": "Global"
   }

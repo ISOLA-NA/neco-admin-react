@@ -34,9 +34,12 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   loading = false,
   contentClassName,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<any>(null);
+
+  // جهت پویا بر اساس زبان فعلی (به‌جای dir="rtl" هاردکد قبلی)
+  const dir = i18n.language === "fa" ? "rtl" : "ltr";
 
   const getLabel = (row: any) => row?.DisplayName ?? row?.Name ?? "";
 
@@ -70,7 +73,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
         }
       `}</style>
 
-      <div className={classNames("w-full h-full flex flex-col", className)} dir="rtl">
+      <div className={classNames("w-full h-full flex flex-col", className)} dir={dir}>
         <div className="header">
           <div className="flex items-center">
             <h3 className="text-xs font-semibold text-white">{title}</h3>
@@ -82,7 +85,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
               isGlobal ? "disabled:opacity-50 disabled:cursor-not-allowed" : ""
             )}
             onClick={() => setIsDialogOpen(true)}
-            aria-label={`افزودن ${title}`}
+            aria-label={`${dir === "rtl" ? "افزودن" : "Add"} ${title}`}
             disabled={isGlobal}
           >
             +
@@ -130,7 +133,7 @@ const ListSelector: React.FC<ListSelectorProps> = ({
                   <button
                     className="text-red-500 hover:text-red-700 focus:outline-none"
                     onClick={() => handleRemove(item.ID)}
-                    aria-label={`حذف ${getLabel(item)}`}
+                    aria-label={`${dir === "rtl" ? "حذف" : "Delete"} ${getLabel(item)}`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

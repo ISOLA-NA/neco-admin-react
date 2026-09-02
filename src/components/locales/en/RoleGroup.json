@@ -1,6 +1,6 @@
 {
   "RoleGroup": {
-    "Name": "Name Group",
+    "Name": "Group Name",
     "Description": "Description",
     "IsGlobal":"Global",
     "Projects": "Related Projects",

@@ -41,7 +41,8 @@
     "Side": {
       "Superintendent": "Superintendent",
       "Admin": "Admin",
-      "ChangeActiveRibbon": "Change Active Ribbon"
+      "ChangeActiveRibbon": "Change Active Ribbon",
+      "Posts": "Posts"
     },
     "Ribbon": {
       "Home": "Home",

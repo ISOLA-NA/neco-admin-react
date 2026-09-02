@@ -27,6 +27,21 @@
       "ProgramDuration": "Program Duration",
       "ProgramExecutionBudget": "Program Execution Budget",
       "ProgramToPlan": "Program To Plan"
+    },
+    "BackendErrors": {
+      "TotalDurationAboveGeneric": "Total duration is above the allowed limit.",
+      "TotalDurationAboveInItem": "Total duration is above the allowed limit in \"{{name}}\".",
+      "TotalWeightAboveGeneric": "Total weight is above the allowed limit.",
+      "TotalWeightAboveInItem": "Total weight is above the allowed limit in \"{{name}}\".",
+      "GpicMustBeFilled": "In item \"{{name}}\": GPIC must be filled for add or edit.",
+      "RowGpicNotFound": "Row {{row}}: GPIC not found.",
+      "RowLevelMustBeGreaterThanZero": "Row {{row}}: Level must be greater than zero.",
+      "FormNameMustBeFilled": "In item \"{{name}}\": Form Name must be filled.",
+      "RowFormMustHaveEntityType": "Row {{row}}: A Form-type activity must have a Form (Entity Type) selected.",
+      "ImportSuccess": "Import has completed successfully.",
+      "ExportSuccess": "Export has completed successfully.",
+      "ImportGenericError": "An error occurred while importing the Excel file.",
+      "ExportGenericError": "An error occurred while exporting the Excel file."
     }
   }
 }
